@@ -16,12 +16,6 @@ export const HOOK_CONTEXT = (
     : null
 ) as AsyncLocalStorage<HookContext>;
 
-export const BATCH_CONTEXT = (
-  typeof window === 'undefined'
-    ? new (await import('node:async_hooks'))['AsyncLocalStorage']()
-    : null
-) as AsyncLocalStorage<boolean>;
-
 export const REACT_CONTEXT = (
   typeof window === 'undefined'
     ? new (await import('node:async_hooks'))['AsyncLocalStorage']()
