@@ -1,0 +1,25 @@
+name: Manually Publish npm Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version type to bump the package version by.'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+          - prerelease
+
+jobs:
+  publish:
+    uses: ronin-co/actions/.github/workflows/publish-manually.yml@main
+    with:
+      version_type: ${{ inputs.version_type }}
+    secrets:
+      NPM_TOKEN_READ_AND_WRITE: ${{ secrets.NPM_TOKEN_READ_AND_WRITE }}
+      ORG_GH_APP_ID: ${{ secrets.ORG_GH_RONIN_APP_ID }}
+      ORG_GH_APP_PRIVATE_KEY: ${{ secrets.ORG_GH_RONIN_APP_PRIVATE_KEY }}

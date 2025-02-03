@@ -1,0 +1,228 @@
+import './types/global.d.ts';
+
+import Queue from 'p-queue';
+import {
+  type MutableRefObject,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
+
+import { usePopulatePathname } from '../../public/universal/hooks.ts';
+import { usePrivateLocation } from '../universal/hooks.ts';
+import type { PageFetchingOptions } from '../universal/types/util';
+import logger from '../universal/utils/logs';
+import { RootClientContext } from './context';
+import type { RevalidationReason } from './types/util';
+import fetchPage from './utils/fetch-page';
+
+export interface RootTransitionOptions extends PageFetchingOptions {
+  /**
+   * Update the query string parameters in the address bar of the browser immediately,
+   * instead of waiting for the page to be rendered on the server and returned.
+   */
+  immediatelyUpdateQueryParams?: boolean;
+}
+
+const pageTransitionQueue = new Queue({ concurrency: 1 });
+
+export const usePageTransition = () => {
+  const [pendingTransition, startTransition] = useTransition();
+
+  const clientContext = useContext(RootClientContext);
+  if (!clientContext)
+    throw new Error(
+      '`usePageTransition` can only be used within `RootClientContext.Provider`.',
+    );
+  const privateLocationRef = usePrivateLocationRef();
+
+  // We're using a reference to store this number, because we need to keep a single
+  // object in memory that is updated with every render, otherwise the information would
+  // be outdated in the deeply nested callback functions.
+  const lastUpdateTime = useRef<number>(clientContext.lastUpdate);
+
+  // Update the reference as soon as possible (before the browser repaints).
+  useLayoutEffect(() => {
+    lastUpdateTime.current = clientContext.lastUpdate;
+  }, [clientContext.lastUpdate]);
+
+  return (
+    path: string,
+    type: 'manual' | 'automatic',
+    options?: RootTransitionOptions,
+  ) => {
+    const privateLocation = privateLocationRef.current;
+
+    // If desired, already update the query params in the address bar before the server
+    // has rendered the new ones. Take a look at the `RootClientContext.Provider`
+    // component for more details on this.
+    if (options?.immediatelyUpdateQueryParams) {
+      const url = new URL(path, privateLocation.origin);
+
+      history.replaceState(history.state, '', url);
+      clientContext.setClientQueryParams(url.search);
+    }
+
+    // If the page transition was triggered automatically and there's a manual or
+    // automatic one in the queue (and therefore about to be run), we want to skip the
+    // new one because the purpose of automatic revalidation is to ensure that the page
+    // always shows the latest data. If a page transition of any kind will be rendered,
+    // that means the page will already show the latest data.
+    if (
+      type === 'automatic' &&
+      (pageTransitionQueue.size > 0 ||
+        pageTransitionQueue.pending > 0 ||
+        pendingTransition)
+    ) {
+      logger.info(
+        'Skipping automatic page transition because of other pending page transitions.',
+      );
+      return;
+    }
+
+    const ongoingManualAmount = pageTransitionQueue.sizeBy({ priority: 1 });
+    const ongoingAutomaticAmount = pageTransitionQueue.sizeBy({ priority: 0 });
+
+    // If there are currently any automatic page transitions in the queue waiting to be
+    // run, we want to stop them because a new update is being started. Regardless of
+    // whether that new update is manual or automatic, it will cause the page to show the
+    // latest data, so we don't want to waste time waiting for the ongoing transition.
+    // Only manual updates are guaranteed to always commit, because that's what the user
+    // would expect.
+    if (ongoingManualAmount === 0 && ongoingAutomaticAmount > 0) {
+      pageTransitionQueue.clear();
+    }
+
+    pageTransitionQueue
+      .add(() => fetchPage(path, options), {
+        priority: type === 'manual' ? 1 : 0,
+      })
+      .then((page) => {
+        if (!page) {
+          logger.info('Skipping page transition because it timed out or crashed.');
+          return;
+        }
+
+        // By the time we're ready to render the new page, a newer page transition might
+        // have already been started. If that's the case, we want to skip the current
+        // update to prevent the UI from temporarily regressing to an older state.
+        if (
+          pageTransitionQueue.size > 0 ||
+          pageTransitionQueue.pending > 0 ||
+          pendingTransition
+        ) {
+          logger.info(
+            'Skipping page transition because of a newer pending page transition.',
+          );
+          return;
+        }
+
+        // The contents of this function are called immediately, and any state updates
+        // performed within it will be marked as transitions.
+        startTransition(() => {
+          const root = window['BLADE_ROOT'];
+          if (!root) throw new Error('Missing React root');
+
+          root.render(page.body);
+        });
+      });
+  };
+};
+
+/**
+ * Allows for revalidating the current page on the edge, in order to render the most
+ * recent version of all the records used on that page.
+ *
+ * @returns A function that can be used to trigger a revalidation for the currently
+ * active page.
+ */
+export const useRevalidation = <T extends RevalidationReason>() => {
+  const transitionPage = usePageTransition();
+  const privateLocationRef = usePrivateLocationRef();
+
+  return (reason: T) => {
+    const privateLocation = privateLocationRef.current;
+    const filesUpdated = reason === 'files updated';
+
+    // Prevent revalidation if one of the following is true:
+    //
+    // - The device is no longer online.
+    // - The document doesn't have focus.
+    // - Pagination is currently happening somewhere on the page.
+    //
+    // If files were updated during development, however, we always want to force a
+    // revalidation regardless.
+    if ((!window.navigator.onLine || !document.hasFocus()) && !filesUpdated) {
+      logger.info(`Skipping revalidation (${reason})`);
+      return;
+    }
+
+    const path = privateLocation.pathname + privateLocation.search + privateLocation.hash;
+
+    logger.info(`Revalidating ${path} (${reason})`);
+
+    transitionPage(path, 'automatic');
+  };
+};
+
+/**
+ * A React reference acting as a replacement for `window.location`. Due to being a
+ * reference, the value is always up-to-date, even inside a callback.
+ */
+export const usePrivateLocationRef = (): MutableRefObject<URL> => {
+  const privateLocation = usePrivateLocation();
+  const populatePathname = usePopulatePathname();
+
+  privateLocation.pathname = populatePathname(privateLocation.pathname);
+  const ref = useRef(privateLocation);
+
+  useEffect(() => {
+    ref.current = privateLocation;
+  }, [privateLocation, privateLocation.href]);
+
+  return ref;
+};
+
+/**
+ * Behaves exactly like `useMemo`, except that the provided factory receives the
+ * previously memorized value as an argument, which allows for accumulating state, just
+ * like the `.reduce` method on an array would.
+ *
+ * Furthermore, in addition to returning the computed value (like `useMemo`), the hook
+ * also returns a function for updating it from the outside.
+ *
+ * @param factory - A function for computing a value.
+ * @param deps - A list of dependencies. If one of them changes, the factory function
+ * will be called and the memorized value will be re-computed.
+ *
+ * @returns The computed value, and a function for setting it.
+ */
+export const useReduce = <T>(
+  rootFactory: (oldValue: T | undefined) => T,
+  deps: unknown[],
+): [T, (factory: (oldValue: T) => T) => void] => {
+  const value = useRef<T>(rootFactory(undefined));
+  const [renderingCount, setRenderingCount] = useState(0);
+
+  // Allow for updating the current value from the outside.
+  const setValue = (childFactory: (oldValue: T) => T) => {
+    // Update the value that is being rendered.
+    value.current = childFactory(value.current);
+
+    // Ask React to re-render the surrounding component. We're intentionally not setting
+    // the value itself as state, as that would duplicate it in memory, since we can't
+    // use state for the memo below, because that would result in an extra re-render.
+    setRenderingCount(renderingCount + 1);
+  };
+
+  // Update the current value whenever the dependencies change.
+  useMemo(() => {
+    value.current = rootFactory(value.current);
+  }, deps);
+
+  return [value.current, setValue];
+};

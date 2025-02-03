@@ -1,0 +1,13 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    uses: ronin-co/actions/.github/workflows/validate.yml@main
