@@ -1,8 +1,8 @@
 import { createId } from '@paralleldrive/cuid2';
+import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
 import { type MouseEvent, useContext, useEffect, useRef } from 'react';
-import type { RONIN } from 'ronin';
 import type { PromiseTuple, Query } from 'ronin/types';
-import { getBatchProxy, getSyntaxProxy, processStorableObjects } from 'ronin/utils';
+import { processStorableObjects } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
 
 import { RootClientContext } from '../../private/client/context';
@@ -124,29 +124,24 @@ export const useMutation = () => {
     });
   };
 
+  const callback = async (query: Query, options?: MutationOptions) => {
+    return (await queryHandler([query], options))[0];
+  };
+
   return {
-    create: getSyntaxProxy('create', async (query, options?: MutationOptions) => {
-      return (await queryHandler([query], options))[0];
-    }) as RONIN.Creator<MutationOptions>,
-
-    set: getSyntaxProxy('set', async (query, options?: MutationOptions) => {
-      return (await queryHandler([query], options))[0];
-    }) as RONIN.Setter<MutationOptions>,
-
-    drop: getSyntaxProxy('drop', async (query, options?: MutationOptions) => {
-      return (await queryHandler([query], options))[0];
-    }) as RONIN.Dropper<MutationOptions>,
+    add: getSyntaxProxy({ rootProperty: 'add', callback }),
+    set: getSyntaxProxy({ rootProperty: 'set', callback }),
+    remove: getSyntaxProxy({ rootProperty: 'remove', callback }),
 
     batch: <T extends [Promise<any>, ...Promise<any>[]]>(
       operations: () => T,
       options?: MutationOptions,
-    ) =>
-      getBatchProxy<T>(operations, {}, (queries) =>
-        queryHandler(
-          queries.map(({ query }) => query),
-          options,
-        ),
-      ) as Promise<PromiseTuple<T>>,
+    ) => {
+      const batchOperations = operations as unknown as () => Array<SyntaxItem<Query>>;
+      const queries = getBatchProxy(batchOperations).map(({ structure }) => structure);
+
+      return queryHandler(queries, options) as Promise<PromiseTuple<T>>;
+    },
   };
 };
 
