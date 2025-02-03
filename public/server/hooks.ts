@@ -1,8 +1,7 @@
+import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
 import type { CookieSerializeOptions } from 'cookie';
 import type { verify } from 'hono/jwt';
-import type { RONIN } from 'ronin';
 import type { Query } from 'ronin/types';
-import { getBatchProxy, getSyntaxProxy } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
 
 import { useServerContext } from '../../private/server/hooks';
@@ -12,7 +11,7 @@ import {
   paginateQuery,
   parsePaginationQueryParam,
 } from '../../private/server/utils/pagination';
-import { BATCH_CONTEXT, SERVER_CONTEXT } from '../../private/server/worker/context';
+import { SERVER_CONTEXT } from '../../private/server/worker/context';
 import type { QueryItemRead } from '../../private/universal/types/util';
 
 export type CookieHookOptions = {
@@ -221,47 +220,49 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
     });
 };
 
-const use = getSyntaxProxy('get', (query, options?: DataOptions) => {
+const callback = (query: Query, options?: DataOptions) => {
   return queryHandler([{ query, options }])[0];
-}) as RONIN.Getter<DataOptions>;
+};
 
-const useCountOf = getSyntaxProxy('count', (query, options?: DataOptions) => {
-  return queryHandler([{ query, options }])[0];
-}) as RONIN.Counter<DataOptions>;
+const use = getSyntaxProxy({ rootProperty: 'get', callback });
+const useCountOf = getSyntaxProxy({ rootProperty: 'count', callback });
 
 const useBatch = <T extends [any, ...any[]]>(
   operations: () => T,
   options?: DataOptions,
-) => {
-  return getBatchProxy<T>(operations, { asyncContext: BATCH_CONTEXT }, (queries) => {
-    const queriesWithIndexes = queries.map((details, index) => {
-      // If no query is provided, we should return the details as-is, since they might
-      // contain `null`, `undefined`, or a similar placeholder value that the developer
-      // wants to retain in the results.
-      if (!details) return { query: details, index };
+): T => {
+  const batchOperations = operations as unknown as () => Array<SyntaxItem<Query>>;
+  const queries = getBatchProxy(batchOperations).map(({ structure, options }) => {
+    return { query: structure, options };
+  });
 
-      return { query: details.query, options: details.options, index };
-    });
+  const queriesWithIndexes = queries.map(({ query, options }, index) => {
+    // If no query is provided, we should return the details as-is, since they might
+    // contain `null`, `undefined`, or a similar placeholder value that the developer
+    // wants to retain in the results.
+    if (!query) return { query, index };
 
-    const queriesClean = queriesWithIndexes.filter(({ query }) => {
-      return typeof query === 'object' && query !== null;
-    }) as { query: Query; options?: DataOptions; index: number }[];
+    return { query, options, index };
+  });
 
-    const queryResults = queryHandler(
-      queriesClean.map(({ query, options: perQueryOptions }) => ({
-        query,
-        options: perQueryOptions || options,
-      })),
-    );
+  const queriesClean = queriesWithIndexes.filter(({ query }) => {
+    return typeof query === 'object' && query !== null;
+  }) as { query: Query; options?: DataOptions; index: number }[];
 
-    // If one of the hooks provided to `useBatch` returns something that isn't a query
-    // (such as `null`), we need to retain that value in the results and only try to run
-    // the hook result as a query if it is actually a query.
-    return queriesWithIndexes.map(({ query, index }) => {
-      const matchingQuery = queriesClean.findIndex((item) => item.index === index);
-      if (matchingQuery > -1) return queryResults[matchingQuery];
-      return query;
-    });
+  const queryResults = queryHandler(
+    queriesClean.map(({ query, options: perQueryOptions }) => ({
+      query,
+      options: perQueryOptions || options,
+    })),
+  );
+
+  // If one of the hooks provided to `useBatch` returns something that isn't a query
+  // (such as `null`), we need to retain that value in the results and only try to run
+  // the hook result as a query if it is actually a query.
+  return queriesWithIndexes.map(({ query, index }) => {
+    const matchingQuery = queriesClean.findIndex((item) => item.index === index);
+    if (matchingQuery > -1) return queryResults[matchingQuery];
+    return query;
   }) as T;
 };
 
