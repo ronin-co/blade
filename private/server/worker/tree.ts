@@ -11,7 +11,7 @@ import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
 import type { Query } from 'ronin/types';
-import { InvalidQueryError, InvalidResponseError } from 'ronin/utils';
+import { InvalidResponseError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
 
 import { DataHookError } from '../../../public/server/utils/errors';
@@ -135,11 +135,7 @@ const runQueriesPerType = async (
   try {
     results = await runQueriesWithTime(serverContext, path, queryObjects, dataSelector);
   } catch (err) {
-    if (
-      err instanceof DataHookError ||
-      err instanceof InvalidQueryError ||
-      err instanceof InvalidResponseError
-    ) {
+    if (err instanceof DataHookError || err instanceof InvalidResponseError) {
       const serializedError = serializeError(err);
 
       // Expose the error for all affected queries.
