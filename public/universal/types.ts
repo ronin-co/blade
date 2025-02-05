@@ -18,3 +18,4 @@ export type {
 
 export type * from 'ronin';
 export type * from 'ronin/types';
+export type { ResultRecord } from '@ronin/compiler';

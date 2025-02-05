@@ -3,7 +3,7 @@ import { hooks as hookList } from 'file-list';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
-import { InvalidQueryError, InvalidResponseError } from 'ronin/utils';
+import { InvalidResponseError } from 'ronin/utils';
 
 import { DataHookError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';
@@ -168,11 +168,7 @@ app.post('/api', async (c) => {
       return runQueries(c, queries, { hooks });
     });
   } catch (err) {
-    if (
-      err instanceof DataHookError ||
-      err instanceof InvalidQueryError ||
-      err instanceof InvalidResponseError
-    ) {
+    if (err instanceof DataHookError || err instanceof InvalidResponseError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
       const error: Record<string, unknown> = {};
 

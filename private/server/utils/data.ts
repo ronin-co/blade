@@ -4,6 +4,7 @@ import type { Context } from 'hono';
 import type { Query, QueryHandlerOptions } from 'ronin/types';
 import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
+import type { ResultRecord } from '@ronin/compiler';
 import type { DataHooksList } from '../types';
 import { HOOK_CONTEXT } from '../worker/context.ts';
 import { VERBOSE_LOGGING } from './constants';
@@ -78,7 +79,7 @@ export const getRoninOptions = (
  *
  * @returns The results of the passed queries.
  */
-export const runQueries = <T>(
+export const runQueries = <T extends ResultRecord>(
   c: Context,
   queries: Query[],
   options: Parameters<typeof getRoninOptions>[1] = {},
