@@ -7,7 +7,7 @@ import { getRoninOptions } from '../../../private/server/utils/data.ts';
 import { SERVER_CONTEXT } from '../../../private/server/worker/context.ts';
 import { prepareHooks } from '../../../private/server/worker/data-hooks';
 
-const { create, get, set, drop, count, batch } = initializeClient(() => {
+const { add, get, set, remove, count, batch } = initializeClient(() => {
   const serverContext = SERVER_CONTEXT.getStore();
 
   if (!serverContext) throw new Error('Missing server context for data hooks.');
@@ -17,4 +17,4 @@ const { create, get, set, drop, count, batch } = initializeClient(() => {
   });
 });
 
-export { create, get, set, drop, count, batch };
+export { add, get, set, remove, count, batch };

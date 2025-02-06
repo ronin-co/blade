@@ -1,19 +1,19 @@
 import type { ComponentType, FunctionComponent } from 'react';
 import type {
+  AddHook as OriginalAddHook,
+  AfterAddHook as OriginalAfterAddHook,
   AfterCountHook as OriginalAfterCountHook,
-  AfterCreateHook as OriginalAfterCreateHook,
-  AfterDropHook as OriginalAfterDropHook,
   AfterGetHook as OriginalAfterGetHook,
+  AfterRemoveHook as OriginalAfterRemoveHook,
   AfterSetHook as OriginalAfterSetHook,
+  BeforeAddHook as OriginalBeforeAddHook,
   BeforeCountHook as OriginalBeforeCountHook,
-  BeforeCreateHook as OriginalBeforeCreateHook,
-  BeforeDropHook as OriginalBeforeDropHook,
   BeforeGetHook as OriginalBeforeGetHook,
+  BeforeRemoveHook as OriginalBeforeRemoveHook,
   BeforeSetHook as OriginalBeforeSetHook,
   CountHook as OriginalCountHook,
-  CreateHook as OriginalCreateHook,
-  DropHook as OriginalDropHook,
   GetHook as OriginalGetHook,
+  RemoveHook as OriginalRemoveHook,
   SetHook as OriginalSetHook,
 } from 'ronin/types';
 
@@ -88,12 +88,12 @@ type AddOptionsArgument<T> = T extends (...a: infer U) => infer R
 export type BeforeCountHook = (
   ...args: Parameters<AddOptionsArgument<OriginalBeforeCountHook>>
 ) => ReturnType<OriginalBeforeCountHook>;
-export type BeforeCreateHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeCreateHook>>
-) => ReturnType<OriginalBeforeCreateHook>;
-export type BeforeDropHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeDropHook>>
-) => ReturnType<OriginalBeforeDropHook>;
+export type BeforeAddHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalBeforeAddHook>>
+) => ReturnType<OriginalBeforeAddHook>;
+export type BeforeRemoveHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalBeforeRemoveHook>>
+) => ReturnType<OriginalBeforeRemoveHook>;
 export type BeforeGetHook = (
   ...args: Parameters<AddOptionsArgument<OriginalBeforeGetHook>>
 ) => ReturnType<OriginalBeforeGetHook>;
@@ -104,12 +104,12 @@ export type BeforeSetHook = (
 export type CountHook<TSchema = unknown> = (
   ...args: Parameters<AddOptionsArgument<OriginalCountHook<TSchema>>>
 ) => ReturnType<OriginalCountHook<TSchema>>;
-export type CreateHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalCreateHook<TSchema>>>
-) => ReturnType<OriginalCreateHook<TSchema>>;
-export type DropHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalDropHook<TSchema>>>
-) => ReturnType<OriginalDropHook<TSchema>>;
+export type AddHook<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalAddHook<TSchema>>>
+) => ReturnType<OriginalAddHook<TSchema>>;
+export type RemoveHook<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalRemoveHook<TSchema>>>
+) => ReturnType<OriginalRemoveHook<TSchema>>;
 export type GetHook<TSchema = unknown> = (
   ...args: Parameters<AddOptionsArgument<OriginalGetHook<TSchema>>>
 ) => ReturnType<OriginalGetHook<TSchema>>;
@@ -120,12 +120,12 @@ export type SetHook<TSchema = unknown> = (
 export type AfterCountHook<TSchema = unknown> = (
   ...args: Parameters<AddOptionsArgument<OriginalAfterCountHook<TSchema>>>
 ) => ReturnType<OriginalAfterCountHook<TSchema>>;
-export type AfterCreateHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterCreateHook<TSchema>>>
-) => ReturnType<OriginalAfterCreateHook<TSchema>>;
-export type AfterDropHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterDropHook<TSchema>>>
-) => ReturnType<OriginalAfterDropHook<TSchema>>;
+export type AfterAddHook<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalAfterAddHook<TSchema>>>
+) => ReturnType<OriginalAfterAddHook<TSchema>>;
+export type AfterRemoveHook<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalAfterRemoveHook<TSchema>>>
+) => ReturnType<OriginalAfterRemoveHook<TSchema>>;
 export type AfterGetHook<TSchema = unknown> = (
   ...args: Parameters<AddOptionsArgument<OriginalAfterGetHook<TSchema>>>
 ) => ReturnType<OriginalAfterGetHook<TSchema>>;
