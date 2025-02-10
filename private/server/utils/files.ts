@@ -8,7 +8,7 @@ import type { Query, QueryType, StoredObject } from 'ronin/types';
 export const assignFiles = (query: Query, files: Map<string, Blob>): Query => {
   const typeKey = Object.keys(query)[0] as QueryType;
 
-  if (typeKey === 'create' || typeKey === 'set') {
+  if (typeKey === 'add' || typeKey === 'set') {
     const typeContents = query[typeKey] as unknown as Record<
       string,
       Record<string, object>
@@ -17,7 +17,7 @@ export const assignFiles = (query: Query, files: Map<string, Blob>): Query => {
     const schemaKey = Object.keys(typeContents)[0];
     const schemaContents = typeContents[schemaKey];
 
-    const instructionKey = typeKey === 'create' ? 'with' : 'to';
+    const instructionKey = typeKey === 'add' ? 'with' : 'to';
     const instructionContents = schemaContents[instructionKey] as Record<
       string,
       StoredObject

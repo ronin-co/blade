@@ -119,12 +119,12 @@ class InvalidPermissionsError extends DataHookError {
   }
 }
 
-class CreateNotAllowedError extends DataHookError {
+class AddNotAllowedError extends DataHookError {
   constructor(details?: ErrorDetails) {
     super({
       message:
         details?.message ||
-        'Queries of type "create" are not supported for the provided schema.',
+        'Queries of type "add" are not supported for the provided schema.',
       code: 'INVALID_QUERY_TYPE',
     });
   }
@@ -141,12 +141,12 @@ class SetNotAllowedError extends DataHookError {
   }
 }
 
-class DropNotAllowedError extends DataHookError {
+class RemoveNotAllowedError extends DataHookError {
   constructor(details?: ErrorDetails) {
     super({
       message:
         details?.message ||
-        'Queries of type "drop" are not supported for the provided schema.',
+        'Queries of type "remove" are not supported for the provided schema.',
       code: 'INVALID_QUERY_TYPE',
     });
   }
@@ -171,8 +171,8 @@ export {
   RecordNotFoundError,
   TooManyRequestsError,
   InvalidPermissionsError,
-  CreateNotAllowedError,
+  AddNotAllowedError,
   SetNotAllowedError,
-  DropNotAllowedError,
+  RemoveNotAllowedError,
   MultipleWithInstructionsError,
 };
