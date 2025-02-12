@@ -221,8 +221,9 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
     });
 };
 
-const callback = (query: Query, options?: DataOptions) => {
-  return queryHandler([{ query, options }])[0];
+const callback = (defaultQuery: Query, options?: DataOptions) => {
+  const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
+  return queryHandler([{ query: query[QUERY_SYMBOLS.QUERY], options }])[0];
 };
 
 const use = getSyntaxProxy<GetQuery>({ root: `${QUERY_SYMBOLS.QUERY}.get`, callback });
