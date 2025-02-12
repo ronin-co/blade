@@ -5,6 +5,12 @@ import type { PromiseTuple, Query } from 'ronin/types';
 import { processStorableObjects } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
 
+import {
+  type AddQuery,
+  QUERY_SYMBOLS,
+  type RemoveQuery,
+  type SetQuery,
+} from '@ronin/compiler';
 import { RootClientContext } from '../../private/client/context';
 import {
   usePageTransition,
@@ -124,14 +130,18 @@ export const useMutation = () => {
     });
   };
 
-  const callback = async (query: Query, options?: MutationOptions) => {
-    return (await queryHandler([query], options))[0];
+  const callback = async (defaultQuery: Query, options?: MutationOptions) => {
+    const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
+    return (await queryHandler([query[QUERY_SYMBOLS.QUERY]], options))[0];
   };
 
   return {
-    add: getSyntaxProxy({ rootProperty: 'add', callback }),
-    set: getSyntaxProxy({ rootProperty: 'set', callback }),
-    remove: getSyntaxProxy({ rootProperty: 'remove', callback }),
+    add: getSyntaxProxy<AddQuery>({ root: `${QUERY_SYMBOLS.QUERY}.add`, callback }),
+    set: getSyntaxProxy<SetQuery>({ root: `${QUERY_SYMBOLS.QUERY}.set`, callback }),
+    remove: getSyntaxProxy<RemoveQuery>({
+      root: `${QUERY_SYMBOLS.QUERY}.remove`,
+      callback,
+    }),
 
     batch: <T extends [Promise<any>, ...Promise<any>[]]>(
       operations: () => T,
