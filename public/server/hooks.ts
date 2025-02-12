@@ -4,6 +4,7 @@ import type { verify } from 'hono/jwt';
 import type { Query } from 'ronin/types';
 import { deserializeError } from 'serialize-error';
 
+import { type CountQuery, type GetQuery, QUERY_SYMBOLS } from '@ronin/compiler';
 import { useServerContext } from '../../private/server/hooks';
 import type { PageMetadata } from '../../private/server/types';
 import { generateHashSync } from '../../private/server/utils/crypto';
@@ -224,8 +225,11 @@ const callback = (query: Query, options?: DataOptions) => {
   return queryHandler([{ query, options }])[0];
 };
 
-const use = getSyntaxProxy({ rootProperty: 'get', callback });
-const useCountOf = getSyntaxProxy({ rootProperty: 'count', callback });
+const use = getSyntaxProxy<GetQuery>({ root: `${QUERY_SYMBOLS.QUERY}.get`, callback });
+const useCountOf = getSyntaxProxy<CountQuery, number>({
+  root: `${QUERY_SYMBOLS.QUERY}.count`,
+  callback,
+});
 
 const useBatch = <T extends [any, ...any[]]>(
   operations: () => T,
