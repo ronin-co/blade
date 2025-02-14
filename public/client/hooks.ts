@@ -1,7 +1,8 @@
 import { createId } from '@paralleldrive/cuid2';
+import type { Query } from '@ronin/compiler';
 import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
 import { type MouseEvent, useContext, useEffect, useRef } from 'react';
-import type { PromiseTuple, Query } from 'ronin/types';
+import type { PromiseTuple } from 'ronin/types';
 import { processStorableObjects } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
 
@@ -83,23 +84,26 @@ export const useMutation = () => {
 
     // Extract binary objects (such as `File`s or `Blob`s) that might be included in the
     // queries so that we can later stream them to the server as separate entities.
-    const updatedQueries: Query[] = await processStorableObjects(queries, (objects) => {
-      return objects.map(({ value: file }) => {
-        const id = generateUniqueId();
-        files.set(id, file);
+    const updatedQueries: Array<Query> = await processStorableObjects(
+      queries,
+      (objects) => {
+        return objects.map(({ value: file }) => {
+          const id = generateUniqueId();
+          files.set(id, file);
 
-        return {
-          name: file.name,
-          key: id,
-          src: file.name,
-          meta: {
-            size: file.size,
-            type: file.type,
-          },
-          placeholder: null,
-        };
-      });
-    });
+          return {
+            name: file.name,
+            key: id,
+            src: file.name,
+            meta: {
+              size: file.size,
+              type: file.type,
+            },
+            placeholder: null,
+          };
+        });
+      },
+    );
 
     transitionPage(destination, 'manual', {
       queries: queries.map((_, index) => ({
