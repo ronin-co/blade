@@ -1,4 +1,4 @@
-import type { GetQueryInstructions, Query } from 'ronin/types';
+import type { GetQueryInstructions, Query } from '@ronin/compiler';
 
 import type { PaginationInstruction } from '../../universal/types/util';
 

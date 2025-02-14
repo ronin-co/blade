@@ -1,10 +1,14 @@
 import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
 import type { CookieSerializeOptions } from 'cookie';
 import type { verify } from 'hono/jwt';
-import type { Query } from 'ronin/types';
 import { deserializeError } from 'serialize-error';
 
-import { type CountQuery, type GetQuery, QUERY_SYMBOLS } from '@ronin/compiler';
+import {
+  type CountQuery,
+  type GetQuery,
+  QUERY_SYMBOLS,
+  type Query,
+} from '@ronin/compiler';
 import { useServerContext } from '../../private/server/hooks';
 import type { PageMetadata } from '../../private/server/types';
 import { generateHashSync } from '../../private/server/utils/crypto';
@@ -252,7 +256,7 @@ const useBatch = <T extends [any, ...any[]]>(
 
   const queriesClean = queriesWithIndexes.filter(({ query }) => {
     return typeof query === 'object' && query !== null;
-  }) as { query: Query; options?: DataOptions; index: number }[];
+  }) as Array<{ query: Query; options?: DataOptions; index: number }>;
 
   const queryResults = queryHandler(
     queriesClean.map(({ query, options: perQueryOptions }) => ({
