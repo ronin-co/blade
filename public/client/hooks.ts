@@ -3,7 +3,7 @@ import type { Query } from '@ronin/compiler';
 import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
 import { type MouseEvent, useContext, useEffect, useRef } from 'react';
 import type { PromiseTuple } from 'ronin/types';
-import { processStorableObjects } from 'ronin/utils';
+import { isStorableObject, processStorableObjects } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
 
 import {
@@ -139,12 +139,24 @@ export const useMutation = () => {
     return (await queryHandler([query[QUERY_SYMBOLS.QUERY]], options))[0];
   };
 
+  // Ensure that storable objects are retained as-is instead of being serialized.
+  const replacer = (value: unknown) => (isStorableObject(value) ? value : undefined);
+
   return {
-    add: getSyntaxProxy<AddQuery>({ root: `${QUERY_SYMBOLS.QUERY}.add`, callback }),
-    set: getSyntaxProxy<SetQuery>({ root: `${QUERY_SYMBOLS.QUERY}.set`, callback }),
+    add: getSyntaxProxy<AddQuery>({
+      root: `${QUERY_SYMBOLS.QUERY}.add`,
+      callback,
+      replacer,
+    }),
+    set: getSyntaxProxy<SetQuery>({
+      root: `${QUERY_SYMBOLS.QUERY}.set`,
+      callback,
+      replacer,
+    }),
     remove: getSyntaxProxy<RemoveQuery>({
       root: `${QUERY_SYMBOLS.QUERY}.remove`,
       callback,
+      replacer,
     }),
 
     batch: <T extends [Promise<any>, ...Promise<any>[]]>(
