@@ -92,13 +92,15 @@ const runQueriesWithTime = async (
     const spaceNotFound =
       dataSelector && (err as { code?: string }).code === 'AUTH_INVALID_ACCESS';
 
-    // If a custom "data selector" (space handle) was provided and an
-    // authentication error is returned by RONIN, that means the addressed space
-    // was not found.
+    // If a custom "data selector" (custom database) was provided and an authentication
+    // error is returned by RONIN, that means the addressed database was not found.
     //
-    // In that case, we want to ignore the error and thereby fall back to an
-    // empty result list, as this matches RONIN's general behavior whenever a
-    // query is executed for which no records are found.
+    // In that case, we want to ignore the error and thereby fall back to an empty result
+    // list, as this matches RONIN's general behavior whenever a query is executed for
+    // which no records are found.
+    //
+    // Addressing a custom database is useful for cases in which a RONIN space contains
+    // multiple databases and the developer wants to address a specific one.
     if (!spaceNotFound) throw err;
   }
 
