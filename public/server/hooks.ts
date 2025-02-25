@@ -257,17 +257,16 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
       if (typeof result === 'object' && result !== null && 'models' in result) {
         return Object.fromEntries(
           Object.entries(result['models'] || {}).map(([model, result]) => {
-            return [
+            const formattedResult = formatResult(
+              formattedQueries,
+              result,
+              leafIndex,
+              hookHash,
+              queryIndex,
               model,
-              formatResult(
-                formattedQueries,
-                result,
-                leafIndex,
-                hookHash,
-                queryIndex,
-                model,
-              ),
-            ];
+            );
+
+            return [model, formattedResult];
           }),
         );
       }
