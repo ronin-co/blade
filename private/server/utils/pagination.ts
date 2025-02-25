@@ -91,6 +91,7 @@ export const paginateQuery = (
     querySchema = targetModel;
   }
 
+  // Apply the pagination instruction (`before` or `after`) to the query.
   queryInstructions[direction] = cursor;
 
   const countQuery = {
