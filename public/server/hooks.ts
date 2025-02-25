@@ -169,7 +169,7 @@ const formatResult = (
 
   if (resultArray.moreAfter) {
     resultArray.nextPage = `${leafIndex}-${hookHash}-${queryIndex}-a-${resultArray.moreAfter}`;
-    if (targetModel) resultArray.previousPage += `-${targetModel}`;
+    if (targetModel) resultArray.nextPage += `-${targetModel}`;
 
     delete resultArray.moreAfter;
   }
