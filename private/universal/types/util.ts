@@ -41,6 +41,7 @@ export type PaginationInstruction = {
   queryIndex: number;
   direction: 'before' | 'after';
   cursor: string;
+  targetModel?: string;
 };
 
 export type GeoLocation = {

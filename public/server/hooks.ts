@@ -116,6 +116,8 @@ interface DataOptions {
  * @param hookHash - The hash of the `use` query hook that is being executed.
  * @param queryIndex - The index of the query that is being executed, within the `use`
  * query hook that is being executed.
+ * @param targetModel - If the query is used to address multiple models at once, the
+ * model for which the current result was provided is passed here.
  *
  * @returns The formatted query result.
  */
@@ -125,6 +127,7 @@ const formatResult = (
   leafIndex: number,
   hookHash: number,
   queryIndex: number,
+  targetModel?: string,
 ) => {
   // If the result is not an array, we don't need to apply any pagination cursors.
   if (!Array.isArray(result)) return result;
@@ -159,11 +162,15 @@ const formatResult = (
 
   if (resultArray.moreBefore) {
     resultArray.previousPage = `${leafIndex}-${hookHash}-${queryIndex}-b-${resultArray.moreBefore}`;
+    if (targetModel) resultArray.previousPage += `-${targetModel}`;
+
     delete resultArray.moreBefore;
   }
 
   if (resultArray.moreAfter) {
     resultArray.nextPage = `${leafIndex}-${hookHash}-${queryIndex}-a-${resultArray.moreAfter}`;
+    if (targetModel) resultArray.previousPage += `-${targetModel}`;
+
     delete resultArray.moreAfter;
   }
 
@@ -199,6 +206,7 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
           query,
           page.direction,
           page.cursor,
+          page.targetModel,
         );
 
         return [
@@ -251,7 +259,14 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
           Object.entries(result['models'] || {}).map(([model, result]) => {
             return [
               model,
-              formatResult(formattedQueries, result, leafIndex, hookHash, queryIndex),
+              formatResult(
+                formattedQueries,
+                result,
+                leafIndex,
+                hookHash,
+                queryIndex,
+                model,
+              ),
             ];
           }),
         );
