@@ -107,6 +107,69 @@ interface DataOptions {
   dataSelector?: QueryItemRead['dataSelector'];
 }
 
+/**
+ * Formats a particular query result by applying pagination cursors to it.
+ *
+ * @param queries - The full list of queries being executed.
+ * @param result - The result of the particular query being executed.
+ * @param leafIndex - The index of the leaf (layout or page) in the layout tree.
+ * @param hookHash - The hash of the `use` query hook that is being executed.
+ * @param queryIndex - The index of the query that is being executed, within the `use`
+ * query hook that is being executed.
+ *
+ * @returns The formatted query result.
+ */
+const formatResult = (
+  queries: QueryItemRead[],
+  result: unknown,
+  leafIndex: number,
+  hookHash: number,
+  queryIndex: number,
+) => {
+  // If the result is not an array, we don't need to apply any pagination cursors.
+  if (!Array.isArray(result)) return result;
+
+  const resultArray = result as unknown[] & {
+    // Properties that are exposed from the hook.
+    previousPage?: string;
+    nextPage?: string;
+    beforeAmount?: number;
+    afterAmount?: number;
+
+    // Properties that are only used internally.
+    moreBefore?: string;
+    moreAfter?: string;
+  };
+
+  const paginationAmountQueryItem = queries.find((queryDetails) => {
+    return queryDetails.paginationDetails?.countForQueryAtIndex === queryIndex;
+  });
+
+  if (paginationAmountQueryItem) {
+    // Increment the amount by one because the count query will return the amount
+    // excluding the cursor record itself.
+    const amount = paginationAmountQueryItem.result as number;
+    const beforeAmount = amount === 0 ? amount : amount + 1;
+
+    const { direction } = paginationAmountQueryItem.paginationDetails || {};
+    const propertyName = direction === 'after' ? 'beforeAmount' : 'afterAmount';
+
+    resultArray[propertyName] = beforeAmount;
+  }
+
+  if (resultArray.moreBefore) {
+    resultArray.previousPage = `${leafIndex}-${hookHash}-${queryIndex}-b-${resultArray.moreBefore}`;
+    delete resultArray.moreBefore;
+  }
+
+  if (resultArray.moreAfter) {
+    resultArray.nextPage = `${leafIndex}-${hookHash}-${queryIndex}-a-${resultArray.moreAfter}`;
+    delete resultArray.moreAfter;
+  }
+
+  return result;
+};
+
 const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unknown[] => {
   const serverContext = SERVER_CONTEXT.getStore();
   if (!serverContext) throw new Error('Server context not available.');
@@ -181,47 +244,20 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
     .map(({ result, error }, queryIndex) => {
       if (typeof error !== 'undefined') throw deserializeError(error);
 
-      if (!Array.isArray(result)) return result;
-
-      const resultArray = result as unknown[] & {
-        // Properties that are exposed from the hook.
-        previousPage?: string;
-        nextPage?: string;
-        beforeAmount?: number;
-        afterAmount?: number;
-
-        // Properties that are only used internally.
-        moreBefore?: string;
-        moreAfter?: string;
-      };
-
-      const paginationAmountQueryItem = formattedQueries.find((queryDetails) => {
-        return queryDetails.paginationDetails?.countForQueryAtIndex === queryIndex;
-      });
-
-      if (paginationAmountQueryItem) {
-        // Increment the amount by one because the count query will return the amount
-        // excluding the cursor record itself.
-        const amount = paginationAmountQueryItem.result as number;
-        const beforeAmount = amount === 0 ? amount : amount + 1;
-
-        const { direction } = paginationAmountQueryItem.paginationDetails || {};
-        const propertyName = direction === 'after' ? 'beforeAmount' : 'afterAmount';
-
-        resultArray[propertyName] = beforeAmount;
+      // If a `models` property is present in the result, that means the result combines
+      // the results of multiple different queries.
+      if ('models' in result) {
+        return Object.fromEntries(
+          Object.entries(result.models).map(([model, result]) => {
+            return [
+              model,
+              formatResult(formattedQueries, result, leafIndex, hookHash, queryIndex),
+            ];
+          }),
+        );
       }
 
-      if (resultArray.moreBefore) {
-        resultArray.previousPage = `${leafIndex}-${hookHash}-${queryIndex}-b-${resultArray.moreBefore}`;
-        delete resultArray.moreBefore;
-      }
-
-      if (resultArray.moreAfter) {
-        resultArray.nextPage = `${leafIndex}-${hookHash}-${queryIndex}-a-${resultArray.moreAfter}`;
-        delete resultArray.moreAfter;
-      }
-
-      return result;
+      return formatResult(formattedQueries, result, leafIndex, hookHash, queryIndex);
     });
 };
 
