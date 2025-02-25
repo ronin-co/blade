@@ -1,3 +1,4 @@
+import type { FormattedResults } from 'ronin/types';
 import type { UniversalContext } from '../context';
 
 interface QueryItemBase {
@@ -12,7 +13,7 @@ interface QueryItemBase {
    */
   query: string;
   dataSelector?: string;
-  result?: unknown;
+  result?: FormattedResults<unknown>[number];
   error?: unknown;
 }
 

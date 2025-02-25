@@ -10,7 +10,7 @@ import { assign } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
-import type { Query } from 'ronin/types';
+import type { FormattedResults, Query } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
 
@@ -61,7 +61,7 @@ const runQueriesWithTime = async (
   path: string,
   queries: Query[],
   dataSelector?: string,
-): Promise<unknown[]> => {
+): Promise<FormattedResults<unknown>> => {
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
@@ -78,7 +78,7 @@ const runQueriesWithTime = async (
       dataSelector,
     });
 
-  let results: unknown[] = [];
+  let results: FormattedResults<unknown> = [];
 
   try {
     // If hooks are used, we need to provide them with the server context.
@@ -148,7 +148,7 @@ const runQueriesPerType = async (
 
   const dataSelector = type === 'space' ? filteredList[0].dataSelector : undefined;
 
-  let results: unknown[] = [];
+  let results: FormattedResults<unknown> = [];
 
   try {
     results = await runQueriesWithTime(serverContext, path, queryObjects, dataSelector);

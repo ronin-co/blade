@@ -246,9 +246,9 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
 
       // If a `models` property is present in the result, that means the result combines
       // the results of multiple different queries.
-      if ('models' in result) {
+      if (typeof result === 'object' && result !== null && 'models' in result) {
         return Object.fromEntries(
-          Object.entries(result.models).map(([model, result]) => {
+          Object.entries(result['models'] || {}).map(([model, result]) => {
             return [
               model,
               formatResult(formattedQueries, result, leafIndex, hookHash, queryIndex),
