@@ -68,7 +68,7 @@ export const paginateQuery = (
 ): { query: Query; countQuery: Query } => {
   const queryValue = Object.values(query)[0] as { [key: string]: GetQueryInstructions };
 
-  const querySchema = Object.keys(queryValue)[0] as string;
+  let querySchema = Object.keys(queryValue)[0] as string;
 
   if (queryValue[querySchema] === null) {
     queryValue[querySchema] = {};
@@ -79,6 +79,8 @@ export const paginateQuery = (
   // If a custom target model was provided, that means the query that is being paginated
   // is being used to address multiple models at once. Therefore, the pagination
   // instruction must be set inside a nested `on` instruction instead of the top level.
+  //
+  // Once this condition is met, `querySchema` is guaranteed to be `all`.
   if (targetModel) {
     const allQueryInstructions = queryInstructions as { on: any };
     if (!allQueryInstructions['on']) allQueryInstructions['on'] = {};
@@ -86,6 +88,7 @@ export const paginateQuery = (
       allQueryInstructions['on'][targetModel] = {};
 
     queryInstructions = allQueryInstructions['on'][targetModel];
+    querySchema = targetModel;
   }
 
   queryInstructions[direction] = cursor;
