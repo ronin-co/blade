@@ -1,3 +1,4 @@
+import type { FormattedResults } from 'ronin/types';
 import type { UniversalContext } from '../context';
 
 interface QueryItemBase {
@@ -12,7 +13,7 @@ interface QueryItemBase {
    */
   query: string;
   dataSelector?: string;
-  result?: unknown;
+  result?: FormattedResults<unknown>[number];
   error?: unknown;
 }
 
@@ -22,6 +23,8 @@ export interface QueryItemRead extends QueryItemBase {
     countForQueryAtIndex: PaginationInstruction['queryIndex'];
     direction: PaginationInstruction['direction'];
   };
+  /** Whether the query is addressing multiple models at once. */
+  multiModel?: boolean;
 }
 
 export interface QueryItemWrite extends QueryItemBase {
@@ -40,6 +43,7 @@ export type PaginationInstruction = {
   queryIndex: number;
   direction: 'before' | 'after';
   cursor: string;
+  targetModel?: string;
 };
 
 export type GeoLocation = {
