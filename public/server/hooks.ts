@@ -196,6 +196,9 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
     .flatMap(({ query, options }, queryIndex): QueryItemRead | QueryItemRead[] => {
       const queryDetails = { ...options, type: 'read' } as QueryItemRead;
 
+      // Whether the query is addressing multiple models at once.
+      const multiModel = 'all' in Object.values(query)[0];
+
       if (
         page &&
         page.leafIndex === leafIndex &&
@@ -210,7 +213,7 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
         );
 
         return [
-          { ...queryDetails, query: JSON.stringify(newQuery) },
+          { ...queryDetails, query: JSON.stringify(newQuery), multiModel },
           {
             ...queryDetails,
             query: JSON.stringify(countQuery),
@@ -222,7 +225,7 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
         ];
       }
 
-      return { ...queryDetails, query: JSON.stringify(query) };
+      return { ...queryDetails, query: JSON.stringify(query), multiModel };
     })
     .map((currentQuery) => {
       const executedQueryMatch = executedQueries.find(({ query, dataSelector }) => {
@@ -249,17 +252,17 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
   // If all queries have results, return them.
   return formattedQueries
     .filter(({ paginationDetails }) => typeof paginationDetails === 'undefined')
-    .map(({ result, error }, queryIndex) => {
+    .map(({ result, error, multiModel }, queryIndex) => {
       if (typeof error !== 'undefined') throw deserializeError(error);
 
       // If a `models` property is present in the result, that means the result combines
       // the results of multiple different queries.
-      if (typeof result === 'object' && result !== null && 'models' in result) {
+      if (result && multiModel) {
         return Object.fromEntries(
-          Object.entries(result['models'] || {}).map(([model, result]) => {
+          Object.entries(result).map(([model, nestedResult]) => {
             const formattedResult = formatResult(
               formattedQueries,
-              result,
+              nestedResult,
               leafIndex,
               hookHash,
               queryIndex,

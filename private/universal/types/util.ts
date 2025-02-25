@@ -23,6 +23,8 @@ export interface QueryItemRead extends QueryItemBase {
     countForQueryAtIndex: PaginationInstruction['queryIndex'];
     direction: PaginationInstruction['direction'];
   };
+  /** Whether the query is addressing multiple models at once. */
+  multiModel?: boolean;
 }
 
 export interface QueryItemWrite extends QueryItemBase {
