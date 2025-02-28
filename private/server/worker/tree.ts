@@ -134,6 +134,10 @@ const runQueriesPerType = async (
   //
   // We are intentionally creating a new array here, to avoid affecting the order of the
   // original queries, since other parts of the code might rely on the original order.
+  //
+  // It is extremely important that the queries per database retain the same order, since
+  // the application that is using blade of course expects queries to be run in the order
+  // in which they were provided.
   const sortedList = originalList.toSorted((a, b) => {
     if (!a.database && !b.database) return 0;
     if (!a.database) return -1;
