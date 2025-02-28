@@ -12,7 +12,7 @@ interface QueryItemBase {
    * executing the queries.
    */
   query: string;
-  dataSelector?: string;
+  database?: string;
   result?: FormattedResults<unknown>[number];
   error?: unknown;
 }

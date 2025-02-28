@@ -2,23 +2,22 @@ import type { AfterGetHook } from 'ronin/types';
 
 import type { ServerContext } from '../context';
 import type { DataHookOptions, DataHooks, DataHooksList } from '../types';
-import type { getRoninOptions } from '../utils/data';
 
 /**
  * Convert a list of data hook files to data hooks that can be passed to RONIN.
  *
  * @param serverContext - A partial server context object.
  * @param hooks - The data hooks that should be prepared for invocation.
- * @param dataSelector - A custom selector for which the queries should be run.
+ * @param config - Additional configuration options.
  *
  * @returns Data hooks ready to be passed to RONIN.
  */
 export const prepareHooks = (
   serverContext: Partial<ServerContext> &
     Pick<ServerContext, 'cookies' | 'userAgent' | 'geoLocation' | 'languages' | 'url'>,
-  hooks: Parameters<typeof getRoninOptions>[1]['hooks'],
+  hooks: DataHooksList,
   config?: {
-    dataSelector?: string;
+    fromRoninDashboard?: boolean;
     fromHeadlessAPI?: boolean;
   },
 ): DataHooksList => {
@@ -30,7 +29,7 @@ export const prepareHooks = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-    fromRoninDashboard: Boolean(config?.dataSelector),
+    fromRoninDashboard: Boolean(config?.fromRoninDashboard),
     fromHeadlessAPI: Boolean(config?.fromHeadlessAPI),
   };
 

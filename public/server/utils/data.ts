@@ -12,9 +12,10 @@ const { add, get, set, remove, count, batch } = initializeClient(() => {
 
   if (!serverContext) throw new Error('Missing server context for data hooks.');
 
-  return getRoninOptions(serverContext.requestContext, {
-    hooks: prepareHooks(serverContext, hooks),
-  });
+  return getRoninOptions(
+    serverContext.requestContext,
+    prepareHooks(serverContext, hooks),
+  );
 });
 
 export { add, get, set, remove, count, batch };

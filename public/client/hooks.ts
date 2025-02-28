@@ -27,8 +27,8 @@ import { usePopulatePathname, useRedirect } from '../universal/hooks';
 interface MutationOptions {
   /** Display a different page once the queries have run. */
   redirect?: string;
-  /** ## 🚧 For internal use only! 🚧 */
-  dataSelector?: string;
+  /** A custom RONIN database in your space for which the queries should be executed. */
+  database?: string;
 }
 
 export const useMutation = () => {
@@ -109,7 +109,7 @@ export const useMutation = () => {
       queries: queries.map((_, index) => ({
         query: JSON.stringify(updatedQueries[index]),
         type: 'write',
-        dataSelector: options?.dataSelector,
+        database: options?.database,
         hookHash,
       })),
       errorFallback: currentPathnameWithQuery,

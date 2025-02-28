@@ -59,26 +59,27 @@ const getRenderingLeaves = (location: keyof typeof pages): Map<string, TreeItem>
 const runQueriesWithTime = async (
   serverContext: ServerContext,
   path: string,
-  queries: Query[],
-  dataSelector?: string,
-): Promise<FormattedResults<unknown>> => {
+  queries: Record<string, Array<Query>>,
+): Promise<Record<string, FormattedResults<unknown>>> => {
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
   const { requestContext } = serverContext;
+  const hooks = prepareHooks(serverContext, hookList, {
+    // TODO: Make this work for other spaces too.
+    //
+    // If queries that are specifically targeting the "ronin" database were provided,
+    // that means the records of that space are currently being edited on the dashboard,
+    // by the RONIN team.
+    fromRoninDashboard: Boolean(queries['ronin']),
+  });
 
-  const hooks =
-    !dataSelector || dataSelector === 'ronin'
-      ? prepareHooks(serverContext, hookList, { dataSelector })
-      : undefined;
+  const databaseAmount = Object.keys(queries).length;
+  const queryAmount = Object.values(queries).flat().length;
 
-  const callback = () =>
-    runQueries(requestContext, queries, {
-      hooks,
-      dataSelector,
-    });
+  const callback = () => runQueries(requestContext, queries, hooks);
 
-  let results: FormattedResults<unknown> = [];
+  let results: Record<string, FormattedResults<unknown>> = {};
 
   try {
     // If hooks are used, we need to provide them with the server context.
@@ -90,7 +91,7 @@ const runQueriesWithTime = async (
       : await callback();
   } catch (err: unknown) {
     const spaceNotFound =
-      dataSelector && (err as { code?: string }).code === 'AUTH_INVALID_ACCESS';
+      databaseAmount > 1 && (err as { code?: string }).code === 'AUTH_INVALID_ACCESS';
 
     // If a custom "data selector" (custom database) was provided and an authentication
     // error is returned by RONIN, that means the addressed database was not found.
@@ -105,10 +106,10 @@ const runQueriesWithTime = async (
   }
 
   const end = Date.now();
-  const spaceSlug = dataSelector ? ` targeting "${dataSelector}" space` : '';
 
+  const databases = databaseAmount > 1 ? ` targeting ${databaseAmount} databases` : '';
   console.log(
-    `[BLADE] Page ${path} took ${end - start}ms for ${queries.length} queries${spaceSlug}`,
+    `[BLADE] Page ${path} took ${end - start}ms for ${queryAmount} queries${databases}`,
   );
 
   if (VERBOSE_LOGGING) {
@@ -125,13 +126,17 @@ const runQueriesPerType = async (
   originalList: (QueryItemRead | QueryItemWrite)[],
   files: Map<string, Blob> | undefined,
   path: string,
-  type: 'normal' | 'space',
 ) => {
-  const filteredList = originalList.filter(({ dataSelector }) => {
-    return type === 'space' ? dataSelector : !dataSelector;
-  });
+  if (originalList.length === 0) return;
 
-  if (filteredList.length === 0) return;
+  // Sort the queries in alphabetical order by database, but position queries that don't
+  // have a database at the beginning of the list.
+  const sortedList = originalList.sort((a, b) => {
+    if (!a.database) return -1;
+    if (!b.database) return 1;
+
+    return a.database.localeCompare(b.database);
+  });
 
   // Convert the queries from strings to objects, so that we can execute them and attach
   // any potential files that might be available.
@@ -141,27 +146,31 @@ const runQueriesPerType = async (
   // queries in the framework. We also wouldn't be able to clone the queries, since they
   // might contain binary objects, which cannot be cloned. Storing the queries as strings
   // and converting them into objects a single time (here) is therefore more efficient.
-  const queryObjects: Query[] = filteredList.map(({ query }) => {
-    const parsedQuery = JSON.parse(query);
-    return files ? assignFiles(parsedQuery, files) : parsedQuery;
-  });
+  const reducedQueries = sortedList.reduce(
+    (acc, { query, database = 'default' }) => {
+      const parsedQuery = JSON.parse(query);
+      const finalQuery = files ? assignFiles(parsedQuery, files) : parsedQuery;
 
-  const dataSelector = type === 'space' ? filteredList[0].dataSelector : undefined;
+      if (!acc[database]) acc[database] = [];
+      acc[database].push(finalQuery);
+      return acc;
+    },
+    {} as Record<string, Array<Query>>,
+  );
 
-  let results: FormattedResults<unknown> = [];
+  let results: Record<string, FormattedResults<unknown>> = {};
 
   try {
-    results = await runQueriesWithTime(serverContext, path, queryObjects, dataSelector);
+    results = await runQueriesWithTime(serverContext, path, reducedQueries);
   } catch (err) {
     if (err instanceof DataHookError || err instanceof InvalidResponseError) {
       const serializedError = serializeError(err);
 
       // Expose the error for all affected queries.
-      for (const queryDetails of filteredList) {
+      for (const queryDetails of sortedList) {
         const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
           return (
-            item.query === queryDetails.query &&
-            item.dataSelector === queryDetails.dataSelector
+            item.query === queryDetails.query && item.database === queryDetails.database
           );
         });
 
@@ -175,21 +184,11 @@ const runQueriesPerType = async (
     throw err;
   }
 
-  for (let index = 0; index < results.length; index++) {
-    const result = results[index];
-    const queryDetails = filteredList[index];
+  const flatResults = Object.entries(results).flatMap(([_database, results]) => results);
 
-    const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
-      return (
-        item.query === queryDetails.query &&
-        item.dataSelector === queryDetails.dataSelector
-      );
-    });
-
-    if (queryEntryIndex === -1) throw new Error('Missing query entry index');
-    (
-      serverContext.collected.queries[queryEntryIndex] as QueryItemRead | QueryItemWrite
-    ).result = result;
+  // Assign the results to their respective queries.
+  for (let index = 0; index < flatResults.length; index++) {
+    sortedList[index].result = flatResults[index];
   }
 };
 
@@ -258,13 +257,11 @@ const prepareRenderingTree = (
           leavesCheckedForQueries++;
 
           for (const queryDetails of details.__blade_queries) {
-            const { query, dataSelector } = queryDetails;
+            const { query, database } = queryDetails;
 
             // If the query was already collected, don't add it again.
             if (
-              queries.some(
-                (item) => item.query === query && item.dataSelector === dataSelector,
-              )
+              queries.some((item) => item.query === query && item.database === database)
             ) {
               continue;
             }
@@ -510,22 +507,12 @@ const renderReactTree = async (
       );
 
       try {
-        await Promise.all([
-          runQueriesPerType(
-            serverContext,
-            queriesWithoutResults,
-            options.files,
-            url.pathname,
-            'normal',
-          ),
-          runQueriesPerType(
-            serverContext,
-            queriesWithoutResults,
-            options.files,
-            url.pathname,
-            'space',
-          ),
-        ]);
+        await runQueriesPerType(
+          serverContext,
+          queriesWithoutResults,
+          options.files,
+          url.pathname,
+        );
       } catch (err) {
         if ((err as { renderable?: boolean }).renderable) {
           // If an error was thrown during the execution of the provided write queries,
