@@ -103,8 +103,8 @@ const useMetadata = (metadata: IncomingPageMetadata) => {
 };
 
 interface DataOptions {
-  /** ## 🚧 For internal use only! 🚧 */
-  dataSelector?: QueryItemRead['dataSelector'];
+  /** A custom RONIN database in your space for which the queries should be executed. */
+  database?: QueryItemRead['database'];
 }
 
 /**
@@ -228,8 +228,8 @@ const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unkno
       return { ...queryDetails, query: JSON.stringify(query), multiModel };
     })
     .map((currentQuery) => {
-      const executedQueryMatch = executedQueries.find(({ query, dataSelector }) => {
-        return query === currentQuery.query && dataSelector === currentQuery.dataSelector;
+      const executedQueryMatch = executedQueries.find(({ query, database }) => {
+        return query === currentQuery.query && database === currentQuery.database;
       });
 
       if (executedQueryMatch) {

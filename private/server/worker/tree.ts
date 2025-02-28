@@ -67,7 +67,8 @@ const runQueriesWithTime = async (
   const { requestContext } = serverContext;
   const hooks = prepareHooks(serverContext, hookList);
 
-  const multipleDatabases = Object.keys(queries).length > 1;
+  const databaseAmount = Object.keys(queries).length;
+  const queryAmount = Object.values(queries).flat().length;
 
   const callback = () => runQueries(requestContext, queries, hooks);
 
@@ -83,7 +84,7 @@ const runQueriesWithTime = async (
       : await callback();
   } catch (err: unknown) {
     const spaceNotFound =
-      multipleDatabases && (err as { code?: string }).code === 'AUTH_INVALID_ACCESS';
+      databaseAmount > 1 && (err as { code?: string }).code === 'AUTH_INVALID_ACCESS';
 
     // If a custom "data selector" (custom database) was provided and an authentication
     // error is returned by RONIN, that means the addressed database was not found.
@@ -99,7 +100,7 @@ const runQueriesWithTime = async (
 
   const end = Date.now();
 
-  console.log(`[BLADE] Page ${path} took ${end - start}ms for ${queries.length} queries`);
+  console.log(`[BLADE] Page ${path} took ${end - start}ms for ${queryAmount} queries`);
 
   if (VERBOSE_LOGGING) {
     console.log('-'.repeat(20));
@@ -126,19 +127,19 @@ const runQueriesPerType = async (
   // queries in the framework. We also wouldn't be able to clone the queries, since they
   // might contain binary objects, which cannot be cloned. Storing the queries as strings
   // and converting them into objects a single time (here) is therefore more efficient.
-  const queryObjects: Array<{ query: Query; dataSelector?: string }> = filteredList.map(
-    ({ query, dataSelector }) => {
+  const queryObjects: Array<{ query: Query; database?: string }> = filteredList.map(
+    ({ query, database }) => {
       const parsedQuery = JSON.parse(query);
       const finalQuery = files ? assignFiles(parsedQuery, files) : parsedQuery;
 
-      return { query: finalQuery, dataSelector };
+      return { query: finalQuery, database };
     },
   );
 
   const reducedQueries = queryObjects.reduce(
-    (acc, { query, dataSelector = 'default' }) => {
-      if (!acc[dataSelector]) acc[dataSelector] = [];
-      acc[dataSelector].push(query);
+    (acc, { query, database = 'default' }) => {
+      if (!acc[database]) acc[database] = [];
+      acc[database].push(query);
       return acc;
     },
     {} as Record<string, Array<Query>>,
@@ -156,8 +157,7 @@ const runQueriesPerType = async (
       for (const queryDetails of filteredList) {
         const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
           return (
-            item.query === queryDetails.query &&
-            item.dataSelector === queryDetails.dataSelector
+            item.query === queryDetails.query && item.database === queryDetails.database
           );
         });
 
@@ -178,10 +178,7 @@ const runQueriesPerType = async (
     const queryDetails = filteredList[index];
 
     const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
-      return (
-        item.query === queryDetails.query &&
-        item.dataSelector === queryDetails.dataSelector
-      );
+      return item.query === queryDetails.query && item.database === queryDetails.database;
     });
 
     if (queryEntryIndex === -1) throw new Error('Missing query entry index');
@@ -256,13 +253,11 @@ const prepareRenderingTree = (
           leavesCheckedForQueries++;
 
           for (const queryDetails of details.__blade_queries) {
-            const { query, dataSelector } = queryDetails;
+            const { query, database } = queryDetails;
 
             // If the query was already collected, don't add it again.
             if (
-              queries.some(
-                (item) => item.query === query && item.dataSelector === dataSelector,
-              )
+              queries.some((item) => item.query === query && item.database === database)
             ) {
               continue;
             }

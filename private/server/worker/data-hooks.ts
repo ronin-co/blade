@@ -8,7 +8,6 @@ import type { DataHookOptions, DataHooks, DataHooksList } from '../types';
  *
  * @param serverContext - A partial server context object.
  * @param hooks - The data hooks that should be prepared for invocation.
- * @param dataSelector - A custom selector for which the queries should be run.
  *
  * @returns Data hooks ready to be passed to RONIN.
  */
@@ -17,7 +16,6 @@ export const prepareHooks = (
     Pick<ServerContext, 'cookies' | 'userAgent' | 'geoLocation' | 'languages' | 'url'>,
   hooks: DataHooksList,
   config?: {
-    dataSelector?: string;
     fromHeadlessAPI?: boolean;
   },
 ): DataHooksList => {
@@ -29,7 +27,6 @@ export const prepareHooks = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-    fromRoninDashboard: Boolean(config?.dataSelector),
     fromHeadlessAPI: Boolean(config?.fromHeadlessAPI),
   };
 
