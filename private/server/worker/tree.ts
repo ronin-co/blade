@@ -130,19 +130,13 @@ const runQueriesPerType = async (
   // queries in the framework. We also wouldn't be able to clone the queries, since they
   // might contain binary objects, which cannot be cloned. Storing the queries as strings
   // and converting them into objects a single time (here) is therefore more efficient.
-  const queryObjects: Array<{ query: Query; database?: string }> = filteredList.map(
-    ({ query, database }) => {
+  const reducedQueries = filteredList.reduce(
+    (acc, { query, database = 'default' }) => {
       const parsedQuery = JSON.parse(query);
       const finalQuery = files ? assignFiles(parsedQuery, files) : parsedQuery;
 
-      return { query: finalQuery, database };
-    },
-  );
-
-  const reducedQueries = queryObjects.reduce(
-    (acc, { query, database = 'default' }) => {
       if (!acc[database]) acc[database] = [];
-      acc[database].push(query);
+      acc[database].push(finalQuery);
       return acc;
     },
     {} as Record<string, Array<Query>>,
