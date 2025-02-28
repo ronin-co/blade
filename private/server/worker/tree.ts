@@ -469,6 +469,9 @@ const renderReactTree = async (
 
   const renderingLeaves = getRenderingLeaves(entry.path);
 
+  let currentQueryAmount = serverContext.collected.queries.length;
+  let currentJwtAmount = Object.entries(serverContext.collected.jwts).length;
+
   // Simulate the behavior of React's promise handling by invoking all layouts and the
   // page of the current path. If one of them throws something we are interested in (such
   // as redirects or queries), we handle them accordingly and then invoke the layouts and
@@ -493,17 +496,21 @@ const renderReactTree = async (
     // operation and/or re-use their results between multiple layouts and pages, which
     // speeds up the rendering.
 
+    // Only compute the entries of the object once.
+    const jwtEntries = Object.entries(serverContext.collected.jwts);
+
+    const newQueryAmount = serverContext.collected.queries.length;
+    const newJwtAmount = jwtEntries.length;
+
     const queriesWithoutResults = serverContext.collected.queries.filter(
       ({ result, error }) => {
         return typeof result === 'undefined' && typeof error === 'undefined';
       },
     );
 
-    const jwtsWithoutPayloads = Object.entries(serverContext.collected.jwts).filter(
-      ([, value]) => {
-        return !value.decodedPayload;
-      },
-    );
+    const jwtsWithoutPayloads = jwtEntries.filter(([, value]) => {
+      return !value.decodedPayload;
+    });
 
     const hasQueriesToRun = canRun.queries && queriesWithoutResults.length > 0;
     const hasJwtsToRun = canRun.jwts && jwtsWithoutPayloads.length > 0;
@@ -574,10 +581,17 @@ const renderReactTree = async (
       );
     }
 
+    // IMPORTANT: Prevent infinite loops.
+    const runMore =
+      newQueryAmount > currentQueryAmount || newJwtAmount > currentJwtAmount;
+
+    currentQueryAmount = newQueryAmount;
+    currentJwtAmount = newJwtAmount;
+
     // If queries or JWTs were executed, we need to re-run the layouts and pages with the
     // respective results. Alternatively, if none were executed, we don't need to re-run
     // the layouts and pages either.
-    if (hasQueriesToRun || hasJwtsToRun) continue;
+    if ((hasQueriesToRun || hasJwtsToRun) && runMore) continue;
     break;
   }
 
