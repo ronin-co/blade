@@ -100,7 +100,10 @@ const runQueriesWithTime = async (
 
   const end = Date.now();
 
-  console.log(`[BLADE] Page ${path} took ${end - start}ms for ${queryAmount} queries`);
+  const databases = databaseAmount > 1 ? ` targeting ${databaseAmount} databases` : '';
+  console.log(
+    `[BLADE] Page ${path} took ${end - start}ms for ${queryAmount} queries${databases}`,
+  );
 
   if (VERBOSE_LOGGING) {
     console.log('-'.repeat(20));
