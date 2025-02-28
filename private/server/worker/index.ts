@@ -164,8 +164,9 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = await SERVER_CONTEXT.run(serverContext, () => {
-      return runQueries(c, queries, hooks);
+    results = await SERVER_CONTEXT.run(serverContext, async () => {
+      const results = await runQueries(c, { default: queries }, hooks);
+      return results['default'];
     });
   } catch (err) {
     if (err instanceof DataHookError || err instanceof InvalidResponseError) {

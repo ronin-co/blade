@@ -1,10 +1,10 @@
 import '../types/global.d.ts';
 
 import type { Context } from 'hono';
-import type { Query, QueryHandlerOptions } from 'ronin/types';
+import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
 import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
-import type { ResultRecord } from '@ronin/compiler';
+import type { Query, ResultRecord } from '@ronin/compiler';
 import type { DataHooksList } from '../types';
 import { HOOK_CONTEXT } from '../worker/context.ts';
 import { VERBOSE_LOGGING } from './constants';
@@ -75,9 +75,9 @@ export const getRoninOptions = (
  */
 export const runQueries = <T extends ResultRecord>(
   c: Context,
-  queries: Query[],
+  queries: Record<string, Array<Query>>,
   hooks: DataHooksList = {},
-) => {
+): Promise<Record<string, FormattedResults<T>>> => {
   return runQueriesOnRonin<T>(queries, getRoninOptions(c, hooks));
 };
 
