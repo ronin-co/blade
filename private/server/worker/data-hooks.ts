@@ -16,6 +16,7 @@ export const prepareHooks = (
     Pick<ServerContext, 'cookies' | 'userAgent' | 'geoLocation' | 'languages' | 'url'>,
   hooks: DataHooksList,
   config?: {
+    fromRoninDashboard?: boolean;
     fromHeadlessAPI?: boolean;
   },
 ): DataHooksList => {
@@ -27,6 +28,7 @@ export const prepareHooks = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
+    fromRoninDashboard: Boolean(config?.fromRoninDashboard),
     fromHeadlessAPI: Boolean(config?.fromHeadlessAPI),
   };
 

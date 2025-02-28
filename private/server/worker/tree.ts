@@ -65,7 +65,14 @@ const runQueriesWithTime = async (
 
   const start = Date.now();
   const { requestContext } = serverContext;
-  const hooks = prepareHooks(serverContext, hookList);
+  const hooks = prepareHooks(serverContext, hookList, {
+    // TODO: Make this work for other spaces too.
+    //
+    // If queries that are specifically targeting the "ronin" database were provided,
+    // that means the records of that space are currently being edited on the dashboard,
+    // by the RONIN team.
+    fromRoninDashboard: Boolean(queries['ronin']),
+  });
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
