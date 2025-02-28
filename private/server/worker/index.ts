@@ -165,7 +165,7 @@ app.post('/api', async (c) => {
   // Run the queries and handle any errors that might occur.
   try {
     results = await SERVER_CONTEXT.run(serverContext, () => {
-      return runQueries(c, queries, { hooks });
+      return runQueries(c, queries, hooks);
     });
   } catch (err) {
     if (err instanceof DataHookError || err instanceof InvalidResponseError) {

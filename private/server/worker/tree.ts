@@ -72,11 +72,7 @@ const runQueriesWithTime = async (
       ? prepareHooks(serverContext, hookList, { dataSelector })
       : undefined;
 
-  const callback = () =>
-    runQueries(requestContext, queries, {
-      hooks,
-      dataSelector,
-    });
+  const callback = () => runQueries(requestContext, queries, hooks);
 
   let results: FormattedResults<unknown> = [];
 

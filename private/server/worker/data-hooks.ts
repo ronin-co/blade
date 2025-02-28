@@ -2,7 +2,6 @@ import type { AfterGetHook } from 'ronin/types';
 
 import type { ServerContext } from '../context';
 import type { DataHookOptions, DataHooks, DataHooksList } from '../types';
-import type { getRoninOptions } from '../utils/data';
 
 /**
  * Convert a list of data hook files to data hooks that can be passed to RONIN.
@@ -16,7 +15,7 @@ import type { getRoninOptions } from '../utils/data';
 export const prepareHooks = (
   serverContext: Partial<ServerContext> &
     Pick<ServerContext, 'cookies' | 'userAgent' | 'geoLocation' | 'languages' | 'url'>,
-  hooks: Parameters<typeof getRoninOptions>[1]['hooks'],
+  hooks: DataHooksList,
   config?: {
     dataSelector?: string;
     fromHeadlessAPI?: boolean;

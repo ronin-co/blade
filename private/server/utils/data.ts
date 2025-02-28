@@ -13,16 +13,13 @@ import { VERBOSE_LOGGING } from './constants';
  * Generate the options passed to the `ronin` JavaScript client.
  *
  * @param c - The context of the current request.
- * @param config - Custom configuration options for extending the defaults.
+ * @param hooks - A list of data hooks that should be executed.
  *
  * @returns Options that can be passed to the `ronin` JavaScript client.
  */
 export const getRoninOptions = (
   c: Context,
-  defaultOptions: {
-    hooks?: DataHooksList;
-    dataSelector?: string;
-  },
+  hooks?: DataHooksList,
 ): QueryHandlerOptions => {
   const dataFetcher: typeof fetch = async (input, init) => {
     // Normalize the parameters of the surrounding function, as the first argument might
@@ -44,9 +41,6 @@ export const getRoninOptions = (
       url.host = parsedCustomHost.host;
     }
 
-    if (defaultOptions.dataSelector)
-      url.searchParams.set('data-selector', defaultOptions.dataSelector);
-
     const start = performance.now();
 
     const res = await fetch(new Request(url, request));
@@ -61,7 +55,7 @@ export const getRoninOptions = (
   const dataFetcherWaitUntil = c.executionCtx.waitUntil?.bind(c.executionCtx);
 
   return {
-    hooks: defaultOptions.hooks,
+    hooks,
     token: import.meta.env.BLADE_APP_TOKEN,
     fetch: dataFetcher,
     waitUntil: dataFetcherWaitUntil,
@@ -75,16 +69,16 @@ export const getRoninOptions = (
  *
  * @param c - The context of the current request.
  * @param queries - A list of RONIN queries that should be executed.
- * @param config - Optional config options for extending the default config.
+ * @param hooks - A list of data hooks that should be executed.
  *
  * @returns The results of the passed queries.
  */
 export const runQueries = <T extends ResultRecord>(
   c: Context,
   queries: Query[],
-  options: Parameters<typeof getRoninOptions>[1] = {},
+  hooks: DataHooksList = {},
 ) => {
-  return runQueriesOnRonin<T>(queries, getRoninOptions(c, options));
+  return runQueriesOnRonin<T>(queries, getRoninOptions(c, hooks));
 };
 
 /**
