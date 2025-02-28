@@ -76,7 +76,7 @@
     "p-queue": "8.0.1",
     "radash": "12.1.0",
     "rehype-pretty-code": "0.14.0",
-    "ronin": "6.2.24",
+    "ronin": "leo-ron-1113-experimental-123",
     "serialize-error": "11.0.3",
     "ua-parser-js": "1.0.39"
   },
