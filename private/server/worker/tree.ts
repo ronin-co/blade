@@ -122,6 +122,15 @@ const runQueriesPerType = async (
 ) => {
   if (filteredList.length === 0) return;
 
+  // Sort the queries in alphabetical order by database, but position queries that don't
+  // have a database at the beginning of the list.
+  const sortedList = filteredList.sort((a, b) => {
+    if (!a.database) return -1;
+    if (!b.database) return 1;
+
+    return a.database.localeCompare(b.database);
+  });
+
   // Convert the queries from strings to objects, so that we can execute them and attach
   // any potential files that might be available.
   //
@@ -130,7 +139,7 @@ const runQueriesPerType = async (
   // queries in the framework. We also wouldn't be able to clone the queries, since they
   // might contain binary objects, which cannot be cloned. Storing the queries as strings
   // and converting them into objects a single time (here) is therefore more efficient.
-  const reducedQueries = filteredList.reduce(
+  const reducedQueries = sortedList.reduce(
     (acc, { query, database = 'default' }) => {
       const parsedQuery = JSON.parse(query);
       const finalQuery = files ? assignFiles(parsedQuery, files) : parsedQuery;
@@ -151,7 +160,7 @@ const runQueriesPerType = async (
       const serializedError = serializeError(err);
 
       // Expose the error for all affected queries.
-      for (const queryDetails of filteredList) {
+      for (const queryDetails of sortedList) {
         const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
           return (
             item.query === queryDetails.query && item.database === queryDetails.database
@@ -170,18 +179,9 @@ const runQueriesPerType = async (
 
   const flatResults = Object.entries(results).flatMap(([_database, results]) => results);
 
+  // Assign the results to their respective queries.
   for (let index = 0; index < flatResults.length; index++) {
-    const result = flatResults[index];
-    const queryDetails = filteredList[index];
-
-    const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
-      return item.query === queryDetails.query && item.database === queryDetails.database;
-    });
-
-    if (queryEntryIndex === -1) throw new Error('Missing query entry index');
-    (
-      serverContext.collected.queries[queryEntryIndex] as QueryItemRead | QueryItemWrite
-    ).result = result;
+    sortedList[index].result = flatResults[index];
   }
 };
 
