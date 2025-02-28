@@ -123,15 +123,15 @@ const runQueriesWithTime = async (
 
 const runQueriesPerType = async (
   serverContext: ServerContext,
-  filteredList: (QueryItemRead | QueryItemWrite)[],
+  originalList: (QueryItemRead | QueryItemWrite)[],
   files: Map<string, Blob> | undefined,
   path: string,
 ) => {
-  if (filteredList.length === 0) return;
+  if (originalList.length === 0) return;
 
   // Sort the queries in alphabetical order by database, but position queries that don't
   // have a database at the beginning of the list.
-  const sortedList = filteredList.sort((a, b) => {
+  const sortedList = originalList.sort((a, b) => {
     if (!a.database) return -1;
     if (!b.database) return 1;
 

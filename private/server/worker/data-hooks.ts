@@ -8,6 +8,7 @@ import type { DataHookOptions, DataHooks, DataHooksList } from '../types';
  *
  * @param serverContext - A partial server context object.
  * @param hooks - The data hooks that should be prepared for invocation.
+ * @param config - Additional configuration options.
  *
  * @returns Data hooks ready to be passed to RONIN.
  */
