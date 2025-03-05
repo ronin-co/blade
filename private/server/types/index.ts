@@ -81,8 +81,8 @@ export type RecursiveRequired<T> = {
 
 export type ValueOf<T> = T[keyof T];
 
-type AddOptionsArgument<T> = T extends (...a: infer U) => infer R
-  ? (...a: [...U, DataHookOptions]) => R
+type AddOptionsArgument<T> = T extends (...args: [...infer Rest, infer Last]) => infer R
+  ? (...args: [...Rest, Last & DataHookOptions]) => R
   : never;
 
 export type BeforeCountHook = (

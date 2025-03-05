@@ -1,4 +1,4 @@
-import type { AfterGetHook } from 'ronin/types';
+import type { BeforeGetHook } from 'ronin/types';
 
 import type { ServerContext } from '../context';
 import type { DataHookOptions, DataHooks, DataHooksList } from '../types';
@@ -35,15 +35,21 @@ export const prepareHooks = (
 
   const list = Object.entries(hooks || {}).map(
     ([fileName, hookList]): [string, DataHooks] => {
-      // For every hook, provide an additional argument that contains the `options`
-      // object defined above. This allows us to pass on BLADE-specific arguments to the
-      // data hooks.
+      // For every data hook, update the existing options argument to provide additional
+      // options that are specific to BLADE.
       const extendedHookEntries = Object.entries(hookList).map(([key, hook]) => [
         key,
         // This handles data hooks of all types, but for the sake of being able to parse
         // the arguments of the original data hook type, we're using only the type of
-        // `after*` data hooks.
-        async (...args: Parameters<AfterGetHook>) => hook(...args, options),
+        // `before*` data hooks.
+        (...args: Parameters<BeforeGetHook>) => {
+          const argsBeforeLast = args.slice(0, -1);
+          const lastArg = args.at(-1) as object;
+
+          const finalArgs = [...argsBeforeLast, { ...options, ...lastArg }];
+
+          return hook(...finalArgs);
+        },
       ]);
 
       return [fileName.replace('.ts', ''), Object.fromEntries(extendedHookEntries)];
