@@ -277,9 +277,9 @@ const prepareRenderingTree = (
 
             // If the query was already collected, don't add it again.
             if (
-              existingQueries.some(
-                (item) => item.query === query && item.database === database,
-              )
+              existingQueries.some((item) => {
+                return item.query === query && item.database === database;
+              })
             ) {
               continue;
             }
