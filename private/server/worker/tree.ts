@@ -220,11 +220,10 @@ const prepareRenderingTree = (
   serverContext: ServerContext,
 ): {
   updatedServerContext: ServerContext;
-  canRun: { queries: boolean; jwts: boolean };
+  hasNew: { queries: boolean; jwts: boolean };
 } => {
   return SERVER_CONTEXT.run(serverContext, () => {
-    let hasNewQueries = false;
-    let hasNewJwts = false;
+    const hasNew = { queries: false, jwts: false };
 
     // Start with the uppermost layout.
     const reversedLeaves = Array.from(leaves.entries()).reverse();
@@ -285,7 +284,7 @@ const prepareRenderingTree = (
             }
 
             // If the query was not collected yet, add it to the collection.
-            hasNewQueries = true;
+            hasNew.queries = true;
             existingQueries.push(queryDetails);
           }
 
@@ -304,7 +303,7 @@ const prepareRenderingTree = (
               algo,
             };
 
-            hasNewJwts = true;
+            hasNew.jwts = true;
           }
 
           continue;
@@ -322,11 +321,14 @@ const prepareRenderingTree = (
       leavesCheckedForQueries++;
     }
 
+    // Whether all tree leaves have been checked for queries.
+    const checkedAllLeaves = leavesCheckedForQueries === reversedLeaves.length;
+
     return {
       updatedServerContext,
-      canRun: {
-        queries: hasNewQueries && leavesCheckedForQueries === reversedLeaves.length,
-        jwts: hasNewJwts,
+      hasNew: {
+        queries: hasNew.queries && checkedAllLeaves,
+        jwts: hasNew.jwts,
       },
     };
   });
@@ -493,7 +495,7 @@ const renderReactTree = async (
   // how React internally handles promises, except that we are implementing it ourselves.
   for (;;) {
     // Prime the server context with metadata, redirects, and similar.
-    const { updatedServerContext, canRun } = prepareRenderingTree(
+    const { updatedServerContext, hasNew } = prepareRenderingTree(
       renderingLeaves,
       serverContext,
     );
@@ -510,22 +512,13 @@ const renderReactTree = async (
     // operation and/or re-use their results between multiple layouts and pages, which
     // speeds up the rendering.
 
-    const queriesWithoutResults = serverContext.collected.queries.filter(
-      ({ result, error }) => {
-        return typeof result === 'undefined' && typeof error === 'undefined';
-      },
-    );
+    if (hasNew.queries) {
+      const queriesWithoutResults = serverContext.collected.queries.filter(
+        ({ result, error }) => {
+          return typeof result === 'undefined' && typeof error === 'undefined';
+        },
+      );
 
-    const jwtsWithoutPayloads = Object.entries(serverContext.collected.jwts).filter(
-      ([, value]) => {
-        return !value.decodedPayload;
-      },
-    );
-
-    const hasQueriesToRun = canRun.queries && queriesWithoutResults.length > 0;
-    const hasJwtsToRun = canRun.jwts && jwtsWithoutPayloads.length > 0;
-
-    if (hasQueriesToRun) {
       const hasWriteQueries = queriesWithoutResults.some(({ type }) => type === 'write');
       const hasErrorQueries = queriesWithoutResults.some(
         ({ error }) => typeof error !== 'undefined',
@@ -575,7 +568,13 @@ const renderReactTree = async (
       }
     }
 
-    if (hasJwtsToRun) {
+    if (hasNew.jwts) {
+      const jwtsWithoutPayloads = Object.entries(serverContext.collected.jwts).filter(
+        ([, value]) => {
+          return !value.decodedPayload;
+        },
+      );
+
       await Promise.all(
         jwtsWithoutPayloads.map(async ([token, { secret, algo }]) => {
           let result = null;
@@ -594,7 +593,7 @@ const renderReactTree = async (
     // If queries or JWTs were executed, we need to re-run the layouts and pages with the
     // respective results. Alternatively, if none were executed, we don't need to re-run
     // the layouts and pages either.
-    if (hasQueriesToRun || hasJwtsToRun) continue;
+    if (hasNew.queries || hasNew.jwts) continue;
     break;
   }
 
