@@ -196,7 +196,14 @@ const runQueriesPerType = async (
 
   // Assign the results to their respective queries.
   for (let index = 0; index < flatResults.length; index++) {
-    sortedList[index].result = flatResults[index];
+    const queryDetails = sortedList[index];
+
+    const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
+      return item.query === queryDetails.query && item.database === queryDetails.database;
+    });
+
+    if (queryEntryIndex === -1) throw new Error('Missing query entry index');
+    serverContext.collected.queries[queryEntryIndex].result = flatResults[index];
   }
 };
 
@@ -215,15 +222,15 @@ export interface Collected {
   >;
 }
 
+interface CollectedRunnable extends Pick<Collected, 'queries' | 'jwts'> {}
+
 const prepareRenderingTree = (
   leaves: Map<string, TreeItem>,
   serverContext: ServerContext,
-): {
-  updatedServerContext: ServerContext;
-  hasNew: { queries: boolean; jwts: boolean };
-} => {
-  return SERVER_CONTEXT.run(serverContext, () => {
-    const hasNew = { queries: false, jwts: false };
+  existingNewlyAdded?: CollectedRunnable,
+): CollectedRunnable => {
+  const { updatedServerContext, newlyAdded } = SERVER_CONTEXT.run(serverContext, () => {
+    const newlyAdded: CollectedRunnable = existingNewlyAdded || { queries: [], jwts: {} };
 
     // Start with the uppermost layout.
     const reversedLeaves = Array.from(leaves.entries()).reverse();
@@ -254,7 +261,7 @@ const prepareRenderingTree = (
             };
 
         if ('__blade_redirect' in details) {
-          const { redirect: existingRedirect } = updatedServerContext.collected;
+          const { redirect: existingRedirect } = serverContext.collected;
           const newRedirect = details.__blade_redirect;
 
           // If the redirect was not collected yet, add it to the collection.
@@ -269,14 +276,13 @@ const prepareRenderingTree = (
 
         if ('__blade_queries' in details) {
           leavesCheckedForQueries++;
-          const { queries: existingQueries } = updatedServerContext.collected;
 
           for (const queryDetails of details.__blade_queries) {
             const { query, database } = queryDetails;
 
             // If the query was already collected, don't add it again.
             if (
-              existingQueries.some((item) => {
+              serverContext.collected.queries.some((item) => {
                 return item.query === query && item.database === database;
               })
             ) {
@@ -284,27 +290,25 @@ const prepareRenderingTree = (
             }
 
             // If the query was not collected yet, add it to the collection.
-            hasNew.queries = true;
-            existingQueries.push(queryDetails);
+            newlyAdded.queries.push(queryDetails);
+            updatedServerContext.collected.queries.push(queryDetails);
           }
 
           continue;
         }
 
         if ('__blade_jwt' in details) {
-          const { jwts: existingJwts } = updatedServerContext.collected;
           const { token, secret, algo } = details.__blade_jwt;
 
-          // If the JWT was not collected yet, add it to the collection.
-          if (!existingJwts[token]) {
-            existingJwts[token] = {
-              decodedPayload: null,
-              secret,
-              algo,
-            };
+          // If the query was already collected, don't add it again.
+          if (serverContext.collected.jwts[token]) continue;
 
-            hasNew.jwts = true;
-          }
+          // If the JWT was not collected yet, add it to the collection.
+          newlyAdded.jwts[token] = updatedServerContext.collected.jwts[token] = {
+            decodedPayload: null,
+            secret,
+            algo,
+          };
 
           continue;
         }
@@ -326,12 +330,20 @@ const prepareRenderingTree = (
 
     return {
       updatedServerContext,
-      hasNew: {
-        queries: hasNew.queries && checkedAllLeaves,
-        jwts: hasNew.jwts,
+      newlyAdded: {
+        queries: checkedAllLeaves ? newlyAdded.queries : [],
+        jwts: newlyAdded.jwts,
       },
     };
   });
+
+  // Assign redirects, metadata, and cookies.
+  serverContext.collected = assign(
+    serverContext.collected,
+    updatedServerContext.collected,
+  );
+
+  return newlyAdded;
 };
 
 const getRenderingTree = (leaves: Map<string, TreeItem>) => {
@@ -488,33 +500,31 @@ const renderReactTree = async (
 
   const renderingLeaves = getRenderingLeaves(entry.path);
 
-  let hasNew = {
-    queries: serverContext.collected.queries.some(({ result, error }) => {
+  const existingNewlyAdded: CollectedRunnable = {
+    queries: serverContext.collected.queries.filter(({ result, error }) => {
       return typeof result === 'undefined' && typeof error === 'undefined';
     }),
-    jwts: Object.entries(serverContext.collected.jwts).some(([, value]) => {
-      return !value.decodedPayload;
-    }),
+    jwts: Object.fromEntries(
+      Object.entries(serverContext.collected.jwts).filter(([, value]) => {
+        return !value.decodedPayload;
+      }),
+    ),
   };
+
+  let index = 0;
 
   // Simulate the behavior of React's promise handling by invoking all layouts and the
   // page of the current path. If one of them throws something we are interested in (such
   // as redirects or queries), we handle them accordingly and then invoke the layouts and
   // page again. At the end of the cycle, nothing will be thrown anymore. This is also
   // how React internally handles promises, except that we are implementing it ourselves.
-  while (hasNew.queries || hasNew.jwts) {
+  while (true) {
     // Prime the server context with metadata, redirects, and similar.
-    const { updatedServerContext, hasNew: updatedHasNew } = prepareRenderingTree(
+    const newlyAdded = prepareRenderingTree(
       renderingLeaves,
       serverContext,
-    );
-
-    hasNew = updatedHasNew;
-
-    // Assign redirects, metadata, and cookies.
-    serverContext.collected = assign(
-      serverContext.collected,
-      updatedServerContext.collected,
+      // On the first run, provide existing queries and JWTs that were already provided.
+      index === 0 ? existingNewlyAdded : undefined,
     );
 
     // Below, we lift certain asynchronous operations out of the async context, which
@@ -523,22 +533,16 @@ const renderReactTree = async (
     // operation and/or re-use their results between multiple layouts and pages, which
     // speeds up the rendering.
 
-    if (hasNew.queries) {
-      const queriesWithoutResults = serverContext.collected.queries.filter(
-        ({ result, error }) => {
-          return typeof result === 'undefined' && typeof error === 'undefined';
-        },
-      );
-
-      const hasWriteQueries = queriesWithoutResults.some(({ type }) => type === 'write');
-      const hasErrorQueries = queriesWithoutResults.some(
+    if (newlyAdded.queries.length > 0) {
+      const hasWriteQueries = newlyAdded.queries.some(({ type }) => type === 'write');
+      const hasErrorQueries = newlyAdded.queries.some(
         ({ error }) => typeof error !== 'undefined',
       );
 
       try {
         await runQueriesPerType(
           serverContext,
-          queriesWithoutResults,
+          newlyAdded.queries,
           options.files,
           url.pathname,
         );
@@ -579,15 +583,11 @@ const renderReactTree = async (
       }
     }
 
-    if (hasNew.jwts) {
-      const jwtsWithoutPayloads = Object.entries(serverContext.collected.jwts).filter(
-        ([, value]) => {
-          return !value.decodedPayload;
-        },
-      );
+    const normalizedJwts = Object.entries(newlyAdded.jwts);
 
+    if (normalizedJwts.length > 0) {
       await Promise.all(
-        jwtsWithoutPayloads.map(async ([token, { secret, algo }]) => {
+        normalizedJwts.map(async ([token, { secret, algo }]) => {
           let result = null;
 
           try {
@@ -600,6 +600,11 @@ const renderReactTree = async (
         }),
       );
     }
+
+    index++;
+
+    if (newlyAdded.queries.length > 0 || normalizedJwts.length > 0) continue;
+    break;
   }
 
   const writeQueryResults = serverContext.collected.queries
