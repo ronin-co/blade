@@ -336,7 +336,7 @@ const collectPromises = (
     };
   });
 
-  // Assign redirects, metadata, and cookies.
+  // Assign redirects, metadata, and cookies to context.
   serverContext.collected = assign(
     serverContext.collected,
     updatedServerContext.collected,
