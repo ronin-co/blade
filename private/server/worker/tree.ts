@@ -221,11 +221,11 @@ const prepareRenderingTree = (
 ): {
   updatedServerContext: ServerContext;
   canRun: { queries: boolean; jwts: boolean };
-  hasNew: boolean;
 } => {
-  let hasNew = false;
-
   return SERVER_CONTEXT.run(serverContext, () => {
+    let hasNewQueries = false;
+    let hasNewJwts = false;
+
     // Start with the uppermost layout.
     const reversedLeaves = Array.from(leaves.entries()).reverse();
 
@@ -261,7 +261,6 @@ const prepareRenderingTree = (
           // If the redirect was not collected yet, add it to the collection.
           if (existingRedirect !== newRedirect) {
             updatedServerContext.collected.redirect = newRedirect;
-            hasNew = true;
           }
 
           // Don't continue checking other layouts or pages if a redirect was provided,
@@ -286,7 +285,7 @@ const prepareRenderingTree = (
             }
 
             // If the query was not collected yet, add it to the collection.
-            hasNew = true;
+            hasNewQueries = true;
             existingQueries.push(queryDetails);
           }
 
@@ -305,7 +304,7 @@ const prepareRenderingTree = (
               algo,
             };
 
-            hasNew = true;
+            hasNewJwts = true;
           }
 
           continue;
@@ -326,10 +325,9 @@ const prepareRenderingTree = (
     return {
       updatedServerContext,
       canRun: {
-        queries: leavesCheckedForQueries === reversedLeaves.length,
-        jwts: true,
+        queries: hasNewQueries && leavesCheckedForQueries === reversedLeaves.length,
+        jwts: hasNewJwts,
       },
-      hasNew,
     };
   });
 };
@@ -495,15 +493,10 @@ const renderReactTree = async (
   // how React internally handles promises, except that we are implementing it ourselves.
   for (;;) {
     // Prime the server context with metadata, redirects, and similar.
-    const { updatedServerContext, canRun, hasNew } = prepareRenderingTree(
+    const { updatedServerContext, canRun } = prepareRenderingTree(
       renderingLeaves,
       serverContext,
     );
-
-    // If new queries, JWTs, redirects, or other data was collected, we want to execute
-    // those queries, JWTs, or similar, and then re-render the tree. Otherwise, abort
-    // immediately in order to avoid infinite loops.
-    if (!hasNew) break;
 
     // Assign redirects, metadata, and cookies.
     serverContext.collected = assign(
@@ -597,6 +590,12 @@ const renderReactTree = async (
         }),
       );
     }
+
+    // If queries or JWTs were executed, we need to re-run the layouts and pages with the
+    // respective results. Alternatively, if none were executed, we don't need to re-run
+    // the layouts and pages either.
+    if (hasQueriesToRun || hasJwtsToRun) continue;
+    break;
   }
 
   const writeQueryResults = serverContext.collected.queries
