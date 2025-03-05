@@ -230,7 +230,7 @@ const prepareRenderingTree = (
   existingNewlyAdded?: CollectedRunnable,
 ): CollectedRunnable => {
   const { updatedServerContext, newlyAdded } = SERVER_CONTEXT.run(serverContext, () => {
-    const newlyAdded: CollectedRunnable = existingNewlyAdded || { queries: [], jwts: {} };
+    const newlyAdded: CollectedRunnable = { queries: [], jwts: {} };
 
     // Start with the uppermost layout.
     const reversedLeaves = Array.from(leaves.entries()).reverse();
@@ -291,7 +291,6 @@ const prepareRenderingTree = (
 
             // If the query was not collected yet, add it to the collection.
             newlyAdded.queries.push(queryDetails);
-            updatedServerContext.collected.queries.push(queryDetails);
           }
 
           continue;
@@ -304,7 +303,7 @@ const prepareRenderingTree = (
           if (serverContext.collected.jwts[token]) continue;
 
           // If the JWT was not collected yet, add it to the collection.
-          newlyAdded.jwts[token] = updatedServerContext.collected.jwts[token] = {
+          newlyAdded.jwts[token] = {
             decodedPayload: null,
             secret,
             algo,
@@ -343,7 +342,20 @@ const prepareRenderingTree = (
     updatedServerContext.collected,
   );
 
-  return newlyAdded;
+  // Assign newly added queries to context.
+  for (const newQuery of newlyAdded.queries) {
+    serverContext.collected.queries.push(newQuery);
+  }
+
+  // Assign newly added JWTs to context.
+  for (const [token, details] of Object.entries(newlyAdded.jwts)) {
+    serverContext.collected.jwts[token] = details;
+  }
+
+  return {
+    queries: [...(existingNewlyAdded?.queries || []), ...newlyAdded.queries],
+    jwts: { ...existingNewlyAdded?.jwts, ...newlyAdded.jwts },
+  };
 };
 
 const getRenderingTree = (leaves: Map<string, TreeItem>) => {
