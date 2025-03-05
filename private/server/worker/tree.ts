@@ -196,7 +196,14 @@ const runQueriesPerType = async (
 
   // Assign the results to their respective queries.
   for (let index = 0; index < flatResults.length; index++) {
-    sortedList[index].result = flatResults[index];
+    const queryDetails = sortedList[index];
+
+    const queryEntryIndex = serverContext.collected.queries.findIndex((item) => {
+      return item.query === queryDetails.query && item.database === queryDetails.database;
+    });
+
+    if (queryEntryIndex === -1) throw new Error('Missing query entry index');
+    serverContext.collected.queries[queryEntryIndex].result = flatResults[index];
   }
 };
 
@@ -215,21 +222,21 @@ export interface Collected {
   >;
 }
 
-const prepareRenderingTree = (
+interface CollectedRunnable extends Pick<Collected, 'queries' | 'jwts'> {}
+
+const collectPromises = (
   leaves: Map<string, TreeItem>,
   serverContext: ServerContext,
-): {
-  updatedServerContext: ServerContext;
-  canRun: { queries: boolean; jwts: boolean };
-} => {
-  return SERVER_CONTEXT.run(serverContext, () => {
+  existingNewlyAdded?: CollectedRunnable,
+): CollectedRunnable => {
+  const { updatedServerContext, newlyAdded } = SERVER_CONTEXT.run(serverContext, () => {
+    const newlyAdded: CollectedRunnable = { queries: [], jwts: {} };
+
     // Start with the uppermost layout.
     const reversedLeaves = Array.from(leaves.entries()).reverse();
 
     const updatedServerContext = SERVER_CONTEXT.getStore();
     if (!updatedServerContext) throw new Error('Missing server context store');
-
-    const { queries, jwts } = updatedServerContext.collected;
 
     let leavesCheckedForQueries = 0;
 
@@ -254,7 +261,13 @@ const prepareRenderingTree = (
             };
 
         if ('__blade_redirect' in details) {
-          updatedServerContext.collected.redirect = details.__blade_redirect;
+          const { redirect: existingRedirect } = serverContext.collected;
+          const newRedirect = details.__blade_redirect;
+
+          // If the redirect was not collected yet, add it to the collection.
+          if (existingRedirect !== newRedirect) {
+            updatedServerContext.collected.redirect = newRedirect;
+          }
 
           // Don't continue checking other layouts or pages if a redirect was provided,
           // because that means the code execution should stop.
@@ -269,13 +282,15 @@ const prepareRenderingTree = (
 
             // If the query was already collected, don't add it again.
             if (
-              queries.some((item) => item.query === query && item.database === database)
+              serverContext.collected.queries.some((item) => {
+                return item.query === query && item.database === database;
+              })
             ) {
               continue;
             }
 
             // If the query was not collected yet, add it to the collection.
-            queries.push(queryDetails);
+            newlyAdded.queries.push(queryDetails);
           }
 
           continue;
@@ -284,7 +299,11 @@ const prepareRenderingTree = (
         if ('__blade_jwt' in details) {
           const { token, secret, algo } = details.__blade_jwt;
 
-          jwts[token] = {
+          // If the query was already collected, don't add it again.
+          if (serverContext.collected.jwts[token]) continue;
+
+          // If the JWT was not collected yet, add it to the collection.
+          newlyAdded.jwts[token] = {
             decodedPayload: null,
             secret,
             algo,
@@ -305,14 +324,38 @@ const prepareRenderingTree = (
       leavesCheckedForQueries++;
     }
 
+    // Whether all tree leaves have been checked for queries.
+    const checkedAllLeaves = leavesCheckedForQueries === reversedLeaves.length;
+
     return {
       updatedServerContext,
-      canRun: {
-        queries: leavesCheckedForQueries === reversedLeaves.length,
-        jwts: true,
+      newlyAdded: {
+        queries: checkedAllLeaves ? newlyAdded.queries : [],
+        jwts: newlyAdded.jwts,
       },
     };
   });
+
+  // Assign redirects, metadata, and cookies to context.
+  serverContext.collected = assign(
+    serverContext.collected,
+    updatedServerContext.collected,
+  );
+
+  // Assign newly added queries to context.
+  for (const newQuery of newlyAdded.queries) {
+    serverContext.collected.queries.push(newQuery);
+  }
+
+  // Assign newly added JWTs to context.
+  for (const [token, details] of Object.entries(newlyAdded.jwts)) {
+    serverContext.collected.jwts[token] = details;
+  }
+
+  return {
+    queries: [...(existingNewlyAdded?.queries || []), ...newlyAdded.queries],
+    jwts: { ...existingNewlyAdded?.jwts, ...newlyAdded.jwts },
+  };
 };
 
 const getRenderingTree = (leaves: Map<string, TreeItem>) => {
@@ -469,25 +512,31 @@ const renderReactTree = async (
 
   const renderingLeaves = getRenderingLeaves(entry.path);
 
-  let currentQueryAmount = serverContext.collected.queries.length;
-  let currentJwtAmount = Object.entries(serverContext.collected.jwts).length;
+  const existingNewlyAdded: CollectedRunnable = {
+    queries: serverContext.collected.queries.filter(({ result, error }) => {
+      return typeof result === 'undefined' && typeof error === 'undefined';
+    }),
+    jwts: Object.fromEntries(
+      Object.entries(serverContext.collected.jwts).filter(([, value]) => {
+        return !value.decodedPayload;
+      }),
+    ),
+  };
+
+  let index = 0;
 
   // Simulate the behavior of React's promise handling by invoking all layouts and the
   // page of the current path. If one of them throws something we are interested in (such
   // as redirects or queries), we handle them accordingly and then invoke the layouts and
   // page again. At the end of the cycle, nothing will be thrown anymore. This is also
   // how React internally handles promises, except that we are implementing it ourselves.
-  for (;;) {
+  while (true) {
     // Prime the server context with metadata, redirects, and similar.
-    const { updatedServerContext, canRun } = prepareRenderingTree(
+    const newlyAdded = collectPromises(
       renderingLeaves,
       serverContext,
-    );
-
-    // Assign redirects, metadata, and cookies.
-    serverContext.collected = assign(
-      serverContext.collected,
-      updatedServerContext.collected,
+      // On the first run, provide existing queries and JWTs that were already provided.
+      index === 0 ? existingNewlyAdded : undefined,
     );
 
     // Below, we lift certain asynchronous operations out of the async context, which
@@ -496,35 +545,16 @@ const renderReactTree = async (
     // operation and/or re-use their results between multiple layouts and pages, which
     // speeds up the rendering.
 
-    // Only compute the entries of the object once.
-    const jwtEntries = Object.entries(serverContext.collected.jwts);
-
-    const newQueryAmount = serverContext.collected.queries.length;
-    const newJwtAmount = jwtEntries.length;
-
-    const queriesWithoutResults = serverContext.collected.queries.filter(
-      ({ result, error }) => {
-        return typeof result === 'undefined' && typeof error === 'undefined';
-      },
-    );
-
-    const jwtsWithoutPayloads = jwtEntries.filter(([, value]) => {
-      return !value.decodedPayload;
-    });
-
-    const hasQueriesToRun = canRun.queries && queriesWithoutResults.length > 0;
-    const hasJwtsToRun = canRun.jwts && jwtsWithoutPayloads.length > 0;
-
-    if (hasQueriesToRun) {
-      const hasWriteQueries = queriesWithoutResults.some(({ type }) => type === 'write');
-      const hasErrorQueries = queriesWithoutResults.some(
+    if (newlyAdded.queries.length > 0) {
+      const hasWriteQueries = newlyAdded.queries.some(({ type }) => type === 'write');
+      const hasErrorQueries = newlyAdded.queries.some(
         ({ error }) => typeof error !== 'undefined',
       );
 
       try {
         await runQueriesPerType(
           serverContext,
-          queriesWithoutResults,
+          newlyAdded.queries,
           options.files,
           url.pathname,
         );
@@ -565,9 +595,11 @@ const renderReactTree = async (
       }
     }
 
-    if (hasJwtsToRun) {
+    const normalizedJwts = Object.entries(newlyAdded.jwts);
+
+    if (normalizedJwts.length > 0) {
       await Promise.all(
-        jwtsWithoutPayloads.map(async ([token, { secret, algo }]) => {
+        normalizedJwts.map(async ([token, { secret, algo }]) => {
           let result = null;
 
           try {
@@ -581,17 +613,9 @@ const renderReactTree = async (
       );
     }
 
-    // IMPORTANT: Prevent infinite loops.
-    const runMore =
-      newQueryAmount > currentQueryAmount || newJwtAmount > currentJwtAmount;
+    index++;
 
-    currentQueryAmount = newQueryAmount;
-    currentJwtAmount = newJwtAmount;
-
-    // If queries or JWTs were executed, we need to re-run the layouts and pages with the
-    // respective results. Alternatively, if none were executed, we don't need to re-run
-    // the layouts and pages either.
-    if ((hasQueriesToRun || hasJwtsToRun) && runMore) continue;
+    if (newlyAdded.queries.length > 0 || normalizedJwts.length > 0) continue;
     break;
   }
 
