@@ -224,7 +224,7 @@ export interface Collected {
 
 interface CollectedRunnable extends Pick<Collected, 'queries' | 'jwts'> {}
 
-const prepareRenderingTree = (
+const collectPromises = (
   leaves: Map<string, TreeItem>,
   serverContext: ServerContext,
   existingNewlyAdded?: CollectedRunnable,
@@ -532,7 +532,7 @@ const renderReactTree = async (
   // how React internally handles promises, except that we are implementing it ourselves.
   while (true) {
     // Prime the server context with metadata, redirects, and similar.
-    const newlyAdded = prepareRenderingTree(
+    const newlyAdded = collectPromises(
       renderingLeaves,
       serverContext,
       // On the first run, provide existing queries and JWTs that were already provided.
