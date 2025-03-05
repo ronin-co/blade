@@ -221,15 +221,16 @@ const prepareRenderingTree = (
 ): {
   updatedServerContext: ServerContext;
   canRun: { queries: boolean; jwts: boolean };
+  hasNew: boolean;
 } => {
+  let hasNew = false;
+
   return SERVER_CONTEXT.run(serverContext, () => {
     // Start with the uppermost layout.
     const reversedLeaves = Array.from(leaves.entries()).reverse();
 
     const updatedServerContext = SERVER_CONTEXT.getStore();
     if (!updatedServerContext) throw new Error('Missing server context store');
-
-    const { queries, jwts } = updatedServerContext.collected;
 
     let leavesCheckedForQueries = 0;
 
@@ -254,7 +255,14 @@ const prepareRenderingTree = (
             };
 
         if ('__blade_redirect' in details) {
-          updatedServerContext.collected.redirect = details.__blade_redirect;
+          const { redirect: existingRedirect } = updatedServerContext.collected;
+          const newRedirect = details.__blade_redirect;
+
+          // If the redirect was not collected yet, add it to the collection.
+          if (existingRedirect !== newRedirect) {
+            updatedServerContext.collected.redirect = newRedirect;
+            hasNew = true;
+          }
 
           // Don't continue checking other layouts or pages if a redirect was provided,
           // because that means the code execution should stop.
@@ -263,32 +271,42 @@ const prepareRenderingTree = (
 
         if ('__blade_queries' in details) {
           leavesCheckedForQueries++;
+          const { queries: existingQueries } = updatedServerContext.collected;
 
           for (const queryDetails of details.__blade_queries) {
             const { query, database } = queryDetails;
 
             // If the query was already collected, don't add it again.
             if (
-              queries.some((item) => item.query === query && item.database === database)
+              existingQueries.some(
+                (item) => item.query === query && item.database === database,
+              )
             ) {
               continue;
             }
 
             // If the query was not collected yet, add it to the collection.
-            queries.push(queryDetails);
+            hasNew = true;
+            existingQueries.push(queryDetails);
           }
 
           continue;
         }
 
         if ('__blade_jwt' in details) {
+          const { jwts: existingJwts } = updatedServerContext.collected;
           const { token, secret, algo } = details.__blade_jwt;
 
-          jwts[token] = {
-            decodedPayload: null,
-            secret,
-            algo,
-          };
+          // If the JWT was not collected yet, add it to the collection.
+          if (!existingJwts[token]) {
+            existingJwts[token] = {
+              decodedPayload: null,
+              secret,
+              algo,
+            };
+
+            hasNew = true;
+          }
 
           continue;
         }
@@ -311,6 +329,7 @@ const prepareRenderingTree = (
         queries: leavesCheckedForQueries === reversedLeaves.length,
         jwts: true,
       },
+      hasNew,
     };
   });
 };
@@ -476,10 +495,15 @@ const renderReactTree = async (
   // how React internally handles promises, except that we are implementing it ourselves.
   for (;;) {
     // Prime the server context with metadata, redirects, and similar.
-    const { updatedServerContext, canRun } = prepareRenderingTree(
+    const { updatedServerContext, canRun, hasNew } = prepareRenderingTree(
       renderingLeaves,
       serverContext,
     );
+
+    // If new queries, JWTs, redirects, or other data was collected, we want to execute
+    // those queries, JWTs, or similar, and then re-render the tree. Otherwise, abort
+    // immediately in order to avoid infinite loops.
+    if (!hasNew) break;
 
     // Assign redirects, metadata, and cookies.
     serverContext.collected = assign(
@@ -573,12 +597,6 @@ const renderReactTree = async (
         }),
       );
     }
-
-    // If queries or JWTs were executed, we need to re-run the layouts and pages with the
-    // respective results. Alternatively, if none were executed, we don't need to re-run
-    // the layouts and pages either.
-    if (hasQueriesToRun || hasJwtsToRun) continue;
-    break;
   }
 
   const writeQueryResults = serverContext.collected.queries
