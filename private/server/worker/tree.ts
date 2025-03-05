@@ -488,17 +488,28 @@ const renderReactTree = async (
 
   const renderingLeaves = getRenderingLeaves(entry.path);
 
+  let hasNew = {
+    queries: serverContext.collected.queries.some(({ result, error }) => {
+      return typeof result === 'undefined' && typeof error === 'undefined';
+    }),
+    jwts: Object.entries(serverContext.collected.jwts).some(([, value]) => {
+      return !value.decodedPayload;
+    }),
+  };
+
   // Simulate the behavior of React's promise handling by invoking all layouts and the
   // page of the current path. If one of them throws something we are interested in (such
   // as redirects or queries), we handle them accordingly and then invoke the layouts and
   // page again. At the end of the cycle, nothing will be thrown anymore. This is also
   // how React internally handles promises, except that we are implementing it ourselves.
-  for (;;) {
+  while (hasNew.queries || hasNew.jwts) {
     // Prime the server context with metadata, redirects, and similar.
-    const { updatedServerContext, hasNew } = prepareRenderingTree(
+    const { updatedServerContext, hasNew: updatedHasNew } = prepareRenderingTree(
       renderingLeaves,
       serverContext,
     );
+
+    hasNew = updatedHasNew;
 
     // Assign redirects, metadata, and cookies.
     serverContext.collected = assign(
@@ -589,12 +600,6 @@ const renderReactTree = async (
         }),
       );
     }
-
-    // If queries or JWTs were executed, we need to re-run the layouts and pages with the
-    // respective results. Alternatively, if none were executed, we don't need to re-run
-    // the layouts and pages either.
-    if (hasNew.queries || hasNew.jwts) continue;
-    break;
   }
 
   const writeQueryResults = serverContext.collected.queries
