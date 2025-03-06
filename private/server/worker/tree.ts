@@ -656,8 +656,11 @@ const renderReactTree = async (
     );
 
     return renderReactTree(new URL(newPathname, url), c, initial, options, {
+      // We only need to pass the queries to the page, in order to provide the page with
+      // the results of the write queries that were executed.
       queries: serverContext.collected.queries,
-      jwts: serverContext.collected.jwts,
+      // The other properties should be empty, since nothing else was collected yet.
+      jwts: {},
       metadata: {},
     });
   }
