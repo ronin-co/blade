@@ -454,8 +454,23 @@ const renderReactTree = async (
   if (entry) {
     // When the 404 page is rendered, the address bar should still show the URL of the
     // page that was originally accessed.
-    if (entry.notFound) options.updateAddressBar = false;
+    if (entry.notFound) {
+      options.updateAddressBar = false;
+    } else {
+      const lastPathSegment = pathSegments.at(-1);
+      const isNotFound = lastPathSegment === NOT_FOUND_PAGE;
+
+      // By default, `entry.notFound` will only be `true` if the page provided
+      // in `url` was not found and a fallback 404 page therefore had to be
+      // selected as the `entry`.
+      //
+      // In the case that the provided `url` is already a 404 page (which
+      // happens if the 404 page is being rendered explicitly, by blade, for
+      // example), we must therefore set `notFound` to `true` explicitly.
+      if (isNotFound) entry.notFound = true;
+    }
   } else {
+    // TODO: Render a default 404 page here.
     // Return early if the requested page doesn't exist.
     return null;
   }
@@ -548,6 +563,9 @@ const renderReactTree = async (
       } catch (err) {
         // If one of the accessed databases does not exist, display the 404 page.
         if (err instanceof InvalidResponseError && err.code === 'AUTH_INVALID_ACCESS') {
+          // If the current page is already a 404 page, throw the error.
+          if (entry.notFound) throw err;
+
           return renderReactTree(new URL(NOT_FOUND_PAGE, c.req.url), c, initial, {
             // When the 404 page is rendered, the address bar should still show the URL
             // of the page that was originally accessed.
