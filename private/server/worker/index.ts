@@ -275,7 +275,8 @@ app.onError(async (err, c) => {
 
   try {
     const exceptionResponse = await renderReactTree(
-      new URL(EXCEPTION_PAGE, c.req.url),
+      // Passing the slash prefix here ensures that the root 500 page is rendered.
+      new URL(`/${EXCEPTION_PAGE}`, c.req.url),
       c,
       true,
       {
