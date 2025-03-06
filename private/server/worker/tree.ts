@@ -563,7 +563,12 @@ const renderReactTree = async (
       } catch (err) {
         // If one of the accessed databases does not exist, display the 404 page.
         if (err instanceof InvalidResponseError && err.code === 'AUTH_INVALID_ACCESS') {
-          // If the current page is already a 404 page, throw the error.
+          // TODO: Ensure that this causes a default 404 page to render instead.
+          // However that page should not be rendered here, but instead further above.
+          //
+          // If the current page is already a 404 page, throw the error, because that
+          // means the 404 page cannot be rendered, because, in that case, the 404 page
+          // itself likely relies on queries that are causing this error.
           if (entry.notFound) throw err;
 
           return renderReactTree(new URL(NOT_FOUND_PAGE, c.req.url), c, initial, {
