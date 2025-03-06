@@ -639,8 +639,8 @@ const renderReactTree = async (
 
     return renderReactTree(new URL(newPathname, url), c, initial, options, {
       queries: serverContext.collected.queries,
+      jwts: serverContext.collected.jwts,
       metadata: {},
-      jwts: {},
     });
   }
 
