@@ -23,7 +23,7 @@ import type {
 import Root from '../components/root.tsx';
 import type { ServerContext } from '../context';
 import type { PageMetadata, TreeItem } from '../types';
-import { SECURITY_HEADERS, VERBOSE_LOGGING } from '../utils/constants';
+import { NOT_FOUND_PAGE, SECURITY_HEADERS, VERBOSE_LOGGING } from '../utils/constants';
 import { runQueries } from '../utils/data';
 import { assignFiles } from '../utils/files.ts';
 import { getParentDirectories, joinPaths } from '../utils/paths';
@@ -79,31 +79,13 @@ const runQueriesWithTime = async (
 
   const callback = () => runQueries(requestContext, queries, hooks);
 
-  let results: Record<string, FormattedResults<unknown>> = {};
-
-  try {
-    // If hooks are used, we need to provide them with the server context.
-    //
-    // If none are used, however, we don't want to provide the server context, since
-    // providing it causes the code inside to run synchronously.
-    results = hooks
-      ? await SERVER_CONTEXT.run(serverContext, callback)
-      : await callback();
-  } catch (err: unknown) {
-    const spaceNotFound =
-      databaseAmount > 1 && (err as { code?: string }).code === 'AUTH_INVALID_ACCESS';
-
-    // If a custom "data selector" (custom database) was provided and an authentication
-    // error is returned by RONIN, that means the addressed database was not found.
-    //
-    // In that case, we want to ignore the error and thereby fall back to an empty result
-    // list, as this matches RONIN's general behavior whenever a query is executed for
-    // which no records are found.
-    //
-    // Addressing a custom database is useful for cases in which a RONIN space contains
-    // multiple databases and the developer wants to address a specific one.
-    if (!spaceNotFound) throw err;
-  }
+  // If hooks are used, we need to provide them with the server context.
+  //
+  // If none are used, however, we don't want to provide the server context, since
+  // providing it causes the code inside to run synchronously.
+  const results: Record<string, FormattedResults<unknown>> = hooks
+    ? await SERVER_CONTEXT.run(serverContext, callback)
+    : await callback();
 
   const end = Date.now();
 
@@ -121,7 +103,7 @@ const runQueriesWithTime = async (
   return results;
 };
 
-const runQueriesPerType = async (
+const obtainQueryResults = async (
   serverContext: ServerContext,
   originalList: (QueryItemRead | QueryItemWrite)[],
   files: Map<string, Blob> | undefined,
@@ -171,7 +153,12 @@ const runQueriesPerType = async (
   try {
     results = await runQueriesWithTime(serverContext, path, reducedQueries);
   } catch (err) {
-    if (err instanceof DataHookError || err instanceof InvalidResponseError) {
+    if (
+      err instanceof DataHookError ||
+      // Raise up errors about databases not existing, because they will be caught at a
+      // higher level and handled accordingly.
+      (err instanceof InvalidResponseError && err.code !== 'AUTH_INVALID_ACCESS')
+    ) {
       const serializedError = serializeError(err);
 
       // Expose the error for all affected queries.
@@ -465,8 +452,8 @@ const renderReactTree = async (
   const incomingCookies = structuredClone(getCookie(c));
 
   if (entry) {
-    // When a 404 page is rendered, the address bar should still show the URL of the page
-    // that was originally accessed.
+    // When the 404 page is rendered, the address bar should still show the URL of the
+    // page that was originally accessed.
     if (entry.notFound) options.updateAddressBar = false;
   } else {
     // Return early if the requested page doesn't exist.
@@ -552,13 +539,22 @@ const renderReactTree = async (
       );
 
       try {
-        await runQueriesPerType(
+        await obtainQueryResults(
           serverContext,
           newlyAdded.queries,
           options.files,
           url.pathname,
         );
       } catch (err) {
+        // If one of the accessed databases does not exist, display the 404 page.
+        if (err instanceof InvalidResponseError && err.code === 'AUTH_INVALID_ACCESS') {
+          return renderReactTree(new URL(NOT_FOUND_PAGE, c.req.url), c, initial, {
+            // When the 404 page is rendered, the address bar should still show the URL
+            // of the page that was originally accessed.
+            updateAddressBar: false,
+          });
+        }
+
         if ((err as { renderable?: boolean }).renderable) {
           // If an error was thrown during the execution of the provided write queries,
           // we can render the page fresh and pass the error to it, so that the page can

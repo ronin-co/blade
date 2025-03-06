@@ -8,6 +8,7 @@ import { InvalidResponseError } from 'ronin/utils';
 import { DataHookError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';
 import { CLIENT_ASSET_PREFIX, SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
+import { EXCEPTION_PAGE } from '../utils/constants';
 import { runQueries, toDashCase } from '../utils/data';
 import {
   getRequestGeoLocation,
@@ -273,11 +274,16 @@ app.onError(async (err, c) => {
   }
 
   try {
-    const exceptionResponse = await renderReactTree(new URL('/500', c.req.url), c, true, {
-      // When the 500 page is rendered, the address bar should still show the URL of the
-      // page that was originally accessed.
-      updateAddressBar: false,
-    });
+    const exceptionResponse = await renderReactTree(
+      new URL(EXCEPTION_PAGE, c.req.url),
+      c,
+      true,
+      {
+        // When the 500 page is rendered, the address bar should still show the URL of
+        // the page that was originally accessed.
+        updateAddressBar: false,
+      },
+    );
 
     if (exceptionResponse) return exceptionResponse;
   } catch (err) {
