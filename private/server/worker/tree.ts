@@ -525,10 +525,10 @@ const renderReactTree = async (
 
   // If the `href` (covers both `pathname` and `search` at once) of the page that should
   // be rendered contains field segments (represented as `{0.handle}`, for example), we
-  // want to replace those with the fields contained in the results of the queries that
-  // were performed. For example, this allows for asking BLADE to provide the destination
-  // page of a redirect directly instead of first rendering the original page again and
-  // then redirecting.
+  // want to replace those with the fields values contained in the results of the queries
+  // that were run. For example, this allows for instructing BLADE to immediately provide
+  // the destination page of a redirect directly instead of first rendering the original
+  // page again and then redirecting.
   const curlyBracesToReplace = /\{([^{}]+)\}/g;
   const hasPatternInURL = url.href.match(curlyBracesToReplace);
 
