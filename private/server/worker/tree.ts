@@ -523,13 +523,14 @@ const renderReactTree = async (
     ),
   };
 
-  // If the `pathname` of the page that should be rendered contains field segments
-  // (represented as `{0.handle}`, for example), we want to replace those with the fields
-  // contained in the results of the queries that were performed. For example, this
-  // allows for asking BLADE to provide the destination page of a redirect directly
-  // instead of first rendering the original page again and then redirecting.
-  const curlyBracesToReplace = /%7B(.*)%7D/g;
-  const hasPatternInURL = url.pathname.match(curlyBracesToReplace);
+  // If the `href` (covers both `pathname` and `search` at once) of the page that should
+  // be rendered contains field segments (represented as `{0.handle}`, for example), we
+  // want to replace those with the fields contained in the results of the queries that
+  // were performed. For example, this allows for asking BLADE to provide the destination
+  // page of a redirect directly instead of first rendering the original page again and
+  // then redirecting.
+  const curlyBracesToReplace = /\{([^{}]+)\}/g;
+  const hasPatternInURL = url.href.match(curlyBracesToReplace);
 
   let index = 0;
 
@@ -651,11 +652,11 @@ const renderReactTree = async (
   if (hasPatternInURL && writeQueryResults.length > 0) {
     // We need to use the URL-encoded version of the `{` and `}` characters, as URL
     // instances in JavaScript automatically encode the URL.
-    const newPathname = url.pathname.replace(curlyBracesToReplace, (_, content) =>
+    const newURL = url.href.replace(curlyBracesToReplace, (_, content) =>
       getValue(writeQueryResults, content),
     );
 
-    return renderReactTree(new URL(newPathname, url), c, initial, options, {
+    return renderReactTree(new URL(newURL), c, initial, options, {
       // We only need to pass the queries to the page, in order to provide the page with
       // the results of the write queries that were executed.
       queries: serverContext.collected.queries,
