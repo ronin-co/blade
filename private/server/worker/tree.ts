@@ -525,7 +525,7 @@ const renderReactTree = async (
 
   // If the `href` (covers both `pathname` and `search` at once) of the page that should
   // be rendered contains field segments (represented as `{0.handle}`, for example), we
-  // want to replace those with the fields values contained in the results of the queries
+  // want to replace those with the field values contained in the results of the queries
   // that were run. For example, this allows for instructing BLADE to immediately provide
   // the destination page of a redirect directly instead of first rendering the original
   // page again and then redirecting.
