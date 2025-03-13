@@ -101,7 +101,7 @@ export const scanExports = (transpiler: Transpiler, code: string): ExportItem[] 
     ? // Named default export — e.g. `export default Test;`
       code.match(/export default (\w+);/)?.[1] ||
       // Function default export — e.g. `export default function Graph() {}`
-      code.match(/export default function (\w+)\(\)/)?.[1]
+      code.match(/export default function (\w+)\(\) {/)?.[1]
     : null;
 
   return fileExports.map((name) => {
