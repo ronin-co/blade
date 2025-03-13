@@ -42,6 +42,7 @@ export const getClientReferenceLoader: (
       contents += "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
       contents += "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
 
+      contents = contents.replaceAll(/export default function/g, 'function');
       contents = contents.replaceAll(/export default (.*)/g, '');
       contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
       contents = contents.replaceAll(/export /g, '');
