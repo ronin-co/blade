@@ -530,7 +530,10 @@ const renderReactTree = async (
   // the destination page of a redirect directly instead of first rendering the original
   // page again and then redirecting.
   const curlyBracesToReplace = /\{([^{}]+)\}/g;
-  const hasPatternInURL = url.href.match(curlyBracesToReplace);
+  // We must decode the URL before checking for patterns, since the patterns might be
+  // encoded, in which case the regex above wouldn't match them.
+  const decodedHref = decodeURIComponent(url.href);
+  const hasPatternInURL = decodedHref.match(curlyBracesToReplace);
 
   let index = 0;
 
@@ -650,9 +653,7 @@ const renderReactTree = async (
     .map(({ result }) => result);
 
   if (hasPatternInURL && writeQueryResults.length > 0) {
-    // We need to use the URL-encoded version of the `{` and `}` characters, as URL
-    // instances in JavaScript automatically encode the URL.
-    const newURL = url.href.replace(curlyBracesToReplace, (_, content) =>
+    const newURL = decodedHref.replace(curlyBracesToReplace, (_, content) =>
       getValue(writeQueryResults, content),
     );
 
