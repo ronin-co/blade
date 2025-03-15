@@ -14,6 +14,11 @@ export type {
   RemoveHook,
   GetHook,
   SetHook,
+  PostCountHook,
+  PostAddHook,
+  PostRemoveHook,
+  PostGetHook,
+  PostSetHook,
 } from '../../private/server/types';
 
 export type * from 'ronin';
