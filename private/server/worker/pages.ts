@@ -53,7 +53,6 @@ const getEntryPath = (
   segments: string[],
   parentDirectory = '',
   params: Params = {},
-  traverseUpwards = false,
 ): Omit<PageEntry, 'errorPage'> | null => {
   const newSegments = [...segments] as [string];
   const currentSegment = newSegments[0];
@@ -91,7 +90,7 @@ const getEntryPath = (
     const directoryPath = joinPaths(parentDirectory, directoryName);
 
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, newSegments, directoryPath, params, traverseUpwards);
+      return getEntryPath(pages, newSegments, directoryPath, params);
     }
   }
 
@@ -133,27 +132,10 @@ const getEntryPath = (
 
       // If a directory that matches the current segment was found, we need to look
       // inside that directory to find suitable page files.
-      //
-      // When traversing upwards, however, we only want to look inside that directory if
-      // there is more than one segment left, because `traverseUpwards` implies that we
-      // are looking for a page with a matching name, so a directory that captures any
-      // name is not allowed.
-      if (type === 'directory' && (traverseUpwards ? newSegments.length > 0 : true)) {
-        return getEntryPath(pages, newSegments, location, params, traverseUpwards);
+      if (type === 'directory') {
+        return getEntryPath(pages, newSegments, location, params);
       }
     }
-  }
-
-  const finalSegments = [parentDirectory, ...segments].filter(Boolean);
-
-  // If it is allowed to look further upward in the tree for matches, then do so.
-  //
-  // But only continue traversing upwards if there are at least two segments left in the
-  // path. If there is only one segment left, we have reached the root of the app and
-  // should stop traversing.
-  if (traverseUpwards && finalSegments.length >= 2) {
-    finalSegments.splice(-2, 1);
-    return getEntryPath(pages, finalSegments, undefined, undefined, true);
   }
 
   // No matching page was found.
@@ -177,6 +159,8 @@ const getEntry = (
     // Clone the list of segments to avoid modifying the original list.
     newSegments = [...segments];
 
+    newSegments.pop();
+
     // Attach the error path to the list of segments, in order to find a page within the
     // app whose name matches the error code.
     newSegments.push(options.error.toString());
@@ -184,9 +168,7 @@ const getEntry = (
 
   // If a native error page is being force-rendered, don't even try to find a matching
   // app-provided error page, because we *must* render the native one provided by Blade.
-  const entry = options?.forceNativeError
-    ? null
-    : getEntryPath(pages, newSegments, undefined, undefined, Boolean(options?.error));
+  const entry = options?.forceNativeError ? null : getEntryPath(pages, newSegments);
 
   // If a page that matches the provided path segments was found, return it.
   if (entry) {
@@ -197,6 +179,13 @@ const getEntry = (
   // app does not define a custom error page for the given error code. In that case, we
   // want to render the respective native error page for the given error code.
   if (options?.error) {
+    const finalSegments = [...newSegments];
+
+    if (finalSegments.length >= 2) {
+      finalSegments.splice(-2, 1);
+      return getEntry(pages, finalSegments, options);
+    }
+
     // TODO: Pass path of native error page.
     return {
       path: `${options.error}.tsx`,
