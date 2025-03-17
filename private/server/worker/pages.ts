@@ -148,7 +148,7 @@ const getEntryPath = (
 
   // If it is allowed to look further upward in the tree for matches, then do so.
   //
-  // Only continue traversing upwards if there are at least two segments left in the
+  // But only continue traversing upwards if there are at least two segments left in the
   // path. If there is only one segment left, we have reached the root of the app and
   // should stop traversing.
   if (traverseUpwards && finalSegments.length >= 2) {
