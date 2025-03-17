@@ -95,57 +95,66 @@ const getEntryPath = (
     }
   }
 
-  const directoryContents = Object.keys(pages)
-    .filter((path) => {
-      if (parentDirectory) {
-        // Exclude the parent directory itself.
-        if (path === parentDirectory) return false;
-
-        // Include all paths that start with the parent directory.
-        return path.startsWith(parentDirectory);
-      }
-
-      // If there is no parent directory, include all paths.
-      return true;
-    })
-    .map((path) => {
-      return parentDirectory ? path.replace(`${parentDirectory}/`, '') : path;
-    })
-    .filter((path) => {
-      // Filter out the contents of sub directories, so that only the names of files and
-      // directories on the current (first) level remain.
-      return !path.includes('/');
-    });
-
-  for (const item of directoryContents) {
-    const { type, name, value = null } = getParameter(item, currentSegment, newSegments);
-    const location = joinPaths(parentDirectory, item);
-
-    if (type) {
-      params[name] = value;
-
-      if (type === 'file') {
-        return {
-          path: location,
-          params,
-        };
-      }
-
-      if (type === 'directory') {
-        return getEntryPath(pages, newSegments, location, params, traverseUpwards);
-      }
-    }
-  }
-
   const finalSegments = [parentDirectory, ...segments].filter(Boolean);
 
   // If it is allowed to look further upward in the tree for matches, then do so.
-  // Only continue traversing upwards if there are at least two segments left in the
-  // path. If there is only one segment left, we have reached the root of the app and
-  // should stop traversing.
-  if (traverseUpwards && finalSegments.length >= 2) {
-    finalSegments.splice(-2, 1);
-    return getEntryPath(pages, finalSegments, undefined, undefined, true);
+  if (traverseUpwards) {
+    // Only continue traversing upwards if there are at least two segments left in the
+    // path. If there is only one segment left, we have reached the root of the app and
+    // should stop traversing.
+    if (finalSegments.length >= 2) {
+      finalSegments.splice(-2, 1);
+      return getEntryPath(pages, finalSegments, undefined, undefined, true);
+    }
+  }
+  // If it is not allowed to look further upward in the tree for matches, find
+  // directories with dynamic names and match them against the current segment.
+  else {
+    const directoryContents = Object.keys(pages)
+      .filter((path) => {
+        if (parentDirectory) {
+          // Exclude the parent directory itself.
+          if (path === parentDirectory) return false;
+
+          // Include all paths that start with the parent directory.
+          return path.startsWith(parentDirectory);
+        }
+
+        // If there is no parent directory, include all paths.
+        return true;
+      })
+      .map((path) => {
+        return parentDirectory ? path.replace(`${parentDirectory}/`, '') : path;
+      })
+      .filter((path) => {
+        // Filter out the contents of sub directories, so that only the names of files and
+        // directories on the current (first) level remain.
+        return !path.includes('/');
+      });
+
+    for (const item of directoryContents) {
+      const {
+        type,
+        name,
+        value = null,
+      } = getParameter(item, currentSegment, newSegments);
+      const location = joinPaths(parentDirectory, item);
+
+      if (type) {
+        params[name] = value;
+
+        if (type === 'file') {
+          return {
+            path: location,
+            params,
+          };
+        }
+
+        if (type === 'directory') {
+          return getEntryPath(pages, newSegments, location, params, traverseUpwards);
+        }
+      }
+    }
   }
 
   // No matching page was found.

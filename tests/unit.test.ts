@@ -132,7 +132,12 @@ test('get entry path of non-existing page', () => {
   const pathSegments = getPathSegments('/testing/another-test');
   const entry = getEntry(pages, pathSegments);
 
-  expect(entry).toBe(null);
+  expect(entry).toMatchObject({
+    // Represents the native error page provided by Blade.
+    path: '404.tsx',
+    params: {},
+    errorPage: 404,
+  });
 });
 
 test('get entry path of page with catch-all dynamic page name', () => {
