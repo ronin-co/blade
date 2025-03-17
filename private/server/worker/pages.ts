@@ -9,7 +9,15 @@ const getParameter = (
   item: string,
   currentSegment: string,
   remainingSegments: string[],
+  hasError = false,
 ) => {
+  if (hasError && item === '404.tsx') {
+    return {
+      type: 'file',
+      name: '404',
+    };
+  }
+
   let type = '';
   let name = '';
   const extension = item.endsWith('].tsx') ? 'tsx' : item.endsWith('].mdx') && 'mdx';
@@ -51,6 +59,7 @@ export type PageEntry = {
 const getEntryPath = (
   pages: Record<string, TreeItem | 'DIRECTORY'>,
   segments: string[],
+  hasError = false,
   parentDirectory = '',
   params: Params = {},
 ): Omit<PageEntry, 'errorPage'> | null => {
@@ -59,7 +68,7 @@ const getEntryPath = (
 
   newSegments.shift();
 
-  const filePrefix = currentSegment ? currentSegment : 'index';
+  const filePrefix = currentSegment ? currentSegment : hasError ? '404' : 'index';
   let fileExtension: 'tsx' | 'mdx' = 'tsx';
   let fileName = `${filePrefix}.${fileExtension}`;
   let filePath = joinPaths(parentDirectory, fileName);
@@ -90,7 +99,7 @@ const getEntryPath = (
     const directoryPath = joinPaths(parentDirectory, directoryName);
 
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, newSegments, directoryPath, params);
+      return getEntryPath(pages, newSegments, hasError, directoryPath, params);
     }
   }
 
@@ -114,10 +123,18 @@ const getEntryPath = (
       // Filter out the contents of sub directories, so that only the names of files and
       // directories on the current (first) level remain.
       return !path.includes('/');
+    })
+    .sort((a, b) => {
+      // Sort dynamic path segments to the end.
+      return Number(a.startsWith('[')) - Number(b.startsWith('['));
     });
 
   for (const item of directoryContents) {
-    const { type, name, value = null } = getParameter(item, currentSegment, newSegments);
+    const {
+      type,
+      name,
+      value = null,
+    } = getParameter(item, currentSegment, newSegments, hasError);
     const location = joinPaths(parentDirectory, item);
 
     if (type) {
@@ -133,7 +150,7 @@ const getEntryPath = (
       // If a directory that matches the current segment was found, we need to look
       // inside that directory to find suitable page files.
       if (type === 'directory') {
-        return getEntryPath(pages, newSegments, location, params);
+        return getEntryPath(pages, newSegments, hasError, location, params);
       }
     }
   }
@@ -150,36 +167,25 @@ const getEntry = (
     forceNativeError?: boolean;
   },
 ): PageEntry => {
-  let newSegments = segments;
-
-  // If an error is being rendered for the current page, remove the last segment from the
-  // path and replace it with the error code, such that the respective error page on the
-  // directory level of the page can be rendered, if it exists.
-  if (options?.error) {
-    // Clone the list of segments to avoid modifying the original list.
-    newSegments = [...segments];
-
-    newSegments.pop();
-
-    // Attach the error path to the list of segments, in order to find a page within the
-    // app whose name matches the error code.
-    newSegments.push(options.error.toString());
-  }
+  const newSegments = segments;
+  const hasError = options?.error !== undefined;
 
   // If a native error page is being force-rendered, don't even try to find a matching
   // app-provided error page, because we *must* render the native one provided by Blade.
-  const entry = options?.forceNativeError ? null : getEntryPath(pages, newSegments);
+  const entry = options?.forceNativeError
+    ? null
+    : getEntryPath(pages, newSegments, hasError);
 
   // If a page that matches the provided path segments was found, return it.
   if (entry) {
-    return options?.error ? { ...entry, errorPage: options.error } : entry;
+    return hasError ? { ...entry, errorPage: options.error } : entry;
   }
 
   // If an error page should be rendered and no matching page was found, that means the
   // app does not define a custom error page for the given error code. In that case, we
   // want to render the respective native error page for the given error code.
-  if (options?.error) {
-    const finalSegments = [...newSegments];
+  if (hasError) {
+    const finalSegments = [...segments];
 
     if (finalSegments.length >= 2) {
       finalSegments.splice(-2, 1);
