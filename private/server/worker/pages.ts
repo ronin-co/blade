@@ -9,15 +9,7 @@ const getParameter = (
   item: string,
   currentSegment: string,
   remainingSegments: string[],
-  hasError = false,
 ) => {
-  if (hasError && item === '404.tsx') {
-    return {
-      type: 'file',
-      name: '404',
-    };
-  }
-
   let type = '';
   let name = '';
   const extension = item.endsWith('].tsx') ? 'tsx' : item.endsWith('].mdx') && 'mdx';
@@ -130,12 +122,16 @@ const getEntryPath = (
     });
 
   for (const item of directoryContents) {
-    const {
-      type,
-      name,
-      value = null,
-    } = getParameter(item, currentSegment, newSegments, hasError);
     const location = joinPaths(parentDirectory, item);
+
+    if (hasError && item === '404.tsx') {
+      return {
+        path: location,
+        params,
+      };
+    }
+
+    const { type, name, value = null } = getParameter(item, currentSegment, newSegments);
 
     if (type) {
       params[name] = value;
