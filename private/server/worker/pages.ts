@@ -131,7 +131,14 @@ const getEntryPath = (
         };
       }
 
-      if (type === 'directory') {
+      // If a directory that matches the current segment was found, we need to look
+      // inside that directory to find suitable page files.
+      //
+      // When traversing upwards, however, we only want to look inside that directory if
+      // there is more than one segment left, because `traverseUpwards` implies that we
+      // are looking for a page with a matching name, so a directory that captures any
+      // name is not allowed.
+      if (type === 'directory' && (traverseUpwards ? newSegments.length > 0 : true)) {
         return getEntryPath(pages, newSegments, location, params, traverseUpwards);
       }
     }
@@ -169,10 +176,6 @@ const getEntry = (
   if (options?.error) {
     // Clone the list of segments to avoid modifying the original list.
     newSegments = [...segments];
-
-    // Remove the last path segment to ensure that the error path is attached to the
-    // correct directory level. For example, `/account` should become `/404`.
-    newSegments.pop();
 
     // Attach the error path to the list of segments, in order to find a page within the
     // app whose name matches the error code.
