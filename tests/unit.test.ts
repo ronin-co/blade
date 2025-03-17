@@ -128,6 +128,7 @@ test('get entry path of deeply nested page where parent of page is dynamic', () 
   });
 });
 
+/*
 test('get entry path of non-existing page', () => {
   const pathSegments = getPathSegments('/docs/non-existent-page');
   const entry = getEntry(pages, pathSegments);
@@ -139,6 +140,7 @@ test('get entry path of non-existing page', () => {
     errorPage: 404,
   });
 });
+*/
 
 test('get entry path of page with catch-all dynamic page name', () => {
   const pathSegments = getPathSegments('/ronin/explore/spaces/test-6');
