@@ -68,14 +68,8 @@ export const getClientReferenceLoader: (
         return source.path.endsWith(`.${extension}`);
       });
 
-      if (requiresTranspilation) {
-        let newContents = '';
-
-        if (environment === 'production') {
-          newContents = `import { jsx, ${contents.includes('Fragment') ? '' : 'Fragment'} } from "react/jsx-runtime";`;
-        } else {
-          newContents = `import { jsxDEV, ${contents.includes('Fragment') ? '' : 'Fragment'} } from "react/jsx-dev-runtime";`;
-        }
+      if (requiresTranspilation && environment !== 'production') {
+        const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, ${contents.includes('Fragment') ? '' : 'Fragment as Fragment_8vg9x3sq'} } from "react/jsx-dev-runtime";`;
 
         contents = `${newContents}\n${transpiler.transformSync(contents)}`;
         loader = 'js';
