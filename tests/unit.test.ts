@@ -129,7 +129,7 @@ test('get entry path of deeply nested page where parent of page is dynamic', () 
 });
 
 test('get entry path of non-existing page', () => {
-  const pathSegments = getPathSegments('/testing/another-test');
+  const pathSegments = getPathSegments('/docs/non-existent-page');
   const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
@@ -167,6 +167,16 @@ test('get closest 404 page', () => {
 
   expect(entry).toMatchObject({
     path: 'account/404.tsx',
+    params: {},
+  });
+});
+
+test('get closest 404 page to dynamic directory segment', () => {
+  const pathSegments = getPathSegments('/ronin');
+  const entry = getEntry(pages, pathSegments, { error: 404 });
+
+  expect(entry).toMatchObject({
+    path: '[space]/404.tsx',
     params: {},
   });
 });
