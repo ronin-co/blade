@@ -51,7 +51,7 @@ export type PageEntry = {
 const getEntryPath = (
   pages: Record<string, TreeItem | 'DIRECTORY'>,
   segments: string[],
-  hasError = false,
+  indexName = 'index',
   parentDirectory = '',
   params: Params = {},
 ): Omit<PageEntry, 'errorPage'> | null => {
@@ -60,7 +60,7 @@ const getEntryPath = (
 
   newSegments.shift();
 
-  const filePrefix = currentSegment ? currentSegment : hasError ? '404' : 'index';
+  const filePrefix = currentSegment ? currentSegment : indexName;
   let fileExtension: 'tsx' | 'mdx' = 'tsx';
   let fileName = `${filePrefix}.${fileExtension}`;
   let filePath = joinPaths(parentDirectory, fileName);
@@ -91,7 +91,7 @@ const getEntryPath = (
     const directoryPath = joinPaths(parentDirectory, directoryName);
 
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, newSegments, hasError, directoryPath, params);
+      return getEntryPath(pages, newSegments, indexName, directoryPath, params);
     }
   }
 
@@ -124,7 +124,7 @@ const getEntryPath = (
   for (const item of directoryContents) {
     const location = joinPaths(parentDirectory, item);
 
-    if (hasError && item === '404.tsx') {
+    if (indexName !== 'index' && item === `${indexName}.tsx`) {
       return {
         path: location,
         params,
@@ -146,7 +146,7 @@ const getEntryPath = (
       // If a directory that matches the current segment was found, we need to look
       // inside that directory to find suitable page files.
       if (type === 'directory') {
-        return getEntryPath(pages, newSegments, hasError, location, params);
+        return getEntryPath(pages, newSegments, indexName, location, params);
       }
     }
   }
@@ -170,7 +170,7 @@ const getEntry = (
   // app-provided error page, because we *must* render the native one provided by Blade.
   const entry = options?.forceNativeError
     ? null
-    : getEntryPath(pages, newSegments, hasError);
+    : getEntryPath(pages, newSegments, options?.error?.toString());
 
   // If a page that matches the provided path segments was found, return it.
   if (entry) {
