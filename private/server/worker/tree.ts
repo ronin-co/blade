@@ -434,7 +434,10 @@ const renderReactTree = async (
   /** Whether the initial request is being handled (SSR). */
   initial: boolean,
   /** A list of options for customizing the rendering behavior. */
-  options: Omit<PageFetchingOptions, 'queries'> & { error?: 404 | 500 } = {},
+  options: Omit<PageFetchingOptions, 'queries'> & {
+    error?: 404 | 500;
+    errorReason?: 'database-not-found';
+  } = {},
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
 ): Promise<Response> => {
@@ -455,9 +458,14 @@ const renderReactTree = async (
   // This condition only gets met if no `404` page was defined in the app.
   if (!entry) return new Response('Not Found', { status: 404 });
 
-  // When an error page is rendered, the address bar should still show the URL of the
-  // page that was originally accessed.
-  if (entry.errorPage) options.updateAddressBar = false;
+  if (entry.errorPage) {
+    // When an error page is rendered, the address bar should still show the URL of the
+    // page that was originally accessed.
+    options.updateAddressBar = false;
+
+    // If an error reason was provided, expose it using query params to the error page.
+    if (options?.errorReason) url.searchParams.set('reason', options.errorReason);
+  }
 
   const rawRequest = c.req.raw;
 
