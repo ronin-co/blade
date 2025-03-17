@@ -78,7 +78,9 @@ const getEntryPath = (
     .filter((path) => {
       if (!parentDirectory) return !path.includes('/');
       return (
+        // Include all paths that start with the parent directory.
         path.startsWith(parentDirectory) &&
+        // Exclude the parent directory itself.
         path !== parentDirectory &&
         !path.replace(`${parentDirectory}/`, '').includes('/')
       );
