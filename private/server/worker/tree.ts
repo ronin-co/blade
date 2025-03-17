@@ -435,8 +435,15 @@ const renderReactTree = async (
   initial: boolean,
   /** A list of options for customizing the rendering behavior. */
   options: Omit<PageFetchingOptions, 'queries'> & {
+    /** Whether an error page should be rendered, and for which error code. */
     error?: 404 | 500;
+    /** The reason why the error page is being rendered. */
     errorReason?: 'database-not-found';
+    /**
+     * Whether to force a native error page to be rendered because the app-provided error
+     * page is not renderable.
+     */
+    forceNativeError?: boolean;
   } = {},
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -450,7 +457,10 @@ const renderReactTree = async (
   if (import.meta.env.BLADE_ENV === 'production') url.protocol = 'https';
 
   const pathSegments = getPathSegments(url.pathname);
-  const entry = getEntry(pages, pathSegments, options.error);
+  const entry = getEntry(pages, pathSegments, {
+    error: options.error,
+    forceNativeError: options.forceNativeError,
+  });
 
   const incomingCookies = structuredClone(getCookie(c));
 
@@ -574,18 +584,17 @@ const renderReactTree = async (
       } catch (err) {
         // If one of the accessed databases does not exist, display the 404 page.
         if (err instanceof InvalidResponseError && err.code === 'AUTH_INVALID_ACCESS') {
-          // TODO: Ensure that this causes a default 404 page to render instead.
-          // However that page should not be rendered here, but instead further above.
-          //
           // If the current page is already a 404 (defined in the app), log the error and
           // render the native 404 page instead, because, in that case, the app-provided
           // 404 page relies on queries that are causing this error.
+          let forceNativeError: boolean | undefined;
+
           if (entry.errorPage === 404) {
             console.error(err);
-            return new Response('Not Found', { status: 404 });
+            forceNativeError = true;
           }
 
-          return renderReactTree(url, c, initial, { error: 404 });
+          return renderReactTree(url, c, initial, { error: 404, forceNativeError });
         }
 
         if ((err as { renderable?: boolean }).renderable) {

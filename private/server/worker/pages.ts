@@ -164,14 +164,17 @@ const getEntryPath = (
 const getEntry = (
   pages: Record<string, TreeItem | 'DIRECTORY'>,
   segments: string[],
-  error?: PageEntry['errorPage'],
+  options?: {
+    error?: PageEntry['errorPage'];
+    forceNativeError?: boolean;
+  },
 ): PageEntry => {
   let newSegments = segments;
 
   // If an error is being rendered for the current page, remove the last segment from the
   // path and replace it with the error code, such that the respective error page on the
   // directory level of the page can be rendered, if it exists.
-  if (error) {
+  if (options?.error) {
     // Clone the list of segments to avoid modifying the original list.
     newSegments = [...segments];
 
@@ -186,23 +189,27 @@ const getEntry = (
 
     // Attach the error path to the list of segments, in order to find a page within the
     // app whose name matches the error code.
-    newSegments.push(error.toString());
+    newSegments.push(options.error.toString());
   }
 
-  const entry = getEntryPath(pages, newSegments, undefined, undefined, Boolean(error));
+  // If a native error page is being force-rendered, don't even try to find a matching
+  // app-provided error page, because we *must* render the native one provided by Blade.
+  const entry = options?.forceNativeError
+    ? null
+    : getEntryPath(pages, newSegments, undefined, undefined, Boolean(options?.error));
 
   // If a page that matches the provided path segments was found, return it.
   if (entry) {
-    return error ? { ...entry, errorPage: error } : entry;
+    return options?.error ? { ...entry, errorPage: options.error } : entry;
   }
 
   // If an error page should be rendered and no matching page was found, that means the
   // app does not define a custom error page for the given error code. In that case, we
-  // want to render the respective default error page for the given error code.
-  if (error) {
+  // want to render the respective native error page for the given error code.
+  if (options?.error) {
     // TODO: Pass path of native error page.
     return {
-      path: `${error}.tsx`,
+      path: `${options.error}.tsx`,
       params: {},
       errorPage: 404,
     };
@@ -211,7 +218,7 @@ const getEntry = (
   // If a regular page (not an error page) should be rendered and no matching page was
   // found, that means the respective page was not defined by the app and we must try to
   // render a "Not Found" (404) page provided by the app instead.
-  return getEntry(pages, newSegments, 404);
+  return getEntry(pages, newSegments, { error: 404 });
 };
 
 const getPathSegments = (pathname: string): string[] => {
