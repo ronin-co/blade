@@ -46,7 +46,7 @@ export type PageEntry = {
   params: {
     [key: string]: string | string[] | null;
   };
-  notFound: boolean;
+  errorPage: 404 | 500 | null;
 };
 
 const getEntryPath = (
@@ -54,7 +54,7 @@ const getEntryPath = (
   segments: string[],
   parentDirectory = '',
   params: Params = {},
-  notFound = false,
+  errorPage: PageEntry['errorPage'] = null,
 ): PageEntry | null => {
   const newSegments = [...segments] as [string];
   const currentSegment = newSegments[0];
@@ -70,7 +70,7 @@ const getEntryPath = (
     return {
       path: filePath,
       params,
-      notFound,
+      errorPage,
     };
   }
 
@@ -82,7 +82,7 @@ const getEntryPath = (
     return {
       path: filePath,
       params,
-      notFound,
+      errorPage,
     };
   }
 
@@ -94,7 +94,7 @@ const getEntryPath = (
     const directoryPath = joinPaths(parentDirectory, directoryName);
 
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, newSegments, directoryPath, params, notFound);
+      return getEntryPath(pages, newSegments, directoryPath, params, errorPage);
     }
   }
 
@@ -133,22 +133,22 @@ const getEntryPath = (
         return {
           path: location,
           params,
-          notFound,
+          errorPage,
         };
       }
 
       if (type === 'directory') {
-        return getEntryPath(pages, newSegments, location, params, notFound);
+        return getEntryPath(pages, newSegments, location, params, errorPage);
       }
     }
   }
 
   const notFoundSegments = [parentDirectory, ...segments].filter(Boolean);
   notFoundSegments.pop();
-  if (notFound) notFoundSegments.pop();
+  if (errorPage) notFoundSegments.pop();
   notFoundSegments.push(NOT_FOUND_PAGE);
 
-  return getEntryPath(pages, notFoundSegments, undefined, undefined, true);
+  return getEntryPath(pages, notFoundSegments, undefined, undefined, 404);
 };
 
 const getPathSegments = (pathname: string): string[] => {

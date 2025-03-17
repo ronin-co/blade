@@ -434,7 +434,7 @@ const renderReactTree = async (
   /** Whether the initial request is being handled (SSR). */
   initial: boolean,
   /** A list of options for customizing the rendering behavior. */
-  options: Omit<PageFetchingOptions, 'queries'> = {},
+  options: Omit<PageFetchingOptions, 'queries'> & { error?: 404 | 500 } = {},
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
 ): Promise<Response> => {
@@ -451,29 +451,13 @@ const renderReactTree = async (
 
   const incomingCookies = structuredClone(getCookie(c));
 
-  if (entry) {
-    // When the 404 page is rendered, the address bar should still show the URL of the
-    // page that was originally accessed.
-    if (entry.notFound) {
-      options.updateAddressBar = false;
-    } else {
-      const lastPathSegment = pathSegments.at(-1);
-      const isNotFound = lastPathSegment === NOT_FOUND_PAGE;
+  // TODO: Render a default 404 page here.
+  // This condition only gets met if no `404` page was defined in the app.
+  if (!entry) return new Response('Not Found', { status: 404 });
 
-      // By default, `entry.notFound` will only be `true` if the page provided
-      // in `url` was not found and a fallback 404 page therefore had to be
-      // selected as the `entry`.
-      //
-      // In the case that the provided `url` is already a 404 page (which
-      // happens if the 404 page is being rendered explicitly, by blade, for
-      // example), we must therefore set `notFound` to `true` explicitly.
-      if (isNotFound) entry.notFound = true;
-    }
-  } else {
-    // TODO: Render a default 404 page here.
-    // This condition only gets met if no `404` page was defined in the app.
-    return new Response('Not Found', { status: 404 });
-  }
+  // When an error page is rendered, the address bar should still show the URL of the
+  // page that was originally accessed.
+  if (entry.errorPage) options.updateAddressBar = false;
 
   const rawRequest = c.req.raw;
 
@@ -592,7 +576,7 @@ const renderReactTree = async (
           // If the current page is already a 404 (defined in the app), log the error and
           // render the native 404 page instead, because, in that case, the app-provided
           // 404 page relies on queries that are causing this error.
-          if (entry.notFound) {
+          if (entry.errorPage === 404) {
             console.error(err);
             return new Response('Not Found', { status: 404 });
           }
@@ -600,11 +584,7 @@ const renderReactTree = async (
           const newURL = new URL(NOT_FOUND_PAGE, url);
           newURL.searchParams.set('reason', 'database-not-found');
 
-          return renderReactTree(newURL, c, initial, {
-            // When the 404 page is rendered, the address bar should still show the URL
-            // of the page that was originally accessed.
-            updateAddressBar: false,
-          });
+          return renderReactTree(newURL, c, initial, { error: 404 });
         }
 
         if ((err as { renderable?: boolean }).renderable) {

@@ -8,7 +8,6 @@ import { InvalidResponseError } from 'ronin/utils';
 import { DataHookError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';
 import { CLIENT_ASSET_PREFIX, SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
-import { EXCEPTION_PAGE } from '../utils/constants';
 import { runQueries, toDashCase } from '../utils/data';
 import {
   getRequestGeoLocation,
@@ -206,8 +205,6 @@ app.post('*', async (c) => {
     cookies: c.req.header('Cookie'),
   });
 
-  const url = new URL(c.req.url);
-
   const body = await c.req.parseBody<{ options?: string; files: File }>({ all: true });
   const options: PageFetchingOptions = body.options
     ? JSON.parse(body.options)
@@ -238,7 +235,7 @@ app.post('*', async (c) => {
     existingCollected.queries = list;
   }
 
-  return renderReactTree(url, c, false, options, existingCollected);
+  return renderReactTree(new URL(c.req.url), c, false, options, existingCollected);
 });
 
 // Handle errors that occurred during the request lifecycle.
@@ -262,17 +259,7 @@ app.onError((err, c) => {
   }
 
   try {
-    return renderReactTree(
-      // Passing the slash prefix here ensures that the root 500 page is rendered.
-      new URL(`/${EXCEPTION_PAGE}`, c.req.url),
-      c,
-      true,
-      {
-        // When the 500 page is rendered, the address bar should still show the URL of
-        // the page that was originally accessed.
-        updateAddressBar: false,
-      },
-    );
+    return renderReactTree(new URL(c.req.url), c, true, { error: 500 });
   } catch (err) {
     console.error(err);
     c.get('sentry').captureException(err);
