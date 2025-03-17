@@ -594,7 +594,11 @@ const renderReactTree = async (
             forceNativeError = true;
           }
 
-          return renderReactTree(url, c, initial, { error: 404, forceNativeError });
+          return renderReactTree(url, c, initial, {
+            error: 404,
+            errorReason: 'database-not-found',
+            forceNativeError,
+          });
         }
 
         if ((err as { renderable?: boolean }).renderable) {
