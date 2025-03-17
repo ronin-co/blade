@@ -83,7 +83,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@sentry/types": "8.30.0",
-    "@types/bun": "1.1.9",
+    "@types/bun": "1.2.4",
     "@types/flat": "5.0.5",
     "@types/gradient-string": "1.1.6",
     "@types/react": "18.3.6",
