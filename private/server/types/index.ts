@@ -13,6 +13,11 @@ import type {
   BeforeSetHook as OriginalBeforeSetHook,
   CountHook as OriginalCountHook,
   GetHook as OriginalGetHook,
+  PostAddHook as OriginalPostAddHook,
+  PostCountHook as OriginalPostCountHook,
+  PostGetHook as OriginalPostGetHook,
+  PostRemoveHook as OriginalPostRemoveHook,
+  PostSetHook as OriginalPostSetHook,
   RemoveHook as OriginalRemoveHook,
   SetHook as OriginalSetHook,
 } from 'ronin/types';
@@ -116,6 +121,22 @@ export type GetHook<TSchema = unknown> = (
 export type SetHook<TSchema = unknown> = (
   ...args: Parameters<AddOptionsArgument<OriginalSetHook<TSchema>>>
 ) => ReturnType<OriginalSetHook<TSchema>>;
+
+export type PostCountHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPostCountHook>>
+) => ReturnType<OriginalPostCountHook>;
+export type PostAddHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPostAddHook>>
+) => ReturnType<OriginalPostAddHook>;
+export type PostRemoveHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPostRemoveHook>>
+) => ReturnType<OriginalPostRemoveHook>;
+export type PostGetHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPostGetHook>>
+) => ReturnType<OriginalPostGetHook>;
+export type PostSetHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPostSetHook>>
+) => ReturnType<OriginalPostSetHook>;
 
 export type AfterCountHook<TSchema = unknown> = (
   ...args: Parameters<AddOptionsArgument<OriginalAfterCountHook<TSchema>>>

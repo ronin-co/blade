@@ -1,6 +1,6 @@
 {
   "name": "@ronin/blade",
-  "version": "0.1.16",
+  "version": "0.1.24",
   "type": "module",
   "description": "React at the edge.",
   "repository": "ronin-co/blade",
@@ -76,14 +76,14 @@
     "p-queue": "8.0.1",
     "radash": "12.1.0",
     "rehype-pretty-code": "0.14.0",
-    "ronin": "6.2.29",
+    "ronin": "6.3.0",
     "serialize-error": "11.0.3",
     "ua-parser-js": "1.0.39"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@sentry/types": "8.30.0",
-    "@types/bun": "1.1.9",
+    "@types/bun": "1.2.4",
     "@types/flat": "5.0.5",
     "@types/gradient-string": "1.1.6",
     "@types/react": "18.3.6",

@@ -525,6 +525,18 @@ const renderReactTree = async (
     ),
   };
 
+  // If the `href` (covers both `pathname` and `search` at once) of the page that should
+  // be rendered contains field segments (represented as `{0.handle}`, for example), we
+  // want to replace those with the field values contained in the results of the queries
+  // that were run. For example, this allows for instructing BLADE to immediately provide
+  // the destination page of a redirect directly instead of first rendering the original
+  // page again and then redirecting.
+  const curlyBracesToReplace = /\{([^{}]+)\}/g;
+  // We must decode the URL before checking for patterns, since the patterns might be
+  // encoded, in which case the regex above wouldn't match them.
+  const decodedHref = decodeURIComponent(url.href);
+  const hasPatternInURL = decodedHref.match(curlyBracesToReplace);
+
   let index = 0;
 
   // Simulate the behavior of React's promise handling by invoking all layouts and the
@@ -533,13 +545,21 @@ const renderReactTree = async (
   // page again. At the end of the cycle, nothing will be thrown anymore. This is also
   // how React internally handles promises, except that we are implementing it ourselves.
   while (true) {
-    // Prime the server context with metadata, redirects, and similar.
-    const newlyAdded = collectPromises(
-      renderingLeaves,
-      serverContext,
-      // On the first run, provide existing queries and JWTs that were already provided.
-      index === 0 ? existingNewlyAdded : undefined,
-    );
+    let newlyAdded = existingNewlyAdded;
+
+    // If the URL contains patterns such as `{0.handle}`, we don't want to collect any
+    // read queries from the target page. Instead, we only want to continue with the
+    // write queries that were already provided, since those must be executed before we
+    // can fill the pattern with an actual value and render the page.
+    if (!hasPatternInURL) {
+      // Prime the server context with metadata, redirects, and similar.
+      newlyAdded = collectPromises(
+        renderingLeaves,
+        serverContext,
+        // On the first run, provide existing queries and JWTs that were already provided.
+        index === 0 ? existingNewlyAdded : undefined,
+      );
+    }
 
     // Below, we lift certain asynchronous operations out of the async context, which
     // allows us to run them asynchronously without blocking the thread, and, in certain
@@ -558,7 +578,10 @@ const renderReactTree = async (
           serverContext,
           newlyAdded.queries,
           options.files,
-          url.pathname,
+          // If the URL contains patterns such as `{0.handle}`, an error fallback page
+          // is always present, because write queries can only be executed with an error
+          // fallback page that can be rendered in the case that the queries fail.
+          hasPatternInURL ? (options.errorFallback as string) : url.pathname,
         );
       } catch (err) {
         // If one of the accessed databases does not exist, display the 404 page.
@@ -634,7 +657,13 @@ const renderReactTree = async (
 
     index++;
 
-    if (newlyAdded.queries.length > 0 || normalizedJwts.length > 0) continue;
+    if (
+      (newlyAdded.queries.length > 0 || normalizedJwts.length > 0) &&
+      !hasPatternInURL
+    ) {
+      continue;
+    }
+
     break;
   }
 
@@ -642,24 +671,18 @@ const renderReactTree = async (
     .filter(({ type }) => type === 'write')
     .map(({ result }) => result);
 
-  const curlyBracesToReplace = /%7B(.*)%7D/g;
-
-  // If the `pathname` of the page that should be rendered contains field segments
-  // (represented as `{0.handle}`, for example), we want to replace those with the fields
-  // contained in the results of the queries that were performed. For example, this
-  // allows for asking BLADE to provide the destination page of a redirect directly
-  // instead of first rendering the original page again and then redirecting.
-  if (writeQueryResults.length > 0 && url.pathname.match(curlyBracesToReplace)) {
-    // We need to use the URL-encoded version of the `{` and `}` characters, as URL
-    // instances in JavaScript automatically encode the URL.
-    const newPathname = url.pathname.replace(curlyBracesToReplace, (_, content) =>
+  if (hasPatternInURL && writeQueryResults.length > 0) {
+    const newURL = decodedHref.replace(curlyBracesToReplace, (_, content) =>
       getValue(writeQueryResults, content),
     );
 
-    return renderReactTree(new URL(newPathname, url), c, initial, options, {
+    return renderReactTree(new URL(newURL), c, initial, options, {
+      // We only need to pass the queries to the page, in order to provide the page with
+      // the results of the write queries that were executed.
       queries: serverContext.collected.queries,
-      metadata: {},
+      // The other properties should be empty, since nothing else was collected yet.
       jwts: {},
+      metadata: {},
     });
   }
 
