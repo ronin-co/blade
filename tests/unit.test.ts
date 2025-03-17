@@ -1,12 +1,12 @@
 import { expect, test } from 'vitest';
 
 import { getParentDirectories } from '../private/server/utils/paths';
-import { getEntryPath, getPathSegments } from '../private/server/worker/pages';
+import { getEntry, getPathSegments } from '../private/server/worker/pages';
 import { examplePage, pages } from './fixtures/pages';
 
 test('get entry path of non-index page', () => {
   const pathSegments = getPathSegments('/login');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: 'login.tsx',
@@ -16,7 +16,7 @@ test('get entry path of non-index page', () => {
 
 test('get entry path of non-index MDX page', () => {
   const pathSegments = getPathSegments('/docs/platform');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: 'docs/platform.mdx',
@@ -26,7 +26,7 @@ test('get entry path of non-index MDX page', () => {
 
 test('get entry path of nested index page', () => {
   const pathSegments = getPathSegments('/account');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: 'account/index.tsx',
@@ -36,7 +36,7 @@ test('get entry path of nested index page', () => {
 
 test('get entry path of nested non-index page', () => {
   const pathSegments = getPathSegments('/account/security');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: 'account/security.tsx',
@@ -46,7 +46,7 @@ test('get entry path of nested non-index page', () => {
 
 test('get entry path of nested dynamic index page', () => {
   const pathSegments = getPathSegments('/');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/index.tsx',
@@ -56,7 +56,7 @@ test('get entry path of nested dynamic index page', () => {
 
 test('get entry path of nested dynamic index page with params', () => {
   const pathSegments = getPathSegments('/ronin');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/index.tsx',
@@ -66,7 +66,7 @@ test('get entry path of nested dynamic index page with params', () => {
 
 test('get entry path of nested dynamic non-index page with params', () => {
   const pathSegments = getPathSegments('/ronin/settings');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/settings/index.tsx',
@@ -76,7 +76,7 @@ test('get entry path of nested dynamic non-index page with params', () => {
 
 test('get entry path of deeply nested dynamic index page', () => {
   const pathSegments = getPathSegments('/ronin/developers/schemas/team/settings');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/developers/schemas/[schema]/settings/index.tsx',
@@ -88,7 +88,7 @@ test('get entry path of deeply nested dynamic non-index page', () => {
   const pathSegments = getPathSegments(
     '/ronin/developers/schemas/team/settings/variants',
   );
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/developers/schemas/[schema]/settings/variants.tsx',
@@ -100,7 +100,7 @@ test('get entry path of page with dynamic page name', () => {
   const pathSegments = getPathSegments(
     '/ronin/help/tickets/front-page-no-longer-responding',
   );
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/help/tickets/[ticket].tsx',
@@ -110,7 +110,7 @@ test('get entry path of page with dynamic page name', () => {
 
 test('get entry path of MDX page with dynamic page name', () => {
   const pathSegments = getPathSegments('/guides/dashboard');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: 'guides/[category].mdx',
@@ -120,7 +120,7 @@ test('get entry path of MDX page with dynamic page name', () => {
 
 test('get entry path of deeply nested page where parent of page is dynamic', () => {
   const pathSegments = getPathSegments('/ronin/records/new-teams');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/records/[view]/index.tsx',
@@ -130,14 +130,14 @@ test('get entry path of deeply nested page where parent of page is dynamic', () 
 
 test('get entry path of non-existing page', () => {
   const pathSegments = getPathSegments('/testing/another-test');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toBe(null);
 });
 
 test('get entry path of page with catch-all dynamic page name', () => {
   const pathSegments = getPathSegments('/ronin/explore/spaces/test-6');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '[space]/explore/[schema]/[...record].tsx',
@@ -158,7 +158,7 @@ test('get parent directories of path', () => {
 
 test('get closest 404 page', () => {
   const pathSegments = getPathSegments('/account/testing/another-test');
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   expect(entry).toMatchObject({
     path: 'account/404.tsx',
@@ -174,7 +174,7 @@ test('get root 404 page', () => {
     '404.tsx': examplePage,
   };
 
-  const entry = getEntryPath(newPages, pathSegments);
+  const entry = getEntry(newPages, pathSegments);
 
   expect(entry).toMatchObject({
     path: '404.tsx',

@@ -51,14 +51,10 @@ export type PageEntry = {
 const getEntryPath = (
   pages: Record<string, TreeItem | 'DIRECTORY'>,
   segments: string[],
-  options?: {
-    parentDirectory?: string;
-    params?: Params;
-    errorPage?: PageEntry['errorPage'];
-  },
+  parentDirectory = '',
+  params: Params = {},
+  errorPage: PageEntry['errorPage'] = null,
 ): PageEntry | null => {
-  const { parentDirectory = '', params = {}, errorPage = null } = options || {};
-
   const newSegments = [...segments] as [string];
   const currentSegment = newSegments[0];
 
@@ -97,11 +93,7 @@ const getEntryPath = (
     const directoryPath = joinPaths(parentDirectory, directoryName);
 
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, newSegments, {
-        parentDirectory: directoryPath,
-        params,
-        errorPage,
-      });
+      return getEntryPath(pages, newSegments, directoryPath, params, errorPage);
     }
   }
 
@@ -145,11 +137,7 @@ const getEntryPath = (
       }
 
       if (type === 'directory') {
-        return getEntryPath(pages, newSegments, {
-          parentDirectory: location,
-          params,
-          errorPage,
-        });
+        return getEntryPath(pages, newSegments, location, params, errorPage);
       }
     }
   }
@@ -159,7 +147,14 @@ const getEntryPath = (
   if (errorPage) notFoundSegments.pop();
   notFoundSegments.push('404');
 
-  return getEntryPath(pages, notFoundSegments, { errorPage: 404 });
+  return getEntryPath(pages, notFoundSegments, undefined, undefined, 404);
+};
+
+const getEntry = (
+  pages: Record<string, TreeItem | 'DIRECTORY'>,
+  segments: string[],
+): PageEntry | null => {
+  return getEntryPath(pages, segments);
 };
 
 const getPathSegments = (pathname: string): string[] => {
@@ -168,4 +163,4 @@ const getPathSegments = (pathname: string): string[] => {
   return segments.split('/');
 };
 
-export { getPathSegments, getEntryPath };
+export { getPathSegments, getEntry };

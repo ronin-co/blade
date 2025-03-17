@@ -35,7 +35,7 @@ import {
 import { renderToReadableStream } from '../utils/serializer';
 import { SERVER_CONTEXT } from './context';
 import { prepareHooks } from './data-hooks';
-import { type PageEntry, getEntryPath, getPathSegments } from './pages';
+import { type PageEntry, getEntry, getPathSegments } from './pages';
 
 const getRenderingLeaves = (location: keyof typeof pages): Map<string, TreeItem> => {
   const leaves = new Map<string, TreeItem>();
@@ -450,7 +450,7 @@ const renderReactTree = async (
   if (import.meta.env.BLADE_ENV === 'production') url.protocol = 'https';
 
   const pathSegments = getPathSegments(url.pathname);
-  const entry = getEntryPath(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments);
 
   const incomingCookies = structuredClone(getCookie(c));
 
