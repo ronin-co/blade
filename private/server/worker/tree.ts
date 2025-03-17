@@ -589,10 +589,13 @@ const renderReactTree = async (
           // TODO: Ensure that this causes a default 404 page to render instead.
           // However that page should not be rendered here, but instead further above.
           //
-          // If the current page is already a 404 page, throw the error, because that
-          // means the 404 page cannot be rendered, because, in that case, the 404 page
-          // itself likely relies on queries that are causing this error.
-          if (entry.notFound) throw err;
+          // If the current page is already a 404 (defined in the app), log the error and
+          // render the native 404 page instead, because, in that case, the app-provided
+          // 404 page relies on queries that are causing this error.
+          if (entry.notFound) {
+            console.error(err);
+            return new Response('Not Found', { status: 404 });
+          }
 
           const newURL = new URL(NOT_FOUND_PAGE, url);
           newURL.searchParams.set('reason', 'database-not-found');
