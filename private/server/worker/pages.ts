@@ -55,59 +55,103 @@ const getEntryPath = (
   parentDirectory = '',
   params: Params = {},
 ): Omit<PageEntry, 'errorPage'> | null => {
-  const [currentSegment, ...remainingSegments] = segments;
-  const filePrefix = currentSegment || indexName;
+  const newSegments = [...segments] as [string];
+  const currentSegment = newSegments[0];
 
-  // Try to find a direct file match first.
-  for (const ext of ['tsx', 'mdx']) {
-    const filePath = joinPaths(parentDirectory, `${filePrefix}.${ext}`);
-    if (typeof pages[filePath] === 'object') return { path: filePath, params };
+  newSegments.shift();
+
+  const filePrefix = currentSegment ? currentSegment : indexName;
+  let fileExtension: 'tsx' | 'mdx' = 'tsx';
+  let fileName = `${filePrefix}.${fileExtension}`;
+  let filePath = joinPaths(parentDirectory, fileName);
+
+  if (typeof pages[filePath] === 'object') {
+    return {
+      path: filePath,
+      params,
+    };
+  }
+
+  fileExtension = 'mdx';
+  fileName = `${filePrefix}.${fileExtension}`;
+  filePath = joinPaths(parentDirectory, fileName);
+
+  if (typeof pages[filePath] === 'object') {
+    return {
+      path: filePath,
+      params,
+    };
   }
 
   // If the current segment is empty, it's guaranteed that there won't be a named
   // directory that we have to look inside. A directory with a dynamic name (such as
   // "[space]") might exist, but that will be handled further down below.
   if (currentSegment) {
-    const directoryPath = joinPaths(parentDirectory, currentSegment);
+    const directoryName = currentSegment;
+    const directoryPath = joinPaths(parentDirectory, directoryName);
+
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, remainingSegments, indexName, directoryPath, params);
+      return getEntryPath(pages, newSegments, indexName, directoryPath, params);
     }
   }
 
   const directoryContents = Object.keys(pages)
     .filter((path) => {
-      if (!parentDirectory) return !path.includes('/');
-      return (
-        path.startsWith(parentDirectory) &&
-        path !== parentDirectory &&
-        !path.replace(`${parentDirectory}/`, '').includes('/')
-      );
+      if (parentDirectory) {
+        // Exclude the parent directory itself.
+        if (path === parentDirectory) return false;
+
+        // Include all paths that start with the parent directory.
+        return path.startsWith(parentDirectory);
+      }
+
+      // If there is no parent directory, include all paths.
+      return true;
     })
-    .map((path) => (parentDirectory ? path.replace(`${parentDirectory}/`, '') : path))
-    // Sort dynamic path segments to the end.
-    .sort((a, b) => Number(a.startsWith('[')) - Number(b.startsWith('[')));
+    .map((path) => {
+      return parentDirectory ? path.replace(`${parentDirectory}/`, '') : path;
+    })
+    .filter((path) => {
+      // Filter out the contents of sub directories, so that only the names of files and
+      // directories on the current (first) level remain.
+      return !path.includes('/');
+    })
+    .sort((a, b) => {
+      // Sort dynamic path segments to the end.
+      return Number(a.startsWith('[')) - Number(b.startsWith('['));
+    });
 
   for (const item of directoryContents) {
     const location = joinPaths(parentDirectory, item);
 
     if (indexName !== 'index' && item === `${indexName}.tsx`) {
-      return { path: location, params };
+      return {
+        path: location,
+        params,
+      };
     }
 
-    const { type, name, value } = getParameter(item, currentSegment, remainingSegments);
-    if (!type) continue;
+    const { type, name, value = null } = getParameter(item, currentSegment, newSegments);
 
-    const newParams = { ...params, [name]: value };
+    if (type) {
+      params[name] = value;
 
-    if (type === 'file') {
-      return { path: location, params: newParams };
-    }
+      if (type === 'file') {
+        return {
+          path: location,
+          params,
+        };
+      }
 
-    if (type === 'directory') {
-      return getEntryPath(pages, remainingSegments, indexName, location, newParams);
+      // If a directory that matches the current segment was found, we need to look
+      // inside that directory to find suitable page files.
+      if (type === 'directory') {
+        return getEntryPath(pages, newSegments, indexName, location, params);
+      }
     }
   }
 
+  // No matching page was found.
   return null;
 };
 
