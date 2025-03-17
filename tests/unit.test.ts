@@ -181,6 +181,16 @@ test('get closest 404 page to dynamic directory segment', () => {
   });
 });
 
+test('get closest 404 page to dynamic directory segment with multiple levels', () => {
+  const pathSegments = getPathSegments('/ronin/settings');
+  const entry = getEntry(pages, pathSegments, { error: 404 });
+
+  expect(entry).toMatchObject({
+    path: '[space]/404.tsx',
+    params: {},
+  });
+});
+
 test('get root 404 page', () => {
   const pathSegments = getPathSegments('/docs/testing-nicely');
 

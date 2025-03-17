@@ -201,7 +201,7 @@ const getEntry = (
     return {
       path: `${options.error}.tsx`,
       params: {},
-      errorPage: 404,
+      errorPage: options.error,
     };
   }
 
