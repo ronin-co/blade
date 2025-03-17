@@ -594,7 +594,10 @@ const renderReactTree = async (
           // itself likely relies on queries that are causing this error.
           if (entry.notFound) throw err;
 
-          return renderReactTree(new URL(NOT_FOUND_PAGE, c.req.url), c, initial, {
+          const newURL = new URL(NOT_FOUND_PAGE, url);
+          newURL.searchParams.set('reason', 'database-not-found');
+
+          return renderReactTree(newURL, c, initial, {
             // When the 404 page is rendered, the address bar should still show the URL
             // of the page that was originally accessed.
             updateAddressBar: false,
