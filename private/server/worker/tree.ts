@@ -450,7 +450,7 @@ const renderReactTree = async (
   if (import.meta.env.BLADE_ENV === 'production') url.protocol = 'https';
 
   const pathSegments = getPathSegments(url.pathname);
-  const entry = getEntry(pages, pathSegments);
+  const entry = getEntry(pages, pathSegments, options.error);
 
   const incomingCookies = structuredClone(getCookie(c));
 

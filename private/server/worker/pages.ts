@@ -45,7 +45,7 @@ export type PageEntry = {
   params: {
     [key: string]: string | string[] | null;
   };
-  errorPage: 404 | 500 | null;
+  errorPage?: 404 | 500;
 };
 
 const getEntryPath = (
@@ -53,8 +53,8 @@ const getEntryPath = (
   segments: string[],
   parentDirectory = '',
   params: Params = {},
-  errorPage: PageEntry['errorPage'] = null,
-): PageEntry | null => {
+  traverseUpwards = false,
+): Omit<PageEntry, 'errorPage'> | null => {
   const newSegments = [...segments] as [string];
   const currentSegment = newSegments[0];
 
@@ -69,7 +69,6 @@ const getEntryPath = (
     return {
       path: filePath,
       params,
-      errorPage,
     };
   }
 
@@ -81,7 +80,6 @@ const getEntryPath = (
     return {
       path: filePath,
       params,
-      errorPage,
     };
   }
 
@@ -93,11 +91,9 @@ const getEntryPath = (
     const directoryPath = joinPaths(parentDirectory, directoryName);
 
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, newSegments, directoryPath, params, errorPage);
+      return getEntryPath(pages, newSegments, directoryPath, params, traverseUpwards);
     }
   }
-
-  if (!parentDirectory && currentSegment === '404') return null;
 
   const directoryContents = Object.keys(pages)
     .filter((path) => {
@@ -132,22 +128,28 @@ const getEntryPath = (
         return {
           path: location,
           params,
-          errorPage,
         };
       }
 
       if (type === 'directory') {
-        return getEntryPath(pages, newSegments, location, params, errorPage);
+        return getEntryPath(pages, newSegments, location, params, traverseUpwards);
       }
     }
   }
 
-  const notFoundSegments = [parentDirectory, ...segments].filter(Boolean);
-  notFoundSegments.pop();
-  if (errorPage) notFoundSegments.pop();
-  notFoundSegments.push('404');
+  const finalSegments = [parentDirectory, ...segments].filter(Boolean);
 
-  return getEntryPath(pages, notFoundSegments, undefined, undefined, 404);
+  // If it is allowed to look further upward in the tree for matches, then do so.
+  // Only continue traversing upwards if there are at least two segments left in the
+  // path. If there is only one segment left, we have reached the root of the app and
+  // should stop traversing.
+  if (traverseUpwards && finalSegments.length >= 2) {
+    finalSegments.splice(-2, 1);
+    return getEntryPath(pages, finalSegments, undefined, undefined, true);
+  }
+
+  // No matching page was found.
+  return null;
 };
 
 const getEntry = (
@@ -178,15 +180,23 @@ const getEntry = (
     newSegments.push(error.toString());
   }
 
-  const entry = getEntryPath(pages, newSegments);
-  if (entry) return entry;
+  const entry = getEntryPath(pages, newSegments, undefined, undefined, Boolean(error));
+
+  // If a page that matches the provided path segments was found, return it.
+  if (entry) {
+    return error ? { ...entry, errorPage: error } : entry;
+  }
 
   // TODO: Render a default 404 page provided by Blade.
-  return {
-    path: '404.tsx',
-    params: {},
-    errorPage: 404,
-  };
+  if (error) {
+    return {
+      path: '404.tsx',
+      params: {},
+      errorPage: 404,
+    };
+  }
+
+  return getEntry(pages, newSegments, 404);
 };
 
 const getPathSegments = (pathname: string): string[] => {
