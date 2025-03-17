@@ -187,15 +187,21 @@ const getEntry = (
     return error ? { ...entry, errorPage: error } : entry;
   }
 
-  // TODO: Render a default 404 page provided by Blade.
+  // If an error page should be rendered and no matching page was found, that means the
+  // app does not define a custom error page for the given error code. In that case, we
+  // want to render the respective default error page for the given error code.
   if (error) {
+    // TODO: Pass path of native error page.
     return {
-      path: '404.tsx',
+      path: `${error}.tsx`,
       params: {},
       errorPage: 404,
     };
   }
 
+  // If a regular page (not an error page) should be rendered and no matching page was
+  // found, that means the respective page was not defined by the app and we must try to
+  // render a "Not Found" (404) page provided by the app instead.
   return getEntry(pages, newSegments, 404);
 };
 
