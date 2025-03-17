@@ -153,8 +153,40 @@ const getEntryPath = (
 const getEntry = (
   pages: Record<string, TreeItem | 'DIRECTORY'>,
   segments: string[],
-): PageEntry | null => {
-  return getEntryPath(pages, segments);
+  error?: PageEntry['errorPage'],
+): PageEntry => {
+  let newSegments = segments;
+
+  // If an error is being rendered for the current page, remove the last segment from the
+  // path and replace it with the error code, such that the respective error page on the
+  // directory level of the page can be rendered, if it exists.
+  if (error) {
+    // Clone the list of segments to avoid modifying the original list.
+    newSegments = [...segments];
+
+    // If the last path segment is a dynamic segment, don't remove it, since we want to
+    // attach the error path after it. For example, `/account/[id]` should become
+    // `/account/[id]/404`.
+    //
+    // If the last path segment is not a dynamic segment, however, remove it, to ensure
+    // that the error path is attached to the correct directory level. For example,
+    // `/account` should become `/404`.
+    if (!newSegments.at(-1)?.startsWith('[')) newSegments.pop();
+
+    // Attach the error path to the list of segments, in order to find a page within the
+    // app whose name matches the error code.
+    newSegments.push(error.toString());
+  }
+
+  const entry = getEntryPath(pages, newSegments);
+  if (entry) return entry;
+
+  // TODO: Render a default 404 page provided by Blade.
+  return {
+    path: '404.tsx',
+    params: {},
+    errorPage: 404,
+  };
 };
 
 const getPathSegments = (pathname: string): string[] => {

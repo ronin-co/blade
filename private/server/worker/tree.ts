@@ -454,10 +454,6 @@ const renderReactTree = async (
 
   const incomingCookies = structuredClone(getCookie(c));
 
-  // TODO: Render a default 404 page here.
-  // This condition only gets met if no `404` page was defined in the app.
-  if (!entry) return new Response('Not Found', { status: 404 });
-
   if (entry.errorPage) {
     // When an error page is rendered, the address bar should still show the URL of the
     // page that was originally accessed.
