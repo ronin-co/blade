@@ -23,7 +23,7 @@ import type {
 import Root from '../components/root.tsx';
 import type { ServerContext } from '../context';
 import type { PageMetadata, TreeItem } from '../types';
-import { NOT_FOUND_PAGE, SECURITY_HEADERS, VERBOSE_LOGGING } from '../utils/constants';
+import { SECURITY_HEADERS, VERBOSE_LOGGING } from '../utils/constants';
 import { runQueries } from '../utils/data';
 import { assignFiles } from '../utils/files.ts';
 import { getParentDirectories, joinPaths } from '../utils/paths';
@@ -581,10 +581,7 @@ const renderReactTree = async (
             return new Response('Not Found', { status: 404 });
           }
 
-          const newURL = new URL(NOT_FOUND_PAGE, url);
-          newURL.searchParams.set('reason', 'database-not-found');
-
-          return renderReactTree(newURL, c, initial, { error: 404 });
+          return renderReactTree(url, c, initial, { error: 404 });
         }
 
         if ((err as { renderable?: boolean }).renderable) {

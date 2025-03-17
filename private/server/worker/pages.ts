@@ -1,7 +1,6 @@
 import '../types/global.d.ts';
 
 import type { TreeItem } from '../types/index.ts';
-import { NOT_FOUND_PAGE } from '../utils/constants.ts';
 import { joinPaths } from '../utils/paths';
 
 type Params = { [key: string]: string | string[] | null };
@@ -98,7 +97,7 @@ const getEntryPath = (
     }
   }
 
-  if (!parentDirectory && currentSegment === NOT_FOUND_PAGE) return null;
+  if (!parentDirectory && currentSegment === '404') return null;
 
   const directoryContents = Object.keys(pages)
     .filter((path) => {
@@ -146,7 +145,7 @@ const getEntryPath = (
   const notFoundSegments = [parentDirectory, ...segments].filter(Boolean);
   notFoundSegments.pop();
   if (errorPage) notFoundSegments.pop();
-  notFoundSegments.push(NOT_FOUND_PAGE);
+  notFoundSegments.push('404');
 
   return getEntryPath(pages, notFoundSegments, undefined, undefined, 404);
 };
