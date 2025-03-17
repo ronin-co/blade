@@ -1,7 +1,5 @@
 export const VERBOSE_LOGGING = import.meta.env.__BLADE_DEBUG_LEVEL === 'verbose';
 
-export const NOT_FOUND_PAGE = '404';
-
 /**
  * These security headers are required to ensure a basic level of security.
  *

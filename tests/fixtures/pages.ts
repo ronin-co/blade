@@ -10,6 +10,7 @@ const pages: Record<string, TreeItem | 'DIRECTORY'> = {
   '[space]': 'DIRECTORY',
   '[space]/index.tsx': examplePage,
   '[space]/layout.tsx': examplePage,
+  '[space]/404.tsx': examplePage,
   account: 'DIRECTORY',
   'account/advanced.tsx': examplePage,
   'account/index.tsx': examplePage,

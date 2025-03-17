@@ -189,19 +189,13 @@ app.post('/api', async (c) => {
 });
 
 // Handle the initial render (first byte).
-app.get('*', async (c) => {
+app.get('*', (c) => {
   c.get('sentry').setContext('navigation', {
     type: 'initial',
     cookies: c.req.header('Cookie'),
   });
 
-  const treeResponse = await renderReactTree(new URL(c.req.url), c, true);
-
-  // If a matching page was found, return it.
-  if (treeResponse) return treeResponse;
-
-  // TODO: Add a default 404 page.
-  return new Response('Not Found', { status: 404 });
+  return renderReactTree(new URL(c.req.url), c, true);
 });
 
 // Handle client side navigation.
@@ -210,8 +204,6 @@ app.post('*', async (c) => {
     type: 'client',
     cookies: c.req.header('Cookie'),
   });
-
-  const url = new URL(c.req.url);
 
   const body = await c.req.parseBody<{ options?: string; files: File }>({ all: true });
   const options: PageFetchingOptions = body.options
@@ -243,17 +235,11 @@ app.post('*', async (c) => {
     existingCollected.queries = list;
   }
 
-  const treeResponse = await renderReactTree(url, c, false, options, existingCollected);
-
-  // If a matching page was found, return it.
-  if (treeResponse) return treeResponse;
-
-  // TODO: Add a default 404 page.
-  return new Response('Not Found', { status: 404 });
+  return renderReactTree(new URL(c.req.url), c, false, options, existingCollected);
 });
 
 // Handle errors that occurred during the request lifecycle.
-app.onError(async (err, c) => {
+app.onError((err, c) => {
   console.error(err);
   c.get('sentry').captureException(err);
 
@@ -273,13 +259,7 @@ app.onError(async (err, c) => {
   }
 
   try {
-    const exceptionResponse = await renderReactTree(new URL('/500', c.req.url), c, true, {
-      // When the 500 page is rendered, the address bar should still show the URL of the
-      // page that was originally accessed.
-      updateAddressBar: false,
-    });
-
-    if (exceptionResponse) return exceptionResponse;
+    return renderReactTree(new URL(c.req.url), c, true, { error: 500 });
   } catch (err) {
     console.error(err);
     c.get('sentry').captureException(err);

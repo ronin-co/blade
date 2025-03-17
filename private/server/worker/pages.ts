@@ -1,7 +1,6 @@
 import '../types/global.d.ts';
 
 import type { TreeItem } from '../types/index.ts';
-import { NOT_FOUND_PAGE } from '../utils/constants.ts';
 import { joinPaths } from '../utils/paths';
 
 type Params = { [key: string]: string | string[] | null };
@@ -46,22 +45,22 @@ export type PageEntry = {
   params: {
     [key: string]: string | string[] | null;
   };
-  notFound: boolean;
+  errorPage?: 404 | 500;
 };
 
 const getEntryPath = (
   pages: Record<string, TreeItem | 'DIRECTORY'>,
   segments: string[],
+  indexName = 'index',
   parentDirectory = '',
   params: Params = {},
-  notFound = false,
-): PageEntry | null => {
+): Omit<PageEntry, 'errorPage'> | null => {
   const newSegments = [...segments] as [string];
   const currentSegment = newSegments[0];
 
   newSegments.shift();
 
-  const filePrefix = currentSegment ? currentSegment : 'index';
+  const filePrefix = currentSegment ? currentSegment : indexName;
   let fileExtension: 'tsx' | 'mdx' = 'tsx';
   let fileName = `${filePrefix}.${fileExtension}`;
   let filePath = joinPaths(parentDirectory, fileName);
@@ -70,7 +69,6 @@ const getEntryPath = (
     return {
       path: filePath,
       params,
-      notFound,
     };
   }
 
@@ -82,7 +80,6 @@ const getEntryPath = (
     return {
       path: filePath,
       params,
-      notFound,
     };
   }
 
@@ -94,11 +91,9 @@ const getEntryPath = (
     const directoryPath = joinPaths(parentDirectory, directoryName);
 
     if (pages[directoryPath] === 'DIRECTORY') {
-      return getEntryPath(pages, newSegments, directoryPath, params, notFound);
+      return getEntryPath(pages, newSegments, indexName, directoryPath, params);
     }
   }
-
-  if (!parentDirectory && currentSegment === NOT_FOUND_PAGE) return null;
 
   const directoryContents = Object.keys(pages)
     .filter((path) => {
@@ -120,11 +115,23 @@ const getEntryPath = (
       // Filter out the contents of sub directories, so that only the names of files and
       // directories on the current (first) level remain.
       return !path.includes('/');
+    })
+    .sort((a, b) => {
+      // Sort dynamic path segments to the end.
+      return Number(a.startsWith('[')) - Number(b.startsWith('['));
     });
 
   for (const item of directoryContents) {
-    const { type, name, value = null } = getParameter(item, currentSegment, newSegments);
     const location = joinPaths(parentDirectory, item);
+
+    if (indexName !== 'index' && item === `${indexName}.tsx`) {
+      return {
+        path: location,
+        params,
+      };
+    }
+
+    const { type, name, value = null } = getParameter(item, currentSegment, newSegments);
 
     if (type) {
       params[name] = value;
@@ -133,22 +140,66 @@ const getEntryPath = (
         return {
           path: location,
           params,
-          notFound,
         };
       }
 
+      // If a directory that matches the current segment was found, we need to look
+      // inside that directory to find suitable page files.
       if (type === 'directory') {
-        return getEntryPath(pages, newSegments, location, params, notFound);
+        return getEntryPath(pages, newSegments, indexName, location, params);
       }
     }
   }
 
-  const notFoundSegments = [parentDirectory, ...segments].filter(Boolean);
-  notFoundSegments.pop();
-  if (notFound) notFoundSegments.pop();
-  notFoundSegments.push(NOT_FOUND_PAGE);
+  // No matching page was found.
+  return null;
+};
 
-  return getEntryPath(pages, notFoundSegments, undefined, undefined, true);
+const getEntry = (
+  pages: Record<string, TreeItem | 'DIRECTORY'>,
+  segments: string[],
+  options?: {
+    error?: PageEntry['errorPage'];
+    forceNativeError?: boolean;
+  },
+): PageEntry => {
+  const newSegments = segments;
+  const hasError = options?.error !== undefined;
+
+  // If a native error page is being force-rendered, don't even try to find a matching
+  // app-provided error page, because we *must* render the native one provided by Blade.
+  const entry = options?.forceNativeError
+    ? null
+    : getEntryPath(pages, newSegments, options?.error?.toString());
+
+  // If a page that matches the provided path segments was found, return it.
+  if (entry) {
+    return hasError ? { ...entry, errorPage: options.error } : entry;
+  }
+
+  // If an error page should be rendered and no matching page was found, that means the
+  // app does not define a custom error page for the given error code. In that case, we
+  // want to render the respective native error page for the given error code.
+  if (hasError) {
+    const finalSegments = [...segments];
+
+    if (finalSegments.length >= 2) {
+      finalSegments.splice(-2, 1);
+      return getEntry(pages, finalSegments, options);
+    }
+
+    // TODO: Pass path of native error page.
+    return {
+      path: `${options.error}.tsx`,
+      params: {},
+      errorPage: options.error,
+    };
+  }
+
+  // If a regular page (not an error page) should be rendered and no matching page was
+  // found, that means the respective page was not defined by the app and we must try to
+  // render a "Not Found" (404) page provided by the app instead.
+  return getEntry(pages, newSegments, { error: 404 });
 };
 
 const getPathSegments = (pathname: string): string[] => {
@@ -157,4 +208,4 @@ const getPathSegments = (pathname: string): string[] => {
   return segments.split('/');
 };
 
-export { getPathSegments, getEntryPath };
+export { getPathSegments, getEntry };
