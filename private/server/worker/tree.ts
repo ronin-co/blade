@@ -437,7 +437,7 @@ const renderReactTree = async (
   options: Omit<PageFetchingOptions, 'queries'> = {},
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
-): Promise<Response | null> => {
+): Promise<Response> => {
   // In production, we always want to assume HTTPS as the protocol, since people should
   // never run BLADE (or apps in general) with HTTP. This is helpful for cases where the
   // app runs behind a load balancer that terminates TLS and passes on HTTP traffic to
@@ -471,8 +471,8 @@ const renderReactTree = async (
     }
   } else {
     // TODO: Render a default 404 page here.
-    // Return early if the requested page doesn't exist.
-    return null;
+    // This condition only gets met if no `404` page was defined in the app.
+    return new Response('Not Found', { status: 404 });
   }
 
   const rawRequest = c.req.raw;
