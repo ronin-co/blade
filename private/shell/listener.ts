@@ -63,6 +63,13 @@ const requestHandler = await import(
   environment === 'development' ? serverInputFile : serverOutputFile
 );
 
+const assetHeaders: Record<string, string> =
+  environment === 'production'
+    ? {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      }
+    : {};
+
 const server: Server = Bun.serve({
   port,
   development: environment === 'development',
@@ -92,11 +99,14 @@ const server: Server = Bun.serve({
         return new Response(newFileContents, {
           headers: {
             'Content-Type': outputFile.type,
+            ...assetHeaders,
           },
         });
       }
 
-      return new Response(outputFile);
+      return new Response(outputFile, {
+        headers: { ...assetHeaders },
+      });
     }
 
     if (publicFileExists) return new Response(publicFile);
