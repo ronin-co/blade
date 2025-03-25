@@ -448,12 +448,7 @@ const renderReactTree = async (
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
 ): Promise<Response> => {
-  // In production, we always want to assume HTTPS as the protocol, since people should
-  // never run BLADE (or apps in general) with HTTP. This is helpful for cases where the
-  // app runs behind a load balancer that terminates TLS and passes on HTTP traffic to
-  // the app. In that case, the URL received by BLADE via headers might have the `http`
-  // protocol, but we want to treat it as `https` regardless. If someone really needs to
-  // run BLADE with HTTP for some reason, we might offer a config flag in the future.
+  // See https://github.com/ronin-co/blade/pull/31 for more details.
   if (import.meta.env.BLADE_ENV === 'production') url.protocol = 'https';
 
   const pathSegments = getPathSegments(url.pathname);
