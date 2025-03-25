@@ -448,6 +448,9 @@ const renderReactTree = async (
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
 ): Promise<Response> => {
+  // See https://github.com/ronin-co/blade/pull/31 for more details.
+  if (import.meta.env.BLADE_ENV === 'production') url.protocol = 'https';
+
   const pathSegments = getPathSegments(url.pathname);
   const entry = getEntry(pages, pathSegments, {
     error: options.error,
