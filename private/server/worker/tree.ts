@@ -526,23 +526,23 @@ const renderReactTree = async (
   // page again and then redirecting.
   const curlyBracesToReplace = /\{([^{}]+)\}/g;
 
-  let decodedHref = url.href;
+  let decodedHref: string = url.href;
+  let hasPatternInURL: RegExpMatchArray | null = null;
 
   try {
     // We must decode the URL before checking for patterns, since the patterns might be
     // encoded, in which case the regex above wouldn't match them.
     decodedHref = decodeURIComponent(url.href);
+    hasPatternInURL = decodedHref.match(curlyBracesToReplace);
   } catch (_err) {
     // If decoding the URL fails, the client might have provided an invalid URL, in which
     // case we should not throw an error, but instead continue with the URL as it is,
-    // becase Blade is not responsible for deciding whether a URL is valid or not.
+    // because Blade is not responsible for deciding whether a URL is valid or not.
     //
     // Since, in that case, we are sure that the URL does not contain patterns that we
     // are interested in, we let the application decide how to proceed (e.g. by just
     // rendering a "Not Found" page for the path).
   }
-
-  const hasPatternInURL = decodedHref.match(curlyBracesToReplace);
 
   let index = 0;
 
