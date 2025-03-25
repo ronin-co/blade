@@ -528,9 +528,9 @@ const renderReactTree = async (
 
   let decodedHref = url.href;
 
-  // We must decode the URL before checking for patterns, since the patterns might be
-  // encoded, in which case the regex above wouldn't match them.
   try {
+    // We must decode the URL before checking for patterns, since the patterns might be
+    // encoded, in which case the regex above wouldn't match them.
     decodedHref = decodeURIComponent(url.href);
   } catch (_err) {
     // If decoding the URL fails, the client might have provided an invalid URL, in which
