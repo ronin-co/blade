@@ -74,7 +74,17 @@ const server: Server = Bun.serve({
   port,
   development: environment === 'development',
   fetch: async (request) => {
-    const { pathname } = new URL(request.url);
+    let pathname: string;
+
+    try {
+      ({ pathname } = new URL(request.url));
+    } catch (_err) {
+      // If the request URL is malformed, reject the request. For example, this can
+      // happen if the request is missing a `Host` header. The correct response in such
+      // a scenario is defined here:
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host
+      return new Response('Bad Request', { status: 400 });
+    }
 
     // Enable WebSockets for automatically triggering revalidation when files are updated
     // during development.
