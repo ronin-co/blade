@@ -246,7 +246,6 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     target: 'browser',
     naming: path.basename(getOutputFile(bundleId, 'js')),
     minify: environment === 'production',
-    external: ['react', 'react-dom'],
     // On Cloudflare Pages, inline plain-text environment variables in the client bundles.
     define: Bun.env['CF_PAGES']
       ? Object.fromEntries(clientEnvironmentVariables)

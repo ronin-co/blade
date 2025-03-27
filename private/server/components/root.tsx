@@ -48,30 +48,6 @@ const Root = ({ children }: RootProps) => {
       suppressHydrationWarning={true}
       style={{ transitionProperty: 'none !important' }}>
       <head>
-        <script
-          type="importmap"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              imports: Object.fromEntries(
-                [
-                  'react',
-                  'react/jsx-runtime',
-                  'react/jsx-dev-runtime',
-                  'react-dom',
-                  'react-dom/client',
-                ].map((item) => {
-                  const [packageName, packagePath] = item.split('/');
-
-                  return [
-                    item,
-                    `https://esm.sh/${packageName}@0.0.0-experimental-df12d7eac-20230510/${packagePath || ''}`,
-                  ];
-                }),
-              ),
-            }),
-          }}
-        />
-
         {JSON.parse(import.meta.env.__BLADE_ASSETS).map(({ type, source }: Asset) => {
           switch (type) {
             case 'css':
