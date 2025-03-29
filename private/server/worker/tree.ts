@@ -438,7 +438,7 @@ const renderReactTree = async (
     /** Whether an error page should be rendered, and for which error code. */
     error?: 404 | 500;
     /** The reason why the error page is being rendered. */
-    errorReason?: 'database-not-found';
+    errorReason?: 'database-not-found' | 'model-not-found';
     /**
      * Whether to force a native error page to be rendered because the app-provided error
      * page is not renderable.
@@ -591,8 +591,13 @@ const renderReactTree = async (
           hasPatternInURL ? (options.errorFallback as string) : url.pathname,
         );
       } catch (err) {
-        // If one of the accessed databases does not exist, display the 404 page.
-        if (err instanceof InvalidResponseError && err.code === 'AUTH_INVALID_ACCESS') {
+        // If one of the accessed databases or models does not exist, display a 404 page.
+        // This is necessary because both of them might be accessed directly through URL
+        // paths, such as `/[space]/explore/[model]` on the RONIN dashboard.
+        if (
+          err instanceof InvalidResponseError &&
+          (err.code === 'AUTH_INVALID_ACCESS' || err.code === 'MODEL_NOT_FOUND')
+        ) {
           // If the current page is already a 404 (defined in the app), log the error and
           // render the native 404 page instead, because, in that case, the app-provided
           // 404 page relies on queries that are causing this error.
@@ -603,9 +608,14 @@ const renderReactTree = async (
             forceNativeError = true;
           }
 
+          const type = err.code === 'AUTH_INVALID_ACCESS' ? 'database' : 'model';
+          // TODO: Determine the exact database or model that was not found, by extending
+          // the error returned from the backend.
+          console.log(`[BLADE] The provided ${type} was not found`);
+
           return renderReactTree(url, c, initial, {
             error: 404,
-            errorReason: 'database-not-found',
+            errorReason: `${type}-not-found`,
             forceNativeError,
           });
         }
