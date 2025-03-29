@@ -608,7 +608,7 @@ const renderReactTree = async (
             forceNativeError = true;
           }
 
-          const type = err.code === 'MODEL_NOT_FOUND' ? 'model' : 'database';
+          const type = err.code === 'AUTH_INVALID_ACCESS' ? 'database' : 'model';
           // TODO: Determine the exact database or model that was not found, by extending
           // the error returned from the backend.
           console.log(`[BLADE] The provided ${type} was not found`);
