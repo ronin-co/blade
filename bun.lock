@@ -29,7 +29,7 @@
         "p-queue": "8.0.1",
         "radash": "12.1.0",
         "rehype-pretty-code": "0.14.0",
-        "ronin": "6.4.9",
+        "ronin": "6.4.10",
         "serialize-error": "11.0.3",
         "ua-parser-js": "1.0.39",
       },
@@ -853,7 +853,7 @@
 
     "rollup": ["rollup@4.38.0", "", { "dependencies": { "@types/estree": "1.0.7" }, "optionalDependencies": { "@rollup/rollup-android-arm-eabi": "4.38.0", "@rollup/rollup-android-arm64": "4.38.0", "@rollup/rollup-darwin-arm64": "4.38.0", "@rollup/rollup-darwin-x64": "4.38.0", "@rollup/rollup-freebsd-arm64": "4.38.0", "@rollup/rollup-freebsd-x64": "4.38.0", "@rollup/rollup-linux-arm-gnueabihf": "4.38.0", "@rollup/rollup-linux-arm-musleabihf": "4.38.0", "@rollup/rollup-linux-arm64-gnu": "4.38.0", "@rollup/rollup-linux-arm64-musl": "4.38.0", "@rollup/rollup-linux-loongarch64-gnu": "4.38.0", "@rollup/rollup-linux-powerpc64le-gnu": "4.38.0", "@rollup/rollup-linux-riscv64-gnu": "4.38.0", "@rollup/rollup-linux-riscv64-musl": "4.38.0", "@rollup/rollup-linux-s390x-gnu": "4.38.0", "@rollup/rollup-linux-x64-gnu": "4.38.0", "@rollup/rollup-linux-x64-musl": "4.38.0", "@rollup/rollup-win32-arm64-msvc": "4.38.0", "@rollup/rollup-win32-ia32-msvc": "4.38.0", "@rollup/rollup-win32-x64-msvc": "4.38.0", "fsevents": "~2.3.2" }, "bin": { "rollup": "dist/bin/rollup" } }, "sha512-5SsIRtJy9bf1ErAOiFMFzl64Ex9X5V7bnJ+WlFMb+zmP459OSWCEG7b0ERZ+PEU7xPt4OG3RHbrp1LJlXxYTrw=="],
 
-    "ronin": ["ronin@6.4.9", "", { "dependencies": { "@ronin/cli": "0.3.2", "@ronin/compiler": "0.17.22", "@ronin/syntax": "0.2.37" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-kH2unVfnz6NaWrS5BbiSmYm3JIjrq9+2p1zHRPIUArKt5Y9AYulaXHKp7iIyddtpqeWDUDFeQ8azURfWH+zeXA=="],
+    "ronin": ["ronin@6.4.10", "", { "dependencies": { "@ronin/cli": "0.3.2", "@ronin/compiler": "0.17.22", "@ronin/syntax": "0.2.37" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-TsyMO9j19XenHiqGpp8T2XQ0Hj3p9/D3/meP7fiuu6Y3DwwAASVrSAmv05nzgQ+Km59XejNqUxxSfh1Q4XFa2Q=="],
 
     "run-applescript": ["run-applescript@7.0.0", "", {}, "sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A=="],
 
