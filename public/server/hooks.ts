@@ -6,6 +6,7 @@ import { deserializeError } from 'serialize-error';
 import {
   type CountQuery,
   type GetQuery,
+  type ListQuery,
   QUERY_SYMBOLS,
   type Query,
 } from '@ronin/compiler';
@@ -283,9 +284,18 @@ const callback = (defaultQuery: Query, options?: DataOptions) => {
   return queryHandler([{ query: query[QUERY_SYMBOLS.QUERY], options }])[0];
 };
 
+/** Allows for retrieving records. */
 const use = getSyntaxProxy<GetQuery>({ root: `${QUERY_SYMBOLS.QUERY}.get`, callback });
+
+/** Allows for counting records. */
 const useCountOf = getSyntaxProxy<CountQuery, number>({
   root: `${QUERY_SYMBOLS.QUERY}.count`,
+  callback,
+});
+
+/** Allows for retrieving models. */
+const useListOf = getSyntaxProxy<ListQuery, number>({
+  root: `${QUERY_SYMBOLS.QUERY}.list`,
   callback,
 });
 
@@ -355,4 +365,13 @@ const useMutationResult = <T>(): T => {
   return queries.filter(({ type }) => type === 'write').map(({ result }) => result) as T;
 };
 
-export { useCookie, use, useCountOf, useBatch, useMutationResult, useMetadata, useJWT };
+export {
+  useCookie,
+  use,
+  useCountOf,
+  useListOf,
+  useBatch,
+  useMutationResult,
+  useMetadata,
+  useJWT,
+};
