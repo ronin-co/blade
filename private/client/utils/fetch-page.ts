@@ -75,6 +75,7 @@ const fetchPage = async (
   const root = window['BLADE_ROOT'];
   if (!root) throw new Error('Missing React root');
   root.unmount();
+  window['BLADE_ROOT'] = null;
   document.documentElement.innerHTML = markup;
 
   // Since the updated DOM will mount a new instance of React, we don't want to proceed
