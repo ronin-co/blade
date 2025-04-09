@@ -730,15 +730,28 @@ const renderReactTree = async (
     );
   }
 
-  const body = await renderShell(initial, renderingLeaves, serverContext);
+  // The ID of the main bundle currently being used on the client.
+  const clientBundle = c.req.raw.headers.get('X-Client-Bundle-Id');
 
-  if (initial) {
+  // The ID of the main bundle currently available on the server.
+  const serverBundle = import.meta.env['__BLADE_ASSETS_ID'];
+
+  // If the application is being rendered for the first time, we want to render it as
+  // static markup. The same should happen if a new main bundle is available on the
+  // server, which means that the client-side instance of React might be outdated and
+  // therefore must be replaced with a new one.
+  const renderMarkup = clientBundle ? clientBundle !== serverBundle : initial;
+
+  const body = await renderShell(renderMarkup, renderingLeaves, serverContext);
+
+  if (renderMarkup) {
     headers.set('Content-Type', 'text/html; charset=utf-8');
     // Enable JavaScript performance profiling for Sentry.
     headers.set('Document-Policy', 'js-profiling');
+
+    if (clientBundle) headers.set('X-Server-Bundle-Id', serverBundle);
   } else {
     headers.set('Content-Type', 'application/json');
-    headers.set('X-Bundle-Id', import.meta.env['__BLADE_ASSETS_ID']);
     headers.set('X-Update-Time', serverContext.lastUpdate.toString());
   }
 

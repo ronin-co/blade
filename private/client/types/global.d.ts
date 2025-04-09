@@ -4,8 +4,8 @@ interface Window {
   // the browser.
   BLADE_ROOT: import('react-dom/client').Root | null;
 
-  // Contains a list of all the bundles that were loaded on the client so far.
-  BLADE_BUNDLES: Set<string>;
+  // Contains the ID of the main bundle that is currently loaded on the client.
+  BLADE_BUNDLE: string;
 
   // Contains a list of all the chunks that were loaded on the client so far.
   BLADE_CHUNKS: Record<string, Record<string, unknown>>;

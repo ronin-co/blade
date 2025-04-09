@@ -8,6 +8,28 @@ import { getOutputFile } from '../../universal/utils/paths.ts';
 import { createFromReadableStream } from '../utils/parser';
 import { fetchRetry } from './data';
 
+/**
+ * Downloads a CSS or JS bundle from the server, without evaluating it.
+ *
+ * @param bundleId - The ID of the bundle to download.
+ * @param type - The type of the bundle to download. Can be either 'style' or 'script'.
+ *
+ * @returns A promise that resolves once the bundle is downloaded.
+ */
+const loadResource = async (bundleId: string, type: 'style' | 'script') => {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+
+    link.rel = 'preload';
+    link.as = type;
+    link.onload = resolve;
+    link.onerror = reject;
+    link.href = getOutputFile(bundleId, type === 'style' ? 'css' : 'js');
+
+    document.head.appendChild(link);
+  });
+};
+
 const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
@@ -32,6 +54,7 @@ const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
+    'X-Client-Bundle-Id': window['BLADE_BUNDLE'],
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });
@@ -49,46 +72,59 @@ const fetchPage = async (
     throw new Error(await response.text());
   }
 
-  const bundleId = response.headers.get('X-Bundle-Id');
-  const updateTime = response.headers.get('X-Update-Time');
-
-  if (!bundleId || !updateTime) throw new Error('Missing response headers on client.');
+  const serverBundleId = response.headers.get('X-Server-Bundle-Id');
   if (!response.body) throw new Error('Missing response body on client.');
 
-  if (!window['BLADE_BUNDLES'].has(bundleId)) {
-    // Load all required bundle files concurrently.
-    await Promise.all([
-      // Load JavaScript bundle.
-      new Promise((resolve, reject) => {
-        const script = document.createElement('script');
+  // If the bundles used on the client are the same as the ones available on the server,
+  // the server will not provide a new bundle, which means we can just proceed with
+  // rendering the page using the existing React instance.
+  if (!serverBundleId) {
+    const updateTime = response.headers.get('X-Update-Time');
+    if (!updateTime) throw new Error('Missing response headers on client.');
 
-        script.async = true;
-        script.type = 'module';
-        script.onload = resolve;
-        script.onerror = reject;
-        script.src = getOutputFile(bundleId, 'js');
-
-        document.head.appendChild(script);
-      }),
-
-      // Load CSS bundle.
-      new Promise((resolve, reject) => {
-        const link = document.createElement('link');
-
-        link.rel = 'stylesheet';
-        link.onload = resolve;
-        link.onerror = reject;
-        link.href = getOutputFile(bundleId, 'css');
-
-        document.head.appendChild(link);
-      }),
-    ]);
+    return {
+      body: await createFromReadableStream(response.body),
+      time: Number.parseInt(updateTime),
+    };
   }
 
-  return {
-    body: await createFromReadableStream(response.body),
-    time: Number.parseInt(updateTime),
-  };
+  // Otherwise, if the server did provide a new bundle, that means the client-side
+  // instance of React is outdated and needs to be replaced with a new one.
+
+  // Download the new markup, CSS, and JS at the same time, but don't execute
+  // any of them just yet.
+  const [markup] = await Promise.all([
+    response.text(),
+    loadResource(serverBundleId, 'style'),
+    loadResource(serverBundleId, 'script'),
+  ]);
+
+  // Unmount React and replace the DOM with the static HTML markup, which then also loads
+  // the updated CSS and JS bundles and mounts a new React root. This ensures that not
+  // only the CSS and JS bundles can be upgraded, but also React itself.
+  const root = window['BLADE_ROOT'];
+  if (!root) throw new Error('Missing React root');
+  root.unmount();
+  window['BLADE_ROOT'] = null;
+  document.documentElement.innerHTML = markup;
+
+  // Since rendering the markup above only evaluates the CSS, we have to separately
+  // explicitly run the JS as well.
+  for (const oldScript of document.querySelectorAll('script.blade-script')) {
+    // Cloning the old element will not cause the script to be executed. Instead, we must
+    // creae a new element with the same attributes and append it to the DOM.
+    const newScript = document.createElement('script');
+    // Copy over every attribute
+    for (const attr of oldScript.attributes) {
+      newScript.setAttribute(attr.name, attr.value);
+    }
+    document.head.appendChild(newScript);
+    oldScript.remove();
+  }
+
+  // Since the updated DOM will mount a new instance of React, we don't want to proceed
+  // with rendering the updated page using the old React instance.
+  return null;
 };
 
 export default fetchPage;
