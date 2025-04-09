@@ -131,7 +131,7 @@ app.post('/api', async (c) => {
 
   // Generate a list of hook functions based on the data hook files that exist in the
   // source code of the application.
-  const hooks = prepareHooks(serverContext, hookList, { fromHeadlessAPI: true });
+  const hooks = prepareHooks(serverContext, hookList, { headless: true });
 
   // For every query, check whether a data hook exists that is being publicly exposed.
   // If none exists, prevent the query from being executed.

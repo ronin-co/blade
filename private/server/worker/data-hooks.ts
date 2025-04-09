@@ -17,7 +17,7 @@ export const prepareHooks = (
     Pick<ServerContext, 'cookies' | 'userAgent' | 'geoLocation' | 'languages' | 'url'>,
   hooks: DataHooksList,
   config?: {
-    fromHeadlessAPI?: boolean;
+    headless?: boolean;
   },
 ): DataHooksList => {
   const options: DataHookOptions = {
@@ -28,7 +28,7 @@ export const prepareHooks = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-    fromHeadlessAPI: Boolean(config?.fromHeadlessAPI),
+    headless: Boolean(config?.headless),
   };
 
   const list = Object.entries(hooks || {}).map(

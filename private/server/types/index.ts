@@ -68,7 +68,7 @@ export interface DataHookOptions {
   /**
    * Indicates whether the incoming query stems from the REST API.
    */
-  fromHeadlessAPI: boolean;
+  headless: boolean;
 }
 
 export type RecursiveRequired<T> = {
