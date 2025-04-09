@@ -4,6 +4,7 @@ import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
 import type { PageFetchingOptions } from '../../universal/types/util';
+import { getOutputFile } from '../../universal/utils/paths.ts';
 import { createFromReadableStream } from '../utils/parser';
 import { fetchRetry } from './data';
 
@@ -31,18 +32,17 @@ const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
-    'X-Bundle-Id': window['BLADE_BUNDLE'],
+    'X-Client-Bundle-Id': window['BLADE_BUNDLE'],
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });
-  const isJSON = response.headers.get('Content-Type') === 'application/json';
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
   // be caught and rendered further upwards in the code.
   if (!response.ok) {
     // TODO: If the response is JSON, that means it was already handled and reported by
     // BLADE on the server-side, so we do not need to report it again on the client-side.
-    if (isJSON) {
+    if (response.headers.get('Content-Type') === 'application/json') {
       console.error(await response.json());
       return null;
     }
@@ -50,13 +50,14 @@ const fetchPage = async (
     throw new Error(await response.text());
   }
 
-  const updateTime = response.headers.get('X-Update-Time');
-
-  if (!updateTime) throw new Error('Missing response headers on client.');
+  const serverBundleId = response.headers.get('X-Server-Bundle-Id');
   if (!response.body) throw new Error('Missing response body on client.');
 
   // If the server returned JSON, that means we can render it.
-  if (isJSON) {
+  if (!serverBundleId) {
+    const updateTime = response.headers.get('X-Update-Time');
+    if (!updateTime) throw new Error('Missing response headers on client.');
+
     return {
       body: await createFromReadableStream(response.body),
       time: Number.parseInt(updateTime),
@@ -66,8 +67,25 @@ const fetchPage = async (
   // Otherwise, if the server didn't return JSON, that means the client-side instance of
   // React is outdated and needs to be replaced with a new one.
 
-  // Convert the stream into a string of static HTML markup.
-  const markup = await response.text();
+  const [markup] = await Promise.all([
+    // Convert the stream into a string of static HTML markup.
+    response.text(),
+
+    // Before rendering the markup further below, we must prime the browser cache with
+    // the CSS bundle that will be used by the markup. Without this, the browser will
+    // only start downloading the CSS after the DOM has been updated to render the new
+    // markup, which is too late.
+    new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+
+      link.rel = 'stylesheet';
+      link.onload = resolve;
+      link.onerror = reject;
+      link.href = getOutputFile(serverBundleId, 'css');
+
+      document.head.appendChild(link);
+    }),
+  ]);
 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not

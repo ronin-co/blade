@@ -731,7 +731,7 @@ const renderReactTree = async (
   }
 
   // The ID of the main bundle currently being used on the client.
-  const clientBundle = c.req.raw.headers.get('X-Bundle-Id');
+  const clientBundle = c.req.raw.headers.get('X-Client-Bundle-Id');
 
   // The ID of the main bundle currently available on the server.
   const serverBundle = import.meta.env['__BLADE_ASSETS_ID'];
@@ -748,6 +748,8 @@ const renderReactTree = async (
     headers.set('Content-Type', 'text/html; charset=utf-8');
     // Enable JavaScript performance profiling for Sentry.
     headers.set('Document-Policy', 'js-profiling');
+
+    if (clientBundle) headers.set('X-Server-Bundle-Id', serverBundle);
   } else {
     headers.set('Content-Type', 'application/json');
     headers.set('X-Update-Time', serverContext.lastUpdate.toString());
