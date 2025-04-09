@@ -740,9 +740,7 @@ const renderReactTree = async (
   // static markup. The same should happen if a new main bundle is available on the
   // server, which means that the client-side instance of React might be outdated and
   // therefore must be replaced with a new one.
-  const renderMarkup = Boolean(
-    initial || (clientBundle && clientBundle !== serverBundle),
-  );
+  const renderMarkup = clientBundle ? clientBundle !== serverBundle : initial;
 
   const body = await renderShell(renderMarkup, renderingLeaves, serverContext);
 
