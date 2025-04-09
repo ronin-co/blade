@@ -260,9 +260,8 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
 
   const chunkFilePrefix = [
     Bun.env['CF_PAGES'] ? 'if(!import.meta.env){import.meta.env={}};' : '',
-    `if(!window['BLADE_BUNDLES']){window['BLADE_BUNDLES']=new Set()};`,
     `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
-    `window['BLADE_BUNDLES'].add('${bundleId}');`,
+    `window['BLADE_BUNDLE']='${bundleId}';`,
     await chunkFile.text(),
   ].join('');
 

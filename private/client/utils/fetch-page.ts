@@ -4,7 +4,6 @@ import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
 import type { PageFetchingOptions } from '../../universal/types/util';
-import { getOutputFile } from '../../universal/utils/paths.ts';
 import { createFromReadableStream } from '../utils/parser';
 import { fetchRetry } from './data';
 
@@ -32,16 +31,18 @@ const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
+    'X-Bundle-Id': window['BLADE_BUNDLE'],
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });
+  const isJSON = response.headers.get('Content-Type') === 'application/json';
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
   // be caught and rendered further upwards in the code.
   if (!response.ok) {
     // TODO: If the response is JSON, that means it was already handled and reported by
     // BLADE on the server-side, so we do not need to report it again on the client-side.
-    if (response.headers.get('Content-Type') === 'application/json') {
+    if (isJSON) {
       console.error(await response.json());
       return null;
     }
@@ -49,52 +50,36 @@ const fetchPage = async (
     throw new Error(await response.text());
   }
 
-  const bundleId = response.headers.get('X-Bundle-Id');
   const updateTime = response.headers.get('X-Update-Time');
 
-  if (!bundleId || !updateTime) throw new Error('Missing response headers on client.');
+  if (!updateTime) throw new Error('Missing response headers on client.');
   if (!response.body) throw new Error('Missing response body on client.');
 
-  if (!window['BLADE_BUNDLES'].has(bundleId)) {
-    const root = window['BLADE_ROOT'];
-    if (!root) throw new Error('Missing React root');
-
-    // Load new CSS.
-    await new Promise((resolve, reject) => {
-      const link = document.createElement('link');
-
-      link.rel = 'stylesheet';
-      link.onload = resolve;
-      link.onerror = reject;
-      link.href = getOutputFile(bundleId, 'css');
-
-      document.head.appendChild(link);
-    });
-
-    // Once the CSS is loaded, unmount React, but retain the DOM nodes.
-    const snapshot = document.documentElement.innerHTML;
-    root.unmount();
-    document.documentElement.innerHTML = snapshot;
-
-    // Once the old React has been unmounted, load the new JS, which can mount
-    // a new React as well, in case that React got upgraded.
-    await new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-
-      script.async = true;
-      script.type = 'module';
-      script.onload = resolve;
-      script.onerror = reject;
-      script.src = getOutputFile(bundleId, 'js');
-
-      document.head.appendChild(script);
-    });
+  // If the server returned JSON, that means we can render it.
+  if (isJSON) {
+    return {
+      body: await createFromReadableStream(response.body),
+      time: Number.parseInt(updateTime),
+    };
   }
 
-  return {
-    body: await createFromReadableStream(response.body),
-    time: Number.parseInt(updateTime),
-  };
+  // Otherwise, if the server didn't return JSON, that means the client-side instance of
+  // React is outdated and needs to be replaced with a new one.
+
+  // Convert the stream into a string of static HTML markup.
+  const markup = await response.text();
+
+  // Unmount React and replace the DOM with the static HTML markup, which then also loads
+  // the updated CSS and JS bundles and mounts a new React root. This ensures that not
+  // only the CSS and JS bundles can be upgraded, but also React itself.
+  const root = window['BLADE_ROOT'];
+  if (!root) throw new Error('Missing React root');
+  root.unmount();
+  document.documentElement.innerHTML = markup;
+
+  // Since the updated DOM will mount a new instance of React, we don't want to proceed
+  // with rendering the updated page using the old React instance.
+  return null;
 };
 
 export default fetchPage;
