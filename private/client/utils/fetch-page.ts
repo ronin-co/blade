@@ -56,33 +56,39 @@ const fetchPage = async (
   if (!response.body) throw new Error('Missing response body on client.');
 
   if (!window['BLADE_BUNDLES'].has(bundleId)) {
-    // Load all required bundle files concurrently.
-    await Promise.all([
-      // Load JavaScript bundle.
-      new Promise((resolve, reject) => {
-        const script = document.createElement('script');
+    const root = window['BLADE_ROOT'];
+    if (!root) throw new Error('Missing React root');
 
-        script.async = true;
-        script.type = 'module';
-        script.onload = resolve;
-        script.onerror = reject;
-        script.src = getOutputFile(bundleId, 'js');
+    // Load new CSS.
+    await new Promise((resolve, reject) => {
+      const link = document.createElement('link');
 
-        document.head.appendChild(script);
-      }),
+      link.rel = 'stylesheet';
+      link.onload = resolve;
+      link.onerror = reject;
+      link.href = getOutputFile(bundleId, 'css');
 
-      // Load CSS bundle.
-      new Promise((resolve, reject) => {
-        const link = document.createElement('link');
+      document.head.appendChild(link);
+    });
 
-        link.rel = 'stylesheet';
-        link.onload = resolve;
-        link.onerror = reject;
-        link.href = getOutputFile(bundleId, 'css');
+    // Once the CSS is loaded, unmount React, but retain the DOM nodes.
+    const snapshot = document.documentElement.innerHTML;
+    root.unmount();
+    document.documentElement.innerHTML = snapshot;
 
-        document.head.appendChild(link);
-      }),
-    ]);
+    // Once the old React has been unmounted, load the new JS, which can mount
+    // a new React as well, in case that React got upgraded.
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+
+      script.async = true;
+      script.type = 'module';
+      script.onload = resolve;
+      script.onerror = reject;
+      script.src = getOutputFile(bundleId, 'js');
+
+      document.head.appendChild(script);
+    });
   }
 
   return {
