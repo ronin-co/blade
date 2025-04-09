@@ -111,6 +111,8 @@ const fetchPage = async (
   // Since rendering the markup above only evaluates the CSS, we have to separately
   // explicitly run the JS as well.
   for (const oldScript of document.querySelectorAll('script.blade-script')) {
+    // Cloning the old element will not cause the script to be executed. Instead, we must
+    // creae a new element with the same attributes and append it to the DOM.
     const newScript = document.createElement('script');
     // Copy over every attribute
     for (const attr of oldScript.attributes) {
