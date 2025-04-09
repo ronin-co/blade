@@ -66,9 +66,11 @@ export interface DataHookOptions {
    */
   location: URL;
   /**
-   * Indicates whether the incoming query stems from a headless source, meaning, for
-   * example, the browser client of the application, or the REST API. In such cases, it
-   * is adviced to perform permission validation in data hooks.
+   * Indicates whether the incoming query stems from a headless source, meaning the
+   * application's browser client or REST API.
+   *
+   * In such cases, it is advised to validate the authority of the incoming query within
+   * data hooks, by performing permission validation.
    */
   headless: boolean;
 }
