@@ -66,15 +66,6 @@ export interface DataHookOptions {
    */
   location: URL;
   /**
-   * Indicates whether the incoming query stems from the RONIN dashboard instead of an
-   * app that was configured for the space.
-   *
-   * Once data hooks are deployed to RONIN, this allows people to treat the RONIN
-   * dashboard in a special way, such that data hooks expose all data for the RONIN
-   * dashboard, but still limit what data gets exposed to apps.
-   */
-  fromRoninDashboard: boolean;
-  /**
    * Indicates whether the incoming query stems from the REST API.
    */
   fromHeadlessAPI: boolean;
