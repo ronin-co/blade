@@ -66,18 +66,13 @@ export interface DataHookOptions {
    */
   location: URL;
   /**
-   * Indicates whether the incoming query stems from the RONIN dashboard instead of an
-   * app that was configured for the space.
+   * Indicates whether the incoming query stems from a headless source, meaning the
+   * application's browser client or REST API.
    *
-   * Once data hooks are deployed to RONIN, this allows people to treat the RONIN
-   * dashboard in a special way, such that data hooks expose all data for the RONIN
-   * dashboard, but still limit what data gets exposed to apps.
+   * In such cases, it is advised to validate the authority of the incoming query within
+   * data hooks, by performing permission validation.
    */
-  fromRoninDashboard: boolean;
-  /**
-   * Indicates whether the incoming query stems from the REST API.
-   */
-  fromHeadlessAPI: boolean;
+  headless: boolean;
 }
 
 export type RecursiveRequired<T> = {

@@ -15,7 +15,7 @@ const { add, get, set, remove, count, list, create, alter, drop, batch } =
 
     return getRoninOptions(
       serverContext.requestContext,
-      prepareHooks(serverContext, hooks),
+      prepareHooks(serverContext, hooks, false),
     );
   });
 
