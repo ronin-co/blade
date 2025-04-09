@@ -110,9 +110,14 @@ const fetchPage = async (
 
   // Since rendering the markup above only evaluates the CSS, we have to separately
   // explicitly run the JS as well.
-  for (const script of document.querySelectorAll('script.blade-script')) {
-    script.remove();
-    document.head.appendChild(script.cloneNode());
+  for (const oldScript of document.querySelectorAll('script.blade-script')) {
+    const newScript = document.createElement('script');
+    // Copy over every attribute
+    for (const attr of oldScript.attributes) {
+      newScript.setAttribute(attr.name, attr.value);
+    }
+    document.head.appendChild(newScript);
+    oldScript.remove();
   }
 
   // Since the updated DOM will mount a new instance of React, we don't want to proceed
