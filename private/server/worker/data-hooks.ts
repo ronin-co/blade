@@ -61,9 +61,10 @@ export const prepareHooks = (
               // source, or not.
               //
               // Specifically, read queries are never headless because they always stem
-              // from the server (where the database is located), whereas write queries are
-              // always headless because they always stem from the client (where the user
-              // expressing the intent is located).
+              // from the server (where the database is located), whereas write queries
+              // are always headless because they always stem from the client (where the
+              // user expressing the intent is located). The only exception to this rule
+              // is handled above, if `headless` is defined explicitly.
               newOptions.headless = WRITE_QUERY_TYPES.some((queryType) => {
                 return hookNameSlug.endsWith(queryType);
               });
