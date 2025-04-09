@@ -8,6 +8,14 @@ import { getOutputFile } from '../../universal/utils/paths.ts';
 import { createFromReadableStream } from '../utils/parser';
 import { fetchRetry } from './data';
 
+/**
+ * Downloads a CSS or JS bundle from the server, without evaluating it.
+ *
+ * @param bundleId - The ID of the bundle to download.
+ * @param type - The type of the bundle to download. Can be either 'style' or 'script'.
+ *
+ * @returns A promise that resolves once the bundle is downloaded.
+ */
 const loadResource = async (bundleId: string, type: 'style' | 'script') => {
   return new Promise((resolve, reject) => {
     const link = document.createElement('link');
