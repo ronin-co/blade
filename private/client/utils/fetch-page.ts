@@ -67,7 +67,9 @@ const fetchPage = async (
   const serverBundleId = response.headers.get('X-Server-Bundle-Id');
   if (!response.body) throw new Error('Missing response body on client.');
 
-  // If the server returned JSON, that means we can render it.
+  // If the bundles used on the client are the same as the ones available on the server,
+  // the server will not provide a new bundle, which means we can just proceed with
+  // rendering the page using the existing React instance.
   if (!serverBundleId) {
     const updateTime = response.headers.get('X-Update-Time');
     if (!updateTime) throw new Error('Missing response headers on client.');
@@ -78,8 +80,8 @@ const fetchPage = async (
     };
   }
 
-  // Otherwise, if the server didn't return JSON, that means the client-side instance of
-  // React is outdated and needs to be replaced with a new one.
+  // Otherwise, if the server did provide a new bundle, that means the client-side
+  // instance of React is outdated and needs to be replaced with a new one.
 
   // Download the new markup, CSS, and JS at the same time, but don't execute
   // any of them just yet.
@@ -97,6 +99,13 @@ const fetchPage = async (
   root.unmount();
   window['BLADE_ROOT'] = null;
   document.documentElement.innerHTML = markup;
+
+  // Since rendering the markup above only evaluates the CSS, we have to separately
+  // explicitly run the JS as well.
+  for (const script of document.querySelectorAll('script.blade-script')) {
+    script.remove();
+    document.head.appendChild(script.cloneNode());
+  }
 
   // Since the updated DOM will mount a new instance of React, we don't want to proceed
   // with rendering the updated page using the old React instance.

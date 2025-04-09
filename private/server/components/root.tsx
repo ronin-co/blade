@@ -55,6 +55,7 @@ const Root = ({ children }: RootProps) => {
                   rel="stylesheet"
                   href={source}
                   key={source}
+                  className="blade-style"
                 />
               );
             case 'js':
@@ -63,6 +64,7 @@ const Root = ({ children }: RootProps) => {
                   src={source}
                   key={source}
                   type="module"
+                  className="blade-script"
                 />
               );
 
