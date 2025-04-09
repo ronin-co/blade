@@ -45,8 +45,7 @@ const Root = ({ children }: RootProps) => {
     <html
       lang="en"
       className={metadata.htmlClassName}
-      suppressHydrationWarning={true}
-      style={{ transitionProperty: 'none !important' }}>
+      suppressHydrationWarning={true}>
       <head>
         {JSON.parse(import.meta.env.__BLADE_ASSETS).map(({ type, source }: Asset) => {
           switch (type) {
@@ -169,17 +168,6 @@ const Root = ({ children }: RootProps) => {
             }
           }
         })}
-
-        {/* Prevent unwanted transitions on first render. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.addEventListener('load', function () {
-                document.querySelector("html").removeAttribute('style');
-              }, false);
-            `,
-          }}
-        />
       </head>
 
       <body
