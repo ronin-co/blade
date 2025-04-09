@@ -4,7 +4,6 @@ import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
 import type { PageFetchingOptions } from '../../universal/types/util';
-import { getOutputFile } from '../../universal/utils/paths.ts';
 import { createFromReadableStream } from '../utils/parser';
 import { fetchRetry } from './data';
 
@@ -67,25 +66,21 @@ const fetchPage = async (
   // Otherwise, if the server didn't return JSON, that means the client-side instance of
   // React is outdated and needs to be replaced with a new one.
 
-  const [markup] = await Promise.all([
-    // Convert the stream into a string of static HTML markup.
-    response.text(),
+  // Convert the stream into a string of static HTML markup.
+  const [markup] = await response.text();
 
-    // Before rendering the markup further below, we must prime the browser cache with
-    // the CSS bundle that will be used by the markup. Without this, the browser will
-    // only start downloading the CSS after the DOM has been updated to render the new
-    // markup, which is too late.
-    new Promise((resolve, reject) => {
-      const link = document.createElement('link');
+  // Create a html `document` object and prime it with the static markup, which will also
+  // prime the browser's cache with the updated CSS and JS bundles.
+  const newDoc = document.implementation.createHTMLDocument();
+  newDoc.documentElement.setAttribute('lang', 'en');
+  newDoc.documentElement.style.setProperty('transition-property', 'none', 'important');
+  newDoc.documentElement.innerHTML = markup;
 
-      link.rel = 'stylesheet';
-      link.onload = resolve;
-      link.onerror = reject;
-      link.href = getOutputFile(serverBundleId, 'css');
-
-      document.head.appendChild(link);
-    }),
-  ]);
+  /** Finally, replace the old root <html> with this new one. */
+  document.replaceChild(
+    document.importNode(newDoc.documentElement, true),
+    document.documentElement,
+  );
 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not
@@ -94,7 +89,11 @@ const fetchPage = async (
   if (!root) throw new Error('Missing React root');
   root.unmount();
   window['BLADE_ROOT'] = null;
-  document.documentElement.innerHTML = markup;
+  // document.documentElement.innerHTML = markup;
+  document.replaceChild(
+    document.importNode(newDoc.documentElement, true),
+    document.documentElement,
+  );
 
   // Since the updated DOM will mount a new instance of React, we don't want to proceed
   // with rendering the updated page using the old React instance.
