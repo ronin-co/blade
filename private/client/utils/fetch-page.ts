@@ -8,6 +8,20 @@ import { getOutputFile } from '../../universal/utils/paths.ts';
 import { createFromReadableStream } from '../utils/parser';
 import { fetchRetry } from './data';
 
+const loadResource = async (bundleId: string, type: 'style' | 'script') => {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+
+    link.rel = 'preload';
+    link.as = type;
+    link.onload = resolve;
+    link.onerror = reject;
+    link.href = getOutputFile(bundleId, type === 'style' ? 'css' : 'js');
+
+    document.head.appendChild(link);
+  });
+};
+
 const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
@@ -67,24 +81,12 @@ const fetchPage = async (
   // Otherwise, if the server didn't return JSON, that means the client-side instance of
   // React is outdated and needs to be replaced with a new one.
 
+  // Download the new markup, CSS, and JS at the same time, but don't execute
+  // any of them just yet.
   const [markup] = await Promise.all([
-    // Convert the stream into a string of static HTML markup.
     response.text(),
-
-    // Before rendering the markup further below, we must prime the browser cache with
-    // the CSS bundle that will be used by the markup. Without this, the browser will
-    // only start downloading the CSS after the DOM has been updated to render the new
-    // markup, which is too late.
-    new Promise((resolve, reject) => {
-      const link = document.createElement('link');
-
-      link.rel = 'stylesheet';
-      link.onload = resolve;
-      link.onerror = reject;
-      link.href = getOutputFile(serverBundleId, 'css');
-
-      document.head.appendChild(link);
-    }),
+    loadResource(serverBundleId, 'style'),
+    loadResource(serverBundleId, 'script'),
   ]);
 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
