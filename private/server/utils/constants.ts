@@ -1,3 +1,5 @@
+import { DDL_QUERY_TYPES, DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
+
 export const VERBOSE_LOGGING = import.meta.env.__BLADE_DEBUG_LEVEL === 'verbose';
 
 /**
@@ -21,3 +23,9 @@ export const SECURITY_HEADERS = {
   'X-Permitted-Cross-Domain-Policies': 'none',
   'X-XSS-Protection': '0',
 };
+
+/** A list of all query types that update the database. */
+export const WRITE_QUERY_TYPES = [
+  ...DML_QUERY_TYPES_WRITE,
+  ...DDL_QUERY_TYPES.filter((item) => item !== 'list'),
+];

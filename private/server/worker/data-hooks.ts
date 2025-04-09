@@ -2,6 +2,7 @@ import type { BeforeGetHook } from 'ronin/types';
 
 import type { ServerContext } from '../context';
 import type { DataHookOptions, DataHooks, DataHooksList } from '../types';
+import { WRITE_QUERY_TYPES } from '../utils/constants';
 
 /**
  * Convert a list of data hook files to data hooks that can be passed to RONIN.
@@ -53,6 +54,8 @@ export const prepareHooks = (
               // we can explicitly set the headless property to `true` or `false`.
               newOptions.headless = headless;
             } else {
+              const hookNameSlug = hookName.toLowerCase();
+
               // If the queries stem from multiple different data sources, the type of
               // query that is being executed determines whether it stems from a headless
               // source, or not.
@@ -61,7 +64,9 @@ export const prepareHooks = (
               // from the server (where the database is located), whereas write queries are
               // always headless because they always stem from the client (where the user
               // expressing the intent is located).
-              newOptions.headless = false;
+              newOptions.headless = WRITE_QUERY_TYPES.some((queryType) => {
+                return hookNameSlug.endsWith(queryType);
+              });
             }
 
             const finalArgs = [...argsBeforeLast, { ...newOptions, ...lastArg }];
