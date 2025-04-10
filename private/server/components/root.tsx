@@ -15,6 +15,7 @@ const metadataNames: Record<string, string> = {
   'x.title': 'twitter:title',
   'x.description': 'twitter:description',
   'x.card': 'twitter:card',
+  'x.site': 'twitter:site',
   'x.creator': 'twitter:creator',
 
   'openGraph.title': 'og:title',
@@ -30,7 +31,7 @@ const Root = ({ children }: RootProps) => {
   const serverContext = useServerContext();
   const { metadata } = serverContext.collected;
 
-  const { origin } = usePrivateLocation();
+  const currentLocation = usePrivateLocation();
 
   const flatMetadata = Object.entries(
     flatten<PageMetadata, Record<string, ValueOf<PageMetadata>>>(
@@ -99,7 +100,7 @@ const Root = ({ children }: RootProps) => {
         />
         <meta
           property="og:url"
-          content={origin}
+          content={currentLocation.href}
         />
 
         {flatMetadata.map(([name, value]) => {

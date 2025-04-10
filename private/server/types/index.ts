@@ -40,11 +40,16 @@ export interface PageMetadata {
   description?: string;
   icon?: string;
   openGraph?: {
+    title?: string;
+    description?: string;
     siteName?: string;
     images?: { url: string; width: number; height: number }[];
   };
   x?: {
+    title?: string;
+    description?: string;
     card?: string;
+    site?: string;
     creator?: string;
     images?: string[];
   };
