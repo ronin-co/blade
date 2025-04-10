@@ -15,6 +15,7 @@ const metadataNames: Record<string, string> = {
   'x.title': 'twitter:title',
   'x.description': 'twitter:description',
   'x.card': 'twitter:card',
+  'x.site': 'twitter:site',
   'x.creator': 'twitter:creator',
 
   'openGraph.title': 'og:title',

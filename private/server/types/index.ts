@@ -49,6 +49,7 @@ export interface PageMetadata {
     title?: string;
     description?: string;
     card?: string;
+    site?: string;
     creator?: string;
     images?: string[];
   };
