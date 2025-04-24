@@ -35,7 +35,9 @@ Mimics [document.location](https://developer.mozilla.org/en-US/docs/Web/API/Docu
 
 Unlike in `document.location`, however, the URL is not populated, so dynamic path segments of pages will not be populated with their respective value.
 
-```typescript
+```tsx
+import { useLocation } from '@ronin/blade/universal/hooks';
+
 const location = useLocation();
 ```
 
@@ -45,7 +47,9 @@ Exposes the keys and values of all parameters (dynamic path segments) present in
 
 For example, if the URL being accessed is `/elaine` and the page is named `[handle].tsx`, the returned object would be `{ handle: 'elaine' }`.
 
-```typescript
+```tsx
+import { useParams } from '@ronin/blade/universal/hooks';
+
 const params = useParams();
 ```
 
@@ -53,7 +57,9 @@ const params = useParams();
 
 Used to transition to a different page.
 
-```typescript
+```tsx
+import { useRedirect } from '@ronin/blade/universal/hooks';
+
 const redirect = useRedirect();
 
 redirect('/pathname');
@@ -61,7 +67,7 @@ redirect('/pathname');
 
 The following options are available:
 
-```typescript
+```tsx
 redirect('/pathname', {
     // If the pathname provided to `redirect()` contains dynamic segments, such as
     // `/[handle]`, you can provide a value for those segments here.
@@ -82,7 +88,9 @@ As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[
 
 To populate them, you can pass the pathname to the `usePopulatePathname()` hook.
 
-```typescript
+```tsx
+import { usePopulatePathname } from '@ronin/blade/universal/hooks';
+
 const populatePathname = usePopulatePathname();
 
 // Assuming that the URL being accessed is `/elaine` and the page is called
@@ -92,7 +100,7 @@ populatePathname('/[handle]');
 
 The following options are available:
 
-```typescript
+```tsx
 populatePathname('/[handle]', {
     // May be used to provide values for params that are present in the pathname that was
     // provided to `populatePathname()`, but are not present in the current URL. This is
@@ -105,7 +113,9 @@ populatePathname('/[handle]', {
 
 Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
 
-```typescript
+```tsx
+import { useNavigator } from '@ronin/blade/universal/hooks';
+
 const navigator = useNavigator();
 
 navigator.userAgent; // See MDN docs
@@ -119,7 +129,9 @@ Allows for performing data mutations and updates all `use` queries accordingly.
 
 The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used instead as well.
 
-```typescript
+```tsx
+import { useMutation } from '@ronin/blade/client/hooks';
+
 const { set, add, remove, batch } = useMutation();
 
 await set.account({
@@ -146,7 +158,7 @@ When a mutation happens, its queries are combined with any potential read querie
 
 The following options are available for all query types:
 
-```typescript
+```tsx
 await add.account.with.handle('elaine', {
     // Render a different page after the mutation has been completed.
     redirect: '/accounts/elaine',
@@ -163,6 +175,36 @@ await add.account.with.handle('elaine', {
 ```
 
 ### `usePagination` (Client)
+
+Allows for paginating a read query and thereby modifies the result of the respective `use` hook associated with that read query.
+
+For example, you might use the following read query in your page (on the server):
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+import SomeComponent from './components/test.client';
+
+const Page = () => {
+    const accounts = use.accounts();
+
+    return <SomeComponent records={accounts} recordsNextPage={accounts.nextPage}>;
+}
+```
+
+Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then paginate the list of records you've retrieved like this:
+
+```tsx
+export const SomeComponent = ({ records, recordsNextPage }) => {
+    const { paginate, resetPagination } = usePagination(recordsNextPage);
+
+    return (
+        <div>
+            <button onClick={() => paginate()}>Show next page</button>
+            <button onClick={() => resetPagination()}>Show initial page</button>
+        </div>;
+    );
+};
+```
 
 ### `usePaginationBuffer` (Client)
 
