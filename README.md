@@ -62,7 +62,7 @@ redirect('/pathname');
 The following options are available:
 
 ```typescript
-redirect('/redirect', {
+redirect('/pathname', {
     // If the pathname provided to `redirect()` contains dynamic segments, such as
     // `/[handle]`, you can provide a value for those segments here.
     extraParams: { handle: 'elaine' },
