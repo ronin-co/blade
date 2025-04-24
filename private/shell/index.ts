@@ -6,7 +6,7 @@ import { parseArgs } from 'node:util';
 import type { SpawnOptions } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
-import { loggingPrefixes, pagesDirectory } from './constants';
+import { frameworkDirectory, loggingPrefixes, pagesDirectory } from './constants';
 import { logSpinner, setEnvironmentVariables } from './utils';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
@@ -34,9 +34,31 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
 });
 
+const isInitializing = positionals.includes('init');
 const isBuilding = positionals.includes('build');
 const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
+
+if (isInitializing) {
+  const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
+  const targetDirectory = path.join(process.cwd(), 'blade-example');
+
+  const { success, stderr } = Bun.spawnSync([
+    'cp',
+    '-r',
+    originDirectory,
+    targetDirectory,
+  ]);
+
+  if (success) {
+    logSpinner('Created example app').succeed();
+  } else {
+    logSpinner('Failed to create example app').fail();
+    console.error(stderr);
+  }
+
+  process.exit();
+}
 
 let port = Number.parseInt(Bun.env['PORT'] as string) || 3000;
 
