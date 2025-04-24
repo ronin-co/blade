@@ -83,9 +83,20 @@ To populate them, you can pass the pathname to the `usePopulatePathname()` hook.
 ```typescript
 const populatePathname = usePopulatePathname();
 
-// Assuming that the URL being accessed is `/elaine` and the page is called `[handle].tsx`,
-// this would output `/elaine`.
-usePopulatePathname('/[handle]');
+// Assuming that the URL being accessed is `/elaine` and the page is called
+// `[handle].tsx`, this would output `/elaine`.
+populatePathname('/[handle]');
+```
+
+The following options are available:
+
+```typescript
+populatePathname('/[handle]', {
+    // May be used to provide values for params that are present in the pathname that was
+    // provided to `populatePathname()`, but are not present in the current URL. This is
+    // essentially a clean way of using `populatePathname(`/${params.handle}`)`.
+    extraParams: { handle: 'elaine' }
+});
 ```
 
 ## Contributing
