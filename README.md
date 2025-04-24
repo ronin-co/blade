@@ -23,6 +23,96 @@ Lastly, start the development server:
 bun run dev
 ```
 
+## API
+
+Blade provides the following programmatic APIs that can be imported from your app:
+
+### React Hooks
+
+#### `useLocation` (Universal)
+
+Mimics [document.location](https://developer.mozilla.org/en-US/docs/Web/API/Document/location) and thereby exposes a `URL` object containing the URL of the current page.
+
+Unlike in `document.location`, however, the URL is not populated, so dynamic path segments of pages will not be populated with their respective value.
+
+```typescript
+const location = useLocation();
+```
+
+#### `useParams` (Universal)
+
+Exposes the keys and values of all parameters (dynamic path segments) present in the URL.
+
+For example, if the URL being accessed is `/elaine` and the page is named `[handle].tsx`, the returned object would be `{ handle: 'elaine' }`.
+
+```typescript
+const params = useParams();
+```
+
+#### `useRedirect` (Universal)
+
+Used to transition to a different page.
+
+```typescript
+const redirect = useRedirect();
+
+redirect('/pathname');
+```
+
+The following options are available:
+
+```typescript
+redirect('/pathname', {
+    // If the pathname provided to `redirect()` contains dynamic segments, such as
+    // `/[handle]`, you can provide a value for those segments here.
+    extraParams: { handle: 'elaine' },
+
+    // If a part of your app relies on React state that is also reflected in the URL
+    // (e.g. this often happens with `?search` text), you can avoid keeping React state
+    // by using this option and simply reading the output of `useLocation()`.
+    //
+    // However note that this option is only available on the client.
+    immediatelyUpdateQueryParams: true
+});
+```
+
+### `usePopulatePathname` (Universal)
+
+As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[handle]`) are not populated in the `URL` object exposed by the hook.
+
+To populate them, you can pass the pathname to the `usePopulatePathname()` hook.
+
+```typescript
+const populatePathname = usePopulatePathname();
+
+// Assuming that the URL being accessed is `/elaine` and the page is called
+// `[handle].tsx`, this would output `/elaine`.
+populatePathname('/[handle]');
+```
+
+The following options are available:
+
+```typescript
+populatePathname('/[handle]', {
+    // May be used to provide values for params that are present in the pathname that was
+    // provided to `populatePathname()`, but are not present in the current URL. This is
+    // essentially a clean way of using `populatePathname(`/${params.handle}`)`.
+    extraParams: { handle: 'elaine' }
+});
+```
+
+### `useNavigator` (Universal)
+
+Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
+
+```typescript
+const navigator = useNavigator();
+
+navigator.userAgent; // See MDN docs
+navigator.languages; // See MDN docs
+navigator.geoLocation; // See MDN docs (currently under construction)
+```
+
 ## Contributing
 
 To start contributing code, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
@@ -51,9 +141,7 @@ You will just need to make sure that, once you [create a pull request](https://d
 
 ### Running Tests
 
-The package has 100% test coverage, which means that every single line of code is tested automatically, to ensure that any change to the source code doesn't cause a regression.
-
-Before you create a pull request on the `blade` repo, it is therefore advised to run those tests in order to ensure everything works as expected:
+Before you create a pull request on the `blade` repo, it is advised to run its tests in order to ensure everything works as expected:
 
 ```bash
 # Run all tests
