@@ -82,7 +82,7 @@ redirect('/pathname', {
 });
 ```
 
-### `usePopulatePathname` (Universal)
+#### `usePopulatePathname` (Universal)
 
 As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[handle]`) are not populated in the `URL` object exposed by the hook.
 
@@ -109,7 +109,7 @@ populatePathname('/[handle]', {
 });
 ```
 
-### `useNavigator` (Universal)
+#### `useNavigator` (Universal)
 
 Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
 
@@ -123,7 +123,7 @@ navigator.languages; // See MDN docs
 navigator.geoLocation; // See MDN docs (currently under construction)
 ```
 
-### `useMutation` (Client)
+#### `useMutation` (Client)
 
 Allows for performing data mutations and updates all `use` queries accordingly.
 
@@ -168,13 +168,13 @@ await add.account.with.handle('elaine', {
     //
     // The curly braces represent a segment that will be replaced with the result of the
     // mutation query. The number (0) indicates the item in the list of results (when
-    // using `batch`, you might have multiple queries) and the string ("handle") indicates
-    // the slug of the field that should be used.
+    // using `batch`, you might have multiple queries) and the string ("handle")
+    // indicates the slug of the field that should be used.
     redirect: '/accounts/{0.handle}'
 });
 ```
 
-### `usePagination` (Client)
+#### `usePagination` (Client)
 
 Allows for paginating a read query and thereby modifies the result of the respective `use` hook associated with that read query.
 
@@ -227,7 +227,7 @@ usePagination(nextPage, {
 });
 ```
 
-### `usePaginationBuffer` (Client)
+#### `usePaginationBuffer` (Client)
 
 Concatenates arrays based on pagination. Whenever the current paginated page changes, the
 provided items will be concatenated with the previously provided list of items.
@@ -260,7 +260,7 @@ import { usePagination, usePaginationBuffer } from '@ronin/blade/client/hooks';
 
 export const SomeComponent = ({ children: defaultChildren, nextPage, previousPage }) => {
     const { paginate, resetPagination } = usePagination(nextPage);
-    const [children] = usePaginationBuffer<ReactElement>(defaultChildren, { previousPage });
+    const [children] = usePaginationBuffer(defaultChildren, { previousPage });
 
     return <div>{children}</div>;
 };
@@ -289,7 +289,13 @@ usePaginationBuffer(list, {
 });
 ```
 
-### `useLinkOnClick` (Client)
+You may also decide to pass a TypeScript generic with the type of provided array item:
+
+```tsx
+usePaginationBuffer<ReactElement>();
+```
+
+#### `useLinkOnClick` (Client)
 
 In the majority of cases, you should use Blade's `<Link>` component to display links that should automatically result in a page transition (links pointing to external pages should just use anchor elements).
 
@@ -305,15 +311,15 @@ const onClick = useLinkOnClick('/pathname');
 <button onClick={event => onClick(event)}>I am a link</button>
 ```
 
-### `use` (Server)
+#### `use` (Server)
 
-### `useCookie` (Server)
+#### `useCookie` (Server)
 
-### `useMetadata` (Server)
+#### `useMetadata` (Server)
 
-### `useMutationResult` (Server)
+#### `useMutationResult` (Server)
 
-### `useJWT` (Server)
+#### `useJWT` (Server)
 
 ## Contributing
 
