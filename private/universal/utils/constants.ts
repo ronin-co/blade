@@ -5,3 +5,5 @@ export const SENTRY_ENVIRONMENT = import.meta.env.BLADE_PUBLIC_GIT_BRANCH
   : 'development';
 
 export const CLIENT_ASSET_PREFIX = '/client';
+
+export const DEFAULT_PAGE_PATH = 'blade-default-pages';

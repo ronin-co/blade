@@ -4,16 +4,15 @@ import { copyFile, cp, exists, mkdir, readdir, rm } from 'node:fs/promises';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
-import { CLIENT_ASSET_PREFIX } from '../universal/utils/constants';
+import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../universal/utils/constants';
 import { generateUniqueId } from '../universal/utils/crypto';
 import { getOutputFile } from '../universal/utils/paths';
 import {
   clientManifestFile,
+  directoriesToParse,
   frameworkDirectory,
-  hooksDirectory,
   loggingPrefixes,
   outputDirectory,
-  pagesDirectory,
   publicDirectory,
 } from './constants';
 import {
@@ -29,9 +28,8 @@ const crawlDirectory = async (directory: string): Promise<string[]> => {
   return files.map((file) => (path.extname(file) === '' ? `${file}/` : file));
 };
 
-const getImportList = async (directoryPath: string) => {
-  const directoryName = path.basename(directoryPath);
-  const files = await crawlDirectory(directoryPath);
+const getImportList = async (directoryName: string, directoryPath: string) => {
+  const files = (await exists(directoryPath)) ? await crawlDirectory(directoryPath) : [];
 
   const importList = [];
   const exportList: { [key: string]: string } = {};
@@ -40,13 +38,17 @@ const getImportList = async (directoryPath: string) => {
     const filePath = files[index] as (typeof files)[number];
     const filePathFull = path.join(directoryPath, filePath);
 
-    const variable = directoryName + index;
+    const variableName = directoryName + index;
+    const keyName =
+      directoryName === 'defaultPages'
+        ? path.join(DEFAULT_PAGE_PATH, filePath)
+        : filePath;
 
     if (filePath.endsWith('/')) {
-      exportList[filePath.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
+      exportList[keyName.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
     } else {
-      importList.push(`import * as ${variable} from '${filePathFull}';`);
-      exportList[filePath] = variable;
+      importList.push(`import * as ${variableName} from '${filePathFull}';`);
+      exportList[keyName] = variableName;
     }
   }
 
@@ -61,11 +63,15 @@ const getImportList = async (directoryPath: string) => {
 };
 
 export const getFileList = async (): Promise<string> => {
-  const directoryPaths = [pagesDirectory, hooksDirectory];
-  const directoryNames = directoryPaths.map((dir) => path.basename(dir));
+  const directories = Object.entries(directoriesToParse);
+  const importPromises = directories.map(([name, path]) => getImportList(name, path));
+  const imports = await Promise.all(importPromises);
 
-  let file = (await Promise.all(directoryPaths.map(getImportList))).join('\n\n');
-  file += `\n\n export { ${directoryNames.join(', ')} }`;
+  let file = imports.join('\n\n');
+
+  file += '\n\n';
+  file += 'export const pages = { ...customPages, ...defaultPages };\n';
+  file += 'export const hooks = { ...customHooks };\n';
 
   return file;
 };

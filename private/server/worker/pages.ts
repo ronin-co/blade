@@ -1,5 +1,6 @@
 import '../types/global.d.ts';
 
+import { DEFAULT_PAGE_PATH } from '../../universal/utils/constants.ts';
 import type { TreeItem } from '../types/index.ts';
 import { joinPaths } from '../utils/paths';
 
@@ -188,9 +189,8 @@ const getEntry = (
       return getEntry(pages, finalSegments, options);
     }
 
-    // TODO: Pass path of native error page.
     return {
-      path: `${options.error}.tsx`,
+      path: joinPaths(DEFAULT_PAGE_PATH, `${options.error}.tsx`),
       params: {},
       errorPage: options.error,
     };
