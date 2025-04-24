@@ -113,6 +113,71 @@ navigator.languages; // See MDN docs
 navigator.geoLocation; // See MDN docs (currently under construction)
 ```
 
+### `useMutation` (Client)
+
+Allows for performing data mutations and updates all `use` queries accordingly.
+
+The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used instead as well.
+
+```typescript
+const { set, add, remove, batch } = useMutation();
+
+await set.account({
+    with: { handle: 'elaine' },
+    to: { handle: 'mia' }
+});
+
+await add.account.with.handle('elaine');
+await remove.account.with.handle('elaine');
+
+// If you need to run multiple mutation queries serially, use a single transaction to
+// avoid unnecessary hops to the database.
+await batch(() => [
+    set.account({
+        with: { handle: 'elaine' },
+        to: { handle: 'mia' }
+    }),
+    add.account.with.handle('elaine'),
+    remove.account.with.handle('elaine')
+]);
+```
+
+When a mutation happens, its queries are combined with any potential read queries that might be necessary to update the `use` hooks on the current path and sent to the database as a single transaction.
+
+The following options are available for all query types:
+
+```typescript
+await add.account.with.handle('elaine', {
+    // Render a different page after the mutation has been completed.
+    redirect: '/accounts/elaine',
+
+    // For the above, you may also decide to access the result of the mutation, such that
+    // the pathname of the destination page depends on the mutation result.
+    //
+    // The curly braces represent a segment that will be replaced with the result of the
+    // mutation query. The number (0) indicates the item in the list of results (when
+    // using `batch`, you might have multiple queries) and the string ("handle") indicates
+    // the slug of the field that should be used.
+    redirect: '/accounts/{0.handle}'
+});
+```
+
+### `usePagination` (Client)
+
+### `usePaginationBuffer` (Client)
+
+### `useLinkOnClick` (Client)
+
+### `use` (Server)
+
+### `useCookie` (Server)
+
+### `useMetadata` (Server)
+
+### `useMutationResult` (Server)
+
+### `useJWT` (Server)
+
 ## Contributing
 
 To start contributing code, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
