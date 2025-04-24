@@ -1,6 +1,6 @@
 import { use, useMetadata } from '@ronin/blade/server/hooks';
 
-import { AddPostButton } from '../../components/AddPost.client';
+import { AddPostButton } from '../../components/add-post.client';
 
 const Page = () => {
   useMetadata({
