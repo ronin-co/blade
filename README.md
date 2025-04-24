@@ -51,9 +51,7 @@ You will just need to make sure that, once you [create a pull request](https://d
 
 ### Running Tests
 
-The package has 100% test coverage, which means that every single line of code is tested automatically, to ensure that any change to the source code doesn't cause a regression.
-
-Before you create a pull request on the `blade` repo, it is therefore advised to run those tests in order to ensure everything works as expected:
+Before you create a pull request on the `blade` repo, it is advised to run its tests in order to ensure everything works as expected:
 
 ```bash
 # Run all tests
