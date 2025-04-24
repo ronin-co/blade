@@ -194,6 +194,8 @@ const Page = () => {
 Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then paginate the list of records you've retrieved like this:
 
 ```tsx
+import { usePagination } from '@ronin/blade/client/hooks';
+
 export const SomeComponent = ({ records, recordsNextPage }) => {
     const { paginate, resetPagination } = usePagination(recordsNextPage);
 
@@ -254,6 +256,8 @@ const Page = () => {
 Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then concatenate the list of records like so:
 
 ```tsx
+import { usePagination, usePaginationBuffer } from '@ronin/blade/client/hooks';
+
 export const SomeComponent = ({ children: defaultChildren, nextPage, previousPage }) => {
     const { paginate, resetPagination } = usePagination(nextPage);
     const [children] = usePaginationBuffer<ReactElement>(defaultChildren, { previousPage });
@@ -294,6 +298,8 @@ In the rare scenario that you need to capture the `onClick` event of a link elem
 For example, if a drag-and-drop system is used, it might want to overwrite the click handler and then choose to fire the user-provided one whenever it deems it to be a good idea, instead of the browser immediately firing it after `onMouseUp`.
 
 ```tsx
+import { useLinkOnClick } from '@ronin/blade/client/hooks';
+
 const onClick = useLinkOnClick('/pathname');
 
 <button onClick={event => onClick(event)}>I am a link</button>
