@@ -23,6 +23,71 @@ Lastly, start the development server:
 bun run dev
 ```
 
+## API
+
+Blade provides the following programmatic APIs that can be imported from your app:
+
+### React Hooks
+
+#### `useLocation` (Universal)
+
+Mimics `document.location` and thereby exposes a `URL` object containing the URL of the current page.
+
+Unlike in `document.location`, however, the URL is not populated, so dynamic path segments of pages will not be populated with their respective value.
+
+```typescript
+const location = useLocation();
+```
+
+#### `useParams` (Universal)
+
+Exposes the keys and values of all parameters (dynamic path segments) present in the URL.
+
+For example, if the URL being accessed is `/elaine` and the page is named `[handle].tsx`, the returned object would be `{ handle: 'elaine' }`.
+
+```typescript
+const params = useParams();
+```
+
+#### `useRedirect` (Universal)
+
+Used to transition to a different page.
+
+```typescript
+const redirect = useRedirect();
+
+redirect('/pathname');
+```
+
+The following options are available:
+
+```typescript
+redirect('/redirect', {
+    // If the pathname provided to `redirect()` contains dynamic segments, such as
+    // `/[handle]`, you can provide a value for those segments here.
+    extraParams: { handle: 'elaine' },
+
+    // If a part of your app relies on React state that is also reflected in the URL
+    // (e.g. this often happens with `?search` text), you can avoid keeping React state
+    // by using this option and simply reading the output of `useLocation()`.
+    immediatelyUpdateQueryParams: true
+});
+```
+
+### `usePopulatePathname` (Universal)
+
+As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[handle]`) are not populated in the `URL` object exposed by the hook.
+
+To populate them, you can pass the pathname to the `usePopulatePathname()` hook.
+
+```typescript
+const populatePathname = usePopulatePathname();
+
+// Assuming that the URL being accessed is `/elaine` and the page is called `[handle].tsx`,
+// this would output `/elaine`.
+usePopulatePathname('/[handle]');
+```
+
 ## Contributing
 
 To start contributing code, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
