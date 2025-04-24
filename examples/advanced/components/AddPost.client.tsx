@@ -1,4 +1,4 @@
-import { useMutation } from '@ronin/blade/client/hooks.ts';
+import { useMutation } from '@ronin/blade/client/hooks';
 
 export const AddPostButton = () => {
   const { add } = useMutation();

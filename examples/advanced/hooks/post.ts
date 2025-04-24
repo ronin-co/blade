@@ -1,6 +1,6 @@
-import { MultipleWithInstructionsError } from '@ronin/blade/server/utils/errors.ts';
+import { MultipleWithInstructionsError } from '@ronin/blade/server/utils/errors';
 
-import type { AddHook, GetHook } from '@ronin/blade/universal/types.ts';
+import type { AddHook, GetHook } from '@ronin/blade/universal/types';
 
 interface Post {
   body: string;

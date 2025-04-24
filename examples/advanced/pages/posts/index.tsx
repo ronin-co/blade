@@ -1,4 +1,4 @@
-import { use, useMetadata } from '@ronin/blade/server/hooks.ts';
+import { use, useMetadata } from '@ronin/blade/server/hooks';
 
 import { AddPostButton } from '../../components/AddPost.client';
 
