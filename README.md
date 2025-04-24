@@ -264,6 +264,27 @@ export const SomeComponent = ({ children: defaultChildren, nextPage, previousPag
 
 This allows for shipping the least amount of code to the client, because the entire layout (including `Row`, with the only exception being `SomeComponent`) will be rendered only on the server, so no unnecessary code will leave the server.
 
+The following options are available:
+
+```tsx
+usePaginationBuffer(list, {
+    // The pagination cursor for the previous page of your record list. Must be provided.
+    previousPage: '...',
+
+    // By default, any changes to `list` will be reflected in the concatenated list
+    // returned by `usePaginationBuffer()`. This default is useful because that means
+    // automatically revalidated read queries will see their results reflected.
+    //
+    // However, if you want to force a list to untouched by revalidation, you can set
+    // this option to `false`, which will result in the returned list staying static,
+    // even if the provided `list` is modified.
+    //
+    // For example, if you are paginating a list of records within an overlay, you might
+    // want the list of records within the overlay to never automatically update.
+    allowUpdates: true
+});
+```
+
 ### `useLinkOnClick` (Client)
 
 In the majority of cases, you should use Blade's `<Link>` component to display links that should automatically result in a page transition (links pointing to external pages should just use anchor elements).
