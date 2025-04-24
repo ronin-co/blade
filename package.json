@@ -13,6 +13,7 @@
   "files": [
     "private/**/*",
     "public/**/*",
+    "examples/advanced/**/*",
     "examples/basic/**/*"
   ],
   "scripts": {
