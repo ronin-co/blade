@@ -30,7 +30,7 @@ const posts = [
   },
 ] satisfies Array<Post>;
 
-export const add: AddHook = (query, multiple) => {
+export const add: AddHook<Post> = (query, multiple) => {
   if (multiple) throw new MultipleWithInstructionsError();
 
   const newPost = {
@@ -45,7 +45,7 @@ export const add: AddHook = (query, multiple) => {
   return newPost;
 };
 
-export const get: GetHook = async (query, multiple) => {
+export const get: GetHook<Post | null | Array<Post>> = async (query, multiple) => {
   if (multiple) return posts;
 
   return posts.find((post) => post.id === Number.parseInt(query.with?.id)) ?? null;
