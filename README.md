@@ -206,6 +206,25 @@ export const SomeComponent = ({ records, recordsNextPage }) => {
 };
 ```
 
+The following options are available:
+
+```tsx
+usePagination(nextPage, {
+    // By default, a `?page` parameter will be added to the URL, which allows for sharing
+    // the current pagination status of the page with other people. Setting this argument
+    // to `false` will avoid that.
+    //
+    // For example, if you're paginating a large list of records in the middle of your
+    // page, you should likely use the default value, such that users can share a link
+    // to a particular page of records with other people.
+    //
+    // If you're paginating a list of records within an overlay, however, for example,
+    // you should set this to `false`, since people don't need to be able to link to a
+    // specific page of records within an overlay that's nested deeply into your UI.
+    updateAddressBar: true
+});
+```
+
 ### `usePaginationBuffer` (Client)
 
 ### `useLinkOnClick` (Client)
