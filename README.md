@@ -227,6 +227,43 @@ usePagination(nextPage, {
 
 ### `usePaginationBuffer` (Client)
 
+Concatenates arrays based on pagination. Whenever the current paginated page changes, the
+provided items will be concatenated with the previously provided list of items.
+
+When implementing pagination in an application, one of the key considerations is how to efficiently manage the complete array of records, since your backend should only ever return a single page at once, and never the full list, as the latter would degrade performance and affect memory usage.
+
+When displaying a list of records, `usePaginationBuffer` automates this for you. You simply provide it with the result of a read query, and it intelligently concatenates the result of the query for you, allowing you to operate on the full list of records if needed.
+
+For example, you might use the following read query in your page (on the server):
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+import SomeComponent from './components/test.client';
+
+const Page = () => {
+    const accounts = use.accounts();
+
+    return (
+        <SomeComponent previousPage={accounts.previousPage} nextPage={accounts.nextPage}>
+            {accounts.map(account => <Row record={account} />)}
+        </SomeComponent>;
+    );
+}
+```
+
+Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then concatenate the list of records like so:
+
+```tsx
+export const SomeComponent = ({ children: defaultChildren, nextPage, previousPage }) => {
+    const { paginate, resetPagination } = usePagination(nextPage);
+    const [children] = usePaginationBuffer<ReactElement>(defaultChildren, { previousPage });
+
+    return <div>{children}</div>;
+};
+```
+
+This allows for shipping the least amount of code to the client, because the entire layout (including `Row`, with the only exception being `SomeComponent`) will be rendered only on the server, so no unnecessary code will leave the server.
+
 ### `useLinkOnClick` (Client)
 
 ### `use` (Server)
