@@ -82,7 +82,7 @@ redirect('/pathname', {
 });
 ```
 
-### `usePopulatePathname` (Universal)
+#### `usePopulatePathname` (Universal)
 
 As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[handle]`) are not populated in the `URL` object exposed by the hook.
 
@@ -109,7 +109,7 @@ populatePathname('/[handle]', {
 });
 ```
 
-### `useNavigator` (Universal)
+#### `useNavigator` (Universal)
 
 Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
 
@@ -123,7 +123,7 @@ navigator.languages; // See MDN docs
 navigator.geoLocation; // See MDN docs (currently under construction)
 ```
 
-### `useMutation` (Client)
+#### `useMutation` (Client)
 
 Allows for performing data mutations and updates all `use` queries accordingly.
 
@@ -174,7 +174,7 @@ await add.account.with.handle('elaine', {
 });
 ```
 
-### `usePagination` (Client)
+#### `usePagination` (Client)
 
 Allows for paginating a read query and thereby modifies the result of the respective `use` hook associated with that read query.
 
@@ -227,7 +227,7 @@ usePagination(nextPage, {
 });
 ```
 
-### `usePaginationBuffer` (Client)
+#### `usePaginationBuffer` (Client)
 
 Concatenates arrays based on pagination. Whenever the current paginated page changes, the
 provided items will be concatenated with the previously provided list of items.
@@ -289,7 +289,7 @@ usePaginationBuffer(list, {
 });
 ```
 
-### `useLinkOnClick` (Client)
+#### `useLinkOnClick` (Client)
 
 In the majority of cases, you should use Blade's `<Link>` component to display links that should automatically result in a page transition (links pointing to external pages should just use anchor elements).
 
@@ -305,15 +305,15 @@ const onClick = useLinkOnClick('/pathname');
 <button onClick={event => onClick(event)}>I am a link</button>
 ```
 
-### `use` (Server)
+#### `use` (Server)
 
-### `useCookie` (Server)
+#### `useCookie` (Server)
 
-### `useMetadata` (Server)
+#### `useMetadata` (Server)
 
-### `useMutationResult` (Server)
+#### `useMutationResult` (Server)
 
-### `useJWT` (Server)
+#### `useJWT` (Server)
 
 ## Contributing
 
