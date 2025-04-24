@@ -31,7 +31,7 @@ const crawlDirectory = async (directory: string): Promise<string[]> => {
 
 const getImportList = async (directoryPath: string) => {
   const directoryName = path.basename(directoryPath);
-  const files = await crawlDirectory(directoryPath);
+  const files = (await exists(directoryPath)) ? await crawlDirectory(directoryPath) : [];
 
   const importList = [];
   const exportList: { [key: string]: string } = {};
