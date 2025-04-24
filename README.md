@@ -2,6 +2,27 @@
 
 This package renders [React](https://react.dev) at the edge.
 
+## Setup
+
+To get started with Blade, run the following command:
+
+```bash
+npx @ronin/blade init
+```
+
+Afterward, enter the newly created directory and install the dependencies:
+
+```bash
+cd blade-example
+bun install
+```
+
+Lastly, start the development server:
+
+```bash
+bun run dev
+```
+
 ## Contributing
 
 To start contributing code, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
