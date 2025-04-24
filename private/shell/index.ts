@@ -133,8 +133,13 @@ if (isServing) {
     };
 
     for (const project of projects) {
+      const componentPath = path.join(project, 'components');
+
       watch(path.join(project, 'pages'), { recursive: true }, handleFileChange);
-      watch(path.join(project, 'components'), { recursive: true }, handleFileChange);
+
+      if (await Bun.file(componentPath).exists()) {
+        watch(path.join(project, 'components'), { recursive: true }, handleFileChange);
+      }
     }
   }
 }

@@ -1,0 +1,14 @@
+{
+  "name": "basic-example",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "blade",
+    "build": "blade build",
+    "serve": "blade serve"
+  },
+  "author": "ronin",
+  "dependencies": {
+    "@ronin/blade": "0.1.44"
+  }
+}
