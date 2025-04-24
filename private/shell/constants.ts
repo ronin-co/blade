@@ -10,6 +10,12 @@ export const publicDirectory = path.resolve(process.cwd(), 'public');
 
 export const frameworkDirectory = path.join(__dirname, '..', '..');
 
+export const directoriesToParse = {
+  customPages: pagesDirectory,
+  customHooks: hooksDirectory,
+  defaultPages: path.join(frameworkDirectory, 'private/server/pages'),
+};
+
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
 
 export const clientManifestFile = path.join(outputDirectory, 'client-manifest.json');
