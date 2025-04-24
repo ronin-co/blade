@@ -24,5 +24,6 @@
     // Some stricter flags
     "useUnknownInCatchVariables": true,
     "noPropertyAccessFromIndexSignature": true
-  }
+  },
+  "exclude": ["./examples/**/*"]
 }
