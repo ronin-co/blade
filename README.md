@@ -31,7 +31,7 @@ Blade provides the following programmatic APIs that can be imported from your ap
 
 #### `useLocation` (Universal)
 
-Mimics `document.location` and thereby exposes a `URL` object containing the URL of the current page.
+Mimics [document.location](https://developer.mozilla.org/en-US/docs/Web/API/Document/location) and thereby exposes a `URL` object containing the URL of the current page.
 
 Unlike in `document.location`, however, the URL is not populated, so dynamic path segments of pages will not be populated with their respective value.
 
@@ -70,6 +70,8 @@ redirect('/redirect', {
     // If a part of your app relies on React state that is also reflected in the URL
     // (e.g. this often happens with `?search` text), you can avoid keeping React state
     // by using this option and simply reading the output of `useLocation()`.
+    //
+    // However note that this option is only available on the client.
     immediatelyUpdateQueryParams: true
 });
 ```
@@ -97,6 +99,18 @@ populatePathname('/[handle]', {
     // essentially a clean way of using `populatePathname(`/${params.handle}`)`.
     extraParams: { handle: 'elaine' }
 });
+```
+
+### `useNavigator` (Universal)
+
+Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
+
+```typescript
+const navigator = useNavigator();
+
+navigator.userAgent; // See MDN docs
+navigator.languages; // See MDN docs
+navigator.geoLocation; // See MDN docs (currently under construction)
 ```
 
 ## Contributing
