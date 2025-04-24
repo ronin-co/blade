@@ -168,8 +168,8 @@ await add.account.with.handle('elaine', {
     //
     // The curly braces represent a segment that will be replaced with the result of the
     // mutation query. The number (0) indicates the item in the list of results (when
-    // using `batch`, you might have multiple queries) and the string ("handle") indicates
-    // the slug of the field that should be used.
+    // using `batch`, you might have multiple queries) and the string ("handle")
+    // indicates the slug of the field that should be used.
     redirect: '/accounts/{0.handle}'
 });
 ```
@@ -260,7 +260,7 @@ import { usePagination, usePaginationBuffer } from '@ronin/blade/client/hooks';
 
 export const SomeComponent = ({ children: defaultChildren, nextPage, previousPage }) => {
     const { paginate, resetPagination } = usePagination(nextPage);
-    const [children] = usePaginationBuffer<ReactElement>(defaultChildren, { previousPage });
+    const [children] = usePaginationBuffer(defaultChildren, { previousPage });
 
     return <div>{children}</div>;
 };
@@ -287,6 +287,12 @@ usePaginationBuffer(list, {
     // want the list of records within the overlay to never automatically update.
     allowUpdates: true
 });
+```
+
+You may also decide to pass a TypeScript generic with the type of provided array item:
+
+```tsx
+usePaginationBuffer<ReactElement>();
 ```
 
 #### `useLinkOnClick` (Client)
