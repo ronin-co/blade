@@ -19,15 +19,7 @@ import {
 import { cleanUp, getClientEnvironmentVariables, prepareClientAssets } from './utils';
 
 const environment = Bun.env['BLADE_ENV'];
-const appToken = Bun.env['BLADE_APP_TOKEN'];
 const port = Bun.env['__BLADE_PORT'];
-
-if (!appToken) {
-  console.error(
-    `${loggingPrefixes.error} Missing \`BLADE_APP_TOKEN\` environment variable.`,
-  );
-  process.exit(0);
-}
 
 if (environment === 'development') {
   await cleanUp();
