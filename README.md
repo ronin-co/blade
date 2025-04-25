@@ -1,6 +1,6 @@
-# RONIN Blade
+# Blade
 
-This package renders [React](https://react.dev) at the edge.
+This package allows for building instant web apps with [React](https://react.dev).
 
 ## Features
 
