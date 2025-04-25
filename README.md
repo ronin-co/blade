@@ -1,4 +1,4 @@
-# Blade
+# RONIN Blade
 
 This package allows for building instant web apps with [React](https://react.dev).
 
