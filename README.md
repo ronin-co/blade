@@ -343,6 +343,58 @@ const onClick = useLinkOnClick('/pathname');
 
 #### `use` (Server)
 
+Usually, in React, the [use](https://react.dev/reference/react/use) hook is used to consume a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or [context](https://react.dev/learn/passing-data-deeply-with-context).
+
+In Blade, however, since Blade purposefully does not support Suspense and also does not support asynchronous components, the hook is used to load data instead.
+
+Specifically, the hook reflects the full capabilities of the [RONIN query syntax](https://ronin.co/docs/queries) (which is as powerful as SQL) and thereby allows for easily querying records on your database.
+
+By default, if you provide a `BLADE_APP_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using data hooks instead (documentation for those will follow).
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+    // "accounts" would be the name of your model.
+    const records = use.accounts();
+
+    return <>{records.map(record => <span>{record.name}</span>)}</>;
+};
+```
+
+The queries you provide can be as complex as you would like them to be (see the [query syntax docs](https://ronin.co/docs/queries) for more details on what you can do):
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+
+const records = use.members({
+    with: {
+        team: { notBeing: null },
+        email: { endingWith: '@site.co' }
+    },
+    orderedBy: {
+        descending: ['joinedAt']
+    }
+});
+```
+
+Note that, in order to avoid data waterfalls, data can only be read in server components. On the client, data can only be [modified](#usemutation-client).
+
+The queries of your page and its surrounding layouts are executed as a single database transaction, in order to ensure instant page renders.
+
+To run multiple queries within a single layout or page, the `useBatch` hook can be used:
+
+```tsx
+import { useBatch } from '@ronin/blade/server/hooks';
+
+const [accounts, posts] = useBatch(() => [
+    use.accounts(),
+    use.posts()
+]);
+```
+
+To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
+
 #### `useCookie` (Server)
 
 #### `useMetadata` (Server)
