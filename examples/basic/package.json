@@ -10,9 +10,8 @@
   "author": "ronin",
   "dependencies": {
     "@ronin/blade": "0.1.45",
-    "@tailwindcss/cli": "4.1.4",
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510",
-    "tailwindcss": "4.1.4"
+    "tailwindcss": "3.4.7"
   }
 }
