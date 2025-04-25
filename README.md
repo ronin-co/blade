@@ -2,6 +2,36 @@
 
 This package renders [React](https://react.dev) at the edge.
 
+## Features
+
+- **Native Data State Management** (built-in React hooks for reads and mutations)
+- **Native Pagination** (built-in React hooks for paginating lists of records)
+- **Native Styling** (Tailwind CSS support with zero config)
+- **Client & Server Components** (code is not shipped to the client by default, unless you opt in)
+- **Web Standard Compliant** (outputs a req/res worker + static files that run anywhere — also runs in containers)
+- **No Data Waterfalls** (queries are collected across layouts and pages to ensure a single DB transaction)
+- **Instant Prod Builds** (no compiler, only relies on Bun and loaders)
+- **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/examples/basic) to get Blade to run)
+- **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
+
+Blade works most efficiently when using [RONIN](https://ronin.co) — a globally replicatable database powered by SQLite. However Blade can and will always be usable with any other data source as well, however you will see performance drawbacks if that datasource isn't equally fast.
+
+The first and currently largest known implementation of Blade is the [RONIN](https://ronin.co) dashboard (its code is currently closed, but will be opened up very soon), which has been implemented with Blade since its inception.
+
+## Considerations
+
+Blade purposefully does not (and likely won't ever) comply with the official specification for React Server Components, because it provides different solutions to the problems that RSC aims to solve.
+
+- **No Server Functions** (instead of executing arbitrary code, the only way to invoke the server in Blade is through a [mutation](#usemutation-client))
+- **No Async Components** (I/O leads to slow code, so reads in Blade are always synchronous, but async behind the scenes)
+- **No Suspense** (Blade does not support reads on the client — server components can only read and client components can only write)
+
+## Temporary Limitations
+
+- You can already deploy Blade anywhere, but in terms of zero-config, Blade currently only works in containers. Zero-config support for Vercel, CloudFlare, and all other providers will land very soon.
+- Tailwind v4 (only v3) is not yet supported. Support will land very soon.
+- The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
+
 ## Setup
 
 To get started with Blade, run the following command:
