@@ -34,10 +34,12 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 
 ## Setup
 
-To get started with Blade, run the following command:
+To get started with Blade, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
+
+Next, create a new app with this command:
 
 ```bash
-npx @ronin/blade init
+bunx @ronin/blade init
 ```
 
 Afterward, enter the newly created directory and install the dependencies:
