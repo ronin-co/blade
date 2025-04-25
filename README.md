@@ -405,7 +405,7 @@ To count records, the `useCountOf` hook can be used with the same syntax as the 
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 
-Blade intelligently keeps your data up-to-date for you, so no extra state management is needed for your data. Read queries are refreshed:
+Blade intelligently keeps your data up-to-date for you, so no extra state management is needed for the output of your read queries. The data is refreshed:
 
 - When a [mutation](#usemutation-client) happens (in the same DB transaction as the mutation).
 - Every 5 seconds while the window is in focus.
