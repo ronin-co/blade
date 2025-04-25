@@ -397,6 +397,36 @@ To count records, the `useCountOf` hook can be used with the same syntax as the 
 
 #### `useCookie` (Server)
 
+Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
+
+```tsx
+import { useCookie } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+    const [tokenCookie, setTokenCookie] = useCookie('token');
+
+    if (!tokenCookie) setTokenCooke('a-value');
+
+    return <div>I am a page</div>;
+};
+```
+
+The following options are available:
+
+```tsx
+setCookie('a-value', {
+    // By default, cookies are set as HTTP-only. To let JavaScript access them in the
+    // browser, you can set this option to `true`.
+    client: false,
+
+    // By default, cookies receive a path value of "/". You can customize it using this
+    // option if needed.
+    path: '/'
+});
+```
+
+The max age of cookies currently defaults to 365 days, which is not yet customizable.
+
 #### `useMetadata` (Server)
 
 #### `useMutationResult` (Server)
