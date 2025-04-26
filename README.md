@@ -159,7 +159,7 @@ navigator.geoLocation; // See MDN docs (currently under construction)
 
 Allows for performing data mutations and updates all `use` queries accordingly.
 
-The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used instead as well.
+The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used as well.
 
 ```tsx
 import { useMutation } from '@ronin/blade/client/hooks';
@@ -298,7 +298,7 @@ export const SomeComponent = ({ children: defaultChildren, nextPage, previousPag
 };
 ```
 
-This allows for shipping the least amount of code to the client, because the entire layout (including `Row`, with the only exception being `SomeComponent`) will be rendered only on the server, so no unnecessary code will leave the server.
+This allows for shipping the least amount of code to the client, because the entire layout (including `Row`, with the only exception being `SomeComponent`) will be rendered only on the server, so no unnecessary code will leave the server, ensuring that no unnecessary JavaScript must be downloaded.
 
 The following options are available:
 
@@ -333,7 +333,7 @@ In the majority of cases, you should use Blade's `<Link>` component to display l
 
 In the rare scenario that you need to capture the `onClick` event of a link element yourself for other purposes, however, you can use `useLinkOnClick` to trigger the same `onClick` behavior that would normally be triggered for a `<Link>` component instance.
 
-For example, if a drag-and-drop system is used, it might want to overwrite the click handler and then choose to fire the user-provided one whenever it deems it to be a good idea, instead of the browser immediately firing it after `onMouseUp`.
+For example, if a drag-and-drop system is used, it might want to overwrite the click handler and then choose to fire the user-provided one whenever it deems it to be a good idea, instead of the browser immediately firing it after the `onMouseUp` event.
 
 ```tsx
 import { useLinkOnClick } from '@ronin/blade/client/hooks';
@@ -397,7 +397,7 @@ const [accounts, posts] = useBatch(() => [
 
 To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
 
-If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
+If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
 
 #### `useCookie` (Server)
 
@@ -433,7 +433,7 @@ The max age of cookies currently defaults to 365 days, which is not yet customiz
 
 #### `useMetadata` (Server)
 
-Allows for defining the metadata of a layout or page and thereby populates the [head](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head) element with metadata elements.
+Allows for defining the metadata of a layout or page and thereby populates the [head](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head) element of the rendered page with metadata elements.
 
 ```tsx
 import { useMetadata } from '@ronin/blade/server/hooks';
@@ -524,7 +524,7 @@ interface SessionToken {
 useJWT<SessionToken>(token, secret);
 ```
 
-If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
+If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 
