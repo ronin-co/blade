@@ -397,6 +397,8 @@ const [accounts, posts] = useBatch(() => [
 
 To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
 
+If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are automatically deduped across layouts and pages.
+
 #### `useCookie` (Server)
 
 Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
@@ -431,9 +433,86 @@ The max age of cookies currently defaults to 365 days, which is not yet customiz
 
 #### `useMetadata` (Server)
 
+Allows for defining the metadata of a layout or page and thereby populates the [head](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head) element with metadata elements.
+
+```tsx
+import { useMetadata } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+    useMetadata({
+        title: 'Page Title'
+    });
+
+    return <div>I am a page</div>;
+};
+```
+
+The following options are available:
+
+```tsx
+useMetadata({
+    // The browser tab title of the page. Titles defined in surrounding layouts are
+    // joined together with the title of the page using an em dash separator.
+    title: 'Page Title',
+
+    // Additional metadata for browsers.
+    themeColor: '#4285f4',
+    colorScheme: 'light',
+    description: 'This is a description',
+    icon: 'https://example.co/icon.png',
+
+    // Additional metadata for Open Graph (OG).
+    openGraph: {
+        title: 'Page Title',
+        description: 'This is a description',
+        siteName: 'Site',
+        images: [{ url: 'https://example.co/banner.png'; width: 1280; height: 720 }],
+    },
+
+    // Additional metadata for X (formerly Twitter).
+    x: {
+        title: 'Page Title',
+        description: 'This is a description',
+        card: 'summary_large_image',
+        site: '@nytimes',
+        creator: '@jk_rowling',
+        images: ['https://example.co/banner.png'];
+    },
+
+    // Since Blade does not allow for replacing the `<html>` or `<body>` elements,
+    // these options can be used to attach classes to them.
+    htmlClassName: 'lg:overflow-hidden',
+    bodyClassName: 'text-gray-800'
+});
+```
+
 #### `useMutationResult` (Server)
 
 #### `useJWT` (Server)
+
+Allows for parsing [JSON Web Tokens](https://jwt.io) without blocking the page render.
+
+```tsx
+import { useJWT } from '@ronin/blade/server/hooks';
+
+const payload = useJWT(token, secret);
+```
+
+You may also decide to pass a TypeScript generic with the type of payload:
+
+```tsx
+interface SessionToken {
+    iss: string;
+    sub: string;
+    aud: string;
+    iat?: number | undefined;
+    exp?: number | undefined;
+};
+
+useJWT<SessionToken>(token, secret);
+```
+
+If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are automatically deduped across layouts and pages.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 
