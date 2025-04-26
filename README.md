@@ -159,7 +159,7 @@ navigator.geoLocation; // See MDN docs (currently under construction)
 
 Allows for performing data mutations and updates all `use` queries accordingly.
 
-The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used instead as well.
+The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used as well.
 
 ```tsx
 import { useMutation } from '@ronin/blade/client/hooks';
@@ -298,7 +298,7 @@ export const SomeComponent = ({ children: defaultChildren, nextPage, previousPag
 };
 ```
 
-This allows for shipping the least amount of code to the client, because the entire layout (including `Row`, with the only exception being `SomeComponent`) will be rendered only on the server, so no unnecessary code will leave the server.
+This allows for shipping the least amount of code to the client, because the entire layout (including `Row`, with the only exception being `SomeComponent`) will be rendered only on the server, so no unnecessary code will leave the server, ensuring that no unnecessary JavaScript must be downloaded.
 
 The following options are available:
 
@@ -333,7 +333,7 @@ In the majority of cases, you should use Blade's `<Link>` component to display l
 
 In the rare scenario that you need to capture the `onClick` event of a link element yourself for other purposes, however, you can use `useLinkOnClick` to trigger the same `onClick` behavior that would normally be triggered for a `<Link>` component instance.
 
-For example, if a drag-and-drop system is used, it might want to overwrite the click handler and then choose to fire the user-provided one whenever it deems it to be a good idea, instead of the browser immediately firing it after `onMouseUp`.
+For example, if a drag-and-drop system is used, it might want to overwrite the click handler and then choose to fire the user-provided one whenever it deems it to be a good idea, instead of the browser immediately firing it after the `onMouseUp` event.
 
 ```tsx
 import { useLinkOnClick } from '@ronin/blade/client/hooks';
@@ -397,6 +397,8 @@ const [accounts, posts] = useBatch(() => [
 
 To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
 
+If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
+
 #### `useCookie` (Server)
 
 Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
@@ -431,9 +433,98 @@ The max age of cookies currently defaults to 365 days, which is not yet customiz
 
 #### `useMetadata` (Server)
 
+Allows for defining the metadata of a layout or page and thereby populates the [head](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head) element of the rendered page with metadata elements.
+
+```tsx
+import { useMetadata } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+    useMetadata({
+        title: 'Page Title'
+    });
+
+    return <div>I am a page</div>;
+};
+```
+
+The following options are available:
+
+```tsx
+useMetadata({
+    // The browser tab title of the page. Titles defined in surrounding layouts are
+    // joined together with the title of the page using an em dash separator.
+    title: 'Page Title',
+
+    // Additional metadata for browsers.
+    themeColor: '#4285f4',
+    colorScheme: 'light',
+    description: 'This is a description',
+    icon: 'https://example.co/icon.png',
+
+    // Additional metadata for Open Graph (OG).
+    openGraph: {
+        title: 'Page Title',
+        description: 'This is a description',
+        siteName: 'Site',
+        images: [{ url: 'https://example.co/banner.png'; width: 1280; height: 720 }],
+    },
+
+    // Additional metadata for X (formerly Twitter).
+    x: {
+        title: 'Page Title',
+        description: 'This is a description',
+        card: 'summary_large_image',
+        site: '@nytimes',
+        creator: '@jk_rowling',
+        images: ['https://example.co/banner.png'];
+    },
+
+    // Since Blade does not allow for replacing the `<html>` or `<body>` elements,
+    // these options can be used to attach classes to them.
+    htmlClassName: 'lg:overflow-hidden',
+    bodyClassName: 'text-gray-800'
+});
+```
+
 #### `useMutationResult` (Server)
 
+Since Blade requires data to be read only on the server and data to be mutated only on the client, the result of a mutation is only accessible as a result of the respective [mutation call](#usemutation-client). 
+
+In scenarios where you must explicitly access the result of a mutation on the server, however (for example in order to [set](#usecookie-server) HTTP-only cookies), you may invoke `useMutationResult()` on the server to retrieve its result.
+
+This interface will likely be moved into a different position within the programmatic API in the future.
+
+```tsx
+import { useMutationResult } from '@ronin/blade/server/hooks';
+
+const updatedRecords = useMutationResult();
+```
+
 #### `useJWT` (Server)
+
+Allows for parsing [JSON Web Tokens](https://jwt.io) without blocking the page render.
+
+```tsx
+import { useJWT } from '@ronin/blade/server/hooks';
+
+const payload = useJWT(token, secret);
+```
+
+You may also decide to pass a TypeScript generic with the type of payload:
+
+```tsx
+interface SessionToken {
+    iss: string;
+    sub: string;
+    aud: string;
+    iat?: number | undefined;
+    exp?: number | undefined;
+};
+
+useJWT<SessionToken>(token, secret);
+```
+
+If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 
