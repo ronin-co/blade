@@ -488,6 +488,18 @@ useMetadata({
 
 #### `useMutationResult` (Server)
 
+Since Blade requires data to be read only on the server and data to be mutated only on the client, the result of a mutation is only accessible as a result of the respective [mutation call](#usemutation-client). 
+
+In scenarios where you must explicitly access the result of a mutation on the server, however (for example in order to [set](#usecookie-server) HTTP-only cookies), you may invoke `useMutationResult()` on the server to retrieve its result.
+
+This interface will likely be moved into a different position within the programmatic API in the future.
+
+```tsx
+import { useMutationResult } from '@ronin/blade/server/hooks';
+
+const updatedRecords = useMutationResult();
+```
+
 #### `useJWT` (Server)
 
 Allows for parsing [JSON Web Tokens](https://jwt.io) without blocking the page render.
