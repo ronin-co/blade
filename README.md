@@ -397,7 +397,7 @@ const [accounts, posts] = useBatch(() => [
 
 To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
 
-If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are automatically deduped across layouts and pages.
+If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
 
 #### `useCookie` (Server)
 
@@ -524,7 +524,7 @@ interface SessionToken {
 useJWT<SessionToken>(token, secret);
 ```
 
-If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are automatically deduped across layouts and pages.
+If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook above in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 
