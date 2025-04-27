@@ -2,7 +2,7 @@ import { type AnchorHTMLAttributes, type ReactElement, cloneElement } from 'reac
 
 import { useUniversalContext } from '../../../private/universal/hooks';
 import { usePopulatePathname } from '../../universal/hooks';
-import { useLinkOnClick } from '../hooks';
+import { useLinkEvents } from '../hooks';
 
 interface LinkURL extends Omit<Partial<InstanceType<typeof URL>>, 'search'> {
   search?: string | Record<string, string | number | boolean | null>;
@@ -87,11 +87,11 @@ const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProp
 
   const populatePathname = usePopulatePathname();
   const destination = populatePathname(href, segments);
-  const onClick = useLinkOnClick(destination);
+  const linkEventHandlers = useLinkEvents(destination);
 
   return cloneElement(children, {
     href: destination,
-    onClick,
+    ...linkEventHandlers,
     ...extraProps,
   });
 };
