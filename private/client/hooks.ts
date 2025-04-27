@@ -131,9 +131,10 @@ export const usePageTransition = () => {
     });
 
     return () => {
-      pagePromiseChain.then((defaultPage) => {
-        // At this point, the page is guaranteed to be available.
-        const page = defaultPage as FetchedPage;
+      pagePromiseChain.then((page) => {
+        // If the page is not available, then because the previous `.then()` call decided
+        // that it cannot be or should not be rendered.
+        if (!page) return;
 
         // The contents of this function are called immediately, and any state updates
         // performed within it will be marked as transitions.
