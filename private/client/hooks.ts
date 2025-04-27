@@ -9,7 +9,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useTransition,
 } from 'react';
 
 import { usePopulatePathname } from '../../public/universal/hooks.ts';
@@ -18,7 +17,7 @@ import type { PageFetchingOptions } from '../universal/types/util';
 import logger from '../universal/utils/logs';
 import { RootClientContext } from './context';
 import type { RevalidationReason } from './types/util';
-import fetchPage from './utils/fetch-page';
+import fetchPage, { type FetchedPage } from './utils/fetch-page';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**
@@ -31,7 +30,7 @@ export interface RootTransitionOptions extends PageFetchingOptions {
 const pageTransitionQueue = new Queue({ concurrency: 1 });
 
 export const usePageTransition = () => {
-  const [pendingTransition, startTransition] = useTransition();
+  const cache = useRef(new Map<string, FetchedPage>());
 
   const clientContext = useContext(RootClientContext);
   if (!clientContext)
@@ -55,7 +54,19 @@ export const usePageTransition = () => {
     type: 'manual' | 'automatic',
     options?: RootTransitionOptions,
   ) => {
+    const cacheable = !(options?.queries || options?.immediatelyUpdateQueryParams);
     const privateLocation = privateLocationRef.current;
+
+    if (cacheable) {
+      const maxAge = Date.now() - 10000;
+      const cacheEntry = cache.current.get(path);
+
+      // If the page was already loaded on the client and it's not older than 10 seconds,
+      // we can just render it directly without having to fetch it again.
+      if (cacheEntry && cacheEntry.time > maxAge) {
+        return () => window['BLADE_ROOT']!.render(cacheEntry.body);
+      }
+    }
 
     // If desired, already update the query params in the address bar before the server
     // has rendered the new ones. Take a look at the `RootClientContext.Provider`
@@ -74,14 +85,13 @@ export const usePageTransition = () => {
     // that means the page will already show the latest data.
     if (
       type === 'automatic' &&
-      (pageTransitionQueue.size > 0 ||
-        pageTransitionQueue.pending > 0 ||
-        pendingTransition)
+      (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0)
     ) {
-      logger.info(
-        'Skipping automatic page transition because of other pending page transitions.',
-      );
-      return;
+      return () => {
+        logger.info(
+          'Skipping automatic page transition because of other pending page transitions.',
+        );
+      };
     }
 
     const ongoingManualAmount = pageTransitionQueue.sizeBy({ priority: 1 });
@@ -97,39 +107,42 @@ export const usePageTransition = () => {
       pageTransitionQueue.clear();
     }
 
-    pageTransitionQueue
-      .add(() => fetchPage(path, options), {
-        priority: type === 'manual' ? 1 : 0,
-      })
-      .then((page) => {
-        if (!page) {
-          logger.info('Skipping page transition because it timed out or crashed.');
-          return;
-        }
+    const pagePromise = pageTransitionQueue.add(() => fetchPage(path, options), {
+      priority: type === 'manual' ? 1 : 0,
+    });
 
-        // By the time we're ready to render the new page, a newer page transition might
-        // have already been started. If that's the case, we want to skip the current
-        // update to prevent the UI from temporarily regressing to an older state.
-        if (
-          pageTransitionQueue.size > 0 ||
-          pageTransitionQueue.pending > 0 ||
-          pendingTransition
-        ) {
-          logger.info(
-            'Skipping page transition because of a newer pending page transition.',
-          );
-          return;
-        }
+    const pagePromiseChain = pagePromise.then((page) => {
+      if (!page) {
+        logger.info('Skipping page transition because it timed out or crashed.');
+        return;
+      }
 
-        // The contents of this function are called immediately, and any state updates
-        // performed within it will be marked as transitions.
-        startTransition(() => {
-          const root = window['BLADE_ROOT'];
-          if (!root) throw new Error('Missing React root');
+      // As soon as possible, store the page in the cache.
+      if (cacheable) cache.current.set(path, page);
 
-          root.render(page.body);
-        });
+      // By the time we're ready to render the new page, a newer page transition might
+      // have already been started. If that's the case, we want to skip the current
+      // update to prevent the UI from temporarily regressing to an older state.
+      if (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0) {
+        logger.info(
+          'Skipping page transition because of a newer pending page transition.',
+        );
+        return;
+      }
+
+      return page;
+    });
+
+    return () => {
+      pagePromiseChain.then((page) => {
+        // If the page is not available, then because the previous `.then()` call decided
+        // that it cannot be or should not be rendered.
+        if (!page) return;
+
+        // Render the page.
+        window['BLADE_ROOT']!.render(page.body);
       });
+    };
   };
 };
 
@@ -165,7 +178,7 @@ export const useRevalidation = <T extends RevalidationReason>() => {
 
     logger.info(`Revalidating ${path} (${reason})`);
 
-    transitionPage(path, 'automatic');
+    transitionPage(path, 'automatic')();
   };
 };
 

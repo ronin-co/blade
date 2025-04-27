@@ -1,7 +1,14 @@
 import { createId } from '@paralleldrive/cuid2';
 import type { Query } from '@ronin/compiler';
 import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
-import { type MouseEvent, useContext, useEffect, useRef } from 'react';
+import {
+  type MouseEvent,
+  type MouseEventHandler,
+  type TouchEventHandler,
+  useContext,
+  useEffect,
+  useRef,
+} from 'react';
 import type { PromiseTuple } from 'ronin/types';
 import { isStorableObject, processStorableObjects } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
@@ -22,7 +29,7 @@ import { usePrivateLocation } from '../../private/universal/hooks';
 import type { PageFetchingOptions } from '../../private/universal/types/util';
 import { generateUniqueId } from '../../private/universal/utils/crypto';
 import logger from '../../private/universal/utils/logs';
-import { usePopulatePathname, useRedirect } from '../universal/hooks';
+import { usePopulatePathname } from '../universal/hooks';
 
 interface MutationOptions {
   /** Display a different page once the queries have run. */
@@ -114,7 +121,7 @@ export const useMutation = () => {
       })),
       errorFallback: currentPathnameWithQuery,
       files,
-    });
+    })();
 
     return new Promise((resolve, reject) => {
       const clear = () => {
@@ -172,40 +179,76 @@ export const useMutation = () => {
 };
 
 // We're exposing this as a dedicated hook because there are often cases where it's not
-// possible to use our native `<Link>` component, but the event handler is still needed.
+// possible to use our native `<Link>` component, but the event handlers are still needed.
 // For example, if a drag-and-drop system is used, it might want to overwrite the click
-// handler and then choose to fire the user-provided one whenever it deems it to be a
+// handler and then choose to fire the one provided by Blade whenever it deems it to be a
 // good idea, instead of the browser immediately firing it after `onMouseUp`.
-export const useLinkOnClick = (
+export const useLinkEvents = (
   destination?: string,
-): ((event: MouseEvent) => void) | undefined => {
-  const redirect = useRedirect();
+): {
+  onClick: MouseEventHandler | undefined;
+
+  onMouseEnter: MouseEventHandler | undefined;
+  onTouchStart: TouchEventHandler | undefined;
+} => {
+  const transitionPage = usePageTransition();
+  const populatePathname = usePopulatePathname();
+  const activeTransition = useRef<() => void>();
 
   // The `destination` parameter is optional because components often have optional
   // `href` props, and since React doesn't allow hooks to be invoked conditionally, we
   // instead have to account for it ourselves. It's important that `undefined` and not
   // `null` is returned in this case, because the `onClick` prop that React offers for
   // elements does not allow `null`.
-  if (!destination) return undefined;
+  if (!destination) {
+    return {
+      onClick: undefined,
 
-  return (event: MouseEvent) => {
-    // With this, we're ensuring that the entire link acts like the default navigation
-    // behavior that normally applies when clicking a link. Meaning that, if a different
-    // event handler prevents the default action, we don't want to trigger the navigation.
-    if (event.defaultPrevented) return;
+      onMouseEnter: undefined,
+      onTouchStart: undefined,
+    };
+  }
 
-    // If someone wants to open the link in a new tab, we can just stop the execution of
-    // our own code and therefore allow for the default behavior of the browser to
-    // execute. More specifically, opening a link in a new tab means the browser has to
-    // load the page fresh anyways, so there's no need for us to handle the navigation.
-    if (event.metaKey) return;
+  const populatedPathname = populatePathname(destination);
 
-    event.preventDefault();
-
+  const primePage = () => {
     // We don't want to rely on `event.target` for retrieving the destination path, as
     // the event target might not be a link in the case that there are many nested
     // children present.
-    redirect(destination);
+    activeTransition.current = transitionPage(populatedPathname, 'manual');
+  };
+
+  return {
+    onMouseEnter: () => primePage(),
+    onTouchStart: () => primePage(),
+
+    onClick: (event: MouseEvent) => {
+      // With this, we're ensuring that the entire link acts like the default navigation
+      // behavior that normally applies when clicking a link. Like that, if a different
+      // event handler prevents the default action, we don't want to trigger the link.
+      if (event.defaultPrevented) return;
+
+      // If someone wants to open the link in a new tab, we can just stop the execution of
+      // our own code and therefore allow for the default behavior of the browser to
+      // execute. More specifically, opening a link in a new tab means the browser has to
+      // load the page fresh anyways, so there's no need for us to handle the navigation.
+      if (event.metaKey) return;
+
+      // Prevent the default browser behavior of links.
+      event.preventDefault();
+
+      // In the majority of cases, `onClick` will fire after `onMouseUp` or
+      // `onTouchStart` and thereby prime the page cache. However, there are cases in
+      // which they don't fire before `onClick`, such as when the element moves under a
+      // stationary pointer, for example via scrolling, CSS transforms, or DOM
+      // repositioning. In those cases, we have to make sure the page is still primed
+      // before we can render it.
+      if (!activeTransition.current) primePage();
+
+      // Render the primed page.
+      activeTransition.current!();
+      activeTransition.current = undefined;
+    },
   };
 };
 
@@ -268,7 +311,7 @@ export const usePagination = (
     newSearchParams.delete('page');
     const params = newSearchParams.toString();
 
-    transitionPage(privateLocation.pathname + (params ? `?${params}` : ''), 'manual');
+    transitionPage(privateLocation.pathname + (params ? `?${params}` : ''), 'manual')();
   };
 
   if (!nextPage) {
@@ -301,7 +344,7 @@ export const usePagination = (
 
     transitionPage(newPath, 'manual', {
       updateAddressBar: options?.updateAddressBar,
-    });
+    })();
   };
 
   return { paginate, resetPagination };
