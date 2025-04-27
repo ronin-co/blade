@@ -224,8 +224,8 @@ export const useLinkEvents = (
 
     onClick: (event: MouseEvent) => {
       // With this, we're ensuring that the entire link acts like the default navigation
-      // behavior that normally applies when clicking a link. Meaning that, if a different
-      // event handler prevents the default action, we don't want to trigger the navigation.
+      // behavior that normally applies when clicking a link. Like that, if a different
+      // event handler prevents the default action, we don't want to trigger the link.
       if (event.defaultPrevented) return;
 
       // If someone wants to open the link in a new tab, we can just stop the execution of
@@ -237,11 +237,12 @@ export const useLinkEvents = (
       // Prevent the default browser behavior of links.
       event.preventDefault();
 
-      // In the majority of cases, `onMouseEnter` will fire before `onMouseUp` and prime
-      // the page cache. However, there are cases in which `onMouseEnter` does not fire
-      // before `onMouseUp`, such as when the element moves under a stationary pointer,
-      // for example via scrolling, CSS transforms, or DOM repositioning. In those cases,
-      // we have to make sure the page is still primed before we render it.
+      // In the majority of cases, `onClick` will fire after `onMouseUp` or
+      // `onTouchStart` and thereby prime the page cache. However, there are cases in
+      // which they don't fire before `onClick`, such as when the element moves under a
+      // stationary pointer, for example via scrolling, CSS transforms, or DOM
+      // repositioning. In those cases, we have to make sure the page is still primed
+      // before we can render it.
       if (!activeTransition.current) primePage();
 
       // Render the primed page.
