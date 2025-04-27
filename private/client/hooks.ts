@@ -9,7 +9,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useTransition,
 } from 'react';
 
 import { usePopulatePathname } from '../../public/universal/hooks.ts';
@@ -31,7 +30,6 @@ export interface RootTransitionOptions extends PageFetchingOptions {
 const pageTransitionQueue = new Queue({ concurrency: 1 });
 
 export const usePageTransition = () => {
-  const [pendingTransition, startTransition] = useTransition();
   const cache = useRef(new Map<string, FetchedPage>());
 
   const clientContext = useContext(RootClientContext);
@@ -76,9 +74,7 @@ export const usePageTransition = () => {
     // that means the page will already show the latest data.
     if (
       type === 'automatic' &&
-      (pageTransitionQueue.size > 0 ||
-        pageTransitionQueue.pending > 0 ||
-        pendingTransition)
+      (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0)
     ) {
       return () => {
         logger.info(
@@ -116,11 +112,7 @@ export const usePageTransition = () => {
       // By the time we're ready to render the new page, a newer page transition might
       // have already been started. If that's the case, we want to skip the current
       // update to prevent the UI from temporarily regressing to an older state.
-      if (
-        pageTransitionQueue.size > 0 ||
-        pageTransitionQueue.pending > 0 ||
-        pendingTransition
-      ) {
+      if (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0) {
         logger.info(
           'Skipping page transition because of a newer pending page transition.',
         );
@@ -136,14 +128,10 @@ export const usePageTransition = () => {
         // that it cannot be or should not be rendered.
         if (!page) return;
 
-        // The contents of this function are called immediately, and any state updates
-        // performed within it will be marked as transitions.
-        startTransition(() => {
-          const root = window['BLADE_ROOT'];
-          if (!root) throw new Error('Missing React root');
+        const root = window['BLADE_ROOT'];
+        if (!root) throw new Error('Missing React root');
 
-          root.render(page.body);
-        });
+        root.render(page.body);
       });
     };
   };
