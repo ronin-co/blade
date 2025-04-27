@@ -186,7 +186,7 @@ export const useLinkEvents = (
   destination?: string,
 ): {
   onMouseEnter: MouseEventHandler | undefined;
-  onMouseUp: MouseEventHandler | undefined;
+  onClick: MouseEventHandler | undefined;
 } => {
   const transitionPage = usePageTransition();
   const populatePathname = usePopulatePathname();
@@ -200,7 +200,7 @@ export const useLinkEvents = (
   if (!destination) {
     return {
       onMouseEnter: undefined,
-      onMouseUp: undefined,
+      onClick: undefined,
     };
   }
 
@@ -214,15 +214,8 @@ export const useLinkEvents = (
   };
 
   return {
-    onMouseEnter: (event: MouseEvent) => {
-      // With this, we're ensuring that the entire link acts like the default navigation
-      // behavior that normally applies when clicking a link. Meaning that, if a different
-      // event handler prevents the default action, we don't want to trigger the navigation.
-      if (event.defaultPrevented) return;
-
-      primePage();
-    },
-    onMouseUp: (event: MouseEvent) => {
+    onMouseEnter: () => primePage(),
+    onClick: (event: MouseEvent) => {
       // With this, we're ensuring that the entire link acts like the default navigation
       // behavior that normally applies when clicking a link. Meaning that, if a different
       // event handler prevents the default action, we don't want to trigger the navigation.
