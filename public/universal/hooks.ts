@@ -81,7 +81,7 @@ const useRedirect = () => {
 
     transitionPage(populatedPathname, 'manual', {
       immediatelyUpdateQueryParams: options?.immediatelyUpdateQueryParams,
-    });
+    })();
   };
 };
 
