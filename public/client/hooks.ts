@@ -4,6 +4,7 @@ import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/qu
 import {
   type MouseEvent,
   type MouseEventHandler,
+  type TouchEventHandler,
   useContext,
   useEffect,
   useRef,
@@ -185,8 +186,10 @@ export const useMutation = () => {
 export const useLinkEvents = (
   destination?: string,
 ): {
-  onMouseEnter: MouseEventHandler | undefined;
   onClick: MouseEventHandler | undefined;
+
+  onMouseEnter: MouseEventHandler | undefined;
+  onTouchStart: TouchEventHandler | undefined;
 } => {
   const transitionPage = usePageTransition();
   const populatePathname = usePopulatePathname();
@@ -199,8 +202,10 @@ export const useLinkEvents = (
   // elements does not allow `null`.
   if (!destination) {
     return {
-      onMouseEnter: undefined,
       onClick: undefined,
+
+      onMouseEnter: undefined,
+      onTouchStart: undefined,
     };
   }
 
@@ -215,6 +220,8 @@ export const useLinkEvents = (
 
   return {
     onMouseEnter: () => primePage(),
+    onTouchStart: () => primePage(),
+
     onClick: (event: MouseEvent) => {
       // With this, we're ensuring that the entire link acts like the default navigation
       // behavior that normally applies when clicking a link. Meaning that, if a different
