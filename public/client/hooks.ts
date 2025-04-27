@@ -179,9 +179,9 @@ export const useMutation = () => {
 };
 
 // We're exposing this as a dedicated hook because there are often cases where it's not
-// possible to use our native `<Link>` component, but the event handler is still needed.
+// possible to use our native `<Link>` component, but the event handlers are still needed.
 // For example, if a drag-and-drop system is used, it might want to overwrite the click
-// handler and then choose to fire the user-provided one whenever it deems it to be a
+// handler and then choose to fire the one provided by Blade whenever it deems it to be a
 // good idea, instead of the browser immediately firing it after `onMouseUp`.
 export const useLinkEvents = (
   destination?: string,

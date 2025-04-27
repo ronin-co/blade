@@ -331,7 +331,7 @@ usePaginationBuffer<ReactElement>();
 
 In the majority of cases, you should use Blade's `<Link>` component to display links that should automatically result in a page transition (links pointing to external pages should just use anchor elements).
 
-In the rare scenario that you need to capture the `onMouseEnter` or `onMouseUp` event of a link element yourself for other purposes, however, you can use `useLinkEvents` to manually trigger the same event handlers that would normally be triggered for a `<Link>` component instance.
+In the rare scenario that you need to capture the click event of a link element yourself for other purposes, however, you can use `useLinkEvents` to manually trigger the same event handlers that would normally be triggered for a `<Link>` component instance.
 
 For example, if a drag-and-drop system is used, it might want to use those event handlers for different purposes (detecting whether an element is being dragged or dropped), so it could fire the ones provided by Blade at a different time.
 
