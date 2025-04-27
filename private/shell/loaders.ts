@@ -69,7 +69,7 @@ export const getClientReferenceLoader: (
       });
 
       if (requiresTranspilation && environment !== 'production') {
-        const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, ${contents.includes('Fragment') ? '' : 'Fragment as Fragment_8vg9x3sq'} } from "react/jsx-dev-runtime";`;
+        const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
 
         contents = `${newContents}\n${transpiler.transformSync(contents)}`;
         loader = 'js';
