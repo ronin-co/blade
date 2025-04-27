@@ -30,10 +30,15 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
   });
 };
 
+export interface FetchedPage {
+  body: ReactNode;
+  time: number;
+}
+
 const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
-): Promise<{ body: ReactNode; time: number } | null> => {
+): Promise<FetchedPage | null> => {
   let body = null;
 
   if (options && Object.keys(options).length > 0) {

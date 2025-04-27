@@ -18,7 +18,7 @@ import type { PageFetchingOptions } from '../universal/types/util';
 import logger from '../universal/utils/logs';
 import { RootClientContext } from './context';
 import type { RevalidationReason } from './types/util';
-import fetchPage from './utils/fetch-page';
+import fetchPage, { type FetchedPage } from './utils/fetch-page';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**
@@ -32,6 +32,7 @@ const pageTransitionQueue = new Queue({ concurrency: 1 });
 
 export const usePageTransition = () => {
   const [pendingTransition, startTransition] = useTransition();
+  const cache = useRef(new Map<string, FetchedPage>());
 
   const clientContext = useContext(RootClientContext);
   if (!clientContext)
@@ -55,6 +56,7 @@ export const usePageTransition = () => {
     type: 'manual' | 'automatic',
     options?: RootTransitionOptions,
   ) => {
+    const fetchType = options?.queries ? 'write' : 'read';
     const privateLocation = privateLocationRef.current;
 
     // If desired, already update the query params in the address bar before the server
@@ -78,10 +80,11 @@ export const usePageTransition = () => {
         pageTransitionQueue.pending > 0 ||
         pendingTransition)
     ) {
-      logger.info(
-        'Skipping automatic page transition because of other pending page transitions.',
-      );
-      return;
+      return () => {
+        logger.info(
+          'Skipping automatic page transition because of other pending page transitions.',
+        );
+      };
     }
 
     const ongoingManualAmount = pageTransitionQueue.sizeBy({ priority: 1 });
@@ -97,29 +100,40 @@ export const usePageTransition = () => {
       pageTransitionQueue.clear();
     }
 
-    pageTransitionQueue
-      .add(() => fetchPage(path, options), {
-        priority: type === 'manual' ? 1 : 0,
-      })
-      .then((page) => {
-        if (!page) {
-          logger.info('Skipping page transition because it timed out or crashed.');
-          return;
-        }
+    const pagePromise = pageTransitionQueue.add(() => fetchPage(path, options), {
+      priority: type === 'manual' ? 1 : 0,
+    });
 
-        // By the time we're ready to render the new page, a newer page transition might
-        // have already been started. If that's the case, we want to skip the current
-        // update to prevent the UI from temporarily regressing to an older state.
-        if (
-          pageTransitionQueue.size > 0 ||
-          pageTransitionQueue.pending > 0 ||
-          pendingTransition
-        ) {
-          logger.info(
-            'Skipping page transition because of a newer pending page transition.',
-          );
-          return;
-        }
+    const pagePromiseChain = pagePromise.then((page) => {
+      if (!page) {
+        logger.info('Skipping page transition because it timed out or crashed.');
+        return;
+      }
+
+      // As soon as possible, store the page in the cache.
+      if (fetchType === 'read') cache.current.set(path, page);
+
+      // By the time we're ready to render the new page, a newer page transition might
+      // have already been started. If that's the case, we want to skip the current
+      // update to prevent the UI from temporarily regressing to an older state.
+      if (
+        pageTransitionQueue.size > 0 ||
+        pageTransitionQueue.pending > 0 ||
+        pendingTransition
+      ) {
+        logger.info(
+          'Skipping page transition because of a newer pending page transition.',
+        );
+        return;
+      }
+
+      return page;
+    });
+
+    return () => {
+      pagePromiseChain.then((defaultPage) => {
+        // At this point, the page is guaranteed to be available.
+        const page = defaultPage as FetchedPage;
 
         // The contents of this function are called immediately, and any state updates
         // performed within it will be marked as transitions.
@@ -130,6 +144,7 @@ export const usePageTransition = () => {
           root.render(page.body);
         });
       });
+    };
   };
 };
 
@@ -165,7 +180,7 @@ export const useRevalidation = <T extends RevalidationReason>() => {
 
     logger.info(`Revalidating ${path} (${reason})`);
 
-    transitionPage(path, 'automatic');
+    transitionPage(path, 'automatic')();
   };
 };
 

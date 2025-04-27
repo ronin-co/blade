@@ -66,7 +66,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     const pageChanged = () => {
       const newLocation = window.location;
       const pathname = newLocation.pathname + newLocation.search + newLocation.hash;
-      transitionPage(pathname, 'manual');
+      transitionPage(pathname, 'manual')();
     };
 
     window.addEventListener('popstate', pageChanged);
