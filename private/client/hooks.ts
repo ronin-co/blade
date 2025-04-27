@@ -54,8 +54,19 @@ export const usePageTransition = () => {
     type: 'manual' | 'automatic',
     options?: RootTransitionOptions,
   ) => {
-    const fetchType = options?.queries ? 'write' : 'read';
+    const cacheable = !(options?.queries || options?.immediatelyUpdateQueryParams);
     const privateLocation = privateLocationRef.current;
+
+    if (cacheable) {
+      const maxAge = Date.now() - 10000;
+      const cacheEntry = cache.current.get(path);
+
+      // If the page was already loaded on the client and it's not older than 10 seconds,
+      // we can just render it directly without having to fetch it again.
+      if (cacheEntry && cacheEntry.time > maxAge) {
+        return () => window['BLADE_ROOT']!.render(cacheEntry.body);
+      }
+    }
 
     // If desired, already update the query params in the address bar before the server
     // has rendered the new ones. Take a look at the `RootClientContext.Provider`
@@ -107,7 +118,7 @@ export const usePageTransition = () => {
       }
 
       // As soon as possible, store the page in the cache.
-      if (fetchType === 'read') cache.current.set(path, page);
+      if (cacheable) cache.current.set(path, page);
 
       // By the time we're ready to render the new page, a newer page transition might
       // have already been started. If that's the case, we want to skip the current
@@ -128,10 +139,8 @@ export const usePageTransition = () => {
         // that it cannot be or should not be rendered.
         if (!page) return;
 
-        const root = window['BLADE_ROOT'];
-        if (!root) throw new Error('Missing React root');
-
-        root.render(page.body);
+        // Render the page.
+        window['BLADE_ROOT']!.render(page.body);
       });
     };
   };
