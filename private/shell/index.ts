@@ -115,8 +115,9 @@ if (isServing) {
     // when the process starts, and since we don't want to require `BUN_ENV` to be set
     // when starting `blade build`, we need a child process that we can set this
     // environment variable on.
+    const builderFileName = Bun.env.VERCEL === '1' ? 'vercel.ts' : 'default.ts';
     const builder = Bun.spawn(
-      ['bun', path.join(__dirname, 'builder.ts')],
+      ['bun', path.join(__dirname, 'builders', builderFileName)],
       childProcessConfig,
     );
 

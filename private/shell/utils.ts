@@ -187,11 +187,11 @@ export const logSpinner = (text: string) => {
   });
 };
 
-export const cleanUp = async () => {
+export const cleanUp = async (path = outputDirectory) => {
   const removalSpinner = logSpinner('Cleaning up previous build').start();
 
   try {
-    await rm(outputDirectory, { recursive: true });
+    await rm(path, { recursive: true });
   } catch (err: unknown) {
     if ((err as FileError).code !== 'ENOENT') {
       console.error(err);

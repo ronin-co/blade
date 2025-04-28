@@ -1,18 +1,18 @@
 import path from 'node:path';
 
-import { outputDirectory, serverInputFile, serverOutputFile } from './constants';
+import { outputDirectory, serverInputFile, serverOutputFile } from '../constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from './loaders';
-import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
+} from '../loaders';
+import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from '../utils';
 
 await cleanUp();
 await prepareClientAssets('production');
 
-const serverSpinner = logSpinner('Performing server build (production)').start();
+const spinner = logSpinner('Performing server build (production)').start();
 
 // Inline all environment variables on Cloudflare Pages, because their runtime does not
 // have support for `import.meta.env`. Everywhere else, only inline what is truly
@@ -47,9 +47,9 @@ const output = await Bun.build({
 });
 
 if (output.success) {
-  serverSpinner.succeed();
+  spinner.succeed();
 } else {
-  serverSpinner.fail();
+  spinner.fail();
 }
 
 handleBuildLogs(output);
