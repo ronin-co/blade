@@ -17,7 +17,7 @@ const edgeFuncOutputFile = path.join(edgeFuncOutputDir, OUTPUT_FILE_NAME);
 
 async function build(): Promise<void> {
   await cleanUp(vercelOutputDir);
-  await prepareClientAssets('production', vercelOutputDir);
+  await prepareClientAssets('production', path.join(vercelOutputDir, 'static'));
 
   const spinner = logSpinner('Performing server build (production)').start();
 
@@ -34,7 +34,7 @@ async function build(): Promise<void> {
       naming: `[dir]/${path.basename(edgeFuncOutputFile)}`,
       minify: true,
       sourcemap: 'external',
-      target: 'browser',
+      target: 'node',
       define: {
         'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
         'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
