@@ -32,7 +32,7 @@ async function build(): Promise<void> {
         getReactAriaLoader(),
       ],
       naming: `[dir]/${path.basename(edgeFuncOutputFile)}`,
-      minify: true,
+      minify: false,
       sourcemap: 'external',
       target: 'node',
       define: {
