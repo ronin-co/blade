@@ -1,13 +1,13 @@
 import path from 'node:path';
 
-import { outputDirectory, serverInputFile, serverOutputFile } from './constants';
+import { outputDirectory, serverInputFile, serverOutputFile } from '../constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from './loaders';
-import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
+} from '../loaders';
+import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from '../utils';
 
 await cleanUp();
 await prepareClientAssets('production');

@@ -116,7 +116,7 @@ if (isServing) {
     // when starting `blade build`, we need a child process that we can set this
     // environment variable on.
     const builder = Bun.spawn(
-      ['bun', path.join(__dirname, 'builder.ts')],
+      ['bun', path.join(__dirname, 'builders', 'default.ts')],
       childProcessConfig,
     );
 
