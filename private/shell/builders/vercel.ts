@@ -33,7 +33,7 @@ async function build(): Promise<void> {
       ],
       naming: `[dir]/${path.basename(edgeFuncOutputFile)}`,
       minify: false,
-      sourcemap: 'external',
+      // sourcemap: 'external',
       target: 'browser',
       define: {
         'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
