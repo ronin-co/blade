@@ -17,7 +17,7 @@ const edgeFuncOutputFile = path.join(edgeFuncOutputDir, OUTPUT_FILE_NAME);
 
 async function build(): Promise<void> {
   await cleanUp(vercelOutputDir);
-  await prepareClientAssets('production');
+  await prepareClientAssets('production', vercelOutputDir);
 
   const spinner = logSpinner('Performing server build (production)').start();
 

@@ -222,7 +222,10 @@ export const handleBuildLogs = (output: BuildOutput) => {
   }
 };
 
-export const prepareClientAssets = async (environment: 'development' | 'production') => {
+export const prepareClientAssets = async (
+  environment: 'development' | 'production',
+  outputPath = outputDirectory,
+) => {
   const bundleId = generateUniqueId();
 
   const clientSpinner = logSpinner(
@@ -236,7 +239,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     },
   );
 
-  const outdir = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
+  const outdir = path.join(outputPath, CLIENT_ASSET_PREFIX);
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
 
   const output = await Bun.build({
@@ -262,7 +265,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
 
   handleBuildLogs(output);
 
-  const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
+  const chunkFile = Bun.file(path.join(outputPath, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
     Bun.env['CF_PAGES'] ? 'if(!import.meta.env){import.meta.env={}};' : '',
@@ -292,7 +295,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
       '--input',
       path.join(__dirname, '../client/assets/styles.css'),
       '--output',
-      path.join(outputDirectory, getOutputFile(bundleId, 'css')),
+      path.join(outputPath, getOutputFile(bundleId, 'css')),
       ...(environment === 'production' ? ['--minify'] : []),
       '--content',
       content.join(','),
@@ -326,7 +329,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
-    await cp(publicDirectory, outputDirectory, { recursive: true });
+    await cp(publicDirectory, outputPath, { recursive: true });
 
   // Copy font files from font package.
   await mkdir(fontFileOutputDirectory);
@@ -336,7 +339,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     { type: 'js', source: getOutputFile(bundleId, 'js') },
     ...fontFiles.map((file) => ({
       type: 'font',
-      source: `/${path.relative(outputDirectory, file.output)}`,
+      source: `/${path.relative(outputPath, file.output)}`,
     })),
     { type: 'css', source: getOutputFile(bundleId, 'css') },
   ]);
