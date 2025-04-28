@@ -15,53 +15,57 @@ const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
 const edgeFuncOutputDir = path.resolve(vercelOutputDir, 'functions', 'index.func');
 const edgeFuncOutputFile = path.join(edgeFuncOutputDir, OUTPUT_FILE_NAME);
 
-await cleanUp(vercelOutputDir);
-await prepareClientAssets('production');
+async function build(): Promise<void> {
+  await cleanUp(vercelOutputDir);
+  await prepareClientAssets('production');
 
-const spinner = logSpinner('Performing server build (production)').start();
+  const spinner = logSpinner('Performing server build (production)').start();
 
-const [output] = await Promise.all([
-  Bun.build({
-    entrypoints: [serverInputFile],
-    outdir: edgeFuncOutputDir,
-    plugins: [
-      getClientReferenceLoader('production'),
-      getFileListLoader(true),
-      getMdxLoader('production'),
-      getReactAriaLoader(),
-    ],
-    naming: `[dir]/${path.basename(edgeFuncOutputFile)}`,
-    minify: true,
-    sourcemap: 'external',
-    target: 'browser',
-    define: {
-      'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
-      'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
-        import.meta.env.__BLADE_ASSETS_ID,
-      ),
-    },
-  }),
-
-  Bun.write(
-    path.join(vercelOutputDir, 'config.json'),
-    JSON.stringify({
-      version: 3,
+  const [output] = await Promise.all([
+    Bun.build({
+      entrypoints: [serverInputFile],
+      outdir: edgeFuncOutputDir,
+      plugins: [
+        getClientReferenceLoader('production'),
+        getFileListLoader(true),
+        getMdxLoader('production'),
+        getReactAriaLoader(),
+      ],
+      naming: `[dir]/${path.basename(edgeFuncOutputFile)}`,
+      minify: true,
+      sourcemap: 'external',
+      target: 'browser',
+      define: {
+        'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
+        'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
+          import.meta.env.__BLADE_ASSETS_ID,
+        ),
+      },
     }),
-  ),
 
-  Bun.write(
-    path.join(edgeFuncOutputDir, '.vc-config.json'),
-    JSON.stringify({
-      entrypoint: OUTPUT_FILE_NAME,
-      runtime: 'edge',
-    }),
-  ),
-]);
+    Bun.write(
+      path.join(vercelOutputDir, 'config.json'),
+      JSON.stringify({
+        version: 3,
+      }),
+    ),
 
-if (output.success) {
-  spinner.succeed();
-} else {
-  spinner.fail();
+    Bun.write(
+      path.join(edgeFuncOutputDir, '.vc-config.json'),
+      JSON.stringify({
+        entrypoint: OUTPUT_FILE_NAME,
+        runtime: 'edge',
+      }),
+    ),
+  ]);
+
+  if (output.success) {
+    spinner.succeed();
+  } else {
+    spinner.fail();
+  }
+
+  handleBuildLogs(output);
 }
 
-handleBuildLogs(output);
+build();
