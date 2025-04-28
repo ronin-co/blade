@@ -1,6 +1,7 @@
 #!/usr/bin/env -S bun
 
 import { watch } from 'node:fs';
+import { exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import type { SpawnOptions } from 'bun';
@@ -155,12 +156,13 @@ if (isServing) {
     };
 
     for (const project of projects) {
+      const pagePath = path.join(project, 'pages');
       const componentPath = path.join(project, 'components');
 
-      watch(path.join(project, 'pages'), { recursive: true }, handleFileChange);
+      watch(pagePath, { recursive: true }, handleFileChange);
 
-      if (await Bun.file(componentPath).exists()) {
-        watch(path.join(project, 'components'), { recursive: true }, handleFileChange);
+      if (await exists(componentPath)) {
+        watch(componentPath, { recursive: true }, handleFileChange);
       }
     }
   }
