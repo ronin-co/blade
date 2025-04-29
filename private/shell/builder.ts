@@ -55,7 +55,6 @@ const output = await Bun.build({
   sourcemap: 'external',
   target: 'browser',
   define,
-  external: ['node:async_hooks'],
 });
 
 if (output.success) {
