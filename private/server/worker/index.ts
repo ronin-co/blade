@@ -268,4 +268,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default app.fetch;
+export default new Hono().get('/', (c) => c.text('Hello World')).fetch;
