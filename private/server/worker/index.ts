@@ -2,10 +2,10 @@ import { sentry } from '@hono/sentry';
 import { hooks as hookList } from 'file-list';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
-import { handle } from 'hono/vercel';
 import type { Query, QueryType } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 
+import type { ExecutionContext } from 'hono';
 import { DataHookError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';
 import { CLIENT_ASSET_PREFIX, SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
@@ -269,4 +269,6 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default handle(app);
+export default function (request: Request, event: ExecutionContext) {
+  return app.fetch(request, {}, event);
+}
