@@ -15,10 +15,19 @@ await prepareClientAssets('production');
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
+const IS_CLOUDFLARE = Bun.env['CF_PAGES'];
+const IS_VERCEL = Bun.env['CF_PAGES'] === '1';
+
+const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
+  if (IS_CLOUDFLARE) return 'cloudflare';
+  if (IS_VERCEL) return 'vercel';
+  return '';
+};
+
 // Inline all environment variables on Cloudflare Pages, because their runtime does not
 // have support for `import.meta.env`. Everywhere else, only inline what is truly
 // necessary (what cannot be made available at runtime).
-const define: { [key: string]: string } = Bun.env['CF_PAGES']
+const define: { [key: string]: string } = IS_CLOUDFLARE
   ? Object.fromEntries(
       Object.entries(import.meta.env)
         .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
@@ -29,6 +38,7 @@ const define: { [key: string]: string } = Bun.env['CF_PAGES']
       'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
         import.meta.env.__BLADE_ASSETS_ID,
       ),
+      'import.meta.env.__BLADE_PROVIDER': getProvider(),
     };
 
 const output = await Bun.build({
@@ -53,6 +63,6 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (Bun.env.VERCEL === '1') await transformToVercelBuildOutput();
+if (IS_VERCEL) await transformToVercelBuildOutput();
 
 handleBuildLogs(output);
