@@ -1,18 +1,24 @@
 import path from 'node:path';
 
-import { outputDirectory, serverInputFile, serverOutputFile } from '../constants';
+import {
+  loggingPrefixes,
+  outputDirectory,
+  serverInputFile,
+  serverOutputFile,
+} from './constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from '../loaders';
-import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from '../utils';
+} from './loaders';
+import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
+import { transformToVercelBuildOutput } from './utils/providers';
 
 await cleanUp();
 await prepareClientAssets('production');
 
-const spinner = logSpinner('Performing server build (production)').start();
+const serverSpinner = logSpinner('Performing server build (production)').start();
 
 // Inline all environment variables on Cloudflare Pages, because their runtime does not
 // have support for `import.meta.env`. Everywhere else, only inline what is truly
@@ -47,9 +53,14 @@ const output = await Bun.build({
 });
 
 if (output.success) {
-  spinner.succeed();
+  serverSpinner.succeed();
 } else {
-  spinner.fail();
+  serverSpinner.fail();
+}
+
+if (Bun.env.VERCEL === '1') {
+  console.log(`${loggingPrefixes.info} Transforming to Vercel build output API...`);
+  transformToVercelBuildOutput();
 }
 
 handleBuildLogs(output);

@@ -4,24 +4,24 @@ import { copyFile, cp, exists, mkdir, readdir, rm } from 'node:fs/promises';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
-import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../universal/utils/constants';
-import { generateUniqueId } from '../universal/utils/crypto';
-import { getOutputFile } from '../universal/utils/paths';
+import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../../universal/utils/constants';
+import { generateUniqueId } from '../../universal/utils/crypto';
+import { getOutputFile } from '../../universal/utils/paths';
 import {
-  CLIENT_MANIFEST_FILE_NAME,
+  clientManifestFile,
   directoriesToParse,
   frameworkDirectory,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-} from './constants';
+} from '../constants';
 import {
   getClientChunkLoader,
   getClientComponentLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from './loaders';
-import type { ClientChunks, FileError } from './types';
+} from '../loaders';
+import type { ClientChunks, FileError } from '../types';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
   const files = await readdir(directory, { recursive: true });
@@ -187,11 +187,11 @@ export const logSpinner = (text: string) => {
   });
 };
 
-export const cleanUp = async (path = outputDirectory) => {
+export const cleanUp = async () => {
   const removalSpinner = logSpinner('Cleaning up previous build').start();
 
   try {
-    await rm(path, { recursive: true });
+    await rm(outputDirectory, { recursive: true });
   } catch (err: unknown) {
     if ((err as FileError).code !== 'ENOENT') {
       console.error(err);
@@ -222,10 +222,7 @@ export const handleBuildLogs = (output: BuildOutput) => {
   }
 };
 
-export const prepareClientAssets = async (
-  environment: 'development' | 'production',
-  outputPath = outputDirectory,
-) => {
+export const prepareClientAssets = async (environment: 'development' | 'production') => {
   const bundleId = generateUniqueId();
 
   const clientSpinner = logSpinner(
@@ -239,7 +236,7 @@ export const prepareClientAssets = async (
     },
   );
 
-  const outdir = path.join(outputPath, CLIENT_ASSET_PREFIX);
+  const outdir = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
 
   const output = await Bun.build({
@@ -261,12 +258,11 @@ export const prepareClientAssets = async (
       : undefined,
   });
 
-  const clientManifestFile = path.join(outputPath, CLIENT_MANIFEST_FILE_NAME);
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
 
   handleBuildLogs(output);
 
-  const chunkFile = Bun.file(path.join(outputPath, getOutputFile(bundleId, 'js')));
+  const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
     Bun.env['CF_PAGES'] ? 'if(!import.meta.env){import.meta.env={}};' : '',
@@ -296,7 +292,7 @@ export const prepareClientAssets = async (
       '--input',
       path.join(__dirname, '../client/assets/styles.css'),
       '--output',
-      path.join(outputPath, getOutputFile(bundleId, 'css')),
+      path.join(outputDirectory, getOutputFile(bundleId, 'css')),
       ...(environment === 'production' ? ['--minify'] : []),
       '--content',
       content.join(','),
@@ -330,7 +326,7 @@ export const prepareClientAssets = async (
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
-    await cp(publicDirectory, outputPath, { recursive: true });
+    await cp(publicDirectory, outputDirectory, { recursive: true });
 
   // Copy font files from font package.
   await mkdir(fontFileOutputDirectory);
@@ -340,7 +336,7 @@ export const prepareClientAssets = async (
     { type: 'js', source: getOutputFile(bundleId, 'js') },
     ...fontFiles.map((file) => ({
       type: 'font',
-      source: `/${path.relative(outputPath, file.output)}`,
+      source: `/${path.relative(outputDirectory, file.output)}`,
     })),
     { type: 'css', source: getOutputFile(bundleId, 'css') },
   ]);
