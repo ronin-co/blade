@@ -31,14 +31,22 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   await fs.rename(outputDirectory, staticFilesDir);
 
   await Promise.all([
+    Bun.write(
+      path.join(functionDir, 'index.js'),
+      `import worker from './_worker.js';
+export default function (request, event) {
+  return worker.fetch(request, {}, event);
+}`,
+    ),
+
     fs.rename(
       path.join(staticFilesDir, '_worker.js'),
-      path.join(functionDir, 'index.js'),
+      path.join(functionDir, '_worker.js'),
     ),
 
     fs.rename(
       path.join(staticFilesDir, '_worker.js.map'),
-      path.join(functionDir, 'index.js.map'),
+      path.join(functionDir, '_worker.js.map'),
     ),
 
     Bun.write(
