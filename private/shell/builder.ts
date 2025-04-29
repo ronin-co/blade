@@ -41,7 +41,7 @@ const output = await Bun.build({
     getReactAriaLoader(),
   ],
   naming: `[dir]/${path.basename(serverOutputFile)}`,
-  minify: true,
+  // minify: true,
   sourcemap: 'external',
   target: 'browser',
   define,
