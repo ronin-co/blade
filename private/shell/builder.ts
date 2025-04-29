@@ -1,11 +1,6 @@
 import path from 'node:path';
 
-import {
-  loggingPrefixes,
-  outputDirectory,
-  serverInputFile,
-  serverOutputFile,
-} from './constants';
+import { outputDirectory, serverInputFile, serverOutputFile } from './constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -58,9 +53,6 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (Bun.env.VERCEL === '1') {
-  console.log(`${loggingPrefixes.info} Transforming to Vercel build output API...`);
-  transformToVercelBuildOutput();
-}
+if (Bun.env.VERCEL === '1') await transformToVercelBuildOutput();
 
 handleBuildLogs(output);
