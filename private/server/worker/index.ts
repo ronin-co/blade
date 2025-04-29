@@ -5,7 +5,6 @@ import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 
-import type { ExecutionContext } from 'hono';
 import { DataHookError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';
 import { CLIENT_ASSET_PREFIX, SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
@@ -269,6 +268,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default function (request: Request, event: ExecutionContext) {
-  return app.fetch(request, {}, event);
-}
+export default app.fetch;
