@@ -24,6 +24,9 @@ type Bindings = {
   };
 };
 
+// biome-ignore lint/nursery/noProcessEnv: Edge functions expose environment variables via `process.env`
+const IS_VERCEL = process.env.VERCEL === '1';
+
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', async (c, next) => {
@@ -268,4 +271,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default import.meta.env.VERCEL === '1' ? app.fetch : app;
+export default IS_VERCEL ? app.fetch : app;
