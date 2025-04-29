@@ -19,6 +19,7 @@ declare module 'bun' {
     __BLADE_PORT: string;
     __BLADE_PROJECTS: string;
 
+    // Provided by Vercel as a system environment variable.
     VERCEL?: string;
   }
 }
