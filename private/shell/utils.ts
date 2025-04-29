@@ -8,7 +8,7 @@ import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../universal/utils/const
 import { generateUniqueId } from '../universal/utils/crypto';
 import { getOutputFile } from '../universal/utils/paths';
 import {
-  clientManifestFile,
+  CLIENT_MANIFEST_FILE_NAME,
   directoriesToParse,
   frameworkDirectory,
   loggingPrefixes,
@@ -261,6 +261,7 @@ export const prepareClientAssets = async (
       : undefined,
   });
 
+  const clientManifestFile = path.join(outputPath, CLIENT_MANIFEST_FILE_NAME);
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
 
   handleBuildLogs(output);

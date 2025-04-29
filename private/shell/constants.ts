@@ -18,7 +18,7 @@ export const directoriesToParse = {
 
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
 
-export const clientManifestFile = path.join(outputDirectory, 'client-manifest.json');
+export const CLIENT_MANIFEST_FILE_NAME = 'client-manifest.json';
 
 export const serverOutputFile = path.join(outputDirectory, '_worker.js');
 export const serverInputFile = require.resolve('../server/worker/index.ts');

@@ -26,7 +26,7 @@ async function build(): Promise<void> {
       entrypoints: [serverInputFile],
       outdir: edgeFuncOutputDir,
       plugins: [
-        getClientReferenceLoader('production'),
+        getClientReferenceLoader('production', vercelOutputDir),
         getFileListLoader(true),
         getMdxLoader('production'),
         getReactAriaLoader(),

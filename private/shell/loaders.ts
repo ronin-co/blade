@@ -7,13 +7,18 @@ import YAML from 'js-yaml';
 import rehypePrettyCode from 'rehype-pretty-code';
 
 import { generateUniqueId } from '../universal/utils/crypto';
-import { clientManifestFile, frameworkDirectory } from './constants';
+import {
+  CLIENT_MANIFEST_FILE_NAME,
+  frameworkDirectory,
+  outputDirectory,
+} from './constants';
 import type { ClientChunks } from './types';
 import { getFileList, scanExports, wrapClientExport } from './utils';
 
 export const getClientReferenceLoader: (
   environment: 'development' | 'production',
-) => BunPlugin = (environment) => ({
+  outputPath?: string,
+) => BunPlugin = (environment, outputPath) => ({
   name: 'Client Reference Loader',
   async setup(build) {
     let clientChunks: ClientChunks | null = null;
@@ -22,6 +27,11 @@ export const getClientReferenceLoader: (
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
       let contents = await Bun.file(source.path).text();
       let loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
+
+      const clientManifestFile = path.join(
+        outputPath ?? outputDirectory,
+        CLIENT_MANIFEST_FILE_NAME,
+      );
 
       const clientChunksUpdated = (await stat(clientManifestFile)).mtime;
 
