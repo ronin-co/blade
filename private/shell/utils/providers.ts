@@ -31,15 +31,22 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   await fs.rename(outputDirectory, staticFilesDir);
 
   await Promise.all([
-    fs.rename(
-      path.join(staticFilesDir, '_worker.js'),
+    Bun.write(
       path.join(functionDir, 'index.js'),
+      `export default function index(request, event) {
+  return new Response('Hello, from the Edge!')
+}`,
     ),
 
-    fs.rename(
-      path.join(staticFilesDir, '_worker.js.map'),
-      path.join(functionDir, 'index.js.map'),
-    ),
+    // fs.rename(
+    //   path.join(staticFilesDir, '_worker.js'),
+    //   path.join(functionDir, 'index.js'),
+    // ),
+
+    // fs.rename(
+    //   path.join(staticFilesDir, '_worker.js.map'),
+    //   path.join(functionDir, 'index.js.map'),
+    // ),
 
     Bun.write(
       path.join(vercelOutputDir, 'config.json'),
