@@ -268,4 +268,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default Bun.env.VERCEL === '1' ? app.fetch : app;
+export default import.meta.env.VERCEL === '1' ? app.fetch : app;
