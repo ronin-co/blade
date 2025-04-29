@@ -270,4 +270,4 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>().get('/', (c) => c.text('Hello world!'));
 
-export default app;
+export default app.fetch;
