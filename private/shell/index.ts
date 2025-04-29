@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bun
+#!/usr/bin/env bun
 
 import { watch } from 'node:fs';
 import { exists } from 'node:fs/promises';
