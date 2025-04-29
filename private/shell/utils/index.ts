@@ -290,7 +290,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     [
       tailwindBinPath,
       '--input',
-      path.join(__dirname, '../client/assets/styles.css'),
+      path.join(__dirname, '../../client/assets/styles.css'),
       '--output',
       path.join(outputDirectory, getOutputFile(bundleId, 'css')),
       ...(environment === 'production' ? ['--minify'] : []),
