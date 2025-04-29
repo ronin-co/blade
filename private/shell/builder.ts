@@ -16,7 +16,7 @@ await prepareClientAssets('production');
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
 const IS_CLOUDFLARE = Bun.env['CF_PAGES'];
-const IS_VERCEL = Bun.env['CF_PAGES'] === '1';
+const IS_VERCEL = Bun.env['VERCEL'] === '1';
 
 const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
   if (IS_CLOUDFLARE) return 'cloudflare';
