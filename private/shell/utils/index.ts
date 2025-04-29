@@ -240,7 +240,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
 
   const output = await Bun.build({
-    entrypoints: [require.resolve('../client/assets/chunks.ts')],
+    entrypoints: [require.resolve('../../client/assets/chunks.ts')],
     outdir,
     plugins: [
       getClientComponentLoader(projects),
