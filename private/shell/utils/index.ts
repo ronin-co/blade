@@ -155,6 +155,10 @@ export const setEnvironmentVariables = (options: {
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
   }
 
+  if (!import.meta.env['BLADE_PUBLIC_SENTRY_DSN']) {
+    import.meta.env['BLADE_PUBLIC_SENTRY_DSN'] = '';
+  }
+
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
   const environment =
