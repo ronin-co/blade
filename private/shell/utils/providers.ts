@@ -4,6 +4,12 @@ import path from 'node:path';
 import { logSpinner } from '.';
 import { outputDirectory } from '../constants';
 
+export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
+  if (Bun.env['CF_PAGES']) return 'cloudflare';
+  if (Bun.env['VERCEL'] === '1') return 'vercel';
+  return '';
+};
+
 /**
  * Transform to Vercel build output API.
  *
