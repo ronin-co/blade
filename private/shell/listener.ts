@@ -32,12 +32,11 @@ if (environment === 'development') {
 } else {
   // In cases where BLADE is run as a standalone server in production, we need a
   // separate Sentry instance outside of the worker file to catch all errors.
-  if (import.meta.env.BLADE_PUBLIC_SENTRY_DSN)
-    Sentry.init({
-      dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
-      release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
-      environment: SENTRY_ENVIRONMENT,
-    });
+  Sentry.init({
+    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
+    release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
+    environment: SENTRY_ENVIRONMENT,
+  });
 
   // Prevent the process from exiting when an exception occurs.
   process.on('uncaughtException', (error) => {
