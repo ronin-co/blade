@@ -149,11 +149,6 @@ export const setEnvironmentVariables = (options: {
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'];
   }
 
-  if (Bun.env['VERCEL']) {
-    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'];
-    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
-  }
-
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
   const environment =
