@@ -29,14 +29,11 @@ export const mapProviderInlineDefinitions = (): Record<string, string> => {
   switch (import.meta.env.__BLADE_PROVIDER) {
     case 'cloudflare':
     case 'vercel': {
-      const entries = new Map<string, string>();
-      for (const [key, value] of Object.entries(import.meta.env)) {
-        if (!value) continue;
-        if (key.startsWith('BLADE_') || key.startsWith('__BLADE_')) {
-          entries.set(`import.meta.env.${key}`, JSON.stringify(value));
-        }
-      }
-      return Object.fromEntries(entries);
+      return Object.fromEntries(
+        Object.entries(import.meta.env)
+          .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
+          .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
+      );
     }
     default:
       return {
