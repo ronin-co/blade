@@ -39,12 +39,12 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   await Promise.all([
     fs.rename(
       path.join(staticFilesDir, '_worker.js'),
-      path.join(functionDir, 'index.js'),
+      path.join(functionDir, 'index.mjs'),
     ),
 
     fs.rename(
       path.join(staticFilesDir, '_worker.js.map'),
-      path.join(functionDir, 'index.js.map'),
+      path.join(functionDir, 'index.mjs.map'),
     ),
 
     Bun.write(
@@ -56,7 +56,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     Bun.write(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
-        handler: 'index.js',
+        handler: 'index.mjs',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
       }),
