@@ -23,19 +23,13 @@ export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
  * `import.meta.env`. Everywhere else, only inline what is truly necessary
  * (what cannot be made available at runtime).
  *
- * @param provider - The provider name.
- *
  * @returns A record / object of environment variables to be inlined.
  */
-export const mapProviderInlineDefinitions = (
-  provider: typeof Bun.env.__BLADE_PROVIDER,
-): Record<string, string> => {
-  switch (provider) {
+export const mapProviderInlineDefinitions = (): Record<string, string> => {
+  switch (import.meta.env.__BLADE_PROVIDER) {
     case 'cloudflare':
     case 'vercel': {
-      const entries = new Map<string, string>([
-        ['import.meta.env.__BLADE_PROVIDER', JSON.stringify(provider)],
-      ]);
+      const entries = new Map<string, string>();
       for (const [key, value] of Object.entries(import.meta.env)) {
         if (key.startsWith('BLADE_') || key.startsWith('__BLADE_')) {
           entries.set(`import.meta.env.${key}`, JSON.stringify(value));
@@ -49,7 +43,6 @@ export const mapProviderInlineDefinitions = (
         'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
           import.meta.env.__BLADE_ASSETS_ID,
         ),
-        'import.meta.env.__BLADE_PROVIDER': provider,
       };
   }
 };

@@ -22,6 +22,7 @@ import {
   getReactAriaLoader,
 } from '../loaders';
 import type { ClientChunks, FileError } from '../types';
+import { getProvider } from './providers';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
   const files = await readdir(directory, { recursive: true });
@@ -173,6 +174,9 @@ export const setEnvironmentVariables = (options: {
 
   // The directories that contain the source code of the application.
   import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
+
+  // Get the current provider based on the environment variables.
+  import.meta.env['__BLADE_PROVIDER'] = getProvider();
 };
 
 export const getClientEnvironmentVariables = () => {
