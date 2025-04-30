@@ -4,6 +4,11 @@ import path from 'node:path';
 import { logSpinner } from '.';
 import { outputDirectory } from '../constants';
 
+/**
+ * Get the name of the provider based on the environment variables.
+ *
+ * @returns A string representing the provider name.
+ */
 export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
   if (Bun.env['CF_PAGES']) return 'cloudflare';
   if (Bun.env['VERCEL'] === '1') return 'vercel';
