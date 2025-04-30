@@ -17,23 +17,22 @@ const serverSpinner = logSpinner('Performing server build (production)').start()
 
 const bladeProvider = getProvider();
 
-// Inline all environment variables on Cloudflare Pages, because their runtime does not
-// have support for `import.meta.env`. Everywhere else, only inline what is truly
-// necessary (what cannot be made available at runtime).
-const define: { [key: string]: string } =
-  bladeProvider === 'cloudflare'
-    ? Object.fromEntries(
-        Object.entries(import.meta.env)
-          .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
-          .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
-      )
-    : {
-        'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
-        'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
-          import.meta.env.__BLADE_ASSETS_ID,
-        ),
-        'import.meta.env.__BLADE_PROVIDER': bladeProvider,
-      };
+// Inline all environment variables on Cloudflare Pages or Vercel, because their runtime
+// does not have support for `import.meta.env`. Everywhere else, only inline what is
+// truly necessary (what cannot be made available at runtime).
+const define: { [key: string]: string } = ['cloudflare', 'vercel'].includes(bladeProvider)
+  ? Object.fromEntries(
+      Object.entries(import.meta.env)
+        .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
+        .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
+    )
+  : {
+      'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
+      'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
+        import.meta.env.__BLADE_ASSETS_ID,
+      ),
+      'import.meta.env.__BLADE_PROVIDER': bladeProvider,
+    };
 
 const output = await Bun.build({
   entrypoints: [serverInputFile],
