@@ -19,7 +19,7 @@ interface HistoryContentProps {
 // In addition, however, we must prevent the initialization if the client component is
 // rendered on the server. That's because the server uses a separate Sentry instance that
 // sits outside React's component tree, in order to guarantee that all errors are caught.
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && import.meta.env.BLADE_PUBLIC_SENTRY_DSN) {
   Sentry.init({
     dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
     release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
