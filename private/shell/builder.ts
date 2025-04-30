@@ -8,31 +8,18 @@ import {
   getReactAriaLoader,
 } from './loaders';
 import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
-import { getProvider, transformToVercelBuildOutput } from './utils/providers';
+import {
+  getProvider,
+  mapProviderInlineDefinitions,
+  transformToVercelBuildOutput,
+} from './utils/providers';
 
 await cleanUp();
 await prepareClientAssets('production');
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
-const bladeProvider = getProvider();
-
-// Inline all environment variables on Cloudflare Pages or Vercel, because their runtime
-// does not have support for `import.meta.env`. Everywhere else, only inline what is
-// truly necessary (what cannot be made available at runtime).
-const define: { [key: string]: string } = ['cloudflare', 'vercel'].includes(bladeProvider)
-  ? Object.fromEntries(
-      Object.entries(import.meta.env)
-        .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
-        .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
-    )
-  : {
-      'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
-      'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
-        import.meta.env.__BLADE_ASSETS_ID,
-      ),
-      'import.meta.env.__BLADE_PROVIDER': bladeProvider,
-    };
+const provider = getProvider();
 
 const output = await Bun.build({
   entrypoints: [serverInputFile],
@@ -47,7 +34,7 @@ const output = await Bun.build({
   // minify: true,
   sourcemap: 'external',
   target: 'browser',
-  define,
+  define: mapProviderInlineDefinitions(provider),
 });
 
 if (output.success) {
@@ -56,6 +43,6 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (bladeProvider === 'vercel') await transformToVercelBuildOutput();
+if (provider === 'vercel') await transformToVercelBuildOutput();
 
 handleBuildLogs(output);
