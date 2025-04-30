@@ -156,7 +156,8 @@ export const setEnvironmentVariables = (options: {
   }
 
   if (!import.meta.env['BLADE_PUBLIC_SENTRY_DSN']) {
-    import.meta.env['BLADE_PUBLIC_SENTRY_DSN'] = '';
+    // @ts-expect-error `undefined ` does not suffice as an default value.
+    import.meta.env['BLADE_PUBLIC_SENTRY_DSN'] = null;
   }
 
   // Used by dependencies and the application itself to understand which environment the
