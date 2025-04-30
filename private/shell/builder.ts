@@ -9,7 +9,6 @@ import {
 } from './loaders';
 import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
 import {
-  getProvider,
   mapProviderInlineDefinitions,
   transformToVercelBuildOutput,
 } from './utils/providers';
@@ -19,7 +18,7 @@ await prepareClientAssets('production');
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
-const provider = getProvider();
+// const provider = getProvider();
 
 const output = await Bun.build({
   entrypoints: [serverInputFile],
@@ -34,7 +33,7 @@ const output = await Bun.build({
   // minify: true,
   sourcemap: 'external',
   target: 'browser',
-  define: mapProviderInlineDefinitions(provider),
+  define: mapProviderInlineDefinitions(),
 });
 
 if (output.success) {
@@ -43,6 +42,6 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (provider === 'vercel') await transformToVercelBuildOutput();
+if (import.meta.env.__BLADE_PROVIDER === 'vercel') await transformToVercelBuildOutput();
 
 handleBuildLogs(output);
