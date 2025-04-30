@@ -18,6 +18,11 @@ import type {
   PostGetHook as OriginalPostGetHook,
   PostRemoveHook as OriginalPostRemoveHook,
   PostSetHook as OriginalPostSetHook,
+  PreAddHook as OriginalPreAddHook,
+  PreCountHook as OriginalPreCountHook,
+  PreGetHook as OriginalPreGetHook,
+  PreRemoveHook as OriginalPreRemoveHook,
+  PreSetHook as OriginalPreSetHook,
   RemoveHook as OriginalRemoveHook,
   SetHook as OriginalSetHook,
 } from 'ronin/types';
@@ -89,6 +94,22 @@ export type ValueOf<T> = T[keyof T];
 type AddOptionsArgument<T> = T extends (...args: [...infer Rest, infer Last]) => infer R
   ? (...args: [...Rest, Last & DataHookOptions]) => R
   : never;
+
+export type PreCountHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPreCountHook>>
+) => ReturnType<OriginalPreCountHook>;
+export type PreAddHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPreAddHook>>
+) => ReturnType<OriginalPreAddHook>;
+export type PreRemoveHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPreRemoveHook>>
+) => ReturnType<OriginalPreRemoveHook>;
+export type PreGetHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPreGetHook>>
+) => ReturnType<OriginalPreGetHook>;
+export type PreSetHook = (
+  ...args: Parameters<AddOptionsArgument<OriginalPreSetHook>>
+) => ReturnType<OriginalPreSetHook>;
 
 export type BeforeCountHook = (
   ...args: Parameters<AddOptionsArgument<OriginalBeforeCountHook>>
