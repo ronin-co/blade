@@ -18,8 +18,6 @@ await prepareClientAssets('production');
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
-// const provider = getProvider();
-
 const output = await Bun.build({
   entrypoints: [serverInputFile],
   outdir: outputDirectory,
