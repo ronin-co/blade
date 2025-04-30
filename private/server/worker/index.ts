@@ -57,20 +57,19 @@ app.use('*', async (c, next) => {
   await next();
 });
 
-if (import.meta.env.BLADE_PUBLIC_SENTRY_DSN)
-  app.use(
-    '*',
-    sentry({
-      // If this variable is missing, Sentry automatically won't capture any errors.
-      dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
-      release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
-      environment: SENTRY_ENVIRONMENT,
-      requestDataOptions: {
-        allowedHeaders: ['user-agent'],
-        allowedSearchParams: /(.*)/,
-      },
-    }),
-  );
+app.use(
+  '*',
+  sentry({
+    // If this variable is missing, Sentry automatically won't capture any errors.
+    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
+    release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
+    environment: SENTRY_ENVIRONMENT,
+    requestDataOptions: {
+      allowedHeaders: ['user-agent'],
+      allowedSearchParams: /(.*)/,
+    },
+  }),
+);
 
 // Strip trailing slashes.
 app.all('*', async (c, next) => {
