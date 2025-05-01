@@ -71,7 +71,7 @@ export const getFileList = async (): Promise<string> => {
 
   file += '\n\n';
   file += 'export const pages = { ...customPages, ...defaultPages };\n';
-  file += 'export const hooks = { ...customHooks };\n';
+  file += 'export const effects = { ...customEffects };\n';
 
   return file;
 };
