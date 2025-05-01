@@ -1,4 +1,3 @@
-import { sentry } from '@hono/sentry';
 import { hooks as hookList } from 'file-list';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
@@ -7,7 +6,7 @@ import { InvalidResponseError } from 'ronin/utils';
 
 import { DataHookError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';
-import { CLIENT_ASSET_PREFIX, SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
+import { CLIENT_ASSET_PREFIX } from '../../universal/utils/constants';
 import { runQueries, toDashCase } from '../utils/data';
 import {
   getRequestGeoLocation,
@@ -56,22 +55,6 @@ app.use('*', async (c, next) => {
 
   await next();
 });
-
-app.use(
-  '*',
-  sentry({
-    // If this variable is missing, Sentry automatically won't capture any errors.
-    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN
-      ? import.meta.env.BLADE_PUBLIC_SENTRY_DSN
-      : undefined,
-    release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
-    environment: SENTRY_ENVIRONMENT,
-    requestDataOptions: {
-      allowedHeaders: ['user-agent'],
-      allowedSearchParams: /(.*)/,
-    },
-  }),
-);
 
 // Strip trailing slashes.
 app.all('*', async (c, next) => {
