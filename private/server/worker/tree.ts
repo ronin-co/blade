@@ -734,7 +734,7 @@ const renderReactTree = async (
   const clientBundle = c.req.raw.headers.get('X-Client-Bundle-Id');
 
   // The ID of the main bundle currently available on the server.
-  const serverBundle = import.meta.env['__BLADE_ASSETS_ID'];
+  const serverBundle = import.meta.env.__BLADE_ASSETS_ID;
 
   // If the application is being rendered for the first time, we want to render it as
   // static markup. The same should happen if a new main bundle is available on the
