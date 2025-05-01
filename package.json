@@ -1,6 +1,6 @@
 {
   "name": "@ronin/blade",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "description": "React at the edge.",
   "repository": "ronin-co/blade",
