@@ -286,7 +286,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     'node_modules/.bin/tailwindcss',
   );
 
-  Bun.spawn(
+  const tailwindProcess = Bun.spawn(
     [
       tailwindBinPath,
       '--input',
@@ -311,6 +311,19 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
       cwd: process.cwd(),
     },
   );
+  if (environment === 'production') {
+    const tailwindProcessExitCode = await tailwindProcess.exited;
+    if (tailwindProcessExitCode !== 0) {
+      clientSpinner.fail('Failed to build Tailwind CSS styles.');
+      const { value } = await tailwindProcess.stderr.getReader().read();
+      const errorMessage = new TextDecoder().decode(value);
+      console.log(
+        loggingPrefixes.error,
+        errorMessage.replaceAll('\n', `\n${loggingPrefixes.error}`),
+      );
+      process.exit(1);
+    }
+  }
 
   const fontFileDirectory = path.join(
     path.dirname(require.resolve('@fontsource-variable/inter')),
