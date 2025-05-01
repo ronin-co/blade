@@ -74,19 +74,12 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   await Promise.all([
     fs.rename(
       path.join(staticFilesDir, '_worker.js'),
-      path.join(functionDir, '_worker.mjs'),
+      path.join(functionDir, 'index.mjs'),
     ),
 
     fs.rename(
       path.join(staticFilesDir, '_worker.js.map'),
-      path.join(functionDir, '_worker.mjs.map'),
-    ),
-
-    Bun.write(
-      path.join(functionDir, 'index.mjs'),
-      `import { handle } from '@hono/node-server/vercel';
-import app from './_worker.mjs';
-export default handle(app);`,
+      path.join(functionDir, 'index.mjs.map'),
     ),
 
     Bun.write(

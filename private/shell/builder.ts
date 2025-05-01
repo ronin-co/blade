@@ -1,6 +1,11 @@
 import path from 'node:path';
 
-import { outputDirectory, serverInputFile, serverOutputFile } from './constants';
+import {
+  outputDirectory,
+  serverInputFile,
+  serverOutputFile,
+  serverVercelInputFile,
+} from './constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -21,7 +26,7 @@ const serverSpinner = logSpinner('Performing server build (production)').start()
 const IS_VERCEL = import.meta.env.__BLADE_PROVIDER === 'vercel';
 
 const output = await Bun.build({
-  entrypoints: [serverInputFile],
+  entrypoints: [IS_VERCEL ? serverVercelInputFile : serverInputFile],
   outdir: outputDirectory,
   plugins: [
     getClientReferenceLoader('production'),
