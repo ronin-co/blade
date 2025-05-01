@@ -324,16 +324,18 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
       cwd: process.cwd(),
     },
   );
-  const tailwindProcessExitCode = await tailwindProcess.exited;
-  if (tailwindProcessExitCode !== 0) {
-    clientSpinner.fail(`${loggingPrefixes.error} Failed to build Tailwind CSS styles.`);
-    const { value } = await tailwindProcess.stderr.getReader().read();
-    const errorMessage = new TextDecoder().decode(value);
-    console.log(
-      loggingPrefixes.info,
-      errorMessage.replaceAll('\n', `\n${loggingPrefixes.info}`),
-    );
-    process.exit(1);
+  if (environment === 'production') {
+    const tailwindProcessExitCode = await tailwindProcess.exited;
+    if (tailwindProcessExitCode !== 0) {
+      clientSpinner.fail('Failed to build Tailwind CSS styles.');
+      const { value } = await tailwindProcess.stderr.getReader().read();
+      const errorMessage = new TextDecoder().decode(value);
+      console.log(
+        loggingPrefixes.error,
+        errorMessage.replaceAll('\n', `\n${loggingPrefixes.error}`),
+      );
+      process.exit(1);
+    }
   }
 
   const fontFileDirectory = path.join(
