@@ -313,12 +313,12 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
   );
   const tailwindProcessExitCode = await tailwindProcess.exited;
   if (tailwindProcessExitCode !== 0) {
-    clientSpinner.fail(`${loggingPrefixes.error} Failed to build Tailwind CSS styles.`);
+    clientSpinner.fail('Failed to build Tailwind CSS styles.');
     const { value } = await tailwindProcess.stderr.getReader().read();
     const errorMessage = new TextDecoder().decode(value);
     console.log(
       loggingPrefixes.error,
-      errorMessage.replaceAll('\n', `\n${loggingPrefixes.info}`),
+      errorMessage.replaceAll('\n', `\n${loggingPrefixes.error}`),
     );
     process.exit(1);
   }
