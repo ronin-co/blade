@@ -52,8 +52,9 @@ export const getRoninOptions = (
     return res;
   };
 
-  const dataFetcherWaitUntil = c.executionCtx
-    ? c.executionCtx.waitUntil?.bind(c.executionCtx)
+  const executionCtx = c.executionCtx ?? null;
+  const dataFetcherWaitUntil = executionCtx
+    ? executionCtx.waitUntil?.bind(executionCtx)
     : undefined;
 
   return {
