@@ -1,8 +1,8 @@
 declare module 'file-list' {
-  import type { DataHooksList, TreeItem } from './index';
+  import type { EffectsList, TreeItem } from './index';
 
   export const pages: Record<string, TreeItem | 'DIRECTORY'>;
-  export const hooks: DataHooksList;
+  export const effects: EffectsList;
 }
 
 declare module '@mapbox/timespace' {

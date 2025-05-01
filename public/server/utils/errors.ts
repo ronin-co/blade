@@ -17,7 +17,7 @@ const joinFields = (fields: string[]): string =>
     ? '[]'
     : fields.map((field) => `\`${field}\``).join(', ');
 
-class DataHookError extends Error {
+class EffectError extends Error {
   code?: ErrorDetails['code'];
   fields?: ErrorDetails['fields'];
   instructions?: ErrorDetails['instructions'];
@@ -25,14 +25,14 @@ class DataHookError extends Error {
   constructor(details?: ErrorDetails) {
     super(details?.message);
 
-    this.name = 'DataHookError';
+    this.name = 'EffectError';
     this.code = details?.code;
     this.fields = details?.fields || [];
     this.instructions = details?.instructions || [];
   }
 }
 
-class InvalidFieldsError extends DataHookError {
+class InvalidFieldsError extends EffectError {
   constructor(details: ErrorDetails & { fields: string[]; reasons?: string[] }) {
     const { fields, reasons } = details;
     const joined = joinFields(fields);
@@ -48,7 +48,7 @@ class InvalidFieldsError extends DataHookError {
   }
 }
 
-class EmptyFieldsError extends DataHookError {
+class EmptyFieldsError extends EffectError {
   constructor(details: ErrorDetails & { fields: string[] }) {
     const { fields } = details;
     const joined = joinFields(fields);
@@ -63,7 +63,7 @@ class EmptyFieldsError extends DataHookError {
   }
 }
 
-class ExtraneousFieldsError extends DataHookError {
+class ExtraneousFieldsError extends EffectError {
   constructor(details: ErrorDetails & { fields: string[] }) {
     const { fields } = details;
     const joined = joinFields(fields);
@@ -78,7 +78,7 @@ class ExtraneousFieldsError extends DataHookError {
   }
 }
 
-class RecordExistsError extends DataHookError {
+class RecordExistsError extends EffectError {
   constructor(details?: ErrorDetails) {
     super({
       message: details?.message || 'The provided record already exists.',
@@ -88,7 +88,7 @@ class RecordExistsError extends DataHookError {
   }
 }
 
-class RecordNotFoundError extends DataHookError {
+class RecordNotFoundError extends EffectError {
   constructor(details?: ErrorDetails) {
     super({
       message: details?.message || 'No record could be found for the provided query.',
@@ -98,7 +98,7 @@ class RecordNotFoundError extends DataHookError {
   }
 }
 
-class TooManyRequestsError extends DataHookError {
+class TooManyRequestsError extends EffectError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -110,7 +110,7 @@ class TooManyRequestsError extends DataHookError {
   }
 }
 
-class InvalidPermissionsError extends DataHookError {
+class InvalidPermissionsError extends EffectError {
   constructor(details?: ErrorDetails) {
     super({
       message: details?.message || 'You do not have permission to perform this action.',
@@ -119,7 +119,7 @@ class InvalidPermissionsError extends DataHookError {
   }
 }
 
-class AddNotAllowedError extends DataHookError {
+class AddNotAllowedError extends EffectError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -130,7 +130,7 @@ class AddNotAllowedError extends DataHookError {
   }
 }
 
-class SetNotAllowedError extends DataHookError {
+class SetNotAllowedError extends EffectError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -141,7 +141,7 @@ class SetNotAllowedError extends DataHookError {
   }
 }
 
-class RemoveNotAllowedError extends DataHookError {
+class RemoveNotAllowedError extends EffectError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -152,7 +152,7 @@ class RemoveNotAllowedError extends DataHookError {
   }
 }
 
-class MultipleWithInstructionsError extends DataHookError {
+class MultipleWithInstructionsError extends EffectError {
   constructor() {
     super({
       message: 'The given `with` instruction must not be an array.',
@@ -163,7 +163,7 @@ class MultipleWithInstructionsError extends DataHookError {
 }
 
 export {
-  DataHookError,
+  EffectError,
   InvalidFieldsError,
   EmptyFieldsError,
   ExtraneousFieldsError,
