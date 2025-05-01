@@ -5,14 +5,14 @@ import gradient from 'gradient-string';
 
 export const pagesDirectory = path.resolve(process.cwd(), 'pages');
 export const componentsDirectory = path.resolve(process.cwd(), 'components');
-export const hooksDirectory = path.resolve(process.cwd(), 'hooks');
+export const effectsDirectory = path.resolve(process.cwd(), 'effects');
 export const publicDirectory = path.resolve(process.cwd(), 'public');
 
 export const frameworkDirectory = path.join(__dirname, '..', '..');
 
 export const directoriesToParse = {
   customPages: pagesDirectory,
-  customHooks: hooksDirectory,
+  customEffects: effectsDirectory,
   defaultPages: path.join(frameworkDirectory, 'private/server/pages'),
 };
 

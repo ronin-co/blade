@@ -1,30 +1,30 @@
 import type { ComponentType, FunctionComponent } from 'react';
 import type {
-  AddHook as OriginalAddHook,
-  AfterAddHook as OriginalAfterAddHook,
-  AfterCountHook as OriginalAfterCountHook,
-  AfterGetHook as OriginalAfterGetHook,
-  AfterRemoveHook as OriginalAfterRemoveHook,
-  AfterSetHook as OriginalAfterSetHook,
-  BeforeAddHook as OriginalBeforeAddHook,
-  BeforeCountHook as OriginalBeforeCountHook,
-  BeforeGetHook as OriginalBeforeGetHook,
-  BeforeRemoveHook as OriginalBeforeRemoveHook,
-  BeforeSetHook as OriginalBeforeSetHook,
-  CountHook as OriginalCountHook,
-  FollowingAddHook as OriginalFollowingAddHook,
-  FollowingCountHook as OriginalFollowingCountHook,
-  FollowingGetHook as OriginalFollowingGetHook,
-  FollowingRemoveHook as OriginalFollowingRemoveHook,
-  FollowingSetHook as OriginalFollowingSetHook,
-  GetHook as OriginalGetHook,
-  RemoveHook as OriginalRemoveHook,
-  ResolvingAddHook as OriginalResolvingAddHook,
-  ResolvingCountHook as OriginalResolvingCountHook,
-  ResolvingGetHook as OriginalResolvingGetHook,
-  ResolvingRemoveHook as OriginalResolvingRemoveHook,
-  ResolvingSetHook as OriginalResolvingSetHook,
-  SetHook as OriginalSetHook,
+  AddEffect as OriginalAddEffect,
+  AfterAddEffect as OriginalAfterAddEffect,
+  AfterCountEffect as OriginalAfterCountEffect,
+  AfterGetEffect as OriginalAfterGetEffect,
+  AfterRemoveEffect as OriginalAfterRemoveEffect,
+  AfterSetEffect as OriginalAfterSetEffect,
+  BeforeAddEffect as OriginalBeforeAddEffect,
+  BeforeCountEffect as OriginalBeforeCountEffect,
+  BeforeGetEffect as OriginalBeforeGetEffect,
+  BeforeRemoveEffect as OriginalBeforeRemoveEffect,
+  BeforeSetEffect as OriginalBeforeSetEffect,
+  CountEffect as OriginalCountEffect,
+  FollowingAddEffect as OriginalFollowingAddEffect,
+  FollowingCountEffect as OriginalFollowingCountEffect,
+  FollowingGetEffect as OriginalFollowingGetEffect,
+  FollowingRemoveEffect as OriginalFollowingRemoveEffect,
+  FollowingSetEffect as OriginalFollowingSetEffect,
+  GetEffect as OriginalGetEffect,
+  RemoveEffect as OriginalRemoveEffect,
+  ResolvingAddEffect as OriginalResolvingAddEffect,
+  ResolvingCountEffect as OriginalResolvingCountEffect,
+  ResolvingGetEffect as OriginalResolvingGetEffect,
+  ResolvingRemoveEffect as OriginalResolvingRemoveEffect,
+  ResolvingSetEffect as OriginalResolvingSetEffect,
+  SetEffect as OriginalSetEffect,
 } from 'ronin/types';
 
 import type { CustomNavigator } from '../../universal/types/util';
@@ -62,7 +62,7 @@ export interface PageMetadata {
   bodyClassName?: string;
 }
 
-export interface DataHookOptions {
+export interface EffectOptions {
   /**
    * A list of cookies that are stored on the client.
    */
@@ -72,7 +72,7 @@ export interface DataHookOptions {
    */
   navigator: CustomNavigator;
   /**
-   * The URL of the page for which the data hook is being executed.
+   * The URL of the page for which the effect is being executed.
    */
   location: URL;
   /**
@@ -80,7 +80,7 @@ export interface DataHookOptions {
    * application's browser client or REST API.
    *
    * In such cases, it is advised to validate the authority of the incoming query within
-   * data hooks, by performing permission validation.
+   * effects, by performing permission validation.
    */
   headless: boolean;
 }
@@ -92,96 +92,96 @@ export type RecursiveRequired<T> = {
 export type ValueOf<T> = T[keyof T];
 
 type AddOptionsArgument<T> = T extends (...args: [...infer Rest, infer Last]) => infer R
-  ? (...args: [...Rest, Last & DataHookOptions]) => R
+  ? (...args: [...Rest, Last & EffectOptions]) => R
   : never;
 
-export type BeforeCountHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeCountHook>>
-) => ReturnType<OriginalBeforeCountHook>;
-export type BeforeAddHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeAddHook>>
-) => ReturnType<OriginalBeforeAddHook>;
-export type BeforeRemoveHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeRemoveHook>>
-) => ReturnType<OriginalBeforeRemoveHook>;
-export type BeforeGetHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeGetHook>>
-) => ReturnType<OriginalBeforeGetHook>;
-export type BeforeSetHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeSetHook>>
-) => ReturnType<OriginalBeforeSetHook>;
+export type BeforeCountEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalBeforeCountEffect>>
+) => ReturnType<OriginalBeforeCountEffect>;
+export type BeforeAddEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalBeforeAddEffect>>
+) => ReturnType<OriginalBeforeAddEffect>;
+export type BeforeRemoveEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalBeforeRemoveEffect>>
+) => ReturnType<OriginalBeforeRemoveEffect>;
+export type BeforeGetEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalBeforeGetEffect>>
+) => ReturnType<OriginalBeforeGetEffect>;
+export type BeforeSetEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalBeforeSetEffect>>
+) => ReturnType<OriginalBeforeSetEffect>;
 
-export type CountHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalCountHook>>
-) => ReturnType<OriginalCountHook>;
-export type AddHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalAddHook>>
-) => ReturnType<OriginalAddHook>;
-export type RemoveHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalRemoveHook>>
-) => ReturnType<OriginalRemoveHook>;
-export type GetHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalGetHook>>
-) => ReturnType<OriginalGetHook>;
-export type SetHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalSetHook>>
-) => ReturnType<OriginalSetHook>;
+export type CountEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalCountEffect>>
+) => ReturnType<OriginalCountEffect>;
+export type AddEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalAddEffect>>
+) => ReturnType<OriginalAddEffect>;
+export type RemoveEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalRemoveEffect>>
+) => ReturnType<OriginalRemoveEffect>;
+export type GetEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalGetEffect>>
+) => ReturnType<OriginalGetEffect>;
+export type SetEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalSetEffect>>
+) => ReturnType<OriginalSetEffect>;
 
-export type AfterCountHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterCountHook>>
-) => ReturnType<OriginalAfterCountHook>;
-export type AfterAddHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterAddHook>>
-) => ReturnType<OriginalAfterAddHook>;
-export type AfterRemoveHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterRemoveHook>>
-) => ReturnType<OriginalAfterRemoveHook>;
-export type AfterGetHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterGetHook>>
-) => ReturnType<OriginalAfterGetHook>;
-export type AfterSetHook = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterSetHook>>
-) => ReturnType<OriginalAfterSetHook>;
+export type AfterCountEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalAfterCountEffect>>
+) => ReturnType<OriginalAfterCountEffect>;
+export type AfterAddEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalAfterAddEffect>>
+) => ReturnType<OriginalAfterAddEffect>;
+export type AfterRemoveEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalAfterRemoveEffect>>
+) => ReturnType<OriginalAfterRemoveEffect>;
+export type AfterGetEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalAfterGetEffect>>
+) => ReturnType<OriginalAfterGetEffect>;
+export type AfterSetEffect = (
+  ...args: Parameters<AddOptionsArgument<OriginalAfterSetEffect>>
+) => ReturnType<OriginalAfterSetEffect>;
 
-export type ResolvingCountHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingCountHook<TSchema>>>
-) => ReturnType<OriginalResolvingCountHook<TSchema>>;
-export type ResolvingAddHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingAddHook<TSchema>>>
-) => ReturnType<OriginalResolvingAddHook<TSchema>>;
-export type ResolvingRemoveHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingRemoveHook<TSchema>>>
-) => ReturnType<OriginalResolvingRemoveHook<TSchema>>;
-export type ResolvingGetHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingGetHook<TSchema>>>
-) => ReturnType<OriginalResolvingGetHook<TSchema>>;
-export type ResolvingSetHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingSetHook<TSchema>>>
-) => ReturnType<OriginalResolvingSetHook<TSchema>>;
+export type ResolvingCountEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalResolvingCountEffect<TSchema>>>
+) => ReturnType<OriginalResolvingCountEffect<TSchema>>;
+export type ResolvingAddEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalResolvingAddEffect<TSchema>>>
+) => ReturnType<OriginalResolvingAddEffect<TSchema>>;
+export type ResolvingRemoveEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalResolvingRemoveEffect<TSchema>>>
+) => ReturnType<OriginalResolvingRemoveEffect<TSchema>>;
+export type ResolvingGetEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalResolvingGetEffect<TSchema>>>
+) => ReturnType<OriginalResolvingGetEffect<TSchema>>;
+export type ResolvingSetEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalResolvingSetEffect<TSchema>>>
+) => ReturnType<OriginalResolvingSetEffect<TSchema>>;
 
-export type FollowingCountHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingCountHook<TSchema>>>
-) => ReturnType<OriginalFollowingCountHook<TSchema>>;
-export type FollowingAddHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingAddHook<TSchema>>>
-) => ReturnType<OriginalFollowingAddHook<TSchema>>;
-export type FollowingRemoveHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingRemoveHook<TSchema>>>
-) => ReturnType<OriginalFollowingRemoveHook<TSchema>>;
-export type FollowingGetHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingGetHook<TSchema>>>
-) => ReturnType<OriginalFollowingGetHook<TSchema>>;
-export type FollowingSetHook<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingSetHook<TSchema>>>
-) => ReturnType<OriginalFollowingSetHook<TSchema>>;
+export type FollowingCountEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalFollowingCountEffect<TSchema>>>
+) => ReturnType<OriginalFollowingCountEffect<TSchema>>;
+export type FollowingAddEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalFollowingAddEffect<TSchema>>>
+) => ReturnType<OriginalFollowingAddEffect<TSchema>>;
+export type FollowingRemoveEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalFollowingRemoveEffect<TSchema>>>
+) => ReturnType<OriginalFollowingRemoveEffect<TSchema>>;
+export type FollowingGetEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalFollowingGetEffect<TSchema>>>
+) => ReturnType<OriginalFollowingGetEffect<TSchema>>;
+export type FollowingSetEffect<TSchema = unknown> = (
+  ...args: Parameters<AddOptionsArgument<OriginalFollowingSetEffect<TSchema>>>
+) => ReturnType<OriginalFollowingSetEffect<TSchema>>;
 
-export type DataHooks<TSchema = unknown> = Record<
+export type Effects<TSchema = unknown> = Record<
   string,
-  | BeforeGetHook
-  | GetHook
-  | AfterGetHook
-  | ResolvingGetHook<TSchema>
-  | FollowingGetHook<TSchema>
+  | BeforeGetEffect
+  | GetEffect
+  | AfterGetEffect
+  | ResolvingGetEffect<TSchema>
+  | FollowingGetEffect<TSchema>
 >;
 
-export type DataHooksList<TSchema = unknown> = Record<string, DataHooks<TSchema>>;
+export type EffectsList<TSchema = unknown> = Record<string, Effects<TSchema>>;
