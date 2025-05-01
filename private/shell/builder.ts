@@ -18,6 +18,8 @@ await prepareClientAssets('production');
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
+const IS_VERCEL = import.meta.env.__BLADE_PROVIDER === 'vercel';
+
 const output = await Bun.build({
   entrypoints: [serverInputFile],
   outdir: outputDirectory,
@@ -30,7 +32,7 @@ const output = await Bun.build({
   naming: `[dir]/${path.basename(serverOutputFile)}`,
   // minify: true,
   sourcemap: 'external',
-  target: 'browser',
+  target: IS_VERCEL ? 'node' : 'browser',
   define: mapProviderInlineDefinitions(),
 });
 
@@ -40,6 +42,6 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (import.meta.env.__BLADE_PROVIDER === 'vercel') await transformToVercelBuildOutput();
+if (IS_VERCEL) await transformToVercelBuildOutput();
 
 handleBuildLogs(output);
