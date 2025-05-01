@@ -1,6 +1,7 @@
 import { hooks as hookList } from 'file-list';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
+import { handle as handleVercel } from 'hono/vercel';
 import type { Query, QueryType } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 
@@ -240,4 +241,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default import.meta.env.__BLADE_PROVIDER === 'vercel' ? app.fetch : app;
+export default import.meta.env.__BLADE_PROVIDER === 'vercel' ? handleVercel(app) : app;
