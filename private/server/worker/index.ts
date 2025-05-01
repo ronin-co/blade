@@ -1,4 +1,3 @@
-import { handle as handleVercel } from '@hono/node-server/vercel';
 import { hooks as hookList } from 'file-list';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
@@ -241,4 +240,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default import.meta.env.__BLADE_PROVIDER === 'vercel' ? handleVercel(app) : app;
+export default app;
