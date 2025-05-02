@@ -526,6 +526,41 @@ useJWT<SessionToken>(token, secret);
 
 If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
 
+### Components
+
+#### `Link` (Client)
+
+When writing Blade apps, [anchor elements](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a) should only be used for linking to external URLs.
+
+For linking to URLs within the same application, use the native `Link` component instead:
+
+```tsx
+import Link from '@ronin/blade/client/components/link.client';
+
+<Link href="/another-page">click me</Link>
+```
+
+The following props are available:
+
+- `href`: A string or `URL` object containing the pathname and search params of the
+  destination page.
+- `segments`: An object containing key/value pairs of dynamic segments that should be
+  used to populate the `href`. For example, if the `href` is `/teams/[handle]` and the
+  `segments` prop is `{ handle: 'engineering' }`, the destination page would be
+  `/teams/engineering`.
+
+##### Prefetching
+
+On desktop, when a cursor enters a `Link` element (hover), the destination page will be
+prefetched by Blade, to ensure that, by the time the page transition happens (when the
+element is clicked), the page transition will be instant.
+
+Similarily, on mobile devices, the destination page will be prefetched upon the start of
+the touch action, meaning when the screen is pressed. When the touch action ends (e.g.
+the finger is lifted), the transition begins.
+
+In the future, links will also be prefetched when the page that contains them is loaded.
+
 ### Revalidation (Stale-While-Revalidate, SWR)
 
 Blade intelligently keeps your data up-to-date for you, so no extra state management is needed for the output of your read queries. The data is refreshed:
