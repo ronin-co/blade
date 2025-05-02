@@ -1,5 +1,4 @@
 import { type AnchorHTMLAttributes, type ReactElement, cloneElement } from 'react';
-
 import { useUniversalContext } from '../../../private/universal/hooks';
 import { usePopulatePathname } from '../../universal/hooks';
 import { useLinkEvents } from '../hooks';
@@ -75,9 +74,16 @@ interface LinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'
   children: ReactElement;
   href: string | LinkURL;
   segments?: Record<string, string | Array<string>>;
+  prefetch?: boolean;
 }
 
-const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProps) => {
+const Link = ({
+  href: hrefDefault,
+  segments,
+  children,
+  prefetch = true,
+  ...extraProps
+}: LinkProps) => {
   const universalContext = useUniversalContext();
 
   const href =
@@ -89,9 +95,13 @@ const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProp
   const destination = populatePathname(href, segments);
   const linkEventHandlers = useLinkEvents(destination);
 
+  const eventHandlers = prefetch
+    ? linkEventHandlers
+    : { onClick: linkEventHandlers.onClick };
+
   return cloneElement(children, {
     href: destination,
-    ...linkEventHandlers,
+    ...eventHandlers,
     ...extraProps,
   });
 };

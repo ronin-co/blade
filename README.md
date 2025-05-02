@@ -548,6 +548,8 @@ The following props are available:
   used to populate the `href`. For example, if the `href` is `/teams/[handle]` and the
   `segments` prop is `{ handle: 'engineering' }`, the destination page would be
   `/teams/engineering`.
+- `prefetch`: A boolean indicating whether the link should be prefetched. Defaults to
+  `true`. Read more about prefetching below.
 
 ##### Prefetching
 
