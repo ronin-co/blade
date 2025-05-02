@@ -159,6 +159,9 @@ export const setEnvironmentVariables = (options: {
     import.meta.env['BLADE_PUBLIC_SENTRY_DSN'] = '';
   }
 
+  import.meta.env.BLADE_DATA_WORKER ??= 'https://data.ronin.co';
+  import.meta.env.BLADE_STORAGE_WORKER ??= 'https://storage.ronin.co';
+
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
   const environment =
