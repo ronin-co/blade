@@ -550,6 +550,10 @@ The following props are available:
   `/teams/engineering`.
 - `prefetch`: A boolean indicating whether the link should be prefetched. Defaults to
   `true`. Read more about prefetching below.
+- Additionally, all attributes of
+  [anchor elements](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a)
+  are supported as props of `Link` and will be forwarded to the underlying auto-generated
+  anchor element.
 
 ##### Prefetching
 
