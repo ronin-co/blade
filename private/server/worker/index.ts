@@ -175,11 +175,21 @@ app.post('/api', async (c) => {
 
 // Handle the initial render (first byte).
 app.get('*', (c) => {
+  c.get('sentry').setContext('navigation', {
+    type: 'initial',
+    cookies: c.req.header('Cookie'),
+  });
+
   return renderReactTree(new URL(c.req.url), c, true);
 });
 
 // Handle client side navigation.
 app.post('*', async (c) => {
+  c.get('sentry').setContext('navigation', {
+    type: 'client',
+    cookies: c.req.header('Cookie'),
+  });
+
   const body = await c.req.parseBody<{ options?: string; files: File }>({ all: true });
   const options: PageFetchingOptions = body.options
     ? JSON.parse(body.options)
@@ -206,6 +216,7 @@ app.post('*', async (c) => {
 
   if (options?.queries) {
     const list = options.queries;
+    c.get('sentry').setContext('queries', { list });
     existingCollected.queries = list;
   }
 
@@ -215,6 +226,7 @@ app.post('*', async (c) => {
 // Handle errors that occurred during the request lifecycle.
 app.onError((err, c) => {
   console.error(err);
+  c.get('sentry').captureException(err);
 
   const message = 'An internal error occurred. Please try again later.';
   const status = 500;
@@ -235,6 +247,7 @@ app.onError((err, c) => {
     return renderReactTree(new URL(c.req.url), c, true, { error: 500 });
   } catch (err) {
     console.error(err);
+    c.get('sentry').captureException(err);
   }
 
   return new Response(message, { status });
