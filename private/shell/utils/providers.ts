@@ -92,8 +92,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
         handler: 'index.mjs',
-        launcherType: 'Nodejs',
-        runtime: 'nodejs22.x',
+        runtime: 'edge',
       }),
     ),
   ]);
