@@ -51,8 +51,13 @@ export const getRoninOptions = (
     return res;
   };
 
-  console.log('c.executionCtx', c.executionCtx);
-  const dataFetcherWaitUntil = c.executionCtx.waitUntil?.bind(c.executionCtx);
+  let dataFetcherWaitUntil = undefined;
+  try {
+    console.log('c.executionCtx', c.executionCtx);
+    dataFetcherWaitUntil = c.executionCtx.waitUntil?.bind(c.executionCtx);
+  } catch (error) {
+    console.error('Error while trying to bind waitUntil', error);
+  }
 
   return {
     effects,
