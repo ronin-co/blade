@@ -9,6 +9,7 @@
         "@mapbox/timespace": "2.0.4",
         "@mdx-js/mdx": "3.0.1",
         "@paralleldrive/cuid2": "2.2.2",
+        "@ronin/react": "0.1.2",
         "@sentry/bun": "8.30.0",
         "@sentry/react": "8.30.0",
         "@types/async-retry": "1.4.8",
@@ -298,6 +299,8 @@
     "@ronin/compiler": ["@ronin/compiler@0.18.3", "", {}, "sha512-t4Wdt/Hwz0j6ymaYNQduTyORJ7b35rAO7LAdSO+1ifQmW2C/tl4OMayaNIBrOLEbAvzdF5xwH7B4vn8pTHn3Hw=="],
 
     "@ronin/engine": ["@ronin/engine@0.1.23", "", { "dependencies": { "zod": "3.24.1" } }, "sha512-QDeikl4YEBFHEdful9+x5e8lLrxXvjhubJEYxnFfM7SJoFC9OxoE+Dq4g6mVzRuCI+gN+Odkdy3gd2ARr7eXFg=="],
+
+    "@ronin/react": ["@ronin/react@0.1.2", "", { "peerDependencies": { "react": ">=18.3.1", "ronin": ">=6.0.29" } }, "sha512-C0ULfvWzB6aYgdEriRIZUBgU4ERhVSeZBGk+RooN7R3omXcmv8KnjPl3kJkx7OUIrQk7oJhjleCt/GXKnKkbrg=="],
 
     "@ronin/syntax": ["@ronin/syntax@0.2.38", "", {}, "sha512-wiuCN0ukrDwmcbxWOEVffwLZKT6hI2UZ5M3jW0xan9t9PW7cgSL0ChEy9yewVYf3SKVBhuBB7x88O6dNIlAeFQ=="],
 
