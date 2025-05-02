@@ -1,12 +1,32 @@
 import '../types/global.d.ts';
 
-import type { Context } from 'hono';
+import type { Context, ExecutionContext } from 'hono';
 import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
 import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
 import type { Query, ResultRecord } from '@ronin/compiler';
 import type { EffectsList } from '../types';
 import { VERBOSE_LOGGING } from './constants';
+
+/**
+ * A minimal implementation of the `ExecutionContext` interface.
+ *
+ * We use this as a fallback default because in Node.js runtimes, primarily
+ * in Vercel, no execution context is provided so we need to provide a mock
+ * implementation.
+ */
+const EXECUTION_CONTEXT: ExecutionContext = {
+  passThroughOnException: () => {},
+  waitUntil: async (func) => {
+    try {
+      await func;
+    } catch (err) {
+      if (!VERBOSE_LOGGING) return;
+      console.error('An error occurred while executing a `waitUntil` callback.');
+      console.error(err);
+    }
+  },
+};
 
 /**
  * Generate the options passed to the `ronin` JavaScript client.
@@ -51,12 +71,12 @@ export const getRoninOptions = (
     return res;
   };
 
-  let dataFetcherWaitUntil = undefined;
+  let dataFetcherWaitUntil: ExecutionContext['waitUntil'] = EXECUTION_CONTEXT.waitUntil;
   try {
-    console.log('c.executionCtx', c.executionCtx);
     dataFetcherWaitUntil = c.executionCtx.waitUntil?.bind(c.executionCtx);
-  } catch (error) {
-    console.error('Error while trying to bind waitUntil', error);
+  } catch (_err) {
+    if (VERBOSE_LOGGING)
+      console.warn('No execution context provided, using default implementation.');
   }
 
   return {
