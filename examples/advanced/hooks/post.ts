@@ -1,6 +1,6 @@
 import { MultipleWithInstructionsError } from '@ronin/blade/server/utils/errors';
 
-import type { AddEffect, GetEffect } from '@ronin/blade/universal/types';
+import type { AddTrigger, GetTrigger } from '@ronin/blade/universal/types';
 
 interface Post {
   body: string;
@@ -30,7 +30,7 @@ const posts = [
   },
 ] satisfies Array<Post>;
 
-export const add: AddEffect<Post> = (query, multiple) => {
+export const add: AddTrigger<Post> = (query, multiple) => {
   if (multiple) throw new MultipleWithInstructionsError();
 
   const newPost = {
@@ -45,7 +45,7 @@ export const add: AddEffect<Post> = (query, multiple) => {
   return newPost;
 };
 
-export const get: GetEffect<Post | null | Array<Post>> = async (query, multiple) => {
+export const get: GetTrigger<Post | null | Array<Post>> = async (query, multiple) => {
   if (multiple) return posts;
 
   return posts.find((post) => post.id === Number.parseInt(query.with?.id)) ?? null;

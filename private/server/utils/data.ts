@@ -5,20 +5,20 @@ import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
 import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
 import type { Query, ResultRecord } from '@ronin/compiler';
-import type { EffectsList } from '../types';
+import type { TriggersList } from '../types';
 import { VERBOSE_LOGGING } from './constants';
 
 /**
  * Generate the options passed to the `ronin` JavaScript client.
  *
  * @param c - The context of the current request.
- * @param effects - A list of effects that should be executed.
+ * @param triggers - A list of triggers that should be executed.
  *
  * @returns Options that can be passed to the `ronin` JavaScript client.
  */
 export const getRoninOptions = (
   c: Context,
-  effects?: EffectsList,
+  triggers?: TriggersList,
 ): QueryHandlerOptions => {
   const dataFetcher: typeof fetch = async (input, init) => {
     // Normalize the parameters of the surrounding function, as the first argument might
@@ -54,7 +54,7 @@ export const getRoninOptions = (
   const dataFetcherWaitUntil = c.executionCtx.waitUntil?.bind(c.executionCtx);
 
   return {
-    effects,
+    triggers,
     token: import.meta.env.BLADE_APP_TOKEN,
     fetch: dataFetcher,
     waitUntil: dataFetcherWaitUntil,
@@ -67,16 +67,16 @@ export const getRoninOptions = (
  *
  * @param c - The context of the current request.
  * @param queries - A list of RONIN queries that should be executed.
- * @param effects - A list of effects that should be executed.
+ * @param triggers - A list of triggers that should be executed.
  *
  * @returns The results of the passed queries.
  */
 export const runQueries = <T extends ResultRecord>(
   c: Context,
   queries: Record<string, Array<Query>>,
-  effects: EffectsList = {},
+  triggers: TriggersList = {},
 ): Promise<Record<string, FormattedResults<T>>> => {
-  return runQueriesOnRonin<T>(queries, getRoninOptions(c, effects));
+  return runQueriesOnRonin<T>(queries, getRoninOptions(c, triggers));
 };
 
 /**

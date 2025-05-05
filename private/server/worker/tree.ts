@@ -1,7 +1,7 @@
 import '../../universal/types/global.d.ts';
 
 import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
-import { effects as effectList, pages } from 'file-list';
+import { pages, triggers as triggerList } from 'file-list';
 import getValue from 'get-value';
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
@@ -14,7 +14,7 @@ import type { FormattedResults, Query } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
 
-import { EffectError } from '../../../public/server/utils/errors';
+import { TriggerError } from '../../../public/server/utils/errors';
 import type {
   PageFetchingOptions,
   QueryItemRead,
@@ -34,8 +34,8 @@ import {
 } from '../utils/request-context';
 import { renderToReadableStream } from '../utils/serializer';
 import { SERVER_CONTEXT } from './context';
-import { prepareEffects } from './effects';
 import { type PageEntry, getEntry, getPathSegments } from './pages';
+import { prepareTriggers } from './triggers';
 
 const getRenderingLeaves = (location: keyof typeof pages): Map<string, TreeItem> => {
   const leaves = new Map<string, TreeItem>();
@@ -65,18 +65,18 @@ const runQueriesWithTime = async (
 
   const start = Date.now();
   const { requestContext } = serverContext;
-  const effects = prepareEffects(serverContext, effectList);
+  const triggers = prepareTriggers(serverContext, triggerList);
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
 
-  const callback = () => runQueries(requestContext, queries, effects);
+  const callback = () => runQueries(requestContext, queries, triggers);
 
-  // If effects are used, we need to provide them with the server context.
+  // If triggers are used, we need to provide them with the server context.
   //
   // If none are used, however, we don't want to provide the server context, since
   // providing it causes the code inside to run synchronously.
-  const results: Record<string, FormattedResults<unknown>> = effects
+  const results: Record<string, FormattedResults<unknown>> = triggers
     ? await SERVER_CONTEXT.run(serverContext, callback)
     : await callback();
 
@@ -125,7 +125,7 @@ const obtainQueryResults = async (
   // any potential files that might be available.
   //
   // If we would store raw objects instead of strings, the original objects would be
-  // modified by developers inside the effects, which would break the deduplication of
+  // modified by developers inside the triggers, which would break the deduplication of
   // queries in the framework. We also wouldn't be able to clone the queries, since they
   // might contain binary objects, which cannot be cloned. Storing the queries as strings
   // and converting them into objects a single time (here) is therefore more efficient.
@@ -147,7 +147,7 @@ const obtainQueryResults = async (
     results = await runQueriesWithTime(serverContext, path, reducedQueries);
   } catch (err) {
     if (
-      err instanceof EffectError ||
+      err instanceof TriggerError ||
       // Raise up errors about databases not existing, because they will be caught at a
       // higher level and handled accordingly.
       (err instanceof InvalidResponseError && err.code !== 'AUTH_INVALID_ACCESS')
