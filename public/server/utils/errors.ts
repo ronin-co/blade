@@ -17,7 +17,7 @@ const joinFields = (fields: string[]): string =>
     ? '[]'
     : fields.map((field) => `\`${field}\``).join(', ');
 
-class EffectError extends Error {
+class TriggerError extends Error {
   code?: ErrorDetails['code'];
   fields?: ErrorDetails['fields'];
   instructions?: ErrorDetails['instructions'];
@@ -25,14 +25,14 @@ class EffectError extends Error {
   constructor(details?: ErrorDetails) {
     super(details?.message);
 
-    this.name = 'EffectError';
+    this.name = 'TriggerError';
     this.code = details?.code;
     this.fields = details?.fields || [];
     this.instructions = details?.instructions || [];
   }
 }
 
-class InvalidFieldsError extends EffectError {
+class InvalidFieldsError extends TriggerError {
   constructor(details: ErrorDetails & { fields: string[]; reasons?: string[] }) {
     const { fields, reasons } = details;
     const joined = joinFields(fields);
@@ -48,7 +48,7 @@ class InvalidFieldsError extends EffectError {
   }
 }
 
-class EmptyFieldsError extends EffectError {
+class EmptyFieldsError extends TriggerError {
   constructor(details: ErrorDetails & { fields: string[] }) {
     const { fields } = details;
     const joined = joinFields(fields);
@@ -63,7 +63,7 @@ class EmptyFieldsError extends EffectError {
   }
 }
 
-class ExtraneousFieldsError extends EffectError {
+class ExtraneousFieldsError extends TriggerError {
   constructor(details: ErrorDetails & { fields: string[] }) {
     const { fields } = details;
     const joined = joinFields(fields);
@@ -78,7 +78,7 @@ class ExtraneousFieldsError extends EffectError {
   }
 }
 
-class RecordExistsError extends EffectError {
+class RecordExistsError extends TriggerError {
   constructor(details?: ErrorDetails) {
     super({
       message: details?.message || 'The provided record already exists.',
@@ -88,7 +88,7 @@ class RecordExistsError extends EffectError {
   }
 }
 
-class RecordNotFoundError extends EffectError {
+class RecordNotFoundError extends TriggerError {
   constructor(details?: ErrorDetails) {
     super({
       message: details?.message || 'No record could be found for the provided query.',
@@ -98,7 +98,7 @@ class RecordNotFoundError extends EffectError {
   }
 }
 
-class TooManyRequestsError extends EffectError {
+class TooManyRequestsError extends TriggerError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -110,7 +110,7 @@ class TooManyRequestsError extends EffectError {
   }
 }
 
-class InvalidPermissionsError extends EffectError {
+class InvalidPermissionsError extends TriggerError {
   constructor(details?: ErrorDetails) {
     super({
       message: details?.message || 'You do not have permission to perform this action.',
@@ -119,7 +119,7 @@ class InvalidPermissionsError extends EffectError {
   }
 }
 
-class AddNotAllowedError extends EffectError {
+class AddNotAllowedError extends TriggerError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -130,7 +130,7 @@ class AddNotAllowedError extends EffectError {
   }
 }
 
-class SetNotAllowedError extends EffectError {
+class SetNotAllowedError extends TriggerError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -141,7 +141,7 @@ class SetNotAllowedError extends EffectError {
   }
 }
 
-class RemoveNotAllowedError extends EffectError {
+class RemoveNotAllowedError extends TriggerError {
   constructor(details?: ErrorDetails) {
     super({
       message:
@@ -152,7 +152,7 @@ class RemoveNotAllowedError extends EffectError {
   }
 }
 
-class MultipleWithInstructionsError extends EffectError {
+class MultipleWithInstructionsError extends TriggerError {
   constructor() {
     super({
       message: 'The given `with` instruction must not be an array.',
@@ -163,7 +163,7 @@ class MultipleWithInstructionsError extends EffectError {
 }
 
 export {
-  EffectError,
+  TriggerError,
   InvalidFieldsError,
   EmptyFieldsError,
   ExtraneousFieldsError,
