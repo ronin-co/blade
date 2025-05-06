@@ -72,7 +72,7 @@ export const getFileList = async (): Promise<string> => {
 
   file += '\n\n';
   file += 'export const pages = { ...customPages, ...defaultPages };\n';
-  file += 'export const effects = { ...customEffects };\n';
+  file += 'export const triggers = { ...customTriggers };\n';
 
   return file;
 };
@@ -221,11 +221,11 @@ export const cleanUp = async () => {
  */
 export const handleBuildLogs = (output: BuildOutput) => {
   for (const log of output.logs) {
-    // Bun logs a warning when it encounters a `sideEffects` property in `package.json`
+    // Bun logs a warning when it encounters a `sideTriggers` property in `package.json`
     // containing a glob (a wildcard), because Bun doesn't support those yet. We want to
     // silence this warning, unless it is requested to be logged explicitly.
     if (
-      log.message.includes('wildcard sideEffects') &&
+      log.message.includes('wildcard sideTriggers') &&
       Bun.env['__BLADE_DEBUG_LEVEL'] !== 'verbose'
     )
       return;

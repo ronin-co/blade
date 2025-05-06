@@ -30,7 +30,7 @@
         "p-queue": "8.0.1",
         "radash": "12.1.0",
         "rehype-pretty-code": "0.14.0",
-        "ronin": "6.5.4",
+        "ronin": "6.6.3",
         "serialize-error": "11.0.3",
         "ua-parser-js": "1.0.39",
       },
@@ -872,7 +872,7 @@
 
     "rollup": ["rollup@4.40.1", "", { "dependencies": { "@types/estree": "1.0.7" }, "optionalDependencies": { "@rollup/rollup-android-arm-eabi": "4.40.1", "@rollup/rollup-android-arm64": "4.40.1", "@rollup/rollup-darwin-arm64": "4.40.1", "@rollup/rollup-darwin-x64": "4.40.1", "@rollup/rollup-freebsd-arm64": "4.40.1", "@rollup/rollup-freebsd-x64": "4.40.1", "@rollup/rollup-linux-arm-gnueabihf": "4.40.1", "@rollup/rollup-linux-arm-musleabihf": "4.40.1", "@rollup/rollup-linux-arm64-gnu": "4.40.1", "@rollup/rollup-linux-arm64-musl": "4.40.1", "@rollup/rollup-linux-loongarch64-gnu": "4.40.1", "@rollup/rollup-linux-powerpc64le-gnu": "4.40.1", "@rollup/rollup-linux-riscv64-gnu": "4.40.1", "@rollup/rollup-linux-riscv64-musl": "4.40.1", "@rollup/rollup-linux-s390x-gnu": "4.40.1", "@rollup/rollup-linux-x64-gnu": "4.40.1", "@rollup/rollup-linux-x64-musl": "4.40.1", "@rollup/rollup-win32-arm64-msvc": "4.40.1", "@rollup/rollup-win32-ia32-msvc": "4.40.1", "@rollup/rollup-win32-x64-msvc": "4.40.1", "fsevents": "~2.3.2" }, "bin": { "rollup": "dist/bin/rollup" } }, "sha512-C5VvvgCCyfyotVITIAv+4efVytl5F7wt+/I2i9q9GZcEXW9BP52YYOXC58igUi+LFZVHukErIIqQSWwv/M3WRw=="],
 
-    "ronin": ["ronin@6.5.4", "", { "dependencies": { "@ronin/cli": "0.3.6", "@ronin/compiler": "0.18.3", "@ronin/syntax": "0.2.38" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-VJBCqFOuaji5knOadHOmo14EKtObGleGhCUgSm/Fku99usgswmqVUjzizwrLsdzKLt0MSJqedTYHpxEBP5GWlQ=="],
+    "ronin": ["ronin@6.6.3", "", { "dependencies": { "@ronin/cli": "0.3.6", "@ronin/compiler": "0.18.3", "@ronin/syntax": "0.2.38" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-1yJfDDNfVTLfd1CTbV6/8pvO9pWGGzCJ3ifUQAj3mYdJDYpC3psIT5or5/Vqjp00tkBYgWPUJpgdyM+cmKLDOg=="],
 
     "run-applescript": ["run-applescript@7.0.0", "", {}, "sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A=="],
 
