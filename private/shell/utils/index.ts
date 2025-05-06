@@ -180,7 +180,7 @@ export const setEnvironmentVariables = (options: {
   import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
 
   // Get the current provider based on the environment variables.
-  import.meta.env['__BLADE_PROVIDER'] = getProvider();
+  import.meta.env.__BLADE_PROVIDER = getProvider();
 };
 
 export const getClientEnvironmentVariables = () => {
