@@ -4,9 +4,9 @@ import { copyFile, cp, exists, mkdir, readdir, rm } from 'node:fs/promises';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
-import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../universal/utils/constants';
-import { generateUniqueId } from '../universal/utils/crypto';
-import { getOutputFile } from '../universal/utils/paths';
+import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../../universal/utils/constants';
+import { generateUniqueId } from '../../universal/utils/crypto';
+import { getOutputFile } from '../../universal/utils/paths';
 import {
   clientManifestFile,
   directoriesToParse,
@@ -14,14 +14,15 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-} from './constants';
+} from '../constants';
 import {
   getClientChunkLoader,
   getClientComponentLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from './loaders';
-import type { ClientChunks, FileError } from './types';
+} from '../loaders';
+import type { ClientChunks, FileError } from '../types';
+import { getProvider } from './providers';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
   const files = await readdir(directory, { recursive: true });
@@ -149,6 +150,15 @@ export const setEnvironmentVariables = (options: {
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'];
   }
 
+  if (Bun.env['VERCEL']) {
+    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'];
+    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
+  }
+
+  import.meta.env.BLADE_PUBLIC_SENTRY_DSN ??= '';
+  import.meta.env.BLADE_DATA_WORKER ??= 'https://data.ronin.co';
+  import.meta.env.BLADE_STORAGE_WORKER ??= 'https://storage.ronin.co';
+
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
   const environment =
@@ -168,6 +178,9 @@ export const setEnvironmentVariables = (options: {
 
   // The directories that contain the source code of the application.
   import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
+
+  // Get the current provider based on the environment variables.
+  import.meta.env.__BLADE_PROVIDER = getProvider();
 };
 
 export const getClientEnvironmentVariables = () => {
@@ -240,7 +253,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
 
   const output = await Bun.build({
-    entrypoints: [require.resolve('../client/assets/chunks.ts')],
+    entrypoints: [require.resolve('../../client/assets/chunks.ts')],
     outdir,
     plugins: [
       getClientComponentLoader(projects),
@@ -290,7 +303,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     [
       tailwindBinPath,
       '--input',
-      path.join(__dirname, '../client/assets/styles.css'),
+      path.join(__dirname, '../../client/assets/styles.css'),
       '--output',
       path.join(outputDirectory, getOutputFile(bundleId, 'css')),
       ...(environment === 'production' ? ['--minify'] : []),

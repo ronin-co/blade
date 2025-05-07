@@ -1,6 +1,11 @@
 import path from 'node:path';
 
-import { outputDirectory, serverInputFile, serverOutputFile } from './constants';
+import {
+  outputDirectory,
+  serverInputFile,
+  serverOutputFile,
+  serverVercelInputFile,
+} from './constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -8,30 +13,20 @@ import {
   getReactAriaLoader,
 } from './loaders';
 import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
+import {
+  mapProviderInlineDefinitions,
+  transformToVercelBuildOutput,
+} from './utils/providers';
 
 await cleanUp();
 await prepareClientAssets('production');
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
-// Inline all environment variables on Cloudflare Pages, because their runtime does not
-// have support for `import.meta.env`. Everywhere else, only inline what is truly
-// necessary (what cannot be made available at runtime).
-const define: { [key: string]: string } = Bun.env['CF_PAGES']
-  ? Object.fromEntries(
-      Object.entries(import.meta.env)
-        .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
-        .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
-    )
-  : {
-      'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
-      'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
-        import.meta.env.__BLADE_ASSETS_ID,
-      ),
-    };
+const IS_VERCEL = import.meta.env.__BLADE_PROVIDER === 'vercel';
 
 const output = await Bun.build({
-  entrypoints: [serverInputFile],
+  entrypoints: [IS_VERCEL ? serverVercelInputFile : serverInputFile],
   outdir: outputDirectory,
   plugins: [
     getClientReferenceLoader('production'),
@@ -42,8 +37,8 @@ const output = await Bun.build({
   naming: `[dir]/${path.basename(serverOutputFile)}`,
   minify: true,
   sourcemap: 'external',
-  target: 'browser',
-  define,
+  target: IS_VERCEL ? 'node' : 'browser',
+  define: mapProviderInlineDefinitions(),
 });
 
 if (output.success) {
@@ -51,5 +46,7 @@ if (output.success) {
 } else {
   serverSpinner.fail();
 }
+
+if (IS_VERCEL) await transformToVercelBuildOutput();
 
 handleBuildLogs(output);

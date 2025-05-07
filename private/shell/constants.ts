@@ -22,6 +22,7 @@ export const clientManifestFile = path.join(outputDirectory, 'client-manifest.js
 
 export const serverOutputFile = path.join(outputDirectory, '_worker.js');
 export const serverInputFile = require.resolve('../server/worker/index.ts');
+export const serverVercelInputFile = require.resolve('../server/worker/vercel.ts');
 
 export const loggingPrefixes = {
   info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
