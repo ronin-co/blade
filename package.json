@@ -8,7 +8,7 @@
     "access": "public"
   },
   "bin": {
-    "blade": "./private/shell/index.ts"
+    "blade": "./dist/private/shell/index.ts"
   },
   "files": [
     "dist",
@@ -24,24 +24,24 @@
     "build": "tsup"
   },
   "exports": {
-    "./client/": "./dist/client/",
-    "./server/": "./dist/server/",
-    "./universal/": "./dist/universal/",
-    "./schema": "./dist/universal/schema"
+    "./client/": "./dist/public/client/",
+    "./server/": "./dist/public/server/",
+    "./universal/": "./dist/public/universal/",
+    "./schema": "./dist/public/universal/schema"
   },
   "typesVersions": {
     "*": {
       "client/*": [
-        "./dist/client/*"
+        "./dist/public/client/*"
       ],
       "server/*": [
-        "./dist/server/*"
+        "./dist/public/server/*"
       ],
       "universal/*": [
-        "./dist/universal/*"
+        "./dist/public/universal/*"
       ],
       "schema": [
-        "./dist/universal/schema"
+        "./dist/public/universal/schema"
       ]
     }
   },

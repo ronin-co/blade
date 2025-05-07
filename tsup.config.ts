@@ -2,6 +2,8 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: [
+    './private/shell/index.ts',
+
     './public/client/hooks.ts',
     './public/client/components/link.client.ts',
 
@@ -16,5 +18,5 @@ export default defineConfig({
   format: 'esm',
   clean: true,
   dts: true,
-  external: ['react', 'react-dom', 'file-list'],
+  external: ['bun', 'react', 'react-dom', 'file-list'],
 });
