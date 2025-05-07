@@ -8,6 +8,7 @@ import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../../universal/utils/co
 import { generateUniqueId } from '../../universal/utils/crypto';
 import { getOutputFile } from '../../universal/utils/paths';
 import {
+  clientInputFile,
   clientManifestFile,
   directoriesToParse,
   frameworkDirectory,
@@ -253,7 +254,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
 
   const output = await Bun.build({
-    entrypoints: [require.resolve('../../client/assets/chunks.ts')],
+    entrypoints: [clientInputFile],
     outdir,
     plugins: [
       getClientComponentLoader(projects),
@@ -303,7 +304,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     [
       tailwindBinPath,
       '--input',
-      path.join(__dirname, '../../client/assets/styles.css'),
+      path.join(__dirname, 'styles.css'),
       '--output',
       path.join(outputDirectory, getOutputFile(bundleId, 'css')),
       ...(environment === 'production' ? ['--minify'] : []),

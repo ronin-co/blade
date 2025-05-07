@@ -21,8 +21,10 @@ export const outputDirectory = path.resolve(process.cwd(), '.blade');
 export const clientManifestFile = path.join(outputDirectory, 'client-manifest.json');
 
 export const serverOutputFile = path.join(outputDirectory, '_worker.js');
-export const serverInputFile = require.resolve('../server/worker/index.ts');
-export const serverVercelInputFile = require.resolve('../server/worker/vercel.ts');
+
+export const clientInputFile = require.resolve('../client/index.js');
+export const serverInputFile = require.resolve('../server/worker/index.js');
+export const serverVercelInputFile = require.resolve('../server/worker/vercel.js');
 
 export const loggingPrefixes = {
   info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
