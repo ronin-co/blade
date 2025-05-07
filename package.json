@@ -8,7 +8,7 @@
     "access": "public"
   },
   "bin": {
-    "blade": "./dist/private/shell/index.ts"
+    "blade": "./dist/private/shell/index.js"
   },
   "files": [
     "dist",
