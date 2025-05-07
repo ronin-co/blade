@@ -21,7 +21,8 @@
     "format": "biome check --write && biome format --write",
     "test": "vitest",
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "prepare": "bun run build"
   },
   "exports": {
     "./client/": "./dist/public/client/",

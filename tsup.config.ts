@@ -5,7 +5,7 @@ export default defineConfig({
     './private/shell/index.ts',
 
     './public/client/hooks.ts',
-    './public/client/components/link.client.ts',
+    './public/client/components/link.client.tsx',
 
     './public/server/hooks.ts',
     './public/server/utils/data.ts',
