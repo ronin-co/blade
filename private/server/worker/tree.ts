@@ -42,7 +42,7 @@ const getRenderingLeaves = (location: keyof typeof pages): Map<string, TreeItem>
   const parentDirectories = getParentDirectories(location);
 
   // Add current page to the rendering tree.
-  leaves.set(location, pages[location]);
+  leaves.set(location, pages[location] as TreeItem);
 
   // Add parent layouts surrounding the current page to the rendering tree.
   for (const dir of parentDirectories) {

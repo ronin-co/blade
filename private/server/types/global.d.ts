@@ -1,8 +1,6 @@
 declare module 'file-list' {
-  import type { TriggersList, TreeItem } from './index';
-
-  export const pages: Record<string, TreeItem | 'DIRECTORY'>;
-  export const triggers: TriggersList;
+  export const pages: Record<string, import('./index').TreeItem | 'DIRECTORY'>;
+  export const triggers: import('./index').TriggersList;
 }
 
 declare module '@mapbox/timespace' {

@@ -1,4 +1,10 @@
-import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
+import {
+  type DeepCallable,
+  type PromiseTuple,
+  type SyntaxItem,
+  getBatchProxy,
+  getSyntaxProxy,
+} from '@ronin/syntax/queries';
 import type { CookieSerializeOptions } from 'cookie';
 import type { verify } from 'hono/jwt';
 import { deserializeError } from 'serialize-error';
@@ -285,21 +291,24 @@ const callback = (defaultQuery: Query, options?: DataOptions) => {
 };
 
 /** Allows for retrieving records. */
-const use = getSyntaxProxy<GetQuery>({ root: `${QUERY_SYMBOLS.QUERY}.get`, callback });
+const use = getSyntaxProxy<GetQuery>({
+  root: `${QUERY_SYMBOLS.QUERY}.get`,
+  callback,
+}) as DeepCallable<GetQuery>;
 
 /** Allows for counting records. */
 const useCountOf = getSyntaxProxy<CountQuery, number>({
   root: `${QUERY_SYMBOLS.QUERY}.count`,
   callback,
-});
+}) as DeepCallable<CountQuery, number>;
 
 /** Allows for retrieving models. */
 const useListOf = getSyntaxProxy<ListQuery, number>({
   root: `${QUERY_SYMBOLS.QUERY}.list`,
   callback,
-});
+}) as DeepCallable<ListQuery>;
 
-const useBatch = <T extends [any, ...any[]]>(
+const useBatch = (<T extends [any, ...any[]]>(
   operations: () => T,
   options?: DataOptions,
 ): T => {
@@ -336,7 +345,10 @@ const useBatch = <T extends [any, ...any[]]>(
     if (matchingQuery > -1) return queryResults[matchingQuery];
     return query;
   }) as T;
-};
+}) as <T extends [Promise<any>, ...Array<Promise<any>>] | Array<Promise<any>>>(
+  operations: () => T,
+  queryOptions?: Record<string, unknown>,
+) => Promise<PromiseTuple<T>>;
 
 const useJWT = <T>(...args: Parameters<typeof verify>): T => {
   const [token, secret, algo] = args;
