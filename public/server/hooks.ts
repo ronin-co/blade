@@ -348,7 +348,7 @@ const useBatch = (<T extends [any, ...any[]]>(
 }) as <T extends [Promise<any>, ...Array<Promise<any>>] | Array<Promise<any>>>(
   operations: () => T,
   queryOptions?: Record<string, unknown>,
-) => Promise<PromiseTuple<T>>;
+) => PromiseTuple<T>;
 
 const useJWT = <T>(...args: Parameters<typeof verify>): T => {
   const [token, secret, algo] = args;
