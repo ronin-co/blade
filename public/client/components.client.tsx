@@ -96,4 +96,4 @@ const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProp
   });
 };
 
-export default Link;
+export { Link };
