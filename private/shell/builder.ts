@@ -37,7 +37,7 @@ const output = await Bun.build({
   naming: `[dir]/${path.basename(serverOutputFile)}`,
   minify: true,
   sourcemap: 'external',
-  target: IS_VERCEL ? 'node' : 'browser',
+  target: 'browser',
   define: mapProviderInlineDefinitions(),
 });
 
