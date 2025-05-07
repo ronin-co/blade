@@ -11,12 +11,12 @@ import { outputDirectory } from '../constants';
  */
 export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
   if (Bun.env['CF_PAGES']) return 'cloudflare';
-  if (Bun.env['VERCEL'] === '1') return 'vercel';
+  if (Bun.env['VERCEL']) return 'vercel';
   return '';
 };
 
 /**
- * Remap inline environment variable definitions
+ * Remap inline environment variable definitions.
  *
  * @description This is primarily used to inline all environment variables on
  * Cloudflare Pages or Vercel, because their runtime does not have support for
