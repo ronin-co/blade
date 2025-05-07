@@ -11,8 +11,7 @@
     "blade": "./private/shell/index.ts"
   },
   "files": [
-    "private/**/*",
-    "public/**/*",
+    "dist",
     "examples/advanced/**/*",
     "examples/basic/**/*"
   ],
@@ -25,24 +24,24 @@
     "build": "tsup"
   },
   "exports": {
-    "./client/": "./public/client/",
-    "./server/": "./public/server/",
-    "./universal/": "./public/universal/",
-    "./schema": "./public/universal/schema"
+    "./client/": "./dist/client/",
+    "./server/": "./dist/server/",
+    "./universal/": "./dist/universal/",
+    "./schema": "./dist/universal/schema"
   },
   "typesVersions": {
     "*": {
       "client/*": [
-        "./public/client/*"
+        "./dist/client/*"
       ],
       "server/*": [
-        "./public/server/*"
+        "./dist/server/*"
       ],
       "universal/*": [
-        "./public/universal/*"
+        "./dist/universal/*"
       ],
       "schema": [
-        "./public/universal/schema"
+        "./dist/universal/schema"
       ]
     }
   },
