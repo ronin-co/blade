@@ -345,7 +345,7 @@ const useBatch = (<T extends [any, ...any[]]>(
     if (matchingQuery > -1) return queryResults[matchingQuery];
     return query;
   }) as T;
-}) as <T extends [Promise<any>, ...Array<Promise<any>>] | Array<Promise<any>>>(
+}) as <T extends [any, ...Array<any>] | Array<any>>(
   operations: () => T,
   queryOptions?: Record<string, unknown>,
 ) => PromiseTuple<T>;
