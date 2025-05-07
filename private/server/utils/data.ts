@@ -11,7 +11,7 @@ import { VERBOSE_LOGGING } from './constants';
 /**
  * A minimal implementation of the `ExecutionContext` interface.
  *
- * We use this as a fallback default because in Node.js runtimes, primarily
+ * We use this as a fallback default because on Node.js runtimes, primarily
  * in Vercel, no execution context is provided so we need to provide a mock
  * implementation.
  */
@@ -71,7 +71,7 @@ export const getRoninOptions = (
     return res;
   };
 
-  // Trying to access `c.executionCtx` during a Node,js runtime, such as in a Vercel
+  // Trying to access `c.executionCtx` on a Node.js runtime, such as in a Vercel
   // lambda, it will throw an error. So we need to add a mockfallback.
   let dataFetcherWaitUntil: ExecutionContext['waitUntil'] = EXECUTION_CONTEXT.waitUntil;
   try {
