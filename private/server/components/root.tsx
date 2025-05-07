@@ -1,7 +1,7 @@
 import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
-import History from '../../client/components/history.client';
+import { History } from '../../client/components/history.client';
 import { getSerializableContext } from '../../universal/context';
 import { usePrivateLocation } from '../../universal/hooks';
 import type { Asset } from '../../universal/types/util';
