@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: [
     './public/client/hooks.ts',
-    './public/client/components/link.client.tsx',
+    './public/client/components.client.tsx',
     './public/server/hooks.ts',
     './public/server/utils/data.ts',
     './public/server/utils/errors.ts',

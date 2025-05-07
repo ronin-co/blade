@@ -1,8 +1,8 @@
 import { type AnchorHTMLAttributes, type ReactElement, cloneElement } from 'react';
 
-import { useUniversalContext } from '../../../private/universal/hooks';
-import { usePopulatePathname } from '../../universal/hooks';
-import { useLinkEvents } from '../hooks';
+import { useUniversalContext } from '../../private/universal/hooks';
+import { usePopulatePathname } from '../universal/hooks';
+import { useLinkEvents } from './hooks';
 
 interface LinkURL extends Omit<Partial<InstanceType<typeof URL>>, 'search'> {
   search?: string | Record<string, string | number | boolean | null>;
