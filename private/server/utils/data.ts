@@ -72,7 +72,7 @@ export const getRoninOptions = (
   };
 
   // Trying to access `c.executionCtx` on a Node.js runtime, such as in a Vercel
-  // lambda, it will throw an error. So we need to add a mockfallback.
+  // function, it will throw an error. So we need to add a mockfallback.
   let dataFetcherWaitUntil: ExecutionContext['waitUntil'] = EXECUTION_CONTEXT.waitUntil;
   try {
     dataFetcherWaitUntil = c.executionCtx.waitUntil?.bind(c.executionCtx);
