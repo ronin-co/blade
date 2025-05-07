@@ -12,7 +12,6 @@
   },
   "files": [
     "dist",
-    "examples/advanced/**/*",
     "examples/basic/**/*"
   ],
   "scripts": {
@@ -21,7 +20,8 @@
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "vitest",
-    "build": "tsup"
+    "build": "tsup",
+    "dev": "tsup --watch"
   },
   "exports": {
     "./client/": "./dist/public/client/",
