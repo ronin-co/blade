@@ -14,6 +14,52 @@
     "dist",
     "examples/basic/**/*"
   ],
+  "exports": {
+    "./client/hooks": {
+      "types": "./dist/public/client/hooks.d.ts",
+      "import": "./dist/public/client/hooks.js"
+    },
+    "./client/components/link.client": {
+      "types": "./dist/public/client/components/link.client.d.ts",
+      "import": "./dist/public/client/components/link.client.js"
+    },
+    "./server/hooks": {
+      "types": "./dist/public/server/hooks.d.ts",
+      "import": "./dist/public/server/hooks.js"
+    },
+    "./server/utils/data": {
+      "types": "./dist/public/server/utils/data.d.ts",
+      "import": "./dist/public/server/utils/data.js"
+    },
+    "./server/utils/errors": {
+      "types": "./dist/public/server/utils/errors.d.ts",
+      "import": "./dist/public/server/utils/errors.js"
+    },
+    "./universal/hooks": {
+      "types": "./dist/public/universal/hooks.d.ts",
+      "import": "./dist/public/universal/hooks.js"
+    },
+    "./universal/schema": {
+      "types": "./dist/public/universal/schema.d.ts",
+      "import": "./dist/public/universal/schema.js"
+    },
+    "./universal/types": {
+      "types": "./dist/public/universal/types.d.ts",
+      "import": "./dist/public/universal/types.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "client/hooks": ["./dist/public/client/hooks.d.ts"],
+      "client/components/link.client": ["./dist/public/client/components/link.client.d.ts"],
+      "server/hooks": ["./dist/public/server/hooks.d.ts"],
+      "server/utils/data": ["./dist/public/server/utils/data.d.ts"],
+      "server/utils/errors": ["./dist/public/server/utils/errors.d.ts"],
+      "universal/hooks": ["./dist/public/universal/hooks.d.ts"],
+      "universal/schema": ["./dist/public/universal/schema.d.ts"],
+      "universal/types": ["./dist/public/universal/types.d.ts"]
+    }
+  },
   "scripts": {
     "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
     "lint:biome": "biome check --error-on-warnings",
@@ -22,28 +68,6 @@
     "test": "vitest",
     "build": "tsup",
     "dev": "tsup --watch"
-  },
-  "exports": {
-    "./client/": "./dist/public/client/",
-    "./server/": "./dist/public/server/",
-    "./universal/": "./dist/public/universal/",
-    "./schema": "./dist/public/universal/schema"
-  },
-  "typesVersions": {
-    "*": {
-      "client/*": [
-        "./dist/public/client/*"
-      ],
-      "server/*": [
-        "./dist/public/server/*"
-      ],
-      "universal/*": [
-        "./dist/public/universal/*"
-      ],
-      "schema": [
-        "./dist/public/universal/schema"
-      ]
-    }
   },
   "keywords": [
     "react",
