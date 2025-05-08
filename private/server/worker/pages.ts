@@ -1,5 +1,3 @@
-import '../types/global.d.ts';
-
 import { DEFAULT_PAGE_PATH } from '../../universal/utils/constants.ts';
 import type { TreeItem } from '../types/index.ts';
 import { joinPaths } from '../utils/paths';

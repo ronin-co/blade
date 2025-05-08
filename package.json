@@ -1,6 +1,6 @@
 {
   "name": "@ronin/blade",
-  "version": "0.2.7",
+  "version": "0.3.1",
   "type": "module",
   "description": "React at the edge.",
   "repository": "ronin-co/blade",
@@ -8,12 +8,10 @@
     "access": "public"
   },
   "bin": {
-    "blade": "./private/shell/index.ts"
+    "blade": "./dist/private/shell/index.js"
   },
   "files": [
-    "private/**/*",
-    "public/**/*",
-    "examples/advanced/**/*",
+    "dist",
     "examples/basic/**/*"
   ],
   "scripts": {
@@ -22,27 +20,29 @@
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "vitest",
-    "build": "echo 'No build needed'"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepare": "bun run build"
   },
   "exports": {
-    "./client/": "./public/client/",
-    "./server/": "./public/server/",
-    "./universal/": "./public/universal/",
-    "./schema": "./public/universal/schema"
+    "./client/": "./dist/public/client/",
+    "./server/": "./dist/public/server/",
+    "./universal/": "./dist/public/universal/",
+    "./schema": "./dist/public/universal/schema"
   },
   "typesVersions": {
     "*": {
       "client/*": [
-        "./public/client/*"
+        "./dist/public/client/*"
       ],
       "server/*": [
-        "./public/server/*"
+        "./dist/public/server/*"
       ],
       "universal/*": [
-        "./public/universal/*"
+        "./dist/public/universal/*"
       ],
       "schema": [
-        "./public/universal/schema"
+        "./dist/public/universal/schema"
       ]
     }
   },
@@ -54,46 +54,49 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@fontsource-variable/inter": "5.1.0",
-    "@hono/sentry": "1.2.0",
     "@mapbox/timespace": "2.0.4",
-    "@mdx-js/mdx": "3.0.1",
     "@paralleldrive/cuid2": "2.2.2",
-    "@ronin/react": "0.1.2",
-    "@sentry/bun": "8.30.0",
+    "rehype-pretty-code": "0.14.1",
+    "shiki": "3.4.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@hono/node-server": "1.14.1",
+    "@hono/sentry": "1.2.0",
+    "@mdx-js/mdx": "3.0.1",
+    "@sentry/bun": "8.55.0",
     "@sentry/react": "8.30.0",
+    "@sentry/types": "8.30.0",
     "@types/async-retry": "1.4.8",
+    "@types/bun": "1.2.4",
     "@types/cookie": "0.6.0",
+    "@types/flat": "5.0.5",
     "@types/get-value": "3.0.5",
+    "@types/gradient-string": "1.1.6",
     "@types/js-yaml": "4.0.9",
+    "@types/react": "18.3.6",
+    "@types/react-dom": "18.3.0",
     "@types/ua-parser-js": "0.7.39",
+    "@types/web": "0.0.163",
+    "@vercel/functions": "2.0.2",
+    "@vitest/coverage-v8": "2.1.8",
     "async-retry": "1.3.3",
     "chalk": "5.3.0",
-    "cookie": "0.6.0",
+    "cookie": "0.7.0",
     "flat": "6.0.1",
     "get-port": "7.1.0",
     "get-value": "3.0.1",
     "gradient-string": "2.0.2",
-    "hono": "4.6.1",
+    "hono": "4.6.20",
     "js-yaml": "4.1.0",
     "ora": "8.1.0",
     "p-queue": "8.0.1",
     "radash": "12.1.0",
-    "rehype-pretty-code": "0.14.0",
-    "ronin": "6.5.4",
+    "ronin": "6.6.3",
     "serialize-error": "11.0.3",
-    "ua-parser-js": "1.0.39"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@sentry/types": "8.30.0",
-    "@types/bun": "1.2.4",
-    "@types/flat": "5.0.5",
-    "@types/gradient-string": "1.1.6",
-    "@types/react": "18.3.6",
-    "@types/react-dom": "18.3.0",
-    "@types/web": "0.0.163",
-    "@vitest/coverage-v8": "2.1.8",
+    "tsup": "8.4.0",
     "typescript": "5.6.2",
-    "vitest": "2.1.8"
+    "ua-parser-js": "1.0.39",
+    "vitest": "3.1.2"
   }
 }

@@ -1,11 +1,11 @@
 import { sentry } from '@hono/sentry';
-import { effects as effectList } from 'file-list';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
+import { triggers as triggerList } from 'server-list';
 
-import { EffectError } from '../../../public/server/utils/errors';
+import { TriggerError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';
 import { CLIENT_ASSET_PREFIX, SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
 import { runQueries, toDashCase } from '../utils/data';
@@ -15,8 +15,8 @@ import {
   getRequestUserAgent,
 } from '../utils/request-context';
 import { SERVER_CONTEXT } from './context';
-import { prepareEffects } from './effects';
 import renderReactTree, { type Collected } from './tree';
+import { prepareTriggers } from './triggers';
 
 type Bindings = {
   ASSETS: {
@@ -61,7 +61,9 @@ app.use(
   '*',
   sentry({
     // If this variable is missing, Sentry automatically won't capture any errors.
-    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
+    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN
+      ? import.meta.env.BLADE_PUBLIC_SENTRY_DSN
+      : undefined,
     release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
     environment: SENTRY_ENVIRONMENT,
     requestDataOptions: {
@@ -83,7 +85,7 @@ app.all('*', async (c, next) => {
   await next();
 });
 
-// Expose an API endpoint that allows for accessing the provided effects.
+// Expose an API endpoint that allows for accessing the provided triggers.
 app.post('/api', async (c) => {
   console.log('[BLADE] Received request to /api');
 
@@ -129,11 +131,11 @@ app.post('/api', async (c) => {
     currentLeafIndex: null,
   };
 
-  // Generate a list of effect functions based on the effect files that exist in the
+  // Generate a list of trigger functions based on the trigger files that exist in the
   // source code of the application.
-  const effects = prepareEffects(serverContext, effectList, true);
+  const triggers = prepareTriggers(serverContext, triggerList, true);
 
-  // For every query, check whether an effect exists that is being publicly exposed.
+  // For every query, check whether an trigger exists that is being publicly exposed.
   // If none exists, prevent the query from being executed.
   for (const query of queries) {
     const queryType = Object.keys(query)[0] as QueryType;
@@ -143,10 +145,10 @@ app.post('/api', async (c) => {
       ? querySchema.substring(0, querySchema.length - 1)
       : querySchema;
 
-    const effectSlug = toDashCase(schemaSlug);
-    const effectFile = effects[effectSlug];
+    const triggerSlug = toDashCase(schemaSlug);
+    const triggerFile = triggers[triggerSlug];
 
-    if (!effectFile || !effectFile['exposed']) {
+    if (!triggerFile || !triggerFile['exposed']) {
       return c.json(
         {
           error: {
@@ -165,11 +167,11 @@ app.post('/api', async (c) => {
   // Run the queries and handle any errors that might occur.
   try {
     results = await SERVER_CONTEXT.run(serverContext, async () => {
-      const results = await runQueries(c, { default: queries }, effects);
+      const results = await runQueries(c, { default: queries }, triggers);
       return results['default'];
     });
   } catch (err) {
-    if (err instanceof EffectError || err instanceof InvalidResponseError) {
+    if (err instanceof TriggerError || err instanceof InvalidResponseError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
       const error: Record<string, unknown> = {};
 

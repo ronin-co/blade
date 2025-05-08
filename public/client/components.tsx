@@ -1,7 +1,10 @@
+import { Image } from '@ronin/react';
 import { type AnchorHTMLAttributes, type ReactElement, cloneElement } from 'react';
-import { useUniversalContext } from '../../../private/universal/hooks';
-import { usePopulatePathname } from '../../universal/hooks';
-import { useLinkEvents } from '../hooks';
+
+import { wrapClientComponent } from '../../private/client/utils/wrap-client';
+import { useUniversalContext } from '../../private/universal/hooks';
+import { usePopulatePathname } from '../universal/hooks';
+import { useLinkEvents } from './hooks';
 
 interface LinkURL extends Omit<Partial<InstanceType<typeof URL>>, 'search'> {
   search?: string | Record<string, string | number | boolean | null>;
@@ -106,4 +109,7 @@ const Link = ({
   });
 };
 
-export default Link;
+wrapClientComponent(Link, 'Link');
+wrapClientComponent(Image, 'Image');
+
+export { Link, Image };

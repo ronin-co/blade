@@ -1,6 +1,12 @@
 import { createId } from '@paralleldrive/cuid2';
 import type { Query } from '@ronin/compiler';
-import { type SyntaxItem, getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
+import {
+  type DeepCallable,
+  type PromiseTuple,
+  type SyntaxItem,
+  getBatchProxy,
+  getSyntaxProxy,
+} from '@ronin/syntax/queries';
 import {
   type MouseEvent,
   type MouseEventHandler,
@@ -9,7 +15,6 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import type { PromiseTuple } from 'ronin/types';
 import { isStorableObject, processStorableObjects } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
 
@@ -38,7 +43,16 @@ interface MutationOptions {
   database?: string;
 }
 
-export const useMutation = () => {
+export const useMutation = (): {
+  set: DeepCallable<SetQuery>;
+  add: DeepCallable<AddQuery>;
+  remove: DeepCallable<RemoveQuery>;
+
+  batch: <T extends [Promise<any>, ...Promise<any>[]]>(
+    operations: () => T,
+    queryOptions?: Record<string, unknown>,
+  ) => Promise<PromiseTuple<T>>;
+} => {
   const privateLocationRef = usePrivateLocationRef();
   const clientContext = useContext(RootClientContext);
 

@@ -44,4 +44,4 @@ const ErrorBoundary = ({ error: defaultError }: BoundaryProps): ReactElement => 
   );
 };
 
-export default ErrorBoundary;
+export { ErrorBoundary };

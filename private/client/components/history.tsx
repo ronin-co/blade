@@ -8,7 +8,8 @@ import { SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
 import { RootClientContext } from '../context';
 import { usePageTransition, useRevalidation } from '../hooks';
 import type { DeferredPromises, RevalidationReason } from '../types/util';
-import ErrorBoundaryFallback from './error-boundary.client';
+import { wrapClientComponent } from '../utils/wrap-client';
+import { ErrorBoundary as ErrorBoundaryFallback } from './error-boundary';
 
 interface HistoryContentProps {
   children: ReactNode;
@@ -235,4 +236,6 @@ const History = ({ children, universalContext }: HistoryProps) => {
   );
 };
 
-export default History;
+wrapClientComponent(History, 'History');
+
+export { History };

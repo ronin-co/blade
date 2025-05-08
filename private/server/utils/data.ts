@@ -1,24 +1,63 @@
-import '../types/global.d.ts';
-
-import type { Context } from 'hono';
+import { waitUntil as vercelWaitUntil } from '@vercel/functions';
+import type { Context, ExecutionContext } from 'hono';
 import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
 import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
 import type { Query, ResultRecord } from '@ronin/compiler';
-import type { EffectsList } from '../types';
+import type { TriggersList } from '../types';
 import { VERBOSE_LOGGING } from './constants';
+
+/**
+ * A minimal mock implementation of the `ExecutionContext` interface.
+ */
+const MOCK_EXECUTION_CONTEXT: ExecutionContext = {
+  passThroughOnException: () => {},
+  waitUntil: async (func) => {
+    try {
+      await func;
+    } catch (err) {
+      if (!VERBOSE_LOGGING) return;
+      console.error('An error occurred while executing a `waitUntil` callback.');
+      console.error(err);
+    }
+  },
+};
+
+/**
+ * Get the `waitUntil` function from the current context. If the context does not
+ * provide a `waitUntil` function, we use a mock implementation.
+ *
+ * @param context - The context of the current request.
+ *
+ * @returns A function that takes a promise and waits for it to resolve.
+ */
+const getWaitUntil = (context: Context): ((promise: Promise<unknown>) => void) => {
+  if (import.meta.env.__BLADE_PROVIDER === 'vercel') return vercelWaitUntil;
+
+  // Trying to access `c.executionCtx` on a Node.js runtime, such as in a Vercel
+  // function, will throw an error. So we need to add a mockfallback.
+  let dataFetcherWaitUntil = MOCK_EXECUTION_CONTEXT.waitUntil;
+  try {
+    dataFetcherWaitUntil = context.executionCtx.waitUntil?.bind(context.executionCtx);
+  } catch (_err) {
+    if (VERBOSE_LOGGING)
+      console.warn('No execution context provided, using default implementation.');
+  }
+
+  return dataFetcherWaitUntil;
+};
 
 /**
  * Generate the options passed to the `ronin` JavaScript client.
  *
  * @param c - The context of the current request.
- * @param effects - A list of effects that should be executed.
+ * @param triggers - A list of triggers that should be executed.
  *
  * @returns Options that can be passed to the `ronin` JavaScript client.
  */
 export const getRoninOptions = (
   c: Context,
-  effects?: EffectsList,
+  triggers?: TriggersList,
 ): QueryHandlerOptions => {
   const dataFetcher: typeof fetch = async (input, init) => {
     // Normalize the parameters of the surrounding function, as the first argument might
@@ -51,13 +90,11 @@ export const getRoninOptions = (
     return res;
   };
 
-  const dataFetcherWaitUntil = c.executionCtx.waitUntil?.bind(c.executionCtx);
-
   return {
-    effects,
+    triggers,
     token: import.meta.env.BLADE_APP_TOKEN,
     fetch: dataFetcher,
-    waitUntil: dataFetcherWaitUntil,
+    waitUntil: getWaitUntil(c),
   };
 };
 
@@ -67,16 +104,16 @@ export const getRoninOptions = (
  *
  * @param c - The context of the current request.
  * @param queries - A list of RONIN queries that should be executed.
- * @param effects - A list of effects that should be executed.
+ * @param triggers - A list of triggers that should be executed.
  *
  * @returns The results of the passed queries.
  */
 export const runQueries = <T extends ResultRecord>(
   c: Context,
   queries: Record<string, Array<Query>>,
-  effects: EffectsList = {},
+  triggers: TriggersList = {},
 ): Promise<Record<string, FormattedResults<T>>> => {
-  return runQueriesOnRonin<T>(queries, getRoninOptions(c, effects));
+  return runQueriesOnRonin<T>(queries, getRoninOptions(c, triggers));
 };
 
 /**

@@ -18,5 +18,6 @@ declare module 'bun' {
     __BLADE_DEBUG_LEVEL: 'verbose' | 'error';
     __BLADE_PORT: string;
     __BLADE_PROJECTS: string;
+    __BLADE_PROVIDER: 'cloudflare' | 'vercel' | '';
   }
 }
