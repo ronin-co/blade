@@ -53,7 +53,8 @@
         "useImportRestrictions": "off",
         "useExplicitType": "off",
         "useGuardForIn": "off",
-        "noHeadElement": "off"
+        "noHeadElement": "off",
+        "noExportedImports": "off"
       },
       "performance": {
         "all": true,
