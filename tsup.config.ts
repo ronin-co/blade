@@ -25,4 +25,5 @@ export default defineConfig({
   dts: true,
   external: ['bun', 'server-list', 'client-list', 'react', 'react-dom'],
   publicDir: './private/client/assets',
+  treeshake: true,
 });
