@@ -1,10 +1,10 @@
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
-import type { PageFetchingOptions } from '../../universal/types/util';
-import { getOutputFile } from '../../universal/utils/paths.ts';
-import { createFromReadableStream } from '../utils/parser';
-import { fetchRetry } from './data';
+import { fetchRetry } from '@/private/client/utils/data';
+import { createFromReadableStream } from '@/private/client/utils/parser';
+import type { PageFetchingOptions } from '@/private/universal/types/util';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 /**
  * Downloads a CSS or JS bundle from the server, without evaluating it.

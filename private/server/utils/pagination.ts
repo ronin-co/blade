@@ -1,6 +1,6 @@
 import type { GetQueryInstructions, Query } from '@ronin/compiler';
 
-import type { PaginationInstruction } from '../../universal/types/util';
+import type { PaginationInstruction } from '@/private/universal/types/util';
 
 /**
  * Allows for parsing the `?page` query string parameter used for pagination.

@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
-import { getParentDirectories } from '../private/server/utils/paths';
-import { getEntry, getPathSegments } from '../private/server/worker/pages';
+import { getParentDirectories } from '@/private/server/utils/paths';
+import { getEntry, getPathSegments } from '@/private/server/worker/pages';
 import { examplePage, pages } from './fixtures/pages';
 
 test('get entry path of non-index page', () => {

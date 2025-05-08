@@ -1,7 +1,7 @@
 import ts from '@mapbox/timespace';
 import UserAgentParser from 'ua-parser-js';
 
-import type { GeoLocation, UserAgent } from '../../universal/types/util';
+import type { GeoLocation, UserAgent } from '@/private/universal/types/util';
 
 const getTimeZone = (latitude: number, longitude: number): string | null => {
   return (

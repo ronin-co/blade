@@ -1,5 +1,9 @@
-import type { ServerContext } from '../server/context';
-import type { GeoLocation, QueryItemWrite, UserAgent } from './types/util';
+import type { ServerContext } from '@/private/server/context';
+import type {
+  GeoLocation,
+  QueryItemWrite,
+  UserAgent,
+} from '@/private/universal/types/util';
 
 /** This context can be consumed by client and server components. */
 export type UniversalContext<

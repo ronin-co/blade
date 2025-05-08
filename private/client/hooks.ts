@@ -9,13 +9,13 @@ import {
   useState,
 } from 'react';
 
-import { usePopulatePathname } from '../../public/universal/hooks.ts';
-import { usePrivateLocation } from '../universal/hooks.ts';
-import type { PageFetchingOptions } from '../universal/types/util';
-import logger from '../universal/utils/logs';
-import { RootClientContext } from './context';
-import type { RevalidationReason } from './types/util';
-import fetchPage, { type FetchedPage } from './utils/fetch-page';
+import { RootClientContext } from '@/private/client/context';
+import type { RevalidationReason } from '@/private/client/types/util';
+import fetchPage, { type FetchedPage } from '@/private/client/utils/fetch-page';
+import { usePrivateLocation } from '@/private/universal/hooks';
+import type { PageFetchingOptions } from '@/private/universal/types/util';
+import logger from '@/private/universal/utils/logs';
+import { usePopulatePathname } from '@/public/universal/hooks';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**

@@ -1,12 +1,12 @@
 import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
-import { History } from '../../client/components/history';
-import { getSerializableContext } from '../../universal/context';
-import { usePrivateLocation } from '../../universal/hooks';
-import type { Asset } from '../../universal/types/util';
-import { useServerContext } from '../hooks';
-import type { PageMetadata, RecursiveRequired, ValueOf } from '../types';
+import { History } from '@/private/client/components/history';
+import { useServerContext } from '@/private/server/hooks';
+import type { PageMetadata, RecursiveRequired, ValueOf } from '@/private/server/types';
+import { getSerializableContext } from '@/private/universal/context';
+import { usePrivateLocation } from '@/private/universal/hooks';
+import type { Asset } from '@/private/universal/types/util';
 
 const metadataNames: Record<string, string> = {
   colorScheme: 'color-scheme',

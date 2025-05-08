@@ -1,8 +1,11 @@
 import { useContext } from 'react';
 
-import { RootClientContext } from '../client/context';
-import { useServerContext } from '../server/hooks';
-import { type UniversalContext, getSerializableContext } from './context';
+import { RootClientContext } from '@/private/client/context';
+import { useServerContext } from '@/private/server/hooks';
+import {
+  type UniversalContext,
+  getSerializableContext,
+} from '@/private/universal/context';
 
 const useUniversalContext = (): UniversalContext => {
   if (typeof window === 'undefined') {

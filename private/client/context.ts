@@ -1,7 +1,7 @@
 import { type MutableRefObject, createContext } from 'react';
 
-import type { UniversalContext } from '../universal/context';
-import type { DeferredPromises } from './types/util';
+import type { DeferredPromises } from '@/private/client/types/util';
+import type { UniversalContext } from '@/private/universal/context';
 
 /** This context can only be consumed by client components. */
 export type ClientContext<
