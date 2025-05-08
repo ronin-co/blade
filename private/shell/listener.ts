@@ -113,12 +113,7 @@ const server: Server = Bun.serve({
 
     if (publicFileExists) return new Response(publicFile);
 
-    const fetcher =
-      import.meta.env.__BLADE_PROVIDER === 'vercel'
-        ? requestHandler.default
-        : requestHandler.default.fetch;
-
-    return fetcher(request, {}, {});
+    return requestHandler.default.fetch(request, {}, {});
   },
   websocket:
     environment === 'development'
