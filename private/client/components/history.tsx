@@ -8,7 +8,7 @@ import { SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
 import { RootClientContext } from '../context';
 import { usePageTransition, useRevalidation } from '../hooks';
 import type { DeferredPromises, RevalidationReason } from '../types/util';
-import { ErrorBoundary as ErrorBoundaryFallback } from './error-boundary.client';
+import { ErrorBoundary as ErrorBoundaryFallback } from './error-boundary';
 
 interface HistoryContentProps {
   children: ReactNode;
@@ -234,5 +234,16 @@ const History = ({ children, universalContext }: HistoryProps) => {
     </Sentry.ErrorBoundary>
   );
 };
+
+window.BLADE_CHUNKS['history'] = { History: History };
+
+const CLIENT_REFERENCE = Symbol.for('react.client.reference');
+
+Object.defineProperties(History, {
+  $$typeof: { value: CLIENT_REFERENCE },
+  name: { value: 'History' },
+  chunk: { value: 'history' },
+  id: { value: 'testing' },
+});
 
 export { History };

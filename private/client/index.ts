@@ -1,4 +1,5 @@
 import './types/global.d.ts';
+import './components/history';
 import 'client-list';
 
 import { hydrateRoot } from 'react-dom/client';

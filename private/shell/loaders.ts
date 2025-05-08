@@ -7,7 +7,7 @@ import YAML from 'js-yaml';
 import rehypePrettyCode from 'rehype-pretty-code';
 
 import { generateUniqueId } from '../universal/utils/crypto';
-import { clientManifestFile, frameworkDirectory } from './constants';
+import { clientManifestFile } from './constants';
 import type { ClientChunks } from './types';
 import { getFileList, scanExports, wrapClientExport } from './utils';
 
@@ -165,12 +165,7 @@ export const getClientComponentLoader: (projects: string[]) => BunPlugin = (
         // Prevent duplicate files.
         const files = new Set();
 
-        // Explicitly crawl the directory of the framework as well, because it might be
-        // located outside the directories of the projects if the projects are located
-        // inside a monorepo.
-        const directories = [...projects, frameworkDirectory];
-
-        for (const directory of directories) {
+        for (const directory of projects) {
           for await (const file of glob.scan({
             cwd: directory,
             absolute: true,
