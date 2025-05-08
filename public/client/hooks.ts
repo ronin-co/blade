@@ -1,4 +1,3 @@
-import { createId } from '@paralleldrive/cuid2';
 import type { Query } from '@ronin/compiler';
 import {
   type DeepCallable,
@@ -30,7 +29,6 @@ import {
   usePrivateLocationRef,
   useReduce,
 } from '../../private/client/hooks';
-import { usePrivateLocation } from '../../private/universal/hooks';
 import type { PageFetchingOptions } from '../../private/universal/types/util';
 import { generateUniqueId } from '../../private/universal/utils/crypto';
 import logger from '../../private/universal/utils/logs';
@@ -99,7 +97,7 @@ export const useMutation = (): {
       ? populatePathname(options.redirect)
       : currentPathnameWithQuery;
 
-    const hookHash = generateUniqueId(20);
+    const hookHash = generateUniqueId();
 
     const files = new Map<string, Blob>();
 
@@ -284,31 +282,16 @@ export const usePagination = (
   options?: Partial<Pick<PageFetchingOptions, 'updateAddressBar'>>,
 ): { paginate: () => void; resetPagination: () => void } => {
   const transitionPage = usePageTransition();
-  const { pathname } = usePrivateLocation();
-  const populatePathname = usePopulatePathname();
   const privateLocationRef = usePrivateLocationRef();
 
   // These two must be references and not memos in order to avoid a stale closure of the
   // returned functions at the bottom.
   const loadingMore = useRef<boolean>(false);
-  const id = useRef<string>(createId());
 
   useEffect(() => {
     if (!loadingMore.current) return;
     loadingMore.current = false;
   }, [nextPage]);
-
-  // Refresh the unique pagination identifier when the active page changes.
-  useEffect(
-    () => {
-      // We're purposefully not using the output of `useId` here, which is likely to be
-      // the same between different pages.
-      id.current = createId();
-    },
-    // We can't rely on `privateLocationRef` here, as refs don't update during render
-    // time, but instead after the render has completed.
-    [populatePathname(pathname)],
-  );
 
   const resetPagination = () => {
     const privateLocation = privateLocationRef.current;
