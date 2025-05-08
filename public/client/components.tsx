@@ -1,5 +1,6 @@
 import { type AnchorHTMLAttributes, type ReactElement, cloneElement } from 'react';
 
+import { wrapClientComponent } from '../../private/client/utils/wrap-client';
 import { useUniversalContext } from '../../private/universal/hooks';
 import { usePopulatePathname } from '../universal/hooks';
 import { useLinkEvents } from './hooks';
@@ -96,15 +97,6 @@ const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProp
   });
 };
 
-window.BLADE_CHUNKS['link'] = { Link: Link };
-
-const CLIENT_REFERENCE = Symbol.for('react.client.reference');
-
-Object.defineProperties(Link, {
-  $$typeof: { value: CLIENT_REFERENCE },
-  name: { value: 'Link' },
-  chunk: { value: 'link' },
-  id: { value: 'testing' },
-});
+wrapClientComponent(Link, 'Link');
 
 export { Link };
