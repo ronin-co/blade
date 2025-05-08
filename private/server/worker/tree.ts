@@ -11,8 +11,8 @@ import type { FormattedResults, Query } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
 import { pages as pageList, triggers as triggerList } from 'server-list';
-import DefaultPage404 from '../pages/404';
-import DefaultPage500 from '../pages/500';
+import * as DefaultPage404 from '../pages/404';
+import * as DefaultPage500 from '../pages/500';
 
 import { TriggerError } from '../../../public/server/utils/errors';
 import type {
@@ -23,7 +23,7 @@ import type {
 import { DEFAULT_PAGE_PATH } from '../../universal/utils/constants';
 import Root from '../components/root.tsx';
 import type { ServerContext } from '../context';
-import type { PageMetadata, TreeItem } from '../types';
+import type { PageList, PageMetadata, TreeItem } from '../types';
 import { SECURITY_HEADERS, VERBOSE_LOGGING } from '../utils/constants';
 import { runQueries } from '../utils/data';
 import { assignFiles } from '../utils/files.ts';
@@ -38,13 +38,13 @@ import { SERVER_CONTEXT } from './context';
 import { type PageEntry, getEntry, getPathSegments } from './pages';
 import { prepareTriggers } from './triggers';
 
-const pages = {
+const pages: PageList = {
   ...pageList,
   [joinPaths(DEFAULT_PAGE_PATH, '404.tsx')]: DefaultPage404,
   [joinPaths(DEFAULT_PAGE_PATH, '500.tsx')]: DefaultPage500,
 };
 
-const getRenderingLeaves = (location: keyof typeof pageList): Map<string, TreeItem> => {
+const getRenderingLeaves = (location: keyof PageList): Map<string, TreeItem> => {
   const leaves = new Map<string, TreeItem>();
   const parentDirectories = getParentDirectories(location);
 

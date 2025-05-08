@@ -33,7 +33,6 @@ import type { ServerContext } from '../context';
 export type TreeItem = {
   components?: Record<string, ComponentType<unknown>>;
   default: FunctionComponent<{
-    records?: unknown;
     components?: Record<string, ComponentType<unknown>>;
   }>;
 };
@@ -185,3 +184,4 @@ export type Triggers<TSchema = unknown> = Record<
 >;
 
 export type TriggersList<TSchema = unknown> = Record<string, Triggers<TSchema>>;
+export type PageList = Record<string, TreeItem | 'DIRECTORY'>;
