@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { logSpinner } from '.';
-import { outputDirectory } from '../constants';
+import { outputDirectory } from '@/private/shell/constants';
+import { logSpinner } from '@/private/shell/utils';
 
 /**
  * Get the name of the provider based on the environment variables.

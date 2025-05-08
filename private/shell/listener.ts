@@ -2,21 +2,28 @@ import * as Sentry from '@sentry/bun';
 import { type Server, plugin } from 'bun';
 import chalk from 'chalk';
 
-import { CLIENT_ASSET_PREFIX, SENTRY_ENVIRONMENT } from '../universal/utils/constants';
 import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
   serverInputFile,
   serverOutputFile,
-} from './constants';
+} from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from './loaders';
-import { cleanUp, getClientEnvironmentVariables, prepareClientAssets } from './utils';
+} from '@/private/shell/loaders';
+import {
+  cleanUp,
+  getClientEnvironmentVariables,
+  prepareClientAssets,
+} from '@/private/shell/utils';
+import {
+  CLIENT_ASSET_PREFIX,
+  SENTRY_ENVIRONMENT,
+} from '@/private/universal/utils/constants';
 
 const environment = Bun.env['BLADE_ENV'];
 const port = Bun.env['__BLADE_PORT'];

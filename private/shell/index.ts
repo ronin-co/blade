@@ -7,8 +7,12 @@ import { parseArgs } from 'node:util';
 import type { SpawnOptions } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
-import { frameworkDirectory, loggingPrefixes, pagesDirectory } from './constants';
-import { logSpinner, setEnvironmentVariables } from './utils';
+import {
+  frameworkDirectory,
+  loggingPrefixes,
+  pagesDirectory,
+} from '@/private/shell/constants';
+import { logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.

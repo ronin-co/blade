@@ -27,8 +27,8 @@ import type {
   SetTrigger as OriginalSetTrigger,
 } from 'ronin/types';
 
-import type { CustomNavigator } from '../../universal/types/util';
-import type { ServerContext } from '../context';
+import type { ServerContext } from '@/private/server/context';
+import type { CustomNavigator } from '@/private/universal/types/util';
 
 export type TreeItem = {
   components?: Record<string, ComponentType<unknown>>;

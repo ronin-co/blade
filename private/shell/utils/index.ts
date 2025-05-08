@@ -4,9 +4,6 @@ import { cp, exists, readdir, rm } from 'node:fs/promises';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
-import { CLIENT_ASSET_PREFIX } from '../../universal/utils/constants';
-import { generateUniqueId } from '../../universal/utils/crypto';
-import { getOutputFile } from '../../universal/utils/paths';
 import {
   clientInputFile,
   clientManifestFile,
@@ -15,15 +12,18 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-} from '../constants';
+} from '@/private/shell/constants';
 import {
   getClientChunkLoader,
   getClientComponentLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from '../loaders';
-import type { ClientChunks, FileError } from '../types';
-import { getProvider } from './providers';
+} from '@/private/shell/loaders';
+import type { ClientChunks, FileError } from '@/private/shell/types';
+import { getProvider } from '@/private/shell/utils/providers';
+import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
   const files = await readdir(directory, { recursive: true });

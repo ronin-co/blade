@@ -5,18 +5,23 @@ import {
   serverInputFile,
   serverOutputFile,
   serverVercelInputFile,
-} from './constants';
+} from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from './loaders';
-import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
+} from '@/private/shell/loaders';
+import {
+  cleanUp,
+  handleBuildLogs,
+  logSpinner,
+  prepareClientAssets,
+} from '@/private/shell/utils';
 import {
   mapProviderInlineDefinitions,
   transformToVercelBuildOutput,
-} from './utils/providers';
+} from '@/private/shell/utils/providers';
 
 await cleanUp();
 await prepareClientAssets('production');

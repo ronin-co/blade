@@ -1,4 +1,4 @@
-import type { TreeItem } from '../../private/server/types';
+import type { TreeItem } from '@/private/server/types';
 
 export const examplePage = {
   default: () => null,

@@ -1,6 +1,6 @@
-import { DEFAULT_PAGE_PATH } from '../../universal/utils/constants.ts';
-import type { PageList, TreeItem } from '../types/index.ts';
-import { joinPaths } from '../utils/paths';
+import type { PageList, TreeItem } from '@/private/server/types';
+import { joinPaths } from '@/private/server/utils/paths';
+import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 
 type Params = { [key: string]: string | string[] | null };
 

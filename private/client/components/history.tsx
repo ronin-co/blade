@@ -1,15 +1,15 @@
 import * as Sentry from '@sentry/react';
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { usePopulatePathname } from '../../../public/universal/hooks';
-import type { UniversalContext } from '../../universal/context';
-import { usePrivateLocation, useUniversalContext } from '../../universal/hooks';
-import { SENTRY_ENVIRONMENT } from '../../universal/utils/constants';
-import { RootClientContext } from '../context';
-import { usePageTransition, useRevalidation } from '../hooks';
-import type { DeferredPromises, RevalidationReason } from '../types/util';
-import { wrapClientComponent } from '../utils/wrap-client';
-import { ErrorBoundary as ErrorBoundaryFallback } from './error-boundary';
+import { ErrorBoundary as ErrorBoundaryFallback } from '@/private/client/components/error-boundary';
+import { RootClientContext } from '@/private/client/context';
+import { usePageTransition, useRevalidation } from '@/private/client/hooks';
+import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
+import { wrapClientComponent } from '@/private/client/utils/wrap-client';
+import type { UniversalContext } from '@/private/universal/context';
+import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
+import { SENTRY_ENVIRONMENT } from '@/private/universal/utils/constants';
+import { usePopulatePathname } from '@/public/universal/hooks';
 
 interface HistoryContentProps {
   children: ReactNode;

@@ -14,29 +14,29 @@ import { pages as pageList, triggers as triggerList } from 'server-list';
 import * as DefaultPage404 from '../pages/404';
 import * as DefaultPage500 from '../pages/500';
 
-import { TriggerError } from '../../../public/server/utils/errors';
-import type {
-  PageFetchingOptions,
-  QueryItemRead,
-  QueryItemWrite,
-} from '../../universal/types/util';
-import { DEFAULT_PAGE_PATH } from '../../universal/utils/constants';
-import Root from '../components/root.tsx';
-import type { ServerContext } from '../context';
-import type { PageList, PageMetadata, TreeItem } from '../types';
-import { SECURITY_HEADERS, VERBOSE_LOGGING } from '../utils/constants';
-import { runQueries } from '../utils/data';
-import { assignFiles } from '../utils/files.ts';
-import { getParentDirectories, joinPaths } from '../utils/paths';
+import Root from '@/private/server/components/root';
+import type { ServerContext } from '@/private/server/context';
+import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
+import { SECURITY_HEADERS, VERBOSE_LOGGING } from '@/private/server/utils/constants';
+import { runQueries } from '@/private/server/utils/data';
+import { assignFiles } from '@/private/server/utils/files';
+import { getParentDirectories, joinPaths } from '@/private/server/utils/paths';
 import {
   getRequestGeoLocation,
   getRequestLanguages,
   getRequestUserAgent,
-} from '../utils/request-context';
-import { renderToReadableStream } from '../utils/serializer';
-import { SERVER_CONTEXT } from './context';
-import { type PageEntry, getEntry, getPathSegments } from './pages';
-import { prepareTriggers } from './triggers';
+} from '@/private/server/utils/request-context';
+import { renderToReadableStream } from '@/private/server/utils/serializer';
+import { SERVER_CONTEXT } from '@/private/server/worker/context';
+import { type PageEntry, getEntry, getPathSegments } from '@/private/server/worker/pages';
+import { prepareTriggers } from '@/private/server/worker/triggers';
+import type {
+  PageFetchingOptions,
+  QueryItemRead,
+  QueryItemWrite,
+} from '@/private/universal/types/util';
+import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
+import { TriggerError } from '@/public/server/utils/errors';
 
 const pages: PageList = {
   ...pageList,

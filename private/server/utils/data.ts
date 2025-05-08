@@ -3,9 +3,9 @@ import type { Context, ExecutionContext } from 'hono';
 import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
 import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
+import type { TriggersList } from '@/private/server/types';
+import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import type { Query, ResultRecord } from '@ronin/compiler';
-import type { TriggersList } from '../types';
-import { VERBOSE_LOGGING } from './constants';
 
 /**
  * A minimal mock implementation of the `ExecutionContext` interface.

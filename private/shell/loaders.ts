@@ -6,10 +6,10 @@ import { type BunPlugin, Glob } from 'bun';
 import YAML from 'js-yaml';
 import rehypePrettyCode from 'rehype-pretty-code';
 
-import { generateUniqueId } from '../universal/utils/crypto';
-import { clientManifestFile } from './constants';
-import type { ClientChunks } from './types';
-import { getFileList, scanExports, wrapClientExport } from './utils';
+import { clientManifestFile } from '@/private/shell/constants';
+import type { ClientChunks } from '@/private/shell/types';
+import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 export const getClientReferenceLoader: (
   environment: 'development' | 'production',
