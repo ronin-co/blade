@@ -97,7 +97,7 @@ export const useMutation = (): {
       ? populatePathname(options.redirect)
       : currentPathnameWithQuery;
 
-    const hookHash = generateUniqueId(20);
+    const hookHash = generateUniqueId();
 
     const files = new Map<string, Blob>();
 

@@ -1,10 +1,8 @@
-import { init } from '@paralleldrive/cuid2';
-
 /**
- * Generate cryptographically strong unique identifiers.
- *
- * @param length - The length of the identifier to generate; defaults to 10.
+ * Generate pseudo-random unique identifiers.
  *
  * @returns A unique identifier.
  */
-export const generateUniqueId = (length = 10): string => init({ length })();
+export const generateUniqueId = (): string => {
+  return crypto.getRandomValues(new Uint32Array(1))[0].toString();
+};
