@@ -15,6 +15,7 @@ export default defineConfig({
     './private/shell/builder.ts',
     './private/shell/listener.ts',
     './private/client/index.ts',
+    './private/server/types/index.ts',
     './private/server/worker/index.ts',
     './private/server/worker/vercel.ts',
   ],
