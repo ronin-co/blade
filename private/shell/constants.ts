@@ -11,9 +11,8 @@ export const publicDirectory = path.resolve(process.cwd(), 'public');
 export const frameworkDirectory = path.join(__dirname, '..');
 
 export const directoriesToParse = {
-  customPages: pagesDirectory,
-  customTriggers: triggersDirectory,
-  defaultPages: path.join(frameworkDirectory, 'private/server/pages'),
+  pages: pagesDirectory,
+  triggers: triggersDirectory,
 };
 
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
