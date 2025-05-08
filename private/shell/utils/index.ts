@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { copyFile, cp, exists, mkdir, readdir, rm } from 'node:fs/promises';
+import { cp, exists, readdir, rm } from 'node:fs/promises';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
