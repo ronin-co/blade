@@ -1,5 +1,3 @@
-import '../types/global.d.ts';
-
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 

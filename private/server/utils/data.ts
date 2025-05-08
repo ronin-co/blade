@@ -1,5 +1,3 @@
-import '../types/global.d.ts';
-
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
 import type { Context, ExecutionContext } from 'hono';
 import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';

@@ -1,5 +1,3 @@
-import '../../../private/server/types/global.d.ts';
-
 import type { DeepCallable, PromiseTuple } from '@ronin/syntax/queries';
 import { triggers } from 'file-list';
 import initializeClient from 'ronin';

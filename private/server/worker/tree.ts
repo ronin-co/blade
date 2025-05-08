@@ -1,5 +1,3 @@
-import '../../universal/types/global.d.ts';
-
 import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
 import { pages, triggers as triggerList } from 'file-list';
 import getValue from 'get-value';

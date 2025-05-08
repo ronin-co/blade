@@ -15,8 +15,6 @@ export default defineConfig({
     './private/shell/builder.ts',
     './private/shell/listener.ts',
     './private/client/index.ts',
-    './private/client/components/history.client.tsx',
-    './private/client/components/error-boundary.client.tsx',
     './private/server/worker/index.ts',
     './private/server/worker/vercel.ts',
   ],

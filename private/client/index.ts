@@ -1,10 +1,9 @@
-import './types/global.d.ts';
 import './components/history';
 import 'client-list';
 
 import { hydrateRoot } from 'react-dom/client';
 
-import fetchPage from './utils/fetch-page.ts';
+import fetchPage from './utils/fetch-page';
 
 if (!window['BLADE_ROOT']) {
   const path = location.pathname + location.search + location.hash;
