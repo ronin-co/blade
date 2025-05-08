@@ -1,4 +1,4 @@
-declare module 'file-list' {
+declare module 'server-list' {
   export const pages: Record<string, import('./index').TreeItem | 'DIRECTORY'>;
   export const triggers: import('./index').TriggersList;
 }

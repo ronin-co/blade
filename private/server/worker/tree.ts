@@ -1,5 +1,4 @@
 import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
-import { pages, triggers as triggerList } from 'file-list';
 import getValue from 'get-value';
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
@@ -11,6 +10,7 @@ import { renderToReadableStream as renderToReadableStreamInitial } from 'react-d
 import type { FormattedResults, Query } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
+import { pages, triggers as triggerList } from 'server-list';
 
 import { TriggerError } from '../../../public/server/utils/errors';
 import type {

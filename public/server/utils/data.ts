@@ -1,6 +1,6 @@
 import type { DeepCallable, PromiseTuple } from '@ronin/syntax/queries';
-import { triggers } from 'file-list';
 import initializeClient from 'ronin';
+import { triggers } from 'server-list';
 
 import type {
   AlterQuery,

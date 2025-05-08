@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: [
     './public/client/hooks.ts',
-    './public/client/components.client.tsx',
+    './public/client/components.tsx',
     './public/server/hooks.ts',
     './public/server/utils/data.ts',
     './public/server/utils/errors.ts',
@@ -21,6 +21,6 @@ export default defineConfig({
   format: 'esm',
   clean: true,
   dts: true,
-  external: ['bun', 'react', 'react-dom', 'client-list', 'file-list'],
+  external: ['bun', 'react', 'react-dom', 'client-list', 'server-list'],
   publicDir: './private/client/assets',
 });
