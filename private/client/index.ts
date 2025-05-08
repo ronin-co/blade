@@ -1,4 +1,6 @@
 import './components/history';
+import '../../public/client/components';
+
 import 'client-list';
 
 import { hydrateRoot } from 'react-dom/client';

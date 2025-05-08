@@ -96,4 +96,15 @@ const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProp
   });
 };
 
+window.BLADE_CHUNKS['link'] = { Link: Link };
+
+const CLIENT_REFERENCE = Symbol.for('react.client.reference');
+
+Object.defineProperties(Link, {
+  $$typeof: { value: CLIENT_REFERENCE },
+  name: { value: 'Link' },
+  chunk: { value: 'link' },
+  id: { value: 'testing' },
+});
+
 export { Link };
