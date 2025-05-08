@@ -1,6 +1,6 @@
 {
   "name": "@ronin/blade",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "type": "module",
   "description": "React at the edge.",
   "repository": "ronin-co/blade",
@@ -54,7 +54,6 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@fontsource-variable/inter": "5.1.0",
     "@hono/node-server": "1.14.1",
     "@hono/sentry": "1.2.0",
     "@mapbox/timespace": "2.0.4",
