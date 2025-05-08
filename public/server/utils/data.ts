@@ -1,18 +1,6 @@
-import type { DeepCallable, PromiseTuple } from '@ronin/syntax/queries';
 import initializeClient from 'ronin';
 import { triggers } from 'server-list';
 
-import type {
-  AlterQuery,
-  CreateQuery,
-  DropQuery,
-  ListQuery,
-  Model,
-  ModelField,
-  ModelIndex,
-  ModelPreset,
-} from '@ronin/compiler';
-import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from 'ronin/types';
 import { getRoninOptions } from '../../../private/server/utils/data.ts';
 import { SERVER_CONTEXT } from '../../../private/server/worker/context.ts';
 import { prepareTriggers } from '../../../private/server/worker/triggers.ts';
@@ -28,23 +16,17 @@ const factory = initializeClient(() => {
   );
 });
 
-export const get = factory.get as DeepCallable<GetQuery>;
-export const set = factory.set as DeepCallable<SetQuery>;
-export const add = factory.add as DeepCallable<AddQuery>;
-export const remove = factory.remove as DeepCallable<RemoveQuery>;
-export const count = factory.count as DeepCallable<CountQuery, number>;
+type FactoryType = ReturnType<typeof initializeClient>;
 
-export const list = factory.list as DeepCallable<ListQuery>;
-export const create = factory.create as DeepCallable<CreateQuery, Model>;
-export const alter = factory.alter as DeepCallable<
-  AlterQuery,
-  Model | ModelField | ModelIndex | ModelPreset
->;
-export const drop = factory.drop as DeepCallable<DropQuery, Model>;
+export const get = factory.get as FactoryType['get'];
+export const set = factory.set as FactoryType['set'];
+export const add = factory.add as FactoryType['add'];
+export const remove = factory.remove as FactoryType['remove'];
+export const count = factory.count as FactoryType['count'];
 
-export const batch = factory.batch as <
-  T extends [Promise<any>, ...Array<Promise<any>>] | Array<Promise<any>>,
->(
-  operations: () => T,
-  queryOptions?: Record<string, unknown>,
-) => Promise<PromiseTuple<T>>;
+export const list = factory.list as FactoryType['list'];
+export const create = factory.create as FactoryType['create'];
+export const alter = factory.alter as FactoryType['alter'];
+export const drop = factory.drop as FactoryType['drop'];
+
+export const batch = factory.batch as FactoryType['batch'];
