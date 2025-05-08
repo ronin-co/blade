@@ -1,5 +1,3 @@
-import './types/global.d.ts';
-
 import Queue from 'p-queue';
 import {
   type MutableRefObject,

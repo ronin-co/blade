@@ -1,7 +1,4 @@
-import '../../universal/types/global.d.ts';
-
 import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
-import { pages, triggers as triggerList } from 'file-list';
 import getValue from 'get-value';
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
@@ -13,6 +10,7 @@ import { renderToReadableStream as renderToReadableStreamInitial } from 'react-d
 import type { FormattedResults, Query } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
+import { pages, triggers as triggerList } from 'server-list';
 
 import { TriggerError } from '../../../public/server/utils/errors';
 import type {
@@ -42,7 +40,7 @@ const getRenderingLeaves = (location: keyof typeof pages): Map<string, TreeItem>
   const parentDirectories = getParentDirectories(location);
 
   // Add current page to the rendering tree.
-  leaves.set(location, pages[location]);
+  leaves.set(location, pages[location] as TreeItem);
 
   // Add parent layouts surrounding the current page to the rendering tree.
   for (const dir of parentDirectories) {

@@ -96,7 +96,7 @@ setEnvironmentVariables({
   projects,
 });
 
-const serverFile = path.join(import.meta.dirname, 'listener.ts');
+const serverFile = path.join(import.meta.dirname, 'listener.js');
 
 const childProcessConfig: SpawnOptions.OptionsObject = {
   stdin: 'inherit',
@@ -117,7 +117,7 @@ if (isServing) {
     // when starting `blade build`, we need a child process that we can set this
     // environment variable on.
     const builder = Bun.spawn(
-      ['bun', path.join(__dirname, 'builder.ts')],
+      ['bun', path.join(__dirname, 'builder.js')],
       childProcessConfig,
     );
 

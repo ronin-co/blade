@@ -1,4 +1,7 @@
-# RONIN Blade
+# Blade
+
+[![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/blade/validate.yml?label=tests)](https://github.com/ronin-co/blade/actions/workflows/validate.yml)
+[![install size](https://packagephobia.com/badge?p=@ronin/blade)](https://packagephobia.com/result?p=@ronin/blade)
 
 This package allows for building instant web apps with [React](https://react.dev).
 

@@ -1,9 +1,9 @@
 import { sentry } from '@hono/sentry';
-import { triggers as triggerList } from 'file-list';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
+import { triggers as triggerList } from 'server-list';
 
 import { TriggerError } from '../../../public/server/utils/errors';
 import type { PageFetchingOptions } from '../../universal/types/util';

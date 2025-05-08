@@ -7,7 +7,7 @@ import YAML from 'js-yaml';
 import rehypePrettyCode from 'rehype-pretty-code';
 
 import { generateUniqueId } from '../universal/utils/crypto';
-import { clientManifestFile, frameworkDirectory } from './constants';
+import { clientManifestFile } from './constants';
 import type { ClientChunks } from './types';
 import { getFileList, scanExports, wrapClientExport } from './utils';
 
@@ -121,11 +121,11 @@ export const getFileListLoader: (onResolve: boolean) => BunPlugin = (onResolve) 
   name: 'File List Loader',
   setup(build) {
     if (onResolve) {
-      build.onResolve({ filter: /^file-list$/ }, (source) => {
+      build.onResolve({ filter: /^server-list$/ }, (source) => {
         return { path: source.path, namespace: 'dynamic-list' };
       });
 
-      build.onLoad({ filter: /^file-list$/, namespace: 'dynamic-list' }, async () => {
+      build.onLoad({ filter: /^server-list$/, namespace: 'dynamic-list' }, async () => {
         const contents = await getFileList();
 
         return {
@@ -137,7 +137,7 @@ export const getFileListLoader: (onResolve: boolean) => BunPlugin = (onResolve) 
       return;
     }
 
-    build.module('file-list', async () => {
+    build.module('server-list', async () => {
       const contents = await getFileList();
 
       return {
@@ -165,12 +165,7 @@ export const getClientComponentLoader: (projects: string[]) => BunPlugin = (
         // Prevent duplicate files.
         const files = new Set();
 
-        // Explicitly crawl the directory of the framework as well, because it might be
-        // located outside the directories of the projects if the projects are located
-        // inside a monorepo.
-        const directories = [...projects, frameworkDirectory];
-
-        for (const directory of directories) {
+        for (const directory of projects) {
           for await (const file of glob.scan({
             cwd: directory,
             absolute: true,

@@ -24,6 +24,8 @@ export type {
   FollowingRemoveTrigger,
   FollowingGetTrigger,
   FollowingSetTrigger,
+  Triggers,
+  TriggerOptions,
 } from '../../private/server/types';
 
 export type * from 'ronin';
