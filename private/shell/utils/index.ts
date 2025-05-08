@@ -4,7 +4,7 @@ import { cp, exists, readdir, rm } from 'node:fs/promises';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
-import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../../universal/utils/constants';
+import { CLIENT_ASSET_PREFIX } from '../../universal/utils/constants';
 import { generateUniqueId } from '../../universal/utils/crypto';
 import { getOutputFile } from '../../universal/utils/paths';
 import {
@@ -39,18 +39,13 @@ const getImportList = async (directoryName: string, directoryPath: string) => {
   for (let index = 0; index < files.length; index++) {
     const filePath = files[index] as (typeof files)[number];
     const filePathFull = path.join(directoryPath, filePath);
-
     const variableName = directoryName + index;
-    const keyName =
-      directoryName === 'defaultPages'
-        ? path.join(DEFAULT_PAGE_PATH, filePath)
-        : filePath;
 
     if (filePath.endsWith('/')) {
-      exportList[keyName.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
+      exportList[filePath.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
     } else {
       importList.push(`import * as ${variableName} from '${filePathFull}';`);
-      exportList[keyName] = variableName;
+      exportList[filePath] = variableName;
     }
   }
 
@@ -72,8 +67,7 @@ export const getFileList = async (): Promise<string> => {
   let file = imports.join('\n\n');
 
   file += '\n\n';
-  file += 'export const pages = { ...customPages, ...defaultPages };\n';
-  file += 'export const triggers = { ...customTriggers };\n';
+  file += 'export { pages, triggers };\n';
 
   return file;
 };
