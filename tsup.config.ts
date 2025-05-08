@@ -23,6 +23,6 @@ export default defineConfig({
   format: 'esm',
   clean: true,
   dts: true,
-  external: ['bun', 'react', 'react-dom', 'client-list', 'server-list'],
+  external: ['bun', 'server-list', 'client-list', 'react', 'react-dom'],
   publicDir: './private/client/assets',
 });
