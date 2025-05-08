@@ -68,20 +68,6 @@ const Root = ({ children }: RootProps) => {
                   className="blade-script"
                 />
               );
-
-            // Fonts are already loaded by the CSS bundle, but we also want to pre-load
-            // them in addition.
-            case 'font':
-              return (
-                <link
-                  rel="preload"
-                  crossOrigin="anonymous"
-                  as="font"
-                  href={source}
-                  type="font/woff2"
-                  key={source}
-                />
-              );
           }
         })}
 

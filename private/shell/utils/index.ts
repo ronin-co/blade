@@ -339,32 +339,12 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     }
   }
 
-  const fontFileDirectory = path.join(
-    path.dirname(require.resolve('@fontsource-variable/inter')),
-    'files',
-  );
-  const fontFileOutputDirectory = path.join(outdir, 'files');
-  const fontFiles = (await readdir(fontFileDirectory))
-    .filter((file) => file.includes('wght-normal'))
-    .map((file) => ({
-      input: path.join(fontFileDirectory, file),
-      output: path.join(fontFileOutputDirectory, file),
-    }));
-
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
     await cp(publicDirectory, outputDirectory, { recursive: true });
 
-  // Copy font files from font package.
-  await mkdir(fontFileOutputDirectory);
-  await Promise.all(fontFiles.map((file) => copyFile(file.input, file.output)));
-
   import.meta.env['__BLADE_ASSETS'] = JSON.stringify([
     { type: 'js', source: getOutputFile(bundleId, 'js') },
-    ...fontFiles.map((file) => ({
-      type: 'font',
-      source: `/${path.relative(outputDirectory, file.output)}`,
-    })),
     { type: 'css', source: getOutputFile(bundleId, 'css') },
   ]);
 

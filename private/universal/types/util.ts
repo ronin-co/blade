@@ -33,7 +33,7 @@ export interface QueryItemWrite extends QueryItemBase {
 }
 
 export type Asset = {
-  type: 'css' | 'js' | 'font';
+  type: 'css' | 'js';
   source: string;
 };
 
