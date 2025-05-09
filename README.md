@@ -345,6 +345,20 @@ const eventHandlers = useLinkEvents('/pathname');
 <button {...eventHandlers}>I am a link</button>
 ```
 
+#### `useQueryParams` (Client)
+
+TODO
+
+```tsx
+import { useQueryParams } from '@ronin/blade/client/hooks';
+
+const [count, setCount] = useQueryParams('count');
+
+<button onClick={() => setCount((c) => c + 1)}>
+    Count: {count}
+</button>
+```
+
 #### `use` (Server)
 
 Usually, in React, the [use](https://react.dev/reference/react/use) hook is used to consume a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or [context](https://react.dev/learn/passing-data-deeply-with-context).

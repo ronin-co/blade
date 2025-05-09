@@ -32,7 +32,7 @@ import {
 import type { PageFetchingOptions } from '../../private/universal/types/util';
 import { generateUniqueId } from '../../private/universal/utils/crypto';
 import logger from '../../private/universal/utils/logs';
-import { usePopulatePathname } from '../universal/hooks';
+import { usePopulatePathname, useRedirect } from '../universal/hooks';
 
 interface MutationOptions {
   /** Display a different page once the queries have run. */
@@ -419,3 +419,8 @@ export const usePaginationBuffer = <T>(
 
   return [renderedChildren.items, setValue];
 };
+
+/**
+ * TODO(@nurodev): Add documentation.
+ */
+export const useQueryParams = () => {};
