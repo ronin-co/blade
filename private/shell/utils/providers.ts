@@ -59,7 +59,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
-  const functionDir = path.resolve(vercelOutputDir, 'functions', 'index.func');
+  const functionDir = path.resolve(vercelOutputDir, 'functions', '_worker.func');
 
   const vercelOutputDirExists = await fs.exists(vercelOutputDir);
   if (vercelOutputDirExists) await fs.rmdir(vercelOutputDir, { recursive: true });
