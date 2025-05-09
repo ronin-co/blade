@@ -21,6 +21,7 @@ import {
 } from '@/private/shell/loaders';
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
@@ -140,12 +141,16 @@ export const setEnvironmentVariables = (options: {
     process.exit(0);
   }
 
-  if (Bun.env['CF_PAGES']) {
+  // Get the current provider based on the environment variables.
+  const provider = getProvider();
+  import.meta.env.__BLADE_PROVIDER = provider;
+
+  if (provider === 'cloudflare') {
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'];
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'];
   }
 
-  if (Bun.env['VERCEL']) {
+  if (provider === 'vercel') {
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'];
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
   }
@@ -173,9 +178,6 @@ export const setEnvironmentVariables = (options: {
 
   // The directories that contain the source code of the application.
   import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
-
-  // Get the current provider based on the environment variables.
-  import.meta.env.__BLADE_PROVIDER = getProvider();
 };
 
 export const getClientEnvironmentVariables = () => {
@@ -230,7 +232,10 @@ export const handleBuildLogs = (output: BuildOutput) => {
   }
 };
 
-export const prepareClientAssets = async (environment: 'development' | 'production') => {
+export const prepareClientAssets = async (
+  environment: 'development' | 'production',
+  provider?: DeploymentProvider,
+) => {
   const bundleId = generateUniqueId();
 
   const clientSpinner = logSpinner(
@@ -260,10 +265,9 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     target: 'browser',
     naming: path.basename(getOutputFile(bundleId, 'js')),
     minify: environment === 'production',
-    // On Cloudflare Pages, inline plain-text environment variables in the client bundles.
-    define: Bun.env['CF_PAGES']
-      ? Object.fromEntries(clientEnvironmentVariables)
-      : undefined,
+    // When using a serverless deployment provider, inline plain-text environment
+    // variables in the client bundles.
+    define: provider ? Object.fromEntries(clientEnvironmentVariables) : undefined,
   });
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
@@ -273,7 +277,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
-    Bun.env['CF_PAGES'] ? 'if(!import.meta.env){import.meta.env={}};' : '',
+    provider ? 'if(!import.meta.env){import.meta.env={}};' : '',
     `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
     `window['BLADE_BUNDLE']='${bundleId}';`,
     await chunkFile.text(),
