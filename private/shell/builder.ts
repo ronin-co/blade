@@ -23,15 +23,15 @@ import {
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
 
-const PROVIDER = import.meta.env.__BLADE_PROVIDER;
+const provider = import.meta.env.__BLADE_PROVIDER;
 
 await cleanUp();
-await prepareClientAssets('production', PROVIDER);
+await prepareClientAssets('production', provider);
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
 const output = await Bun.build({
-  entrypoints: [PROVIDER === 'vercel' ? serverVercelInputFile : serverInputFile],
+  entrypoints: [provider === 'vercel' ? serverVercelInputFile : serverInputFile],
   outdir: outputDirectory,
   plugins: [
     getClientReferenceLoader('production'),
@@ -42,7 +42,7 @@ const output = await Bun.build({
   naming: `[dir]/${path.basename(serverOutputFile)}`,
   minify: true,
   sourcemap: 'external',
-  target: PROVIDER === 'vercel' ? 'node' : 'browser',
+  target: provider === 'vercel' ? 'node' : 'browser',
   define: mapProviderInlineDefinitions(),
 });
 
@@ -52,6 +52,6 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (PROVIDER === 'vercel') await transformToVercelBuildOutput();
+if (provider === 'vercel') await transformToVercelBuildOutput();
 
 handleBuildLogs(output);
