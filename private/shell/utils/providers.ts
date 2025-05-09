@@ -100,7 +100,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     Bun.write(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
-        handler: 'index.mjs',
+        handler: '_worker.mjs',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
       }),
