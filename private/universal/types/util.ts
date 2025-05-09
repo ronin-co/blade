@@ -93,3 +93,5 @@ export interface CustomNavigator {
   geoLocation: UniversalContext['geoLocation'];
   languages: UniversalContext['languages'];
 }
+
+export type DeploymentProvider = 'vercel' | 'cloudflare' | '';
