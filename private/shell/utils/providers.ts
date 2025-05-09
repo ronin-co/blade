@@ -88,6 +88,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
         version: 3,
         routes: [
           {
+            handle: 'filesystem',
             src: '/(.*)',
             dest: '/index',
           },
