@@ -1,3 +1,4 @@
+import { Image } from '@ronin/react';
 import { type AnchorHTMLAttributes, type ReactElement, cloneElement } from 'react';
 
 import { wrapClientComponent } from '../../private/client/utils/wrap-client';
@@ -76,9 +77,16 @@ interface LinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'
   children: ReactElement;
   href: string | LinkURL;
   segments?: Record<string, string | Array<string>>;
+  prefetch?: boolean;
 }
 
-const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProps) => {
+const Link = ({
+  href: hrefDefault,
+  segments,
+  children,
+  prefetch = true,
+  ...extraProps
+}: LinkProps) => {
   const universalContext = useUniversalContext();
 
   const href =
@@ -90,13 +98,18 @@ const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProp
   const destination = populatePathname(href, segments);
   const linkEventHandlers = useLinkEvents(destination);
 
+  const eventHandlers = prefetch
+    ? linkEventHandlers
+    : { onClick: linkEventHandlers.onClick };
+
   return cloneElement(children, {
     href: destination,
-    ...linkEventHandlers,
+    ...eventHandlers,
     ...extraProps,
   });
 };
 
 wrapClientComponent(Link, 'Link');
+wrapClientComponent(Image, 'Image');
 
-export { Link };
+export { Link, Image };
