@@ -57,6 +57,18 @@ Lastly, start the development server:
 bun run dev
 ```
 
+## Deploying
+
+In order to deploy your Blade app to production, use your deployment provider of choice.
+For example, you can sign up to [Vercel](https://vercel.com) and run this command in the
+directory of your Blade app to deploy it:
+
+```bash
+vercel -y
+```
+
+That's it. The command will create the Vercel project and deploy the app for you.
+
 ## API
 
 Blade provides the following programmatic APIs that can be imported from your app:
