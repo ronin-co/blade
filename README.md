@@ -15,6 +15,7 @@ This package allows for building instant web apps with [React](https://react.dev
 - **Instant Prod Builds** (no compiler, only relies on Bun and loaders)
 - **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/examples/basic) to get Blade to run)
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
+- **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [upcoming], and more soon)
 
 Blade works most efficiently when using [RONIN](https://ronin.co) — a globally replicable database powered by SQLite. Blade is and will always be usable with any other data source as well, however you will see performance drawbacks if that datasource isn't equally fast.
 
@@ -30,7 +31,6 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 
 ## Temporary Limitations
 
-- You can already deploy Blade anywhere, but in terms of zero-config, Blade currently only works in containers. Zero-config support for Vercel, Cloudflare, and all other providers will land very soon.
 - Tailwind v4 (only v3) is not yet supported. Support will land very soon.
 - The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
 
@@ -56,6 +56,16 @@ Lastly, start the development server:
 ```bash
 bun run dev
 ```
+
+## Deploying
+
+In order to deploy your Blade app to production, use your deployment provider of choice. For example, you can sign up to [Vercel](https://vercel.com) and run this command in the directory of your Blade app to deploy it:
+
+```bash
+vercel -y
+```
+
+That's all. The command will create the Vercel project and deploy the app for you.
 
 ## API
 
