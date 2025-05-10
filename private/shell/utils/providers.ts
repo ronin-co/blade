@@ -59,7 +59,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
-  const functionDir = path.resolve(vercelOutputDir, 'functions', 'index.func');
+  const functionDir = path.resolve(vercelOutputDir, 'functions', '_worker.func');
 
   const vercelOutputDirExists = await fs.exists(vercelOutputDir);
   if (vercelOutputDirExists) await fs.rmdir(vercelOutputDir, { recursive: true });
@@ -74,24 +74,33 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   await Promise.all([
     fs.rename(
       path.join(staticFilesDir, '_worker.js'),
-      path.join(functionDir, 'index.mjs'),
+      path.join(functionDir, '_worker.mjs'),
     ),
 
     fs.rename(
       path.join(staticFilesDir, '_worker.js.map'),
-      path.join(functionDir, 'index.mjs.map'),
+      path.join(functionDir, '_worker.mjs.map'),
     ),
 
     Bun.write(
       path.join(vercelOutputDir, 'config.json'),
       JSON.stringify({
         version: 3,
+        routes: [
+          {
+            handle: 'filesystem',
+          },
+          {
+            src: '/(.*)',
+            dest: '/_worker',
+          },
+        ],
       }),
     ),
     Bun.write(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
-        handler: 'index.mjs',
+        handler: '_worker.mjs',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
       }),
