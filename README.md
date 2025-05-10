@@ -65,7 +65,7 @@ In order to deploy your Blade app to production, use your deployment provider of
 vercel -y
 ```
 
-That's it. The command will create the Vercel project and deploy the app for you.
+That's all. The command will create the Vercel project and deploy the app for you.
 
 ## API
 
