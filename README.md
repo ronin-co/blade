@@ -59,9 +59,7 @@ bun run dev
 
 ## Deploying
 
-In order to deploy your Blade app to production, use your deployment provider of choice.
-For example, you can sign up to [Vercel](https://vercel.com) and run this command in the
-directory of your Blade app to deploy it:
+In order to deploy your Blade app to production, use your deployment provider of choice. For example, you can sign up to [Vercel](https://vercel.com) and run this command in the directory of your Blade app to deploy it:
 
 ```bash
 vercel -y
