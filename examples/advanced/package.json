@@ -1,17 +1,17 @@
 {
-  "name": "advanced-example",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "blade",
-    "build": "blade build",
-    "serve": "blade serve"
-  },
-  "author": "ronin",
-  "dependencies": {
-    "@ronin/blade": "0.4.0",
-    "react": "0.0.0-experimental-df12d7eac-20230510",
-    "react-dom": "0.0.0-experimental-df12d7eac-20230510",
-    "tailwindcss": "3.4.7"
-  }
+    "name": "advanced-example",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "blade",
+        "build": "blade build",
+        "serve": "blade serve"
+    },
+    "author": "ronin",
+    "dependencies": {
+        "@ronin/blade": "0.4.0",
+        "react": "0.0.0-experimental-df12d7eac-20230510",
+        "react-dom": "0.0.0-experimental-df12d7eac-20230510",
+        "tailwindcss": "3.4.7"
+    }
 }
