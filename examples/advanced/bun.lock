@@ -4,7 +4,7 @@
     "": {
       "name": "advanced-example",
       "dependencies": {
-        "@ronin/blade": "^0.4.0-fix-vercel-glob-routes-experimental-328",
+        "@ronin/blade": "^0.4.2-fix-vercel-glob-routes-experimental-332",
         "react": "0.0.0-experimental-df12d7eac-20230510",
         "react-dom": "0.0.0-experimental-df12d7eac-20230510",
         "tailwindcss": "3.4.7",
@@ -34,7 +34,7 @@
 
     "@pkgjs/parseargs": ["@pkgjs/parseargs@0.11.0", "", {}, "sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg=="],
 
-    "@ronin/blade": ["@ronin/blade@0.4.0-fix-vercel-glob-routes-experimental-328", "", { "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-rs5RK25kgQQhEXcdPSFJHvhQH57f1Mn8eiTdaTdkzjsRyQAdFUOH9iio5htq4aCvcXuv9bSHd+Rf8y+gP85IEg=="],
+    "@ronin/blade": ["@ronin/blade@0.4.2-fix-vercel-glob-routes-experimental-332", "", { "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-ngGFtZsZZNidA/Jz/Kgn7dQmztEFQ6aLiJ550P3xj+C5GiUxC8pebDZ20sGzt4bPSFbO5PTLTyQIHYGr0eumxw=="],
 
     "ansi-regex": ["ansi-regex@6.1.0", "", {}, "sha512-7HSX4QQb4CspciLpVFwyRe79O3xsIZDDLER21kERQ71oaPodF8jL725AgJMFAYbooIqolJoRLuM81SpeUkpkvA=="],
 
