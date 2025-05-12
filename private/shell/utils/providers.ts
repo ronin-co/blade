@@ -4,6 +4,11 @@ import path from 'node:path';
 import { outputDirectory } from '@/private/shell/constants';
 import { logSpinner } from '@/private/shell/utils';
 
+import type {
+  VercelConfig,
+  VercelNodejsServerlessFunctionConfig,
+} from '@/private/shell/types';
+
 /**
  * Get the name of the provider based on the environment variables.
  *
@@ -95,7 +100,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
             dest: '/_worker',
           },
         ],
-      }),
+      } satisfies VercelConfig),
     ),
     Bun.write(
       path.join(functionDir, '.vc-config.json'),
@@ -103,7 +108,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
         handler: '_worker.mjs',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
-      }),
+      } satisfies VercelNodejsServerlessFunctionConfig),
     ),
   ]);
 
