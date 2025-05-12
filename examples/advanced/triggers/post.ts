@@ -30,7 +30,7 @@ const posts = [
   },
 ] satisfies Array<Post>;
 
-export const add: AddTrigger<Post> = (query, multiple) => {
+export const add: AddTrigger = (query, multiple) => {
   if (multiple) throw new MultipleWithInstructionsError();
 
   const newPost = {
