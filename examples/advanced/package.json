@@ -9,7 +9,7 @@
   },
   "author": "ronin",
   "dependencies": {
-    "@ronin/blade": "^0.4.2-fix-vercel-glob-routes-experimental-334",
+    "@ronin/blade": "^0.4.0",
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510",
     "tailwindcss": "3.4.7"

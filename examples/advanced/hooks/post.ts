@@ -1,9 +1,6 @@
 import { MultipleWithInstructionsError } from '@ronin/blade/server/utils/errors';
 
-import type {
-  ResolvingAddTrigger,
-  ResolvingGetTrigger,
-} from '@ronin/blade/universal/types';
+import type { AddTrigger, GetTrigger } from '@ronin/blade/universal/types';
 
 interface Post {
   body: string;
@@ -33,7 +30,7 @@ const posts = [
   },
 ] satisfies Array<Post>;
 
-export const resolvingAdd: ResolvingAddTrigger<Post> = (query, multiple) => {
+export const add: AddTrigger<Post> = (query, multiple) => {
   if (multiple) throw new MultipleWithInstructionsError();
 
   const newPost = {
@@ -48,10 +45,7 @@ export const resolvingAdd: ResolvingAddTrigger<Post> = (query, multiple) => {
   return newPost;
 };
 
-export const resolvingGet: ResolvingGetTrigger<Post | null | Array<Post>> = async (
-  query,
-  multiple,
-) => {
+export const get: GetTrigger<Post | null | Array<Post>> = async (query, multiple) => {
   if (multiple) return posts;
 
   return posts.find((post) => post.id === Number.parseInt(query.with?.id)) ?? null;
