@@ -96,7 +96,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
             handle: 'filesystem',
           },
           {
-            src: '^/$',
+            src: '^(?:/(.*?))?/?$',
             dest: '_worker',
           },
         ],
