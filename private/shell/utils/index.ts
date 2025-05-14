@@ -28,12 +28,13 @@ import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
+  if (!(await exists(directory))) return [];
   const files = await readdir(directory, { recursive: true });
   return files.map((file) => (path.extname(file) === '' ? `${file}/` : file));
 };
 
 const getImportList = async (directoryName: string, directoryPath: string) => {
-  const files = (await exists(directoryPath)) ? await crawlDirectory(directoryPath) : [];
+  const files = await crawlDirectory(directoryPath);
 
   const importList = [];
   const exportList: { [key: string]: string } = {};
