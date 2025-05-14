@@ -1,6 +1,7 @@
 import path from 'node:path';
 
 import { cp, exists, readdir, rm } from 'node:fs/promises';
+import { compile as compileTailwind } from '@tailwindcss/node';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
@@ -286,56 +287,22 @@ export const prepareClientAssets = async (
   await Bun.write(chunkFile, chunkFilePrefix);
 
   const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
-    return projects.map((project) => `${path.join(project, directory)}/**/*.{ts,tsx}`);
+    return projects.map((project) => path.join(project, directory));
   });
 
   // Consider the directory that contains BLADE's source code.
-  content.push(`${frameworkDirectory}/private/**/*.{js,jsx}`);
+  content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
 
-  const tailwindPath = require.resolve('tailwindcss');
-  const tailwindBinPath = path.join(
-    tailwindPath.substring(0, tailwindPath.lastIndexOf('/node_modules/')),
-    'node_modules/.bin/tailwindcss',
-  );
+  const tailwindCandidates = (await Promise.all(content.map(crawlDirectory))).flat();
+  const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
 
-  const tailwindProcess = Bun.spawn(
-    [
-      tailwindBinPath,
-      '--input',
-      path.join(__dirname, 'styles.css'),
-      '--output',
-      path.join(outputDirectory, getOutputFile(bundleId, 'css')),
-      ...(environment === 'production' ? ['--minify'] : []),
-      '--content',
-      content.join(','),
-    ],
-    {
-      // Don't write any input to the process.
-      stdin: null,
-      // Pipe useful logs that aren't errors to the terminal.
-      stdout: 'inherit',
-      // Tailwind prints non-error logs as errors, which we want to ignore.
-      stderr: 'pipe',
-      env: {
-        ...import.meta.env,
-        FORCE_COLOR: '3',
-      },
-      cwd: process.cwd(),
-    },
-  );
-  if (environment === 'production') {
-    const tailwindProcessExitCode = await tailwindProcess.exited;
-    if (tailwindProcessExitCode !== 0) {
-      clientSpinner.fail('Failed to build Tailwind CSS styles.');
-      const { value } = await tailwindProcess.stderr.getReader().read();
-      const errorMessage = new TextDecoder().decode(value);
-      console.log(
-        loggingPrefixes.error,
-        errorMessage.replaceAll('\n', `\n${loggingPrefixes.error}`),
-      );
-      process.exit(1);
-    }
-  }
+  const tailwindCompiler = await compileTailwind(`@import 'tailwindcss';`, {
+    onDependency(_path) {},
+    base: process.cwd(),
+  });
+
+  const compiledCSS = tailwindCompiler.build(tailwindCandidates);
+  await Bun.write(tailwindOutput, compiledCSS);
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
