@@ -2,7 +2,7 @@
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/blade/validate.yml?label=tests)](https://github.com/ronin-co/blade/actions/workflows/validate.yml)
 
-This package allows for building instant web apps with [React](https://react.dev).
+A [React](https://react.dev) framework for building instant web apps.
 
 ## Features
 
