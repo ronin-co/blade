@@ -1,7 +1,10 @@
 import path from 'node:path';
 
 import { cp, exists, readdir, rm } from 'node:fs/promises';
-import { compile as compileTailwind } from '@tailwindcss/node';
+import {
+  compile as compileTailwind,
+  optimize as optimizeTailwind,
+} from '@tailwindcss/node';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
@@ -303,7 +306,12 @@ export const prepareClientAssets = async (
   });
 
   const compiledCSS = tailwindCompiler.build(tailwindCandidates);
-  await Bun.write(tailwindOutput, compiledCSS);
+
+  const optimizedCSS = optimizeTailwind(compiledCSS, {
+    file: 'input.css',
+    minify: environment === 'production',
+  });
+  await Bun.write(tailwindOutput, optimizedCSS);
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
