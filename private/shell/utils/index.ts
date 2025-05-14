@@ -311,7 +311,7 @@ export const prepareClientAssets = async (
     file: 'input.css',
     minify: environment === 'production',
   });
-  await Bun.write(tailwindOutput, optimizedCSS);
+  await Bun.write(tailwindOutput, optimizedCSS.code);
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
