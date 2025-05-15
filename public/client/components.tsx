@@ -92,8 +92,19 @@ const Link = ({ href: hrefDefault, segments, children, ...extraProps }: LinkProp
 
   return cloneElement(children, {
     href: destination,
-    ...linkEventHandlers,
     ...extraProps,
+
+    // We must pass `extraProps` after `linkEventHandlers`, to allow for overwriting the
+    // default event handlers.
+    //
+    // However, simply deconstructing `extraProps` after deconstructing
+    // `linkEventHandlers` would cause props within `extraProps` to overwrite the props
+    // in `linkEventHandlers`, even if the props in `extraProps` contain the value
+    // `undefined`. To protect against this, we are explicitly checking whether the value
+    // is falsy before using it.
+    onClick: extraProps.onClick || linkEventHandlers.onClick,
+    onMouseEnter: extraProps.onMouseEnter || linkEventHandlers.onMouseEnter,
+    onTouchStart: extraProps.onTouchStart || linkEventHandlers.onTouchStart,
   });
 };
 
