@@ -32,13 +32,12 @@ import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
-  if (!(await exists(directory))) return [];
   const files = await readdir(directory, { recursive: true });
   return files.map((file) => (path.extname(file) === '' ? `${file}/` : file));
 };
 
 const getImportList = async (directoryName: string, directoryPath: string) => {
-  const files = await crawlDirectory(directoryPath);
+  const files = (await exists(directoryPath)) ? await crawlDirectory(directoryPath) : [];
 
   const importList = [];
   const exportList: { [key: string]: string } = {};
@@ -291,41 +290,7 @@ export const prepareClientAssets = async (
 
   await Bun.write(chunkFile, chunkFilePrefix);
 
-  const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
-    return projects.map((project) => path.join(project, directory));
-  });
-
-  // Consider the directory that contains BLADE's source code.
-  content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
-
-  const tailwindCandidates = (await Promise.all(content.map(crawlDirectory))).flat();
-  const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
-
-  const tailwindCompiler = await compileTailwind(`@import 'tailwindcss';`, {
-    onDependency(_path) {},
-    base: process.cwd(),
-  });
-
-  const scanner = new Scanner({
-    sources: [
-      {
-        base: process.cwd(),
-        pattern: '**/*',
-        negated: false,
-      },
-    ],
-  });
-
-  const candidates = scanner.scan();
-  console.log(candidates);
-
-  const compiledCSS = tailwindCompiler.build(tailwindCandidates);
-
-  const optimizedCSS = optimizeTailwind(compiledCSS, {
-    file: 'input.css',
-    minify: environment === 'production',
-  });
-  await Bun.write(tailwindOutput, optimizedCSS.code);
+  await prepareStyles(environment, projects, bundleId);
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
@@ -339,4 +304,46 @@ export const prepareClientAssets = async (
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
   clientSpinner.succeed();
+};
+
+/**
+ * Compiles the Tailwind CSS stylesheet for the application.
+ *
+ * @param environment - The environment in which the application is running.
+ * @param projects - The list of Blade projects to scan for Tailwind CSS classes.
+ * @param bundleId - The unique identifier for the current bundle.
+ *
+ * @returns A promise that resolves when the styles have been prepared.
+ */
+const prepareStyles = async (
+  environment: 'development' | 'production',
+  projects: Array<string>,
+  bundleId: string,
+) => {
+  const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
+    return projects.map((project) => path.join(project, directory));
+  });
+
+  // Consider the directory that contains BLADE's source code.
+  content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
+
+  const tailwindCompiler = await compileTailwind(`@import 'tailwindcss';`, {
+    onDependency(_path) {},
+    base: process.cwd(),
+  });
+
+  const scanner = new Scanner({
+    sources: content.map((base) => ({ base, pattern: '**/*', negated: false })),
+  });
+
+  const candidates = scanner.scan();
+  const compiledCSS = tailwindCompiler.build(candidates);
+
+  const optimizedCSS = optimizeTailwind(compiledCSS, {
+    file: 'input.css',
+    minify: environment === 'production',
+  });
+
+  const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
+  await Bun.write(tailwindOutput, optimizedCSS.code);
 };
