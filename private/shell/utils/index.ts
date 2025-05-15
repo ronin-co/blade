@@ -17,6 +17,7 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
+  styleInputFile,
 } from '@/private/shell/constants';
 import {
   getClientChunkLoader,
@@ -328,7 +329,12 @@ const prepareStyles = async (
   // Consider the directory containing BLADE's component source code.
   content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
 
-  const compiler = await compileTailwind(`@import 'tailwindcss';`, {
+  const inputFile = Bun.file(styleInputFile);
+  const input = (await inputFile.exists())
+    ? await inputFile.text()
+    : `@import 'tailwindcss';`;
+
+  const compiler = await compileTailwind(input, {
     onDependency(_path) {},
     base: process.cwd(),
   });
