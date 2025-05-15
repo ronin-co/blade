@@ -29,10 +29,9 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 - **No Async Components** (I/O leads to slow code, so reads in Blade are always synchronous, but async behind the scenes)
 - **No Suspense** (Blade does not support reads on the client — server components can only read and client components can only write)
 
-## Temporary Limitations
+## Temporary Limitation
 
-- Tailwind v4 (only v3) is not yet supported. Support will land very soon.
-- The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
+The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
 
 ## Setup
 
