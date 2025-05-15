@@ -1,6 +1,11 @@
 import path from 'node:path';
 
 import { cp, exists, readdir, rm } from 'node:fs/promises';
+import {
+  compile as compileTailwind,
+  optimize as optimizeTailwind,
+} from '@tailwindcss/node';
+import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
@@ -12,6 +17,7 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
+  styleInputFile,
 } from '@/private/shell/constants';
 import {
   getClientChunkLoader,
@@ -285,57 +291,7 @@ export const prepareClientAssets = async (
 
   await Bun.write(chunkFile, chunkFilePrefix);
 
-  const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
-    return projects.map((project) => `${path.join(project, directory)}/**/*.{ts,tsx}`);
-  });
-
-  // Consider the directory that contains BLADE's source code.
-  content.push(`${frameworkDirectory}/private/**/*.{js,jsx}`);
-
-  const tailwindPath = require.resolve('tailwindcss');
-  const tailwindBinPath = path.join(
-    tailwindPath.substring(0, tailwindPath.lastIndexOf('/node_modules/')),
-    'node_modules/.bin/tailwindcss',
-  );
-
-  const tailwindProcess = Bun.spawn(
-    [
-      tailwindBinPath,
-      '--input',
-      path.join(__dirname, 'styles.css'),
-      '--output',
-      path.join(outputDirectory, getOutputFile(bundleId, 'css')),
-      ...(environment === 'production' ? ['--minify'] : []),
-      '--content',
-      content.join(','),
-    ],
-    {
-      // Don't write any input to the process.
-      stdin: null,
-      // Pipe useful logs that aren't errors to the terminal.
-      stdout: 'inherit',
-      // Tailwind prints non-error logs as errors, which we want to ignore.
-      stderr: 'pipe',
-      env: {
-        ...import.meta.env,
-        FORCE_COLOR: '3',
-      },
-      cwd: process.cwd(),
-    },
-  );
-  if (environment === 'production') {
-    const tailwindProcessExitCode = await tailwindProcess.exited;
-    if (tailwindProcessExitCode !== 0) {
-      clientSpinner.fail('Failed to build Tailwind CSS styles.');
-      const { value } = await tailwindProcess.stderr.getReader().read();
-      const errorMessage = new TextDecoder().decode(value);
-      console.log(
-        loggingPrefixes.error,
-        errorMessage.replaceAll('\n', `\n${loggingPrefixes.error}`),
-      );
-      process.exit(1);
-    }
-  }
+  await prepareStyles(environment, projects, bundleId);
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
@@ -349,4 +305,52 @@ export const prepareClientAssets = async (
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
   clientSpinner.succeed();
+};
+
+/**
+ * Compiles the Tailwind CSS stylesheet for the application.
+ *
+ * @param environment - The environment in which the application is running.
+ * @param projects - The list of Blade projects to scan for Tailwind CSS classes.
+ * @param bundleId - The unique identifier for the current bundle.
+ *
+ * @returns A promise that resolves when the styles have been prepared.
+ */
+const prepareStyles = async (
+  environment: 'development' | 'production',
+  projects: Array<string>,
+  bundleId: string,
+) => {
+  // Consider the directories containing the source code of the application.
+  const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
+    return projects.map((project) => path.join(project, directory));
+  });
+
+  // Consider the directory containing BLADE's component source code.
+  content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
+
+  const inputFile = Bun.file(styleInputFile);
+  const input = (await inputFile.exists())
+    ? await inputFile.text()
+    : `@import 'tailwindcss';`;
+
+  const compiler = await compileTailwind(input, {
+    onDependency(_path) {},
+    base: process.cwd(),
+  });
+
+  const scanner = new TailwindScanner({
+    sources: content.map((base) => ({ base, pattern: '**/*', negated: false })),
+  });
+
+  const candidates = scanner.scan();
+  const compiledStyles = compiler.build(candidates);
+
+  const optimizedStyles = optimizeTailwind(compiledStyles, {
+    file: 'input.css',
+    minify: environment === 'production',
+  });
+
+  const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
+  await Bun.write(tailwindOutput, optimizedStyles.code);
 };

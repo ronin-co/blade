@@ -52,6 +52,10 @@
   ],
   "author": "ronin",
   "license": "Apache-2.0",
+  "dependencies": {
+    "@tailwindcss/node": "4.1.6",
+    "@tailwindcss/oxide": "4.1.6"
+  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@hono/node-server": "1.14.1",
