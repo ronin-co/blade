@@ -320,11 +320,12 @@ const prepareStyles = async (
   projects: Array<string>,
   bundleId: string,
 ) => {
+  // Consider the directories containing the source code of the application.
   const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
     return projects.map((project) => path.join(project, directory));
   });
 
-  // Consider the directory that contains BLADE's source code.
+  // Consider the directory containing BLADE's component source code.
   content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
 
   const compiler = await compileTailwind(`@import 'tailwindcss';`, {
