@@ -10,10 +10,7 @@
   "bin": {
     "blade": "./dist/private/shell/index.js"
   },
-  "files": [
-    "dist",
-    "examples/basic/**/*"
-  ],
+  "files": ["dist", "examples/basic/**/*"],
   "scripts": {
     "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
     "lint:biome": "biome check --error-on-warnings",
@@ -32,24 +29,13 @@
   },
   "typesVersions": {
     "*": {
-      "client/*": [
-        "./dist/public/client/*"
-      ],
-      "server/*": [
-        "./dist/public/server/*"
-      ],
-      "universal/*": [
-        "./dist/public/universal/*"
-      ],
-      "schema": [
-        "./dist/public/universal/schema"
-      ]
+      "client/*": ["./dist/public/client/*"],
+      "server/*": ["./dist/public/server/*"],
+      "universal/*": ["./dist/public/universal/*"],
+      "schema": ["./dist/public/universal/schema"]
     }
   },
-  "keywords": [
-    "react",
-    "framework"
-  ],
+  "keywords": ["react", "framework"],
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {
