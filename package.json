@@ -53,6 +53,7 @@
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {
+    "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6"
   },
   "devDependencies": {
@@ -64,7 +65,6 @@
     "@sentry/bun": "8.55.0",
     "@sentry/react": "8.30.0",
     "@sentry/types": "8.30.0",
-    "@tailwindcss/node": "4.1.6",
     "@types/async-retry": "1.4.8",
     "@types/bun": "1.2.4",
     "@types/cookie": "0.6.0",
