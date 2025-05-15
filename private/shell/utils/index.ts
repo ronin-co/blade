@@ -5,7 +5,7 @@ import {
   compile as compileTailwind,
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
-import { Scanner } from '@tailwindcss/oxide';
+import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
@@ -327,23 +327,23 @@ const prepareStyles = async (
   // Consider the directory that contains BLADE's source code.
   content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
 
-  const tailwindCompiler = await compileTailwind(`@import 'tailwindcss';`, {
+  const compiler = await compileTailwind(`@import 'tailwindcss';`, {
     onDependency(_path) {},
     base: process.cwd(),
   });
 
-  const scanner = new Scanner({
+  const scanner = new TailwindScanner({
     sources: content.map((base) => ({ base, pattern: '**/*', negated: false })),
   });
 
   const candidates = scanner.scan();
-  const compiledCSS = tailwindCompiler.build(candidates);
+  const compiledStyles = compiler.build(candidates);
 
-  const optimizedCSS = optimizeTailwind(compiledCSS, {
+  const optimizedStyles = optimizeTailwind(compiledStyles, {
     file: 'input.css',
     minify: environment === 'production',
   });
 
   const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
-  await Bun.write(tailwindOutput, optimizedCSS.code);
+  await Bun.write(tailwindOutput, optimizedStyles.code);
 };
