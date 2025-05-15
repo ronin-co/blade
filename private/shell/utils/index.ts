@@ -5,6 +5,7 @@ import {
   compile as compileTailwind,
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
+import { Scanner } from '@tailwindcss/oxide';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
@@ -304,6 +305,19 @@ export const prepareClientAssets = async (
     onDependency(_path) {},
     base: process.cwd(),
   });
+
+  const scanner = new Scanner({
+    sources: [
+      {
+        base: process.cwd(),
+        pattern: '**/*',
+        negated: false,
+      },
+    ],
+  });
+
+  const candidates = scanner.scan();
+  console.log(candidates);
 
   const compiledCSS = tailwindCompiler.build(tailwindCandidates);
 
