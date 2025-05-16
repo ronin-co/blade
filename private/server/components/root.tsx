@@ -48,28 +48,32 @@ const Root = ({ children }: RootProps) => {
       className={metadata.htmlClassName}
       suppressHydrationWarning={true}>
       <head>
-        {JSON.parse(import.meta.env.__BLADE_ASSETS).map(({ type, source }: Asset) => {
-          switch (type) {
-            case 'css':
-              return (
-                <link
-                  rel="stylesheet"
-                  href={source}
-                  key={source}
-                  className="blade-style"
-                />
-              );
-            case 'js':
-              return (
-                <script
-                  src={source}
-                  key={source}
-                  type="module"
-                  className="blade-script"
-                />
-              );
-          }
-        })}
+        {(JSON.parse(import.meta.env.__BLADE_ASSETS) as Array<Asset>)
+          // Ensure that stylesheets are loaded first in favor of performance. The HMR
+          // logic on the client depends on this order as well.
+          .sort((a, b) => Number(b.type === 'css') - Number(a.type === 'css'))
+          .map(({ type, source }) => {
+            switch (type) {
+              case 'css':
+                return (
+                  <link
+                    rel="stylesheet"
+                    href={source}
+                    key={source}
+                    className="blade-style"
+                  />
+                );
+              case 'js':
+                return (
+                  <script
+                    src={source}
+                    key={source}
+                    type="module"
+                    className="blade-script"
+                  />
+                );
+            }
+          })}
 
         <meta
           name="viewport"
