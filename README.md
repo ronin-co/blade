@@ -545,9 +545,9 @@ Blade automatically generates REST API routes at `/api` for your [triggers](http
 export const exposed = true;
 ```
 
-API routes should only be used if you need to interact with your app from a client that is not the browser. For example, if you are also building a native iOS app, you could send HTTP requests to the auto-generated REST API.
+API routes should only be used if you need to interact with your app from a client that is not the browser. For example, if you are also building a native iOS app, you could send HTTP requests to the auto-generated REST API from there.
 
-On the client-side of the application you've built using Blade (within the browser), however, you should always make use of [useMutation](#usemutation-client) instead, which guarantees that all read queries on the page are revalidated upon a mutation, avoiding the need for custom client-side data state management.
+On the client side of the application you've built using Blade (within the browser), however, you should always make use of [useMutation](#usemutation-client) instead, which guarantees that all read queries on the page are revalidated upon a mutation, avoiding the need for custom client-side data state management.
 
 #### Custom API Routes
 
@@ -562,7 +562,7 @@ app.post('/some-path', (c) => c.text('Testing'));
 export default app;
 ```
 
-However, note that any paths mounted in this app cannot interface with the rest of your Blade application in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature.
+However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same server.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 
