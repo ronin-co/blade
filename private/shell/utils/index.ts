@@ -17,6 +17,7 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
+  routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
 import {
@@ -70,11 +71,17 @@ export const getFileList = async (): Promise<string> => {
   const directories = Object.entries(directoriesToParse);
   const importPromises = directories.map(([name, path]) => getImportList(name, path));
   const imports = await Promise.all(importPromises);
+  const routerExists = await exists(routerInputFile);
+
+  if (await exists(routerInputFile)) {
+    imports.push(`import { default as honoRouter } from '${routerInputFile}';`);
+  }
 
   let file = imports.join('\n\n');
 
   file += '\n\n';
-  file += 'export { pages, triggers };\n';
+  file += `const router = ${routerExists ? 'honoRouter' : 'null'};\n`;
+  file += 'export { pages, triggers, router };\n';
 
   return file;
 };
