@@ -562,7 +562,7 @@ app.post('/some-path', (c) => c.text('Testing'));
 export default app;
 ```
 
-However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same server.
+However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same domain.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 
