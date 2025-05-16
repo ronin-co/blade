@@ -3,7 +3,7 @@ import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
-import { triggers as triggerList } from 'server-list';
+import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import { runQueries, toDashCase } from '@/private/server/utils/data';
 import {
@@ -192,6 +192,9 @@ app.post('/api', async (c) => {
   // Return the results of the provided queries.
   return c.json({ results });
 });
+
+// If the application defines its own Hono instance, we need to mount it here.
+if (projectRouter) app.route('/', projectRouter);
 
 // Handle the initial render (first byte).
 app.get('*', (c) => {
