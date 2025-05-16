@@ -54,7 +54,8 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@tailwindcss/node": "4.1.6",
-    "@tailwindcss/oxide": "4.1.6"
+    "@tailwindcss/oxide": "4.1.6",
+    "ronin": "6.6.10"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -91,7 +92,6 @@
     "p-queue": "8.0.1",
     "radash": "12.1.0",
     "rehype-pretty-code": "0.14.1",
-    "ronin": "6.6.3",
     "serialize-error": "11.0.3",
     "shiki": "3.4.0",
     "tsup": "8.4.0",
