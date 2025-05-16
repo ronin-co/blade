@@ -224,11 +224,11 @@ export const cleanUp = async () => {
  */
 export const handleBuildLogs = (output: BuildOutput) => {
   for (const log of output.logs) {
-    // Bun logs a warning when it encounters a `sideTriggers` property in `package.json`
+    // Bun logs a warning when it encounters a `sideEffects` property in `package.json`
     // containing a glob (a wildcard), because Bun doesn't support those yet. We want to
     // silence this warning, unless it is requested to be logged explicitly.
     if (
-      log.message.includes('wildcard sideTriggers') &&
+      log.message.includes('wildcard sideEffects') &&
       Bun.env['__BLADE_DEBUG_LEVEL'] !== 'verbose'
     )
       return;
