@@ -109,7 +109,19 @@ const fetchPage = async (
   if (!root) throw new Error('Missing React root');
   root.unmount();
   window['BLADE_ROOT'] = null;
-  document.documentElement.innerHTML = markup;
+
+  const parser = new DOMParser();
+  const newDocument = parser.parseFromString(markup, 'text/html');
+
+  // Replace the inner markup of the document element, since it is not possible to
+  // replace the document element itself using DOM APIs.
+  document.documentElement.innerHTML = newDocument.documentElement.innerHTML;
+
+  // Copy over every attribute from the new document element to the current one, due to
+  // the constraint mentioned further above.
+  [...newDocument.documentElement.attributes].forEach(({ name, value }) => {
+    document.documentElement.setAttribute(name, value);
+  });
 
   // Since rendering the markup above only evaluates the CSS, we have to separately
   // explicitly run the JS as well.
