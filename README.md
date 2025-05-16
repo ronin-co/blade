@@ -556,8 +556,8 @@ In the rare case that you need to mount an API with a specific request signature
 ```typescript
 import { Hono } from "hono";
 
-const app = new Hono();
-app.post('/some-path', (c) => c.text('Testing'));
+const app = new Hono()
+  .post('/some-path', (c) => c.text('Testing'));
 
 export default app;
 ```
