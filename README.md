@@ -537,6 +537,33 @@ useJWT<SessionToken>(token, secret);
 
 If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
 
+### API Routes
+
+Blade automatically generates REST API routes at `/api` for your [triggers](https://ronin.co/docs/models/triggers) if you define the following in the file of your triggers:
+
+```typescript
+export const exposed = true;
+```
+
+API routes should only be used if you need to interact with your app from a client that is not the browser. For example, if you are also building a native iOS app, you could send HTTP requests to the auto-generated REST API.
+
+On the client-side of the application you've built using Blade (within the browser), however, you should always make use of [useMutation](#usemutation-client) instead, which guarantees that all read queries on the page are revalidated upon a mutation, avoiding the need for custom client-side data state management.
+
+#### Custom API Routes
+
+In the rare case that you need to mount an API with a specific request signature to your Blade application, you can add a `router.ts` file at the root of your application and place a [Hono](https://hono.dev) app inside of it, which will then be mounted by Blade:
+
+```typescript
+import { Hono } from "hono";
+
+const app = new Hono();
+app.post('/some-path', (c) => c.text('Testing'));
+
+export default app;
+```
+
+However, note that any paths mounted in this app cannot interface with the rest of your Blade application in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature.
+
 ### Revalidation (Stale-While-Revalidate, SWR)
 
 Blade intelligently keeps your data up-to-date for you, so no extra state management is needed for the output of your read queries. The data is refreshed:
