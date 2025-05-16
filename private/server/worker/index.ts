@@ -194,7 +194,7 @@ app.post('/api', async (c) => {
 });
 
 // If the application defines its own Hono instance, we need to mount it here.
-if (projectRouter) app.route('*', projectRouter);
+if (projectRouter) app.route('/', projectRouter);
 
 // Handle the initial render (first byte).
 app.get('*', (c) => {
