@@ -2,7 +2,7 @@
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/blade/validate.yml?label=tests)](https://github.com/ronin-co/blade/actions/workflows/validate.yml)
 
-This package allows for building instant web apps with [React](https://react.dev).
+A [React](https://react.dev) framework for building instant web apps.
 
 ## Features
 
@@ -15,6 +15,7 @@ This package allows for building instant web apps with [React](https://react.dev
 - **Instant Prod Builds** (no compiler, only relies on Bun and loaders)
 - **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/examples/basic) to get Blade to run)
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
+- **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [upcoming], and more soon)
 
 Blade works most efficiently when using [RONIN](https://ronin.co) — a globally replicable database powered by SQLite. Blade is and will always be usable with any other data source as well, however you will see performance drawbacks if that datasource isn't equally fast.
 
@@ -28,11 +29,9 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 - **No Async Components** (I/O leads to slow code, so reads in Blade are always synchronous, but async behind the scenes)
 - **No Suspense** (Blade does not support reads on the client — server components can only read and client components can only write)
 
-## Temporary Limitations
+## Temporary Limitation
 
-- You can already deploy Blade anywhere, but in terms of zero-config, Blade currently only works in containers. Zero-config support for Vercel, Cloudflare, and all other providers will land very soon.
-- Tailwind v4 (only v3) is not yet supported. Support will land very soon.
-- The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
+The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
 
 ## Setup
 
@@ -56,6 +55,16 @@ Lastly, start the development server:
 ```bash
 bun run dev
 ```
+
+## Deploying
+
+In order to deploy your Blade app to production, use your deployment provider of choice. For example, you can sign up to [Vercel](https://vercel.com) and run this command in the directory of your Blade app to deploy it:
+
+```bash
+vercel -y
+```
+
+That's all. The command will create the Vercel project and deploy the app for you.
 
 ## API
 
@@ -541,6 +550,33 @@ useJWT<SessionToken>(token, secret);
 ```
 
 If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
+
+### API Routes
+
+Blade automatically generates REST API routes at `/api` for your [triggers](https://ronin.co/docs/models/triggers) if you define the following in the file of your triggers:
+
+```typescript
+export const exposed = true;
+```
+
+API routes should only be used if you need to interact with your app from a client that is not the browser. For example, if you are also building a native iOS app, you could send HTTP requests to the auto-generated REST API from there.
+
+On the client side of the application you've built using Blade (within the browser), however, you should always make use of [useMutation](#usemutation-client) instead, which guarantees that all read queries on the page are revalidated upon a mutation, avoiding the need for custom client-side data state management.
+
+#### Custom API Routes
+
+In the rare case that you need to mount an API with a specific request signature to your Blade application, you can add a `router.ts` file at the root of your application and place a [Hono](https://hono.dev) app inside of it, which will then be mounted by Blade:
+
+```typescript
+import { Hono } from "hono";
+
+const app = new Hono()
+  .post('/some-path', (c) => c.text('Testing'));
+
+export default app;
+```
+
+However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same domain.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 

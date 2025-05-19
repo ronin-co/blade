@@ -34,6 +34,10 @@ const { values, positionals } = parseArgs({
       type: 'boolean',
       default: false,
     },
+    port: {
+      type: 'string',
+      default: Bun.env['PORT'] || '3000',
+    },
   },
   strict: true,
   allowPositionals: true,
@@ -65,7 +69,7 @@ if (isInitializing) {
   process.exit();
 }
 
-let port = Number.parseInt(Bun.env['PORT'] as string) || 3000;
+let port = Number.parseInt(values.port);
 
 if (isDeveloping) {
   const usablePort = await getPort({ port: portNumbers(port, port + 1000) });
