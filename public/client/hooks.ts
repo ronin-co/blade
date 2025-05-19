@@ -10,8 +10,10 @@ import {
   type MouseEvent,
   type MouseEventHandler,
   type TouchEventHandler,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
 } from 'react';
 import { isStorableObject, processStorableObjects } from 'ronin/utils';
@@ -32,7 +34,7 @@ import {
 import type { PageFetchingOptions } from '../../private/universal/types/util';
 import { generateUniqueId } from '../../private/universal/utils/crypto';
 import logger from '../../private/universal/utils/logs';
-import { usePopulatePathname, useRedirect } from '../universal/hooks';
+import { useLocation, usePopulatePathname, useRedirect } from '../universal/hooks';
 
 interface MutationOptions {
   /** Display a different page once the queries have run. */
@@ -421,6 +423,71 @@ export const usePaginationBuffer = <T>(
 };
 
 /**
- * TODO(@nurodev): Add documentation.
+ * A hook for search / query parameter state management.
+ *
+ * @param key - The key of the query parameter to manage.
+ * @param options - Options for the query parameter.
+ *
+ * @returns A tuple containing the current value of the query parameter and a function to set it.
+ *
+ * @example
+ * ```tsx
+ * import { useQueryState } from '@ronin/blade/client/hooks';
+ *
+ * export default () => {
+ *  const [hello, setHello] = useQueryState('hello');
+ *
+ *  return (
+ *    <>
+ *      <input
+ *        onChange={(e) => setHello(e.target.value)}
+ *        placeholder="Enter your name"
+ *        value={hello}
+ *      />
+ *      <p>Hello, {hello || 'anonymous visitor'}!</p>
+ *    </>
+ *  )
+ * }
+ * ```
  */
-export const useQueryParams = () => {};
+export const useQueryState = <T = string>(
+  key: string,
+  options?: {
+    defaultValue?: T;
+    parse?: (ctx: { defaultValue: T | null; value: string }) => T | null;
+  },
+): [T, (value: T | null) => void] => {
+  const { defaultValue = null, parse } = options ?? {};
+
+  const location = useLocation();
+  const redirect = useRedirect();
+
+  const queryState = useMemo(() => {
+    const rawParam = location.searchParams.get(key);
+    if (rawParam === null) return defaultValue;
+
+    if (parse)
+      return parse({
+        defaultValue: defaultValue,
+        value: rawParam,
+      });
+
+    return rawParam;
+  }, [location.searchParams]);
+
+  const setQueryState = useCallback(
+    (value: T | null): void => {
+      if (value === null) {
+        location.searchParams.delete(key);
+        redirect(location.href, { immediatelyUpdateQueryParams: true });
+        return;
+      }
+
+      location.searchParams.set(key, String(value));
+      redirect(location.href, { immediatelyUpdateQueryParams: true });
+    },
+    [queryState, location.searchParams, redirect],
+  );
+
+  return [queryState as T, setQueryState];
+};
