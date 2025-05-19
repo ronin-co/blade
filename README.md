@@ -354,18 +354,23 @@ const eventHandlers = useLinkEvents('/pathname');
 <button {...eventHandlers}>I am a link</button>
 ```
 
-#### `useQueryParams` (Client)
+#### `useQueryState` (Client)
 
 TODO
 
 ```tsx
-import { useQueryParams } from '@ronin/blade/client/hooks';
+import { useQueryState } from '@ronin/blade/client/hooks';
 
-const [count, setCount] = useQueryParams('count');
+const Page = () => {
+    const [hello, setHello] = useQueryState('hello');
 
-<button onClick={() => setCount((c) => c + 1)}>
-    Count: {count}
-</button>
+    return (
+        <>
+            <input onChange={(e) => setHello(e.target.value)} value={hello} />
+            <p>Hello, {hello || 'world'}!</p>
+        </>
+    );
+};
 ```
 
 #### `use` (Server)
