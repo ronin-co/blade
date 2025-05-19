@@ -441,10 +441,9 @@ export const usePaginationBuffer = <T>(
  *    <>
  *      <input
  *        onChange={(e) => setHello(e.target.value)}
- *        placeholder="Enter your name"
  *        value={hello}
  *      />
- *      <p>Hello, {hello || 'anonymous visitor'}!</p>
+ *      <p>Hello, {hello || 'world'}!</p>
  *    </>
  *  )
  * }
