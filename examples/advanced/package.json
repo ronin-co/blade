@@ -9,7 +9,7 @@
   },
   "author": "ronin",
   "dependencies": {
-    "@ronin/blade": "0.6.2",
+    "@ronin/blade": "0.7.0",
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510"
   },
