@@ -8,7 +8,8 @@ A [React](https://react.dev) framework for building instant web apps.
 
 - **Native Data State Management** (built-in React hooks for reads and mutations)
 - **Native Pagination** (built-in React hooks for paginating lists of records)
-- **Native Styling** (Tailwind CSS support with zero config)
+- **Native Styling** (Support for [Tailwind CSS](https://tailwindcss.com) with zero config)
+- **Native Markdown** (Support for [MDX](https://mdxjs.com) with zero config)
 - **Client & Server Components** (code is not shipped to the client by default, unless you opt in)
 - **Web Standard Compliant** (outputs a req/res worker + static files that run anywhere — also runs in containers)
 - **No Data Waterfalls** (queries are collected across layouts and pages to ensure a single DB transaction)
