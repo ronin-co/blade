@@ -1,6 +1,7 @@
 declare module 'server-list' {
-  export const pages: Record<string, import('./index').TreeItem | 'DIRECTORY'>;
+  export const pages: import('./index').PageList;
   export const triggers: import('./index').TriggersList;
+  export const router: import('hono').Hono | null;
 }
 
 declare module '@mapbox/timespace' {

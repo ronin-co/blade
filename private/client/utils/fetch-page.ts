@@ -1,10 +1,10 @@
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
-import type { PageFetchingOptions } from '../../universal/types/util';
-import { getOutputFile } from '../../universal/utils/paths.ts';
-import { createFromReadableStream } from '../utils/parser';
-import { fetchRetry } from './data';
+import { fetchRetry } from '@/private/client/utils/data';
+import { createFromReadableStream } from '@/private/client/utils/parser';
+import type { PageFetchingOptions } from '@/private/universal/types/util';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 /**
  * Downloads a CSS or JS bundle from the server, without evaluating it.
@@ -109,7 +109,19 @@ const fetchPage = async (
   if (!root) throw new Error('Missing React root');
   root.unmount();
   window['BLADE_ROOT'] = null;
-  document.documentElement.innerHTML = markup;
+
+  const parser = new DOMParser();
+  const newDocument = parser.parseFromString(markup, 'text/html');
+
+  // Replace the inner markup of the document element, since it is not possible to
+  // replace the document element itself using DOM APIs.
+  document.documentElement.innerHTML = newDocument.documentElement.innerHTML;
+
+  // Copy over every attribute from the new document element to the current one, due to
+  // the constraint mentioned further above.
+  [...newDocument.documentElement.attributes].forEach(({ name, value }) => {
+    document.documentElement.setAttribute(name, value);
+  });
 
   // Since rendering the markup above only evaluates the CSS, we have to separately
   // explicitly run the JS as well.

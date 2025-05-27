@@ -1,6 +1,6 @@
-import { DEFAULT_PAGE_PATH } from '../../universal/utils/constants.ts';
-import type { TreeItem } from '../types/index.ts';
-import { joinPaths } from '../utils/paths';
+import type { PageList, TreeItem } from '@/private/server/types';
+import { joinPaths } from '@/private/server/utils/paths';
+import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 
 type Params = { [key: string]: string | string[] | null };
 
@@ -155,7 +155,7 @@ const getEntryPath = (
 };
 
 const getEntry = (
-  pages: Record<string, TreeItem | 'DIRECTORY'>,
+  pages: PageList,
   segments: string[],
   options?: {
     error?: PageEntry['errorPage'];

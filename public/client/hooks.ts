@@ -1,4 +1,3 @@
-import { createId } from '@paralleldrive/cuid2';
 import type { Query } from '@ronin/compiler';
 import {
   type DeepCallable,
@@ -11,8 +10,10 @@ import {
   type MouseEvent,
   type MouseEventHandler,
   type TouchEventHandler,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
 } from 'react';
 import { isStorableObject, processStorableObjects } from 'ronin/utils';
@@ -30,11 +31,10 @@ import {
   usePrivateLocationRef,
   useReduce,
 } from '../../private/client/hooks';
-import { usePrivateLocation } from '../../private/universal/hooks';
 import type { PageFetchingOptions } from '../../private/universal/types/util';
 import { generateUniqueId } from '../../private/universal/utils/crypto';
 import logger from '../../private/universal/utils/logs';
-import { usePopulatePathname } from '../universal/hooks';
+import { useLocation, usePopulatePathname, useRedirect } from '../universal/hooks';
 
 interface MutationOptions {
   /** Display a different page once the queries have run. */
@@ -99,7 +99,7 @@ export const useMutation = (): {
       ? populatePathname(options.redirect)
       : currentPathnameWithQuery;
 
-    const hookHash = generateUniqueId(20);
+    const hookHash = generateUniqueId();
 
     const files = new Map<string, Blob>();
 
@@ -284,31 +284,16 @@ export const usePagination = (
   options?: Partial<Pick<PageFetchingOptions, 'updateAddressBar'>>,
 ): { paginate: () => void; resetPagination: () => void } => {
   const transitionPage = usePageTransition();
-  const { pathname } = usePrivateLocation();
-  const populatePathname = usePopulatePathname();
   const privateLocationRef = usePrivateLocationRef();
 
   // These two must be references and not memos in order to avoid a stale closure of the
   // returned functions at the bottom.
   const loadingMore = useRef<boolean>(false);
-  const id = useRef<string>(createId());
 
   useEffect(() => {
     if (!loadingMore.current) return;
     loadingMore.current = false;
   }, [nextPage]);
-
-  // Refresh the unique pagination identifier when the active page changes.
-  useEffect(
-    () => {
-      // We're purposefully not using the output of `useId` here, which is likely to be
-      // the same between different pages.
-      id.current = createId();
-    },
-    // We can't rely on `privateLocationRef` here, as refs don't update during render
-    // time, but instead after the render has completed.
-    [populatePathname(pathname)],
-  );
 
   const resetPagination = () => {
     const privateLocation = privateLocationRef.current;
@@ -435,4 +420,73 @@ export const usePaginationBuffer = <T>(
   };
 
   return [renderedChildren.items, setValue];
+};
+
+/**
+ * A hook for search / query parameter state management.
+ *
+ * @param key - The key of the query parameter to manage.
+ * @param options - Options for the query parameter.
+ *
+ * @returns A tuple containing the current value of the query parameter and a function to set it.
+ *
+ * @example
+ * ```tsx
+ * import { useQueryState } from '@ronin/blade/client/hooks';
+ *
+ * export default () => {
+ *  const [hello, setHello] = useQueryState('hello');
+ *
+ *  return (
+ *    <>
+ *      <input
+ *        onChange={(e) => setHello(e.target.value)}
+ *        value={hello}
+ *      />
+ *      <p>Hello, {hello || 'world'}!</p>
+ *    </>
+ *  )
+ * }
+ * ```
+ */
+export const useQueryState = <T = string>(
+  key: string,
+  options?: {
+    defaultValue?: T;
+    parse?: (ctx: { defaultValue: T | null; value: string }) => T | null;
+  },
+): [T, (value: T | null) => void] => {
+  const { defaultValue = null, parse } = options ?? {};
+
+  const location = useLocation();
+  const redirect = useRedirect();
+
+  const queryState = useMemo(() => {
+    const rawParam = location.searchParams.get(key);
+    if (rawParam === null) return defaultValue;
+
+    if (parse)
+      return parse({
+        defaultValue: defaultValue,
+        value: rawParam,
+      });
+
+    return rawParam;
+  }, [location.searchParams]);
+
+  const setQueryState = useCallback(
+    (value: T | null): void => {
+      if (value === null) {
+        location.searchParams.delete(key);
+        redirect(location.href, { immediatelyUpdateQueryParams: true });
+        return;
+      }
+
+      location.searchParams.set(key, String(value));
+      redirect(location.href, { immediatelyUpdateQueryParams: true });
+    },
+    [queryState, location.searchParams, redirect],
+  );
+
+  return [queryState as T, setQueryState];
 };

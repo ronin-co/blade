@@ -1,9 +1,8 @@
 # Blade
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/blade/validate.yml?label=tests)](https://github.com/ronin-co/blade/actions/workflows/validate.yml)
-[![install size](https://packagephobia.com/badge?p=@ronin/blade)](https://packagephobia.com/result?p=@ronin/blade)
 
-This package allows for building instant web apps with [React](https://react.dev).
+A [React](https://react.dev) framework for building instant web apps.
 
 ## Features
 
@@ -16,6 +15,7 @@ This package allows for building instant web apps with [React](https://react.dev
 - **Instant Prod Builds** (no compiler, only relies on Bun and loaders)
 - **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/examples/basic) to get Blade to run)
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
+- **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [upcoming], and more soon)
 
 Blade works most efficiently when using [RONIN](https://ronin.co) — a globally replicable database powered by SQLite. Blade is and will always be usable with any other data source as well, however you will see performance drawbacks if that datasource isn't equally fast.
 
@@ -29,11 +29,9 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 - **No Async Components** (I/O leads to slow code, so reads in Blade are always synchronous, but async behind the scenes)
 - **No Suspense** (Blade does not support reads on the client — server components can only read and client components can only write)
 
-## Temporary Limitations
+## Temporary Limitation
 
-- You can already deploy Blade anywhere, but in terms of zero-config, Blade currently only works in containers. Zero-config support for Vercel, Cloudflare, and all other providers will land very soon.
-- Tailwind v4 (only v3) is not yet supported. Support will land very soon.
-- The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
+The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
 
 ## Setup
 
@@ -57,6 +55,16 @@ Lastly, start the development server:
 ```bash
 bun run dev
 ```
+
+## Deploying
+
+In order to deploy your Blade app to production, use your deployment provider of choice. For example, you can sign up to [Vercel](https://vercel.com) and run this command in the directory of your Blade app to deploy it:
+
+```bash
+vercel -y
+```
+
+That's all. The command will create the Vercel project and deploy the app for you.
 
 ## API
 
@@ -346,6 +354,33 @@ const eventHandlers = useLinkEvents('/pathname');
 <button {...eventHandlers}>I am a link</button>
 ```
 
+#### `useQueryState` (Client)
+
+In React, ephemeral state is managed with the [`useState`](https://react.dev/reference/react/useState) hook. For example, if your interface contains a dialog that should open when a button is clicked, you would typically store the status of the dialog in `useState`. This state does not persist across sessions, meaning if a user closes the browser tab, the state will be lost.
+
+To persist state, it should be stored with the client-side [`useMutation`](#usemutation-client) hook, which has the ability to commit changes to your database. This state, since it is stored in your database, can then also be accessed by other users, if needed.
+
+For maximum flexibility, Blade offers a third kind of state: In addition to ephemeral and persistent state (which we've covered above), there is also **URL state**. This kind of state can be re-used across different browser sessions, as long as the same URL is used to access the page.
+
+For example, if your application contains a list of items within the interface, you might decide to add a `?search` query parameter as part of the URL, in order to store search keywords in the URL. Like that, the state does not need to be stored in your database, but it also wouldn't get lost when the page gets reloaded, and it would apply whenever the URL is shared with other people.
+
+In those kinds of scenarios, you can add the `useQueryState` hook, which essentially auto-generates a `useState` hook that depends on a query parameter in the URL. Reading the value of the hook therefore reads the value of the query parameter in the URL, and setting the value of the hook therefore also updates the value of the query parameter in the URL — all without you needing to write extra code.
+
+```tsx
+import { useQueryState } from '@ronin/blade/client/hooks';
+
+const ClientComponent = () => {
+    const [hello, setHello] = useQueryState('hello');
+
+    return (
+        <>
+            <input onChange={(e) => setHello(e.target.value)} value={hello} />
+            <p>Hello, {hello || 'world'}!</p>
+        </>
+    );
+};
+```
+
 #### `use` (Server)
 
 Usually, in React, the [use](https://react.dev/reference/react/use) hook is used to consume a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or [context](https://react.dev/learn/passing-data-deeply-with-context).
@@ -569,6 +604,33 @@ the touch action, meaning when the screen is pressed. When the touch action ends
 the finger is lifted), the transition begins.
 
 In the future, links will also be prefetched when the page that contains them is loaded.
+
+### API Routes
+
+Blade automatically generates REST API routes at `/api` for your [triggers](https://ronin.co/docs/models/triggers) if you define the following in the file of your triggers:
+
+```typescript
+export const exposed = true;
+```
+
+API routes should only be used if you need to interact with your app from a client that is not the browser. For example, if you are also building a native iOS app, you could send HTTP requests to the auto-generated REST API from there.
+
+On the client side of the application you've built using Blade (within the browser), however, you should always make use of [useMutation](#usemutation-client) instead, which guarantees that all read queries on the page are revalidated upon a mutation, avoiding the need for custom client-side data state management.
+
+#### Custom API Routes
+
+In the rare case that you need to mount an API with a specific request signature to your Blade application, you can add a `router.ts` file at the root of your application and place a [Hono](https://hono.dev) app inside of it, which will then be mounted by Blade:
+
+```typescript
+import { Hono } from "hono";
+
+const app = new Hono()
+  .post('/some-path', (c) => c.text('Testing'));
+
+export default app;
+```
+
+However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same domain.
 
 ### Revalidation (Stale-While-Revalidate, SWR)
 

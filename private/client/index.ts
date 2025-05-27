@@ -1,11 +1,11 @@
-import './components/history';
-import '../../public/client/components';
+import '@/private/client/components/history';
+import '@/public/client/components';
 
 import 'client-list';
 
 import { hydrateRoot } from 'react-dom/client';
 
-import fetchPage from './utils/fetch-page';
+import fetchPage from '@/private/client/utils/fetch-page';
 
 if (!window['BLADE_ROOT']) {
   const path = location.pathname + location.search + location.hash;

@@ -1,12 +1,12 @@
 import type { BeforeGetTrigger } from 'ronin/types';
 
-import type { ServerContext } from '../context';
+import type { ServerContext } from '@/private/server/context';
 import type {
   TriggerOptions as NewTriggerOptions,
   Triggers,
   TriggersList,
-} from '../types';
-import { WRITE_QUERY_TYPES } from '../utils/constants';
+} from '@/private/server/types';
+import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
 
 /** The original trigger options provided by the RONIN client. */
 type OldTriggerOptions = Parameters<BeforeGetTrigger>[2];

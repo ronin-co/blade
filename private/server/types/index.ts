@@ -27,13 +27,12 @@ import type {
   SetTrigger as OriginalSetTrigger,
 } from 'ronin/types';
 
-import type { CustomNavigator } from '../../universal/types/util';
-import type { ServerContext } from '../context';
+import type { ServerContext } from '@/private/server/context';
+import type { CustomNavigator } from '@/private/universal/types/util';
 
 export type TreeItem = {
   components?: Record<string, ComponentType<unknown>>;
   default: FunctionComponent<{
-    records?: unknown;
     components?: Record<string, ComponentType<unknown>>;
   }>;
 };
@@ -185,3 +184,4 @@ export type Triggers<TSchema = unknown> = Record<
 >;
 
 export type TriggersList<TSchema = unknown> = Record<string, Triggers<TSchema>>;
+export type PageList = Record<string, TreeItem | 'DIRECTORY'>;

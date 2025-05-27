@@ -1,12 +1,14 @@
 import path from 'node:path';
 
-import { copyFile, cp, exists, mkdir, readdir, rm } from 'node:fs/promises';
+import { cp, exists, readdir, rm } from 'node:fs/promises';
+import {
+  compile as compileTailwind,
+  optimize as optimizeTailwind,
+} from '@tailwindcss/node';
+import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { BuildOutput, Transpiler } from 'bun';
 import ora from 'ora';
 
-import { CLIENT_ASSET_PREFIX, DEFAULT_PAGE_PATH } from '../../universal/utils/constants';
-import { generateUniqueId } from '../../universal/utils/crypto';
-import { getOutputFile } from '../../universal/utils/paths';
 import {
   clientInputFile,
   clientManifestFile,
@@ -15,15 +17,21 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-} from '../constants';
+  routerInputFile,
+  styleInputFile,
+} from '@/private/shell/constants';
 import {
   getClientChunkLoader,
   getClientComponentLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from '../loaders';
-import type { ClientChunks, FileError } from '../types';
-import { getProvider } from './providers';
+} from '@/private/shell/loaders';
+import type { ClientChunks, FileError } from '@/private/shell/types';
+import { getProvider } from '@/private/shell/utils/providers';
+import type { DeploymentProvider } from '@/private/universal/types/util';
+import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
   const files = await readdir(directory, { recursive: true });
@@ -39,18 +47,13 @@ const getImportList = async (directoryName: string, directoryPath: string) => {
   for (let index = 0; index < files.length; index++) {
     const filePath = files[index] as (typeof files)[number];
     const filePathFull = path.join(directoryPath, filePath);
-
     const variableName = directoryName + index;
-    const keyName =
-      directoryName === 'defaultPages'
-        ? path.join(DEFAULT_PAGE_PATH, filePath)
-        : filePath;
 
     if (filePath.endsWith('/')) {
-      exportList[keyName.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
+      exportList[filePath.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
     } else {
       importList.push(`import * as ${variableName} from '${filePathFull}';`);
-      exportList[keyName] = variableName;
+      exportList[filePath] = variableName;
     }
   }
 
@@ -68,12 +71,17 @@ export const getFileList = async (): Promise<string> => {
   const directories = Object.entries(directoriesToParse);
   const importPromises = directories.map(([name, path]) => getImportList(name, path));
   const imports = await Promise.all(importPromises);
+  const routerExists = await exists(routerInputFile);
+
+  if (await exists(routerInputFile)) {
+    imports.push(`import { default as honoRouter } from '${routerInputFile}';`);
+  }
 
   let file = imports.join('\n\n');
 
   file += '\n\n';
-  file += 'export const pages = { ...customPages, ...defaultPages };\n';
-  file += 'export const triggers = { ...customTriggers };\n';
+  file += `const router = ${routerExists ? 'honoRouter' : 'null'};\n`;
+  file += 'export { pages, triggers, router };\n';
 
   return file;
 };
@@ -146,12 +154,16 @@ export const setEnvironmentVariables = (options: {
     process.exit(0);
   }
 
-  if (Bun.env['CF_PAGES']) {
+  // Get the current provider based on the environment variables.
+  const provider = getProvider();
+  import.meta.env.__BLADE_PROVIDER = provider;
+
+  if (provider === 'cloudflare') {
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'];
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'];
   }
 
-  if (Bun.env['VERCEL']) {
+  if (provider === 'vercel') {
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'];
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
   }
@@ -179,9 +191,6 @@ export const setEnvironmentVariables = (options: {
 
   // The directories that contain the source code of the application.
   import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
-
-  // Get the current provider based on the environment variables.
-  import.meta.env.__BLADE_PROVIDER = getProvider();
 };
 
 export const getClientEnvironmentVariables = () => {
@@ -222,11 +231,11 @@ export const cleanUp = async () => {
  */
 export const handleBuildLogs = (output: BuildOutput) => {
   for (const log of output.logs) {
-    // Bun logs a warning when it encounters a `sideTriggers` property in `package.json`
+    // Bun logs a warning when it encounters a `sideEffects` property in `package.json`
     // containing a glob (a wildcard), because Bun doesn't support those yet. We want to
     // silence this warning, unless it is requested to be logged explicitly.
     if (
-      log.message.includes('wildcard sideTriggers') &&
+      log.message.includes('wildcard sideEffects') &&
       Bun.env['__BLADE_DEBUG_LEVEL'] !== 'verbose'
     )
       return;
@@ -236,7 +245,10 @@ export const handleBuildLogs = (output: BuildOutput) => {
   }
 };
 
-export const prepareClientAssets = async (environment: 'development' | 'production') => {
+export const prepareClientAssets = async (
+  environment: 'development' | 'production',
+  provider?: DeploymentProvider,
+) => {
   const bundleId = generateUniqueId();
 
   const clientSpinner = logSpinner(
@@ -266,10 +278,9 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
     target: 'browser',
     naming: path.basename(getOutputFile(bundleId, 'js')),
     minify: environment === 'production',
-    // On Cloudflare Pages, inline plain-text environment variables in the client bundles.
-    define: Bun.env['CF_PAGES']
-      ? Object.fromEntries(clientEnvironmentVariables)
-      : undefined,
+    // When using a serverless deployment provider, inline plain-text environment
+    // variables in the client bundles.
+    define: provider ? Object.fromEntries(clientEnvironmentVariables) : undefined,
   });
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
@@ -279,7 +290,7 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
-    Bun.env['CF_PAGES'] ? 'if(!import.meta.env){import.meta.env={}};' : '',
+    provider ? 'if(!import.meta.env){import.meta.env={}};' : '',
     `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
     `window['BLADE_BUNDLE']='${bundleId}';`,
     await chunkFile.text(),
@@ -287,88 +298,66 @@ export const prepareClientAssets = async (environment: 'development' | 'producti
 
   await Bun.write(chunkFile, chunkFilePrefix);
 
-  const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
-    return projects.map((project) => `${path.join(project, directory)}/**/*.{ts,tsx}`);
-  });
-
-  // Consider the directory that contains BLADE's source code.
-  content.push(`${frameworkDirectory}/private/**/*.{js,jsx}`);
-
-  const tailwindPath = require.resolve('tailwindcss');
-  const tailwindBinPath = path.join(
-    tailwindPath.substring(0, tailwindPath.lastIndexOf('/node_modules/')),
-    'node_modules/.bin/tailwindcss',
-  );
-
-  const tailwindProcess = Bun.spawn(
-    [
-      tailwindBinPath,
-      '--input',
-      path.join(__dirname, 'styles.css'),
-      '--output',
-      path.join(outputDirectory, getOutputFile(bundleId, 'css')),
-      ...(environment === 'production' ? ['--minify'] : []),
-      '--content',
-      content.join(','),
-    ],
-    {
-      // Don't write any input to the process.
-      stdin: null,
-      // Pipe useful logs that aren't errors to the terminal.
-      stdout: 'inherit',
-      // Tailwind prints non-error logs as errors, which we want to ignore.
-      stderr: 'pipe',
-      env: {
-        ...import.meta.env,
-        FORCE_COLOR: '3',
-      },
-      cwd: process.cwd(),
-    },
-  );
-  if (environment === 'production') {
-    const tailwindProcessExitCode = await tailwindProcess.exited;
-    if (tailwindProcessExitCode !== 0) {
-      clientSpinner.fail('Failed to build Tailwind CSS styles.');
-      const { value } = await tailwindProcess.stderr.getReader().read();
-      const errorMessage = new TextDecoder().decode(value);
-      console.log(
-        loggingPrefixes.error,
-        errorMessage.replaceAll('\n', `\n${loggingPrefixes.error}`),
-      );
-      process.exit(1);
-    }
-  }
-
-  const fontFileDirectory = path.join(
-    path.dirname(require.resolve('@fontsource-variable/inter')),
-    'files',
-  );
-  const fontFileOutputDirectory = path.join(outdir, 'files');
-  const fontFiles = (await readdir(fontFileDirectory))
-    .filter((file) => file.includes('wght-normal'))
-    .map((file) => ({
-      input: path.join(fontFileDirectory, file),
-      output: path.join(fontFileOutputDirectory, file),
-    }));
+  await prepareStyles(environment, projects, bundleId);
 
   // Copy hard-coded static assets into output directory.
   if (await exists(publicDirectory))
     await cp(publicDirectory, outputDirectory, { recursive: true });
 
-  // Copy font files from font package.
-  await mkdir(fontFileOutputDirectory);
-  await Promise.all(fontFiles.map((file) => copyFile(file.input, file.output)));
-
   import.meta.env['__BLADE_ASSETS'] = JSON.stringify([
     { type: 'js', source: getOutputFile(bundleId, 'js') },
-    ...fontFiles.map((file) => ({
-      type: 'font',
-      source: `/${path.relative(outputDirectory, file.output)}`,
-    })),
     { type: 'css', source: getOutputFile(bundleId, 'css') },
   ]);
 
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
   clientSpinner.succeed();
+};
+
+/**
+ * Compiles the Tailwind CSS stylesheet for the application.
+ *
+ * @param environment - The environment in which the application is running.
+ * @param projects - The list of Blade projects to scan for Tailwind CSS classes.
+ * @param bundleId - The unique identifier for the current bundle.
+ *
+ * @returns A promise that resolves when the styles have been prepared.
+ */
+const prepareStyles = async (
+  environment: 'development' | 'production',
+  projects: Array<string>,
+  bundleId: string,
+) => {
+  // Consider the directories containing the source code of the application.
+  const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
+    return projects.map((project) => path.join(project, directory));
+  });
+
+  // Consider the directory containing BLADE's component source code.
+  content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
+
+  const inputFile = Bun.file(styleInputFile);
+  const input = (await inputFile.exists())
+    ? await inputFile.text()
+    : `@import 'tailwindcss';`;
+
+  const compiler = await compileTailwind(input, {
+    onDependency(_path) {},
+    base: process.cwd(),
+  });
+
+  const scanner = new TailwindScanner({
+    sources: content.map((base) => ({ base, pattern: '**/*', negated: false })),
+  });
+
+  const candidates = scanner.scan();
+  const compiledStyles = compiler.build(candidates);
+
+  const optimizedStyles = optimizeTailwind(compiledStyles, {
+    file: 'input.css',
+    minify: environment === 'production',
+  });
+
+  const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
+  await Bun.write(tailwindOutput, optimizedStyles.code);
 };

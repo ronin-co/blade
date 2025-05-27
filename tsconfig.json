@@ -23,7 +23,13 @@
 
     // Some stricter flags
     "useUnknownInCatchVariables": true,
-    "noPropertyAccessFromIndexSignature": true
+    "noPropertyAccessFromIndexSignature": true,
+
+    // Extra config
+    "paths": {
+      "@/private/*": ["./private/*"],
+      "@/public/*": ["./public/*"]
+    }
   },
   "exclude": ["./examples/**/*"]
 }

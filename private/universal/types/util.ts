@@ -1,5 +1,5 @@
+import type { UniversalContext } from '@/private/universal/context';
 import type { FormattedResults } from 'ronin/types';
-import type { UniversalContext } from '../context';
 
 interface QueryItemBase {
   /**
@@ -33,7 +33,7 @@ export interface QueryItemWrite extends QueryItemBase {
 }
 
 export type Asset = {
-  type: 'css' | 'js' | 'font';
+  type: 'css' | 'js';
   source: string;
 };
 
@@ -93,3 +93,5 @@ export interface CustomNavigator {
   geoLocation: UniversalContext['geoLocation'];
   languages: UniversalContext['languages'];
 }
+
+export type DeploymentProvider = 'vercel' | 'cloudflare' | '';

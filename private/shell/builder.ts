@@ -5,28 +5,33 @@ import {
   serverInputFile,
   serverOutputFile,
   serverVercelInputFile,
-} from './constants';
+} from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
   getReactAriaLoader,
-} from './loaders';
-import { cleanUp, handleBuildLogs, logSpinner, prepareClientAssets } from './utils';
+} from '@/private/shell/loaders';
+import {
+  cleanUp,
+  handleBuildLogs,
+  logSpinner,
+  prepareClientAssets,
+} from '@/private/shell/utils';
 import {
   mapProviderInlineDefinitions,
   transformToVercelBuildOutput,
-} from './utils/providers';
+} from '@/private/shell/utils/providers';
+
+const provider = import.meta.env.__BLADE_PROVIDER;
 
 await cleanUp();
-await prepareClientAssets('production');
+await prepareClientAssets('production', provider);
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
-const IS_VERCEL = import.meta.env.__BLADE_PROVIDER === 'vercel';
-
 const output = await Bun.build({
-  entrypoints: [IS_VERCEL ? serverVercelInputFile : serverInputFile],
+  entrypoints: [provider === 'vercel' ? serverVercelInputFile : serverInputFile],
   outdir: outputDirectory,
   plugins: [
     getClientReferenceLoader('production'),
@@ -37,7 +42,7 @@ const output = await Bun.build({
   naming: `[dir]/${path.basename(serverOutputFile)}`,
   minify: true,
   sourcemap: 'external',
-  target: IS_VERCEL ? 'node' : 'browser',
+  target: provider === 'vercel' ? 'node' : 'browser',
   define: mapProviderInlineDefinitions(),
 });
 
@@ -47,6 +52,6 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (IS_VERCEL) await transformToVercelBuildOutput();
+if (provider === 'vercel') await transformToVercelBuildOutput();
 
 handleBuildLogs(output);

@@ -7,8 +7,12 @@ import { parseArgs } from 'node:util';
 import type { SpawnOptions } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
-import { frameworkDirectory, loggingPrefixes, pagesDirectory } from './constants';
-import { logSpinner, setEnvironmentVariables } from './utils';
+import {
+  frameworkDirectory,
+  loggingPrefixes,
+  pagesDirectory,
+} from '@/private/shell/constants';
+import { logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -29,6 +33,10 @@ const { values, positionals } = parseArgs({
     queries: {
       type: 'boolean',
       default: false,
+    },
+    port: {
+      type: 'string',
+      default: Bun.env['PORT'] || '3000',
     },
   },
   strict: true,
@@ -61,7 +69,7 @@ if (isInitializing) {
   process.exit();
 }
 
-let port = Number.parseInt(Bun.env['PORT'] as string) || 3000;
+let port = Number.parseInt(values.port);
 
 if (isDeveloping) {
   const usablePort = await getPort({ port: portNumbers(port, port + 1000) });

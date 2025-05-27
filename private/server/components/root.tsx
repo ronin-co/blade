@@ -1,12 +1,12 @@
 import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
-import { History } from '../../client/components/history';
-import { getSerializableContext } from '../../universal/context';
-import { usePrivateLocation } from '../../universal/hooks';
-import type { Asset } from '../../universal/types/util';
-import { useServerContext } from '../hooks';
-import type { PageMetadata, RecursiveRequired, ValueOf } from '../types';
+import { History } from '@/private/client/components/history';
+import { useServerContext } from '@/private/server/hooks';
+import type { PageMetadata, RecursiveRequired, ValueOf } from '@/private/server/types';
+import { getSerializableContext } from '@/private/universal/context';
+import { usePrivateLocation } from '@/private/universal/hooks';
+import type { Asset } from '@/private/universal/types/util';
 
 const metadataNames: Record<string, string> = {
   colorScheme: 'color-scheme',
@@ -48,42 +48,32 @@ const Root = ({ children }: RootProps) => {
       className={metadata.htmlClassName}
       suppressHydrationWarning={true}>
       <head>
-        {JSON.parse(import.meta.env.__BLADE_ASSETS).map(({ type, source }: Asset) => {
-          switch (type) {
-            case 'css':
-              return (
-                <link
-                  rel="stylesheet"
-                  href={source}
-                  key={source}
-                  className="blade-style"
-                />
-              );
-            case 'js':
-              return (
-                <script
-                  src={source}
-                  key={source}
-                  type="module"
-                  className="blade-script"
-                />
-              );
-
-            // Fonts are already loaded by the CSS bundle, but we also want to pre-load
-            // them in addition.
-            case 'font':
-              return (
-                <link
-                  rel="preload"
-                  crossOrigin="anonymous"
-                  as="font"
-                  href={source}
-                  type="font/woff2"
-                  key={source}
-                />
-              );
-          }
-        })}
+        {(JSON.parse(import.meta.env.__BLADE_ASSETS) as Array<Asset>)
+          // Ensure that stylesheets are loaded first in favor of performance. The HMR
+          // logic on the client depends on this order as well.
+          .sort((a, b) => Number(b.type === 'css') - Number(a.type === 'css'))
+          .map(({ type, source }) => {
+            switch (type) {
+              case 'css':
+                return (
+                  <link
+                    rel="stylesheet"
+                    href={source}
+                    key={source}
+                    className="blade-style"
+                  />
+                );
+              case 'js':
+                return (
+                  <script
+                    src={source}
+                    key={source}
+                    type="module"
+                    className="blade-script"
+                  />
+                );
+            }
+          })}
 
         <meta
           name="viewport"
