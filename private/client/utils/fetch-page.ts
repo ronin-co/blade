@@ -119,18 +119,18 @@ const fetchPage = async (
 
   // Copy over every attribute from the new document element to the current one, due to
   // the constraint mentioned further above.
-  [...newDocument.documentElement.attributes].forEach(({ name, value }) => {
+  [...Array.from(newDocument.documentElement.attributes)].forEach(({ name, value }) => {
     document.documentElement.setAttribute(name, value);
   });
 
   // Since rendering the markup above only evaluates the CSS, we have to separately
   // explicitly run the JS as well.
-  for (const oldScript of document.querySelectorAll('script.blade-script')) {
+  for (const oldScript of Array.from(document.querySelectorAll('script.blade-script'))) {
     // Cloning the old element will not cause the script to be executed. Instead, we must
     // creae a new element with the same attributes and append it to the DOM.
     const newScript = document.createElement('script');
     // Copy over every attribute
-    for (const attr of oldScript.attributes) {
+    for (const attr of Array.from(oldScript.attributes)) {
       newScript.setAttribute(attr.name, attr.value);
     }
     document.head.appendChild(newScript);
