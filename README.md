@@ -32,7 +32,7 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 
 ## Temporary Limitation
 
-The experimental React version defined in our [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the latest stable version will follow very soon.
+The experimental React version defined in the [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the "stable" release channel of React will follow very soon.
 
 ## Setup
 
