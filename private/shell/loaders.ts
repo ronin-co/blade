@@ -192,11 +192,6 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
     build.onLoad({ filter: /\.mdx$/ }, async (source) => {
       const contents = await Bun.file(source.path).text();
 
-      const options = {
-        keepBackground: false,
-        theme: 'github-dark',
-      };
-
       const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
 
       const yaml = contents.match(yamlPattern);
