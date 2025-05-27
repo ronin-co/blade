@@ -4,7 +4,6 @@ import { stat } from 'node:fs/promises';
 import { compile } from '@mdx-js/mdx';
 import { type BunPlugin, Glob } from 'bun';
 import YAML from 'js-yaml';
-import rehypePrettyCode from 'rehype-pretty-code';
 
 import { clientManifestFile } from '@/private/shell/constants';
 import type { ClientChunks } from '@/private/shell/types';
@@ -211,7 +210,6 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
       }
 
       const mdx = await compile(mdxContents, {
-        rehypePlugins: [[rehypePrettyCode, options]],
         development: environment === 'development',
       });
 
