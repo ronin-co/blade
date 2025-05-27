@@ -4,7 +4,6 @@ import { stat } from 'node:fs/promises';
 import { compile } from '@mdx-js/mdx';
 import { type BunPlugin, Glob } from 'bun';
 import YAML from 'js-yaml';
-import rehypePrettyCode from 'rehype-pretty-code';
 
 import { clientManifestFile } from '@/private/shell/constants';
 import type { ClientChunks } from '@/private/shell/types';
@@ -193,11 +192,6 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
     build.onLoad({ filter: /\.mdx$/ }, async (source) => {
       const contents = await Bun.file(source.path).text();
 
-      const options = {
-        keepBackground: false,
-        theme: 'github-dark',
-      };
-
       const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
 
       const yaml = contents.match(yamlPattern);
@@ -211,7 +205,6 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
       }
 
       const mdx = await compile(mdxContents, {
-        rehypePlugins: [[rehypePrettyCode, options]],
         development: environment === 'development',
       });
 
