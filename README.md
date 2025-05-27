@@ -561,8 +561,8 @@ The following props are available:
 ##### Prefetching
 
 On desktop, when a cursor enters a `Link` element (hover), the destination page will be
-prefetched by Blade, to ensure that, by the time the page transition happens (when the
-element is clicked), the page transition will be instant.
+loaded by Blade in the background, to ensure that, by the time the page transition happens
+(when the element is clicked), the page transition will be instant.
 
 Similarily, on mobile devices, the destination page will be prefetched upon the start of
 the touch action, meaning when the screen is pressed. When the touch action ends (e.g.
