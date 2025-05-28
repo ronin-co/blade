@@ -747,7 +747,6 @@ const HooksDispatcher = {
 
     return data;
   },
-  use: use,
 };
 
 function unsupportedHook(...args) {
