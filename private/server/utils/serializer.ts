@@ -878,7 +878,7 @@ const POP = {}; // Used for DEV messages to keep track of which parent rendered 
 const jsxPropsParents = new WeakMap();
 const jsxChildrenParents = new WeakMap();
 
-function attemptResolveElement(request, type, key, ref, props, prevThenableState) {
+function attemptResolveElement(request, type, key, ref, props) {
   if (ref !== null && ref !== undefined) {
     // When the ref moves to the regular props object this will implicitly
     // throw for functions. We could probably relax it to a DEV warning for other
@@ -932,14 +932,7 @@ function attemptResolveElement(request, type, key, ref, props, prevThenableState
       }
 
       case REACT_MEMO_TYPE: {
-        return attemptResolveElement(
-          request,
-          type.type,
-          key,
-          ref,
-          props,
-          prevThenableState,
-        );
+        return attemptResolveElement(request, type.type, key, ref, props);
       }
     }
   }
@@ -965,7 +958,6 @@ function createTask(request, model, abortSet) {
     status: PENDING,
     model: model,
     ping: () => pingTask(request, task),
-    thenableState: null,
   };
   abortSet.add(task);
   return task;
@@ -983,21 +975,12 @@ function serializeSymbolReference(name) {
   return `$S${name}`;
 }
 
-function serializeClientReference(request, parent, key, moduleReference) {
+function serializeClientReference(request, moduleReference) {
   const moduleKey = getClientReferenceKey(moduleReference);
   const writtenModules = request.writtenModules;
   const existingId = writtenModules.get(moduleKey);
 
   if (existingId !== undefined) {
-    if (parent[0] === REACT_ELEMENT_TYPE && key === '1') {
-      // If we're encoding the "type" of an element, we can refer
-      // to that by a lazy reference instead of directly since React
-      // knows how to deal with lazy values. This lets us suspend
-      // on this component rather than its parent until the code has
-      // loaded.
-      return serializeLazyID(existingId);
-    }
-
     return serializeByValueID(existingId);
   }
 
@@ -1007,15 +990,6 @@ function serializeClientReference(request, parent, key, moduleReference) {
     const moduleId = request.nextChunkId++;
     emitModuleChunk(request, moduleId, moduleMetaData);
     writtenModules.set(moduleKey, moduleId);
-
-    if (parent[0] === REACT_ELEMENT_TYPE && key === '1') {
-      // If we're encoding the "type" of an element, we can refer
-      // to that by a lazy reference instead of directly since React
-      // knows how to deal with lazy values. This lets us suspend
-      // on this component rather than its parent until the code has
-      // loaded.
-      return serializeLazyID(moduleId);
-    }
 
     return serializeByValueID(moduleId);
   } catch (x) {
@@ -1399,7 +1373,7 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
 
   if (typeof value === 'object') {
     if (isClientReference(value)) {
-      return serializeClientReference(request, parent, key, value);
+      return serializeClientReference(request, value);
     }
     if (value === POP) {
       popProvider();
@@ -1447,7 +1421,7 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
 
   if (typeof value === 'function') {
     if (isClientReference(value)) {
-      return serializeClientReference(request, parent, key, value);
+      return serializeClientReference(request, value);
     }
 
     if (/^on[A-Z]/.test(key)) {
@@ -1576,12 +1550,7 @@ function retryTask(request, task) {
       value.$$typeof === REACT_ELEMENT_TYPE
     ) {
       // TODO: Concatenate keys of parents onto children.
-      const element = value; // When retrying a component, reuse the thenableState from the
-      // previous attempt.
-
-      const prevThenableState = task.thenableState; // Attempt to render the Server Component.
-      // Doing this here lets us reuse this same task if the next component
-      // also suspends.
+      const element = value;
 
       task.model = value;
       value = attemptResolveElement(
@@ -1590,13 +1559,7 @@ function retryTask(request, task) {
         element.key,
         element.ref,
         element.props,
-        prevThenableState,
-      ); // Successfully finished this component. We're going to keep rendering
-      // using the same task, but we reset its thenable state before continuing.
-
-      task.thenableState = null; // Keep rendering and reuse the same task. This inner loop is separate
-      // from the render above because we don't need to reset the thenable state
-      // until the next time something suspends and retries.
+      );
 
       while (
         typeof value === 'object' &&
