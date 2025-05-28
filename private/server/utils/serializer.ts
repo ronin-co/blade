@@ -715,9 +715,6 @@ function prepareToUseHooksForRequest(request) {
 function resetHooksForRequest() {
   currentRequest = null;
 }
-function prepareToUseHooksForComponent(prevThenableState) {
-  thenableState = prevThenableState;
-}
 
 const HooksDispatcher = {
   useMemo: (nextCreate) => nextCreate(),
@@ -902,7 +899,6 @@ function attemptResolveElement(request, type, key, ref, props, prevThenableState
       return [REACT_ELEMENT_TYPE, type, key, props];
     } // This is a server-side component.
 
-    prepareToUseHooksForComponent(prevThenableState);
     return type(props);
   }
 
@@ -932,9 +928,7 @@ function attemptResolveElement(request, type, key, ref, props, prevThenableState
 
     switch (type.$$typeof) {
       case REACT_FORWARD_REF_TYPE: {
-        const render = type.render;
-        prepareToUseHooksForComponent(prevThenableState);
-        return render(props, undefined);
+        return type.render(props, undefined);
       }
 
       case REACT_MEMO_TYPE: {
