@@ -708,41 +708,7 @@ function popProvider() {
   return currentActiveSnapshot;
 }
 
-// Corresponds to ReactFiberWakeable and ReactFizzWakeable modules. Generally,
-// changes to one module should be reflected in the others.
-// TODO: Rename this module and the corresponding Fiber one to "Thenable"
-// instead of "Wakeable". Or some other more appropriate name.
-// An error that is thrown (e.g. by `use`) to trigger Suspense. If we
-// detect this is caught by userspace, we'll log a warning in development.
-const SuspenseException = new Error(
-  "Suspense Exception: This is not a real error! It's an implementation " +
-    'detail of `use` to interrupt the current render. You must either ' +
-    'rethrow it immediately, or move the `use` call outside of the ' +
-    '`try/catch` block. Capturing without rethrowing will lead to ' +
-    'unexpected behavior.\n\n' +
-    'To handle async errors, wrap your component in an error boundary, or ' +
-    "call the promise's `.catch` method and pass the result to `use`",
-);
-
-let suspendedThenable = null;
-function getSuspendedThenable() {
-  // This is called right after `use` suspends by throwing an exception. `use`
-  // throws an opaque value instead of the thenable itself so that it can't be
-  // caught in userspace. Then the work loop accesses the actual thenable using
-  // this function.
-  if (suspendedThenable === null) {
-    throw new Error(
-      'Expected a suspended thenable. This is a bug in React. Please file an issue.',
-    );
-  }
-
-  const thenable = suspendedThenable;
-  suspendedThenable = null;
-  return thenable;
-}
-
 let currentRequest = null;
-let thenableState = null;
 function prepareToUseHooksForRequest(request) {
   currentRequest = request;
 }
@@ -751,11 +717,6 @@ function resetHooksForRequest() {
 }
 function prepareToUseHooksForComponent(prevThenableState) {
   thenableState = prevThenableState;
-}
-function getThenableStateAfterSuspending() {
-  const state = thenableState;
-  thenableState = null;
-  return state;
 }
 
 const HooksDispatcher = {
@@ -921,78 +882,6 @@ const POP = {}; // Used for DEV messages to keep track of which parent rendered 
 const jsxPropsParents = new WeakMap();
 const jsxChildrenParents = new WeakMap();
 
-function serializeThenable(request, thenable) {
-  request.pendingChunks++;
-  const newTask = createTask(request, null, request.abortableTasks);
-
-  switch (thenable.status) {
-    case 'fulfilled': {
-      // We have the resolved value, we can go ahead and schedule it for serialization.
-      newTask.model = thenable.value;
-      pingTask(request, newTask);
-      return newTask.id;
-    }
-
-    case 'rejected': {
-      const x = thenable.reason;
-      const digest = logRecoverableError(request, x);
-      const _getErrorMessageAndSt = getErrorMessageAndStackDev(x);
-      const message = _getErrorMessageAndSt.message;
-      const stack = _getErrorMessageAndSt.stack;
-
-      emitErrorChunkDev(request, newTask.id, digest, message, stack);
-
-      return newTask.id;
-    }
-
-    default: {
-      if (typeof thenable.status === 'string') {
-        // Only instrument the thenable if the status if not defined. If
-        // it's defined, but an unknown value, assume it's been instrumented by
-        // some custom userspace implementation. We treat it as "pending".
-        break;
-      }
-
-      const pendingThenable = thenable;
-      pendingThenable.status = 'pending';
-      pendingThenable.then(
-        (fulfilledValue) => {
-          if (thenable.status === 'pending') {
-            const fulfilledThenable = thenable;
-            fulfilledThenable.status = 'fulfilled';
-            fulfilledThenable.value = fulfilledValue;
-          }
-        },
-        (error) => {
-          if (thenable.status === 'pending') {
-            const rejectedThenable = thenable;
-            rejectedThenable.status = 'rejected';
-            rejectedThenable.reason = error;
-          }
-        },
-      );
-      break;
-    }
-  }
-
-  thenable.then(
-    (value) => {
-      newTask.model = value;
-      pingTask(request, newTask);
-    },
-    (reason) => {
-      // TODO: Is it safe to directly emit these without being inside a retry?
-      const digest = logRecoverableError(request, reason);
-      const _getErrorMessageAndSt2 = getErrorMessageAndStackDev(reason);
-      const _message = _getErrorMessageAndSt2.message;
-      const _stack = _getErrorMessageAndSt2.stack;
-
-      emitErrorChunkDev(request, newTask.id, digest, _message, _stack);
-    },
-  );
-  return newTask.id;
-}
-
 function attemptResolveElement(request, type, key, ref, props, prevThenableState) {
   if (ref !== null && ref !== undefined) {
     // When the ref moves to the regular props object this will implicitly
@@ -1095,10 +984,6 @@ function serializeByValueID(id) {
 
 function serializeLazyID(id) {
   return `$L${id.toString(16)}`;
-}
-
-function serializePromiseID(id) {
-  return `$@${id.toString(16)}`;
 }
 
 function serializeSymbolReference(name) {
@@ -1499,31 +1384,13 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
         }
       }
     } catch (thrownValue) {
-      const x =
-        thrownValue === SuspenseException // This is a special type of exception used for Suspense. For historical
-          ? // reasons, the rest of the Suspense implementation expects the thrown
-            // value to be a thenable, because before `use` existed that was the
-            // (unstable) API for suspending. This implementation detail can change
-            // later, once we deprecate the old API in favor of `use`.
-            getSuspendedThenable()
-          : thrownValue;
-
-      if (typeof x === 'object' && x !== null && typeof x.then === 'function') {
-        // Something suspended, we'll need to create a new task and resolve it later.
-        request.pendingChunks++;
-        const newTask = createTask(request, value, request.abortableTasks);
-        const ping = newTask.ping;
-        x.then(ping, ping);
-        newTask.thenableState = getThenableStateAfterSuspending();
-        return serializeLazyID(newTask.id);
-      }
       // Something errored. We'll still send everything we have up until this point.
       // We'll replace this element with a lazy reference that throws on the client
       // once it gets rendered.
       request.pendingChunks++;
       const errorId = request.nextChunkId++;
-      const digest = logRecoverableError(request, x);
-      const _getErrorMessageAndSt4 = getErrorMessageAndStackDev(x);
+      const digest = logRecoverableError(request, thrownValue);
+      const _getErrorMessageAndSt4 = getErrorMessageAndStackDev(thrownValue);
       const message = _getErrorMessageAndSt4.message;
       const stack = _getErrorMessageAndSt4.stack;
 
@@ -1540,12 +1407,6 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
   if (typeof value === 'object') {
     if (isClientReference(value)) {
       return serializeClientReference(request, parent, key, value);
-    }
-    if (typeof value.then === 'function') {
-      // We assume that any object with a .then property is a "Thenable" type,
-      // or a Promise type. Either of which can be represented by a Promise.
-      const promiseId = serializeThenable(request, value);
-      return serializePromiseID(promiseId);
     }
     if (value === POP) {
       popProvider();
@@ -1768,26 +1629,10 @@ function retryTask(request, task) {
     request.abortableTasks.delete(task);
     task.status = COMPLETED;
   } catch (thrownValue) {
-    const x =
-      thrownValue === SuspenseException // This is a special type of exception used for Suspense. For historical
-        ? // reasons, the rest of the Suspense implementation expects the thrown
-          // value to be a thenable, because before `use` existed that was the
-          // (unstable) API for suspending. This implementation detail can change
-          // later, once we deprecate the old API in favor of `use`.
-          getSuspendedThenable()
-        : thrownValue;
-
-    if (typeof x === 'object' && x !== null && typeof x.then === 'function') {
-      // Something suspended again, let's pick it back up later.
-      const ping = task.ping;
-      x.then(ping, ping);
-      task.thenableState = getThenableStateAfterSuspending();
-      return;
-    }
     request.abortableTasks.delete(task);
     task.status = ERRORED;
-    const digest = logRecoverableError(request, x);
-    const _getErrorMessageAndSt5 = getErrorMessageAndStackDev(x);
+    const digest = logRecoverableError(request, thrownValue);
+    const _getErrorMessageAndSt5 = getErrorMessageAndStackDev(thrownValue);
     const message = _getErrorMessageAndSt5.message;
     const stack = _getErrorMessageAndSt5.stack;
 
