@@ -192,12 +192,8 @@ function resolveModuleMetaData(clientReference) {
 // The Symbol used to tag the ReactElement-like types.
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 const REACT_FRAGMENT_TYPE = Symbol.for('react.fragment');
-const REACT_CONTEXT_TYPE = Symbol.for('react.context');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
-const REACT_SUSPENSE_TYPE = Symbol.for('react.suspense');
-const REACT_SUSPENSE_LIST_TYPE = Symbol.for('react.suspense_list');
 const REACT_MEMO_TYPE = Symbol.for('react.memo');
-const REACT_LAZY_TYPE = Symbol.for('react.lazy');
 const REACT_MEMO_CACHE_SENTINEL = Symbol.for('react.memo_cache_sentinel');
 
 // It is handled by React separately and shouldn't be written to the DOM.
@@ -727,93 +723,6 @@ const SuspenseException = new Error(
     'To handle async errors, wrap your component in an error boundary, or ' +
     "call the promise's `.catch` method and pass the result to `use`",
 );
-function createThenableState() {
-  // The ThenableState is created the first time a component suspends. If it
-  // suspends again, we'll reuse the same state.
-  return [];
-}
-
-function noop() {}
-
-function trackUsedThenable(thenableState, defaultThenable, index) {
-  let thenable = defaultThenable;
-  const previous = thenableState[index];
-
-  if (previous === undefined) {
-    thenableState.push(thenable);
-  } else if (previous !== thenable) {
-    // Reuse the previous thenable, and drop the new one. We can assume
-    // they represent the same value, because components are idempotent.
-    // Avoid an unhandled rejection errors for the Promises that we'll
-    // intentionally ignore.
-    thenable.then(noop, noop);
-    thenable = previous;
-  } // We use an expando to track the status and result of a thenable so that we
-  // can synchronously unwrap the value. Think of this as an extension of the
-  // Promise API, or a custom interface that is a superset of Thenable.
-  //
-  // If the thenable doesn't have a status, set it to "pending" and attach
-  // a listener that will update its status and result when it resolves.
-
-  switch (thenable.status) {
-    case 'fulfilled': {
-      const fulfilledValue = thenable.value;
-      return fulfilledValue;
-    }
-
-    case 'rejected': {
-      const rejectedError = thenable.reason;
-      throw rejectedError;
-    }
-
-    default: {
-      if (typeof thenable.status === 'string');
-      else {
-        const pendingThenable = thenable;
-        pendingThenable.status = 'pending';
-        pendingThenable.then(
-          (fulfilledValue) => {
-            if (thenable.status === 'pending') {
-              const fulfilledThenable = thenable;
-              fulfilledThenable.status = 'fulfilled';
-              fulfilledThenable.value = fulfilledValue;
-            }
-          },
-          (error) => {
-            if (thenable.status === 'pending') {
-              const rejectedThenable = thenable;
-              rejectedThenable.status = 'rejected';
-              rejectedThenable.reason = error;
-            }
-          },
-        ); // Check one more time in case the thenable resolved synchronously
-
-        switch (thenable.status) {
-          case 'fulfilled': {
-            const fulfilledThenable = thenable;
-            return fulfilledThenable.value;
-          }
-
-          case 'rejected': {
-            const rejectedThenable = thenable;
-            throw rejectedThenable.reason;
-          }
-        }
-      } // Suspend.
-      //
-      // Throwing here is an implementation detail that allows us to unwind the
-      // call stack. But we shouldn't allow it to leak into userspace. Throw an
-      // opaque placeholder value instead of the actual thenable. If it doesn't
-      // get captured by the work loop, log a warning, because that means
-      // something in userspace must have caught it.
-
-      suspendedThenable = thenable;
-      throw SuspenseException;
-    }
-  }
-} // This is used to track the actual thenable that suspended so it can be
-// passed to the rest of the Suspense implementation — which, for historical
-// reasons, expects to receive a thenable.
 
 let suspendedThenable = null;
 function getSuspendedThenable() {
@@ -833,7 +742,6 @@ function getSuspendedThenable() {
 }
 
 let currentRequest = null;
-let thenableIndexCounter = 0;
 let thenableState = null;
 function prepareToUseHooksForRequest(request) {
   currentRequest = request;
@@ -842,7 +750,6 @@ function resetHooksForRequest() {
   currentRequest = null;
 }
 function prepareToUseHooksForComponent(prevThenableState) {
-  thenableIndexCounter = 0;
   thenableState = prevThenableState;
 }
 function getThenableStateAfterSuspending() {
@@ -904,34 +811,6 @@ function useId() {
   const id = currentRequest.identifierCount++; // use 'S' for Flight components to distinguish from 'R' and 'r' in Fizz/Client
 
   return `:${currentRequest.identifierPrefix}S${id.toString(32)}:`;
-}
-
-function use(usable) {
-  if ((usable !== null && typeof usable === 'object') || typeof usable === 'function') {
-    if (typeof usable.then === 'function') {
-      // This is a thenable.
-      const thenable = usable; // Track the position of the thenable within this fiber.
-
-      const index = thenableIndexCounter;
-      thenableIndexCounter += 1;
-
-      if (thenableState === null) {
-        thenableState = createThenableState();
-      }
-
-      return trackUsedThenable(thenableState, thenable, index);
-    }
-
-    if (usable.$$typeof === REACT_CONTEXT_TYPE) {
-      unsupportedContext();
-    }
-  }
-
-  if (isClientReference(usable)) {
-    error('Cannot use() an already resolved Client Reference.');
-  }
-
-  throw new Error(`An unsupported type was passed to use(): ${String(usable)}`);
 }
 
 function createSignal() {
@@ -1114,66 +993,6 @@ function serializeThenable(request, thenable) {
   return newTask.id;
 }
 
-function readThenable(thenable) {
-  if (thenable.status === 'fulfilled') {
-    return thenable.value;
-  }
-
-  if (thenable.status === 'rejected') {
-    throw thenable.reason;
-  }
-
-  throw thenable;
-}
-
-function createLazyWrapperAroundWakeable(wakeable) {
-  // This is a temporary fork of the `use` implementation until we accept
-  // promises everywhere.
-  const thenable = wakeable;
-
-  switch (thenable.status) {
-    case 'fulfilled':
-    case 'rejected':
-      break;
-
-    default: {
-      if (typeof thenable.status === 'string') {
-        // Only instrument the thenable if the status if not defined. If
-        // it's defined, but an unknown value, assume it's been instrumented by
-        // some custom userspace implementation. We treat it as "pending".
-        break;
-      }
-
-      const pendingThenable = thenable;
-      pendingThenable.status = 'pending';
-      pendingThenable.then(
-        (fulfilledValue) => {
-          if (thenable.status === 'pending') {
-            const fulfilledThenable = thenable;
-            fulfilledThenable.status = 'fulfilled';
-            fulfilledThenable.value = fulfilledValue;
-          }
-        },
-        (error) => {
-          if (thenable.status === 'pending') {
-            const rejectedThenable = thenable;
-            rejectedThenable.status = 'rejected';
-            rejectedThenable.reason = error;
-          }
-        },
-      );
-      break;
-    }
-  }
-
-  const lazyType = {
-    $$typeof: REACT_LAZY_TYPE,
-    _payload: thenable,
-    _init: readThenable,
-  };
-  return lazyType;
-}
-
 function attemptResolveElement(request, type, key, ref, props, prevThenableState) {
   if (ref !== null && ref !== undefined) {
     // When the ref moves to the regular props object this will implicitly
@@ -1196,26 +1015,7 @@ function attemptResolveElement(request, type, key, ref, props, prevThenableState
     } // This is a server-side component.
 
     prepareToUseHooksForComponent(prevThenableState);
-    const result = type(props);
-
-    if (
-      typeof result === 'object' &&
-      result !== null &&
-      typeof result.then === 'function'
-    ) {
-      // When the return value is in children position we can resolve it immediately,
-      // to its value without a wrapper if it's synchronously available.
-      const thenable = result;
-
-      if (thenable.status === 'fulfilled') {
-        return thenable.value;
-      } // TODO: Once we accept Promises as children on the client, we can just return
-      // the thenable here.
-
-      return createLazyWrapperAroundWakeable(result);
-    }
-
-    return result;
+    return type(props);
   }
 
   if (typeof type === 'string') {
@@ -1243,20 +1043,6 @@ function attemptResolveElement(request, type, key, ref, props, prevThenableState
     }
 
     switch (type.$$typeof) {
-      case REACT_LAZY_TYPE: {
-        const payload = type._payload;
-        const init = type._init;
-        const wrappedType = init(payload);
-        return attemptResolveElement(
-          request,
-          wrappedType,
-          key,
-          ref,
-          props,
-          prevThenableState,
-        );
-      }
-
       case REACT_FORWARD_REF_TYPE: {
         const render = type.render;
         prepareToUseHooksForComponent(prevThenableState);
@@ -1480,14 +1266,6 @@ function describeElementType(type) {
     return type;
   }
 
-  switch (type) {
-    case REACT_SUSPENSE_TYPE:
-      return 'Suspense';
-
-    case REACT_SUSPENSE_LIST_TYPE:
-      return 'SuspenseList';
-  }
-
   if (typeof type === 'object') {
     switch (type.$$typeof) {
       case REACT_FORWARD_REF_TYPE:
@@ -1495,17 +1273,6 @@ function describeElementType(type) {
 
       case REACT_MEMO_TYPE:
         return describeElementType(type.type);
-
-      case REACT_LAZY_TYPE: {
-        const lazyComponent = type;
-        const payload = lazyComponent._payload;
-        const init = lazyComponent._init;
-
-        try {
-          // Lazy may contain any component type so we recursively resolve it.
-          return describeElementType(init(payload));
-        } catch (_x) {}
-      }
     }
   }
 
@@ -1712,7 +1479,7 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
   while (
     typeof value === 'object' &&
     value !== null &&
-    (value.$$typeof === REACT_ELEMENT_TYPE || value.$$typeof === REACT_LAZY_TYPE)
+    value.$$typeof === REACT_ELEMENT_TYPE
   ) {
     try {
       switch (value.$$typeof) {
@@ -1728,13 +1495,6 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
             element.props,
             null,
           );
-          break;
-        }
-
-        case REACT_LAZY_TYPE: {
-          const payload = value._payload;
-          const init = value._init;
-          value = init(payload);
           break;
         }
       }
