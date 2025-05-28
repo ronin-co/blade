@@ -967,10 +967,6 @@ function serializeByValueID(id) {
   return `$${id.toString(16)}`;
 }
 
-function serializeLazyID(id) {
-  return `$L${id.toString(16)}`;
-}
-
 function serializeSymbolReference(name) {
   return `$S${name}`;
 }
@@ -1333,37 +1329,21 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
     value !== null &&
     value.$$typeof === REACT_ELEMENT_TYPE
   ) {
-    try {
-      switch (value.$$typeof) {
-        case REACT_ELEMENT_TYPE: {
-          // TODO: Concatenate keys of parents onto children.
-          const element = value; // Attempt to render the Server Component.
+    switch (value.$$typeof) {
+      case REACT_ELEMENT_TYPE: {
+        // TODO: Concatenate keys of parents onto children.
+        const element = value; // Attempt to render the Server Component.
 
-          value = attemptResolveElement(
-            request,
-            element.type,
-            element.key,
-            element.ref,
-            element.props,
-            null,
-          );
-          break;
-        }
+        value = attemptResolveElement(
+          request,
+          element.type,
+          element.key,
+          element.ref,
+          element.props,
+          null,
+        );
+        break;
       }
-    } catch (thrownValue) {
-      // Something errored. We'll still send everything we have up until this point.
-      // We'll replace this element with a lazy reference that throws on the client
-      // once it gets rendered.
-      request.pendingChunks++;
-      const errorId = request.nextChunkId++;
-      const digest = logRecoverableError(request, thrownValue);
-      const _getErrorMessageAndSt4 = getErrorMessageAndStackDev(thrownValue);
-      const message = _getErrorMessageAndSt4.message;
-      const stack = _getErrorMessageAndSt4.stack;
-
-      emitErrorChunkDev(request, errorId, digest, message, stack);
-
-      return serializeLazyID(errorId);
     }
   }
 
