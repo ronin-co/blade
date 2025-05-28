@@ -574,7 +574,7 @@ When writing Blade apps, [anchor elements](https://developer.mozilla.org/en-US/d
 For linking to URLs within the same application, use the native `Link` component instead:
 
 ```tsx
-import Link from '@ronin/blade/client/components/link.client';
+import { Link } from '@ronin/blade/client/components';
 
 <Link href="/another-page">click me</Link>
 ```
