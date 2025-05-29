@@ -7,7 +7,6 @@
 import type { ReactElement, ReactNode } from 'react';
 
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
-const REACT_LAZY_TYPE = Symbol.for('react.lazy');
 
 const PENDING = 'pending';
 const BLOCKED = 'blocked';
@@ -101,34 +100,6 @@ Chunk.prototype.then = function (resolve, reject) {
     default:
       reject?.(this.reason);
       break;
-  }
-};
-
-const readChunk = (chunk: Chunk) => {
-  // If we have resolved content, we try to initialize it first, which might put us back
-  // into one of the other states.
-
-  // The status might have changed after initialization.
-  switch (chunk.status) {
-    case RESOLVED_MODEL:
-      initializeModelChunk(chunk);
-      break;
-
-    case RESOLVED_MODULE:
-      initializeModuleChunk(chunk);
-      break;
-  }
-
-  switch (chunk.status) {
-    case INITIALIZED:
-      return chunk.value;
-
-    case PENDING:
-    case BLOCKED:
-      throw chunk;
-
-    default:
-      throw chunk.reason;
   }
 };
 
@@ -358,12 +329,6 @@ const createElement = (
   return element;
 };
 
-const createLazyChunkWrapper = (chunk: Chunk) => ({
-  $$typeof: REACT_LAZY_TYPE,
-  _payload: chunk,
-  _init: readChunk,
-});
-
 const getChunk = (response: ChunkResponse, id: number): Chunk => {
   const chunks = response._chunks;
   let chunk = chunks.get(id);
@@ -431,20 +396,6 @@ const parseModelString = (
     // This was an escaped string value.
     case '$': {
       return value.substring(1);
-    }
-
-    // Lazy node
-    case 'L': {
-      const id = Number.parseInt(value.substring(2), 16);
-      const chunk = getChunk(response, id);
-
-      return createLazyChunkWrapper(chunk);
-    }
-
-    // Promise
-    case '@': {
-      const id = Number.parseInt(value.substring(2), 16);
-      return getChunk(response, id);
     }
 
     case 'S': {
