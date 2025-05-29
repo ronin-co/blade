@@ -20,6 +20,7 @@ import {
 } from '@/private/shell/utils';
 import {
   mapProviderInlineDefinitions,
+  transformToCloudflareOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
 
@@ -52,6 +53,17 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-if (provider === 'vercel') await transformToVercelBuildOutput();
+switch (provider) {
+  case 'cloudflare': {
+    await transformToCloudflareOutput();
+    break;
+  }
+  case 'vercel': {
+    await transformToVercelBuildOutput();
+    break;
+  }
+  default:
+    break;
+}
 
 handleBuildLogs(output);

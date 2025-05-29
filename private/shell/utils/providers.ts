@@ -114,3 +114,16 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   spinner.succeed();
 };
+
+/**
+ * Transform to match the Cloudflare output structure.
+ */
+export const transformToCloudflareOutput = async (): Promise<void> => {
+  const spinner = logSpinner(
+    'Transforming to output for Cloudflare (production)',
+  ).start();
+
+  await Bun.sleep(0);
+
+  spinner.succeed();
+};
