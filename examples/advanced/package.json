@@ -9,7 +9,7 @@
   },
   "author": "ronin",
   "dependencies": {
-    "@ronin/blade": "ben-cloudflare-adapter-experimental-391",
+    "@ronin/blade": "ben-cloudflare-adapter-experimental-393",
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510"
   },
