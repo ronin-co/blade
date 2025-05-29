@@ -123,7 +123,10 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
     'Transforming to output for Cloudflare (production)',
   ).start();
 
-  await Bun.sleep(0);
+  await Bun.write(
+    path.join(outputDirectory, '.assetsignore'),
+    ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+  );
 
   spinner.succeed();
 };
