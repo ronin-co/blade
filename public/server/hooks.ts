@@ -23,6 +23,7 @@ import {
   paginateQuery,
   parsePaginationQueryParam,
 } from '../../private/server/utils/pagination';
+import { SERVER_CONTEXT } from '../../private/server/worker/context';
 import type { QueryItemRead } from '../../private/universal/types/util';
 
 export type CookieHookOptions = {
@@ -184,7 +185,9 @@ const formatResult = (
 };
 
 const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unknown[] => {
-  const serverContext = useServerContext();
+  const serverContext = SERVER_CONTEXT.getStore();
+  if (!serverContext) throw new Error('Server context not available.');
+
   const hookHash = generateHashSync(JSON.stringify(queries));
 
   const executedQueries = serverContext.collected.queries;
