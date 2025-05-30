@@ -1,10 +1,10 @@
-import { Image } from '@ronin/react';
+import { Image as ImageComponent } from '@ronin/react';
 import { type AnchorHTMLAttributes, type ReactElement, cloneElement } from 'react';
 
-import { wrapClientComponent } from '../../private/client/utils/wrap-client';
-import { useUniversalContext } from '../../private/universal/hooks';
-import { usePopulatePathname } from '../universal/hooks';
-import { useLinkEvents } from './hooks';
+import { wrapClientComponent } from '@/private/client/utils/wrap-client';
+import { useUniversalContext } from '@/private/universal/hooks';
+import { useLinkEvents } from '@/public/client/hooks';
+import { usePopulatePathname } from '@/public/universal/hooks';
 
 interface LinkURL extends Omit<Partial<InstanceType<typeof URL>>, 'search'> {
   search?: string | Record<string, string | number | boolean | null>;
@@ -120,6 +120,11 @@ const Link = ({
     onTouchStart: extraProps.onTouchStart || linkEventHandlers.onTouchStart,
   });
 };
+
+// We need to assign the component to a variable, otherwise `tsup` will remove the export
+// below and try to export it directly from the import, so `wrapClientComponent` would not
+// apply to it.
+const Image: typeof ImageComponent = ImageComponent;
 
 wrapClientComponent(Link, 'Link');
 wrapClientComponent(Image, 'Image');

@@ -11,11 +11,11 @@ import type { FormattedResults, Query } from 'ronin/types';
 import { InvalidResponseError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
 import { pages as pageList, triggers as triggerList } from 'server-list';
-import * as DefaultPage404 from '../pages/404';
-import * as DefaultPage500 from '../pages/500';
 
 import Root from '@/private/server/components/root';
 import type { ServerContext } from '@/private/server/context';
+import * as DefaultPage404 from '@/private/server/pages/404';
+import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import { SECURITY_HEADERS, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { runQueries } from '@/private/server/utils/data';
