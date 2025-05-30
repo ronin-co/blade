@@ -43,7 +43,7 @@ const output = await Bun.build({
   naming: `[dir]/${path.basename(serverOutputFile)}`,
   minify: true,
   sourcemap: 'external',
-  target: provider === 'vercel' ? 'node' : 'browser',
+  target: ['cloudflare', 'vercel'].includes(provider) ? 'node' : 'browser',
   define: mapProviderInlineDefinitions(),
 });
 
