@@ -55,7 +55,7 @@
   "dependencies": {
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
-    "ronin": "6.6.10"
+    "ronin": "6.6.12"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
