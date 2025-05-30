@@ -1,10 +1,7 @@
-import {
-  type RootTransitionOptions,
-  usePageTransition,
-} from '../../private/client/hooks';
-import { usePrivateLocation, useUniversalContext } from '../../private/universal/hooks';
-import type { CustomNavigator } from '../../private/universal/types/util';
-import { populatePathSegments } from '../../private/universal/utils/paths';
+import { type RootTransitionOptions, usePageTransition } from '@/private/client/hooks';
+import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
+import type { CustomNavigator } from '@/private/universal/types/util';
+import { populatePathSegments } from '@/private/universal/utils/paths';
 
 const useParams = <
   TParams extends Record<string, unknown> | Array<string> = Record<
