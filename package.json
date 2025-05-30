@@ -63,7 +63,7 @@
     "@hono/sentry": "1.2.0",
     "@mapbox/timespace": "2.0.4",
     "@mdx-js/mdx": "3.0.1",
-    "@ronin/react": "0.1.2",
+    "@ronin/react": "0.1.3",
     "@sentry/bun": "8.55.0",
     "@sentry/react": "8.30.0",
     "@sentry/types": "8.30.0",
