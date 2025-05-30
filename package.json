@@ -55,7 +55,7 @@
   "dependencies": {
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
-    "ronin": "6.6.12"
+    "ronin": "6.6.13"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -63,7 +63,9 @@
     "@hono/sentry": "1.2.0",
     "@mapbox/timespace": "2.0.4",
     "@mdx-js/mdx": "3.0.1",
-    "@ronin/react": "0.1.2",
+    "@ronin/compiler": "0.18.7",
+    "@ronin/react": "0.1.3",
+    "@ronin/syntax": "0.2.40",
     "@sentry/bun": "8.55.0",
     "@sentry/react": "8.30.0",
     "@sentry/types": "8.30.0",
