@@ -16,7 +16,7 @@ A [React](https://react.dev) framework for building instant web apps.
 - **Instant Prod Builds** (no compiler, only relies on Bun and loaders)
 - **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/examples/basic) to get Blade to run)
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
-- **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [upcoming], and more soon)
+- **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [ready], and more soon)
 
 Blade works most efficiently when using [RONIN](https://ronin.co) — a globally replicable database powered by SQLite. Blade is and will always be usable with any other data source as well, however you will see performance drawbacks if that datasource isn't equally fast.
 
