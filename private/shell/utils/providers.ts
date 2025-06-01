@@ -114,3 +114,19 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   spinner.succeed();
 };
+
+/**
+ * Transform to match the Cloudflare output structure.
+ */
+export const transformToCloudflareOutput = async (): Promise<void> => {
+  const spinner = logSpinner(
+    'Transforming to output for Cloudflare (production)',
+  ).start();
+
+  await Bun.write(
+    path.join(outputDirectory, '.assetsignore'),
+    ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+  );
+
+  spinner.succeed();
+};
