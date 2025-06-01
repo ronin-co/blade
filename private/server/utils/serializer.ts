@@ -6,8 +6,8 @@
 
 // @ts-nocheck
 
+import { REACT_CONTEXT } from '@/private/server/worker/context';
 import React from 'react';
-import { REACT_CONTEXT } from '../worker/context';
 
 const ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 

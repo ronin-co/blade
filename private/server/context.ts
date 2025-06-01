@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 
-import type { UniversalContext } from '../universal/context';
-import type { Collected } from './worker/tree';
+import type { Collected } from '@/private/server/worker/tree';
+import type { UniversalContext } from '@/private/universal/context';
 
 /** This context can only be consumed by server components. */
 export type ServerContext<
