@@ -159,6 +159,7 @@ export const setEnvironmentVariables = (options: {
   import.meta.env.__BLADE_PROVIDER = provider;
 
   if (provider === 'cloudflare') {
+    import.meta.env['BLADE_APP_TOKEN'] ??= '';
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
   }
