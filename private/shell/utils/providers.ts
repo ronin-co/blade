@@ -179,9 +179,39 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const spinner = logSpinner('Transforming to output for Netlify (production)').start();
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
+  const staticFilesDir = path.resolve(netlifyOutputDir, 'static');
+  const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
+
+  const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
+  if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
 
   await Promise.all([
-    Bun.write(path.join(netlifyOutputDir, 'config.json'), JSON.stringify({})),
+    fs.mkdir(staticFilesDir, { recursive: true }),
+    fs.mkdir(edgeFunctionDir, { recursive: true }),
+  ]);
+
+  await fs.rename(outputDirectory, staticFilesDir);
+
+  await Promise.all([
+    fs.rename(
+      path.join(staticFilesDir, '_worker.js'),
+      path.join(edgeFunctionDir, '_worker.js'),
+    ),
+    fs.rename(
+      path.join(staticFilesDir, '_worker.js.map'),
+      path.join(edgeFunctionDir, '_worker.mjs.map'),
+    ),
+    Bun.write(
+      path.join(netlifyOutputDir, 'config.json'),
+      JSON.stringify({
+        edge_functions: [
+          {
+            function: '_worker',
+            path: '*',
+          },
+        ],
+      }),
+    ),
   ]);
 
   spinner.succeed();
