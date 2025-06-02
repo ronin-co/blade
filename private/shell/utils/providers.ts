@@ -1,4 +1,4 @@
-import fs, { exists } from 'node:fs/promises';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { outputDirectory } from '@/private/shell/constants';
@@ -135,9 +135,9 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   const jsoncConfig = path.join(process.cwd(), 'wrangler.jsonc');
   const tomlConfig = path.join(process.cwd(), 'wrangler.toml');
   const [jsonConfigExists, jsoncConfigExists, tomlConfigExists] = await Promise.all([
-    exists(jsonConfig),
-    exists(jsoncConfig),
-    exists(tomlConfig),
+    fs.exists(jsonConfig),
+    fs.exists(jsoncConfig),
+    fs.exists(tomlConfig),
   ]);
 
   if (!jsonConfigExists && !jsoncConfigExists && !tomlConfigExists) {
