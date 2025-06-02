@@ -15,7 +15,7 @@ import type {
  * @returns A string representing the provider name.
  */
 export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
-  if (Bun.env['CF_PAGES']) return 'cloudflare';
+  if (Bun.env['CF_PAGES'] || Bun.env['WORKERS_CI']) return 'cloudflare';
   if (Bun.env['VERCEL']) return 'vercel';
   return '';
 };
@@ -123,10 +123,49 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
     'Transforming to output for Cloudflare (production)',
   ).start();
 
-  await Bun.write(
-    path.join(outputDirectory, '.assetsignore'),
-    ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+  const promises = new Array<Promise<unknown>>(
+    Bun.write(
+      path.join(outputDirectory, '.assetsignore'),
+      ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+    ),
   );
+
+  // Check if a any Wrangler config exists, and if not create one.
+  const jsonConfig = path.join(process.cwd(), 'wrangler.json');
+  const jsoncConfig = path.join(process.cwd(), 'wrangler.jsonc');
+  const tomlConfig = path.join(process.cwd(), 'wrangler.toml');
+  const [jsonConfigExists, jsoncConfigExists, tomlConfigExists] = await Promise.all([
+    fs.exists(jsonConfig),
+    fs.exists(jsoncConfig),
+    fs.exists(tomlConfig),
+  ]);
+
+  if (!jsonConfigExists && !jsoncConfigExists && !tomlConfigExists) {
+    spinner.info('No Wrangler config found, creating a new one...');
+    const currentDirectoryName = path.basename(process.cwd());
+    promises.push(
+      Bun.write(
+        jsoncConfig,
+        JSON.stringify(
+          {
+            $schema: 'node_modules/wrangler/config-schema.json',
+            name: currentDirectoryName,
+            main: '.blade/_worker.js',
+            compatibility_date: '2025-06-02',
+            compatibility_flags: ['nodejs_als', 'nodejs_compat'],
+            assets: {
+              binding: 'ASSETS',
+              directory: '.blade/',
+            },
+          },
+          null,
+          4,
+        ),
+      ),
+    );
+  }
+
+  await Promise.all(promises);
 
   spinner.succeed();
 };
