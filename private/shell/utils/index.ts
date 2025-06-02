@@ -174,7 +174,6 @@ export const setEnvironmentVariables = (options: {
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
   }
 
-  import.meta.env.BLADE_PUBLIC_SENTRY_DSN ??= '';
   import.meta.env.BLADE_DATA_WORKER ??= 'https://data.ronin.co';
   import.meta.env.BLADE_STORAGE_WORKER ??= 'https://storage.ronin.co';
 

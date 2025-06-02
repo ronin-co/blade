@@ -1,53 +1,16 @@
-import * as Sentry from '@sentry/react';
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { ErrorBoundary as ErrorBoundaryFallback } from '@/private/client/components/error-boundary';
 import { RootClientContext } from '@/private/client/context';
 import { usePageTransition, useRevalidation } from '@/private/client/hooks';
 import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
-import { SENTRY_ENVIRONMENT } from '@/private/universal/utils/constants';
+import { IS_DEV } from '@/private/universal/utils/constants';
 import { usePopulatePathname } from '@/public/universal/hooks';
 
 interface HistoryContentProps {
   children: ReactNode;
-}
-
-// If no DSN is available, Sentry automatically avoids initialization.
-//
-// In addition, however, we must prevent the initialization if the client component is
-// rendered on the server. That's because the server uses a separate Sentry instance that
-// sits outside React's component tree, in order to guarantee that all errors are caught.
-if (typeof window !== 'undefined') {
-  Sentry.init({
-    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
-    release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
-    environment: SENTRY_ENVIRONMENT,
-    integrations: [
-      Sentry.browserProfilingIntegration(),
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration(),
-    ],
-
-    // Capture 100% of all Traces.
-    tracesSampleRate: 1.0,
-    // Propagate Traces to the edge.
-    //
-    // We're allowing `localhost` here, but Sentry won't even get activated unless the
-    // `BLADE_PUBLIC_SENTRY_DSN` environment variable is set, which should not be set
-    // locally. This is just to allow for testing the integration.
-    tracePropagationTargets: ['localhost', /^https:\/\/ronin\.co/],
-
-    // Capture Replays for 10% of all sessions, plus for 100% of sessions during which an
-    // error occurred.
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
-
-    // Capture 100% of all Performance Profiles.
-    profilesSampleRate: 1.0,
-  });
 }
 
 const HistoryContent = ({ children }: HistoryContentProps) => {
@@ -93,7 +56,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   // Revalidate the current page whenever the code of the server bundle gets updated
   // during development. This happens whenever client or server components are changed.
   useEffect(() => {
-    if (import.meta.env.BLADE_ENV !== 'development') return;
+    if (!IS_DEV) return;
 
     // Here we default to the origin available in the browser, because BLADE might
     // locally sit behind a proxy that terminates TLS, in which case the origin protocol
@@ -216,23 +179,15 @@ const History = ({ children, universalContext }: HistoryProps) => {
   if (clientQueryParams) parsedURL.search = clientQueryParams;
 
   return (
-    <Sentry.ErrorBoundary
-      fallback={ErrorBoundaryFallback}
-      showDialog={true}
-      dialogOptions={{
-        title: 'An unexpected error occurred.',
-        lang: 'en',
+    <RootClientContext.Provider
+      value={{
+        ...universalContext,
+        url: parsedURL.href,
+        setClientQueryParams,
+        deferredPromises,
       }}>
-      <RootClientContext.Provider
-        value={{
-          ...universalContext,
-          url: parsedURL.href,
-          setClientQueryParams,
-          deferredPromises,
-        }}>
-        <HistoryContent>{children}</HistoryContent>
-      </RootClientContext.Provider>
-    </Sentry.ErrorBoundary>
+      <HistoryContent>{children}</HistoryContent>
+    </RootClientContext.Provider>
   );
 };
 

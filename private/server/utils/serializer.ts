@@ -7,6 +7,7 @@
 // @ts-nocheck
 
 import { REACT_CONTEXT } from '@/private/server/worker/context';
+import { IS_DEV } from '@/private/universal/utils/constants';
 import React from 'react';
 
 const ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
@@ -1728,7 +1729,7 @@ function abort(request, reason) {
       request.pendingChunks++;
       const errorId = request.nextChunkId++;
 
-      if (import.meta.env.BLADE_ENV === 'development') {
+      if (IS_DEV) {
         const _getErrorMessageAndSt6 = getErrorMessageAndStackDev(error);
         const message = _getErrorMessageAndSt6.message;
         const stack = _getErrorMessageAndSt6.stack;
