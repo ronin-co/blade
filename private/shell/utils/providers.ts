@@ -146,16 +146,20 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
     promises.push(
       Bun.write(
         jsoncConfig,
-        JSON.stringify({
-          $schema: 'node_modules/wrangler/config-schema.json',
-          name: currentDirectoryName,
-          main: '.blade/_worker.js',
-          compatibility_date: '2025-06-02',
-          assets: {
-            binding: 'ASSETS',
-            directory: '.blade/',
+        JSON.stringify(
+          {
+            $schema: 'node_modules/wrangler/config-schema.json',
+            name: currentDirectoryName,
+            main: '.blade/_worker.js',
+            compatibility_date: '2025-06-02',
+            assets: {
+              binding: 'ASSETS',
+              directory: '.blade/',
+            },
           },
-        }),
+          null,
+          4,
+        ),
       ),
     );
   }
