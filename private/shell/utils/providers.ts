@@ -16,6 +16,7 @@ import type {
  */
 export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
   if (Bun.env['CF_PAGES'] || Bun.env['WORKERS_CI']) return 'cloudflare';
+  if (Bun.env['NETLIFY']) return 'netlify';
   if (Bun.env['VERCEL']) return 'vercel';
   return '';
 };
@@ -33,6 +34,7 @@ export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
 export const mapProviderInlineDefinitions = (): Record<string, string> => {
   switch (import.meta.env.__BLADE_PROVIDER) {
     case 'cloudflare':
+    case 'netlify':
     case 'vercel': {
       return Object.fromEntries(
         Object.entries(import.meta.env)

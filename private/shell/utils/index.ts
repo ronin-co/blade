@@ -164,6 +164,11 @@ export const setEnvironmentVariables = (options: {
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
   }
 
+  if (provider === 'netlify') {
+    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
+    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
+  }
+
   if (provider === 'vercel') {
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'];
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];

@@ -21,6 +21,7 @@ import {
 import {
   mapProviderInlineDefinitions,
   transformToCloudflareOutput,
+  transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
 
@@ -56,6 +57,10 @@ if (output.success) {
 switch (provider) {
   case 'cloudflare': {
     await transformToCloudflareOutput();
+    break;
+  }
+  case 'netlify': {
+    await transformToNetlifyOutput();
     break;
   }
   case 'vercel': {
