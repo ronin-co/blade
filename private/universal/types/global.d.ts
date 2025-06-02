@@ -5,7 +5,6 @@ declare module 'bun' {
     BLADE_DATA_WORKER: string;
     BLADE_STORAGE_WORKER: string;
 
-    BLADE_PUBLIC_SENTRY_DSN?: string;
     BLADE_PUBLIC_GIT_COMMIT?: string;
     BLADE_PUBLIC_GIT_BRANCH?: string;
 

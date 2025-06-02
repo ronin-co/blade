@@ -2,6 +2,7 @@ import ts from '@mapbox/timespace';
 import UserAgentParser from 'ua-parser-js';
 
 import type { GeoLocation, UserAgent } from '@/private/universal/types/util';
+import { IS_DEV } from '@/private/universal/utils/constants';
 
 const getTimeZone = (latitude: number, longitude: number): string | null => {
   return (
@@ -31,7 +32,7 @@ export const getRequestGeoLocation = (request: Request): GeoLocation => {
 
   // During local development, we don't have access to the client's location, so we would
   // like to provide default values.
-  if (import.meta.env.BLADE_ENV === 'development') {
+  if (IS_DEV) {
     geoLocation.country = 'DE';
     geoLocation.region = 'DEBE';
     geoLocation.city = 'Berlin';

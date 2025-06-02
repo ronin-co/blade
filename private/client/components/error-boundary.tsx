@@ -1,5 +1,5 @@
+import { IS_DEV } from '@/private/universal/utils/constants';
 import type { ReactElement } from 'react';
-
 interface BoundaryProps {
   error: unknown;
 }
@@ -20,26 +20,24 @@ const ErrorBoundary = ({ error: defaultError }: BoundaryProps): ReactElement => 
     stack = `${constructorDetails.name}: ${message}\n${details}`;
   }
 
-  // Only expose the stack trace in development. In production, we only want to render
-  // the red background, because a Sentry overlay (which lets people report additional
-  // details) will be shown on top of it.
-  const content =
-    import.meta.env.BLADE_ENV === 'development' ? (
-      <div className="flex w-full max-w-4xl flex-col justify-around">
-        <h1 className="font-mono text-2xl">{name}:</h1>
-        <h2 className="mt-4 break-normal font-mono text-lg">{message}</h2>
-
-        <div className="mt-4 w-full overflow-x-scroll">
-          <pre>{stack.substring(stack.indexOf('\n') + 1)}</pre>
-        </div>
-      </div>
-    ) : null;
-
   return (
     <div
       role="alert"
       className="absolute inset-0 flex flex-col items-center justify-center bg-red-500 px-12 text-white">
-      {content}
+      <div className="flex w-full max-w-4xl flex-col justify-around">
+        <h1 className="font-mono text-2xl">
+          {IS_DEV ? name : 'An Unexpected Error Occurred'}
+        </h1>
+        <h2 className="mt-4 break-normal font-mono text-lg">
+          {IS_DEV ? message : 'The error was reported. Please try again later.'}
+        </h2>
+
+        {IS_DEV && (
+          <div className="mt-4 w-full overflow-x-scroll">
+            <pre>{stack.substring(stack.indexOf('\n') + 1)}</pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

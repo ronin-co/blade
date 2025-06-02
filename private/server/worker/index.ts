@@ -1,4 +1,3 @@
-import { sentry } from '@hono/sentry';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
@@ -15,10 +14,7 @@ import { SERVER_CONTEXT } from '@/private/server/worker/context';
 import renderReactTree, { type Collected } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
-import {
-  CLIENT_ASSET_PREFIX,
-  SENTRY_ENVIRONMENT,
-} from '@/private/universal/utils/constants';
+import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
 
 type Bindings = {
@@ -59,22 +55,6 @@ app.use('*', async (c, next) => {
 
   await next();
 });
-
-app.use(
-  '*',
-  sentry({
-    // If this variable is missing, Sentry automatically won't capture any errors.
-    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN
-      ? import.meta.env.BLADE_PUBLIC_SENTRY_DSN
-      : undefined,
-    release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
-    environment: SENTRY_ENVIRONMENT,
-    requestDataOptions: {
-      allowedHeaders: ['user-agent'],
-      allowedSearchParams: /(.*)/,
-    },
-  }),
-);
 
 // Strip trailing slashes.
 app.all('*', async (c, next) => {
@@ -197,22 +177,10 @@ app.post('/api', async (c) => {
 if (projectRouter) app.route('/', projectRouter);
 
 // Handle the initial render (first byte).
-app.get('*', (c) => {
-  c.get('sentry').setContext('navigation', {
-    type: 'initial',
-    cookies: c.req.header('Cookie'),
-  });
-
-  return renderReactTree(new URL(c.req.url), c, true);
-});
+app.get('*', (c) => renderReactTree(new URL(c.req.url), c, true));
 
 // Handle client side navigation.
 app.post('*', async (c) => {
-  c.get('sentry').setContext('navigation', {
-    type: 'client',
-    cookies: c.req.header('Cookie'),
-  });
-
   const body = await c.req.parseBody<{ options?: string; files: File }>({ all: true });
   const options: PageFetchingOptions = body.options
     ? JSON.parse(body.options)
@@ -239,7 +207,6 @@ app.post('*', async (c) => {
 
   if (options?.queries) {
     const list = options.queries;
-    c.get('sentry').setContext('queries', { list });
     existingCollected.queries = list;
   }
 
@@ -249,7 +216,6 @@ app.post('*', async (c) => {
 // Handle errors that occurred during the request lifecycle.
 app.onError((err, c) => {
   console.error(err);
-  c.get('sentry').captureException(err);
 
   const message = 'An internal error occurred. Please try again later.';
   const status = 500;
@@ -270,7 +236,6 @@ app.onError((err, c) => {
     return renderReactTree(new URL(c.req.url), c, true, { error: 500 });
   } catch (err) {
     console.error(err);
-    c.get('sentry').captureException(err);
   }
 
   return new Response(message, { status });

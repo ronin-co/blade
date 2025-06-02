@@ -1,3 +1,5 @@
+import { IS_DEV } from '@/private/universal/utils/constants';
+
 /**
  * Log helpful information to the console.
  *
@@ -6,7 +8,7 @@
  * @returns Nothing.
  */
 const info = (...args: Parameters<typeof console.log>) => {
-  if (import.meta.env.BLADE_ENV === 'development') {
+  if (IS_DEV) {
     console.log(...args);
     return;
   }
