@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/bun';
 import { type Server, plugin } from 'bun';
 import chalk from 'chalk';
 
@@ -20,10 +19,7 @@ import {
   getClientEnvironmentVariables,
   prepareClientAssets,
 } from '@/private/shell/utils';
-import {
-  CLIENT_ASSET_PREFIX,
-  SENTRY_ENVIRONMENT,
-} from '@/private/universal/utils/constants';
+import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 const environment = Bun.env['BLADE_ENV'];
 const port = Bun.env['__BLADE_PORT'];
@@ -37,24 +33,14 @@ if (environment === 'development') {
   plugin(getMdxLoader(environment));
   plugin(getReactAriaLoader());
 } else {
-  // In cases where BLADE is run as a standalone server in production, we need a
-  // separate Sentry instance outside of the worker file to catch all errors.
-  Sentry.init({
-    dsn: import.meta.env.BLADE_PUBLIC_SENTRY_DSN,
-    release: import.meta.env.BLADE_PUBLIC_GIT_COMMIT,
-    environment: SENTRY_ENVIRONMENT,
-  });
-
   // Prevent the process from exiting when an exception occurs.
   process.on('uncaughtException', (error) => {
     console.error('An uncaught exception has occurred:', error);
-    Sentry.captureException(error);
   });
 
   // Prevent the process from exiting when a rejection occurs.
   process.on('unhandledRejection', (reason, promise) => {
     console.error('An uncaught rejection has occurred:', reason, promise);
-    Sentry.captureException(reason, { extra: { promise } });
   });
 }
 

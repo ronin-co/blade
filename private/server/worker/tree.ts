@@ -35,7 +35,7 @@ import type {
   QueryItemRead,
   QueryItemWrite,
 } from '@/private/universal/types/util';
-import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
+import { DEFAULT_PAGE_PATH, IS_DEV } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
 
 const pages: PageList = {
@@ -449,7 +449,7 @@ const renderReactTree = async (
   existingCollected?: Collected,
 ): Promise<Response> => {
   // See https://github.com/ronin-co/blade/pull/31 for more details.
-  if (import.meta.env.BLADE_ENV === 'production') url.protocol = 'https';
+  if (!IS_DEV) url.protocol = 'https';
 
   const pathSegments = getPathSegments(url.pathname);
   const entry = getEntry(pages, pathSegments, {
@@ -753,7 +753,7 @@ const renderReactTree = async (
 
   if (renderMarkup) {
     headers.set('Content-Type', 'text/html; charset=utf-8');
-    // Enable JavaScript performance profiling for Sentry.
+    // Enable JavaScript performance profiling for libraries like Sentry.
     headers.set('Document-Policy', 'js-profiling');
 
     if (clientBundle) headers.set('X-Server-Bundle-Id', serverBundle);
