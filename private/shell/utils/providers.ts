@@ -130,3 +130,18 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
 
   spinner.succeed();
 };
+
+/**
+ * Transform to match the Netlify output structure.
+ */
+export const transformToNetlifyOutput = async (): Promise<void> => {
+  const spinner = logSpinner('Transforming to output for Netlify (production)').start();
+
+  const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
+
+  await Promise.all([
+    Bun.write(path.join(netlifyOutputDir, 'config.json'), JSON.stringify({})),
+  ]);
+
+  spinner.succeed();
+};
