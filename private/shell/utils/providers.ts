@@ -15,8 +15,7 @@ import type {
  * @returns A string representing the provider name.
  */
 export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
-  console.log('Bun.env', Bun.env);
-  if (Bun.env['CF_PAGES']) return 'cloudflare';
+  if (Bun.env['CF_PAGES'] || Bun.env['WORKERS_CI'] === '1') return 'cloudflare';
   if (Bun.env['VERCEL']) return 'vercel';
   return '';
 };
