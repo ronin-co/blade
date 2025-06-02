@@ -153,6 +153,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
             name: currentDirectoryName,
             main: '.blade/_worker.js',
             compatibility_date: '2025-06-02',
+            compatibility_flags: ['nodejs_compat'],
             assets: {
               binding: 'ASSETS',
               directory: '.blade/',
