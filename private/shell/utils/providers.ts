@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises';
+import fs, { exists } from 'node:fs/promises';
 import path from 'node:path';
 
 import { outputDirectory } from '@/private/shell/constants';
@@ -123,10 +123,44 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
     'Transforming to output for Cloudflare (production)',
   ).start();
 
-  await Bun.write(
-    path.join(outputDirectory, '.assetsignore'),
-    ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+  const promises = new Array<Promise<unknown>>(
+    Bun.write(
+      path.join(outputDirectory, '.assetsignore'),
+      ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+    ),
   );
+
+  // Check if a any Wrangler config exists, and if not create one.
+  const jsonConfig = path.join(process.cwd(), 'wrangler.json');
+  const jsoncConfig = path.join(process.cwd(), 'wrangler.jsonc');
+  const tomlConfig = path.join(process.cwd(), 'wrangler.toml');
+  const [jsonConfigExists, jsoncConfigExists, tomlConfigExists] = await Promise.all([
+    exists(jsonConfig),
+    exists(jsoncConfig),
+    exists(tomlConfig),
+  ]);
+
+  if (!jsonConfigExists && !jsoncConfigExists && !tomlConfigExists) {
+    spinner.info('No Wrangler config found, creating a new one...');
+    const currentDirectoryName = path.basename(process.cwd());
+    promises.push(
+      Bun.write(
+        jsoncConfig,
+        JSON.stringify({
+          $schema: 'node_modules/wrangler/config-schema.json',
+          name: currentDirectoryName,
+          main: '.blade/_worker.js',
+          compatibility_date: '2025-06-02',
+          assets: {
+            binding: 'ASSETS',
+            directory: '.blade/',
+          },
+        }),
+      ),
+    );
+  }
+
+  await Promise.all(promises);
 
   spinner.succeed();
 };
