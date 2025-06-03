@@ -179,7 +179,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const spinner = logSpinner('Transforming to output for Netlify (production)').start();
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
-  const functionDir = path.resolve(netlifyOutputDir, 'edge-functions');
+  const functionDir = path.resolve(netlifyOutputDir, 'functions');
 
   // Remove the existing Netlify output directory if it exists.
   const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
