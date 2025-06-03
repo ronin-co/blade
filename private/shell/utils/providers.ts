@@ -191,11 +191,11 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   await Promise.all([
     fs.rename(
       path.join(outputDirectory, '_worker.js'),
-      path.join(functionDir, '_worker.js'),
+      path.join(functionDir, '_worker.mjs'),
     ),
     fs.rename(
       path.join(outputDirectory, '_worker.js.map'),
-      path.join(functionDir, '_worker.js.map'),
+      path.join(functionDir, '_worker.mjs.map'),
     ),
     Bun.write(
       path.join(netlifyOutputDir, 'config.json'),
