@@ -187,30 +187,40 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   await fs.mkdir(edgeFunctionDir, { recursive: true });
 
   await Promise.all([
-    fs.rename(
-      path.join(outputDirectory, '_worker.js'),
-      path.join(edgeFunctionDir, '_worker.mjs'),
-    ),
-    fs.rename(
-      path.join(outputDirectory, '_worker.js.map'),
-      path.join(edgeFunctionDir, '_worker.mjs.map'),
-    ),
+    // fs.rename(
+    //   path.join(outputDirectory, '_worker.js'),
+    //   path.join(edgeFunctionDir, '_worker.mjs'),
+    // ),
+    // fs.rename(
+    //   path.join(outputDirectory, '_worker.js.map'),
+    //   path.join(edgeFunctionDir, '_worker.mjs.map'),
+    // ),
     Bun.write(
-      path.join(netlifyOutputDir, 'config.json'),
-      JSON.stringify(
-        {
-          edge_functions: [
-            {
-              function: '_worker',
-              nodeBundler: 'none',
-              path: '/*',
-            },
-          ],
-        },
-        null,
-        4,
-      ),
+      path.join(edgeFunctionDir, '_worker.mjs'),
+      `export default async (request, context) => {
+      return Response.json({ ok: true });
+};
+      
+export const config = {
+      path: '/*',
+}`,
     ),
+    // Bun.write(
+    //   path.join(netlifyOutputDir, 'config.json'),
+    //   JSON.stringify(
+    //     {
+    //       edge_functions: [
+    //         {
+    //           function: '_worker',
+    //           nodeBundler: 'none',
+    //           path: '/*',
+    //         },
+    //       ],
+    //     },
+    //     null,
+    //     4,
+    //   ),
+    // ),
   ]);
 
   spinner.succeed();
