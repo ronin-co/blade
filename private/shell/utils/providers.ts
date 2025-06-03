@@ -179,26 +179,19 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const spinner = logSpinner('Transforming to output for Netlify (production)').start();
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
-  const staticFilesDir = path.resolve(netlifyOutputDir, 'static');
   const functionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
+  // Create the `.netlify/v1/edge-functions/` directory if it does not exist.
   const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
   if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
 
   await Promise.all([
-    fs.mkdir(staticFilesDir, { recursive: true }),
-    fs.mkdir(functionDir, { recursive: true }),
-  ]);
-
-  await fs.rename(outputDirectory, staticFilesDir);
-
-  await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, '_worker.js'),
+      path.join(outputDirectory, '_worker.js'),
       path.join(functionDir, '_worker.js'),
     ),
     fs.rename(
-      path.join(staticFilesDir, '_worker.js.map'),
+      path.join(outputDirectory, '_worker.js.map'),
       path.join(functionDir, '_worker.js.map'),
     ),
     Bun.write(
