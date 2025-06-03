@@ -30,13 +30,13 @@ await prepareClientAssets('production', bundleId, provider);
 const serverSpinner = logSpinner('Performing server build (production)').start();
 const customHandlers: Array<DeploymentProvider> = ['vercel', 'service-worker'];
 
-const getEntrypoint = (name: DeploymentProvider | 'default') => {
+const getEntrypoint = (name: DeploymentProvider) => {
   return path.join(serverInputFolder, `${name}.js`);
 };
 
 const output = await Bun.build({
   entrypoints: [
-    getEntrypoint(customHandlers.includes(provider) ? provider : 'default'),
+    getEntrypoint(customHandlers.includes(provider) ? provider : 'worker'),
     getEntrypoint('service-worker'),
   ],
   outdir: outputDirectory,

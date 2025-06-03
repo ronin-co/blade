@@ -8,16 +8,17 @@ import type {
   VercelConfig,
   VercelNodejsServerlessFunctionConfig,
 } from '@/private/shell/types';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 
 /**
  * Get the name of the provider based on the environment variables.
  *
  * @returns A string representing the provider name.
  */
-export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
-  if (Bun.env['CF_PAGES'] || Bun.env['WORKERS_CI']) return 'cloudflare';
+export const getProvider = (): DeploymentProvider => {
+  if (Bun.env['WORKERS_CI']) return 'cloudflare';
   if (Bun.env['VERCEL']) return 'vercel';
-  return '';
+  return 'worker';
 };
 
 /**

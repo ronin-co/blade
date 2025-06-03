@@ -247,7 +247,7 @@ export const handleBuildLogs = (output: BuildOutput) => {
 export const prepareClientAssets = async (
   environment: 'development' | 'production',
   bundleId: string,
-  provider?: DeploymentProvider,
+  provider: DeploymentProvider,
 ) => {
   const clientSpinner = logSpinner(
     `Performing client build${environment === 'production' ? ' (production)' : ''}`,
@@ -277,7 +277,8 @@ export const prepareClientAssets = async (
     minify: environment === 'production',
     // When using a serverless deployment provider, inline plain-text environment
     // variables in the client bundles.
-    define: provider ? Object.fromEntries(clientEnvironmentVariables) : undefined,
+    define:
+      provider !== 'worker' ? Object.fromEntries(clientEnvironmentVariables) : undefined,
   });
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
@@ -287,7 +288,7 @@ export const prepareClientAssets = async (
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
-    provider ? 'if(!import.meta.env){import.meta.env={}};' : '',
+    provider !== 'worker' ? 'if(!import.meta.env){import.meta.env={}};' : '',
     `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
     `window['BLADE_BUNDLE']='${bundleId}';`,
     await chunkFile.text(),

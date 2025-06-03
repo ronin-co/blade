@@ -94,4 +94,11 @@ export interface CustomNavigator {
   languages: UniversalContext['languages'];
 }
 
-export type DeploymentProvider = 'vercel' | 'cloudflare' | 'service-worker' | '';
+/**
+ * A list of all supported cloud providers for deployment.
+ *
+ * During development and when using `blade serve`, the `worker` provider is used.
+ *
+ * Within the browser in production, the `service-worker` provider is used.
+ */
+export type DeploymentProvider = 'vercel' | 'cloudflare' | 'service-worker' | 'worker';
