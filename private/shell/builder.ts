@@ -1,6 +1,8 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import {
+  clientOutputDirectory,
   outputDirectory,
   serverInputFile,
   serverOutputFile,
@@ -23,11 +25,13 @@ import {
   transformToCloudflareOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const provider = import.meta.env.__BLADE_PROVIDER;
+const bundleId = generateUniqueId();
 
 await cleanUp();
-await prepareClientAssets('production', provider);
+await prepareClientAssets('production', bundleId, provider);
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
@@ -52,6 +56,11 @@ if (output.success) {
 } else {
   serverSpinner.fail();
 }
+
+await fs.copyFile(
+  serverOutputFile,
+  path.join(clientOutputDirectory, `worker.${bundleId}.js`),
+);
 
 switch (provider) {
   case 'cloudflare': {

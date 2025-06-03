@@ -1,5 +1,6 @@
 import path from 'node:path';
 
+import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 
@@ -16,6 +17,7 @@ export const directoriesToParse = {
 };
 
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
+export const clientOutputDirectory = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
 export const clientManifestFile = path.join(outputDirectory, 'client-manifest.json');
 export const serverOutputFile = path.join(outputDirectory, '_worker.js');
 

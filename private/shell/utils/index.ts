@@ -12,6 +12,7 @@ import ora from 'ora';
 import {
   clientInputFile,
   clientManifestFile,
+  clientOutputDirectory,
   directoriesToParse,
   frameworkDirectory,
   loggingPrefixes,
@@ -29,8 +30,6 @@ import {
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -247,10 +246,9 @@ export const handleBuildLogs = (output: BuildOutput) => {
 
 export const prepareClientAssets = async (
   environment: 'development' | 'production',
+  bundleId: string,
   provider?: DeploymentProvider,
 ) => {
-  const bundleId = generateUniqueId();
-
   const clientSpinner = logSpinner(
     `Performing client build${environment === 'production' ? ' (production)' : ''}`,
   ).start();
@@ -262,12 +260,11 @@ export const prepareClientAssets = async (
     },
   );
 
-  const outdir = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
 
   const output = await Bun.build({
     entrypoints: [clientInputFile],
-    outdir,
+    outdir: clientOutputDirectory,
     plugins: [
       getClientComponentLoader(projects),
       getClientChunkLoader(clientChunks),
