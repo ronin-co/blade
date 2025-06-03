@@ -94,4 +94,4 @@ export interface CustomNavigator {
   languages: UniversalContext['languages'];
 }
 
-export type DeploymentProvider = 'vercel' | 'cloudflare' | '';
+export type DeploymentProvider = 'vercel' | 'cloudflare' | 'service-worker' | '';

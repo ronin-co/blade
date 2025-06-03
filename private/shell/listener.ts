@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { type Server, plugin } from 'bun';
 import chalk from 'chalk';
 
@@ -5,7 +6,7 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-  serverInputFile,
+  serverInputFolder,
   serverOutputFile,
 } from '@/private/shell/constants';
 import {
@@ -48,7 +49,9 @@ if (environment === 'development') {
 }
 
 const requestHandler = await import(
-  environment === 'development' ? serverInputFile : serverOutputFile
+  environment === 'development'
+    ? path.join(serverInputFolder, 'default.js')
+    : serverOutputFile
 );
 
 const assetHeaders: Record<string, string> =

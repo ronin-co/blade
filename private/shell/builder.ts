@@ -1,11 +1,9 @@
-import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import {
   outputDirectory,
-  serverInputFile,
+  serverInputFolder,
   serverOutputFile,
-  serverVercelInputFile,
 } from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
@@ -24,6 +22,7 @@ import {
   transformToCloudflareOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const provider = import.meta.env.__BLADE_PROVIDER;
@@ -33,9 +32,17 @@ await cleanUp();
 await prepareClientAssets('production', bundleId, provider);
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
+const customHandlers: Array<DeploymentProvider> = ['vercel', 'service-worker'];
+
+const getEntrypoint = (name: DeploymentProvider | 'default') => {
+  return path.join(serverInputFolder, `${name}.js`);
+};
 
 const output = await Bun.build({
-  entrypoints: [provider === 'vercel' ? serverVercelInputFile : serverInputFile],
+  entrypoints: [
+    getEntrypoint(customHandlers.includes(provider) ? provider : 'default'),
+    getEntrypoint('service-worker'),
+  ],
   outdir: outputDirectory,
   plugins: [
     getClientReferenceLoader('production'),
@@ -50,13 +57,14 @@ const output = await Bun.build({
   define: mapProviderInlineDefinitions(),
 });
 
-if (output.success) {
-  serverSpinner.succeed();
-} else {
+handleBuildLogs(output);
+
+if (!output.success) {
   serverSpinner.fail();
+  process.exit(1);
 }
 
-await fs.copyFile(serverOutputFile, path.join(outputDirectory, `worker.${bundleId}.js`));
+serverSpinner.succeed();
 
 switch (provider) {
   case 'cloudflare': {
@@ -67,8 +75,4 @@ switch (provider) {
     await transformToVercelBuildOutput();
     break;
   }
-  default:
-    break;
 }
-
-handleBuildLogs(output);
