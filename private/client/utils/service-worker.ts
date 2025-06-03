@@ -11,7 +11,7 @@ const registerWorker = () => {
 
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('WORKER_URL', { scope: '/' })
+      .register('WORKER_URL', { scope: '/', type: 'module' })
       .then((registration) => {
         console.log('[SW] Registered:', registration.scope);
 
