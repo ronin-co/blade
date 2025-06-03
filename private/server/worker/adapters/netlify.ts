@@ -8,4 +8,5 @@ export default handle(app);
 
 export const config = {
   path: '/*',
+  preferStatic: true,
 } satisfies Config;
