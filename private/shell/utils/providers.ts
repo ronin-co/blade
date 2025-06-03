@@ -185,7 +185,10 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
   if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
 
-  await fs.mkdir(edgeFunctionDir, { recursive: true });
+  await Promise.all([
+    fs.mkdir(edgeFunctionDir, { recursive: true }),
+    fs.mkdir(functionDir, { recursive: true }),
+  ]);
 
   await Promise.all([
     fs.rename(
