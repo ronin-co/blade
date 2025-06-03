@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import {
-  clientOutputDirectory,
   outputDirectory,
   serverInputFile,
   serverOutputFile,
@@ -57,10 +56,7 @@ if (output.success) {
   serverSpinner.fail();
 }
 
-await fs.copyFile(
-  serverOutputFile,
-  path.join(clientOutputDirectory, `worker.${bundleId}.js`),
-);
+await fs.copyFile(serverOutputFile, path.join(outputDirectory, `worker.${bundleId}.js`));
 
 switch (provider) {
   case 'cloudflare': {

@@ -309,7 +309,7 @@ export const prepareClientAssets = async (
 
   // In production, load the service worker script.
   if (!IS_DEV) {
-    assets.push({ type: 'worker', source: getOutputFile(bundleId, 'js', 'worker') });
+    assets.push({ type: 'worker', source: `/worker.${bundleId}.js` });
   }
 
   import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
