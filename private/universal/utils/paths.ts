@@ -43,6 +43,6 @@ export const populatePathSegments = (
   return href === '/' ? href : href.replace(/\/$/, '');
 };
 
-export const getOutputFile = (bundleId: string, type: 'js' | 'css') => {
-  return `${CLIENT_ASSET_PREFIX}/main.${bundleId}.${type}`;
+export const getOutputFile = (bundleId: string, type: 'js' | 'css', name = 'main') => {
+  return `${CLIENT_ASSET_PREFIX}/${name}.${bundleId}.${type}`;
 };

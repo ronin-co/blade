@@ -2,6 +2,7 @@ import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
 import { History } from '@/private/client/components/history';
+import { composeWorkerRegistration } from '@/private/client/utils/service-worker';
 import { useServerContext } from '@/private/server/hooks';
 import type { PageMetadata, RecursiveRequired, ValueOf } from '@/private/server/types';
 import { getSerializableContext } from '@/private/universal/context';
@@ -22,6 +23,10 @@ const metadataNames: Record<string, string> = {
   'openGraph.description': 'og:description',
   'openGraph.siteName': 'og:site_name',
 };
+
+// Perform the parsing once instead of on every render.
+const ASSETS = JSON.parse(import.meta.env.__BLADE_ASSETS) as Array<Asset>;
+const SERVICE_WORKER = ASSETS.find((asset) => asset.type === 'worker');
 
 interface RootProps {
   children?: ReactNode;
@@ -48,7 +53,7 @@ const Root = ({ children }: RootProps) => {
       className={metadata.htmlClassName}
       suppressHydrationWarning={true}>
       <head>
-        {(JSON.parse(import.meta.env.__BLADE_ASSETS) as Array<Asset>)
+        {ASSETS
           // Ensure that stylesheets are loaded first in favor of performance. The HMR
           // logic on the client depends on this order as well.
           .sort((a, b) => Number(b.type === 'css') - Number(a.type === 'css'))
@@ -70,6 +75,14 @@ const Root = ({ children }: RootProps) => {
                     key={source}
                     type="module"
                     className="blade-script"
+                  />
+                );
+              case 'worker':
+                return (
+                  <link
+                    rel="prefetch"
+                    href={source}
+                    as="script"
                   />
                 );
             }
@@ -169,6 +182,14 @@ const Root = ({ children }: RootProps) => {
         <History universalContext={getSerializableContext(serverContext)}>
           {children}
         </History>
+
+        {SERVICE_WORKER && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `${composeWorkerRegistration(SERVICE_WORKER)}();`,
+            }}
+          />
+        )}
       </body>
     </html>
   );
