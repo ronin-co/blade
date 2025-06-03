@@ -19,7 +19,6 @@ export const directoriesToParse = {
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
 export const clientOutputDirectory = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
 export const clientManifestFile = path.join(outputDirectory, 'client-manifest.json');
-export const serverOutputFile = path.join(outputDirectory, '_worker.js');
 
 // The path at which people can define a custom Hono app that Blade will mount.
 export const routerInputFile = path.join(process.cwd(), 'router.ts');

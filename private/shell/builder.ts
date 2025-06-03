@@ -1,10 +1,6 @@
 import path from 'node:path';
 
-import {
-  outputDirectory,
-  serverInputFolder,
-  serverOutputFile,
-} from '@/private/shell/constants';
+import { outputDirectory, serverInputFolder } from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -50,7 +46,6 @@ const output = await Bun.build({
     getMdxLoader('production'),
     getReactAriaLoader(),
   ],
-  naming: `[dir]/${path.basename(serverOutputFile)}`,
   minify: true,
   sourcemap: 'external',
   target: provider === 'vercel' ? 'node' : 'browser',

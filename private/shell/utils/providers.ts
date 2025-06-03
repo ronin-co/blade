@@ -78,12 +78,12 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, '_worker.js'),
+      path.join(staticFilesDir, 'worker.js'),
       path.join(functionDir, '_worker.mjs'),
     ),
 
     fs.rename(
-      path.join(staticFilesDir, '_worker.js.map'),
+      path.join(staticFilesDir, 'worker.js.map'),
       path.join(functionDir, '_worker.mjs.map'),
     ),
 
@@ -126,7 +126,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   const promises = new Array<Promise<unknown>>(
     Bun.write(
       path.join(outputDirectory, '.assetsignore'),
-      ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+      ['worker.js', 'worker.js.map', '_routes.json'].join('\n'),
     ),
   );
 
@@ -150,7 +150,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
           {
             $schema: 'node_modules/wrangler/config-schema.json',
             name: currentDirectoryName,
-            main: '.blade/_worker.js',
+            main: '.blade/worker.js',
             compatibility_date: '2025-06-02',
             compatibility_flags: ['nodejs_als', 'nodejs_compat'],
             assets: {

@@ -7,7 +7,6 @@ import {
   outputDirectory,
   publicDirectory,
   serverInputFolder,
-  serverOutputFile,
 } from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
@@ -51,7 +50,7 @@ if (environment === 'development') {
 const requestHandler = await import(
   environment === 'development'
     ? path.join(serverInputFolder, 'default.js')
-    : serverOutputFile
+    : path.join(outputDirectory, 'worker.js')
 );
 
 const assetHeaders: Record<string, string> =
