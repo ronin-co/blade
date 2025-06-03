@@ -14,7 +14,6 @@ import {
   clientManifestFile,
   clientOutputDirectory,
   directoriesToParse,
-  frameworkDirectory,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
@@ -336,9 +335,6 @@ const prepareStyles = async (
   const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
     return projects.map((project) => path.join(project, directory));
   });
-
-  // Consider the directory containing BLADE's component source code.
-  content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
 
   const inputFile = Bun.file(styleInputFile);
   const input = (await inputFile.exists())

@@ -27,7 +27,8 @@ export const routerInputFile = path.join(process.cwd(), 'router.ts');
 export const styleInputFile = path.join(process.cwd(), 'styles.css');
 export const clientInputFile = require.resolve('./private/client/index.js');
 
-export const serverInputFolder = path.join(frameworkDirectory, 'server/worker/providers');
+const serverInputFile = require.resolve('./private/server/worker/providers/default.js');
+export const serverInputFolder = path.dirname(serverInputFile);
 
 export const loggingPrefixes = {
   info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
