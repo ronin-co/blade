@@ -206,25 +206,6 @@ export const config = {
 }
 `,
     ),
-    Bun.write(
-      path.join(netlifyOutputDir, 'config.json'),
-      JSON.stringify(
-        {
-          edge_functions: [
-            {
-              function: '_worker',
-              path: '/*',
-            },
-            {
-              function: 'hello',
-              path: '/hello',
-            },
-          ],
-        },
-        null,
-        4,
-      ),
-    ),
   ]);
 
   spinner.succeed();
