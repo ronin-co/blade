@@ -49,8 +49,9 @@ const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
 
 if (isInitializing) {
+  const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
   const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
-  const targetDirectory = path.join(process.cwd(), 'blade-example');
+  const targetDirectory = path.join(process.cwd(), projectName);
 
   const { success, stderr } = Bun.spawnSync([
     'cp',
