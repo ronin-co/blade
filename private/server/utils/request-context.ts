@@ -1,14 +1,7 @@
-import ts from '@mapbox/timespace';
 import UserAgentParser from 'ua-parser-js';
 
 import type { GeoLocation, UserAgent } from '@/private/universal/types/util';
 import { IS_DEV } from '@/private/universal/utils/constants';
-
-const getTimeZone = (latitude: number, longitude: number): string | null => {
-  return (
-    ts.getFuzzyLocalTimeFromPoint(Date.now(), [longitude, latitude])?._z.name || null
-  );
-};
 
 export const getRequestGeoLocation = (request: Request): GeoLocation => {
   const coordinates = request.headers.get('Ronin-Client-Coordinates');
@@ -23,7 +16,7 @@ export const getRequestGeoLocation = (request: Request): GeoLocation => {
     city: request.headers.get('Ronin-Client-City') || null,
     latitude,
     longitude,
-    timeZone: latitude && longitude ? getTimeZone(latitude, longitude) : null,
+    timeZone: null,
   };
 
   const end = Date.now();
