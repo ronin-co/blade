@@ -77,15 +77,11 @@ const runQueriesWithTime = async (
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
 
-  const callback = () => runQueries(requestContext, queries, triggers);
-
-  // If triggers are used, we need to provide them with the server context.
-  //
-  // If none are used, however, we don't want to provide the server context, since
-  // providing it causes the code inside to run synchronously.
-  const results: Record<string, FormattedResults<unknown>> = triggers
-    ? await SERVER_CONTEXT.run(serverContext, callback)
-    : await callback();
+  const results: Record<string, FormattedResults<unknown>> = await runQueries(
+    requestContext,
+    queries,
+    triggers,
+  );
 
   const end = Date.now();
 
