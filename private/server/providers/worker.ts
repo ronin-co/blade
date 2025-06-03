@@ -1,1 +1,1 @@
-export * from '../worker/index';
+export { default } from '../worker/index';
