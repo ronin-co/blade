@@ -6,7 +6,6 @@
 
 // @ts-nocheck
 
-import { REACT_CONTEXT } from '@/private/server/worker/context';
 import { IS_DEV } from '@/private/universal/utils/constants';
 import React from 'react';
 
@@ -777,9 +776,6 @@ function createSignal() {
 
 function resolveCache() {
   if (currentCache) return currentCache;
-
-  const cache = REACT_CONTEXT.getStore();
-  if (cache) return cache;
 
   // Since we override the dispatcher all the time, we're effectively always
   // active and so to support cache() and fetch() outside of render, we yield
@@ -1686,7 +1682,7 @@ function flushCompletedChunks(request, destination) {
 }
 
 function startWork(request) {
-  scheduleWork(() => REACT_CONTEXT.run(request.cache, performWork, request));
+  scheduleWork(() => performWork(request));
 }
 function startFlowing(request, destination) {
   if (request.status === CLOSING) {
