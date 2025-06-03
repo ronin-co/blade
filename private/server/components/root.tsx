@@ -186,7 +186,7 @@ const Root = ({ children }: RootProps) => {
         {SERVICE_WORKER && (
           <script
             dangerouslySetInnerHTML={{
-              __html: `${composeWorkerRegistration(SERVICE_WORKER)}();`,
+              __html: composeWorkerRegistration(SERVICE_WORKER),
             }}
           />
         )}

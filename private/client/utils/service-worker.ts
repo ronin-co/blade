@@ -7,7 +7,7 @@ import type { Asset } from '@/private/universal/types/util';
  * @returns Nothing.
  */
 const registerWorker = () => {
-  if (!('serviceWorker' in navigator)) return;
+  if (!navigator.serviceWorker) return;
 
   window.addEventListener('load', () => {
     navigator.serviceWorker
