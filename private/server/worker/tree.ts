@@ -83,7 +83,9 @@ const runQueriesWithTime = async (
   //
   // If none are used, however, we don't want to provide the server context, since
   // providing it causes the code inside to run synchronously.
-  const results: Record<string, FormattedResults<unknown>> = await callback();
+  const results: Record<string, FormattedResults<unknown>> = triggers
+    ? await SERVER_CONTEXT.run(serverContext, callback)
+    : await callback();
 
   const end = Date.now();
 

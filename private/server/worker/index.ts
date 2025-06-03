@@ -10,6 +10,7 @@ import {
   getRequestLanguages,
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
+import { SERVER_CONTEXT } from '@/private/server/worker/context';
 import renderReactTree, { type Collected } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
@@ -148,7 +149,10 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = await runQueries(c, { default: queries }, triggers).default;
+    results = await SERVER_CONTEXT.run(serverContext, async () => {
+      const results = await runQueries(c, { default: queries }, triggers);
+      return results['default'];
+    });
   } catch (err) {
     if (err instanceof TriggerError || err instanceof InvalidResponseError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
