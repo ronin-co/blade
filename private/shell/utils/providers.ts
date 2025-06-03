@@ -180,14 +180,14 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const staticFilesDir = path.resolve(netlifyOutputDir, 'static');
-  const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
+  const functionDir = path.resolve(netlifyOutputDir, 'functions');
 
   const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
   if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
 
   await Promise.all([
     fs.mkdir(staticFilesDir, { recursive: true }),
-    fs.mkdir(edgeFunctionDir, { recursive: true }),
+    fs.mkdir(functionDir, { recursive: true }),
   ]);
 
   await fs.rename(outputDirectory, staticFilesDir);
@@ -195,22 +195,11 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   await Promise.all([
     fs.rename(
       path.join(staticFilesDir, '_worker.js'),
-      path.join(edgeFunctionDir, '_worker.js'),
+      path.join(functionDir, '_worker.mjs'),
     ),
     fs.rename(
       path.join(staticFilesDir, '_worker.js.map'),
-      path.join(edgeFunctionDir, '_worker.mjs.map'),
-    ),
-    Bun.write(
-      path.join(netlifyOutputDir, 'config.json'),
-      JSON.stringify({
-        edge_functions: [
-          {
-            function: '_worker',
-            path: '*',
-          },
-        ],
-      }),
+      path.join(functionDir, '_worker.mjs.map'),
     ),
   ]);
 

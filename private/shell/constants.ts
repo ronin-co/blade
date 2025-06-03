@@ -25,7 +25,12 @@ export const routerInputFile = path.join(process.cwd(), 'router.ts');
 export const styleInputFile = path.join(process.cwd(), 'styles.css');
 export const clientInputFile = require.resolve('./private/client/index.js');
 export const serverInputFile = require.resolve('./private/server/worker/index.js');
-export const serverVercelInputFile = require.resolve('./private/server/worker/vercel.js');
+export const serverNetlifyInputFile = require.resolve(
+  './private/server/worker/adapters/netlify.js',
+);
+export const serverVercelInputFile = require.resolve(
+  './private/server/worker/adapters/vercel.js',
+);
 
 export const loggingPrefixes = {
   info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
