@@ -181,9 +181,12 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const functionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
-  // Create the `.netlify/v1/edge-functions/` directory if it does not exist.
+  // Remove the existing Netlify output directory if it exists.
   const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
   if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
+
+  // Create a new `.netlify/v1/edge-functions` directory.
+  await fs.mkdir(functionDir, { recursive: true });
 
   await Promise.all([
     fs.rename(
