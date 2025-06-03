@@ -191,8 +191,6 @@ const History = ({ children, universalContext }: HistoryProps) => {
   );
 };
 
-console.log('Wrapping History client component');
-console.log({ typeofWindow: typeof window });
 wrapClientComponent(History, 'History');
 
 export { History };
