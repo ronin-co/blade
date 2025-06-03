@@ -26,7 +26,7 @@ export const routerInputFile = path.join(process.cwd(), 'router.ts');
 export const styleInputFile = path.join(process.cwd(), 'styles.css');
 export const clientInputFile = require.resolve('./private/client/index.js');
 
-const serverInputFile = require.resolve('./private/server/worker/providers/default.js');
+const serverInputFile = require.resolve('./private/server/providers/worker.js');
 export const serverInputFolder = path.dirname(serverInputFile);
 
 export const loggingPrefixes = {

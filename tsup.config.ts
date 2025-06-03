@@ -12,7 +12,7 @@ export default defineConfig({
     './private/shell/builder.ts',
     './private/shell/listener.ts',
     './private/client/index.ts',
-    './private/server/worker/providers/*.ts',
+    './private/server/providers/*.ts',
   ],
   format: 'esm',
   clean: true,

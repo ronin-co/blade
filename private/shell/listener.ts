@@ -48,9 +48,10 @@ if (environment === 'development') {
 }
 
 const requestHandler = await import(
-  environment === 'development'
-    ? path.join(serverInputFolder, 'default.js')
-    : path.join(outputDirectory, 'worker.js')
+  path.join(
+    environment === 'development' ? serverInputFolder : outputDirectory,
+    'worker.js',
+  )
 );
 
 const assetHeaders: Record<string, string> =
