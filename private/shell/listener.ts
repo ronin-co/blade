@@ -20,13 +20,16 @@ import {
   prepareClientAssets,
 } from '@/private/shell/utils';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const environment = Bun.env['BLADE_ENV'];
 const port = Bun.env['__BLADE_PORT'];
 
 if (environment === 'development') {
+  const bundleId = generateUniqueId();
+
   await cleanUp();
-  await prepareClientAssets('development');
+  await prepareClientAssets('development', bundleId);
 
   plugin(getClientReferenceLoader(environment));
   plugin(getFileListLoader(false));

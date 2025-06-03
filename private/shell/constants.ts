@@ -1,8 +1,8 @@
 import path from 'node:path';
-
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
+
+import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export const pagesDirectory = path.resolve(process.cwd(), 'pages');
 export const componentsDirectory = path.resolve(process.cwd(), 'components');
