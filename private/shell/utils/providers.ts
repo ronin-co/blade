@@ -179,34 +179,51 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const spinner = logSpinner('Transforming to output for Netlify (production)').start();
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
-  const functionDir = path.resolve(netlifyOutputDir, 'functions');
+  const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
-  // Remove the existing Netlify output directory if it exists.
   const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
   if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
 
-  // Create a new `.netlify/v1/edge-functions` directory.
-  await fs.mkdir(functionDir, { recursive: true });
+  await fs.mkdir(edgeFunctionDir, { recursive: true });
 
   await Promise.all([
     fs.rename(
       path.join(outputDirectory, '_worker.js'),
-      path.join(functionDir, '_worker.mjs'),
+      path.join(edgeFunctionDir, '_worker.mjs'),
     ),
     fs.rename(
       path.join(outputDirectory, '_worker.js.map'),
-      path.join(functionDir, '_worker.mjs.map'),
+      path.join(edgeFunctionDir, '_worker.mjs.map'),
+    ),
+    Bun.write(
+      path.join(edgeFunctionDir, 'hello.mjs'),
+      `export default async (req, context) => {
+  return Response.json({ ok: true })
+}
+
+export const config = {
+  path: '/hello',
+}
+`,
     ),
     Bun.write(
       path.join(netlifyOutputDir, 'config.json'),
-      JSON.stringify({
-        edge_functions: [
-          {
-            function: '_worker',
-            path: '/*',
-          },
-        ],
-      }),
+      JSON.stringify(
+        {
+          edge_functions: [
+            {
+              function: '_worker',
+              path: '/*',
+            },
+            {
+              function: 'hello',
+              path: '/hello',
+            },
+          ],
+        },
+        null,
+        4,
+      ),
     ),
   ]);
 
