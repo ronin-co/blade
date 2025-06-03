@@ -180,7 +180,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const staticFilesDir = path.resolve(netlifyOutputDir, 'static');
-  const functionDir = path.resolve(netlifyOutputDir, 'functions');
+  const functionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
   const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
   if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
@@ -200,6 +200,17 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
     fs.rename(
       path.join(staticFilesDir, '_worker.js.map'),
       path.join(functionDir, '_worker.mjs.map'),
+    ),
+    Bun.write(
+      path.join(netlifyOutputDir, 'config.json'),
+      JSON.stringify({
+        edge_functions: [
+          {
+            function: '_worker',
+            path: '/*',
+          },
+        ],
+      }),
     ),
   ]);
 
