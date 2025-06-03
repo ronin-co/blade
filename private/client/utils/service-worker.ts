@@ -1,7 +1,5 @@
 import type { Asset } from '@/private/universal/types/util';
 
-const PLACEHOLDER = 'WORKER_URL';
-
 /**
  * Register the service worker for the application. This function must not make use of
  * other functions, since the function is serialized using `toString()`.
@@ -13,7 +11,7 @@ const registerWorker = () => {
 
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register(PLACEHOLDER, { scope: '/' })
+      .register('WORKER_URL', { scope: '/' })
       .then((registration) => {
         console.log('[SW] Registered:', registration.scope);
 
@@ -34,5 +32,8 @@ const registerWorker = () => {
 };
 
 export const composeWorkerRegistration = (asset: Asset) => {
-  return registerWorker.toString().replace(PLACEHOLDER, JSON.stringify(asset.source));
+  const func = registerWorker.toString().replace('WORKER_URL', asset.source);
+  const funcMinified = func.replace(/\s+/g, '');
+
+  return `(${funcMinified})();`;
 };
