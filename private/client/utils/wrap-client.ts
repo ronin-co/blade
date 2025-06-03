@@ -17,7 +17,7 @@ type Component = ComponentType<any> &
 export const wrapClientComponent = (component: Component, name: string) => {
   const chunkId = name.toLowerCase();
 
-  if (typeof window === 'undefined' && !globalThis.history) {
+  if (typeof window === 'undefined') {
     Object.defineProperties(
       component.$$typeof === REACT_FORWARD_REF_TYPE ? component.render : component,
       {
