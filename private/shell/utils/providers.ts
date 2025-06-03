@@ -195,22 +195,6 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
       path.join(outputDirectory, '_worker.js.map'),
       path.join(edgeFunctionDir, '_worker.mjs.map'),
     ),
-    Bun.write(
-      path.join(netlifyOutputDir, 'config.json'),
-      JSON.stringify(
-        {
-          edge_functions: [
-            {
-              function: '_worker',
-              nodeBundler: 'none',
-              path: '/*',
-            },
-          ],
-        },
-        null,
-        4,
-      ),
-    ),
   ]);
 
   spinner.succeed();
