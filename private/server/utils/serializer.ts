@@ -194,6 +194,7 @@ const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 const REACT_FRAGMENT_TYPE = Symbol.for('react.fragment');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
 const REACT_MEMO_TYPE = Symbol.for('react.memo');
+const REACT_PROVIDER_TYPE = Symbol.for('react.provider');
 
 // It is handled by React separately and shouldn't be written to the DOM.
 
@@ -888,6 +889,10 @@ function attemptResolveElement(request, type, key, ref, props) {
 
       case REACT_MEMO_TYPE: {
         return attemptResolveElement(request, type.type, key, ref, props);
+      }
+
+      case REACT_PROVIDER_TYPE: {
+        return props.children;
       }
     }
   }
