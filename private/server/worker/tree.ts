@@ -216,6 +216,10 @@ const collectPromises = (
   serverContext: ServerContext,
   existingNewlyAdded?: CollectedRunnable,
 ): CollectedRunnable => {
+  console.log({
+    typoefWindow: typeof window,
+    SERVER_CONTEXT: SERVER_CONTEXT,
+  });
   const { updatedServerContext, newlyAdded } = SERVER_CONTEXT.run(serverContext, () => {
     const newlyAdded: CollectedRunnable = { queries: [], jwts: {} };
 
