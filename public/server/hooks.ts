@@ -1,4 +1,11 @@
 import {
+  type CountQuery,
+  type GetQuery,
+  type ListQuery,
+  QUERY_SYMBOLS,
+  type Query,
+} from '@ronin/compiler';
+import {
   type DeepCallable,
   type PromiseTuple,
   type SyntaxItem,
@@ -7,9 +14,10 @@ import {
 } from '@ronin/syntax/queries';
 import type { CookieSerializeOptions } from 'cookie';
 import type { verify } from 'hono/jwt';
+import { useContext } from 'react';
 import { deserializeError } from 'serialize-error';
 
-import { useServerContext } from '@/private/server/hooks';
+import { RootServerContext } from '@/private/server/context';
 import type { PageMetadata } from '@/private/server/types';
 import { generateHashSync } from '@/private/server/utils/crypto';
 import {
@@ -17,13 +25,6 @@ import {
   parsePaginationQueryParam,
 } from '@/private/server/utils/pagination';
 import type { QueryItemRead } from '@/private/universal/types/util';
-import {
-  type CountQuery,
-  type GetQuery,
-  type ListQuery,
-  QUERY_SYMBOLS,
-  type Query,
-} from '@ronin/compiler';
 
 export type CookieHookOptions = {
   /**
@@ -42,7 +43,10 @@ export type CookieHookOptions = {
 const useCookie = <T extends string | null>(
   name: string,
 ): [T | null, (value: T, options?: CookieHookOptions) => void] => {
-  const { cookies, collected } = useServerContext();
+  const serverContext = useContext(RootServerContext);
+  if (!serverContext) throw new Error('Missing server context in `useCookie`');
+
+  const { cookies, collected } = serverContext;
   const value = cookies[name] as T | null;
 
   const setValue = (value: T, options?: CookieHookOptions) => {
@@ -92,7 +96,10 @@ export interface IncomingPageMetadata extends Omit<PageMetadata, 'title'> {
  * should be rendered in the `<head>` element.
  */
 const useMetadata = (metadata: IncomingPageMetadata) => {
-  const { collected } = useServerContext();
+  const serverContext = useContext(RootServerContext);
+  if (!serverContext) throw new Error('Missing server context in `useMetadata`');
+
+  const { collected } = serverContext;
   const { title, ...remainingMetadata } = structuredClone(metadata);
 
   if (title) {
@@ -184,7 +191,8 @@ const formatResult = (
 };
 
 const queryHandler = (queries: { query: Query; options?: DataOptions }[]): unknown[] => {
-  const serverContext = useServerContext();
+  const serverContext = useContext(RootServerContext);
+  if (!serverContext) throw new Error('Missing server context in `use`');
 
   const hookHash = generateHashSync(JSON.stringify(queries));
 
@@ -351,7 +359,8 @@ const useBatch = (<T extends [any, ...any[]]>(
 const useJWT = <T>(...args: Parameters<typeof verify>): T => {
   const [token, secret, algo] = args;
 
-  const serverContext = useServerContext();
+  const serverContext = useContext(RootServerContext);
+  if (!serverContext) throw new Error('Missing server context in `useJWT`');
   const result = serverContext.collected.jwts[token];
 
   if (result?.decodedPayload) {
@@ -369,7 +378,8 @@ const useJWT = <T>(...args: Parameters<typeof verify>): T => {
 };
 
 const useMutationResult = <T>(): T => {
-  const serverContext = useServerContext();
+  const serverContext = useContext(RootServerContext);
+  if (!serverContext) throw new Error('Missing server context in `useMutationResult`');
   const { queries } = serverContext.collected;
 
   return queries.filter(({ type }) => type === 'write').map(({ result }) => result) as T;
