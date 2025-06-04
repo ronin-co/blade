@@ -159,7 +159,14 @@ if (isServing) {
     //
     // More details: https://linear.app/ronin/issue/RON-924
     const handleFileChange: Parameters<typeof watch>[1] = async (_, filename) => {
-      if (!filename?.includes('.client.') && !filename?.endsWith('.mdx')) return;
+      if (
+        !filename?.includes('.client.') &&
+        !filename?.endsWith('.mdx') &&
+        !filename?.endsWith('.css') &&
+        filename !== '.env'
+      )
+        return;
+
       const file = Bun.file(path.join(pagesDirectory, 'index.tsx'));
       await Bun.write(file, await file.text());
     };
@@ -167,6 +174,11 @@ if (isServing) {
     for (const project of projects) {
       const pagePath = path.join(project, 'pages');
       const componentPath = path.join(project, 'components');
+      const cssPath = path.join(project, 'styles.css');
+      const envPath = path.join(project, '.env');
+
+      watch(cssPath, {}, handleFileChange);
+      watch(envPath, {}, handleFileChange);
 
       watch(pagePath, { recursive: true }, handleFileChange);
 
