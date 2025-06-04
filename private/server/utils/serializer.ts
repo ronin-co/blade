@@ -194,7 +194,7 @@ const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 const REACT_FRAGMENT_TYPE = Symbol.for('react.fragment');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
 const REACT_MEMO_TYPE = Symbol.for('react.memo');
-const REACT_MEMO_CACHE_SENTINEL = Symbol.for('react.memo_cache_sentinel');
+const REACT_PROVIDER_TYPE = Symbol.for('react.provider');
 
 // It is handled by React separately and shouldn't be written to the DOM.
 
@@ -708,6 +708,11 @@ function popProvider() {
   return currentActiveSnapshot;
 }
 
+function readContext(context) {
+  const value = context._currentValue;
+  return value;
+}
+
 let currentRequest = null;
 function prepareToUseHooksForRequest(request) {
   currentRequest = request;
@@ -716,48 +721,36 @@ function resetHooksForRequest() {
   currentRequest = null;
 }
 
+function noop$1() {}
+
 const HooksDispatcher = {
+  readContext,
+  use: (promise) => promise,
+  useContext: readContext,
   useMemo: (nextCreate) => nextCreate(),
+  useReducer: (reducer, initialValue) => {
+    return [initialValue, (newValue) => reducer(initialValue, newValue)];
+  },
+  useRef: (initialValue) => ({ current: initialValue }),
+  useState: (initialValue) => [initialValue, noop$1],
+  useInsertionEffect: noop$1,
+  useLayoutEffect: noop$1,
   useCallback: (callback) => callback,
-  useDebugValue: () => {},
-  useDeferredValue: unsupportedHook,
-  useTransition: unsupportedHook,
-  readContext: unsupportedContext,
-  useContext: unsupportedContext,
-  useReducer: unsupportedHook,
-  useRef: unsupportedHook,
-  useState: unsupportedHook,
-  useInsertionEffect: unsupportedHook,
-  useLayoutEffect: unsupportedHook,
-  useImperativeHandle: unsupportedHook,
-  useEffect: unsupportedHook,
-  useId: useId,
+  useImperativeHandle: noop$1,
+  useEffect: noop$1,
+  useDebugValue: noop$1,
+  useDeferredValue: (value, initialValue) => {
+    return typeof initialValue === 'undefined' ? value : initialValue;
+  },
+  useTransition: () => [false, noop$1],
+  useId,
   useMutableSource: unsupportedHook,
   useSyncExternalStore: unsupportedHook,
-  useCacheRefresh: () => unsupportedRefresh,
-  useMemoCache: (size) => {
-    const data = new Array(size);
-
-    for (let i = 0; i < size; i++) {
-      data[i] = REACT_MEMO_CACHE_SENTINEL;
-    }
-
-    return data;
-  },
 };
 
 function unsupportedHook(...args) {
   console.error('Attributes', ...args);
   throw new Error('This Hook is not supported in Server Components.');
-}
-
-function unsupportedRefresh() {
-  throw new Error('Refreshing the cache is not supported in Server Components.');
-}
-
-function unsupportedContext(...args) {
-  console.error('Attributes', ...args);
-  throw new Error('Cannot read a Client Context from a Server Component.');
 }
 
 function useId() {
@@ -896,6 +889,10 @@ function attemptResolveElement(request, type, key, ref, props) {
 
       case REACT_MEMO_TYPE: {
         return attemptResolveElement(request, type.type, key, ref, props);
+      }
+
+      case REACT_PROVIDER_TYPE: {
+        return props.children;
       }
     }
   }
@@ -1539,11 +1536,15 @@ function retryTask(request, task) {
   }
 }
 
+function mountReactDispatcher() {
+  ReactCurrentDispatcher.current = HooksDispatcher;
+}
+
 function performWork(request) {
   const prevDispatcher = ReactCurrentDispatcher.current;
   const prevCacheDispatcher = ReactCurrentCache.current;
 
-  ReactCurrentDispatcher.current = HooksDispatcher;
+  mountReactDispatcher();
   ReactCurrentCache.current = DefaultCacheDispatcher;
 
   prepareToUseHooksForRequest(request);
@@ -1757,4 +1758,4 @@ function renderToReadableStream(model, options) {
   return stream;
 }
 
-export { renderToReadableStream };
+export { renderToReadableStream, mountReactDispatcher };

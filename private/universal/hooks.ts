@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 
 import { RootClientContext } from '@/private/client/context';
-import { useServerContext } from '@/private/server/hooks';
+import { RootServerContext } from '@/private/server/context';
 import {
   type UniversalContext,
   getSerializableContext,
@@ -9,12 +9,15 @@ import {
 
 const useUniversalContext = (): UniversalContext => {
   if (typeof window === 'undefined') {
-    const serverContext = useServerContext();
+    const serverContext = useContext(RootServerContext);
+    if (!serverContext)
+      throw new Error('Missing server context in `useUniversalContext`');
+
     return getSerializableContext(serverContext);
   }
 
   const clientContext = useContext(RootClientContext);
-  if (!clientContext) throw new Error('Missing client context');
+  if (!clientContext) throw new Error('Missing client context in `useUniversalContext`');
 
   const { deferredPromises, ...universalContext } = clientContext;
   return universalContext;
