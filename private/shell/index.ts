@@ -177,14 +177,14 @@ if (isServing) {
       const cssPath = path.join(project, 'styles.css');
       const envPath = path.join(project, '.env');
 
-      watch(cssPath, {}, handleFileChange);
-      watch(envPath, {}, handleFileChange);
-
       watch(pagePath, { recursive: true }, handleFileChange);
 
       if (await exists(componentPath)) {
         watch(componentPath, { recursive: true }, handleFileChange);
       }
+
+      if (await exists(cssPath)) watch(cssPath, {}, handleFileChange);
+      if (await exists(envPath)) watch(envPath, {}, handleFileChange);
     }
   }
 }
