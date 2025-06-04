@@ -12,7 +12,7 @@ import {
   loggingPrefixes,
   pagesDirectory,
 } from '@/private/shell/constants';
-import { logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
+import { elevateReact, logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -96,6 +96,8 @@ if (await tsConfig.exists()) {
     );
   }
 }
+
+await elevateReact();
 
 setEnvironmentVariables({
   isBuilding,
