@@ -1,9 +1,9 @@
 import initializeClient from 'ronin';
 import { triggers } from 'server-list';
 
-import { getRoninOptions } from '@/private/server/utils/data.ts';
-import { SERVER_CONTEXT } from '@/private/server/worker/context.ts';
-import { prepareTriggers } from '@/private/server/worker/triggers.ts';
+import { getRoninOptions } from '@/private/server/utils/data';
+import { SERVER_CONTEXT } from '@/private/server/worker/context';
+import { prepareTriggers } from '@/private/server/worker/triggers';
 
 const factory = initializeClient(() => {
   const serverContext = SERVER_CONTEXT.getStore();
