@@ -6,7 +6,6 @@
 
 // @ts-nocheck
 
-import { REACT_CONTEXT } from '@/private/server/worker/context';
 import { IS_DEV } from '@/private/universal/utils/constants';
 import React from 'react';
 
@@ -771,55 +770,18 @@ function useId() {
   return `:${currentRequest.identifierPrefix}S${id.toString(32)}:`;
 }
 
-function createSignal() {
-  return new AbortController().signal;
+function getCacheSignal() {
+  throw new Error('Not implemented.');
 }
 
-function resolveCache() {
-  if (currentCache) return currentCache;
-
-  const cache = REACT_CONTEXT.getStore();
-  if (cache) return cache;
-
-  // Since we override the dispatcher all the time, we're effectively always
-  // active and so to support cache() and fetch() outside of render, we yield
-  // an empty Map.
-  return new Map();
+function getCacheForType() {
+  throw new Error('Not implemented.');
 }
 
 const DefaultCacheDispatcher = {
-  getCacheSignal: () => {
-    const cache = resolveCache();
-    let entry = cache.get(createSignal);
-
-    if (entry === undefined) {
-      entry = createSignal();
-      cache.set(createSignal, entry);
-    }
-
-    return entry;
-  },
-  getCacheForType: (resourceType) => {
-    const cache = resolveCache();
-    let entry = cache.get(resourceType);
-
-    if (entry === undefined) {
-      entry = resourceType(); // TODO: Warn if undefined?
-
-      cache.set(resourceType, entry);
-    }
-
-    return entry;
-  },
+  getCacheSignal: getCacheSignal,
+  getCacheForType: getCacheForType,
 };
-let currentCache = null;
-function setCurrentCache(cache) {
-  currentCache = cache;
-  return currentCache;
-}
-function getCurrentCache() {
-  return currentCache;
-}
 
 const PENDING = 0;
 const COMPLETED = 1;
@@ -1579,9 +1541,11 @@ function retryTask(request, task) {
 
 function performWork(request) {
   const prevDispatcher = ReactCurrentDispatcher.current;
-  const prevCache = getCurrentCache();
+  const prevCacheDispatcher = ReactCurrentCache.current;
+
   ReactCurrentDispatcher.current = HooksDispatcher;
-  setCurrentCache(request.cache);
+  ReactCurrentCache.current = DefaultCacheDispatcher;
+
   prepareToUseHooksForRequest(request);
 
   try {
@@ -1601,7 +1565,8 @@ function performWork(request) {
     fatalError(request, error);
   } finally {
     ReactCurrentDispatcher.current = prevDispatcher;
-    setCurrentCache(prevCache);
+    ReactCurrentCache.current = prevCacheDispatcher;
+
     resetHooksForRequest();
   }
 }
@@ -1686,7 +1651,7 @@ function flushCompletedChunks(request, destination) {
 }
 
 function startWork(request) {
-  scheduleWork(() => REACT_CONTEXT.run(request.cache, performWork, request));
+  scheduleWork(() => performWork(request));
 }
 function startFlowing(request, destination) {
   if (request.status === CLOSING) {
