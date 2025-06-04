@@ -783,15 +783,6 @@ const DefaultCacheDispatcher = {
   getCacheForType: getCacheForType,
 };
 
-let currentCache = null;
-function setCurrentCache(cache) {
-  currentCache = cache;
-  return currentCache;
-}
-function getCurrentCache() {
-  return currentCache;
-}
-
 const PENDING = 0;
 const COMPLETED = 1;
 const ABORTED = 3;
@@ -1550,9 +1541,11 @@ function retryTask(request, task) {
 
 function performWork(request) {
   const prevDispatcher = ReactCurrentDispatcher.current;
-  const prevCache = getCurrentCache();
+  const prevCacheDispatcher = ReactCurrentCache.current;
+
   ReactCurrentDispatcher.current = HooksDispatcher;
-  setCurrentCache(request.cache);
+  ReactCurrentCache.current = DefaultCacheDispatcher;
+
   prepareToUseHooksForRequest(request);
 
   try {
@@ -1572,7 +1565,8 @@ function performWork(request) {
     fatalError(request, error);
   } finally {
     ReactCurrentDispatcher.current = prevDispatcher;
-    setCurrentCache(prevCache);
+    ReactCurrentCache.current = prevCacheDispatcher;
+
     resetHooksForRequest();
   }
 }
