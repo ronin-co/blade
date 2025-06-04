@@ -726,7 +726,6 @@ const HooksDispatcher = {
   readContext,
   use: (promise) => promise,
   useContext: readContext,
-
   useMemo: (nextCreate) => nextCreate(),
   useReducer: (reducer, initialValue) => {
     return [initialValue, (newValue) => reducer(initialValue, newValue)];
