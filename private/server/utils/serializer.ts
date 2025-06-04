@@ -6,7 +6,6 @@
 
 // @ts-nocheck
 
-import { REACT_CONTEXT } from '@/private/server/worker/context';
 import { IS_DEV } from '@/private/universal/utils/constants';
 import React from 'react';
 
@@ -775,50 +774,30 @@ function createSignal() {
   return new AbortController().signal;
 }
 
-function resolveCache() {
-  if (currentCache) return currentCache;
+function getDefaultCacheDispatcher(cache) {
+  return {
+    getCacheSignal: () => {
+      let entry = cache.get(createSignal);
 
-  const cache = REACT_CONTEXT.getStore();
-  if (cache) return cache;
+      if (entry === undefined) {
+        entry = createSignal();
+        cache.set(createSignal, entry);
+      }
 
-  // Since we override the dispatcher all the time, we're effectively always
-  // active and so to support cache() and fetch() outside of render, we yield
-  // an empty Map.
-  return new Map();
-}
+      return entry;
+    },
+    getCacheForType: (resourceType) => {
+      let entry = cache.get(resourceType);
 
-const DefaultCacheDispatcher = {
-  getCacheSignal: () => {
-    const cache = resolveCache();
-    let entry = cache.get(createSignal);
+      if (entry === undefined) {
+        entry = resourceType(); // TODO: Warn if undefined?
 
-    if (entry === undefined) {
-      entry = createSignal();
-      cache.set(createSignal, entry);
-    }
+        cache.set(resourceType, entry);
+      }
 
-    return entry;
-  },
-  getCacheForType: (resourceType) => {
-    const cache = resolveCache();
-    let entry = cache.get(resourceType);
-
-    if (entry === undefined) {
-      entry = resourceType(); // TODO: Warn if undefined?
-
-      cache.set(resourceType, entry);
-    }
-
-    return entry;
-  },
-};
-let currentCache = null;
-function setCurrentCache(cache) {
-  currentCache = cache;
-  return currentCache;
-}
-function getCurrentCache() {
-  return currentCache;
+      return entry;
+    },
+  };
 }
 
 const PENDING = 0;
@@ -836,6 +815,8 @@ const OPEN = 0;
 const CLOSING = 1;
 const CLOSED = 2;
 function createRequest(model, onError, identifierPrefix) {
+  const requestCache = new Map();
+
   if (
     ReactCurrentCache.current !== null &&
     ReactCurrentCache.current !== DefaultCacheDispatcher
@@ -843,14 +824,15 @@ function createRequest(model, onError, identifierPrefix) {
     throw new Error('Currently React only supports one RSC renderer at a time.');
   }
 
-  ReactCurrentCache.current = DefaultCacheDispatcher;
+  ReactCurrentCache.current = getDefaultCacheDispatcher(requestCache);
+
   const abortSet = new Set();
   const pingedTasks = [];
   const request = {
     status: OPEN,
     fatalError: null,
     destination: null,
-    cache: new Map(),
+    cache: requestCache,
     nextChunkId: 0,
     pendingChunks: 0,
     abortableTasks: abortSet,
@@ -1579,9 +1561,7 @@ function retryTask(request, task) {
 
 function performWork(request) {
   const prevDispatcher = ReactCurrentDispatcher.current;
-  const prevCache = getCurrentCache();
   ReactCurrentDispatcher.current = HooksDispatcher;
-  setCurrentCache(request.cache);
   prepareToUseHooksForRequest(request);
 
   try {
@@ -1601,7 +1581,6 @@ function performWork(request) {
     fatalError(request, error);
   } finally {
     ReactCurrentDispatcher.current = prevDispatcher;
-    setCurrentCache(prevCache);
     resetHooksForRequest();
   }
 }
@@ -1686,7 +1665,7 @@ function flushCompletedChunks(request, destination) {
 }
 
 function startWork(request) {
-  scheduleWork(() => REACT_CONTEXT.run(request.cache, performWork, request));
+  scheduleWork(() => performWork(request));
 }
 function startFlowing(request, destination) {
   if (request.status === CLOSING) {
