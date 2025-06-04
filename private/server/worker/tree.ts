@@ -25,7 +25,10 @@ import {
   getRequestLanguages,
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
-import { renderToReadableStream } from '@/private/server/utils/serializer';
+import {
+  mountReactDispatcher,
+  renderToReadableStream,
+} from '@/private/server/utils/serializer';
 import { type PageEntry, getEntry, getPathSegments } from '@/private/server/worker/pages';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type {
@@ -210,6 +213,8 @@ const collectPromises = (
   serverContext: ServerContext,
   existingNewlyAdded?: CollectedRunnable,
 ): CollectedRunnable => {
+  mountReactDispatcher();
+
   // Expose the server context to the React tree, so that it can be read from hooks.
   //
   // @ts-expect-error This is an internal React property.

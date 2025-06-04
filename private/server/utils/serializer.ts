@@ -1531,11 +1531,15 @@ function retryTask(request, task) {
   }
 }
 
+function mountReactDispatcher() {
+  ReactCurrentDispatcher.current = HooksDispatcher;
+}
+
 function performWork(request) {
   const prevDispatcher = ReactCurrentDispatcher.current;
   const prevCacheDispatcher = ReactCurrentCache.current;
 
-  ReactCurrentDispatcher.current = HooksDispatcher;
+  mountReactDispatcher();
   ReactCurrentCache.current = DefaultCacheDispatcher;
 
   prepareToUseHooksForRequest(request);
@@ -1749,4 +1753,4 @@ function renderToReadableStream(model, options) {
   return stream;
 }
 
-export { renderToReadableStream };
+export { renderToReadableStream, mountReactDispatcher };
