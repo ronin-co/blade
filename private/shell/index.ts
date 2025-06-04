@@ -158,14 +158,11 @@ if (isServing) {
     // resources unnecessarily.
     //
     // More details: https://linear.app/ronin/issue/RON-924
-    const handleFileChange: Parameters<typeof watch>[1] = async (eventType, filename) => {
-      if (!filename) return;
-
-      // Only process relevant file changes
+    const handleFileChange: Parameters<typeof watch>[1] = async (_, filename) => {
       if (
-        !filename.includes('.client.') &&
-        !filename.endsWith('.mdx') &&
-        !filename.endsWith('.css')
+        !filename?.includes('.client.') &&
+        !filename?.endsWith('.mdx') &&
+        !filename?.endsWith('.css')
       )
         return;
 
