@@ -6,7 +6,7 @@
       "dependencies": {
         "@ronin/compiler": "0.18.8",
         "@ronin/react": "0.1.4",
-        "@ronin/syntax": "0.2.42",
+        "@ronin/syntax": "0.2.43",
         "@tailwindcss/node": "4.1.6",
         "@tailwindcss/oxide": "4.1.6",
         "ronin": "6.6.14",
@@ -282,7 +282,7 @@
 
     "@ronin/react": ["@ronin/react@0.1.4", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.7", "react": ">=18.3.1", "ronin": ">=6.6.13" } }, "sha512-VG+lgUBrJ2qKxzgpq9Wk3OV8r4u1L5Zv7UiLOkFm142W8XrZLnV0FyRW8QmFcMDtLPdWjqwfUYGYGZHR5EATQA=="],
 
-    "@ronin/syntax": ["@ronin/syntax@0.2.42", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.8" } }, "sha512-crGfiESmVkrwJUgwyEyRcEpFxlyG3zbISmvhM5p/mXAl7+2z4perEmz3VZgIWTYcJEbX5dt8Ggkk4P8G1Eb/MQ=="],
+    "@ronin/syntax": ["@ronin/syntax@0.2.43", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.8" } }, "sha512-1ieYLB3SqmD2JfavuKcf/0gTwgZD4X859FDJ+8R5oO3BS1EUfGpfk1kQ0sYUgp+fM4pu0+4gjbHlNDi6Z998ag=="],
 
     "@tailwindcss/node": ["@tailwindcss/node@4.1.6", "", { "dependencies": { "@ampproject/remapping": "^2.3.0", "enhanced-resolve": "^5.18.1", "jiti": "^2.4.2", "lightningcss": "1.29.2", "magic-string": "^0.30.17", "source-map-js": "^1.2.1", "tailwindcss": "4.1.6" } }, "sha512-ed6zQbgmKsjsVvodAS1q1Ld2BolEuxJOSyyNc+vhkjdmfNUDCmQnlXBfQkHrlzNmslxHsQU/bFmzcEbv4xXsLg=="],
 
@@ -1483,8 +1483,6 @@
     "readdir-glob/minimatch": ["minimatch@5.1.6", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g=="],
 
     "restore-cursor/onetime": ["onetime@7.0.0", "", { "dependencies": { "mimic-function": "^5.0.0" } }, "sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ=="],
-
-    "ronin/@ronin/syntax": ["@ronin/syntax@0.2.43", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.8" } }, "sha512-1ieYLB3SqmD2JfavuKcf/0gTwgZD4X859FDJ+8R5oO3BS1EUfGpfk1kQ0sYUgp+fM4pu0+4gjbHlNDi6Z998ag=="],
 
     "source-map-support/source-map": ["source-map@0.6.1", "", {}, "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g=="],
 
