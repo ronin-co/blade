@@ -162,7 +162,8 @@ if (isServing) {
       if (
         !filename?.includes('.client.') &&
         !filename?.endsWith('.mdx') &&
-        !filename?.endsWith('.css')
+        !filename?.endsWith('.css') &&
+        filename !== '.env'
       )
         return;
 
@@ -173,13 +174,11 @@ if (isServing) {
     for (const project of projects) {
       const pagePath = path.join(project, 'pages');
       const componentPath = path.join(project, 'components');
+      const cssPath = path.join(project, 'styles.css');
+      const envPath = path.join(project, '.env');
 
-      watch(project, { recursive: false }, (eventType, filename) => {
-        // Only consider CSS files that are not part of the hidden `.blade` directory.
-        if (filename?.endsWith('.css') && !filename.includes('.blade')) {
-          handleFileChange(eventType, filename);
-        }
-      });
+      watch(cssPath, {}, handleFileChange);
+      watch(envPath, {}, handleFileChange);
 
       watch(pagePath, { recursive: true }, handleFileChange);
 
