@@ -158,8 +158,17 @@ if (isServing) {
     // resources unnecessarily.
     //
     // More details: https://linear.app/ronin/issue/RON-924
-    const handleFileChange: Parameters<typeof watch>[1] = async (_, filename) => {
-      if (!filename?.includes('.client.') && !filename?.endsWith('.mdx')) return;
+    const handleFileChange: Parameters<typeof watch>[1] = async (eventType, filename) => {
+      if (!filename) return;
+
+      // Only process relevant file changes
+      if (
+        !filename.includes('.client.') &&
+        !filename.endsWith('.mdx') &&
+        !filename.endsWith('.css')
+      )
+        return;
+
       const file = Bun.file(path.join(pagesDirectory, 'index.tsx'));
       await Bun.write(file, await file.text());
     };
@@ -167,6 +176,13 @@ if (isServing) {
     for (const project of projects) {
       const pagePath = path.join(project, 'pages');
       const componentPath = path.join(project, 'components');
+
+      watch(project, { recursive: false }, (eventType, filename) => {
+        // Only consider CSS files that are not part of the hidden `.blade` directory.
+        if (filename?.endsWith('.css') && !filename.includes('.blade')) {
+          handleFileChange(eventType, filename);
+        }
+      });
 
       watch(pagePath, { recursive: true }, handleFileChange);
 
