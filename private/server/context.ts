@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+import { createContext } from 'react';
 
 import type { Collected } from '@/private/server/worker/tree';
 import type { UniversalContext } from '@/private/universal/context';
@@ -15,3 +16,5 @@ export type ServerContext<
   collected: Collected;
   currentLeafIndex: number | null;
 };
+
+export const RootServerContext = createContext<ServerContext | null>(null);

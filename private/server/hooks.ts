@@ -1,7 +1,9 @@
-import { SERVER_CONTEXT } from '@/private/server/worker/context';
+import { useContext } from 'react';
+
+import { RootServerContext } from '@/private/server/context';
 
 const useServerContext = () => {
-  const serverContext = SERVER_CONTEXT.getStore();
+  const serverContext = useContext(RootServerContext);
   if (!serverContext) throw new Error('Missing server context.');
   return serverContext;
 };

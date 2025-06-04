@@ -3,7 +3,6 @@ import getValue from 'get-value';
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { verify } from 'hono/jwt';
-import { assign } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
@@ -13,7 +12,7 @@ import { serializeError } from 'serialize-error';
 import { pages as pageList, triggers as triggerList } from 'server-list';
 
 import Root from '@/private/server/components/root';
-import type { ServerContext } from '@/private/server/context';
+import { RootServerContext, type ServerContext } from '@/private/server/context';
 import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
@@ -27,7 +26,6 @@ import {
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
 import { renderToReadableStream } from '@/private/server/utils/serializer';
-import { SERVER_CONTEXT } from '@/private/server/worker/context';
 import { type PageEntry, getEntry, getPathSegments } from '@/private/server/worker/pages';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type {
@@ -212,136 +210,128 @@ const collectPromises = (
   serverContext: ServerContext,
   existingNewlyAdded?: CollectedRunnable,
 ): CollectedRunnable => {
-  const { updatedServerContext, newlyAdded } = SERVER_CONTEXT.run(serverContext, () => {
-    const newlyAdded: CollectedRunnable = { queries: [], jwts: {} };
+  // Expose the server context to the React tree, so that it can be read from hooks.
+  //
+  // @ts-expect-error This is an internal React property.
+  RootServerContext._currentValue = serverContext;
 
-    // Start with the uppermost layout.
-    const reversedLeaves = Array.from(leaves.entries()).reverse();
+  const freshlyAdded: CollectedRunnable = { queries: [], jwts: {} };
 
-    const updatedServerContext = SERVER_CONTEXT.getStore();
-    if (!updatedServerContext) throw new Error('Missing server context store');
+  // Start with the uppermost layout.
+  const reversedLeaves = Array.from(leaves.entries()).reverse();
 
-    let leavesCheckedForQueries = 0;
+  let leavesCheckedForQueries = 0;
 
-    for (let leafIndex = 0; leafIndex < reversedLeaves.length; leafIndex++) {
-      const [, leaf] = reversedLeaves[leafIndex];
+  for (let leafIndex = 0; leafIndex < reversedLeaves.length; leafIndex++) {
+    const [, leaf] = reversedLeaves[leafIndex];
 
-      updatedServerContext.currentLeafIndex = leafIndex;
+    serverContext.currentLeafIndex = leafIndex;
 
-      try {
-        leaf.default({});
-      } catch (item) {
-        const details = item as
-          | Error
-          | { __blade_redirect: string }
-          | { __blade_queries: QueryItemRead[] }
-          | {
-              __blade_jwt: {
-                token: Parameters<typeof verify>[0];
-                secret: Parameters<typeof verify>[1];
-                algo: Parameters<typeof verify>[2];
-              };
+    try {
+      leaf.default({});
+    } catch (item) {
+      const details = item as
+        | Error
+        | { __blade_redirect: string }
+        | { __blade_queries: QueryItemRead[] }
+        | {
+            __blade_jwt: {
+              token: Parameters<typeof verify>[0];
+              secret: Parameters<typeof verify>[1];
+              algo: Parameters<typeof verify>[2];
             };
-
-        if ('__blade_redirect' in details) {
-          const { redirect: existingRedirect } = serverContext.collected;
-          const newRedirect = details.__blade_redirect;
-
-          // If the redirect was not collected yet, add it to the collection.
-          if (existingRedirect !== newRedirect) {
-            updatedServerContext.collected.redirect = newRedirect;
-          }
-
-          // Don't continue checking other layouts or pages if a redirect was provided,
-          // because that means the code execution should stop.
-          break;
-        }
-
-        if ('__blade_queries' in details) {
-          leavesCheckedForQueries++;
-
-          for (const queryDetails of details.__blade_queries) {
-            const { query, database } = queryDetails;
-
-            // If the query was already collected, don't add it again.
-            if (
-              serverContext.collected.queries.some((item) => {
-                return item.query === query && item.database === database;
-              })
-            ) {
-              continue;
-            }
-
-            // If the query was not collected yet, add it to the collection.
-            newlyAdded.queries.push(queryDetails);
-          }
-
-          continue;
-        }
-
-        if ('__blade_jwt' in details) {
-          const { token, secret, algo } = details.__blade_jwt;
-
-          // If the query was already collected, don't add it again.
-          if (serverContext.collected.jwts[token]) continue;
-
-          // If the JWT was not collected yet, add it to the collection.
-          newlyAdded.jwts[token] = {
-            decodedPayload: null,
-            secret,
-            algo,
           };
 
-          continue;
+      if ('__blade_redirect' in details) {
+        const { redirect: existingRedirect } = serverContext.collected;
+        const newRedirect = details.__blade_redirect;
+
+        // If the redirect was not collected yet, add it to the collection.
+        if (existingRedirect !== newRedirect) {
+          serverContext.collected.redirect = newRedirect;
         }
 
-        // Ignore errors thrown by `use()`.
-        if (item instanceof Error && item.message.includes(".use'")) {
-          leavesCheckedForQueries++;
-          continue;
-        }
-
-        throw details;
+        // Don't continue checking other layouts or pages if a redirect was provided,
+        // because that means the code execution should stop.
+        break;
       }
 
-      leavesCheckedForQueries++;
+      if ('__blade_queries' in details) {
+        leavesCheckedForQueries++;
+
+        for (const queryDetails of details.__blade_queries) {
+          const { query, database } = queryDetails;
+
+          // If the query was already collected, don't add it again.
+          if (
+            serverContext.collected.queries.some((item) => {
+              return item.query === query && item.database === database;
+            })
+          ) {
+            continue;
+          }
+
+          // If the query was not collected yet, add it to the collection.
+          freshlyAdded.queries.push(queryDetails);
+        }
+
+        continue;
+      }
+
+      if ('__blade_jwt' in details) {
+        const { token, secret, algo } = details.__blade_jwt;
+
+        // If the query was already collected, don't add it again.
+        if (serverContext.collected.jwts[token]) continue;
+
+        // If the JWT was not collected yet, add it to the collection.
+        freshlyAdded.jwts[token] = {
+          decodedPayload: null,
+          secret,
+          algo,
+        };
+
+        continue;
+      }
+
+      // Ignore errors thrown by `use()`.
+      if (item instanceof Error && item.message.includes(".use'")) {
+        leavesCheckedForQueries++;
+        continue;
+      }
+
+      throw details;
     }
 
-    // Whether all tree leaves have been checked for queries.
-    const checkedAllLeaves = leavesCheckedForQueries === reversedLeaves.length;
+    leavesCheckedForQueries++;
+  }
 
-    return {
-      updatedServerContext,
-      newlyAdded: {
-        queries: checkedAllLeaves ? newlyAdded.queries : [],
-        jwts: newlyAdded.jwts,
-      },
-    };
-  });
+  // Whether all tree leaves have been checked for queries.
+  const checkedAllLeaves = leavesCheckedForQueries === reversedLeaves.length;
 
-  // Assign redirects, metadata, and cookies to context.
-  serverContext.collected = assign(
-    serverContext.collected,
-    updatedServerContext.collected,
-  );
+  const queries = checkedAllLeaves ? freshlyAdded.queries : [];
+  const jwts = freshlyAdded.jwts;
 
   // Assign newly added queries to context.
-  for (const newQuery of newlyAdded.queries) {
+  for (const newQuery of queries) {
     serverContext.collected.queries.push(newQuery);
   }
 
   // Assign newly added JWTs to context.
-  for (const [token, details] of Object.entries(newlyAdded.jwts)) {
+  for (const [token, details] of Object.entries(jwts)) {
     serverContext.collected.jwts[token] = details;
   }
 
   return {
-    queries: [...(existingNewlyAdded?.queries || []), ...newlyAdded.queries],
-    jwts: { ...existingNewlyAdded?.jwts, ...newlyAdded.jwts },
+    queries: [...(existingNewlyAdded?.queries || []), ...queries],
+    jwts: { ...existingNewlyAdded?.jwts, ...jwts },
   };
 };
 
-const getRenderingTree = (leaves: Map<string, TreeItem>) => {
+const getRenderingTree = (
+  leaves: Map<string, TreeItem>,
+  serverContext: ServerContext,
+) => {
   let element: ReactNode = null;
   let components: Record<string, React.ComponentType<unknown>> = {};
 
@@ -360,7 +350,7 @@ const getRenderingTree = (leaves: Map<string, TreeItem>) => {
 
   if (!element) throw new Error('Rendering tree is empty');
 
-  return React.createElement(Root, {}, element);
+  return React.createElement(Root, { serverContext }, element);
 };
 
 const addPathSegmentsToURL = (requestURL: URL, entry: PageEntry): string => {
@@ -386,16 +376,14 @@ const renderShell = async (
   renderingLeaves: ReturnType<typeof getRenderingLeaves>,
   serverContext: ServerContext,
 ): Promise<ReadableStream> => {
-  return SERVER_CONTEXT.run(serverContext, async () => {
-    const tree = getRenderingTree(renderingLeaves);
+  const tree = getRenderingTree(renderingLeaves, serverContext);
 
-    const onError = (error: Error) => {
-      throw error;
-    };
+  const onError = (error: Error) => {
+    throw error;
+  };
 
-    return (initial ? renderToReadableStreamInitial : renderToReadableStream)(tree, {
-      onError,
-    });
+  return (initial ? renderToReadableStreamInitial : renderToReadableStream)(tree, {
+    onError,
   });
 };
 

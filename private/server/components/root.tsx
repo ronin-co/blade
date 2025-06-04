@@ -2,7 +2,7 @@ import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
 import { History } from '@/private/client/components/history';
-import { useServerContext } from '@/private/server/hooks';
+import { RootServerContext, type ServerContext } from '@/private/server/context';
 import type { PageMetadata, RecursiveRequired, ValueOf } from '@/private/server/types';
 import { getSerializableContext } from '@/private/universal/context';
 import { usePrivateLocation } from '@/private/universal/hooks';
@@ -25,10 +25,10 @@ const metadataNames: Record<string, string> = {
 
 interface RootProps {
   children?: ReactNode;
+  serverContext: ServerContext;
 }
 
-const Root = ({ children }: RootProps) => {
-  const serverContext = useServerContext();
+const Root = ({ children, serverContext }: RootProps) => {
   const { metadata } = serverContext.collected;
 
   const currentLocation = usePrivateLocation();
@@ -166,9 +166,11 @@ const Root = ({ children }: RootProps) => {
       <body
         suppressHydrationWarning={true}
         className={metadata.bodyClassName}>
-        <History universalContext={getSerializableContext(serverContext)}>
-          {children}
-        </History>
+        <RootServerContext.Provider value={serverContext}>
+          <History universalContext={getSerializableContext(serverContext)}>
+            {children}
+          </History>
+        </RootServerContext.Provider>
       </body>
     </html>
   );
