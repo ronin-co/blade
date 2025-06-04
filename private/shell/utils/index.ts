@@ -399,7 +399,7 @@ export const isPackageLinked = () => {
   const packagePath = path.join(process.cwd(), 'node_modules', '@ronin/blade');
   try {
     return fs.lstatSync(packagePath).isSymbolicLink();
-  } catch (error) {
+  } catch {
     return false;
   }
 };
