@@ -817,13 +817,6 @@ const CLOSED = 2;
 function createRequest(model, onError, identifierPrefix) {
   const requestCache = new Map();
 
-  if (
-    ReactCurrentCache.current !== null &&
-    ReactCurrentCache.current !== DefaultCacheDispatcher
-  ) {
-    throw new Error('Currently React only supports one RSC renderer at a time.');
-  }
-
   ReactCurrentCache.current = getDefaultCacheDispatcher(requestCache);
 
   const abortSet = new Set();
