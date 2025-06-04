@@ -55,7 +55,7 @@
   "dependencies": {
     "@ronin/compiler": "0.18.8",
     "@ronin/react": "0.1.4",
-    "@ronin/syntax": "0.2.42",
+    "@ronin/syntax": "0.2.43",
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
     "ronin": "6.6.14"
