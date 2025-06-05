@@ -7,5 +7,5 @@ import type { Config } from '@netlify/edge-functions';
 export default handle(app);
 
 export const config = {
-  path: '/*',
+  path: '/',
 } satisfies Config;
