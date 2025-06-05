@@ -1,6 +1,6 @@
 {
   "name": "@ronin/blade",
-  "version": "0.7.18",
+  "version": "0.7.19",
   "type": "module",
   "description": "React at the edge.",
   "repository": "ronin-co/blade",
@@ -55,10 +55,10 @@
   "dependencies": {
     "@ronin/compiler": "0.18.8",
     "@ronin/react": "0.1.4",
-    "@ronin/syntax": "0.2.42",
+    "@ronin/syntax": "0.2.43",
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
-    "ronin": "6.6.13"
+    "ronin": "6.6.15"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

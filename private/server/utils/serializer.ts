@@ -6,7 +6,6 @@
 
 // @ts-nocheck
 
-import { REACT_CONTEXT } from '@/private/server/worker/context';
 import { IS_DEV } from '@/private/universal/utils/constants';
 import React from 'react';
 
@@ -195,7 +194,7 @@ const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 const REACT_FRAGMENT_TYPE = Symbol.for('react.fragment');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
 const REACT_MEMO_TYPE = Symbol.for('react.memo');
-const REACT_MEMO_CACHE_SENTINEL = Symbol.for('react.memo_cache_sentinel');
+const REACT_PROVIDER_TYPE = Symbol.for('react.provider');
 
 // It is handled by React separately and shouldn't be written to the DOM.
 
@@ -709,6 +708,11 @@ function popProvider() {
   return currentActiveSnapshot;
 }
 
+function readContext(context) {
+  const value = context._currentValue;
+  return value;
+}
+
 let currentRequest = null;
 function prepareToUseHooksForRequest(request) {
   currentRequest = request;
@@ -717,48 +721,36 @@ function resetHooksForRequest() {
   currentRequest = null;
 }
 
+function noop() {}
+
 const HooksDispatcher = {
+  readContext,
+  use: (promise) => promise,
+  useContext: readContext,
   useMemo: (nextCreate) => nextCreate(),
+  useReducer: (reducer, initialValue) => {
+    return [initialValue, (newValue) => reducer(initialValue, newValue)];
+  },
+  useRef: (initialValue) => ({ current: initialValue }),
+  useState: (initialValue) => [initialValue, noop],
+  useInsertionEffect: noop,
+  useLayoutEffect: noop,
   useCallback: (callback) => callback,
-  useDebugValue: () => {},
-  useDeferredValue: unsupportedHook,
-  useTransition: unsupportedHook,
-  readContext: unsupportedContext,
-  useContext: unsupportedContext,
-  useReducer: unsupportedHook,
-  useRef: unsupportedHook,
-  useState: unsupportedHook,
-  useInsertionEffect: unsupportedHook,
-  useLayoutEffect: unsupportedHook,
-  useImperativeHandle: unsupportedHook,
-  useEffect: unsupportedHook,
-  useId: useId,
+  useImperativeHandle: noop,
+  useEffect: noop,
+  useDebugValue: noop,
+  useDeferredValue: (value, initialValue) => {
+    return typeof initialValue === 'undefined' ? value : initialValue;
+  },
+  useTransition: () => [false, noop],
+  useId,
   useMutableSource: unsupportedHook,
   useSyncExternalStore: unsupportedHook,
-  useCacheRefresh: () => unsupportedRefresh,
-  useMemoCache: (size) => {
-    const data = new Array(size);
-
-    for (let i = 0; i < size; i++) {
-      data[i] = REACT_MEMO_CACHE_SENTINEL;
-    }
-
-    return data;
-  },
 };
 
 function unsupportedHook(...args) {
   console.error('Attributes', ...args);
   throw new Error('This Hook is not supported in Server Components.');
-}
-
-function unsupportedRefresh() {
-  throw new Error('Refreshing the cache is not supported in Server Components.');
-}
-
-function unsupportedContext(...args) {
-  console.error('Attributes', ...args);
-  throw new Error('Cannot read a Client Context from a Server Component.');
 }
 
 function useId() {
@@ -771,55 +763,18 @@ function useId() {
   return `:${currentRequest.identifierPrefix}S${id.toString(32)}:`;
 }
 
-function createSignal() {
-  return new AbortController().signal;
+function getCacheSignal() {
+  throw new Error('Not implemented.');
 }
 
-function resolveCache() {
-  if (currentCache) return currentCache;
-
-  const cache = REACT_CONTEXT.getStore();
-  if (cache) return cache;
-
-  // Since we override the dispatcher all the time, we're effectively always
-  // active and so to support cache() and fetch() outside of render, we yield
-  // an empty Map.
-  return new Map();
+function getCacheForType() {
+  throw new Error('Not implemented.');
 }
 
 const DefaultCacheDispatcher = {
-  getCacheSignal: () => {
-    const cache = resolveCache();
-    let entry = cache.get(createSignal);
-
-    if (entry === undefined) {
-      entry = createSignal();
-      cache.set(createSignal, entry);
-    }
-
-    return entry;
-  },
-  getCacheForType: (resourceType) => {
-    const cache = resolveCache();
-    let entry = cache.get(resourceType);
-
-    if (entry === undefined) {
-      entry = resourceType(); // TODO: Warn if undefined?
-
-      cache.set(resourceType, entry);
-    }
-
-    return entry;
-  },
+  getCacheSignal: getCacheSignal,
+  getCacheForType: getCacheForType,
 };
-let currentCache = null;
-function setCurrentCache(cache) {
-  currentCache = cache;
-  return currentCache;
-}
-function getCurrentCache() {
-  return currentCache;
-}
 
 const PENDING = 0;
 const COMPLETED = 1;
@@ -934,6 +889,10 @@ function attemptResolveElement(request, type, key, ref, props) {
 
       case REACT_MEMO_TYPE: {
         return attemptResolveElement(request, type.type, key, ref, props);
+      }
+
+      case REACT_PROVIDER_TYPE: {
+        return props.children;
       }
     }
   }
@@ -1577,11 +1536,17 @@ function retryTask(request, task) {
   }
 }
 
+function mountReactDispatcher() {
+  ReactCurrentDispatcher.current = HooksDispatcher;
+}
+
 function performWork(request) {
   const prevDispatcher = ReactCurrentDispatcher.current;
-  const prevCache = getCurrentCache();
-  ReactCurrentDispatcher.current = HooksDispatcher;
-  setCurrentCache(request.cache);
+  const prevCacheDispatcher = ReactCurrentCache.current;
+
+  mountReactDispatcher();
+  ReactCurrentCache.current = DefaultCacheDispatcher;
+
   prepareToUseHooksForRequest(request);
 
   try {
@@ -1601,7 +1566,8 @@ function performWork(request) {
     fatalError(request, error);
   } finally {
     ReactCurrentDispatcher.current = prevDispatcher;
-    setCurrentCache(prevCache);
+    ReactCurrentCache.current = prevCacheDispatcher;
+
     resetHooksForRequest();
   }
 }
@@ -1686,7 +1652,7 @@ function flushCompletedChunks(request, destination) {
 }
 
 function startWork(request) {
-  scheduleWork(() => REACT_CONTEXT.run(request.cache, performWork, request));
+  scheduleWork(() => performWork(request));
 }
 function startFlowing(request, destination) {
   if (request.status === CLOSING) {
@@ -1792,4 +1758,4 @@ function renderToReadableStream(model, options) {
   return stream;
 }
 
-export { renderToReadableStream };
+export { renderToReadableStream, mountReactDispatcher };
