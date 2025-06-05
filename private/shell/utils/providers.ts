@@ -191,6 +191,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const staticAssets = new Array<string>();
   const glob = new Bun.Glob('./**/*');
   for await (const file of glob.scan(outputDirectory)) {
+    if (file.startsWith('/_worker') || file.endsWith('.map')) continue;
     staticAssets.push(file.replaceAll('./', '/'));
   }
 
@@ -206,7 +207,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
     Bun.write(
       path.join(edgeFunctionDir, 'index.mjs'),
       `import worker from './_worker.mjs';
-export default (request, context) => worker.fetch(req, { context });
+export default (request, context) => worker.fetch(request, { context });
 
 export const config = {
       path: "/*",

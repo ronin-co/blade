@@ -18,7 +18,6 @@ export default defineConfig({
     './private/shell/listener.ts',
     './private/client/index.ts',
     './private/server/worker/index.ts',
-    './private/server/worker/adapters/netlify.ts',
     './private/server/worker/adapters/vercel.ts',
   ],
   format: 'esm',
