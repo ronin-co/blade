@@ -54,7 +54,7 @@ const output = await Bun.build({
     getReactAriaLoader(),
   ],
   naming: `[dir]/${path.basename(serverOutputFile)}`,
-  minify: false,
+  minify: true,
   sourcemap: 'external',
   target: provider === 'vercel' ? 'node' : 'browser',
   define: mapProviderInlineDefinitions(),
