@@ -201,6 +201,14 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
       path.join(edgeFunctionDir, '_worker.mjs.map'),
     ),
     Bun.write(
+      path.join(edgeFunctionDir, 'foo.js'),
+      'export default () => Response.json({ ok: true, timestamp: Date.now() })',
+    ),
+    Bun.write(
+      path.join(edgeFunctionDir, '_bar.js'),
+      'export default () => Response.json({ ok: true, timestamp: Date.now() })',
+    ),
+    Bun.write(
       path.join(netlifyOutputDir, 'config.json'),
       JSON.stringify(
         // https://docs.netlify.com/frameworks-api/#netlify-v1-config-json
@@ -210,6 +218,14 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
               excludedPath: staticAssetPaths,
               function: '_worker',
               path: '/*',
+            },
+            {
+              function: 'foo',
+              path: '/foo',
+            },
+            {
+              function: '_bar',
+              path: '/_bar',
             },
           ],
         },
