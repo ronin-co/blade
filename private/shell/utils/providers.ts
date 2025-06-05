@@ -38,7 +38,8 @@ export const mapProviderInlineDefinitions = (
 ): Record<string, string> => {
   switch (provider) {
     case 'cloudflare':
-    case 'vercel': {
+    case 'vercel':
+    case 'service-worker': {
       return Object.fromEntries(
         Object.entries(import.meta.env)
           .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))

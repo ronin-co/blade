@@ -30,34 +30,34 @@ await prepareClientAssets('production', bundleId, provider);
 const serverSpinner = logSpinner('Performing server build (production)').start();
 const customHandlers: Array<DeploymentProvider> = ['vercel', 'service-worker'];
 
-const getEntrypoint = (name: DeploymentProvider) => {
-  return path.join(serverInputFolder, `${name}.js`);
+const buildEntrypoint = async (provider: DeploymentProvider) => {
+  const output = await Bun.build({
+    entrypoints: [path.join(serverInputFolder, `${provider}.js`)],
+    outdir: outputDirectory,
+    plugins: [
+      getClientReferenceLoader('production'),
+      getFileListLoader(true),
+      getMdxLoader('production'),
+      getReactAriaLoader(),
+    ],
+    minify: true,
+    sourcemap: 'external',
+    target: provider === 'vercel' ? 'node' : 'browser',
+    define: mapProviderInlineDefinitions(provider),
+  });
+
+  handleBuildLogs(output);
+
+  if (!output.success) {
+    serverSpinner.fail();
+    process.exit(1);
+  }
 };
 
-const output = await Bun.build({
-  entrypoints: [
-    getEntrypoint(customHandlers.includes(provider) ? provider : 'worker'),
-    getEntrypoint('service-worker'),
-  ],
-  outdir: outputDirectory,
-  plugins: [
-    getClientReferenceLoader('production'),
-    getFileListLoader(true),
-    getMdxLoader('production'),
-    getReactAriaLoader(),
-  ],
-  minify: true,
-  sourcemap: 'external',
-  target: provider === 'vercel' ? 'node' : 'browser',
-  define: mapProviderInlineDefinitions(provider),
-});
-
-handleBuildLogs(output);
-
-if (!output.success) {
-  serverSpinner.fail();
-  process.exit(1);
-}
+await Promise.all([
+  buildEntrypoint(customHandlers.includes(provider) ? provider : 'worker'),
+  buildEntrypoint('service-worker'),
+]);
 
 serverSpinner.succeed();
 
