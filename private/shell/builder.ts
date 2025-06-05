@@ -30,7 +30,7 @@ await prepareClientAssets('production', bundleId, provider);
 const serverSpinner = logSpinner('Performing server build (production)').start();
 const customHandlers: Array<DeploymentProvider> = ['vercel', 'service-worker'];
 
-const buildEntrypoint = async (provider: DeploymentProvider) => {
+const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
   const output = await Bun.build({
     entrypoints: [path.join(serverInputFolder, `${provider}.js`)],
     outdir: outputDirectory,

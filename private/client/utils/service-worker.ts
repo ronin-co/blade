@@ -6,7 +6,7 @@ import type { Asset } from '@/private/universal/types/util';
  *
  * @returns Nothing.
  */
-const registerWorker = () => {
+const registerWorker = (): void => {
   if (!navigator.serviceWorker) return;
 
   window.addEventListener('load', () => {
@@ -30,7 +30,7 @@ const registerWorker = () => {
   });
 };
 
-export const composeWorkerRegistration = (asset: Asset) => {
+export const composeWorkerRegistration = (asset: Asset): string => {
   const func = registerWorker.toString().replace('WORKER_URL', asset.source);
   const funcMinified = func.replace(/\s+/g, '');
 
