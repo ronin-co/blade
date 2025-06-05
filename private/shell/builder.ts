@@ -3,6 +3,7 @@ import path from 'node:path';
 import {
   outputDirectory,
   serverInputFile,
+  serverNetlifyInputFile,
   serverOutputFile,
   serverVercelInputFile,
 } from '@/private/shell/constants';
@@ -34,6 +35,8 @@ const serverSpinner = logSpinner('Performing server build (production)').start()
 
 function getEntrypointFile(): string {
   switch (provider) {
+    case 'netlify':
+      return serverNetlifyInputFile;
     case 'vercel':
       return serverVercelInputFile;
     default:
