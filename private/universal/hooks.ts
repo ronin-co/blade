@@ -8,6 +8,13 @@ import {
 } from '@/private/universal/context';
 
 const useUniversalContext = (): UniversalContext => {
+  console.log({
+    typeofWindow: typeof window,
+    // @ts-expect-error Ignore Deno global
+    isDeno: typeof Deno !== 'undefined',
+    // @ts-expect-error Ignore Netlify global
+    isNetlify: typeof Netlify,
+  });
   if (typeof window === 'undefined') {
     const serverContext = useContext(RootServerContext);
     if (!serverContext)
