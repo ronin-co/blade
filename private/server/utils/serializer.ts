@@ -721,7 +721,7 @@ function resetHooksForRequest() {
   currentRequest = null;
 }
 
-function noop$1() {}
+function noop() {}
 
 const HooksDispatcher = {
   readContext,
@@ -732,17 +732,17 @@ const HooksDispatcher = {
     return [initialValue, (newValue) => reducer(initialValue, newValue)];
   },
   useRef: (initialValue) => ({ current: initialValue }),
-  useState: (initialValue) => [initialValue, noop$1],
-  useInsertionEffect: noop$1,
-  useLayoutEffect: noop$1,
+  useState: (initialValue) => [initialValue, noop],
+  useInsertionEffect: noop,
+  useLayoutEffect: noop,
   useCallback: (callback) => callback,
-  useImperativeHandle: noop$1,
-  useEffect: noop$1,
-  useDebugValue: noop$1,
+  useImperativeHandle: noop,
+  useEffect: noop,
+  useDebugValue: noop,
   useDeferredValue: (value, initialValue) => {
     return typeof initialValue === 'undefined' ? value : initialValue;
   },
-  useTransition: () => [false, noop$1],
+  useTransition: () => [false, noop],
   useId,
   useMutableSource: unsupportedHook,
   useSyncExternalStore: unsupportedHook,
