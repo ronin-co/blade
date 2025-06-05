@@ -191,8 +191,6 @@ const History = ({ children, universalContext }: HistoryProps) => {
   );
 };
 
-// @ts-expect-error This `Netlify` global only exists in the Netlify Edge Runtime,
-const isNetlifyEdge = typeof Netlify !== 'undefined';
-if (!isNetlifyEdge) wrapClientComponent(History, 'History');
+wrapClientComponent(History, 'History');
 
 export { History };

@@ -8,7 +8,9 @@ import {
 } from '@/private/universal/context';
 
 const useUniversalContext = (): UniversalContext => {
-  if (typeof window === 'undefined') {
+  // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
+  const isNetlify = typeof Netlify !== 'undefined';
+  if (typeof window === 'undefined' || isNetlify) {
     const serverContext = useContext(RootServerContext);
     if (!serverContext)
       throw new Error('Missing server context in `useUniversalContext`');

@@ -60,7 +60,9 @@ interface RedirectOptions
 }
 
 const useRedirect = () => {
-  if (typeof window === 'undefined') {
+  // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
+  const isNetlify = typeof Netlify !== 'undefined';
+  if (typeof window === 'undefined' || isNetlify) {
     const populatePathname = usePopulatePathname();
 
     return (pathname: string, options?: Pick<RedirectOptions, 'extraParams'>): never => {
