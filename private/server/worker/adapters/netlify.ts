@@ -8,5 +8,5 @@ export default handle(app);
 
 export const config = {
   path: '/*',
-  excludedPattern: ['/client-manifest.json', '/client/(.*)'],
+  excludedPath: ['/client-manifest.json', '/client/(.*)'],
 } satisfies Config;
