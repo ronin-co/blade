@@ -205,7 +205,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
     ),
     Bun.write(
       path.join(edgeFunctionDir, 'index.mjs'),
-      `import worker from './_worker';
+      `import worker from './_worker.mjs';
 export default (request, context) => worker.fetch(req, { context });
 
 export const config = {
