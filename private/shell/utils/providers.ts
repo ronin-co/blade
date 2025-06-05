@@ -186,10 +186,13 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
 
   await fs.mkdir(edgeFunctionDir, { recursive: true });
 
-  const staticAssetPaths = new Array<`/${string}`>(
-    '/client-manifest.json',
-    '/client/(.*)',
-  );
+  // Since edge functions do not offer a `preferStatic` option, we need to manually
+  // provide a list of all static assets to not be routed to the edge function.
+  const staticAssets = new Array<string>();
+  const glob = new Bun.Glob('./**/*');
+  for await (const file of glob.scan(outputDirectory)) {
+    staticAssets.push(file.replaceAll('./', '/'));
+  }
 
   await Promise.all([
     fs.rename(
@@ -201,37 +204,14 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
       path.join(edgeFunctionDir, '_worker.mjs.map'),
     ),
     Bun.write(
-      path.join(edgeFunctionDir, 'foo.js'),
-      'export default () => Response.json({ ok: true, timestamp: Date.now() })',
-    ),
-    Bun.write(
-      path.join(edgeFunctionDir, '_bar.js'),
-      'export default () => Response.json({ ok: true, timestamp: Date.now() })',
-    ),
-    Bun.write(
-      path.join(netlifyOutputDir, 'config.json'),
-      JSON.stringify(
-        // https://docs.netlify.com/frameworks-api/#netlify-v1-config-json
-        {
-          edge_functions: [
-            {
-              excludedPath: staticAssetPaths,
-              function: '_worker',
-              path: '/*',
-            },
-            {
-              function: 'foo',
-              path: '/foo',
-            },
-            {
-              function: '_bar',
-              path: '/_bar',
-            },
-          ],
-        },
-        null,
-        4,
-      ),
+      path.join(edgeFunctionDir, 'index.mjs'),
+      `import worker from './_worker';
+export default (request, context) => worker.fetch(req, { context });
+
+export const config = {
+      path: "/*",
+      excludedPath: ${JSON.stringify(staticAssets)},
+};`,
     ),
   ]);
 
