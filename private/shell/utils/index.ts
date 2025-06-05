@@ -165,6 +165,7 @@ export const setEnvironmentVariables = (options: {
   }
 
   if (provider === 'netlify') {
+    import.meta.env['BLADE_APP_TOKEN'] ??= '';
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
   }
