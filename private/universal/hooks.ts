@@ -14,6 +14,8 @@ const useUniversalContext = (): UniversalContext => {
     isDeno: typeof Deno !== 'undefined',
     // @ts-expect-error Ignore Netlify global
     isNetlify: typeof Netlify,
+    // @ts-expect-error Ignore Deno global
+    denoVersion: typeof Deno !== 'undefined' ? Deno.version : undefined,
   });
   if (typeof window === 'undefined') {
     const serverContext = useContext(RootServerContext);
