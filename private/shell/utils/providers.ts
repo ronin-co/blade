@@ -25,7 +25,7 @@ export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
  * Remap inline environment variable definitions.
  *
  * @description This is primarily used to inline all environment variables on
- * Cloudflare Pages or Vercel, because their runtime does not have support for
+ * Cloudflare, Netlify or Vercel, because their runtime does not have support for
  * `import.meta.env`. Everywhere else, only inline what is truly necessary
  * (what cannot be made available at runtime).
  *
