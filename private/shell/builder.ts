@@ -49,7 +49,7 @@ const output = await Bun.build({
   minify: true,
   sourcemap: 'external',
   target: provider === 'vercel' ? 'node' : 'browser',
-  define: mapProviderInlineDefinitions(),
+  define: mapProviderInlineDefinitions(provider),
 });
 
 handleBuildLogs(output);

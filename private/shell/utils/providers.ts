@@ -29,10 +29,14 @@ export const getProvider = (): DeploymentProvider => {
  * `import.meta.env`. Everywhere else, only inline what is truly necessary
  * (what cannot be made available at runtime).
  *
+ * @param provider - The deployment provider to map the inline definitions for.
+ *
  * @returns A record / object of environment variables to be inlined.
  */
-export const mapProviderInlineDefinitions = (): Record<string, string> => {
-  switch (import.meta.env.__BLADE_PROVIDER) {
+export const mapProviderInlineDefinitions = (
+  provider: DeploymentProvider,
+): Record<string, string> => {
+  switch (provider) {
     case 'cloudflare':
     case 'vercel': {
       return Object.fromEntries(
