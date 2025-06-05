@@ -18,7 +18,7 @@ import type { DeploymentProvider } from '@/private/universal/types/util';
 export const getProvider = (): DeploymentProvider => {
   if (Bun.env['WORKERS_CI']) return 'cloudflare';
   if (Bun.env['VERCEL']) return 'vercel';
-  return 'worker';
+  return 'edge-worker';
 };
 
 /**

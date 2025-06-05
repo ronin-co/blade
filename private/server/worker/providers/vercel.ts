@@ -1,5 +1,5 @@
 import { handle } from '@hono/node-server/vercel';
 
-import app from '../worker/index';
+import app from '../index';
 
 export default handle(app);

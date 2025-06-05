@@ -278,7 +278,9 @@ export const prepareClientAssets = async (
     // When using a serverless deployment provider, inline plain-text environment
     // variables in the client bundles.
     define:
-      provider !== 'worker' ? Object.fromEntries(clientEnvironmentVariables) : undefined,
+      provider !== 'edge-worker'
+        ? Object.fromEntries(clientEnvironmentVariables)
+        : undefined,
   });
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
@@ -288,7 +290,7 @@ export const prepareClientAssets = async (
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
-    provider !== 'worker' ? 'if(!import.meta.env){import.meta.env={}};' : '',
+    provider !== 'edge-worker' ? 'if(!import.meta.env){import.meta.env={}};' : '',
     `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
     `window['BLADE_BUNDLE']='${bundleId}';`,
     await chunkFile.text(),

@@ -29,7 +29,7 @@ if (environment === 'development') {
   const bundleId = generateUniqueId();
 
   await cleanUp();
-  await prepareClientAssets('development', bundleId, 'worker');
+  await prepareClientAssets('development', bundleId, 'edge-worker');
 
   plugin(getClientReferenceLoader(environment));
   plugin(getFileListLoader(false));

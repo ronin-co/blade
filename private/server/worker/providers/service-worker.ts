@@ -1,6 +1,6 @@
 import { handle } from 'hono/service-worker';
 
-import app from '../worker/index';
+import app from '../index';
 
 self.addEventListener('fetch', (event: FetchEvent) => {
   const url = new URL(event.request.url);
