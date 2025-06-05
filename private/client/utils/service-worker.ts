@@ -12,17 +12,16 @@ const registerWorker = () => {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('WORKER_URL', { scope: '/', type: 'module' })
-      .then((registration) => {
-        console.log('[SW] Registered:', registration.scope);
+      .then(({ scope, installing, addEventListener }) => {
+        console.log('[SW] Registered:', scope);
 
-        registration.addEventListener('updatefound', () => {
-          const newSW = registration.installing;
-          if (!newSW) return;
+        addEventListener('updatefound', () => {
+          if (!installing) return;
 
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-              // A new SW is waiting—tell it to activate immediately:
-              newSW.postMessage({ action: 'SKIP_WAITING' });
+          installing.addEventListener('statechange', () => {
+            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+              // A new SW is waiting — tell it to activate immediately:
+              installing.postMessage({ action: 'SKIP_WAITING' });
             }
           });
         });
