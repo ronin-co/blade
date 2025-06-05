@@ -186,6 +186,11 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
 
   await fs.mkdir(edgeFunctionDir, { recursive: true });
 
+  const staticAssetPaths = new Array<`/${string}`>(
+    '/client-manifest.json',
+    '/client/(.*)',
+  );
+
   await Promise.all([
     fs.rename(
       path.join(outputDirectory, '_worker.js'),
@@ -194,6 +199,23 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
     fs.rename(
       path.join(outputDirectory, '_worker.js.map'),
       path.join(edgeFunctionDir, '_worker.mjs.map'),
+    ),
+    Bun.write(
+      path.join(netlifyOutputDir, 'config.json'),
+      JSON.stringify(
+        // https://docs.netlify.com/frameworks-api/#netlify-v1-config-json
+        {
+          edge_functions: [
+            {
+              excludedPath: staticAssetPaths,
+              function: '_worker',
+              path: '/*',
+            },
+          ],
+        },
+        null,
+        4,
+      ),
     ),
   ]);
 
