@@ -10,8 +10,6 @@ import {
 const useUniversalContext = (): UniversalContext => {
   console.log({
     typeofWindow: typeof window,
-    // @ts-expect-error Ignore Deno global
-    Deno: typeof Deno !== 'undefined' ? Deno : null,
     // @ts-expect-error Ignore Netlify global
     Netlify: typeof Netlify !== 'undefined' ? Netlify : null,
   });
