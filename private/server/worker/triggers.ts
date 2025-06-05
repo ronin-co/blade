@@ -2,14 +2,12 @@ import type { BeforeGetTrigger } from 'ronin/types';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
+  ClientTriggerOptions,
   TriggerOptions as NewTriggerOptions,
   Triggers,
   TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
-
-/** The original trigger options provided by the RONIN client. */
-type OldTriggerOptions = Parameters<BeforeGetTrigger>[2];
 
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
@@ -50,7 +48,7 @@ export const prepareTriggers = (
           // `before*` triggers.
           (...args: Parameters<BeforeGetTrigger>) => {
             const argsBeforeLast = args.slice(0, -1);
-            const oldOptions = args.at(-1) as OldTriggerOptions;
+            const oldOptions = args.at(-1) as ClientTriggerOptions;
 
             // Create an object of options that are specific to the current trigger
             // function, in order to avoid modifying the global object.

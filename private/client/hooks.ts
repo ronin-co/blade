@@ -31,10 +31,7 @@ export const usePageTransition = () => {
   const cache = useRef(new Map<string, FetchedPage>());
 
   const clientContext = useContext(RootClientContext);
-  if (!clientContext)
-    throw new Error(
-      '`usePageTransition` can only be used within `RootClientContext.Provider`.',
-    );
+  if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
 
   // We're using a reference to store this number, because we need to keep a single

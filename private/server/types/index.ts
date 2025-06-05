@@ -61,7 +61,10 @@ export interface PageMetadata {
   bodyClassName?: string;
 }
 
-export interface TriggerOptions {
+/** The original trigger options provided by the RONIN client. */
+export type ClientTriggerOptions = Parameters<OriginalBeforeGetTrigger>[2];
+
+export interface TriggerOptions extends ClientTriggerOptions {
   /**
    * A list of cookies that are stored on the client.
    */

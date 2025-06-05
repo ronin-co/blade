@@ -7,7 +7,6 @@ export default defineConfig({
     './public/client/components.tsx',
     './public/server/hooks.ts',
     './public/server/components.tsx',
-    './public/server/utils/data.ts',
     './public/server/utils/errors.ts',
     './public/universal/hooks.ts',
     './public/universal/schema.ts',

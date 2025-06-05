@@ -53,16 +53,12 @@ export const useMutation = (): {
     queryOptions?: Record<string, unknown>,
   ) => Promise<PromiseTuple<T>>;
 } => {
-  const privateLocationRef = usePrivateLocationRef();
   const clientContext = useContext(RootClientContext);
-
-  if (!clientContext)
-    throw new Error(
-      '`useMutation` can only be used within `RootClientContext.Provider`.',
-    );
+  if (!clientContext) throw new Error('Missing client context in `useMutation`');
 
   const { deferredPromises, collected } = clientContext;
 
+  const privateLocationRef = usePrivateLocationRef();
   const transitionPage = usePageTransition();
   const populatePathname = usePopulatePathname();
 
