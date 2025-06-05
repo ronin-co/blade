@@ -314,7 +314,7 @@ export const prepareClientAssets = async (
     { type: 'css', source: getOutputFile(bundleId, 'css') },
   ]);
 
-  import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
+  import.meta.env.__BLADE_ASSETS_ID = bundleId;
 
   clientSpinner.succeed();
 };
