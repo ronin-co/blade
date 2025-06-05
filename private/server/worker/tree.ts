@@ -730,6 +730,9 @@ const renderReactTree = async (
   const clientBundle = c.req.raw.headers.get('X-Client-Bundle-Id');
 
   // The ID of the main bundle currently available on the server.
+  console.log({
+    __BLADE_ASSETS_ID: import.meta.env.__BLADE_ASSETS_ID ?? null,
+  });
   const serverBundle = import.meta.env.__BLADE_ASSETS_ID;
 
   // If the application is being rendered for the first time, we want to render it as
