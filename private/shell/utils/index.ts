@@ -366,35 +366,6 @@ const prepareStyles = async (
   await Bun.write(tailwindOutput, optimizedStyles.code);
 };
 
-export const elevateReact = async () => {
-  if (isPackageLinked()) {
-    const sourceReact = path.join(
-      process.cwd(),
-      'node_modules',
-      '@ronin/blade',
-      'node_modules',
-      'react',
-    );
-    const sourceReactDom = path.join(
-      process.cwd(),
-      'node_modules',
-      '@ronin/blade',
-      'node_modules',
-      'react-dom',
-    );
-    const targetReact = path.join(process.cwd(), 'node_modules', 'react');
-    const targetReactDom = path.join(process.cwd(), 'node_modules', 'react-dom');
-
-    // Remove existing directories if they exist.
-    await rm(targetReact, { recursive: true, force: true });
-    await rm(targetReactDom, { recursive: true, force: true });
-
-    // Copy the directories.
-    await cp(sourceReact, targetReact, { recursive: true });
-    await cp(sourceReactDom, targetReactDom, { recursive: true });
-  }
-};
-
 export const isPackageLinked = () => {
   const packagePath = path.join(process.cwd(), 'node_modules', '@ronin/blade');
   try {
