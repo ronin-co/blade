@@ -32,7 +32,11 @@ const bundleId = generateUniqueId();
 await cleanUp();
 await prepareClientAssets('production', bundleId, provider);
 
-const customHandlers: Array<DeploymentProvider> = ['netlify', 'vercel'];
+const customHandlers: Array<DeploymentProvider> = new Array<DeploymentProvider>(
+  'netlify',
+  'service-worker',
+  'vercel',
+);
 
 const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
   const serverSpinner = logSpinner('Performing server build (production)').start();
@@ -65,6 +69,7 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
 
 await Promise.all([
   buildEntrypoint(customHandlers.includes(provider) ? provider : 'edge-worker'),
+  buildEntrypoint('service-worker'),
 ]);
 
 switch (provider) {
