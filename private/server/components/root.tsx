@@ -150,14 +150,14 @@ const Root = ({ children, serverContext }: RootProps) => {
               );
 
             default: {
-              const tagName = metadataNames[name];
-              return tagName ? (
+              const tagName = metadataNames[name] || name;
+              return (
                 <meta
                   key={tagName + value}
                   name={tagName}
                   content={value as string}
                 />
-              ) : null;
+              );
             }
           }
         })}
