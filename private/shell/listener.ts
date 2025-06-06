@@ -3,6 +3,7 @@ import { type Server, plugin } from 'bun';
 import chalk from 'chalk';
 
 import {
+  defaultDeploymentProvider,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
@@ -29,7 +30,7 @@ if (environment === 'development') {
   const bundleId = generateUniqueId();
 
   await cleanUp();
-  await prepareClientAssets('development', bundleId, 'edge-worker');
+  await prepareClientAssets('development', bundleId, defaultDeploymentProvider);
 
   plugin(getClientReferenceLoader(environment));
   plugin(getFileListLoader(false));
@@ -50,7 +51,7 @@ if (environment === 'development') {
 const requestHandler = await import(
   path.join(
     environment === 'development' ? serverInputFolder : outputDirectory,
-    'edge-worker.js',
+    `${defaultDeploymentProvider}.js`,
   )
 );
 

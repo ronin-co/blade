@@ -1,6 +1,10 @@
 import path from 'node:path';
 
-import { outputDirectory, serverInputFolder } from '@/private/shell/constants';
+import {
+  defaultDeploymentProvider,
+  outputDirectory,
+  serverInputFolder,
+} from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -40,6 +44,7 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
       getMdxLoader('production'),
       getReactAriaLoader(),
     ],
+    naming: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}.js`,
     minify: true,
     sourcemap: 'external',
     target: provider === 'vercel' ? 'node' : 'browser',
@@ -55,7 +60,9 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
 };
 
 await Promise.all([
-  buildEntrypoint(customHandlers.includes(provider) ? provider : 'edge-worker'),
+  buildEntrypoint(
+    customHandlers.includes(provider) ? provider : defaultDeploymentProvider,
+  ),
   buildEntrypoint('service-worker'),
 ]);
 

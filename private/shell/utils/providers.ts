@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { outputDirectory } from '@/private/shell/constants';
+import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
 import { logSpinner } from '@/private/shell/utils';
 
 import type {
@@ -18,7 +18,7 @@ import type { DeploymentProvider } from '@/private/universal/types/util';
 export const getProvider = (): DeploymentProvider => {
   if (Bun.env['WORKERS_CI']) return 'cloudflare';
   if (Bun.env['VERCEL']) return 'vercel';
-  return 'edge-worker';
+  return defaultDeploymentProvider;
 };
 
 /**

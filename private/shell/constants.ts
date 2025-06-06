@@ -35,3 +35,5 @@ export const loggingPrefixes = {
   info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
   error: `${chalk.bold(gradient(['#930024', '#d4143e'])('ERROR'))}  `,
 };
+
+export const defaultDeploymentProvider = 'edge-worker';

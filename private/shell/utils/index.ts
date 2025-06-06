@@ -13,6 +13,7 @@ import {
   clientInputFile,
   clientManifestFile,
   clientOutputDirectory,
+  defaultDeploymentProvider,
   directoriesToParse,
   loggingPrefixes,
   outputDirectory,
@@ -261,6 +262,7 @@ export const prepareClientAssets = async (
   );
 
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
+  const isDefaultProvider = provider === defaultDeploymentProvider;
 
   const output = await Bun.build({
     entrypoints: [clientInputFile],
@@ -277,10 +279,9 @@ export const prepareClientAssets = async (
     minify: environment === 'production',
     // When using a serverless deployment provider, inline plain-text environment
     // variables in the client bundles.
-    define:
-      provider !== 'edge-worker'
-        ? Object.fromEntries(clientEnvironmentVariables)
-        : undefined,
+    define: isDefaultProvider
+      ? undefined
+      : Object.fromEntries(clientEnvironmentVariables),
   });
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
@@ -290,7 +291,7 @@ export const prepareClientAssets = async (
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
-    provider !== 'edge-worker' ? 'if(!import.meta.env){import.meta.env={}};' : '',
+    isDefaultProvider ? '' : 'if(!import.meta.env){import.meta.env={}};',
     `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
     `window['BLADE_BUNDLE']='${bundleId}';`,
     await chunkFile.text(),
