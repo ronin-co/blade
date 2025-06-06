@@ -32,6 +32,7 @@ const bundleId = generateUniqueId();
 await cleanUp();
 await prepareClientAssets('production', bundleId, provider);
 
+const serverSpinner = logSpinner('Performing server build (production)').start();
 const customHandlers: Array<DeploymentProvider> = new Array<DeploymentProvider>(
   'netlify',
   'service-worker',
@@ -39,8 +40,6 @@ const customHandlers: Array<DeploymentProvider> = new Array<DeploymentProvider>(
 );
 
 const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
-  const serverSpinner = logSpinner('Performing server build (production)').start();
-
   const output = await Bun.build({
     entrypoints: [path.join(serverInputFolder, `${provider}.js`)],
     outdir: outputDirectory,
@@ -69,6 +68,8 @@ await Promise.all([
   buildEntrypoint(customHandlers.includes(provider) ? provider : 'edge-worker'),
   buildEntrypoint('service-worker'),
 ]);
+
+serverSpinner.succeed();
 
 switch (provider) {
   case 'cloudflare': {
