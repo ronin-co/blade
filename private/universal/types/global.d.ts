@@ -18,6 +18,6 @@ declare module 'bun' {
     __BLADE_PORT: string;
     __BLADE_PROJECTS: string;
     __BLADE_PROVIDER: import('./util').DeploymentProvider;
-    __BLADE_SERVICE_WORKER: boolean;
+    __BLADE_SERVICE_WORKER: string;
   }
 }

@@ -52,7 +52,7 @@ const isInitializing = positionals.includes('init');
 const isBuilding = positionals.includes('build');
 const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
-const enableServiceWorker = values.worker;
+const enableServiceWorker = values.sw;
 
 if (isInitializing) {
   const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';

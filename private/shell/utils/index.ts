@@ -157,7 +157,7 @@ export const setEnvironmentVariables = (options: {
   // Get the current provider based on the environment variables.
   const provider = getProvider();
   import.meta.env.__BLADE_PROVIDER = provider;
-  import.meta.env.__BLADE_SERVICE_WORKER = options.enableServiceWorker;
+  import.meta.env.__BLADE_SERVICE_WORKER = options.enableServiceWorker ? 'true' : 'false';
 
   if (provider === 'cloudflare') {
     import.meta.env['BLADE_APP_TOKEN'] ??= '';
@@ -264,7 +264,7 @@ export const prepareClientAssets = async (
 
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
   const isDefaultProvider = provider === defaultDeploymentProvider;
-  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER;
+  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
 
   const output = await Bun.build({
     entrypoints: [clientInputFile],
