@@ -1,10 +1,9 @@
 import path from 'node:path';
 
 import {
+  defaultDeploymentProvider,
   outputDirectory,
-  serverInputFile,
-  serverOutputFile,
-  serverVercelInputFile,
+  serverInputFolder,
 } from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
@@ -23,35 +22,51 @@ import {
   transformToCloudflareOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
+import type { DeploymentProvider } from '@/private/universal/types/util';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const provider = import.meta.env.__BLADE_PROVIDER;
+const bundleId = generateUniqueId();
 
 await cleanUp();
-await prepareClientAssets('production', provider);
+await prepareClientAssets('production', bundleId, provider);
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
+const customHandlers: Array<DeploymentProvider> = ['vercel', 'service-worker'];
 
-const output = await Bun.build({
-  entrypoints: [provider === 'vercel' ? serverVercelInputFile : serverInputFile],
-  outdir: outputDirectory,
-  plugins: [
-    getClientReferenceLoader('production'),
-    getFileListLoader(true),
-    getMdxLoader('production'),
-    getReactAriaLoader(),
-  ],
-  naming: `[dir]/${path.basename(serverOutputFile)}`,
-  minify: true,
-  sourcemap: 'external',
-  target: provider === 'vercel' ? 'node' : 'browser',
-  define: mapProviderInlineDefinitions(),
-});
+const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
+  const output = await Bun.build({
+    entrypoints: [path.join(serverInputFolder, `${provider}.js`)],
+    outdir: outputDirectory,
+    plugins: [
+      getClientReferenceLoader('production'),
+      getFileListLoader(true),
+      getMdxLoader('production'),
+      getReactAriaLoader(),
+    ],
+    naming: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}.js`,
+    minify: true,
+    sourcemap: 'external',
+    target: provider === 'vercel' ? 'node' : 'browser',
+    define: mapProviderInlineDefinitions(provider),
+  });
 
-if (output.success) {
-  serverSpinner.succeed();
-} else {
-  serverSpinner.fail();
-}
+  handleBuildLogs(output);
+
+  if (!output.success) {
+    serverSpinner.fail();
+    process.exit(1);
+  }
+};
+
+await Promise.all([
+  buildEntrypoint(
+    customHandlers.includes(provider) ? provider : defaultDeploymentProvider,
+  ),
+  buildEntrypoint('service-worker'),
+]);
+
+serverSpinner.succeed();
 
 switch (provider) {
   case 'cloudflare': {
@@ -62,8 +77,4 @@ switch (provider) {
     await transformToVercelBuildOutput();
     break;
   }
-  default:
-    break;
 }
-
-handleBuildLogs(output);

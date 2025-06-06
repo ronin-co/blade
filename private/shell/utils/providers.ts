@@ -1,23 +1,24 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { outputDirectory } from '@/private/shell/constants';
+import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
 import { logSpinner } from '@/private/shell/utils';
 
 import type {
   VercelConfig,
   VercelNodejsServerlessFunctionConfig,
 } from '@/private/shell/types';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 
 /**
  * Get the name of the provider based on the environment variables.
  *
  * @returns A string representing the provider name.
  */
-export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
-  if (Bun.env['CF_PAGES'] || Bun.env['WORKERS_CI']) return 'cloudflare';
+export const getProvider = (): DeploymentProvider => {
+  if (Bun.env['WORKERS_CI']) return 'cloudflare';
   if (Bun.env['VERCEL']) return 'vercel';
-  return '';
+  return defaultDeploymentProvider;
 };
 
 /**
@@ -28,12 +29,17 @@ export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
  * `import.meta.env`. Everywhere else, only inline what is truly necessary
  * (what cannot be made available at runtime).
  *
+ * @param provider - The deployment provider to map the inline definitions for.
+ *
  * @returns A record / object of environment variables to be inlined.
  */
-export const mapProviderInlineDefinitions = (): Record<string, string> => {
-  switch (import.meta.env.__BLADE_PROVIDER) {
+export const mapProviderInlineDefinitions = (
+  provider: DeploymentProvider,
+): Record<string, string> => {
+  switch (provider) {
     case 'cloudflare':
-    case 'vercel': {
+    case 'vercel':
+    case 'service-worker': {
       return Object.fromEntries(
         Object.entries(import.meta.env)
           .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
@@ -64,7 +70,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
-  const functionDir = path.resolve(vercelOutputDir, 'functions', '_worker.func');
+  const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
   const vercelOutputDirExists = await fs.exists(vercelOutputDir);
   if (vercelOutputDirExists) await fs.rmdir(vercelOutputDir, { recursive: true });
@@ -78,13 +84,13 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, '_worker.js'),
-      path.join(functionDir, '_worker.mjs'),
+      path.join(staticFilesDir, 'edge-worker.js'),
+      path.join(functionDir, 'worker.mjs'),
     ),
 
     fs.rename(
-      path.join(staticFilesDir, '_worker.js.map'),
-      path.join(functionDir, '_worker.mjs.map'),
+      path.join(staticFilesDir, 'edge-worker.js.map'),
+      path.join(functionDir, 'worker.mjs.map'),
     ),
 
     Bun.write(
@@ -97,7 +103,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
           },
           {
             src: '^(?:/(.*?))?/?$',
-            dest: '_worker',
+            dest: 'worker',
           },
         ],
       } satisfies VercelConfig),
@@ -105,7 +111,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     Bun.write(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
-        handler: '_worker.mjs',
+        handler: 'worker.mjs',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
       } satisfies VercelNodejsServerlessFunctionConfig),
@@ -126,7 +132,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   const promises = new Array<Promise<unknown>>(
     Bun.write(
       path.join(outputDirectory, '.assetsignore'),
-      ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+      ['edge-worker.js', 'edge-worker.js.map', '_routes.json'].join('\n'),
     ),
   );
 
@@ -150,7 +156,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
           {
             $schema: 'node_modules/wrangler/config-schema.json',
             name: currentDirectoryName,
-            main: '.blade/_worker.js',
+            main: '.blade/edge-worker.js',
             compatibility_date: '2025-06-02',
             compatibility_flags: ['nodejs_compat'],
             assets: {

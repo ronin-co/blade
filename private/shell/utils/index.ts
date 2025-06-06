@@ -12,8 +12,9 @@ import ora from 'ora';
 import {
   clientInputFile,
   clientManifestFile,
+  clientOutputDirectory,
+  defaultDeploymentProvider,
   directoriesToParse,
-  frameworkDirectory,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
@@ -29,8 +30,6 @@ import {
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -143,6 +142,7 @@ export const setEnvironmentVariables = (options: {
   isBuilding: boolean;
   isServing: boolean;
   isLoggingQueries: boolean;
+  enableServiceWorker: boolean;
   port: number;
   projects: string[];
 }) => {
@@ -157,6 +157,7 @@ export const setEnvironmentVariables = (options: {
   // Get the current provider based on the environment variables.
   const provider = getProvider();
   import.meta.env.__BLADE_PROVIDER = provider;
+  import.meta.env.__BLADE_SERVICE_WORKER = options.enableServiceWorker ? 'true' : 'false';
 
   if (provider === 'cloudflare') {
     import.meta.env['BLADE_APP_TOKEN'] ??= '';
@@ -247,10 +248,9 @@ export const handleBuildLogs = (output: BuildOutput) => {
 
 export const prepareClientAssets = async (
   environment: 'development' | 'production',
-  provider?: DeploymentProvider,
+  bundleId: string,
+  provider: DeploymentProvider,
 ) => {
-  const bundleId = generateUniqueId();
-
   const clientSpinner = logSpinner(
     `Performing client build${environment === 'production' ? ' (production)' : ''}`,
   ).start();
@@ -262,12 +262,13 @@ export const prepareClientAssets = async (
     },
   );
 
-  const outdir = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
+  const isDefaultProvider = provider === defaultDeploymentProvider;
+  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
 
   const output = await Bun.build({
     entrypoints: [clientInputFile],
-    outdir,
+    outdir: clientOutputDirectory,
     plugins: [
       getClientComponentLoader(projects),
       getClientChunkLoader(clientChunks),
@@ -280,7 +281,9 @@ export const prepareClientAssets = async (
     minify: environment === 'production',
     // When using a serverless deployment provider, inline plain-text environment
     // variables in the client bundles.
-    define: provider ? Object.fromEntries(clientEnvironmentVariables) : undefined,
+    define: isDefaultProvider
+      ? undefined
+      : Object.fromEntries(clientEnvironmentVariables),
   });
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
@@ -290,7 +293,7 @@ export const prepareClientAssets = async (
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
   const chunkFilePrefix = [
-    provider ? 'if(!import.meta.env){import.meta.env={}};' : '',
+    isDefaultProvider ? '' : 'if(!import.meta.env){import.meta.env={}};',
     `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
     `window['BLADE_BUNDLE']='${bundleId}';`,
     await chunkFile.text(),
@@ -304,11 +307,17 @@ export const prepareClientAssets = async (
   if (await exists(publicDirectory))
     await cp(publicDirectory, outputDirectory, { recursive: true });
 
-  import.meta.env['__BLADE_ASSETS'] = JSON.stringify([
+  const assets = [
     { type: 'js', source: getOutputFile(bundleId, 'js') },
     { type: 'css', source: getOutputFile(bundleId, 'css') },
-  ]);
+  ];
 
+  // In production, load the service worker script.
+  if (enableServiceWorker) {
+    assets.push({ type: 'worker', source: '/service-worker.js' });
+  }
+
+  import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
   clientSpinner.succeed();
@@ -332,9 +341,6 @@ const prepareStyles = async (
   const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
     return projects.map((project) => path.join(project, directory));
   });
-
-  // Consider the directory containing BLADE's component source code.
-  content.push(path.join(frameworkDirectory, 'private', 'client', 'components'));
 
   const inputFile = Bun.file(styleInputFile);
   const input = (await inputFile.exists())
