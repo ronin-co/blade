@@ -4,6 +4,7 @@
     "": {
       "name": "@ronin/blade",
       "dependencies": {
+        "@ronin/blade": "0.7.21-ben-netlify-adapter-experimental-568",
         "@ronin/compiler": "0.18.8",
         "@ronin/react": "0.1.4",
         "@ronin/syntax": "0.2.43",
@@ -223,6 +224,8 @@
     "@rollup/rollup-win32-ia32-msvc": ["@rollup/rollup-win32-ia32-msvc@4.42.0", "", { "os": "win32", "cpu": "ia32" }, "sha512-F+5J9pelstXKwRSDq92J0TEBXn2nfUrQGg+HK1+Tk7VOL09e0gBqUHugZv7SW4MGrYj41oNCUe3IKCDGVlis2g=="],
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.42.0", "", { "os": "win32", "cpu": "x64" }, "sha512-LpHiJRwkaVz/LqjHjK8LCi8osq7elmpwujwbXKNW88bM8eeGxavJIKKjkjpMHAh/2xfnrt1ZSnhTv41WYUHYmA=="],
+
+    "@ronin/blade": ["@ronin/blade@0.7.21-ben-netlify-adapter-experimental-568", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-DOIXEqHPfXfLi4MaaUW+2RWcEPwex7XM0ab+yqmOn6r26Dk/+U1BQ2tkG8fmzCO6KkfnrwfML1MfT3SAP9+NLw=="],
 
     "@ronin/cli": ["@ronin/cli@0.3.19", "", { "dependencies": { "@dprint/formatter": "0.4.1", "@dprint/typescript": "0.93.3", "@iarna/toml": "2.2.5", "@inquirer/prompts": "7.2.3", "chalk-template": "1.1.0", "get-port": "7.1.0", "ini": "5.0.0", "json5": "2.2.3", "open": "10.1.0", "ora": "8.1.1", "resolve-from": "5.0.0" }, "peerDependencies": { "@ronin/codegen": ">=1.7.4", "@ronin/compiler": ">=0.18.8", "@ronin/engine": ">=0.1.23", "@ronin/syntax": ">=0.2.42" } }, "sha512-2M34NVDR/FRcjwhSFKMOVnI0uY0VFqrwotK7P+hQRwiOhE9juTsIPpNBSXPQwHRQBbHdoCxm1udibspDMphBXA=="],
 
