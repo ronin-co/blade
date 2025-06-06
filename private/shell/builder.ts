@@ -20,6 +20,7 @@ import {
 import {
   mapProviderInlineDefinitions,
   transformToCloudflareOutput,
+  transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
@@ -32,7 +33,11 @@ await cleanUp();
 await prepareClientAssets('production', bundleId, provider);
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
-const customHandlers: Array<DeploymentProvider> = ['vercel', 'service-worker'];
+const customHandlers: Array<DeploymentProvider> = new Array<DeploymentProvider>(
+  'netlify',
+  'service-worker',
+  'vercel',
+);
 
 const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
   const output = await Bun.build({
@@ -71,6 +76,10 @@ serverSpinner.succeed();
 switch (provider) {
   case 'cloudflare': {
     await transformToCloudflareOutput();
+    break;
+  }
+  case 'netlify': {
+    await transformToNetlifyOutput();
     break;
   }
   case 'vercel': {

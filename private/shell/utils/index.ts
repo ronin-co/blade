@@ -29,7 +29,7 @@ import {
 } from '@/private/shell/loaders';
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
-import type { DeploymentProvider } from '@/private/universal/types/util';
+import type { Asset, DeploymentProvider } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -163,6 +163,12 @@ export const setEnvironmentVariables = (options: {
     import.meta.env['BLADE_APP_TOKEN'] ??= '';
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
     import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
+  }
+
+  if (provider === 'netlify') {
+    import.meta.env['BLADE_APP_TOKEN'] ??= '';
+    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
+    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
   }
 
   if (provider === 'vercel') {
@@ -307,10 +313,10 @@ export const prepareClientAssets = async (
   if (await exists(publicDirectory))
     await cp(publicDirectory, outputDirectory, { recursive: true });
 
-  const assets = [
+  const assets = new Array<Asset>(
     { type: 'js', source: getOutputFile(bundleId, 'js') },
     { type: 'css', source: getOutputFile(bundleId, 'css') },
-  ];
+  );
 
   // In production, load the service worker script.
   if (enableServiceWorker) {

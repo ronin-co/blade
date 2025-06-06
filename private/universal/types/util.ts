@@ -102,7 +102,8 @@ export interface CustomNavigator {
  * Within the browser in production, the `service-worker` provider is used.
  */
 export type DeploymentProvider =
-  | 'vercel'
   | 'cloudflare'
+  | 'edge-worker'
+  | 'netlify'
   | 'service-worker'
-  | 'edge-worker';
+  | 'vercel';

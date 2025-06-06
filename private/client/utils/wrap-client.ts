@@ -17,7 +17,9 @@ type Component = ComponentType<any> &
 export const wrapClientComponent = (component: Component, name: string) => {
   const chunkId = name.toLowerCase();
 
-  if (typeof window === 'undefined') {
+  // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
+  const isNetlify = typeof Netlify !== 'undefined';
+  if (typeof window === 'undefined' || isNetlify) {
     Object.defineProperties(
       component.$$typeof === REACT_FORWARD_REF_TYPE ? component.render : component,
       {

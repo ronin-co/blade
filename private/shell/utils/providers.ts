@@ -17,6 +17,7 @@ import type { DeploymentProvider } from '@/private/universal/types/util';
  */
 export const getProvider = (): DeploymentProvider => {
   if (Bun.env['WORKERS_CI']) return 'cloudflare';
+  if (Bun.env['NETLIFY']) return 'netlify';
   if (Bun.env['VERCEL']) return 'vercel';
   return defaultDeploymentProvider;
 };
@@ -25,7 +26,7 @@ export const getProvider = (): DeploymentProvider => {
  * Remap inline environment variable definitions.
  *
  * @description This is primarily used to inline all environment variables on
- * Cloudflare Pages or Vercel, because their runtime does not have support for
+ * Cloudflare, Netlify or Vercel, because their runtime does not have support for
  * `import.meta.env`. Everywhere else, only inline what is truly necessary
  * (what cannot be made available at runtime).
  *
@@ -38,8 +39,9 @@ export const mapProviderInlineDefinitions = (
 ): Record<string, string> => {
   switch (provider) {
     case 'cloudflare':
-    case 'vercel':
-    case 'service-worker': {
+    case 'netlify':
+    case 'service-worker':
+    case 'vercel': {
       return Object.fromEntries(
         Object.entries(import.meta.env)
           .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
@@ -84,12 +86,12 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, 'edge-worker.js'),
+      path.join(staticFilesDir, `${defaultDeploymentProvider}.js`),
       path.join(functionDir, 'worker.mjs'),
     ),
 
     fs.rename(
-      path.join(staticFilesDir, 'edge-worker.js.map'),
+      path.join(staticFilesDir, `${defaultDeploymentProvider}.js.map`),
       path.join(functionDir, 'worker.mjs.map'),
     ),
 
@@ -172,6 +174,51 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   }
 
   await Promise.all(promises);
+
+  spinner.succeed();
+};
+
+/**
+ * Transform to match the Netlify output structure.
+ */
+export const transformToNetlifyOutput = async (): Promise<void> => {
+  const spinner = logSpinner('Transforming to output for Netlify (production)').start();
+
+  const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
+  const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
+
+  const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
+  if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
+
+  await fs.mkdir(edgeFunctionDir, { recursive: true });
+
+  // Since edge functions do not offer a `preferStatic` option, we need to manually
+  // provide a list of all static assets to not be routed to the edge function.
+  const staticAssets = new Array<string>();
+  const glob = new Bun.Glob('./**/*');
+  for await (const file of glob.scan(outputDirectory)) {
+    if (file.startsWith('/_worker') || file.endsWith('.map')) continue;
+    staticAssets.push(file.replaceAll('./', '/'));
+  }
+
+  await Promise.all([
+    fs.rename(
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
+      path.join(edgeFunctionDir, 'worker.mjs'),
+    ),
+    fs.rename(
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
+      path.join(edgeFunctionDir, 'worker.mjs.map'),
+    ),
+    Bun.write(
+      path.join(edgeFunctionDir, 'index.mjs'),
+      `export { default } from './worker.mjs';
+export const config = {
+      path: "/*",
+      excludedPath: ${JSON.stringify(staticAssets)},
+};`,
+    ),
+  ]);
 
   spinner.succeed();
 };
