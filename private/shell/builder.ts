@@ -1,12 +1,6 @@
 import path from 'node:path';
 
-import {
-  outputDirectory,
-  serverInputFile,
-  serverNetlifyInputFile,
-  serverOutputFile,
-  serverVercelInputFile,
-} from '@/private/shell/constants';
+import { outputDirectory, serverInputFolder } from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -25,46 +19,46 @@ import {
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
+
+import type { DeploymentProvider } from '@/private/universal/types/util';
 
 const provider = import.meta.env.__BLADE_PROVIDER;
+const bundleId = generateUniqueId();
 
 await cleanUp();
-await prepareClientAssets('production', provider);
+await prepareClientAssets('production', bundleId, provider);
 
 const serverSpinner = logSpinner('Performing server build (production)').start();
+const customHandlers: Array<DeploymentProvider> = ['vercel'];
 
-function getEntrypointFile(): string {
-  switch (provider) {
-    case 'netlify':
-      return serverNetlifyInputFile;
-    case 'vercel':
-      return serverVercelInputFile;
-    default:
-      return serverInputFile;
+const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
+  const output = await Bun.build({
+    entrypoints: [path.join(serverInputFolder, `${provider}.js`)],
+    outdir: outputDirectory,
+    plugins: [
+      getClientReferenceLoader('production'),
+      getFileListLoader(true),
+      getMdxLoader('production'),
+      getReactAriaLoader(),
+    ],
+    minify: true,
+    sourcemap: 'external',
+    target: provider === 'vercel' ? 'node' : 'browser',
+    define: mapProviderInlineDefinitions(provider),
+  });
+
+  handleBuildLogs(output);
+
+  if (!output.success) {
+    serverSpinner.fail();
+    process.exit(1);
   }
-}
+};
 
-const output = await Bun.build({
-  entrypoints: [getEntrypointFile()],
-  outdir: outputDirectory,
-  plugins: [
-    getClientReferenceLoader('production'),
-    getFileListLoader(true),
-    getMdxLoader('production'),
-    getReactAriaLoader(),
-  ],
-  naming: `[dir]/${path.basename(serverOutputFile)}`,
-  minify: true,
-  sourcemap: 'external',
-  target: provider === 'vercel' ? 'node' : 'browser',
-  define: mapProviderInlineDefinitions(),
-});
-
-if (output.success) {
-  serverSpinner.succeed();
-} else {
-  serverSpinner.fail();
-}
+await Promise.all([
+  buildEntrypoint(customHandlers.includes(provider) ? provider : 'edge-worker'),
+]);
 
 switch (provider) {
   case 'cloudflare': {
@@ -79,8 +73,4 @@ switch (provider) {
     await transformToVercelBuildOutput();
     break;
   }
-  default:
-    break;
 }
-
-handleBuildLogs(output);

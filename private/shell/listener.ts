@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { type Server, plugin } from 'bun';
 import chalk from 'chalk';
 
@@ -5,8 +6,7 @@ import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-  serverInputFile,
-  serverOutputFile,
+  serverInputFolder,
 } from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
@@ -20,13 +20,16 @@ import {
   prepareClientAssets,
 } from '@/private/shell/utils';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const environment = Bun.env['BLADE_ENV'];
 const port = Bun.env['__BLADE_PORT'];
 
 if (environment === 'development') {
+  const bundleId = generateUniqueId();
+
   await cleanUp();
-  await prepareClientAssets('development');
+  await prepareClientAssets('development', bundleId, 'edge-worker');
 
   plugin(getClientReferenceLoader(environment));
   plugin(getFileListLoader(false));
@@ -45,7 +48,10 @@ if (environment === 'development') {
 }
 
 const requestHandler = await import(
-  environment === 'development' ? serverInputFile : serverOutputFile
+  path.join(
+    environment === 'development' ? serverInputFolder : outputDirectory,
+    'edge-worker.js',
+  )
 );
 
 const assetHeaders: Record<string, string> =
