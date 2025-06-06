@@ -29,10 +29,11 @@ const bundleId = generateUniqueId();
 await cleanUp();
 await prepareClientAssets('production', bundleId, provider);
 
-const serverSpinner = logSpinner('Performing server build (production)').start();
 const customHandlers: Array<DeploymentProvider> = ['netlify', 'vercel'];
 
 const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
+  const serverSpinner = logSpinner('Performing server build (production)').start();
+
   const output = await Bun.build({
     entrypoints: [path.join(serverInputFolder, `${provider}.js`)],
     outdir: outputDirectory,
@@ -50,10 +51,12 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
 
   handleBuildLogs(output);
 
-  if (!output.success) {
-    serverSpinner.fail();
-    process.exit(1);
+  if (output.success) {
+    serverSpinner.succeed();
+    return;
   }
+
+  serverSpinner.fail();
 };
 
 await Promise.all([
