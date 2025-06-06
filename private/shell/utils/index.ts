@@ -30,9 +30,7 @@ import {
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { IS_DEV } from '@/private/universal/utils/constants';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
