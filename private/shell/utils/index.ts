@@ -30,7 +30,6 @@ import {
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
-import { IS_DEV } from '@/private/universal/utils/constants';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -315,11 +314,6 @@ export const prepareClientAssets = async (
     { type: 'js', source: getOutputFile(bundleId, 'js') },
     { type: 'css', source: getOutputFile(bundleId, 'css') },
   ];
-
-  // In production, load the service worker script.
-  if (!IS_DEV) {
-    assets.push({ type: 'worker', source: '/service-worker.js' });
-  }
 
   import.meta.env.__BLADE_ASSETS = JSON.stringify(assets);
   import.meta.env.__BLADE_ASSETS_ID = bundleId;
