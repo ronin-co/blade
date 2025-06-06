@@ -65,7 +65,9 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
 };
 
 await Promise.all([
-  buildEntrypoint(customHandlers.includes(provider) ? provider : 'edge-worker'),
+  buildEntrypoint(
+    customHandlers.includes(provider) ? provider : defaultDeploymentProvider,
+  ),
   buildEntrypoint('service-worker'),
 ]);
 
