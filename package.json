@@ -53,7 +53,6 @@
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ronin/blade": "0.7.21-ben-netlify-adapter-experimental-568",
     "@ronin/compiler": "0.18.8",
     "@ronin/react": "0.1.4",
     "@ronin/syntax": "0.2.43",
