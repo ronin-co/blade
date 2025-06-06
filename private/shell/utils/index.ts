@@ -30,7 +30,6 @@ import {
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
-import { IS_DEV } from '@/private/universal/utils/constants';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -143,6 +142,7 @@ export const setEnvironmentVariables = (options: {
   isBuilding: boolean;
   isServing: boolean;
   isLoggingQueries: boolean;
+  enableServiceWorker: boolean;
   port: number;
   projects: string[];
 }) => {
@@ -157,6 +157,7 @@ export const setEnvironmentVariables = (options: {
   // Get the current provider based on the environment variables.
   const provider = getProvider();
   import.meta.env.__BLADE_PROVIDER = provider;
+  import.meta.env.__BLADE_SERVICE_WORKER = options.enableServiceWorker;
 
   if (provider === 'cloudflare') {
     import.meta.env['BLADE_APP_TOKEN'] ??= '';
@@ -263,6 +264,7 @@ export const prepareClientAssets = async (
 
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
   const isDefaultProvider = provider === defaultDeploymentProvider;
+  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER;
 
   const output = await Bun.build({
     entrypoints: [clientInputFile],
@@ -311,7 +313,7 @@ export const prepareClientAssets = async (
   ];
 
   // In production, load the service worker script.
-  if (!IS_DEV) {
+  if (enableServiceWorker) {
     assets.push({ type: 'worker', source: '/service-worker.js' });
   }
 
