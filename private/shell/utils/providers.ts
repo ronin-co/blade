@@ -85,12 +85,12 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, 'edge-worker.js'),
+      path.join(staticFilesDir, 'vercel.js'),
       path.join(functionDir, 'worker.mjs'),
     ),
 
     fs.rename(
-      path.join(staticFilesDir, 'edge-worker.js.map'),
+      path.join(staticFilesDir, 'vercel.js.map'),
       path.join(functionDir, 'worker.mjs.map'),
     ),
 
