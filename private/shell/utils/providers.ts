@@ -203,15 +203,15 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   await Promise.all([
     fs.rename(
       path.join(outputDirectory, 'edge-worker.js'),
-      path.join(edgeFunctionDir, 'edge-worker.mjs'),
+      path.join(edgeFunctionDir, 'worker.mjs'),
     ),
     fs.rename(
       path.join(outputDirectory, 'edge-worker.js.map'),
-      path.join(edgeFunctionDir, 'edge-worker.mjs.map'),
+      path.join(edgeFunctionDir, 'worker.mjs.map'),
     ),
     Bun.write(
       path.join(edgeFunctionDir, 'index.mjs'),
-      `export { default } from './edge-worker.mjs';
+      `export { default } from './worker.mjs';
 export const config = {
       path: "/*",
       excludedPath: ${JSON.stringify(staticAssets)},
