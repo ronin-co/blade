@@ -9,7 +9,7 @@
   },
   "author": "ronin",
   "dependencies": {
-    "@ronin/blade": "^0.7.21-ben-netlify-adapter-experimental-569",
+    "@ronin/blade": "^0.7.21-ben-netlify-adapter-experimental-571",
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510"
   },
