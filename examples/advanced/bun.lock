@@ -4,7 +4,7 @@
     "": {
       "name": "advanced-example",
       "dependencies": {
-        "@ronin/blade": "^0.7.21-ben-netlify-adapter-experimental-565",
+        "@ronin/blade": "^0.7.21-ben-netlify-adapter-experimental-566",
         "react": "0.0.0-experimental-df12d7eac-20230510",
         "react-dom": "0.0.0-experimental-df12d7eac-20230510",
       },
@@ -63,7 +63,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@ronin/blade": ["@ronin/blade@0.7.21-ben-netlify-adapter-experimental-565", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-XgGEQLyA15T8VcTZsgLGNpNXvuCI70Et356ciyE5RdpiLUTNOg+bCacEMKWMHF5QNTMUATlDUA5cd3O/x59w7w=="],
+    "@ronin/blade": ["@ronin/blade@0.7.21-ben-netlify-adapter-experimental-566", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-B1CYw3C4vEcVvKSELuHYJtJI2AC+SWnmBE8yHbBAeRx4bLCAIksumk9qlSCxtgBIvzNyJy96V0hl84u9E6RzMg=="],
 
     "@ronin/cli": ["@ronin/cli@0.3.19", "", { "dependencies": { "@dprint/formatter": "0.4.1", "@dprint/typescript": "0.93.3", "@iarna/toml": "2.2.5", "@inquirer/prompts": "7.2.3", "chalk-template": "1.1.0", "get-port": "7.1.0", "ini": "5.0.0", "json5": "2.2.3", "open": "10.1.0", "ora": "8.1.1", "resolve-from": "5.0.0" }, "peerDependencies": { "@ronin/codegen": ">=1.7.4", "@ronin/compiler": ">=0.18.8", "@ronin/engine": ">=0.1.23", "@ronin/syntax": ">=0.2.42" } }, "sha512-2M34NVDR/FRcjwhSFKMOVnI0uY0VFqrwotK7P+hQRwiOhE9juTsIPpNBSXPQwHRQBbHdoCxm1udibspDMphBXA=="],
 
