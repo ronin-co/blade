@@ -50,7 +50,7 @@ if (environment === 'development') {
 const requestHandler = await import(
   path.join(
     environment === 'development' ? serverInputFolder : outputDirectory,
-    'worker.js',
+    'edge-worker.js',
   )
 );
 

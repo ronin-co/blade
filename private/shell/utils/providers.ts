@@ -70,7 +70,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
-  const functionDir = path.resolve(vercelOutputDir, 'functions', '_worker.func');
+  const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
   const vercelOutputDirExists = await fs.exists(vercelOutputDir);
   if (vercelOutputDirExists) await fs.rmdir(vercelOutputDir, { recursive: true });
@@ -84,13 +84,13 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, 'worker.js'),
-      path.join(functionDir, '_worker.mjs'),
+      path.join(staticFilesDir, 'edge-worker.js'),
+      path.join(functionDir, 'worker.mjs'),
     ),
 
     fs.rename(
-      path.join(staticFilesDir, 'worker.js.map'),
-      path.join(functionDir, '_worker.mjs.map'),
+      path.join(staticFilesDir, 'edge-worker.js.map'),
+      path.join(functionDir, 'worker.mjs.map'),
     ),
 
     Bun.write(
@@ -103,7 +103,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
           },
           {
             src: '^(?:/(.*?))?/?$',
-            dest: '_worker',
+            dest: 'worker',
           },
         ],
       } satisfies VercelConfig),
@@ -111,7 +111,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     Bun.write(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
-        handler: '_worker.mjs',
+        handler: 'worker.mjs',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
       } satisfies VercelNodejsServerlessFunctionConfig),
@@ -132,7 +132,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   const promises = new Array<Promise<unknown>>(
     Bun.write(
       path.join(outputDirectory, '.assetsignore'),
-      ['worker.js', 'worker.js.map', '_routes.json'].join('\n'),
+      ['edge-worker.js', 'edge-worker.js.map', '_routes.json'].join('\n'),
     ),
   );
 
@@ -156,7 +156,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
           {
             $schema: 'node_modules/wrangler/config-schema.json',
             name: currentDirectoryName,
-            main: '.blade/worker.js',
+            main: '.blade/edge-worker.js',
             compatibility_date: '2025-06-02',
             compatibility_flags: ['nodejs_compat'],
             assets: {
