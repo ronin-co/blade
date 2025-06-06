@@ -86,12 +86,12 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, defaultDeploymentProvider),
+      path.join(staticFilesDir, `${defaultDeploymentProvider}.js`),
       path.join(functionDir, 'worker.mjs'),
     ),
 
     fs.rename(
-      path.join(staticFilesDir, `${defaultDeploymentProvider}.map`),
+      path.join(staticFilesDir, `${defaultDeploymentProvider}.js.map`),
       path.join(functionDir, 'worker.mjs.map'),
     ),
 
@@ -203,11 +203,11 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(outputDirectory, defaultDeploymentProvider),
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
       path.join(edgeFunctionDir, 'worker.mjs'),
     ),
     fs.rename(
-      path.join(outputDirectory, `${defaultDeploymentProvider}.map`),
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
       path.join(edgeFunctionDir, 'worker.mjs.map'),
     ),
     Bun.write(
