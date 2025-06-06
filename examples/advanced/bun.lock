@@ -4,7 +4,7 @@
     "": {
       "name": "advanced-example",
       "dependencies": {
-        "@ronin/blade": "^0.7.21-ben-netlify-adapter-experimental-566",
+        "@ronin/blade": "^0.7.21-ben-netlify-adapter-experimental-569",
         "react": "0.0.0-experimental-df12d7eac-20230510",
         "react-dom": "0.0.0-experimental-df12d7eac-20230510",
       },
@@ -63,7 +63,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@ronin/blade": ["@ronin/blade@0.7.21-ben-netlify-adapter-experimental-566", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-B1CYw3C4vEcVvKSELuHYJtJI2AC+SWnmBE8yHbBAeRx4bLCAIksumk9qlSCxtgBIvzNyJy96V0hl84u9E6RzMg=="],
+    "@ronin/blade": ["@ronin/blade@0.7.21-ben-netlify-adapter-experimental-569", "", { "dependencies": { "@ronin/blade": "0.7.21-ben-netlify-adapter-experimental-568", "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-J95ygxvunSRgFBIYJaO7g4wEwd1RdjDi0Q+05U8blp2YSLFtG+hG5JnAQxxrI++nMrb18lM4OHASYCeZ41IKTQ=="],
 
     "@ronin/cli": ["@ronin/cli@0.3.19", "", { "dependencies": { "@dprint/formatter": "0.4.1", "@dprint/typescript": "0.93.3", "@iarna/toml": "2.2.5", "@inquirer/prompts": "7.2.3", "chalk-template": "1.1.0", "get-port": "7.1.0", "ini": "5.0.0", "json5": "2.2.3", "open": "10.1.0", "ora": "8.1.1", "resolve-from": "5.0.0" }, "peerDependencies": { "@ronin/codegen": ">=1.7.4", "@ronin/compiler": ">=0.18.8", "@ronin/engine": ">=0.1.23", "@ronin/syntax": ">=0.2.42" } }, "sha512-2M34NVDR/FRcjwhSFKMOVnI0uY0VFqrwotK7P+hQRwiOhE9juTsIPpNBSXPQwHRQBbHdoCxm1udibspDMphBXA=="],
 
@@ -274,6 +274,8 @@
     "yoctocolors-cjs": ["yoctocolors-cjs@2.1.2", "", {}, "sha512-cYVsTjKl8b+FrnidjibDWskAv7UKOfcwaVZdp/it9n1s9fU3IkgDbhdIRKCW4JDsAlECJY0ytoVPT3sK6kideA=="],
 
     "zod": ["zod@3.24.1", "", {}, "sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A=="],
+
+    "@ronin/blade/@ronin/blade": ["@ronin/blade@0.7.21-ben-netlify-adapter-experimental-568", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-DOIXEqHPfXfLi4MaaUW+2RWcEPwex7XM0ab+yqmOn6r26Dk/+U1BQ2tkG8fmzCO6KkfnrwfML1MfT3SAP9+NLw=="],
 
     "@tailwindcss/oxide-wasm32-wasi/@emnapi/core": ["@emnapi/core@1.4.3", "", { "dependencies": { "@emnapi/wasi-threads": "1.0.2", "tslib": "^2.4.0" }, "bundled": true }, "sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g=="],
 
