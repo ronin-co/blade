@@ -59,12 +59,10 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
 
   handleBuildLogs(output);
 
-  if (output.success) {
-    serverSpinner.succeed();
-    return;
+  if (!output.success) {
+    serverSpinner.fail();
+    process.exit(1);
   }
-
-  serverSpinner.fail();
 };
 
 await Promise.all([
