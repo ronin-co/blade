@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { outputDirectory } from '@/private/shell/constants';
+import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
 import { logSpinner } from '@/private/shell/utils';
 
 import type {
@@ -19,7 +19,7 @@ export const getProvider = (): DeploymentProvider => {
   if (Bun.env['CF_PAGES'] || Bun.env['WORKERS_CI']) return 'cloudflare';
   if (Bun.env['NETLIFY']) return 'netlify';
   if (Bun.env['VERCEL']) return 'vercel';
-  return 'edge-worker';
+  return defaultDeploymentProvider;
 };
 
 /**
@@ -40,6 +40,7 @@ export const mapProviderInlineDefinitions = (
   switch (provider) {
     case 'cloudflare':
     case 'netlify':
+    case 'service-worker':
     case 'vercel': {
       return Object.fromEntries(
         Object.entries(import.meta.env)

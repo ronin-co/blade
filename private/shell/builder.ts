@@ -1,6 +1,10 @@
 import path from 'node:path';
 
-import { outputDirectory, serverInputFolder } from '@/private/shell/constants';
+import {
+  defaultDeploymentProvider,
+  outputDirectory,
+  serverInputFolder,
+} from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -19,9 +23,8 @@ import {
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
-
 import type { DeploymentProvider } from '@/private/universal/types/util';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const provider = import.meta.env.__BLADE_PROVIDER;
 const bundleId = generateUniqueId();
@@ -43,6 +46,7 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
       getMdxLoader('production'),
       getReactAriaLoader(),
     ],
+    naming: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}.js`,
     minify: true,
     sourcemap: 'external',
     target: provider === 'vercel' ? 'node' : 'browser',

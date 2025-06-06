@@ -38,6 +38,11 @@ const { values, positionals } = parseArgs({
       type: 'string',
       default: Bun.env['PORT'] || '3000',
     },
+    sw: {
+      type: 'boolean',
+      default: false,
+      description: 'Enable service worker support',
+    },
   },
   strict: true,
   allowPositionals: true,
@@ -47,6 +52,7 @@ const isInitializing = positionals.includes('init');
 const isBuilding = positionals.includes('build');
 const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
+const enableServiceWorker = values.sw;
 
 if (isInitializing) {
   const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
@@ -101,6 +107,7 @@ setEnvironmentVariables({
   isBuilding,
   isServing,
   isLoggingQueries: values.queries || false,
+  enableServiceWorker,
   port,
   projects,
 });

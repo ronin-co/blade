@@ -1,5 +1,4 @@
 import path from 'node:path';
-
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 
@@ -20,13 +19,13 @@ export const directoriesToParse = {
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
 export const clientOutputDirectory = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
 export const clientManifestFile = path.join(outputDirectory, 'client-manifest.json');
-export const serverOutputFile = path.join(outputDirectory, '_worker.js');
 
 // The path at which people can define a custom Hono app that Blade will mount.
 export const routerInputFile = path.join(process.cwd(), 'router.ts');
 
 export const styleInputFile = path.join(process.cwd(), 'styles.css');
 export const clientInputFile = require.resolve('./private/client/index.js');
+
 const serverInputFile = require.resolve(
   './private/server/worker/providers/edge-worker.js',
 );
@@ -36,3 +35,5 @@ export const loggingPrefixes = {
   info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
   error: `${chalk.bold(gradient(['#930024', '#d4143e'])('ERROR'))}  `,
 };
+
+export const defaultDeploymentProvider = 'edge-worker';
