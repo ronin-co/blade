@@ -202,11 +202,11 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(outputDirectory, 'edge-worker.js'),
+      path.join(outputDirectory, 'netlify.js'),
       path.join(edgeFunctionDir, 'worker.mjs'),
     ),
     fs.rename(
-      path.join(outputDirectory, 'edge-worker.js.map'),
+      path.join(outputDirectory, 'netlify.js.map'),
       path.join(edgeFunctionDir, 'worker.mjs.map'),
     ),
     Bun.write(
