@@ -23,39 +23,30 @@ export const getProvider = (): DeploymentProvider => {
 };
 
 /**
- * Remap inline environment variable definitions.
+ * Inline environment variables for runtime environments like Cloudflare, which do not
+ * implement support for `import.meta.env`.
  *
- * @description This is primarily used to inline all environment variables on
- * Cloudflare, Netlify or Vercel, because their runtime does not have support for
- * `import.meta.env`. Everywhere else, only inline what is truly necessary
- * (what cannot be made available at runtime).
+ * @param provider - The deployment provider to evaluate.
  *
- * @param provider - The deployment provider to map the inline definitions for.
- *
- * @returns A record / object of environment variables to be inlined.
+ * @returns An object of environment variables to be inlined.
  */
 export const mapProviderInlineDefinitions = (
   provider: DeploymentProvider,
 ): Record<string, string> => {
-  switch (provider) {
-    case 'cloudflare':
-    case 'netlify':
-    case 'service-worker':
-    case 'vercel': {
-      return Object.fromEntries(
-        Object.entries(import.meta.env)
-          .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
-          .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
-      );
-    }
-    default:
-      return {
-        'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
-        'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
-          import.meta.env.__BLADE_ASSETS_ID,
-        ),
-      };
+  if (provider === 'edge-worker') {
+    return {
+      'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
+      'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
+        import.meta.env.__BLADE_ASSETS_ID,
+      ),
+    };
   }
+
+  return Object.fromEntries(
+    Object.entries(import.meta.env)
+      .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
+      .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
+  );
 };
 
 /**
