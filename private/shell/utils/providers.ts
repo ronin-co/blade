@@ -1,53 +1,52 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { outputDirectory } from '@/private/shell/constants';
+import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
 import { logSpinner } from '@/private/shell/utils';
 
 import type {
   VercelConfig,
   VercelNodejsServerlessFunctionConfig,
 } from '@/private/shell/types';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 
 /**
  * Get the name of the provider based on the environment variables.
  *
  * @returns A string representing the provider name.
  */
-export const getProvider = (): typeof Bun.env.__BLADE_PROVIDER => {
-  if (Bun.env['CF_PAGES'] || Bun.env['WORKERS_CI']) return 'cloudflare';
+export const getProvider = (): DeploymentProvider => {
+  if (Bun.env['WORKERS_CI']) return 'cloudflare';
+  if (Bun.env['NETLIFY']) return 'netlify';
   if (Bun.env['VERCEL']) return 'vercel';
-  return '';
+  return defaultDeploymentProvider;
 };
 
 /**
- * Remap inline environment variable definitions.
+ * Inline environment variables for runtime environments like Cloudflare, which do not
+ * implement support for `import.meta.env`.
  *
- * @description This is primarily used to inline all environment variables on
- * Cloudflare Pages or Vercel, because their runtime does not have support for
- * `import.meta.env`. Everywhere else, only inline what is truly necessary
- * (what cannot be made available at runtime).
+ * @param provider - The deployment provider to evaluate.
  *
- * @returns A record / object of environment variables to be inlined.
+ * @returns An object of environment variables to be inlined.
  */
-export const mapProviderInlineDefinitions = (): Record<string, string> => {
-  switch (import.meta.env.__BLADE_PROVIDER) {
-    case 'cloudflare':
-    case 'vercel': {
-      return Object.fromEntries(
-        Object.entries(import.meta.env)
-          .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
-          .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
-      );
-    }
-    default:
-      return {
-        'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
-        'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
-          import.meta.env.__BLADE_ASSETS_ID,
-        ),
-      };
+export const mapProviderInlineDefinitions = (
+  provider: DeploymentProvider,
+): Record<string, string> => {
+  if (provider === 'edge-worker') {
+    return {
+      'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
+      'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
+        import.meta.env.__BLADE_ASSETS_ID,
+      ),
+    };
   }
+
+  return Object.fromEntries(
+    Object.entries(import.meta.env)
+      .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
+      .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
+  );
 };
 
 /**
@@ -64,7 +63,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
-  const functionDir = path.resolve(vercelOutputDir, 'functions', '_worker.func');
+  const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
   const vercelOutputDirExists = await fs.exists(vercelOutputDir);
   if (vercelOutputDirExists) await fs.rmdir(vercelOutputDir, { recursive: true });
@@ -78,13 +77,13 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await Promise.all([
     fs.rename(
-      path.join(staticFilesDir, '_worker.js'),
-      path.join(functionDir, '_worker.mjs'),
+      path.join(staticFilesDir, `${defaultDeploymentProvider}.js`),
+      path.join(functionDir, 'worker.mjs'),
     ),
 
     fs.rename(
-      path.join(staticFilesDir, '_worker.js.map'),
-      path.join(functionDir, '_worker.mjs.map'),
+      path.join(staticFilesDir, `${defaultDeploymentProvider}.js.map`),
+      path.join(functionDir, 'worker.mjs.map'),
     ),
 
     Bun.write(
@@ -97,7 +96,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
           },
           {
             src: '^(?:/(.*?))?/?$',
-            dest: '_worker',
+            dest: 'worker',
           },
         ],
       } satisfies VercelConfig),
@@ -105,7 +104,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     Bun.write(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
-        handler: '_worker.mjs',
+        handler: 'worker.mjs',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
       } satisfies VercelNodejsServerlessFunctionConfig),
@@ -126,7 +125,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   const promises = new Array<Promise<unknown>>(
     Bun.write(
       path.join(outputDirectory, '.assetsignore'),
-      ['_worker.js', '_worker.js.map', '_routes.json'].join('\n'),
+      ['edge-worker.js', 'edge-worker.js.map', '_routes.json'].join('\n'),
     ),
   );
 
@@ -150,7 +149,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
           {
             $schema: 'node_modules/wrangler/config-schema.json',
             name: currentDirectoryName,
-            main: '.blade/_worker.js',
+            main: '.blade/edge-worker.js',
             compatibility_date: '2025-06-02',
             compatibility_flags: ['nodejs_compat'],
             assets: {
@@ -166,6 +165,51 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   }
 
   await Promise.all(promises);
+
+  spinner.succeed();
+};
+
+/**
+ * Transform to match the Netlify output structure.
+ */
+export const transformToNetlifyOutput = async (): Promise<void> => {
+  const spinner = logSpinner('Transforming to output for Netlify (production)').start();
+
+  const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
+  const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
+
+  const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
+  if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
+
+  await fs.mkdir(edgeFunctionDir, { recursive: true });
+
+  // Since edge functions do not offer a `preferStatic` option, we need to manually
+  // provide a list of all static assets to not be routed to the edge function.
+  const staticAssets = new Array<string>();
+  const glob = new Bun.Glob('./**/*');
+  for await (const file of glob.scan(outputDirectory)) {
+    if (file.startsWith('/_worker') || file.endsWith('.map')) continue;
+    staticAssets.push(file.replaceAll('./', '/'));
+  }
+
+  await Promise.all([
+    fs.rename(
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
+      path.join(edgeFunctionDir, 'worker.mjs'),
+    ),
+    fs.rename(
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
+      path.join(edgeFunctionDir, 'worker.mjs.map'),
+    ),
+    Bun.write(
+      path.join(edgeFunctionDir, 'index.mjs'),
+      `export { default } from './worker.mjs';
+export const config = {
+      path: "/*",
+      excludedPath: ${JSON.stringify(staticAssets)},
+};`,
+    ),
+  ]);
 
   spinner.succeed();
 };

@@ -4,7 +4,7 @@
     "": {
       "name": "advanced-example",
       "dependencies": {
-        "@ronin/blade": "0.7.15",
+        "@ronin/blade": "0.8.1",
         "react": "0.0.0-experimental-df12d7eac-20230510",
         "react-dom": "0.0.0-experimental-df12d7eac-20230510",
       },
@@ -63,17 +63,19 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@ronin/blade": ["@ronin/blade@0.7.15", "", { "dependencies": { "@ronin/compiler": "0.18.7", "@ronin/react": "0.1.3", "@ronin/syntax": "0.2.40", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.13" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-aRs3+bpkh3/3BUp1L+OZYFzHgVwC6/5Mv17SeTqCmUOaXiz+JMuA87F5kgnzrVrQCnOBzrlwt78DFMB23X8xvQ=="],
+    "@ronin/blade": ["@ronin/blade@0.8.1", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-TH/dEcZC77h77eo4gRb2lsD8ElCXTRU282Q/Kurz9USW+vwSOUlgrgk0/ku2bgLydRNPPWRm5L/0j2+YZ2fYWg=="],
 
-    "@ronin/cli": ["@ronin/cli@0.3.16", "", { "dependencies": { "@dprint/formatter": "0.4.1", "@dprint/typescript": "0.93.3", "@iarna/toml": "2.2.5", "@inquirer/prompts": "7.2.3", "chalk-template": "1.1.0", "get-port": "7.1.0", "ini": "5.0.0", "json5": "2.2.3", "open": "10.1.0", "ora": "8.1.1", "resolve-from": "5.0.0" }, "peerDependencies": { "@ronin/compiler": ">=0.18.6", "@ronin/engine": ">=0.1.23", "@ronin/syntax": ">=0.2.40" } }, "sha512-oqMfVeYaliPIwkmnGG4fgJFWGcW2nbFgajDerm6zi7JhcPHK0/GA9/+16gWrdVFRJFuFVeeL6zDtsey8G9IZkA=="],
+    "@ronin/cli": ["@ronin/cli@0.3.19", "", { "dependencies": { "@dprint/formatter": "0.4.1", "@dprint/typescript": "0.93.3", "@iarna/toml": "2.2.5", "@inquirer/prompts": "7.2.3", "chalk-template": "1.1.0", "get-port": "7.1.0", "ini": "5.0.0", "json5": "2.2.3", "open": "10.1.0", "ora": "8.1.1", "resolve-from": "5.0.0" }, "peerDependencies": { "@ronin/codegen": ">=1.7.4", "@ronin/compiler": ">=0.18.8", "@ronin/engine": ">=0.1.23", "@ronin/syntax": ">=0.2.42" } }, "sha512-2M34NVDR/FRcjwhSFKMOVnI0uY0VFqrwotK7P+hQRwiOhE9juTsIPpNBSXPQwHRQBbHdoCxm1udibspDMphBXA=="],
 
-    "@ronin/compiler": ["@ronin/compiler@0.18.7", "", { "peerDependencies": { "@ronin/engine": ">=0.1.23" } }, "sha512-2npAZw80sZ1sFM3oE6iuflCG8xrLT5NAe5WvkkCAX9MWiBJmnJ0Np0IthsH9SCx1pw6yWI+ksaojqFnHh9EEKg=="],
+    "@ronin/codegen": ["@ronin/codegen@1.7.4", "", { "dependencies": { "typescript": "5.7.3" } }, "sha512-snvGHHjiy66mcVm6KG3lHXIq3U/yze1SgNoSZzrKq9vHTG4thkulbnXOXRWjagnFH2HPv0xcQQNW7a8VT0XjZg=="],
+
+    "@ronin/compiler": ["@ronin/compiler@0.18.8", "", { "peerDependencies": { "@ronin/engine": ">=0.1.23" } }, "sha512-9IvxXVmaoT+5ECsUBTkIY6N2GdC8o3HpmfpHYjyMTDXYhg0mrxg8Jgf1cisg/PxFyoOTOr5fkMzZ7nyueH+KvA=="],
 
     "@ronin/engine": ["@ronin/engine@0.1.23", "", { "dependencies": { "zod": "3.24.1" } }, "sha512-QDeikl4YEBFHEdful9+x5e8lLrxXvjhubJEYxnFfM7SJoFC9OxoE+Dq4g6mVzRuCI+gN+Odkdy3gd2ARr7eXFg=="],
 
-    "@ronin/react": ["@ronin/react@0.1.3", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.7", "react": ">=18.3.1", "ronin": ">=6.6.13" } }, "sha512-M84VWguyDLcpysP/unIbRomb2K7shfIuyxjaGseUIC/4ReqgZ18FV9HvsXyAqekpQKGB6tDBTVodJUbHMycPvA=="],
+    "@ronin/react": ["@ronin/react@0.1.4", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.7", "react": ">=18.3.1", "ronin": ">=6.6.13" } }, "sha512-VG+lgUBrJ2qKxzgpq9Wk3OV8r4u1L5Zv7UiLOkFm142W8XrZLnV0FyRW8QmFcMDtLPdWjqwfUYGYGZHR5EATQA=="],
 
-    "@ronin/syntax": ["@ronin/syntax@0.2.40", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.0" } }, "sha512-Uv6A4jBJrN0gZC3nSguUgUPmcdmriQjqSs9nFQlMJsVtFrFexPTUUDynWD+mR6cqqUBMR/ecQou19WR7yeEGpA=="],
+    "@ronin/syntax": ["@ronin/syntax@0.2.43", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.8" } }, "sha512-1ieYLB3SqmD2JfavuKcf/0gTwgZD4X859FDJ+8R5oO3BS1EUfGpfk1kQ0sYUgp+fM4pu0+4gjbHlNDi6Z998ag=="],
 
     "@tailwindcss/node": ["@tailwindcss/node@4.1.6", "", { "dependencies": { "@ampproject/remapping": "^2.3.0", "enhanced-resolve": "^5.18.1", "jiti": "^2.4.2", "lightningcss": "1.29.2", "magic-string": "^0.30.17", "source-map-js": "^1.2.1", "tailwindcss": "4.1.6" } }, "sha512-ed6zQbgmKsjsVvodAS1q1Ld2BolEuxJOSyyNc+vhkjdmfNUDCmQnlXBfQkHrlzNmslxHsQU/bFmzcEbv4xXsLg=="],
 
@@ -233,7 +235,7 @@
 
     "restore-cursor": ["restore-cursor@5.1.0", "", { "dependencies": { "onetime": "^7.0.0", "signal-exit": "^4.1.0" } }, "sha512-oMA2dcrw6u0YfxJQXm342bFKX/E4sG9rbTzO9ptUcR/e8A33cHuvStiYOwH7fszkZlZ1z/ta9AAoPk2F4qIOHA=="],
 
-    "ronin": ["ronin@6.6.13", "", { "dependencies": { "@ronin/cli": "0.3.16", "@ronin/compiler": "0.18.7", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.40" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-CLpk4RvsOu0g0fKVpPnNo78e99PpsLnJqY71f9TYxaL3NLOm1ao0nte682tSI+s2wIGVzC/HVYflDMx0x9dTKg=="],
+    "ronin": ["ronin@6.6.16", "", { "dependencies": { "@ronin/cli": "0.3.19", "@ronin/compiler": "0.18.8", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.43" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-LQjA5OogMkGp4xo8Q89H2jXlNtiuJL3Iun743kK0I87ZOrlMmmfth+JsQaPLo0oPrMfCtFu/riB5EQs9EgEbuQ=="],
 
     "run-applescript": ["run-applescript@7.0.0", "", {}, "sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A=="],
 
@@ -260,6 +262,8 @@
     "tmp": ["tmp@0.0.33", "", { "dependencies": { "os-tmpdir": "~1.0.2" } }, "sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw=="],
 
     "type-fest": ["type-fest@0.21.3", "", {}, "sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w=="],
+
+    "typescript": ["typescript@5.7.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw=="],
 
     "undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
