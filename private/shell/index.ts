@@ -73,13 +73,18 @@ if (isInitializing) {
     console.error(error);
   }
 
-  await Bun.write(
-    path.join(targetDirectory, '.gitignore'),
-    `node_modules
-.env
-.blade
-`,
-  );
+  try {
+    await Bun.write(
+      path.join(targetDirectory, '.gitignore'),
+      `node_modules
+      .env
+      .blade
+      `,
+    );
+  } catch (error) {
+    logSpinner('Failed to create .gitignore').fail();
+    console.error(error);
+  }
 
   if (success) {
     logSpinner('Created example app').succeed();
