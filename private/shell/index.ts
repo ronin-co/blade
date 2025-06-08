@@ -4,7 +4,7 @@ import { watch } from 'node:fs';
 import { exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import type { SpawnOptions } from 'bun';
+import { $, type SpawnOptions } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
 import {
@@ -65,6 +65,21 @@ if (isInitializing) {
     originDirectory,
     targetDirectory,
   ]);
+
+  try {
+    await $`cd ${targetDirectory} && git init`.quiet();
+  } catch (error) {
+    logSpinner('Failed to initialize git repository. Is git installed?').fail();
+    console.error(error);
+  }
+
+  await Bun.write(
+    path.join(targetDirectory, '.gitignore'),
+    `node_modules
+.env
+.blade
+`,
+  );
 
   if (success) {
     logSpinner('Created example app').succeed();
