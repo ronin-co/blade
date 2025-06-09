@@ -1,7 +1,6 @@
 declare module 'bun' {
   interface Env {
     // Can be provided manually.
-    BLADE_APP_TOKEN: string;
     BLADE_DATA_WORKER: string;
     BLADE_STORAGE_WORKER: string;
 
