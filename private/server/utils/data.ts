@@ -92,7 +92,6 @@ export const getRoninOptions = (
 
   return {
     triggers,
-    token: import.meta.env.BLADE_APP_TOKEN,
     fetch: dataFetcher,
     waitUntil: getWaitUntil(c),
   };

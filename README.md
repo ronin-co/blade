@@ -390,7 +390,7 @@ In Blade, however, since Blade purposefully does not support Suspense and also d
 
 Specifically, the hook reflects the full capabilities of the [RONIN query syntax](https://ronin.co/docs/queries) (which is as powerful as SQL) and thereby allows for easily querying records on your database.
 
-By default, if you provide a `BLADE_APP_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using [triggers](https://ronin.co/docs/models/triggers) instead.
+By default, if you provide a `RONIN_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using [triggers](https://ronin.co/docs/models/triggers) instead.
 
 ```tsx
 import { use } from '@ronin/blade/server/hooks';

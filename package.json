@@ -58,7 +58,7 @@
     "@ronin/syntax": "0.2.43",
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
-    "ronin": "6.6.16"
+    "ronin": "6.6.17"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
