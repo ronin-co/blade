@@ -1,0 +1,80 @@
+---
+title: Introduction
+---
+
+import { AlertCard } from "@/components/alert";
+
+
+# Introduction
+
+To get started with RONIN after signing up, first [define a model](/docs/models) and apply it to your database.
+
+Next, to query your RONIN database, start by creating a new App (such as “Website”) in the “Apps” section of your space on the dashboard (left sidebar), which will provide you with a token.
+
+After that, install the [RONIN client](https://www.npmjs.com/package/ronin) on your project:
+
+```bash title="Terminal"
+npm install ronin
+```
+
+<AlertCard>
+  RONIN currently only supports [Bun](https://bun.sh) during development.
+</AlertCard>
+
+Once the package is installed, make sure to define a `RONIN_TOKEN` environment variable on your project that contains the App Token you've created on the dashboard. The RONIN client will automatically make use of this environment variable to authenticate your queries (you can alternatively pass the token using [config](/docs/client)).
+
+Lastly, you can then start sending [queries](/docs/queries) to your RONIN database:
+
+```ts
+import { add } from 'ronin';
+
+await add.account.with({
+    name: 'Elaine Jones',
+    handle: 'elaine',
+});
+```
+
+In the example above, we're adding a new record for the "account" model. Depending on the models you've added to your database, make sure to replace "account" with the slug of the model you've added. Additionally, the fields must match the fields you've defined on your respective model.
+
+That's it! You can now start using RONIN to build your application!
+
+Next up, we recommend learning more about the [RONIN query syntax](/docs/queries), which allows you to construct the ideal database queries for your project.
+
+Feel free to join our [Discord community](https://discord.gg/ronin) if you have any questions or need help getting started. The RONIN team would be happy to guide you in realtime.
+
+# Collaboration
+
+To get started with RONIN after signing up, first [define a model](/docs/models) and apply it to your database.
+
+Next, to query your RONIN database, start by creating a new App (such as “Website”) in the “Apps” section of your space on the dashboard (left sidebar), which will provide you with a token.
+
+After that, install the [RONIN client](https://www.npmjs.com/package/ronin) on your project:
+
+```bash title="Terminal"
+npm install ronin
+```
+
+<AlertCard>
+  RONIN currently only supports [Bun](https://bun.sh) during development.
+</AlertCard>
+
+Once the package is installed, make sure to define a `RONIN_TOKEN` environment variable on your project that contains the App Token you've created on the dashboard. The RONIN client will automatically make use of this environment variable to authenticate your queries (you can alternatively pass the token using [config](/docs/client)).
+
+Lastly, you can then start sending [queries](/docs/queries) to your RONIN database:
+
+```ts
+import { add } from 'ronin';
+
+await add.account.with({
+    name: 'Elaine Jones',
+    handle: 'elaine',
+});
+```
+
+In the example above, we're adding a new record for the "account" model. Depending on the models you've added to your database, make sure to replace "account" with the slug of the model you've added. Additionally, the fields must match the fields you've defined on your respective model.
+
+That's it! You can now start using RONIN to build your application!
+
+Next up, we recommend learning more about the [RONIN query syntax](/docs/queries), which allows you to construct the ideal database queries for your project.
+
+Feel free to join our [Discord community](https://discord.gg/ronin) if you have any questions or need help getting started. The RONIN team would be happy to guide you in realtime.
