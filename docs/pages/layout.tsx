@@ -1,8 +1,8 @@
-import { Bookmark } from '@/components/bookmark';
 import type { CodeProps } from '@/components/code';
 import { Code } from '@/components/code';
 import { Heading } from '@/components/heading.client';
 import { Navbar } from '@/components/navbar';
+import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
 import { useMetadata } from '@ronin/blade/server/hooks';
 
@@ -27,15 +27,6 @@ const DocsLayout = ({
     },
   ];
 
-  const onThisPage = [
-    {
-      id: 'introduction',
-      name: 'Introduction',
-      href: '/docs#introduction',
-      parentItem: '',
-    },
-  ];
-
   return (
     <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
       <Navbar />
@@ -49,10 +40,7 @@ const DocsLayout = ({
         {children}
       </div>
       <div className="fixed top-24 right-20 w-40">
-        <Bookmark
-          title="On this page"
-          items={onThisPage}
-        />
+        <OnThisPage />
       </div>
     </div>
   );
