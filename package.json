@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@hono/node-server": "1.14.1",
+    "@hono/node-server": "1.14.4",
     "@mdx-js/mdx": "3.0.1",
     "@types/async-retry": "1.4.8",
     "@types/bun": "1.2.4",
@@ -83,7 +83,7 @@
     "get-port": "7.1.0",
     "get-value": "3.0.1",
     "gradient-string": "2.0.2",
-    "hono": "4.6.20",
+    "hono": "4.7.11",
     "js-yaml": "4.1.0",
     "ora": "8.1.0",
     "p-queue": "8.0.1",
