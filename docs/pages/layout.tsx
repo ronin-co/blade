@@ -40,10 +40,6 @@ const DocsLayout = ({
         {children}
       </div>
       <div className="fixed top-24 right-20 w-40">
-        {/*     <Bookmark
-          title="On this page"
-          items={onThisPage}
-        /> */}
         <OnThisPage />
       </div>
     </div>
