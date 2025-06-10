@@ -26,10 +26,22 @@ const menuItems = [
     parentItem: '',
   },
   {
+    id: 'models',
+    name: 'Models',
+    href: '/models',
+    parentItem: '',
+  },
+  {
+    id: 'Fields',
+    name: 'Fields',
+    href: '/models/fields',
+    parentItem: 'models',
+  },
+  {
     id: 'triggers',
     name: 'Triggers',
-    href: '/triggers',
-    parentItem: '',
+    href: '/models/triggers',
+    parentItem: 'models',
   },
 ];
 
