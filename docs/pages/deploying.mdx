@@ -1,0 +1,45 @@
+---
+title: Deploying
+---
+
+# Deploying
+
+Blade was designed from the ground up to be easy to deploy anywhere. Its build
+output follows a simple platform-agnostic structure that can be easily adapted
+to any production environment. Most environments are natively supported without
+any configuration.
+
+Before deploying your application, you can compile it with the following command:
+
+```bash
+blade build
+```
+
+This command will generate a directory named `.blade` in the current directory,
+which contains the compiled application. Specifically, the compilation process
+includes bundling dependencies, tree-shaking, eliminating dead code, and
+minfiying it.
+
+## Providers
+
+After you have compiled your application, you can serve it using any of the following
+natively supported deployment providers. If your desired provider is included in the list,
+you don't need to provide any additional configuration during deployment.
+
+In general, we recommend deploying Blade to a provider that allows you to run your
+application "at the edge", meaning as close as possible to your users. Typically, if
+your user base is global, you should choose a provider that has a global network of
+data centers that can run many instances of your application spread across the globe.
+
+Like that, your users will have the smallest latency possible when accessing your application,
+ensuring the best performance and thereby the best user experience.
+
+
+
+### Cloudflare
+
+### Netlify
+
+### Vercel
+
+### Containers
