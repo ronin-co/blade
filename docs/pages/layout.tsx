@@ -20,6 +20,12 @@ const menuItems = [
     parentItem: '',
   },
   {
+    id: 'components',
+    name: 'Components',
+    href: '/components',
+    parentItem: '',
+  },
+  {
     id: 'triggers',
     name: 'Triggers',
     href: '/triggers',
