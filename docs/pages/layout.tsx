@@ -25,6 +25,12 @@ const DocsLayout = ({
       href: '/docs',
       parentItem: '',
     },
+    {
+      id: 'hooks',
+      name: 'Hooks',
+      href: '/docs/hooks',
+      parentItem: '',
+    },
   ];
 
   return (
