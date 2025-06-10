@@ -6,6 +6,27 @@ import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
 import { useMetadata } from '@ronin/blade/server/hooks';
 
+const menuItems = [
+  {
+    id: 'introduction',
+    name: 'Introduction',
+    href: '/',
+    parentItem: '',
+  },
+  {
+    id: 'hooks',
+    name: 'Hooks',
+    href: '/hooks',
+    parentItem: '',
+  },
+  {
+    id: 'triggers',
+    name: 'Triggers',
+    href: '/triggers',
+    parentItem: '',
+  },
+];
+
 interface HeadingProps {
   children: React.ReactNode;
   id?: string;
@@ -17,21 +38,6 @@ const DocsLayout = ({
   children: React.ReactNode;
 }) => {
   useMetadata({ htmlClassName: 'dark' });
-
-  const menuItems = [
-    {
-      id: 'introduction',
-      name: 'Introduction',
-      href: '/docs',
-      parentItem: '',
-    },
-    {
-      id: 'hooks',
-      name: 'Hooks',
-      href: '/hooks',
-      parentItem: '',
-    },
-  ];
 
   return (
     <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
