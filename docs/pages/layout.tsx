@@ -10,7 +10,7 @@ const menuItems = [
   {
     id: 'introduction',
     name: 'Introduction',
-    href: '/docs',
+    href: '/',
     parentItem: '',
   },
   {
