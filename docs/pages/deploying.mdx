@@ -46,8 +46,51 @@ is perfectly fine, since your user base will be close by.
 
 ### Cloudflare
 
+Deploying Blade to [Cloudflare Workers](https://workers.cloudflare.com) is currently
+the recommended way to deploy Blade applications. Cloudflare pioneered the concept of
+edge computing with the invention of Workers and is therefore optimized to run your
+Blade application as close to your users as possible.
+
+To get started, create a Cloudflare account, create a new Workers project, select the
+Git repository that contains your Blade application, and follow the instructions on screen.
+
+Blade will automatically detect Cloudflare based on the presence of the `WORKERS_CI`
+environment variable (which Cloudflare provides by default) and adjust its build output
+accordingly. You can also provide the environment variable yourself if you want to test
+the build output locally: `WORKERS_CI=1 blade build`.
+
 ### Netlify
 
+Like with Cloudflare, [Netlify](https://www.netlify.com) is a great choice for deploying
+your Blade application, due to the fact that Netlify's Edge Functions are powered
+by [Deno Deploy](https://deno.com/subhosting) under the hood, which runs your Blade
+application as close to your users as possible.
+
+To get started, create a Netlify account, create a new project, select the
+Git repository that contains your Blade application, and follow the instructions on screen.
+
+Blade will automatically detect Cloudflare based on the presence of the `NETLIFY`
+environment variable (which Cloudflare provides by default) and adjust its build output
+accordingly. You can also provide the environment variable yourself if you want to test
+the build output locally: `NETLIFY=1 blade build`.
+
 ### Vercel
+
+Deploying Blade to [Vercel](https://vercel.com) gets you an exceptionally well designed
+developer experience and a extremely performant global network of data centers.
+
+Vercel's latest [Fluid compute](https://vercel.com/fluid) technology supports deploying
+your Blade application to 1 geographical region on the Free plan and 3 geographical
+regions on the Pro plan, with more regions available on the Enterprise plan. Those regions
+can be picked from a list of [18 regions](https://vercel.com/docs/edge-network/regions).
+
+This means that your Blade application can run in up to 3 regions at the same time,
+assuming you are on the Pro plan, making Vercel an excellent choice for deploying Blade to
+an application with a user base available in a particular country or continent.
+
+Due to Blade's "edge-first" design, however, 3 regions are not sufficient for serving a global
+user base when using Blade specifically. As soon as [Fluid compute](https://vercel.com/fluid)
+becomes available for Edge Functions, Blade will be able to run in all 18 regions
+at the same time.
 
 ### Containers
