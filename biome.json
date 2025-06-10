@@ -31,7 +31,10 @@
     "rules": {
       "recommended": true,
 
-      "a11y": { "all": true },
+      "a11y": {
+        "all": true,
+        "useValidAnchor": "off"
+      },
       "complexity": {
         "all": true,
         "noExcessiveCognitiveComplexity": "off",
