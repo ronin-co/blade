@@ -95,5 +95,25 @@ at the same time.
 
 ### Containers
 
-If you would like to deploy Blade to a container-based platform like [Fly.io](https://fly.io),
-you can do so by adding a Dockerfile to your project.
+If you would like to run Blade on container-based platform like [Fly.io](https://fly.io)
+or [Railway](https://railway.app), you can do so by running the following command after
+compiling your application:
+
+```bash
+blade serve
+```
+
+Afterward, a HTTP server listening on port 3000 will be started for you, through which
+your Blade application can be accessed. The command serves your application directly
+from the `.blade` directory, without making use of any other files.
+
+A custom port may be provided using the `--port` option:
+
+```bash
+blade serve --port 8080
+```
+
+Note that Blade does not support terminating TLS (HTTPS) connections, so you must run a
+proxy in front of your application that takes care of that for you. Platforms such as
+Fly.io, for example, do so automatically. Additionally, Blade does not perform compression
+and thereby requires providers to do so.
