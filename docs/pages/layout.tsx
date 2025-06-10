@@ -32,6 +32,12 @@ const menuItems = [
     parentItem: '',
   },
   {
+    id: 'crud',
+    name: 'CRUD',
+    href: '/queries/crud',
+    parentItem: 'queries',
+  },
+  {
     id: 'models',
     name: 'Models',
     href: '/models',
