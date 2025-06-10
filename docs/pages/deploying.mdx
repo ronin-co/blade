@@ -34,7 +34,15 @@ data centers that can run many instances of your application spread across the g
 Like that, your users will have the smallest latency possible when accessing your application,
 ensuring the best performance and thereby the best user experience.
 
+Typically, this means choosing a provider that supports primitives such as edge functions
+or workers (stateless), since primitives such as serverless functions or containers
+(stateful) tend to be available in only one or only a few geographical regions, causing
+higher latency for your global user base.
 
+If your user base is not global, however (e.g. if you are deploying a web app for purchasing
+public transport tickets in a specific country), deploying Blade to a provider that only
+supports a single region or very few regions (e.g. using serverless functions or containers)
+is perfectly fine, since your user base will be close by.
 
 ### Cloudflare
 
