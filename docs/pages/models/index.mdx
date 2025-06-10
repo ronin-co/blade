@@ -1,0 +1,161 @@
+---
+title: Models
+---
+
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+# Models
+
+The schema of your RONIN database consistents of multiple models. Each model uses fields to define the shape of a particular kind of record in your database.
+
+For example, your database schema might contain a model called "Account" representing a user, and a model called "Team", representing a group of users.
+
+When using RONIN, your database schema is defined in code, which provides maximum flexibility and benefits such as **revisions**, **reviews** and **reverts** via Git. This page provides an overview of how to define your database schema in code.
+
+## Getting Started
+
+If you haven't yet defined your database schema in code in your project, start by installing the [RONIN client](https://www.npmjs.com/package/ronin) on your device, which comes with a CLI that lets you manage your database schema:
+
+```bash title="Terminal"
+npm install -g ronin
+```
+
+Afterward, log into your RONIN account:
+
+```bash title="Terminal"
+ronin login
+```
+
+Next, create the file (in your project's root directory) that will contain the model definitions for your project:
+
+```bash title="Terminal"
+mkdir schema
+touch schema/index.ts
+```
+
+A model is defined using the `model()` function provided by the RONIN client under the `ronin/schema` path. The `ronin/schema` path also provides all field type primitives, such as `string()`, `number()`, or `blob()`.
+
+Here is an example of a basic schema definition:
+
+```ts title="schema/index.ts"
+import { model, string, date } from 'ronin/schema';
+
+export const Account = model({
+  slug: 'account',
+
+  fields: {
+    name: string(),
+    handle: string(),
+    verifiedAt: date()
+  }
+});
+```
+
+In the example above, we defined a model named `Account` with three fields: `name`, `handle`, and `verifiedAt`. Each field is defined using a key-value pair where the key is the slug of the field and the value is the type of the field. See all available field types in the [Field Types](#Field%20Types) section.
+
+Once you've defined your models locally, you can compare them to the current state of your database like this:
+
+```bash title="Terminal"
+ronin diff
+```
+
+Running the command above will produce a so-called "migration protocol" in the `schema` directory. This protocol contains all the steps required to update your database to match your local schema definition.
+
+To apply the changes to your database, run the following command:
+
+```bash title="Terminal"
+ronin apply
+```
+
+Afterward, you can start sending queries to your database that make use of the newly added (or updated) models in your database schema.
+
+In the future, if you'd like to immediately apply your local changes to your database without first reviewing them, run thhis command:
+
+```bash title="Terminal"
+ronin diff --apply
+```
+
+Like this, the generated migration protocol will be applied immediately.
+
+## Field Types
+
+The following types can be used to define fields in a model:
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead className="w-[100px]">Function</TableHead>
+      <TableHead>Type</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>`string()`</TableCell>
+      <TableCell>String field</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>`number()`</TableCell>
+      <TableCell>Number field</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>`boolean()`</TableCell>
+      <TableCell>Boolean field</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>`date()`</TableCell>
+      <TableCell>Timestamp field</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>`blob()`</TableCell>
+      <TableCell>Binary object field</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>`json()`</TableCell>
+      <TableCell>JSON field</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+
+## Link Fields
+
+You can define the relationship of a field to another model like so:
+
+```ts title="schema/index.ts"
+import { model, string, date, link } from 'ronin/schema';
+
+export const Account = model({
+  slug: 'account',
+
+  fields: {
+    name: string(),
+    handle: string(),
+    verifiedAt: date()
+  }
+});
+
+export const Member = model({
+  slug: 'member',
+
+  fields: {
+    account: link({
+      target: 'account'
+    })
+  }
+});
+```
+
+In the example above, we defined an additional model named `Member` with a fields named `account` that references the `Account` model.
+
+## What if I have multiple repositories?
+
+Once you apply your local schema definition to your database, your local schema definition will be available in your types package (i.e. `@ronin/YOUR_SPACE_HANDLE`) too. See [TypeScript Types](/docs/types) for more information.
+
+The types package is a separate package that you can install in your other repositories to access the same type definitions in those repositories.
