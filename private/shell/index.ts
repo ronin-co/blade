@@ -194,8 +194,18 @@ if (isServing) {
       )
         return;
 
-      const file = Bun.file(path.join(pagesDirectory, 'index.tsx'));
-      await Bun.write(file, await file.text());
+      const indexTsx = path.join(pagesDirectory, 'index.tsx');
+      if (await exists(indexTsx)) {
+        const file = Bun.file(indexTsx);
+        await Bun.write(file, await file.text());
+        return;
+      }
+
+      const indexMdx = path.join(pagesDirectory, 'index.mdx');
+      if (await exists(indexMdx)) {
+        const file = Bun.file(indexMdx);
+        await Bun.write(file, await file.text());
+      }
     };
 
     for (const project of projects) {
