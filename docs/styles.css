@@ -16,6 +16,14 @@ html {
 		@apply scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl;
 	}
 
+	h1,
+	h2,
+	h3,
+	h4,
+	strong {
+		@apply dark:text-white;
+	}
+
 	p {
 		@apply leading-relaxed [&:not(:first-child)]:mt-6 text-[#9E9E9E]
 	}
