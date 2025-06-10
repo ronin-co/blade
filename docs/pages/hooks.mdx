@@ -6,7 +6,7 @@ title: Hooks
 
 Blade provides the following React hooks:
 
-#### `useLocation` (Universal)
+## `useLocation` (Universal)
 
 Mimics [document.location](https://developer.mozilla.org/en-US/docs/Web/API/Document/location) and thereby exposes a `URL` object containing the URL of the current page.
 
@@ -18,7 +18,7 @@ import { useLocation } from '@ronin/blade/universal/hooks';
 const location = useLocation();
 ```
 
-#### `useParams` (Universal)
+## `useParams` (Universal)
 
 Exposes the keys and values of all parameters (dynamic path segments) present in the URL.
 
@@ -30,7 +30,7 @@ import { useParams } from '@ronin/blade/universal/hooks';
 const params = useParams();
 ```
 
-#### `useRedirect` (Universal)
+## `useRedirect` (Universal)
 
 Used to transition to a different page.
 
@@ -59,7 +59,7 @@ redirect('/pathname', {
 });
 ```
 
-#### `usePopulatePathname` (Universal)
+## `usePopulatePathname` (Universal)
 
 As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[handle]`) are not populated in the `URL` object exposed by the hook.
 
@@ -86,7 +86,7 @@ populatePathname('/[handle]', {
 });
 ```
 
-#### `useNavigator` (Universal)
+## `useNavigator` (Universal)
 
 Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
 
@@ -100,7 +100,7 @@ navigator.languages; // See MDN docs
 navigator.geoLocation; // See MDN docs (currently under construction)
 ```
 
-#### `useMutation` (Client)
+## `useMutation` (Client)
 
 Allows for performing data mutations and updates all `use` queries accordingly.
 
@@ -151,7 +151,7 @@ await add.account.with.handle('elaine', {
 });
 ```
 
-#### `usePagination` (Client)
+## `usePagination` (Client)
 
 Allows for paginating a read query and thereby modifies the result of the respective `use` hook associated with that read query.
 
@@ -204,7 +204,7 @@ usePagination(nextPage, {
 });
 ```
 
-#### `usePaginationBuffer` (Client)
+## `usePaginationBuffer` (Client)
 
 Concatenates arrays based on pagination. Whenever the current paginated page changes, the
 provided items will be concatenated with the previously provided list of items.
@@ -272,7 +272,7 @@ You may also decide to pass a TypeScript generic with the type of provided array
 usePaginationBuffer<ReactElement>();
 ```
 
-#### `useLinkEvents` (Client)
+## `useLinkEvents` (Client)
 
 In the majority of cases, you should use Blade's `<Link>` component to display links that should automatically result in a page transition (links pointing to external pages should just use anchor elements).
 
@@ -288,7 +288,7 @@ const eventHandlers = useLinkEvents('/pathname');
 <button {...eventHandlers}>I am a link</button>
 ```
 
-#### `useQueryState` (Client)
+## `useQueryState` (Client)
 
 In React, ephemeral state is managed with the [`useState`](https://react.dev/reference/react/useState) hook. For example, if your interface contains a dialog that should open when a button is clicked, you would typically store the status of the dialog in `useState`. This state does not persist across sessions, meaning if a user closes the browser tab, the state will be lost.
 
@@ -315,7 +315,7 @@ const ClientComponent = () => {
 };
 ```
 
-#### `use` (Server)
+## `use` (Server)
 
 Usually, in React, the [use](https://react.dev/reference/react/use) hook is used to consume a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or [context](https://react.dev/learn/passing-data-deeply-with-context).
 
@@ -371,7 +371,7 @@ To count records, the `useCountOf` hook can be used with the same syntax as the 
 
 If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
 
-#### `useCookie` (Server)
+## `useCookie` (Server)
 
 Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
 
@@ -403,7 +403,7 @@ setCookie('a-value', {
 
 The max age of cookies currently defaults to 365 days, which is not yet customizable.
 
-#### `useMetadata` (Server)
+## `useMetadata` (Server)
 
 Allows for defining the metadata of a layout or page and thereby populates the [head](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head) element of the rendered page with metadata elements.
 
@@ -458,7 +458,7 @@ useMetadata({
 });
 ```
 
-#### `useMutationResult` (Server)
+## `useMutationResult` (Server)
 
 Since Blade requires data to be read only on the server and data to be mutated only on the client, the result of a mutation is only accessible as a result of the respective [mutation call](#usemutation-client). 
 
@@ -472,7 +472,7 @@ import { useMutationResult } from '@ronin/blade/server/hooks';
 const updatedRecords = useMutationResult();
 ```
 
-#### `useJWT` (Server)
+## `useJWT` (Server)
 
 Allows for parsing [JSON Web Tokens](https://jwt.io) without blocking the page render.
 
