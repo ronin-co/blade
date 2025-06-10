@@ -6,7 +6,8 @@
     "dev": "blade",
     "build": "blade build",
     "serve": "blade serve",
-    "format": "biome format --write"
+    "lint": "biome check --error-on-warnings",
+    "format": "biome check --write && biome format --write"
   },
   "author": "ronin",
   "dependencies": {
