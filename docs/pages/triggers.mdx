@@ -1,0 +1,379 @@
+---
+title: Triggers
+---
+
+import { AlertCard } from "@/components/alert";
+
+# Triggers
+
+To perform additional operations when a particular kind of query is executed on
+your RONIN database, you can define database triggers.
+
+Database triggers are TypeScript functions that are executed for incoming RONIN
+queries, and can be used to validate those queries, run additional queries
+within the same transaction, run asynchronous code, or load data from a
+different data source.
+
+## Defining Triggers
+
+To get started with locally developing database triggers, provide the `triggers`
+option when initizalizing the RONIN TypeScript client, like this:
+
+```ts
+import ronin from 'ronin';
+
+const triggers = { ... };
+const { get } = ronin({ triggers });
+```
+
+In the `triggers` object, you can then define database triggers on a per-model
+basis, with the property name being the slug of the model, and the value being
+the different triggers you want to define for that model.
+
+For example, if you have a model with the slug `team` and you would like to run
+special logic for validating every incoming query for adding records to that
+model, you could define an trigger like this one:
+
+```ts
+const triggers = {
+  team: {
+    add: (query) => {
+      // Generate a value for the `handle` field
+      query.with.handle = query.with.name.toLowerCase();
+    
+      // Return the query to continue processing
+      return query;
+    },
+  },
+};
+```
+
+Now, if you were to run the query below, even though you didn't provide a value
+for the `handle` field in the query itself, the resulting record would now
+contain a value for the field that was generated using the `name` field, thanks
+to the trigger you've defined:
+
+```ts
+await add.team.with.name('Engineering');
+```
+
+## When to use Triggers
+
+In general, you should refrain from using triggers for anything that can be
+accomplished using [model definitions](/docs/models), to ensure the best
+performance and maintainability of your queries.
+
+For example, if you need to provide any form of static defaults for your
+queries (meaning defaults that are the same for every query), you should define
+them in the model definition itself, using the `defaultValue` attribute of
+fields, for example. Like that, no unnecessary computational step will happen
+for your queries.
+
+Even if a value is dynamic, such as a mathematic equation, as long as it does
+not depend on the value of another field, and assuming that it always produces
+the same output (meaning it is [deterministic](https://en.wikipedia.org/wiki/Deterministic_system)),
+you should still define it in your model definition.
+
+For any use case that is highly dynamic, or that simply cannot be accomplished
+using the model definition, you can use database triggers, which perform
+computation for every query that is affected.
+
+## Types of Triggers
+
+RONIN supports 2 types of triggers:
+
+- **Synchronous Triggers**: These functions return queries that are executed
+  within the same transaction as the original query. Either before the original
+  query, after it, or instead of it.
+- **Asynchronous Triggers:** These functions are executed separately from the
+  database transaction, and can be used to load data from a third-party data
+  source, or run asynchronous code.
+
+In the majority of cases, you will want to use Synchronous Triggers, which let
+you write arbitrary synchronos code that does not perform any
+[I/O](https://en.wikipedia.org/wiki/Input/output) (e.g. no network requests)
+and purely validate queries, transform queries, or augment them with additional
+surrounding queries.
+
+In certain cases, if you really need to run asynchronous code, you can do so
+using Asynchronous Triggers, but in such cases, you should be careful to write
+efficient code that, for example, doesn't cause any unnecessary
+[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) waterfalls.
+
+## Synchronous Triggers
+
+The following methods are available for defining synchronous triggers:
+
+### Before
+
+These triggers provide queries that are executed before the original query is
+executed, within the same transaction. They can be used to create additional
+resources in the database. For example, if a query depends on a parent record
+to get created first, you may create that parent record in a `before*` trigger.
+
+They can return multiple queries and must return at least one query.
+
+```ts
+beforeAdd: (query, multiple, options) => {
+  return [
+    { add: { team: { with: { name: 'Engineering' } } } },
+  ];
+}
+```
+
+#### Methods
+
+- `beforeGet`: Executed before a `get` query.
+- `beforeCount`: Executed before a `count` query.
+- `beforeAdd`: Executed before an `add` query.
+- `beforeSet`: Executed before an `set` query.
+- `beforeRemove`: Executed before a `remove` query.
+
+### During
+
+These triggers are executed instead of the original query, within the same
+transaction. They can be used to validate the original query, or transform it
+by modifying its [query instructions](/docs/queries/instructions).
+
+They must return exactly one query.
+
+```ts
+add: (query, multiple, options) => {
+  // Modify the query
+  return query;
+}
+```
+
+#### Methods
+
+- `get`: Executed instead of a `get` query.
+- `count`: Executed instead of a `count` query.
+- `add`: Executed instead of an `add` query.
+- `set`: Executed instead of an `set` query.
+- `remove`: Executed instead of a `remove` query.
+
+### After
+
+These triggers provide queries that are executed after the original query is
+executed, within the same transaction. They can be used to create additional
+resources in the database. For example, if a query depends on a child record to
+get created after it, you may create that child record in a `after*` trigger.
+
+They can return multiple queries and must return at least one query.
+
+```ts
+afterAdd: (query, multiple, options) => {
+  return [
+    { add: { member: { with: { account: '1234' } } } },
+  ];
+}
+```
+
+#### Methods
+
+- `afterGet`: Executed after a `get` query.
+- `afterCount`: Executed after a `count` query.
+- `afterAdd`: Executed after an `add` query.
+- `afterSet`: Executed after an `set` query.
+- `afterRemove`: Executed after a `remove` query.
+
+## Asynchronous Triggers
+
+The following methods are available for defining asynchronous triggers:
+
+### Resolving
+
+These triggers are executed instead of the original query and prevent the
+original query from reaching the database. They can therefore be used to load
+data from a third-party data source via a network request, and return it from
+the trigger.
+
+```ts
+resolvingAdd: async (query, multiple, options) => {
+  return { testField: 'testValue', anotherField: 'anotherValue' };
+}
+```
+
+#### Methods
+
+- `resolvingGet`: Executed for a `get` query.
+- `resolvingCount`: Executed for a `count` query.
+- `resolvingAdd`: Executed for an `add` query.
+- `resolvingSet`: Executed for an `set` query.
+- `resolvingRemove`: Executed for a `remove` query.
+
+### Following
+
+These triggers are executed after the original query is executed, meaning after
+the transaction of the original query was fully committed to the database. They
+can be used to run asynchronous code, such as sending a notification to a
+third-party service every time a record is added to the database.
+
+```ts
+followingAdd: async (query, multiple, before, after, options) => {
+  // Run code that should not slow down the original query
+}
+```
+
+As you can see, the triggers of type `following` are provided two extra function
+arguments, which all other types of triggers do not receive: The arguments
+`before` and `after` contain the state of the records that were affected by the
+original query, before and after the query was executed.
+
+This is useful for generating custom audit logs for your application, for
+example, since it allows for diffing the field values of a record.
+
+#### Methods
+
+Unlike the other types of triggers, triggers of type `following` can only be
+defined for [qurey types](/docs/queries/types) that write data. They cannot be
+defined for query types that read data, such as `get` or `count`.
+
+- `followingAdd`: Executed after an `add` query.
+- `followingSet`: Executed after an `set` query.
+- `followingRemove`: Executed after a `remove` query.
+
+## Trigger Arguments
+
+The following arguments are available for all triggers:
+
+- `query`: An object containing the [instructions](/docs/queries/instructions)
+  of the query that is being executed. The argument neither contains the
+  [type](/docs/queries/types) of the query, nor the
+  [target](/docs/queries/targets) of the query. It only contains the
+  instructions of the query. The type and target are already evident from the
+  name of the trigger and the model for which it was defined.
+- `multiple`: A boolean indicating whether the query targets multiple records
+  or a single record. For example, a query such as `get.team()` would result in
+  this argument being `false`, while a query such as `get.teams()` would result
+  in this argument being `true`.
+- `before`: Only available for triggers of type [Following](#Following).
+- `after`: Only available for triggers of type [Following](#Following).
+- `options`: An object containing a property named `implicit`, which indicates
+  whether the query was automatically/implicitly generated by an trigger, and a
+  property named `client`, which contains the instance of the currently used
+  RONIN TypeScript client, allowing for running [Nested Queries](#Nested%20Queries).
+  Additional options are available for [Sink](#Trigger%20Sink) triggers.
+
+## Nested Queries
+
+To run additional queries whenever a particular query is executed, you can
+define [before](#Before) and [after](#After) triggers, which allow for
+executing additional queries in the same transaction as the original query.
+
+Doing so avoids [I/O](https://en.wikipedia.org/wiki/Input/output) waterfalls,
+since the database is only invoked once, executes all queries of the
+transaction and then returns all results at once. This ensures that your
+original query is executed as quickly as possible.
+
+In the rare cases in which you do need to query additional data within triggers,
+however, you can do so using the `client` property of the `options`
+argument that is passed to the trigger. This property contains the instance of
+the RONIN TypeScript client that is currently being used to execute the query,
+and can be used to run additional queries within the trigger:
+
+```ts
+add: (query, multiple, options) => {
+  const { get } = options.client;
+  const anotherRecord = await get.team.with.id(query.with.team);
+  
+  // Modify the query
+  return query;
+}
+```
+
+## Trigger Sink
+
+<AlertCard>
+  Multiple databases per RONIN space are currently in private beta and not yet publicly available.
+</AlertCard>
+
+When executing a query, the RONIN TypeScript client allows for providing a
+config option named `database`, which can be used to target a specific database
+within the RONIN space:
+
+```ts
+await add.team.with.name('Engineering', { database: 'my-database' });
+```
+
+Queries for which this config option was defined do not cause any triggers to be
+executed by default. Instead, such queries must be explicitly captured using
+a special trigger named "sink":
+
+```ts
+const triggers = {
+  sink: {
+    get: (query, multiple, options) => {
+      // This trigger is executed for queries that target a specific database.
+      return query;
+    },
+  }
+};
+```
+
+Specifically, as you can see above, sink triggers are using the word "sink" in
+place of the model slug. This is because sink triggers capture all queries of
+all models.
+
+Additionally, sink queries receive additional properties within the `options`
+object that allow for identifying the original query more easily. A `model`
+property contains the slug of the model that was targeted, and a `database`
+property contains the slug of the database that was targeted.
+
+## Arranging Triggers
+
+While getting started with triggers is as simple as passing the `triggers` option
+to the RONIN TypeScript client (as mentioned at the top of this page), it is
+strongly recommended to split your triggers out into separate files as soon as
+you start writing more than a few lines of code, just like you would with any
+other part of your codebase, in order to keep your code clean and easily maintainable.
+
+When doing so, we recommend creating a folder called `triggers` at the root of
+your project, and creating a separate file for each model inside of it.
+
+```text
+- triggers
+-- team.ts
+-- member.ts
+```
+
+Each file should export the triggers directly, like this:
+
+```ts
+export const beforeAdd = () => { ... };
+export const add = () => { ... };
+export const afterAdd = () => { ... };
+
+export const resolvingAdd = () => { ... };
+export const followingAdd = () => { ... };
+```
+
+Afterward, create an `index.ts` file inside the `triggers` folder, which imports
+all the triggers from the individual files using
+[ESM wildcards](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import),
+so that you can import them all from a single place:
+
+```ts title="index.ts"
+import * as team from './triggers/team';
+import * as member from './triggers/member';
+
+export { team, member };
+```
+
+Lastly, you can import all triggers at once when initializing the RONIN
+TypeScript client, like this:
+
+```ts
+import ronin from 'ronin';
+import * as triggers from './triggers';
+
+const { get } = ronin({ triggers });
+```
+
+## Deploying Triggers
+
+Database triggers currently only exist in the same place in which you invoke
+the RONIN TypeScript client. This behavior will always be supported, in order
+to allow for local development of triggers. In an upcoming update, it will also
+become possible to deploy triggers to your RONIN database, for cases in which
+you want to access your database from multiple different applications.
