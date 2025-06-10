@@ -1,0 +1,119 @@
+---
+title: Deploying
+---
+
+# Deploying
+
+Blade was designed from the ground up to be easy to deploy anywhere. Its build
+output follows a simple platform-agnostic structure that can be easily adapted
+to any production environment. Most environments are natively supported without
+any configuration.
+
+Before deploying your application, you can compile it with the following command:
+
+```bash
+blade build
+```
+
+This command will generate a directory named `.blade` in the current directory,
+which contains the compiled application. Specifically, the compilation process
+includes bundling dependencies, tree-shaking, eliminating dead code, and
+minfiying it.
+
+## Providers
+
+After you have compiled your application, you can serve it using any of the following
+natively supported deployment providers. If your desired provider is included in the list,
+you don't need to provide any additional configuration during deployment.
+
+In general, we recommend deploying Blade to a provider that allows you to run your
+application "at the edge", meaning as close as possible to your users. Typically, if
+your user base is global, you should choose a provider that has a global network of
+data centers that can run many instances of your application spread across the globe.
+
+Like that, your users will have the smallest latency possible when accessing your application,
+ensuring the best performance and thereby the best user experience.
+
+Typically, this means choosing a provider that supports primitives such as edge functions
+or workers (stateless), since primitives such as serverless functions or containers
+(stateful) tend to be available in only one or only a few geographical regions, causing
+higher latency for your global user base.
+
+If your user base is not global, however (e.g. if you are deploying a web app for purchasing
+public transport tickets in a specific country), deploying Blade to a provider that only
+supports a single region or very few regions (e.g. using serverless functions or containers)
+is perfectly fine, since your user base will be close by.
+
+### Cloudflare
+
+Deploying Blade to [Cloudflare Workers](https://workers.cloudflare.com) is currently
+the recommended way to deploy Blade applications. Cloudflare pioneered the concept of
+edge computing with the invention of Workers and is therefore optimized to run your
+Blade application as close to your users as possible.
+
+To get started, create a Cloudflare account, create a new Workers project, select the
+Git repository that contains your Blade application, and follow the instructions on screen.
+
+Blade will automatically detect Cloudflare based on the presence of the `WORKERS_CI`
+environment variable (which Cloudflare provides by default) and adjust its build output
+accordingly. You can also provide the environment variable yourself if you want to test
+the build output locally: `WORKERS_CI=1 blade build`.
+
+### Netlify
+
+Like with Cloudflare, [Netlify](https://www.netlify.com) is a great choice for deploying
+your Blade application, due to the fact that Netlify's Edge Functions are powered
+by [Deno Deploy](https://deno.com/subhosting) under the hood, which runs your Blade
+application as close to your users as possible.
+
+To get started, create a Netlify account, create a new project, select the
+Git repository that contains your Blade application, and follow the instructions on screen.
+
+Blade will automatically detect Cloudflare based on the presence of the `NETLIFY`
+environment variable (which Cloudflare provides by default) and adjust its build output
+accordingly. You can also provide the environment variable yourself if you want to test
+the build output locally: `NETLIFY=1 blade build`.
+
+### Vercel
+
+Deploying Blade to [Vercel](https://vercel.com) gets you an exceptionally well designed
+developer experience and a extremely performant global network of data centers.
+
+Vercel's latest [Fluid compute](https://vercel.com/fluid) technology supports deploying
+your Blade application to 1 geographical region on the Free plan and 3 geographical
+regions on the Pro plan, with more regions available on the Enterprise plan. Those regions
+can be picked from a list of [18 regions](https://vercel.com/docs/edge-network/regions).
+
+This means that your Blade application can run in up to 3 regions at the same time,
+assuming you are on the Pro plan, making Vercel an excellent choice for deploying Blade to
+an application with a user base available in a particular country or continent.
+
+Due to Blade's "edge-first" design, however, 3 regions are not sufficient for serving a global
+user base when using Blade specifically. As soon as [Fluid compute](https://vercel.com/fluid)
+becomes available for Edge Functions, Blade will be able to run in all 18 regions
+at the same time.
+
+### Containers
+
+If you would like to run Blade on container-based platform like [Fly.io](https://fly.io)
+or [Railway](https://railway.app), you can do so by running the following command after
+compiling your application:
+
+```bash
+blade serve
+```
+
+Afterward, a HTTP server listening on port 3000 will be started for you, through which
+your Blade application can be accessed. The command serves your application directly
+from the `.blade` directory, without making use of any other files.
+
+A custom port may be provided using the `--port` option:
+
+```bash
+blade serve --port 8080
+```
+
+Note that Blade does not support terminating TLS (HTTPS) connections, so you must run a
+proxy in front of your application that takes care of that for you. Platforms such as
+Fly.io, for example, do so automatically. Additionally, Blade does not perform compression
+and thereby requires providers to do so.
