@@ -576,7 +576,7 @@ For linking to URLs within the same application, use the native `Link` component
 ```tsx
 import { Link } from '@ronin/blade/client/components';
 
-<Link href="/another-page">click me</Link>
+<Link href="/another-page"><a>click me</a></Link>
 ```
 
 The following props are available:
