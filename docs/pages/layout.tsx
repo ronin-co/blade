@@ -67,6 +67,18 @@ const menuItems = [
     href: '/models/triggers',
     parentItem: 'models',
   },
+  {
+    id: 'types',
+    name: 'Types',
+    href: '/types',
+    parentItem: '',
+  },
+  {
+    id: 'client',
+    name: 'Client',
+    href: '/client',
+    parentItem: '',
+  },
 ];
 
 interface HeadingProps {
