@@ -1,13 +1,22 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
 
-export const CopyText = ({ children }: { children: React.ReactNode }) => {
-  const [isCopied, setIsCopied] = useState(false);
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(children as string);
+import type { JSX } from 'react';
+
+export const CopyText = ({
+  children,
+  text,
+}: {
+  children: React.ReactNode;
+  text: string;
+}): JSX.Element => {
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  const handleCopy = (): void => {
+    navigator.clipboard.writeText(text);
     setIsCopied(true);
-    setTimeout(() => {
+    setTimeout((): void => {
       setIsCopied(false);
     }, 2000);
   };

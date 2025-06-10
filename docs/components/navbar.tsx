@@ -27,7 +27,7 @@ export const Navbar = () => {
           <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
             <div className="flex items-center gap-0.5">
               <p className="font-mono text-xs">
-                <CopyText>
+                <CopyText text="bunx @ronin/blade init">
                   <span className="text-primary/80">$ bunx @ronin/blade init</span>
                 </CopyText>
               </p>
