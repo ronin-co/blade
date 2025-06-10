@@ -1,0 +1,191 @@
+---
+title: 'CRUD'
+---
+
+# CRUD
+
+The first and most important part of every RONIN query is its type (“query type”).
+
+It represents the operation that is being performed at the time when the query is executed and, therefore, the way in which records are either read or written in the RONIN space that is being addressed by the query.
+
+## Adding Records (`add`)
+
+To insert individual records for a given RONIN model, the `add` query type can be used:
+
+```ts
+await add.account.with({
+  name: 'Elaine Marksman',
+  email: 'elaine@kojima-productions.com',
+});
+```
+
+As usual with RONIN’s query syntax, you may choose to nest the different parts of the query in any way you like, at any level you like:
+
+```ts
+await add.session.with.account('acc_vais0g9rrk995tz0');
+```
+
+Every time you create a record, the created record is returned.
+
+### Adding multiple records at once
+
+At the moment, inserting a list of records with a single query is not yet possible. To insert multiple records at once, you may, therefore, run a `add` query multiple times with different values:
+
+```ts
+const posts = [];
+
+for (const postDetails of posts) {
+  await add.post.with(postDetails);
+}
+```
+
+### Supported Query Instructions
+
+The following query instructions may be used in combination with queries of type `add`:
+
+- [Asserting Fields](/docs/queries/instructions) (`with`)
+
+- [Resolving Related Records](/docs/queries/instructions) (`using`)
+
+### Default Fields
+
+Whenever a new record is created, its `id` field will get [filled automatically](/docs/platform/default-fields). You may optionally overwrite the default value by passing the field as part of the `add` query.
+
+Additionally, the `ronin.createdAt` and `ronin.updatedAt` [metadata](/docs/platform/default-fields) fields of the record will automatically get set to when the Record was created.
+
+## Retrieving Records (`get`)
+
+To obtain all records of a given RONIN model, the `get` query type can be used:
+
+```ts
+await get.accounts();
+```
+
+To obtain only specific records, you may optionally pass a list of fields that should be matched:
+
+```ts
+await get.account.with.id('acc_vais0g9rrk995tz0');
+
+await get.accounts.with({
+  handle: 'elaine',
+  emailAddress: 'elaine@site.co',
+});
+```
+
+### Advanced Assertions
+
+In most cases, the syntax above will suffice for retrieving the records you’re interested in. If it doesn’t suffice, you may optionally choose to provide more complex field assertions using the sub instructions of the `with` query instruction:
+
+```ts
+await get.accounts.with({
+  email: {
+    startingWith: 'team-',
+    endingWith: '@site.com',
+  },
+});
+```
+
+### Supported Query Instructions
+
+The following query instructions may be used in combination with queries of type get:
+
+- Asserting Fields (`with`)
+
+- Paginating Records (`before`, `after`, `limitedTo`)
+
+- Ordering Records (`orderedBy`)
+
+- Resolving Related Records (`using`)
+
+- Selecting Fields (`selecting`)
+
+## Modifying Records (set)
+
+To update individual records of a given RONIN model, the `set` query type can be used:
+
+```ts
+await set.account({
+  with: { id: 'acc_vais0g9rrk995tz0' },
+  to: { name: 'David Marksman' },
+});
+```
+
+Similarily, multiple records of the same RONIN model may be updated like so:
+
+```ts
+await set.accounts({
+  with: {
+    email: {
+      endingWith: 'kojima-productions.com',
+    },
+  },
+  to: { name: 'David Marksman' },
+});
+```
+
+Every time you update a record, the updated record (with the modifications applied) is returned.
+
+### Supported Query Instructions
+
+The following query instructions may be used in combination with queries of type set:
+
+- Asserting Fields (`with`)
+
+- Resolving Related Records (`using`)
+
+### Default Fields
+
+Whenever a record is modified, the `ronin.updatedAt` [metadata](/docs/platform/default-fields) field will automatically get updated to the time when the update was performed.
+
+## Removing Records (`remove`)
+
+To remove individual records of a given RONIN model, the `remove` query type can be used:
+
+```ts
+await remove.account.with.id('acc_vais0g9rrk995tz0');
+```
+
+Optionally, multiple fields may be provided for matching the record that should be removed:
+
+```ts
+await remove.account.with({
+  email: 'elaine@kojima-productions.com',
+  handle: 'elaine',
+});
+```
+
+Similarily, multiple records of the same RONIN model may be removed like so:
+
+```ts
+await remove.accounts.with.email.endingWith('kojima-productions.com');
+```
+
+### Supported Query Instructions
+
+The following query instructions may be used in combination with queries of type `remove`:
+
+- Asserting Fields (`with`)
+
+- Resolving Related Records (`using`)
+
+### Removing All Records
+
+Please note that, for safety reasons, running `remove` queries without query instructions is impossible. Meaning running the query `remove.accounts()` is not possible.
+
+If you would like to remove all records of a model, please retrieve them all using a `get` query first and then remove them by running a `remove` query for every record. Alternatively, you can also remove the entire model in the model settings on the dashboard.
+
+## Counting Records (`count`)
+
+To determine the amount of all the records available for a given RONIN model, the `count` query type can be used:
+
+```ts
+await count.accounts();
+```
+
+Note that, as shown above, the `count` query type can only be used with the **Plural Slug** of a model, not the Slug. For example, `count.account()` does not work, whereas `count.accounts()` does.
+
+### Supported Query Instructions
+
+The following query instructions may be used in combination with queries of type `count`:
+
+- Asserting Fields (`with`)

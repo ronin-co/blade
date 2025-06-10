@@ -1,0 +1,173 @@
+---
+title: 'Functions'
+---
+
+# Functions
+
+RONIN provides a set of SQL functions that can be used in queries to manipulate data. These functions can be imported from `ronin/schema`.
+
+### random
+
+Generates a pseudo-random integer between `-9223372036854775808` and `+9223372036854775807`.
+
+```ts
+import { random } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { id: 1 },
+  to: {
+    randomValue: random()
+  }
+}));
+```
+
+### abs
+
+Calculates the absolute value of a number.
+
+```ts
+import { abs } from 'ronin/schema';
+
+// Usage
+await set.transaction(fields => ({
+  with: { id: 1 },
+  to: {
+    amount: abs(fields.amount)
+  }
+}));
+```
+
+## Date Functions
+
+### strftime
+
+Formats a timestamp according to the specified format string.
+
+```ts
+import { strftime } from 'ronin/schema';
+
+// Usage
+await set.log(fields => ({
+  with: { id: 1 },
+  to: {
+    formattedDate: strftime('%Y-%m-%d', 'now')
+  }
+}));
+```
+
+## JSON Functions
+
+### json_extract
+
+Extracts a value from a JSON document at the specified path.
+
+```ts
+import { json_extract } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { id: 1 },
+  to: {
+    name: json_extract(fields.data, '$.name')
+  }
+}));
+```
+
+### json_patch
+
+Applies a JSON patch operation to a JSON document.
+
+```ts
+import { json_patch } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { id: 1 },
+  to: {
+    data: json_patch('[{"op": "add", "path": "/newField", "value": 123}]', fields.data)
+  }
+}));
+```
+
+### json_set
+
+Sets a value in a JSON document at the specified path. Creates the path if it doesn't exist and overwrites if it does.
+
+```ts
+import { json_set } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { name: 'test' },
+  to: {
+    energy: json_set(fields.energy, '$.current', 100)
+  }
+}));
+```
+
+### json_replace
+
+Replaces a value in a JSON document at the specified path. Only modifies existing paths, will not create new ones.
+
+```ts
+import { json_replace } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { id: 1 },
+  to: {
+    settings: json_replace(fields.settings, '$.theme', 'dark')
+  }
+}));
+```
+
+### json_insert
+
+Inserts a value into a JSON document at the specified path. Only creates new paths, will not modify existing ones.
+
+```ts
+import { json_insert } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { id: 1 },
+  to: {
+    metadata: json_insert(fields.metadata, '$.lastLogin', 'today')
+  }
+}));
+```
+
+## String Functions
+
+### concat
+
+Concatenates a list of strings together.
+
+```ts
+import { concat } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { id: 1 },
+  to: {
+    fullName: concat(fields.firstName, ' ', fields.lastName)
+  }
+}));
+```
+
+### replace
+
+Replaces all occurrences of a substring within a string with a replacement value.
+
+```ts
+import { replace } from 'ronin/schema';
+
+// Usage
+await set.user(fields => ({
+  with: { id: 1 },
+  to: {
+    username: replace(fields.username, ' ', '_')
+  }
+}));
+```

@@ -26,6 +26,30 @@ const menuItems = [
     parentItem: '',
   },
   {
+    id: 'queries',
+    name: 'Queries',
+    href: '/queries',
+    parentItem: '',
+  },
+  {
+    id: 'crud',
+    name: 'CRUD',
+    href: '/queries/crud',
+    parentItem: 'queries',
+  },
+  {
+    id: 'instructions',
+    name: 'Instructions',
+    href: '/queries/instructions',
+    parentItem: 'queries',
+  },
+  {
+    id: 'functions',
+    name: 'Functions',
+    href: '/queries/functions',
+    parentItem: 'queries',
+  },
+  {
     id: 'models',
     name: 'Models',
     href: '/models',

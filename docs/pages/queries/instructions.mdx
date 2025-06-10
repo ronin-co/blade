@@ -1,0 +1,295 @@
+---
+title: Query Instructions
+---
+
+# Query Instructions
+
+The third part of every RONIN query is its instructions (“query instructions”).
+
+RONIN queries generally do not require instructions to be provided, as the purpose of instructions to clarify which records should be affected by given query, and to format how the records should be returned from RONIN, meaning in which format.
+
+A query without instructions may look like this, for example:
+
+```ts
+await get.accounts();
+```
+
+Whereas a query with instructions would look like this:
+
+```ts
+await get.accounts.with.email.endingWith('site.co');
+```
+
+Just like with the other levels of a RONIN query, you may choose to nest query instructions in any way you like, meaning that you may use object-notation versus dot-notation on any level of your choice, in order to ensure the simplest query possible.
+
+Below, you will find a list of all the different query instructions that are available, of which several are limited to specific query types.
+
+## Asserting Fields (`with`)
+
+If you only need to apply simple assertions when querying records (meaning ensuring a field matches a particular value directly, using “equals”), you can may choose to use the `with` instruction:
+
+```ts
+await get.account.with.id('acc_fa0k5kkw35fik9pu');
+
+await get.account.with({
+  lastName: 'Elaine',
+  email: 'elaine@kojima-productions.com',
+});
+```
+
+As you can see above, the `with` instruction accepts either a single field (in which case the entire query will only span a single line) or multiple fields (in which case an object with multiple properties can be passed instead).
+
+For more complex assertions that will require a longer syntax, please refer to **Advanced Assertions** below.
+
+### Reference Fields
+
+When filtering nested records (fields of type “Reference”), you can query their fields directly.
+
+In the example below, `space` is defined as a field of type “Record” that links to the “Space” model. You can therefore directly apply instructions for the “Space” record as well:
+
+```ts
+await get.team.with({
+  space: {
+    handle: 'my-space',
+  },
+  handle: 'my-team',
+});
+```
+
+In this example, we are asserting the `handle` field of both the “Team” record and the nested “Space” record. The query retrieves the first “Team” record whose `handle` field matches `"my-team"` and whose `space` field points to a record of the “Space” model that has its `handle` field set to `"my-space"`.
+
+### Advanced Assertions
+
+If you would like to retrieve records where certain fields match certain values, the syntax shown above would be the simplest solution.
+
+However, if you would like to assert the value of those fields in a specific way, instead of just via “equals”, you may instead choose to use the advanced sub properties of the `with` query instruction, which allow for asserting the value of fields with special matching operators:
+
+```ts
+await get.accounts.with.email.startingWith('elaine');
+```
+
+In total, the with query instruction offers 7 different operators for asserting fields:
+
+```ts
+await get.accounts.with.email.being('elaine@twitter.com');
+await get.accounts.with.email.notBeing('elaine@twitter.com');
+
+await get.accounts.with.email.startingWith('elaine');
+await get.accounts.with.email.notStartingWith('elaine');
+
+await get.accounts.with.email.endingWith('@twitter.com');
+await get.accounts.with.email.notEndingWith('@twitter.com');
+
+await get.accounts.with.email.containing('twitter');
+await get.accounts.with.email.notContaining('twitter');
+
+await get.accounts.with.upgradedAt.greaterThan(new Date());
+await get.accounts.with.upgradedAt.greaterOrEqual(new Date());
+
+await get.accounts.with.upgradedAt.lessThan(new Date());
+await get.accounts.with.upgradedAt.lessOrEqual(new Date());
+```
+
+As with all other query instructions, you may also choose to nest the operators in different ways, which allows for asserting multiple fields at once, if necessary:
+
+```ts
+await get.accounts.with({
+  lastName: { being: 'Marksman' },
+  email: { endingWith: '@twitter.com' },
+});
+```
+
+## Paginating Records (`before`, `after`, `limitedTo`)
+
+When retrieving multiple records (such as using `get.accounts()`), a maximum of 20 records are returned at once.
+
+This limit ensures that memory overflows are avoided by default. This means there cannot be a scenario where your Queries retrieve so many records that the memory available to the receiving application (such as a [Vercel Edge Function](https://vercel.com/docs/functions)]) fills up, and the application crashes.
+
+Furthermore, always returning the same amount of records within your application (rather than returning more records if there are more available) ensures consistent response times, as the response time does not depend on how many records are being provided. Like this, you will be able to track and improve your app’s performance much more easily.
+
+To retrieve more than 20 records, making use of “pagination” is advised, which means additional records are loaded on demand. If your application provides a UI, this may, for example, manifest in the following two ways:
+
+- The user looking at the list of Records may request more by clicking on “Next Page”.
+
+- The user looking at the list of Records may request more by scrolling downward.
+
+Which of these implementations (or any other) you may choose is up to you.
+
+### Retrieving the Next Page of Records
+
+When running a Query such as `get.accounts` while more than 20 records are available for the respective model, a `moreAfter` property will be provided to you (the property only exists if more than 20 records are available; otherwise it is not defined).
+
+This property contains a so-called “cursor” pointing to the next page of records:
+
+```ts
+const accounts = await get.accounts();
+
+// Contains the cursor of the next page.
+accounts.moreAfter;
+```
+
+Whenever you would like to load more records, you can then pass the value of `moreAfter` back to RONIN, and you will be provided with the next 20 records:
+
+```ts
+const moreAccounts = await get.accounts.after(accounts.moreAfter);
+
+// Contains the cursor of the next page.
+moreAccounts.moreAfter;
+```
+
+You can repeat the above as often as you want to until there are no more records available (in which case `moreAfter` will not be defined anymore). Every time you run the query, a new `moreAfter` cursor will be provided to you.
+
+### Retrieving the Previous Page of Records
+
+If you would like to implement bi-directional pagination, you may use the `before` instruction and its `moreBefore` counterpart, which behave exactly the same as `after` and `moreAfter`, except that they let you paginate “upwards” instead of “downwards”:
+
+```ts
+const moreAccounts = await get.accounts.before(accounts.moreBefore);
+
+// Contains the cursor of the next page (upwards).
+moreAccounts.moreBefore;
+```
+
+For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in RONIN, which aren’t displayed. You could then use `before` to reveal more of the “previous records” in the list.
+
+### Customizing the Length of Pages
+
+As mentioned above, by default, 20 records are provided per page and more records can be obtained by paginating them, meaning by loading more pages.
+
+However, in special cases in which you would like to retrieve more than 20 records from RONIN without having to load multiple pages, you may decide to use the `limitedTo` instruction to provide a custom page length:
+
+```ts
+await get.accounts.limitedTo(50);
+```
+
+As with other query instructions, `limitedTo` can be combined with the `after` and `before` instructions used for retrieving a specific page of records:
+
+```ts
+await get.accounts({
+  after: '...',
+  limitedTo: 100,
+});
+```
+
+If you would like to display an infinite amount of records in your UI (for example displaying the list of members of a team in your app, which might be allowed to be infinite), we strongly recommend using pagination due to the reasons mentioned in the section above. In those cases, you should therefore only resort to `limitedTo` if you want to decrease or increase the page size slightly, not to retrieve all records.
+
+If, however, there is a guarantee within the conceptual model of your application that a certain kind of record can only exist a finite amount of times (or to be specific, only a finite amount or less than that is always displayed), you may decide to use `limitedTo` in order to retrieve all records at once.
+
+The maximum value allowed by `limitedTo` (the maximum page length) is `1000`. We strongly advice against making use of such a high value unless truly necessary.
+
+## Ordering Records (`orderedBy`)
+
+Regardless of whether a singular or multiple records are being retrieved, the returned records will always be ordered by their creation date by default, meaning that the most recently created records will be returned first.
+
+```ts
+// The most recently created record of the model will be returned.
+await get.customer();
+
+// The 20 most recently created records of the model will be returned.
+await get.customers();
+
+// The most recently created record of the model and matching the provided
+// conditions will be returned.
+await get.customer.with.country('germany');
+
+// The 20 most recently created records of the model and matching the provided
+// conditions will be returned.
+await get.customers.with.country('germany');
+```
+
+In order to define a custom order for the returned records, you may optionally provide the `orderedBy` instruction for any query of type `get`.
+
+RONIN offers the default fields `ronin.createdAt` and `ronin.updatedAt` for easily ordering records using their creation and update date:
+
+```ts
+// The 20 most recently updated records of the model will be returned.
+await get.blogPosts.orderedBy.ascending(['ronin.updatedAt']);
+
+// The 20 least recently updated records of the model will be returned.
+await get.blogPosts.orderedBy.descending(['ronin.updatedAt']);
+```
+
+If needed, you may also order by multiple different fields in different ways:
+
+```ts
+await get.blogPosts.orderedBy({
+  ascending: ['title', 'ronin.updatedAt'],
+  descending: ['slug'],
+});
+```
+
+## Resolving Related Records (`using`)
+
+While designing an advanced data structure for your application, you will find yourself often wanting to make use of “relations”, which, in RONIN, are only a matter of adding a field of type “Record” to a model, and referencing a different model from it.
+
+The `using` query instruction can then be used to resolve the field when needed.
+
+### Architecture Example
+
+For example, your application might have a model called “Team”, and a model called “Member”, in order to allow for multiple members to be part of a single team.
+
+In order to establish a relation, all you need to do is add a Record field named “Team” to the “Member” model and reference the “Team” model from it. You will then be able to write the ID of a related team as a value for this field.
+
+### Query Example
+
+By default, any query of type `get` whose target model contains a field of type “Record” will not automatically resolve the related record (in favor of performance).
+
+In order to resolve the related record, however, you only need to add the Record field (the relational field) to the `using` instruction, like so:
+
+```ts
+// Returns a record where the "team" field is resolved to a related record.
+await get.member({
+  with: { id: 'acc_vais0g9rrk995tz0' },
+  using: ['team'],
+});
+```
+
+Once you’ve added a field to `using`, the return types of the query will automatically reflect a full record object for that field, instead of only a record ID.
+
+If you're importing a type explicitly, you can pass fields that should be resolved as a generic argument:
+
+```ts
+type BlogPostsWithAuthor = BlogPosts<['author']>;
+```
+
+You may even pass multiple fields like so:
+
+```ts
+BlogPosts<['author', 'category']>;
+```
+
+In order to resolve all fields at once, you can pass the string `all` instead of an array of field slugs:
+
+```ts
+await get.member({
+  with: { id: 'acc_vais0g9rrk995tz0' },
+  using: 'all',
+});
+```
+
+Please note that resolving more fields affects the performance of your query, so you should not use `using: 'all'` unless you really need to resolve all fields. If you only need to resolve some of the fields, define only those fields.
+
+## Selecting Fields (`selecting`)
+
+In order to ensure the maximum security of your data, you might want to prevent specific fields from ever leaving RONIN’s storage. You can achieve this by using the `selecting` instruction.
+
+By default, every record will always contain all of its stored fields when retrieved via the `get` [query type](/docs/queries/query-types). To exclude a particular field, it has to be added to `selecting` explicitly.
+
+```ts
+await get.account({
+  with: { handle: 'elaine' },
+  selecting: ['name'],
+});
+```
+
+The query shown above will return the first Account record whose `handle` field matches `"elaine"` while preventing the `password` field from getting included in the final result.
+
+### Architecture Example
+
+For example, if your application uses a password-based login, you might use a model named “Account”, which contains a field of type String (with "Display As" set to "Secret") called “Password”, which holds a hashed version of the Account's password.
+
+This field should never be exposed to your application (neither client- nor server-side) — only when logging in and the hash has to be compared.
+
+In such a case, you may therefore want to add the `password` field to `selecting`.
+
+Similarly, the value of a particular field on a record might be so large that you don’t want to receive it on a particular client in order to avoid hitting memory constraints. This is another case in which using `selecting` will help you.

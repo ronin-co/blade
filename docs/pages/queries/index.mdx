@@ -1,0 +1,199 @@
+---
+title: 'Queries'
+---
+
+import QuerySyntaxPreview from '@/components/custom/query-syntax-preview';
+
+# Queries
+
+Programmatically interacting with records on RONIN is made possible through its unique query syntax, designed to allow for accessing data in the most “humane” way possible, as it closely mimics the English language.
+
+<QuerySyntaxPreview />
+
+To retrieve a list of blog posts from RONIN, for example, you could run the following:
+
+```ts
+await get.blogPosts();
+```
+
+If you’d like to retrieve only a specific blog post, you could do so like this:
+
+```ts
+await get.blogPost.with.slug('new-pricing');
+```
+
+As you can probably already tell, RONIN’s syntax is quite straightforward to use while still providing enough flexibility to scale gradually as more advanced assertions are desired.
+
+## Components of the Query Syntax
+
+Below, you can find a list of all the different parts of the RONIN query syntax.
+
+### Query Type
+
+Learn more about how to perform different actions with queries:
+
+- Adding Records (`add`)
+
+- Retrieving Records (`get`)
+
+- Modifying Records (`set`)
+
+- Removing Records (`remove`)
+
+- Counting Records (`count`)
+
+### Query Target
+
+The second part of every RONIN query is its target (“query target”).
+
+Every query is aimed at a particular model, which is addressed using either the **Slug** or the **Plural Slug** of the respective model. Both can be found in the “Settings” section of the model on the dashboard.
+
+- Using the **Slug** will result in a singular record getting addressed. Specifically, the most recently created record that matches the query.
+
+- Using the **Plural Slug** will result in multiple records getting addressed. Specifically, all existing records that match the provided query, ordered by their creation date.
+
+#### Formatting
+
+In the “Settings” section of every model on the dashboard, both the Slug and the Plural Slug must be provided in [camel case](https://en.wikipedia.org/wiki/Camel_case), in order to make it easy to re-use the slugs in RONIN queries.
+
+For example, the following Slug and Plural Slug **are allowed**:
+
+```plaintext
+blogPost
+blogPosts
+```
+
+While the following are **not allowed**:
+
+```plaintext
+BlogPost
+BlogPosts
+
+blog post
+blog posts
+
+blog_post
+blog_posts
+```
+
+#### Limitations
+
+- Queries of type `add` currently only support providing a Slug, not a Plural Slug, as only one record can be created at a time. You may create multiple records at once, by executing multiple queries. A query such as `add.accounts()` is therefore not supported, while `add.account()` is supported.
+
+- Queries of type `count` only support providing a Plural Slug, not a Slug, as the query type is used for counting records, and if there is a guarantee that there will be only a single record, counting them is not needed. A query such as `count.blogPost()` is therefore not supported, while `count.blogPosts()` is supported.
+
+### Query Instructions
+
+Learn more about how to access specific records and format the query response:
+
+- Asserting Fields (`with`)
+
+- Paginating Records (`before`, `after`, `limitedTo`)
+
+- Ordering Records (`orderedBy`)
+
+- Resolving Related Records (`using`)
+
+- Selecting Fields (`selecting`)
+
+## Composability
+
+As RONIN’s query syntax mimics a plain JavaScript or JSON object in its form, you may choose to expand or compress the individual levels of the object at any position of your choice.
+
+For example, both of these queries perform exactly the same action:
+
+```ts
+await get.blogPosts.with.slug('new-pricing');
+
+await get.blogPosts({
+  with: { slug: 'new-pricing' },
+});
+```
+
+Any level that contains a period (`.`) can instead be a nested object if you decide so. This allows you to structure the query in any way you like, to keep it as simple as possible and as human-readable as possible, even as complexity increases.
+
+## Dot Notation
+
+Additional flexibility is provided as every **key** inside the object can contain dot notation as well.
+
+This is especially useful when addressing nested fields (either of a [relational record](/docs/queries/instructions) or the [RONIN metadata](/docs/platform/default-fields)) or when writing extremely sophisticated queries, as the syntax continues to remain readable and even easy to augment with comments.
+
+For example, the query below retrieves all records of the model “Blog Post” where the author is matched using a given username/handle, and the record is older than a given date:
+
+```ts
+await get.blogPosts({
+  with: {
+    author: { handle: { being: 'elaine' } },
+    ronin: { createdAt: { lessThan: new Date() } },
+  },
+  using: ['author'],
+});
+```
+
+In order to simplify addressing nested fields, RONIN supports “dot notation”, which may be used **on any level of the query**:
+
+```ts
+await get.blogPosts({
+  'with.author.handle.being': 'elaine',
+  'with.ronin.createdAt.lessThan': new Date(),
+  using: ['author'],
+});
+```
+
+Another example of placing the “dot notation” on a different level could be:
+
+```ts
+await get.blogPosts.with({
+  'author.handle': 'elaine',
+  'author.email': 'elaine@kojima-productions.com',
+});
+```
+
+Similarily, if you’d like to provide comment augmentation for extremely sophisticated queries, you can easily do so like this:
+
+```ts
+await get.teams.with({
+  // Only retrieve teams of the current Space.
+  'space.handle.being': spaceHandle,
+
+  // Exclude the current team.
+  'handle.notBeing': teamHandle,
+
+  // Exclude children of the current team.
+  team: [{ 'handle.notBeing': teamHandle }, { being: null }],
+});
+```
+
+## OR Conditions
+
+In certain cases, you might want to express an “OR” condition in RONIN’s query syntax, by requiring one of two (or more) possible sub-conditions to match.
+
+Achieving this is only a matter of using **Arrays**, rather than **Objects**, for your queries.
+
+You can think about RONIN’s query syntax in the following way:
+
+- Objects require every nested property within them to match.
+
+- Arrays require at least one nested item within them to match.
+
+In the following example, we want to retrieve a record of the “Blog Post” model for which the “author” field matches at least one of two possible values:
+
+```ts
+await get.blogPost.with.author(['acc_vais0g9rrk995tz0', 'acc_fa0k5kkw35fik9pu']);
+```
+
+The array syntax can currently be applied to **any level** inside the `with` [query instruction](/docs/queries/instructions):
+
+```ts
+await get.accounts.with.handle(['leo', 'juri']);
+
+await get.accounts.with.handle([{ endingWith: 'test' }, { startingWith: '1234' }]);
+
+await get.accounts.with([{ handle: { being: 'today' } }, { name: { endingWith: 'lamprecht' } }]);
+```
+
+You can even use it on multiple different nesting levels at once:
+
+```ts
+await get.accounts.with([{ handle: { being: ['juri', 'leo'] } }, { name: { endingWith: 'lamprecht' } }]);
+```
