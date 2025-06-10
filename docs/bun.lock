@@ -8,7 +8,7 @@
         "@radix-ui/react-separator": "^1.1.7",
         "@radix-ui/react-slot": "^1.2.3",
         "@radix-ui/react-tooltip": "^1.2.7",
-        "@ronin/blade": "0.8.2",
+        "@ronin/blade": "0.8.3",
         "@tabler/icons-react": "^3.34.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -153,7 +153,7 @@
 
     "@radix-ui/rect": ["@radix-ui/rect@1.1.1", "", {}, "sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw=="],
 
-    "@ronin/blade": ["@ronin/blade@0.8.2", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.16" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-/3p/6E2jLU5mRdmkpsmma3HE5jwkftt1BKM/Xaj7Imdr3gpe0c2u5CXSawCsZxtpvmoQzcp1mTS6QhIDtipLkg=="],
+    "@ronin/blade": ["@ronin/blade@0.8.3", "", { "dependencies": { "@ronin/compiler": "0.18.8", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "ronin": "6.6.17" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-6NB8VyP1Fw6237ArNbRroXwo/vQcoohbNs0oJdZOHLKkj9aRuHDEkIa/MMSafjDVFgKW2p0/AHooOfgX3Ih65Q=="],
 
     "@ronin/cli": ["@ronin/cli@0.3.19", "", { "dependencies": { "@dprint/formatter": "0.4.1", "@dprint/typescript": "0.93.3", "@iarna/toml": "2.2.5", "@inquirer/prompts": "7.2.3", "chalk-template": "1.1.0", "get-port": "7.1.0", "ini": "5.0.0", "json5": "2.2.3", "open": "10.1.0", "ora": "8.1.1", "resolve-from": "5.0.0" }, "peerDependencies": { "@ronin/codegen": ">=1.7.4", "@ronin/compiler": ">=0.18.8", "@ronin/engine": ">=0.1.23", "@ronin/syntax": ">=0.2.42" } }, "sha512-2M34NVDR/FRcjwhSFKMOVnI0uY0VFqrwotK7P+hQRwiOhE9juTsIPpNBSXPQwHRQBbHdoCxm1udibspDMphBXA=="],
 
@@ -425,7 +425,7 @@
 
     "restore-cursor": ["restore-cursor@5.1.0", "", { "dependencies": { "onetime": "^7.0.0", "signal-exit": "^4.1.0" } }, "sha512-oMA2dcrw6u0YfxJQXm342bFKX/E4sG9rbTzO9ptUcR/e8A33cHuvStiYOwH7fszkZlZ1z/ta9AAoPk2F4qIOHA=="],
 
-    "ronin": ["ronin@6.6.16", "", { "dependencies": { "@ronin/cli": "0.3.19", "@ronin/compiler": "0.18.8", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.43" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-LQjA5OogMkGp4xo8Q89H2jXlNtiuJL3Iun743kK0I87ZOrlMmmfth+JsQaPLo0oPrMfCtFu/riB5EQs9EgEbuQ=="],
+    "ronin": ["ronin@6.6.17", "", { "dependencies": { "@ronin/cli": "0.3.19", "@ronin/compiler": "0.18.8", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.43" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-7lWVAFZy++ltqQ/CCXP5chiji6Z5YT+GbddQOk0DFzKuC6EI3X3y2oC/yYy8o2NSsrQ9QNXyfpHnHlAnZGX1eA=="],
 
     "run-applescript": ["run-applescript@7.0.0", "", {}, "sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A=="],
 

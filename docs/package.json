@@ -6,7 +6,8 @@
     "dev": "blade",
     "build": "blade build",
     "serve": "blade serve",
-    "format": "biome format --write"
+    "lint": "biome check --error-on-warnings",
+    "format": "biome check --write && biome format --write"
   },
   "author": "ronin",
   "dependencies": {
@@ -14,7 +15,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.7",
-    "@ronin/blade": "0.8.2",
+    "@ronin/blade": "0.8.3",
     "@tabler/icons-react": "^3.34.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
