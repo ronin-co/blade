@@ -68,6 +68,18 @@ const menuItems = [
     parentItem: 'models',
   },
   {
+    id: 'pages',
+    name: 'Pages',
+    href: '/pages',
+    parentItem: '',
+  },
+  {
+    id: 'api',
+    name: 'API Routes',
+    href: '/api-routes',
+    parentItem: '',
+  },
+  {
     id: 'types',
     name: 'Types',
     href: '/types',
