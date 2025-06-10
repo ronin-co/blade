@@ -1,0 +1,499 @@
+---
+title: Hooks
+---
+
+# Hooks
+
+Blade provides the following React hooks:
+
+## `useLocation` (Universal)
+
+Mimics [document.location](https://developer.mozilla.org/en-US/docs/Web/API/Document/location) and thereby exposes a `URL` object containing the URL of the current page.
+
+Unlike in `document.location`, however, the URL is not populated, so dynamic path segments of pages will not be populated with their respective value.
+
+```tsx
+import { useLocation } from '@ronin/blade/universal/hooks';
+
+const location = useLocation();
+```
+
+## `useParams` (Universal)
+
+Exposes the keys and values of all parameters (dynamic path segments) present in the URL.
+
+For example, if the URL being accessed is `/elaine` and the page is named `[handle].tsx`, the returned object would be `{ handle: 'elaine' }`.
+
+```tsx
+import { useParams } from '@ronin/blade/universal/hooks';
+
+const params = useParams();
+```
+
+## `useRedirect` (Universal)
+
+Used to transition to a different page.
+
+```tsx
+import { useRedirect } from '@ronin/blade/universal/hooks';
+
+const redirect = useRedirect();
+
+redirect('/pathname');
+```
+
+The following options are available:
+
+```tsx
+redirect('/pathname', {
+    // If the pathname provided to `redirect()` contains dynamic segments, such as
+    // `/[handle]`, you can provide a value for those segments here.
+    extraParams: { handle: 'elaine' },
+
+    // If a part of your app relies on React state that is also reflected in the URL
+    // (e.g. this often happens with `?search` text), you can avoid keeping React state
+    // by using this option and simply reading the output of `useLocation()`.
+    //
+    // However note that this option is only available on the client.
+    immediatelyUpdateQueryParams: true
+});
+```
+
+## `usePopulatePathname` (Universal)
+
+As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[handle]`) are not populated in the `URL` object exposed by the hook.
+
+To populate them, you can pass the pathname to the `usePopulatePathname()` hook.
+
+```tsx
+import { usePopulatePathname } from '@ronin/blade/universal/hooks';
+
+const populatePathname = usePopulatePathname();
+
+// Assuming that the URL being accessed is `/elaine` and the page is called
+// `[handle].tsx`, this would output `/elaine`.
+populatePathname('/[handle]');
+```
+
+The following options are available:
+
+```tsx
+populatePathname('/[handle]', {
+    // May be used to provide values for params that are present in the pathname that was
+    // provided to `populatePathname()`, but are not present in the current URL. This is
+    // essentially a clean way of using `populatePathname(`/${params.handle}`)`.
+    extraParams: { handle: 'elaine' }
+});
+```
+
+## `useNavigator` (Universal)
+
+Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
+
+```tsx
+import { useNavigator } from '@ronin/blade/universal/hooks';
+
+const navigator = useNavigator();
+
+navigator.userAgent; // See MDN docs
+navigator.languages; // See MDN docs
+navigator.geoLocation; // See MDN docs (currently under construction)
+```
+
+## `useMutation` (Client)
+
+Allows for performing data mutations and updates all `use` queries accordingly.
+
+The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used as well.
+
+```tsx
+import { useMutation } from '@ronin/blade/client/hooks';
+
+const { set, add, remove, batch } = useMutation();
+
+await set.account({
+    with: { handle: 'elaine' },
+    to: { handle: 'mia' }
+});
+
+await add.account.with.handle('elaine');
+await remove.account.with.handle('elaine');
+
+// If you need to run multiple mutation queries serially, use a single transaction to
+// avoid unnecessary hops to the database.
+await batch(() => [
+    set.account({
+        with: { handle: 'elaine' },
+        to: { handle: 'mia' }
+    }),
+    add.account.with.handle('elaine'),
+    remove.account.with.handle('elaine')
+]);
+```
+
+When a mutation happens, its queries are combined with any potential read queries that might be necessary to update the `use` hooks on the current path and sent to the database as a single transaction.
+
+The following options are available for all query types:
+
+```tsx
+await add.account.with.handle('elaine', {
+    // Render a different page after the mutation has been completed.
+    redirect: '/accounts/elaine',
+
+    // For the above, you may also decide to access the result of the mutation, such that
+    // the pathname of the destination page depends on the mutation result.
+    //
+    // The curly braces represent a segment that will be replaced with the result of the
+    // mutation query. The number (0) indicates the item in the list of results (when
+    // using `batch`, you might have multiple queries) and the string ("handle")
+    // indicates the slug of the field that should be used.
+    redirect: '/accounts/{0.handle}'
+});
+```
+
+## `usePagination` (Client)
+
+Allows for paginating a read query and thereby modifies the result of the respective `use` hook associated with that read query.
+
+For example, you might use the following read query in your page (on the server):
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+import SomeComponent from './components/test.client';
+
+const Page = () => {
+    const accounts = use.accounts();
+
+    return <SomeComponent records={accounts} recordsNextPage={accounts.nextPage}>;
+}
+```
+
+Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then paginate the list of records you've retrieved like this:
+
+```tsx
+import { usePagination } from '@ronin/blade/client/hooks';
+
+export const SomeComponent = ({ records, recordsNextPage }) => {
+    const { paginate, resetPagination } = usePagination(recordsNextPage);
+
+    return (
+        <div>
+            <button onClick={() => paginate()}>Show next page</button>
+            <button onClick={() => resetPagination()}>Show initial page</button>
+        </div>;
+    );
+};
+```
+
+The following options are available:
+
+```tsx
+usePagination(nextPage, {
+    // By default, a `?page` parameter will be added to the URL, which allows for sharing
+    // the current pagination status of the page with other people. Setting this argument
+    // to `false` will avoid that.
+    //
+    // For example, if you're paginating a large list of records in the middle of your
+    // page, you should likely use the default value, such that users can share a link
+    // to a particular page of records with other people.
+    //
+    // If you're paginating a list of records within an overlay, however, for example,
+    // you should set this to `false`, since people don't need to be able to link to a
+    // specific page of records within an overlay that's nested deeply into your UI.
+    updateAddressBar: true
+});
+```
+
+## `usePaginationBuffer` (Client)
+
+Concatenates arrays based on pagination. Whenever the current paginated page changes, the
+provided items will be concatenated with the previously provided list of items.
+
+When implementing pagination in an application, one of the key considerations is how to efficiently manage the complete array of records, since your backend should only ever return a single page at once, and never the full list, as the latter would degrade performance and affect memory usage.
+
+When displaying a list of records, `usePaginationBuffer` automates this for you. You simply provide it with the result of a read query, and it intelligently concatenates the result of the query for you, allowing you to operate on the full list of records if needed.
+
+For example, you might use the following read query in your page (on the server):
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+import SomeComponent from './components/test.client';
+
+const Page = () => {
+    const accounts = use.accounts();
+
+    return (
+        <SomeComponent previousPage={accounts.previousPage} nextPage={accounts.nextPage}>
+            {accounts.map(account => <Row record={account} />)}
+        </SomeComponent>;
+    );
+}
+```
+
+Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then concatenate the list of records like so:
+
+```tsx
+import { usePagination, usePaginationBuffer } from '@ronin/blade/client/hooks';
+
+export const SomeComponent = ({ children: defaultChildren, nextPage, previousPage }) => {
+    const { paginate, resetPagination } = usePagination(nextPage);
+    const [children] = usePaginationBuffer(defaultChildren, { previousPage });
+
+    return <div>{children}</div>;
+};
+```
+
+This allows for shipping the least amount of code to the client, because the entire layout (including `Row`, with the only exception being `SomeComponent`) will be rendered only on the server, so no unnecessary code will leave the server, ensuring that no unnecessary JavaScript must be downloaded.
+
+The following options are available:
+
+```tsx
+usePaginationBuffer(list, {
+    // The pagination cursor for the previous page of your record list. Must be provided.
+    previousPage: '...',
+
+    // By default, any changes to `list` will be reflected in the concatenated list
+    // returned by `usePaginationBuffer()`. This default is useful because that means
+    // automatically revalidated read queries will see their results reflected.
+    //
+    // However, if you want to force a list to untouched by revalidation, you can set
+    // this option to `false`, which will result in the returned list staying static,
+    // even if the provided `list` is modified.
+    //
+    // For example, if you are paginating a list of records within an overlay, you might
+    // want the list of records within the overlay to never automatically update.
+    allowUpdates: true
+});
+```
+
+You may also decide to pass a TypeScript generic with the type of provided array item:
+
+```tsx
+usePaginationBuffer<ReactElement>();
+```
+
+## `useLinkEvents` (Client)
+
+In the majority of cases, you should use Blade's `<Link>` component to display links that should automatically result in a page transition (links pointing to external pages should just use anchor elements).
+
+In the rare scenario that you need to capture the click event of a link element yourself for other purposes, however, you can use `useLinkEvents` to manually trigger the same event handlers that would normally be triggered for a `<Link>` component instance.
+
+For example, if a drag-and-drop system is used, it might want to use those event handlers for different purposes (detecting whether an element is being dragged or dropped), so it could fire the ones provided by Blade at a different time.
+
+```tsx
+import { useLinkEvents } from '@ronin/blade/client/hooks';
+
+const eventHandlers = useLinkEvents('/pathname');
+
+<button {...eventHandlers}>I am a link</button>
+```
+
+## `useQueryState` (Client)
+
+In React, ephemeral state is managed with the [`useState`](https://react.dev/reference/react/useState) hook. For example, if your interface contains a dialog that should open when a button is clicked, you would typically store the status of the dialog in `useState`. This state does not persist across sessions, meaning if a user closes the browser tab, the state will be lost.
+
+To persist state, it should be stored with the client-side [`useMutation`](#usemutation-client) hook, which has the ability to commit changes to your database. This state, since it is stored in your database, can then also be accessed by other users, if needed.
+
+For maximum flexibility, Blade offers a third kind of state: In addition to ephemeral and persistent state (which we've covered above), there is also **URL state**. This kind of state can be re-used across different browser sessions, as long as the same URL is used to access the page.
+
+For example, if your application contains a list of items within the interface, you might decide to add a `?search` query parameter as part of the URL, in order to store search keywords in the URL. Like that, the state does not need to be stored in your database, but it also wouldn't get lost when the page gets reloaded, and it would apply whenever the URL is shared with other people.
+
+In those kinds of scenarios, you can add the `useQueryState` hook, which essentially auto-generates a `useState` hook that depends on a query parameter in the URL. Reading the value of the hook therefore reads the value of the query parameter in the URL, and setting the value of the hook therefore also updates the value of the query parameter in the URL — all without you needing to write extra code.
+
+```tsx
+import { useQueryState } from '@ronin/blade/client/hooks';
+
+const ClientComponent = () => {
+    const [hello, setHello] = useQueryState('hello');
+
+    return (
+        <>
+            <input onChange={(e) => setHello(e.target.value)} value={hello} />
+            <p>Hello, {hello || 'world'}!</p>
+        </>
+    );
+};
+```
+
+## `use` (Server)
+
+Usually, in React, the [use](https://react.dev/reference/react/use) hook is used to consume a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or [context](https://react.dev/learn/passing-data-deeply-with-context).
+
+In Blade, however, since Blade purposefully does not support Suspense and also does not support asynchronous components, the hook is used to load data instead.
+
+Specifically, the hook reflects the full capabilities of the [RONIN query syntax](https://ronin.co/docs/queries) (which is as powerful as SQL) and thereby allows for easily querying records on your database.
+
+By default, if you provide a `RONIN_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using [triggers](https://ronin.co/docs/models/triggers) instead.
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+    // "accounts" would be the name of your model.
+    const records = use.accounts();
+
+    return <>{records.map(record => <span>{record.name}</span>)}</>;
+};
+```
+
+The queries you provide can be as complex as you would like them to be (see the [query syntax docs](https://ronin.co/docs/queries) for more details on what you can do):
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+
+const records = use.members({
+    with: {
+        team: { notBeing: null },
+        email: { endingWith: '@site.co' }
+    },
+    orderedBy: {
+        descending: ['joinedAt']
+    }
+});
+```
+
+Note that, in order to avoid data waterfalls, data can only be read in server components. On the client, data can only be [modified](#usemutation-client).
+
+The queries of your page and its surrounding layouts are executed as a single database transaction, in order to ensure instant page renders.
+
+To run multiple queries within a single layout or page, the `useBatch` hook can be used:
+
+```tsx
+import { useBatch } from '@ronin/blade/server/hooks';
+
+const [accounts, posts] = useBatch(() => [
+    use.accounts(),
+    use.posts()
+]);
+```
+
+To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
+
+If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
+
+## `useCookie` (Server)
+
+Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
+
+```tsx
+import { useCookie } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+    const [tokenCookie, setTokenCookie] = useCookie('token');
+
+    if (!tokenCookie) setTokenCooke('a-value');
+
+    return <div>I am a page</div>;
+};
+```
+
+The following options are available:
+
+```tsx
+setCookie('a-value', {
+    // By default, cookies are set as HTTP-only. To let JavaScript access them in the
+    // browser, you can set this option to `true`.
+    client: false,
+
+    // By default, cookies receive a path value of "/". You can customize it using this
+    // option if needed.
+    path: '/'
+});
+```
+
+The max age of cookies currently defaults to 365 days, which is not yet customizable.
+
+## `useMetadata` (Server)
+
+Allows for defining the metadata of a layout or page and thereby populates the [head](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head) element of the rendered page with metadata elements.
+
+```tsx
+import { useMetadata } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+    useMetadata({
+        title: 'Page Title'
+    });
+
+    return <div>I am a page</div>;
+};
+```
+
+The following options are available:
+
+```tsx
+useMetadata({
+    // The browser tab title of the page. Titles defined in surrounding layouts are
+    // joined together with the title of the page using an em dash separator.
+    title: 'Page Title',
+
+    // Additional metadata for browsers.
+    themeColor: '#4285f4',
+    colorScheme: 'light',
+    description: 'This is a description',
+    icon: 'https://example.co/icon.png',
+
+    // Additional metadata for Open Graph (OG).
+    openGraph: {
+        title: 'Page Title',
+        description: 'This is a description',
+        siteName: 'Site',
+        images: [{ url: 'https://example.co/banner.png'; width: 1280; height: 720 }],
+    },
+
+    // Additional metadata for X (formerly Twitter).
+    x: {
+        title: 'Page Title',
+        description: 'This is a description',
+        card: 'summary_large_image',
+        site: '@nytimes',
+        creator: '@jk_rowling',
+        images: ['https://example.co/banner.png'];
+    },
+
+    // Since Blade does not allow for replacing the `<html>` or `<body>` elements,
+    // these options can be used to attach classes to them.
+    htmlClassName: 'lg:overflow-hidden',
+    bodyClassName: 'text-gray-800'
+});
+```
+
+## `useMutationResult` (Server)
+
+Since Blade requires data to be read only on the server and data to be mutated only on the client, the result of a mutation is only accessible as a result of the respective [mutation call](#usemutation-client). 
+
+In scenarios where you must explicitly access the result of a mutation on the server, however (for example in order to [set](#usecookie-server) HTTP-only cookies), you may invoke `useMutationResult()` on the server to retrieve its result.
+
+This interface will likely be moved into a different position within the programmatic API in the future.
+
+```tsx
+import { useMutationResult } from '@ronin/blade/server/hooks';
+
+const updatedRecords = useMutationResult();
+```
+
+## `useJWT` (Server)
+
+Allows for parsing [JSON Web Tokens](https://jwt.io) without blocking the page render.
+
+```tsx
+import { useJWT } from '@ronin/blade/server/hooks';
+
+const payload = useJWT(token, secret);
+```
+
+You may also decide to pass a TypeScript generic with the type of payload:
+
+```tsx
+interface SessionToken {
+    iss: string;
+    sub: string;
+    aud: string;
+    iat?: number | undefined;
+    exp?: number | undefined;
+};
+
+useJWT<SessionToken>(token, secret);
+```
+
+If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
