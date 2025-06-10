@@ -1,0 +1,68 @@
+---
+title: TypeScript Types
+---
+
+# TypeScript Types
+
+The `ronin` [package](https://www.npmjs.com/package/ronin) on npm provides the programmatic interface for querying RONIN.
+
+After defining your [database schema](/docs/models) in your repository, the `ronin` used within that same repository will automatically adapt its types to the schema you defined.
+
+However, if you have multiple repositories that interact with the same RONIN space, you may want to share the types between them. For all repositories that do not contain your database schema in code (there should only be one repository that contains it), RONIN offers an automatically generated types package that can be installed on those other repositories.
+
+## CLI
+
+To let the RONIN CLI initialize the types of your repository, first make sure you are logged in:
+
+```bash
+ronin login
+```
+
+Afterward, you can continue. The RONIN CLI automatically detects your package manager and configures your project’s `tsconfig.json` for you if you run the following command:
+
+```bash
+ronin types
+```
+
+And voilà! Now all the queries you run from the `ronin` TypeScript client will be typed automatically.
+
+## That’s it!
+
+Once you’ve completed the steps above, your queries will be auto-completed based on the schemas defined in your model definitions.
+
+Additionally, you may then also import the types and pass them around in your app:
+
+```ts
+import type { Post, Comments } from 'ronin';
+```
+
+## Updating Types
+
+Once you have updated one or more schemas, you can update the types like so:
+
+```bash
+ronin types
+```
+
+## CI / CD
+
+When running automated CI (Continuous Integration) systems such as [GitHub Actions](https://github.com/features/actions), you must provide a `.npmrc` file, which `npm` will load automatically.
+
+That’s also the file where `npm` places your credentials locally (usually, it can be found in your home directory, meaning `~/`).
+
+Locally, the file will contain a session token associated with your personal RONIN account, which allows you to install type packages for as many spaces as you want (depending on which spaces your account has access to on the dashboard).
+
+For CI, you can instead create a new App Token in the “Apps” section of your space and give it a name such as “GitHub Actions” (you may also include the name of your repository), after which you can add the following `.npmrc` file to your CI:
+
+```text "RONIN_TOKEN"#variable title=".npmrc"
+@ronin:registry=https://ronin.supply/
+//ronin.supply/:\_authToken=${RONIN_TOKEN}
+```
+
+The `RONIN_TOKEN` above would be the name of the environment variable that contains the token.
+
+## Vercel (Recommended)
+
+If you’re using Vercel, you only need to add the contents shown above to an environment variable named `NPM_RC`. Vercel will then [automatically provide](https://vercel.com/guides/using-private-dependencies-with-vercel) the config to `npm` for you.
+
+Also, don’t forget to add the `RONIN_TOKEN` environment variable, which allows the `ronin` package to access the data within your space.
