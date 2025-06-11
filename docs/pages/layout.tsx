@@ -91,6 +91,12 @@ const menuItems = [
     href: '/client',
     parentItem: '',
   },
+  {
+    id: 'deploying',
+    name: 'Deploying',
+    href: '/deploying',
+    parentItem: '',
+  },
 ];
 
 interface HeadingProps {

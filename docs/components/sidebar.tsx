@@ -1,3 +1,4 @@
+import { Link } from '@ronin/blade/client/components';
 import { useLocation } from '@ronin/blade/universal/hooks';
 
 import { cn } from '@/lib/utils';
@@ -38,7 +39,7 @@ export const Sidebar = ({
                   data-slot="sidebar-menu-item"
                   data-sidebar="menu-item"
                   className="group/menu-item relative">
-                  <a
+                  <Link
                     data-slot="sidebar-menu-button"
                     data-sidebar="menu-button"
                     data-size="default"
@@ -54,8 +55,8 @@ export const Sidebar = ({
                         : null,
                     )}
                     href={item.href}>
-                    {item.name}
-                  </a>
+                    <a>{item.name}</a>
+                  </Link>
                 </li>
               ))}
             </ul>
