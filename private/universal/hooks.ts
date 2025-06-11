@@ -27,6 +27,18 @@ const useUniversalContext = (): UniversalContext => {
 
 // We're creating a new `URL` object here, which ensures that any modifications applied
 // by developers to what the hook returns won't affect other instances of the hook.
-const usePrivateLocation = (): URL => new URL(useUniversalContext().url);
+const usePrivateLocation = (): URL => {
+  const url = new URL(useUniversalContext().url);
+
+  // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
+  const isNetlify = typeof Netlify !== 'undefined';
+  if (typeof window === 'undefined' || isNetlify) return url;
+
+  // In the browser, we need to read the URL hash from the `window` object, since
+  // browsers don't send the URL hash to the server.
+  url.hash = window.location.hash;
+
+  return url;
+};
 
 export { useUniversalContext, usePrivateLocation };
