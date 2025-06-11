@@ -129,7 +129,36 @@ const DocsLayout = ({
 // biome-ignore lint/nursery/useComponentExportOnlyModules: This is needed for the docs.
 export const components = {
   pre: (props: CodeProps) => <Code {...props} />,
-  h1: (props: HeadingProps) => <Heading {...props} />,
+  h1: (props: HeadingProps) => (
+    <Heading
+      level={1}
+      {...props}
+    />
+  ),
+  h2: (props: HeadingProps) => (
+    <Heading
+      level={2}
+      {...props}
+    />
+  ),
+  h3: (props: HeadingProps) => (
+    <Heading
+      level={3}
+      {...props}
+    />
+  ),
+  h4: (props: HeadingProps) => (
+    <Heading
+      level={4}
+      {...props}
+    />
+  ),
+  h5: (props: HeadingProps) => (
+    <Heading
+      level={5}
+      {...props}
+    />
+  ),
 };
 
 export default DocsLayout;
