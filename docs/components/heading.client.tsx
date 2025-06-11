@@ -10,10 +10,13 @@ interface HeadingProps {
 export const Heading = ({ children, level, ...props }: HeadingProps) => {
   const HeadingComponent = `h${level}` as keyof JSX.IntrinsicElements;
 
+  const id = children?.toString()?.toLowerCase();
+
   return (
     <a
       data-heading={true}
-      href={`#${children?.toString()?.toLowerCase()}`}
+      href={`#${id}`}
+      id={id}
       className="group -ml-11 not-prose relative flex items-center gap-2">
       <Button
         variant="ghost"
