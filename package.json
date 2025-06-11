@@ -25,21 +25,21 @@
     "prepare": "bun run build"
   },
   "exports": {
+    ".": "./dist/public/universal/",
     "./client/": "./dist/public/client/",
     "./server/": "./dist/public/server/",
-    "./universal/": "./dist/public/universal/",
     "./schema": "./dist/public/universal/schema"
   },
   "typesVersions": {
     "*": {
+      "*": [
+        "./dist/public/universal/*"
+      ],
       "client/*": [
         "./dist/public/client/*"
       ],
       "server/*": [
         "./dist/public/server/*"
-      ],
-      "universal/*": [
-        "./dist/public/universal/*"
       ],
       "schema": [
         "./dist/public/universal/schema"
