@@ -1,5 +1,6 @@
 import type { CodeProps } from '@/components/code';
 import { Code } from '@/components/code';
+import { Footer } from '@/components/footer';
 import { Heading } from '@/components/heading.client';
 import { Navbar } from '@/components/navbar';
 import { OnThisPage } from '@/components/on-this-page.client';
@@ -114,6 +115,7 @@ const DocsLayout = ({
       <div className="fixed top-24 right-20 w-40">
         <OnThisPage />
       </div>
+      <Footer />
     </div>
   );
 };
