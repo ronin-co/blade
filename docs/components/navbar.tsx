@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 
 export const Navbar = () => {
   return (
-    <header className="sticky top-0 z-50 w-full flex-none bg-background-light p-6 backdrop-blur transition-colors duration-500 supports-backdrop-blur:bg-background-light/95 dark:bg-background-dark/75 ">
-      <div className="container-wrapper 3xl:fixed:px-0 px-6">
-        <div className="**:data-[slot=separator]:!h-4 3xl:fixed:container flex h-(--header-height) items-center gap-6">
+    <header className="sticky top-0 z-50 w-full flex-none bg-background-light p-4 backdrop-blur transition-colors duration-500 supports-backdrop-blur:bg-background-light/95 md:p-6 dark:bg-background-dark/75 ">
+      <div className="container-wrapper 3xl:fixed:px-0 md:px-6">
+        <div className="**:data-[slot=separator]:!h-4 3xl:fixed:container flex h-(--header-height) items-center gap-2 md:gap-6">
           <Logo />
           <Button
             asChild={true}
