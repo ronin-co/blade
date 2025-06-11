@@ -25,24 +25,28 @@
     "prepare": "bun run build"
   },
   "exports": {
-    ".": "./dist/public/universal/",
     "./client/": "./dist/public/client/",
     "./server/": "./dist/public/server/",
-    "./schema": "./dist/public/universal/schema"
+    "./hooks": "./dist/public/universal/hooks",
+    "./schema": "./dist/public/universal/schema",
+    "./types": "./dist/public/universal/types"
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/public/universal/*"
-      ],
       "client/*": [
         "./dist/public/client/*"
       ],
       "server/*": [
         "./dist/public/server/*"
       ],
+      "hooks": [
+        "./dist/public/universal/hooks"
+      ],
       "schema": [
         "./dist/public/universal/schema"
+      ],
+      "types": [
+        "./dist/public/universal/types"
       ]
     }
   },
