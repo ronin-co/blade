@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import type { SidebarItem } from '@/pages/layout';
-import { useLocation } from '@ronin/blade/universal/hooks';
+import { useLocation } from '@ronin/blade/hooks';
 
 export const Navbar = ({ items }: { items: SidebarItem }) => {
   const pathname = useLocation().pathname;
