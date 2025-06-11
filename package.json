@@ -27,9 +27,9 @@
   "exports": {
     "./client/": "./dist/public/client/",
     "./server/": "./dist/public/server/",
-    "./hooks": "./dist/public/universal/hooks",
-    "./schema": "./dist/public/universal/schema",
-    "./types": "./dist/public/universal/types"
+    "./hooks": "./dist/public/universal/hooks.js",
+    "./schema": "./dist/public/universal/schema.js",
+    "./types": "./dist/public/universal/types.js"
   },
   "typesVersions": {
     "*": {
