@@ -371,12 +371,12 @@ To count records, the `useCountOf` hook can be used with the same syntax as the 
 
 If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
 
-## `useCookie` (Server)
+## `useCookie`
 
 Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
 
 ```tsx
-import { useCookie } from '@ronin/blade/server/hooks';
+import { useCookie } from '@ronin/blade/hooks';
 
 const Page = () => {
     const [tokenCookie, setTokenCookie] = useCookie('token');

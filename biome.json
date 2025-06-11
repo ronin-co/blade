@@ -57,7 +57,8 @@
         "useExplicitType": "off",
         "useGuardForIn": "off",
         "noHeadElement": "off",
-        "noExportedImports": "off"
+        "noExportedImports": "off",
+        "noDocumentCookie": "off"
       },
       "performance": {
         "all": true,
