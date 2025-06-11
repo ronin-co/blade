@@ -1,6 +1,7 @@
 import { CopyText } from '@/components/copy-text.client';
 import { Icons } from '@/components/icons';
 import { Logo } from '@/components/logo';
+import { Menu } from '@/components/menu.client';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,11 +11,10 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import type { SidebarItem } from '@/pages/layout';
 import { useLocation } from '@ronin/blade/universal/hooks';
 
-export const Navbar = ({
-  items,
-}: { items: { [key: string]: { id: string; href: string; name: string }[] } }) => {
+export const Navbar = ({ items }: { items: SidebarItem }) => {
   const pathname = useLocation().pathname;
 
   let currentItem = null;
@@ -56,6 +56,7 @@ export const Navbar = ({
                   <span className="text-primary/80">$ bunx @ronin/blade init</span>
                 </CopyText>
               </p>
+              <Menu items={items} />
             </div>
           </div>
         </div>

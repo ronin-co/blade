@@ -6,7 +6,15 @@ import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
 import { useMetadata } from '@ronin/blade/server/hooks';
 
-const menuItems = {
+type MenuItem = {
+  id: string;
+  name: string;
+  href: string;
+};
+
+export type SidebarItem = { [key: string]: MenuItem[] };
+
+const menuItems: SidebarItem = {
   'Get Started': [
     {
       id: 'introduction',
