@@ -112,21 +112,28 @@ const DocsLayout = ({
   useMetadata({ htmlClassName: 'dark' });
 
   return (
-    <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
-      <Navbar items={menuItems} />
-      <div className="fixed top-24 left-6 w-fit">
-        <Sidebar items={menuItems} />
+    <>
+      <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
+        <Navbar items={menuItems} />
+        <div className="fixed top-24 left-6 w-fit">
+          <Sidebar items={menuItems} />
+        </div>
+        <div className="docs-content prose mx-auto flex w-full min-w-0 max-w-2xl flex-1 flex-col px-4 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-300">
+          {children}
+        </div>
+        <div className="fixed top-24 right-20 w-40">
+          <OnThisPage />
+        </div>
+        <div className="mt-16">
+          <Footer />
+        </div>
       </div>
-      <div className="docs-content prose mx-auto flex w-full min-w-0 max-w-2xl flex-1 flex-col px-4 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-300">
-        {children}
-      </div>
-      <div className="fixed top-24 right-20 w-40">
-        <OnThisPage />
-      </div>
-      <div className="mt-16">
-        <Footer />
-      </div>
-    </div>
+      <script
+        data-cf-beacon='{"token": "173532820a6a4edbb501f7ff2305ab48"}'
+        defer={true}
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+      />
+    </>
   );
 };
 
