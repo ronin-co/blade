@@ -6,23 +6,27 @@ import QuerySyntaxPreview from '@/components/custom/query-syntax-preview';
 
 # Queries
 
-Programmatically interacting with records on RONIN is made possible through its unique query syntax, designed to allow for accessing data in the most “humane” way possible, as it closely mimics the English language.
+Programmatically interacting with data in Blade is made possible through its unique query
+syntax, designed to allow for accessing data in the most “humane” way possible, as it
+closely mimics the English language.
 
 <QuerySyntaxPreview />
 
-To retrieve a list of blog posts from RONIN, for example, you could run the following:
+To retrieve a list of records, for example, you could run the following:
 
 ```ts
-await get.blogPosts();
+use.blogPosts();
 ```
 
 If you’d like to retrieve only a specific blog post, you could do so like this:
 
 ```ts
-await get.blogPost.with.slug('new-pricing');
+use.blogPost.with.slug('new-pricing');
 ```
 
-As you can probably already tell, RONIN’s syntax is quite straightforward to use while still providing enough flexibility to scale gradually as more advanced assertions are desired.
+As you can probably already tell, Blade’s query syntax is quite straightforward to use
+while still providing enough flexibility to scale gradually as more advanced assertions
+are desired.
 
 ## Components of the Query Syntax
 
@@ -103,9 +107,9 @@ As RONIN’s query syntax mimics a plain JavaScript or JSON object in its form, 
 For example, both of these queries perform exactly the same action:
 
 ```ts
-await get.blogPosts.with.slug('new-pricing');
+use.blogPosts.with.slug('new-pricing');
 
-await get.blogPosts({
+use.blogPosts({
   with: { slug: 'new-pricing' },
 });
 ```
@@ -121,7 +125,7 @@ This is especially useful when addressing nested fields (either of a [relational
 For example, the query below retrieves all records of the model “Blog Post” where the author is matched using a given username/handle, and the record is older than a given date:
 
 ```ts
-await get.blogPosts({
+use.blogPosts({
   with: {
     author: { handle: { being: 'elaine' } },
     ronin: { createdAt: { lessThan: new Date() } },
@@ -133,7 +137,7 @@ await get.blogPosts({
 In order to simplify addressing nested fields, RONIN supports “dot notation”, which may be used **on any level of the query**:
 
 ```ts
-await get.blogPosts({
+use.blogPosts({
   'with.author.handle.being': 'elaine',
   'with.ronin.createdAt.lessThan': new Date(),
   using: ['author'],
@@ -143,7 +147,7 @@ await get.blogPosts({
 Another example of placing the “dot notation” on a different level could be:
 
 ```ts
-await get.blogPosts.with({
+use.blogPosts.with({
   'author.handle': 'elaine',
   'author.email': 'elaine@kojima-productions.com',
 });
@@ -152,7 +156,7 @@ await get.blogPosts.with({
 Similarily, if you’d like to provide comment augmentation for extremely sophisticated queries, you can easily do so like this:
 
 ```ts
-await get.teams.with({
+use.teams.with({
   // Only retrieve teams of the current Space.
   'space.handle.being': spaceHandle,
 
@@ -179,21 +183,21 @@ You can think about RONIN’s query syntax in the following way:
 In the following example, we want to retrieve a record of the “Blog Post” model for which the “author” field matches at least one of two possible values:
 
 ```ts
-await get.blogPost.with.author(['acc_vais0g9rrk995tz0', 'acc_fa0k5kkw35fik9pu']);
+use.blogPost.with.author(['acc_vais0g9rrk995tz0', 'acc_fa0k5kkw35fik9pu']);
 ```
 
 The array syntax can currently be applied to **any level** inside the `with` [query instruction](/docs/queries/instructions):
 
 ```ts
-await get.accounts.with.handle(['leo', 'juri']);
+use.accounts.with.handle(['leo', 'juri']);
 
-await get.accounts.with.handle([{ endingWith: 'test' }, { startingWith: '1234' }]);
+use.accounts.with.handle([{ endingWith: 'test' }, { startingWith: '1234' }]);
 
-await get.accounts.with([{ handle: { being: 'today' } }, { name: { endingWith: 'lamprecht' } }]);
+use.accounts.with([{ handle: { being: 'today' } }, { name: { endingWith: 'lamprecht' } }]);
 ```
 
 You can even use it on multiple different nesting levels at once:
 
 ```ts
-await get.accounts.with([{ handle: { being: ['juri', 'leo'] } }, { name: { endingWith: 'lamprecht' } }]);
+use.accounts.with([{ handle: { being: ['juri', 'leo'] } }, { name: { endingWith: 'lamprecht' } }]);
 ```

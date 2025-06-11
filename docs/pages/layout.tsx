@@ -24,41 +24,6 @@ const menuItems = {
       href: '/components',
     },
     {
-      id: 'queries',
-      name: 'Queries',
-      href: '/queries',
-    },
-    {
-      id: 'crud',
-      name: 'CRUD',
-      href: '/queries/crud',
-    },
-    {
-      id: 'instructions',
-      name: 'Instructions',
-      href: '/queries/instructions',
-    },
-    {
-      id: 'functions',
-      name: 'Functions',
-      href: '/queries/functions',
-    },
-    {
-      id: 'models',
-      name: 'Models',
-      href: '/models',
-    },
-    {
-      id: 'Fields',
-      name: 'Fields',
-      href: '/models/fields',
-    },
-    {
-      id: 'triggers',
-      name: 'Triggers',
-      href: '/models/triggers',
-    },
-    {
       id: 'pages',
       name: 'Pages',
       href: '/pages',
@@ -82,6 +47,45 @@ const menuItems = {
       id: 'deploying',
       name: 'Deploying',
       href: '/deploying',
+    },
+  ],
+  Queries: [
+    {
+      id: 'queries',
+      name: 'Overview',
+      href: '/queries',
+    },
+    {
+      id: 'crud',
+      name: 'CRUD',
+      href: '/queries/crud',
+    },
+    {
+      id: 'instructions',
+      name: 'Instructions',
+      href: '/queries/instructions',
+    },
+    {
+      id: 'functions',
+      name: 'Functions',
+      href: '/queries/functions',
+    },
+  ],
+  Models: [
+    {
+      id: 'models',
+      name: 'Overview',
+      href: '/models',
+    },
+    {
+      id: 'Fields',
+      name: 'Fields',
+      href: '/models/fields',
+    },
+    {
+      id: 'triggers',
+      name: 'Triggers',
+      href: '/models/triggers',
     },
   ],
 };
