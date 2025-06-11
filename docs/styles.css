@@ -25,7 +25,7 @@ html {
 	}
 
 	p {
-		@apply leading-relaxed [&:not(:first-child)]:mt-6 text-[#9E9E9E]
+		@apply leading-relaxed [&:not(:first-child)]:mt-1 text-[#9E9E9E]
 	}
 
 	code:not(pre code) {
