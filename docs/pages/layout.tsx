@@ -6,7 +6,15 @@ import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
 import { useMetadata } from '@ronin/blade/server/hooks';
 
-const menuItems = {
+type MenuItem = {
+  id: string;
+  name: string;
+  href: string;
+};
+
+export type SidebarItem = { [key: string]: MenuItem[] };
+
+const menuItems: SidebarItem = {
   'Get Started': [
     {
       id: 'introduction',
@@ -104,7 +112,7 @@ const DocsLayout = ({
 
   return (
     <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
-      <Navbar />
+      <Navbar items={menuItems} />
       <div className="fixed top-24 left-6 w-fit">
         <Sidebar items={menuItems} />
       </div>
