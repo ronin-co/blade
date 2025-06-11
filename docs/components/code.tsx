@@ -12,7 +12,7 @@ export const CodeBlock = (props: CodeBlockProps) => {
     <div className="relative">
       <pre
         {...restProps}
-        className="not-prose relative my-0! rounded-lg border p-5 text-sm">
+        className="not-prose relative my-0! rounded-lg border p-5 text-sm whitespace-pre-wrap">
         <code className="bg-none">{children}</code>
         <div className="absolute top-3 right-2">
           <CopyToClipboard content={children as string} />
