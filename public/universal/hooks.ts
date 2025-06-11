@@ -107,65 +107,67 @@ const DEFAULT_COOKIE_MAX_AGE = 31536000;
 const useCookie = <T extends string | null>(
   name: string,
 ): [T | null, (value: T, options?: CookieHookOptions) => void] => {
-  if (typeof window !== 'undefined') {
-    const value =
-      (document.cookie.match(`(^|;)\\s*${name}=([^;]*)`)?.pop() as T | undefined) || null;
+  // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
+  const isNetlify = typeof Netlify !== 'undefined';
+  if (typeof window === 'undefined' || isNetlify) {
+    const serverContext = useContext(RootServerContext);
+    if (!serverContext) throw new Error('Missing server context in `useCookie`');
+
+    const { cookies, collected } = serverContext;
+    const value = cookies[name] as T | null;
 
     const setValue = (value: T, options?: CookieHookOptions) => {
-      const shouldDelete = value === null;
-      const encodedValue = shouldDelete ? '' : encodeURIComponent(value);
+      const cookieSettings: CookieSerializeOptions = {
+        // 365 days.
+        maxAge: DEFAULT_COOKIE_MAX_AGE,
+        httpOnly: !options?.client,
+        path: options?.path || '/',
+      };
 
-      const components = [`${encodeURIComponent(name)}=${encodedValue}`];
-
-      if (shouldDelete) {
-        components.push('expires=Thu, 01 Jan 1970 00:00:00 GMT');
-      } else {
-        components.push(`max-age=${DEFAULT_COOKIE_MAX_AGE}`);
+      // To delete cookies, we have to set their expiration time to the past.
+      if (value === null) {
+        cookieSettings.expires = new Date(Date.now() - 1000000);
+        delete cookieSettings.maxAge;
+      }
+      // As per the types defined for the surrounding function, this condition would never
+      // be met. But we'd like to keep it regardless, to catch cases where the types
+      // provided to the developer aren't smart enough to avoid `undefined` or similar
+      // getting passed.
+      else if (typeof value !== 'string') {
+        let message = 'Cookies can only be set to a string value, or `null` ';
+        message += `for deleting them. Please adjust "${name}".`;
+        throw new Error(message);
       }
 
-      if (options?.path) components.push(`path=${options.path}`);
+      if (!collected.cookies) collected.cookies = {};
 
-      document.cookie = components.join('; ');
+      collected.cookies[name] = {
+        value,
+        ...cookieSettings,
+      };
     };
 
     return [value, setValue];
   }
 
-  const serverContext = useContext(RootServerContext);
-  if (!serverContext) throw new Error('Missing server context in `useCookie`');
-
-  const { cookies, collected } = serverContext;
-  const value = cookies[name] as T | null;
+  const value =
+    (document.cookie.match(`(^|;)\\s*${name}=([^;]*)`)?.pop() as T | undefined) || null;
 
   const setValue = (value: T, options?: CookieHookOptions) => {
-    const cookieSettings: CookieSerializeOptions = {
-      // 365 days.
-      maxAge: DEFAULT_COOKIE_MAX_AGE,
-      httpOnly: !options?.client,
-      path: options?.path || '/',
-    };
+    const shouldDelete = value === null;
+    const encodedValue = shouldDelete ? '' : encodeURIComponent(value);
 
-    // To delete cookies, we have to set their expiration time to the past.
-    if (value === null) {
-      cookieSettings.expires = new Date(Date.now() - 1000000);
-      delete cookieSettings.maxAge;
-    }
-    // As per the types defined for the surrounding function, this condition would never
-    // be met. But we'd like to keep it regardless, to catch cases where the types
-    // provided to the developer aren't smart enough to avoid `undefined` or similar
-    // getting passed.
-    else if (typeof value !== 'string') {
-      let message = 'Cookies can only be set to a string value, or `null` ';
-      message += `for deleting them. Please adjust "${name}".`;
-      throw new Error(message);
+    const components = [`${encodeURIComponent(name)}=${encodedValue}`];
+
+    if (shouldDelete) {
+      components.push('expires=Thu, 01 Jan 1970 00:00:00 GMT');
+    } else {
+      components.push(`max-age=${DEFAULT_COOKIE_MAX_AGE}`);
     }
 
-    if (!collected.cookies) collected.cookies = {};
+    if (options?.path) components.push(`path=${options.path}`);
 
-    collected.cookies[name] = {
-      value,
-      ...cookieSettings,
-    };
+    document.cookie = components.join('; ');
   };
 
   return [value, setValue];
