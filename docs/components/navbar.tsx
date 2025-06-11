@@ -1,9 +1,34 @@
 import { CopyText } from '@/components/copy-text.client';
 import { Icons } from '@/components/icons';
 import { Logo } from '@/components/logo';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { useLocation } from '@ronin/blade/universal/hooks';
 
-export const Navbar = () => {
+export const Navbar = ({
+  items,
+}: { items: { [key: string]: { id: string; href: string; name: string }[] } }) => {
+  const pathname = useLocation().pathname;
+
+  let currentItem = null;
+  let currentKey = null;
+
+  for (const [key, itemList] of Object.entries(items)) {
+    const foundItem = itemList.find((item) => item.href === pathname);
+    if (foundItem) {
+      currentItem = foundItem;
+      currentKey = key;
+      break;
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full flex-none bg-background-light p-4 backdrop-blur transition-colors duration-500 supports-backdrop-blur:bg-background-light/95 md:p-6 dark:bg-background-dark/75 ">
       <div className="container-wrapper 3xl:fixed:px-0 md:px-6">
@@ -26,13 +51,26 @@ export const Navbar = () => {
           </Button>
           <div className="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
             <div className="flex items-center gap-0.5">
-              <p className="font-mono text-xs">
+              <p className="hidden font-mono text-xs md:block">
                 <CopyText text="bunx @ronin/blade init">
                   <span className="text-primary/80">$ bunx @ronin/blade init</span>
                 </CopyText>
               </p>
             </div>
           </div>
+        </div>
+        <div className="mt-4 block md:hidden">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink>{currentKey}</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{currentItem?.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </div>
     </header>
