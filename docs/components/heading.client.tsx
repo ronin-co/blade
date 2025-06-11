@@ -1,11 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { LinkIcon } from 'lucide-react';
+import type { JSX } from 'react';
 
 interface HeadingProps {
   children: React.ReactNode;
+  level: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
-export const Heading = ({ children, ...props }: HeadingProps) => {
+export const Heading = ({ children, level, ...props }: HeadingProps) => {
+  const HeadingComponent = `h${level}` as keyof JSX.IntrinsicElements;
+
   return (
     <a
       data-heading={true}
@@ -23,7 +27,7 @@ export const Heading = ({ children, ...props }: HeadingProps) => {
           height={12}
         />
       </Button>
-      <h1 {...props}>{children}</h1>
+      <HeadingComponent {...props}>{children}</HeadingComponent>
     </a>
   );
 };

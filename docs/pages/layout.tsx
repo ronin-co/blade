@@ -7,7 +7,15 @@ import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
 import { useMetadata } from '@ronin/blade/server/hooks';
 
-const menuItems = {
+type MenuItem = {
+  id: string;
+  name: string;
+  href: string;
+};
+
+export type SidebarItem = { [key: string]: MenuItem[] };
+
+const menuItems: SidebarItem = {
   'Get Started': [
     {
       id: 'introduction',
@@ -105,7 +113,7 @@ const DocsLayout = ({
 
   return (
     <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
-      <Navbar />
+      <Navbar items={menuItems} />
       <div className="fixed top-24 left-6 w-fit">
         <Sidebar items={menuItems} />
       </div>
@@ -123,7 +131,42 @@ const DocsLayout = ({
 // biome-ignore lint/nursery/useComponentExportOnlyModules: This is needed for the docs.
 export const components = {
   pre: (props: CodeProps) => <Code {...props} />,
-  h1: (props: HeadingProps) => <Heading {...props} />,
+  h1: (props: HeadingProps) => (
+    <Heading
+      level={1}
+      {...props}
+    />
+  ),
+  h2: (props: HeadingProps) => (
+    <Heading
+      level={2}
+      {...props}
+    />
+  ),
+  h3: (props: HeadingProps) => (
+    <Heading
+      level={3}
+      {...props}
+    />
+  ),
+  h4: (props: HeadingProps) => (
+    <Heading
+      level={4}
+      {...props}
+    />
+  ),
+  h5: (props: HeadingProps) => (
+    <Heading
+      level={5}
+      {...props}
+    />
+  ),
+  h6: (props: HeadingProps) => (
+    <Heading
+      level={6}
+      {...props}
+    />
+  ),
 };
 
 export default DocsLayout;

@@ -1,6 +1,6 @@
 {
   "name": "@ronin/blade",
-  "version": "0.8.5",
+  "version": "0.8.7",
   "type": "module",
   "description": "React at the edge.",
   "repository": "ronin-co/blade",
@@ -27,8 +27,9 @@
   "exports": {
     "./client/": "./dist/public/client/",
     "./server/": "./dist/public/server/",
-    "./universal/": "./dist/public/universal/",
-    "./schema": "./dist/public/universal/schema"
+    "./hooks": "./dist/public/universal/hooks.js",
+    "./schema": "./dist/public/universal/schema.js",
+    "./types": "./dist/public/universal/types.js"
   },
   "typesVersions": {
     "*": {
@@ -38,11 +39,14 @@
       "server/*": [
         "./dist/public/server/*"
       ],
-      "universal/*": [
-        "./dist/public/universal/*"
+      "hooks": [
+        "./dist/public/universal/hooks"
       ],
       "schema": [
         "./dist/public/universal/schema"
+      ],
+      "types": [
+        "./dist/public/universal/types"
       ]
     }
   },

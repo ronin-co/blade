@@ -6,36 +6,36 @@ title: Hooks
 
 Blade provides the following React hooks:
 
-## `useLocation` (Universal)
+## `useLocation`
 
 Mimics [document.location](https://developer.mozilla.org/en-US/docs/Web/API/Document/location) and thereby exposes a `URL` object containing the URL of the current page.
 
 Unlike in `document.location`, however, the URL is not populated, so dynamic path segments of pages will not be populated with their respective value.
 
 ```tsx
-import { useLocation } from '@ronin/blade/universal/hooks';
+import { useLocation } from '@ronin/blade/hooks';
 
 const location = useLocation();
 ```
 
-## `useParams` (Universal)
+## `useParams`
 
 Exposes the keys and values of all parameters (dynamic path segments) present in the URL.
 
 For example, if the URL being accessed is `/elaine` and the page is named `[handle].tsx`, the returned object would be `{ handle: 'elaine' }`.
 
 ```tsx
-import { useParams } from '@ronin/blade/universal/hooks';
+import { useParams } from '@ronin/blade/hooks';
 
 const params = useParams();
 ```
 
-## `useRedirect` (Universal)
+## `useRedirect`
 
 Used to transition to a different page.
 
 ```tsx
-import { useRedirect } from '@ronin/blade/universal/hooks';
+import { useRedirect } from '@ronin/blade/hooks';
 
 const redirect = useRedirect();
 
@@ -59,14 +59,14 @@ redirect('/pathname', {
 });
 ```
 
-## `usePopulatePathname` (Universal)
+## `usePopulatePathname`
 
 As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[handle]`) are not populated in the `URL` object exposed by the hook.
 
 To populate them, you can pass the pathname to the `usePopulatePathname()` hook.
 
 ```tsx
-import { usePopulatePathname } from '@ronin/blade/universal/hooks';
+import { usePopulatePathname } from '@ronin/blade/hooks';
 
 const populatePathname = usePopulatePathname();
 
@@ -86,12 +86,12 @@ populatePathname('/[handle]', {
 });
 ```
 
-## `useNavigator` (Universal)
+## `useNavigator`
 
 Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
 
 ```tsx
-import { useNavigator } from '@ronin/blade/universal/hooks';
+import { useNavigator } from '@ronin/blade/hooks';
 
 const navigator = useNavigator();
 
@@ -371,12 +371,12 @@ To count records, the `useCountOf` hook can be used with the same syntax as the 
 
 If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
 
-## `useCookie` (Server)
+## `useCookie`
 
 Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
 
 ```tsx
-import { useCookie } from '@ronin/blade/server/hooks';
+import { useCookie } from '@ronin/blade/hooks';
 
 const Page = () => {
     const [tokenCookie, setTokenCookie] = useCookie('token');
