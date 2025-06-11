@@ -12,7 +12,6 @@ import {
   getBatchProxy,
   getSyntaxProxy,
 } from '@ronin/syntax/queries';
-import type { CookieSerializeOptions } from 'cookie';
 import type { verify } from 'hono/jwt';
 import { useContext } from 'react';
 import { deserializeError } from 'serialize-error';
@@ -25,63 +24,6 @@ import {
   parsePaginationQueryParam,
 } from '@/private/server/utils/pagination';
 import type { QueryItemRead } from '@/private/universal/types/util';
-
-export type CookieHookOptions = {
-  /**
-   * Allows for making cookies accessible to the client, instead of allowing only the
-   * server to read and modify them.
-   */
-  client?: true;
-  /**
-   * Allows for restricting the cookie to a specific URL path of the app.
-   *
-   * @default '/'
-   */
-  path?: string;
-};
-
-const useCookie = <T extends string | null>(
-  name: string,
-): [T | null, (value: T, options?: CookieHookOptions) => void] => {
-  const serverContext = useContext(RootServerContext);
-  if (!serverContext) throw new Error('Missing server context in `useCookie`');
-
-  const { cookies, collected } = serverContext;
-  const value = cookies[name] as T | null;
-
-  const setValue = (value: T, options?: CookieHookOptions) => {
-    const cookieSettings: CookieSerializeOptions = {
-      // 365 days.
-      maxAge: 31536000,
-      httpOnly: !options?.client,
-      path: options?.path || '/',
-    };
-
-    // To delete cookies, we have to set their expiration time to the past.
-    if (value === null) {
-      cookieSettings.expires = new Date(Date.now() - 1000000);
-      delete cookieSettings.maxAge;
-    }
-    // As per the types defined for the surrounding function, this condition would never
-    // be met. But we'd like to keep it regardless, to catch cases where the types
-    // provided to the developer aren't smart enough to avoid `undefined` or similar
-    // getting passed.
-    else if (typeof value !== 'string') {
-      let message = 'Cookies can only be set to a string value, or `null` ';
-      message += `for deleting them. Please adjust "${name}".`;
-      throw new Error(message);
-    }
-
-    if (!collected.cookies) collected.cookies = {};
-
-    collected.cookies[name] = {
-      value,
-      ...cookieSettings,
-    };
-  };
-
-  return [value, setValue];
-};
 
 export interface IncomingPageMetadata extends Omit<PageMetadata, 'title'> {
   title?: string;
@@ -385,13 +327,4 @@ const useMutationResult = <T>(): T => {
   return queries.filter(({ type }) => type === 'write').map(({ result }) => result) as T;
 };
 
-export {
-  useCookie,
-  use,
-  useCountOf,
-  useListOf,
-  useBatch,
-  useMutationResult,
-  useMetadata,
-  useJWT,
-};
+export { use, useCountOf, useListOf, useBatch, useMutationResult, useMetadata, useJWT };
