@@ -32,8 +32,8 @@
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "./dist/public/universal"
+      "*": [
+        "./dist/public/universal/*"
       ],
       "client/*": [
         "./dist/public/client/*"
