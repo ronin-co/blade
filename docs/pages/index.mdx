@@ -19,7 +19,7 @@ In practice, this means that loading animations of any form (spinners, skeletons
 are avoided, ensuring the snappiest and thereby most joyful experience for end users,
 similar to how a native app feels.
 
-## API
+## Data Model
 
 The core of Blade is its [Query Syntax](#), which allows for instantly reading and writing
 data.
@@ -47,6 +47,23 @@ REST APIs, data state management libraries, React server functions, or similar.
 
 Blade manages the state of your data for you. Any mutation you apply is instantly
 reflected across all read queries, and propagated to other clients in the background.
+
+## Hooks
+
+In general, just like with the data model described above, the majority of programmatic
+API of Blade revolves around the concept of [Hooks](https://react.dev/reference/react/hooks):
+
+- `use`: Read data
+- `useMutation`: Write data
+- `useLocation`: Mimics `window.location`
+- `useNavigator`: Mimics `window.navigator`
+- `useRedirect`: Change the page
+- `useCookie`: Read and write cookies
+- `useJWT`: Read JSON Web Tokens
+- `useParams`: Read dynamic path segments
+- `usePopulatePathname`: Populate dynamic path segments
+- `usePagination`: Get the next/previous page of records
+- `usePaginationBuffer`: Concatenate paginated lists
 
 ## Get Started
 
