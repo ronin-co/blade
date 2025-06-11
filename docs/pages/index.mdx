@@ -4,8 +4,68 @@ title: Introduction
 
 import { AlertCard } from "@/components/alert";
 
-
 # Introduction
+
+Blade is a React framework for building highly dynamic web applications.
+
+Applications built with Blade are fast across all vectors: The first load is instant,
+while interactions are instant too.
+
+By following the principle of [Edge First](#), Blade meets your users where they are, instead
+of making them come to you. Your application and the data of your users are pushed as
+close as possible to them, instead of requiring them retrieve it.
+
+In practice, this means that loading animations of any form (spinners, skeletons, etc)
+are avoided, ensuring the snappiest and thereby most joyful experience for end users,
+similar to how a native app feels.
+
+## Data Model
+
+The core of Blade is its [Query Syntax](#), which allows for instantly reading and writing
+data.
+
+It combines common data querying patterns of web apps into a syntax that is more powerful
+than SQL, by making it possible to express complex operations with less code, resulting in
+a more effective tool for web apps.
+
+In its simplest form, reading a list of records would look like this:
+
+```typescript
+const records = use.accounts();
+```
+
+While writing a record looks like this:
+
+```typescript
+const { add } = useMutation();
+
+add.account.with.handle('test');
+```
+
+This lets you focus on the user experience of your application instead of adding
+REST APIs, data state management libraries, React server functions, or similar.
+
+Blade manages the state of your data for you. Any mutation you apply is instantly
+reflected across all read queries, and propagated to other clients in the background.
+
+## Hooks
+
+In general, just like with the data model described above, the majority of programmatic
+API of Blade revolves around the concept of [Hooks](https://react.dev/reference/react/hooks):
+
+- `use`: Read data
+- `useMutation`: Write data
+- `useLocation`: Mimics `window.location`
+- `useNavigator`: Mimics `window.navigator`
+- `useRedirect`: Change the page
+- `useCookie`: Read and write cookies
+- `useJWT`: Read JSON Web Tokens
+- `useParams`: Read dynamic path segments
+- `usePopulatePathname`: Populate dynamic path segments
+- `usePagination`: Get the next/previous page of records
+- `usePaginationBuffer`: Concatenate paginated lists
+
+## Get Started
 
 To get started with RONIN after signing up, first [define a model](/docs/models) and apply it to your database.
 
