@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import type { SidebarItem } from '@/pages/layout';
-import { useRedirect } from '@ronin/blade/universal/hooks';
+import { useRedirect } from '@ronin/blade/hooks';
 
 import { MenuIcon } from 'lucide-react';
 
