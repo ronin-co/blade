@@ -123,7 +123,9 @@ const DocsLayout = ({
       <div className="fixed top-24 right-20 w-40">
         <OnThisPage />
       </div>
-      <Footer />
+      <div className="mt-16">
+        <Footer />
+      </div>
     </div>
   );
 };
