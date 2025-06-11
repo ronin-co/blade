@@ -101,9 +101,36 @@ export type CookieHookOptions = {
   path?: string;
 };
 
+// 365 days
+const DEFAULT_COOKIE_MAX_AGE = 31536000;
+
 const useCookie = <T extends string | null>(
   name: string,
 ): [T | null, (value: T, options?: CookieHookOptions) => void] => {
+  if (typeof window !== 'undefined') {
+    const value =
+      (document.cookie.match(`(^|;)\\s*${name}=([^;]*)`)?.pop() as T | undefined) || null;
+
+    const setValue = (value: T, options?: CookieHookOptions) => {
+      const shouldDelete = value === null;
+      const encodedValue = shouldDelete ? '' : encodeURIComponent(value);
+
+      const components = [`${encodeURIComponent(name)}=${encodedValue}`];
+
+      if (shouldDelete) {
+        components.push('expires=Thu, 01 Jan 1970 00:00:00 GMT');
+      } else {
+        components.push(`max-age=${DEFAULT_COOKIE_MAX_AGE}`);
+      }
+
+      if (options?.path) components.push(`path=${options.path}`);
+
+      document.cookie = components.join('; ');
+    };
+
+    return [value, setValue];
+  }
+
   const serverContext = useContext(RootServerContext);
   if (!serverContext) throw new Error('Missing server context in `useCookie`');
 
@@ -113,7 +140,7 @@ const useCookie = <T extends string | null>(
   const setValue = (value: T, options?: CookieHookOptions) => {
     const cookieSettings: CookieSerializeOptions = {
       // 365 days.
-      maxAge: 31536000,
+      maxAge: DEFAULT_COOKIE_MAX_AGE,
       httpOnly: !options?.client,
       path: options?.path || '/',
     };
