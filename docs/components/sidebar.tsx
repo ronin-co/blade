@@ -19,12 +19,15 @@ export const Sidebar = ({
           data-slot="sidebar-group"
           data-sidebar="group"
           className="relative flex w-full min-w-0 flex-col p-2">
-          {Object.entries(items).map(([title, items]) => (
+          {Object.entries(items).map(([title, items], i) => (
             <div key={title}>
               <div
                 data-slot="sidebar-group-label"
                 data-sidebar="group-label"
-                className="group-data-[collapsible=icon]:-mt-8 flex h-8 shrink-0 items-center rounded-md px-2 font-medium text-muted-foreground text-xs outline-hidden ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 group-data-[collapsible=icon]:opacity-0 [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0">
+                className={cn(
+                  'group-data-[collapsible=icon]:-mt-8 flex h-8 shrink-0 items-center rounded-md px-2 font-bold text-muted-foreground text-xs uppercase outline-hidden ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 group-data-[collapsible=icon]:opacity-0 [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0',
+                  i !== 0 ? 'mt-4' : '',
+                )}>
                 {title}
               </div>
               <div
