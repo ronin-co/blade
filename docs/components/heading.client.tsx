@@ -4,7 +4,7 @@ import type { JSX } from 'react';
 
 interface HeadingProps {
   children: React.ReactNode;
-  level: number;
+  level: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 export const Heading = ({ children, level, ...props }: HeadingProps) => {

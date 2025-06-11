@@ -159,6 +159,12 @@ export const components = {
       {...props}
     />
   ),
+  h6: (props: HeadingProps) => (
+    <Heading
+      level={6}
+      {...props}
+    />
+  ),
 };
 
 export default DocsLayout;
