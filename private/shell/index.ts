@@ -1,17 +1,28 @@
 #!/usr/bin/env bun
 
+import fs from 'node:fs/promises'
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { $ } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
-import { frameworkDirectory, loggingPrefixes } from '@/private/shell/constants';
+import { frameworkDirectory } from '@/private/shell/constants';
+import { cleanUp, logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
+import * as esbuild from 'esbuild';
+
 import {
-  cleanUp,
-  logSpinner,
-  prepareServerAssets,
-  setEnvironmentVariables,
-} from '@/private/shell/utils';
+  defaultDeploymentProvider,
+  loggingPrefixes,
+  outputDirectory,
+  serverInputFolder,
+} from '@/private/shell/constants';
+import {
+  getClientReferenceLoader,
+  getFileListLoader,
+  getMdxLoader,
+  getReactAriaLoader,
+} from '@/private/shell/loaders';
+import { mapProviderInlineDefinitions } from '@/private/shell/utils/providers';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -131,14 +142,44 @@ setEnvironmentVariables({
   projects,
 });
 
-const serverFile = path.join(import.meta.dirname, 'listener.js');
-
 if (isBuilding || isDeveloping) {
   const provider = import.meta.env.__BLADE_PROVIDER;
 
   await cleanUp();
 
-  await prepareServerAssets(provider);
-}
+  const output = await esbuild.build({
+    entryPoints: [
+      path.join(serverInputFolder, `${provider}.js?server`),
+      path.join(serverInputFolder, `${provider}.js?client`)
+    ],
+    outdir: outputDirectory,
+    plugins: [
+        {
+    name: 'conditional-xform',
+      setup(build) {
+        // 1. Detect the “?xform” entry and resolve it into a special namespace:
+        build.onResolve({ filter: /\?client$/ }, args => ({
+          path:    args.path.replace(/\?client$/, ''),
+          namespace: 'client',
+        }))
 
-await import(serverFile);
+        // 2. For every module in that namespace, run your transform:
+        build.onLoad({ filter: /.*/, namespace: 'client' }, async args => {
+          const source = await fs.readFile(args.path, 'utf8')
+          console.log('SOURCE', source)
+          return { contents: source, loader: 'ts' }
+        })
+
+        // 3. Everything else (including the “?full” entry and its deps) uses the default JS loader.
+      }
+  }
+    ],
+    entryNames: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}`,
+    minify: true,
+    sourcemap: 'external',
+    target: provider === 'vercel' ? 'node' : 'esnext',
+    define: mapProviderInlineDefinitions(provider),
+  });
+
+  console.log(output);
+}
