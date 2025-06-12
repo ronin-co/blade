@@ -21,6 +21,12 @@ import {
   getMdxLoader,
   getReactAriaLoader,
 } from '@/private/shell/loaders';
+import {
+  mapProviderInlineDefinitions,
+  transformToCloudflareOutput,
+  transformToNetlifyOutput,
+  transformToVercelBuildOutput,
+} from '@/private/shell/utils/providers';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -140,10 +146,9 @@ setEnvironmentVariables({
 });
 
 const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
+const provider = import.meta.env.__BLADE_PROVIDER;
 
 if (isBuilding || isDeveloping) {
-  const provider = import.meta.env.__BLADE_PROVIDER;
-
   await cleanUp();
 
   const clientChunks = new Map<string, string>();
@@ -203,10 +208,28 @@ if (isBuilding || isDeveloping) {
         },
       },
     ],
+    define: mapProviderInlineDefinitions(provider),
   });
 
   await serverBuild.rebuild();
-  await serverBuild.watch();
-}
 
+  if (isDeveloping) await serverBuild.watch();
+
+  if (isBuilding) {
+    switch (provider) {
+      case 'cloudflare': {
+        await transformToCloudflareOutput();
+        break;
+      }
+      case 'netlify': {
+        await transformToNetlifyOutput();
+        break;
+      }
+      case 'vercel': {
+        await transformToVercelBuildOutput();
+        break;
+      }
+    }
+  }
+}
 await serve(environment, port);
