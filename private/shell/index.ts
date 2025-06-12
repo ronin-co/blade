@@ -17,6 +17,8 @@ import {
   getClientChunkLoader,
   getClientReferenceLoader,
   getFileListLoader,
+  getMdxLoader,
+  getReactAriaLoader,
 } from '@/private/shell/loaders';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
@@ -154,6 +156,8 @@ if (isBuilding || isDeveloping) {
     plugins: [
       getClientChunkLoader(clientChunks),
       getFileListLoader(),
+      getMdxLoader('production'),
+      getReactAriaLoader(),
 
       {
         name: 'end-log',
@@ -179,6 +183,8 @@ if (isBuilding || isDeveloping) {
     plugins: [
       getClientReferenceLoader(clientChunks),
       getFileListLoader(),
+      getMdxLoader('production'),
+      getReactAriaLoader(),
 
       {
         name: 'trigger-second-build',
