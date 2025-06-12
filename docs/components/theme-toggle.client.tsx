@@ -1,53 +1,37 @@
+import { useCookie } from '@ronin/blade/hooks';
 import { MoonIcon, SunIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
+import { useEffect } from 'react';
+
+import { Button } from '@/components/ui/button';
+
+export type Theme = 'light' | 'dark';
+
+const MAPPED_ICON = {
+  dark: MoonIcon,
+  light: SunIcon,
+} satisfies Record<Theme, React.ComponentType<any>>;
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [themeCookie, setThemeCookie] = useCookie<Theme>('theme');
 
+  // Set the initial theme based on the user's system preference if no cookie is set.
   useEffect(() => {
-    // Check if theme is stored in localStorage
-    const storedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (themeCookie) return;
 
-    // Check system preference
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    // Use stored theme or system preference
-    const initialTheme = storedTheme || (systemPrefersDark ? 'dark' : 'light');
-
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
+    const initialTheme = systemPrefersDark ? 'dark' : 'light';
+    setThemeCookie(initialTheme, { client: true });
   }, []);
 
-  const applyTheme = (newTheme: 'light' | 'dark') => {
-    const html = document.documentElement;
-
-    if (newTheme === 'dark') {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-
-    localStorage.setItem('theme', newTheme);
-  };
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    applyTheme(newTheme);
-  };
+  const Icon = MAPPED_ICON[themeCookie ?? 'light'];
 
   return (
     <Button
-      variant="ghost"
       className="group/toggle h-8 w-8 px-0"
-      onClick={toggleTheme}>
-      <SunIcon
-        className={`h-4 w-4 transition-opacity ${theme === 'dark' ? 'opacity-100' : 'opacity-0'}`}
-      />
-      <MoonIcon
-        className={`absolute h-4 w-4 transition-opacity ${theme === 'light' ? 'opacity-100' : 'opacity-0'}`}
-      />
+      // onClick={toggleTheme}
+      size="icon"
+      variant="ghost">
+      <Icon className="h-4 w-4 text-black dark:text-white" />
       <span className="sr-only">Toggle theme</span>
     </Button>
   );

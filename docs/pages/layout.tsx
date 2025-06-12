@@ -1,11 +1,15 @@
 import type { CodeProps } from '@/components/code';
 import { Code } from '@/components/code';
+import { useCookie } from '@ronin/blade/hooks';
+
 import { Footer } from '@/components/footer';
 import { Heading } from '@/components/heading.client';
 import { Navbar } from '@/components/navbar';
 import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
 import { useMetadata } from '@ronin/blade/server/hooks';
+
+import type { Theme } from '@/components/theme-toggle.client';
 
 type MenuItem = {
   id: string;
@@ -109,7 +113,11 @@ const DocsLayout = ({
 }: {
   children: React.ReactNode;
 }) => {
-  useMetadata({ htmlClassName: 'dark' });
+  const [theme] = useCookie<Theme>('theme');
+
+  useMetadata({
+    htmlClassName: theme === 'dark' ? 'dark' : undefined,
+  });
 
   return (
     <>
