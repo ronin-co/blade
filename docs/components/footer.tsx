@@ -41,7 +41,7 @@ export const Footer = () => {
 
           <Button
             asChild={true}
-            className="w-fit px-2"
+            className="group/toggle h-8 w-8 px-2"
             size="icon"
             variant="ghost">
             <a
