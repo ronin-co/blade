@@ -9,11 +9,9 @@ import { frameworkDirectory, loggingPrefixes } from '@/private/shell/constants';
 import {
   cleanUp,
   logSpinner,
-  prepareClientAssets,
   prepareServerAssets,
   setEnvironmentVariables,
 } from '@/private/shell/utils';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -137,11 +135,9 @@ const serverFile = path.join(import.meta.dirname, 'listener.js');
 
 if (isBuilding || isDeveloping) {
   const provider = import.meta.env.__BLADE_PROVIDER;
-  const bundleId = generateUniqueId();
 
   await cleanUp();
 
-  await prepareClientAssets('production', bundleId, provider);
   await prepareServerAssets(provider);
 }
 
