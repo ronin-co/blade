@@ -33,7 +33,7 @@ html {
 	}
 
 	a:not([data-heading]) {
-		@apply text-zinc-600 underline hover:decoration-2;
+		@apply text-[#F2F2F2] underline hover:decoration-2;
 	}
 }
 
