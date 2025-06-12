@@ -121,14 +121,14 @@ const DocsLayout = ({
   useMetadata({
     htmlClassName: theme === 'dark' ? 'dark' : undefined,
     title,
-    icon: 'https://ronin.co/static/black.png',
+    icon: 'https://blade.im/static/black.png',
     openGraph: {
       title,
       description,
       siteName: title,
       images: [
         {
-          url: 'https://ronin.co/static/banner.png',
+          url: 'https://blade.im/static/banner.png',
           width: 1280,
           height: 720,
         },
@@ -142,7 +142,7 @@ const DocsLayout = ({
       // shared. In our case, we'll use the same handle for both of them.
       creator: '@ronin',
       site: '@ronin',
-      images: ['https://ronin.co/static/banner.png'],
+      images: ['https://blade.im/static/banner.png'],
     },
   });
 
