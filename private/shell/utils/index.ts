@@ -20,16 +20,25 @@ import {
   outputDirectory,
   publicDirectory,
   routerInputFile,
+  serverInputFolder,
   styleInputFile,
 } from '@/private/shell/constants';
 import {
   getClientChunkLoader,
   getClientComponentLoader,
+  getClientReferenceLoader,
+  getFileListLoader,
   getMdxLoader,
   getReactAriaLoader,
 } from '@/private/shell/loaders';
 import type { ClientChunks, FileError } from '@/private/shell/types';
-import { getProvider } from '@/private/shell/utils/providers';
+import {
+  getProvider,
+  mapProviderInlineDefinitions,
+  transformToCloudflareOutput,
+  transformToNetlifyOutput,
+  transformToVercelBuildOutput,
+} from '@/private/shell/utils/providers';
 import type { Asset, DeploymentProvider } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
@@ -313,6 +322,49 @@ export const prepareClientAssets = async (
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
   clientSpinner.succeed();
+};
+
+export const prepareServerAssets = async (provider: DeploymentProvider) => {
+  const serverSpinner = logSpinner('Performing server build (production)').start();
+
+  const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
+    const output = await esbuild.build({
+      entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
+      outdir: outputDirectory,
+      plugins: [
+        getClientReferenceLoader('production'),
+        getFileListLoader(),
+        getMdxLoader('production'),
+        getReactAriaLoader(),
+      ],
+      entryNames: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}`,
+      minify: true,
+      sourcemap: 'external',
+      target: provider === 'vercel' ? 'node' : 'esnext',
+      define: mapProviderInlineDefinitions(provider),
+    });
+
+    handleBuildLogs(output);
+  };
+
+  await Promise.all([buildEntrypoint(provider), buildEntrypoint('service-worker')]);
+
+  serverSpinner.succeed();
+
+  switch (provider) {
+    case 'cloudflare': {
+      await transformToCloudflareOutput();
+      break;
+    }
+    case 'netlify': {
+      await transformToNetlifyOutput();
+      break;
+    }
+    case 'vercel': {
+      await transformToVercelBuildOutput();
+      break;
+    }
+  }
 };
 
 /**

@@ -1,75 +1,10 @@
-import path from 'node:path';
-import * as esbuild from 'esbuild';
-
-import {
-  defaultDeploymentProvider,
-  outputDirectory,
-  serverInputFolder,
-} from '@/private/shell/constants';
-import {
-  getClientReferenceLoader,
-  getFileListLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import {
-  cleanUp,
-  handleBuildLogs,
-  logSpinner,
-  prepareClientAssets,
-} from '@/private/shell/utils';
-import {
-  mapProviderInlineDefinitions,
-  transformToCloudflareOutput,
-  transformToNetlifyOutput,
-  transformToVercelBuildOutput,
-} from '@/private/shell/utils/providers';
-import type { DeploymentProvider } from '@/private/universal/types/util';
+import { cleanUp, prepareClientAssets, prepareServerAssets } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const provider = import.meta.env.__BLADE_PROVIDER;
 const bundleId = generateUniqueId();
 
 await cleanUp();
+
 await prepareClientAssets('production', bundleId, provider);
-
-const serverSpinner = logSpinner('Performing server build (production)').start();
-
-const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
-  const output = await esbuild.build({
-    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
-    outdir: outputDirectory,
-    plugins: [
-      getClientReferenceLoader('production'),
-      getFileListLoader(),
-      getMdxLoader('production'),
-      getReactAriaLoader(),
-    ],
-    entryNames: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}`,
-    minify: true,
-    sourcemap: 'external',
-    target: provider === 'vercel' ? 'node' : 'esnext',
-    define: mapProviderInlineDefinitions(provider),
-  });
-
-  handleBuildLogs(output);
-};
-
-await Promise.all([buildEntrypoint(provider), buildEntrypoint('service-worker')]);
-
-serverSpinner.succeed();
-
-switch (provider) {
-  case 'cloudflare': {
-    await transformToCloudflareOutput();
-    break;
-  }
-  case 'netlify': {
-    await transformToNetlifyOutput();
-    break;
-  }
-  case 'vercel': {
-    await transformToVercelBuildOutput();
-    break;
-  }
-}
+await prepareServerAssets(provider);
