@@ -835,14 +835,6 @@ const jsxPropsParents = new WeakMap();
 const jsxChildrenParents = new WeakMap();
 
 function attemptResolveElement(request, type, key, ref, props) {
-  if (ref !== null && ref !== undefined) {
-    // When the ref moves to the regular props object this will implicitly
-    // throw for functions. We could probably relax it to a DEV warning for other
-    // cases.
-    throw new Error(
-      'Refs cannot be used in Server Components, nor passed to Client Components.',
-    );
-  }
   jsxPropsParents.set(props, type);
 
   if (typeof props.children === 'object' && props.children !== null) {
@@ -1360,18 +1352,15 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
   }
 
   if (typeof value === 'function') {
+    // If the component is marked as interactive, reference the respective part of the
+    // client-side chunks.
     if (isClientReference(value)) {
       return serializeClientReference(request, value);
     }
 
-    if (/^on[A-Z]/.test(key)) {
-      throw new Error(
-        `Event handlers cannot be passed to Client Component props.${describeObjectForErrorMessage(parent, key)}\nIf you need interactivity, consider converting part of this to a Client Component.`,
-      );
-    }
-    throw new Error(
-      `Functions cannot be passed directly to Client Components because they're not serializable.${describeObjectForErrorMessage(parent, key)}`,
-    );
+    // If the component is not marked as interactive, ignore the function, since it
+    // won't be available in the client-side chunks.
+    return undefined;
   }
 
   if (typeof value === 'symbol') {
