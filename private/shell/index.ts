@@ -147,6 +147,86 @@ if (isBuilding || isDeveloping) {
 
   const clientChunks = new Map<string, string>();
 
+  const clientBuild = await esbuild.context({
+    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
+    entryNames: '[dir]/client.js',
+    sourcemap: 'external',
+    bundle: true,
+    nodePaths: [path.join(process.cwd(), 'node_modules')],
+    outdir: outputDirectory,
+    plugins: [
+      {
+        name: 'test',
+        setup(build) {
+          build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
+            let contents = await Bun.file(source.path).text();
+            const loader = path.extname(source.path).slice(1) as
+              | 'js'
+              | 'jsx'
+              | 'ts'
+              | 'tsx';
+
+            const chunkId = clientChunks.get(source.path);
+
+            console.log('CLIENT CHUNK 1', source.path);
+
+            const transpiler = new Bun.Transpiler({ loader });
+            const exports = scanExports(transpiler, contents);
+
+            contents += `
+                  window.BLADE_CHUNKS["${chunkId}"] = {
+                    ${exports
+                      .map((exportItem) => {
+                        return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
+                      })
+                      .join('\n')}
+                  };
+                `;
+
+            return {
+              contents,
+              loader,
+            };
+          });
+        },
+      },
+
+      {
+        name: 'File List Loader',
+        setup(build) {
+          build.onResolve({ filter: /^server-list$/ }, (source) => {
+            return { path: source.path, namespace: 'dynamic-list' };
+          });
+
+          build.onLoad(
+            { filter: /^server-list$/, namespace: 'dynamic-list' },
+            async () => {
+              const contents = await getFileList();
+
+              return {
+                contents,
+                loader: 'tsx',
+                resolveDir: process.cwd(),
+              };
+            },
+          );
+        },
+      },
+
+      {
+        name: 'end-log',
+        setup(build) {
+          build.onEnd((result) => {
+            // Only rebuild client if server build succeeded
+            if (result.errors.length === 0) {
+              console.log('Built client');
+            }
+          });
+        },
+      },
+    ],
+  });
+
   const serverBuild = await esbuild.context({
     entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
     entryNames: `[dir]/${defaultDeploymentProvider}`,
@@ -236,77 +316,22 @@ if (isBuilding || isDeveloping) {
           );
         },
       },
-    ],
-  });
-
-  const clientBuild = await esbuild.context({
-    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
-    entryNames: '[dir]/client.js',
-    sourcemap: 'external',
-    bundle: true,
-    nodePaths: [path.join(process.cwd(), 'node_modules')],
-    outdir: outputDirectory,
-    plugins: [
-      {
-        name: 'test',
-        setup(build) {
-          build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
-            let contents = await Bun.file(source.path).text();
-            const loader = path.extname(source.path).slice(1) as
-              | 'js'
-              | 'jsx'
-              | 'ts'
-              | 'tsx';
-
-            const chunkId = clientChunks.get(source.path);
-
-            console.log('CLIENT CHUNK 1', source.path);
-
-            const transpiler = new Bun.Transpiler({ loader });
-            const exports = scanExports(transpiler, contents);
-
-            contents += `
-                  window.BLADE_CHUNKS["${chunkId}"] = {
-                    ${exports
-                      .map((exportItem) => {
-                        return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
-                      })
-                      .join('\n')}
-                  };
-                `;
-
-            return {
-              contents,
-              loader,
-            };
-          });
-        },
-      },
 
       {
-        name: 'File List Loader',
+        name: 'trigger-second-build',
         setup(build) {
-          build.onResolve({ filter: /^server-list$/ }, (source) => {
-            return { path: source.path, namespace: 'dynamic-list' };
+          build.onEnd(async (result) => {
+            // Only rebuild client if server build succeeded
+            if (result.errors.length === 0) {
+              console.log('Built server');
+              await clientBuild.rebuild();
+            }
           });
-
-          build.onLoad(
-            { filter: /^server-list$/, namespace: 'dynamic-list' },
-            async () => {
-              const contents = await getFileList();
-
-              return {
-                contents,
-                loader: 'tsx',
-                resolveDir: process.cwd(),
-              };
-            },
-          );
         },
       },
     ],
   });
 
   await serverBuild.rebuild();
-  await clientBuild.rebuild();
+  await serverBuild.watch();
 }
