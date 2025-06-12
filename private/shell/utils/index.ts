@@ -12,7 +12,6 @@ import ora from 'ora';
 
 import {
   clientInputFile,
-  clientManifestFile,
   clientOutputDirectory,
   defaultDeploymentProvider,
   directoriesToParse,
@@ -23,13 +22,8 @@ import {
   serverInputFolder,
   styleInputFile,
 } from '@/private/shell/constants';
-import {
-  getClientChunkLoader,
-  getClientComponentLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import type { ClientChunks, FileError } from '@/private/shell/types';
+import { getMdxLoader, getReactAriaLoader } from '@/private/shell/loaders';
+import type { FileError } from '@/private/shell/types';
 import {
   getProvider,
   mapProviderInlineDefinitions,
@@ -255,7 +249,6 @@ export const prepareClientAssets = async (
     `Performing client build${environment === 'production' ? ' (production)' : ''}`,
   ).start();
 
-  const clientChunks: ClientChunks = {};
   const clientEnvironmentVariables = Object.entries(getClientEnvironmentVariables()).map(
     ([key, value]) => {
       return [`import.meta.env.${key}`, JSON.stringify(value)];
@@ -269,12 +262,7 @@ export const prepareClientAssets = async (
   const output = await esbuild.build({
     entryPoints: [clientInputFile],
     outdir: clientOutputDirectory,
-    plugins: [
-      getClientComponentLoader(projects),
-      getClientChunkLoader(clientChunks),
-      getMdxLoader(environment),
-      getReactAriaLoader(),
-    ],
+    plugins: [getMdxLoader(environment), getReactAriaLoader()],
     sourcemap: 'external',
     entryNames: path.basename(getOutputFile(bundleId)),
     minify: environment === 'production',
@@ -284,8 +272,6 @@ export const prepareClientAssets = async (
       ? undefined
       : Object.fromEntries(clientEnvironmentVariables),
   });
-
-  await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
 
   handleBuildLogs(output);
 

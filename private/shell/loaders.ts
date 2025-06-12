@@ -1,40 +1,21 @@
 import path from 'node:path';
 
-import { stat } from 'node:fs/promises';
 import { compile } from '@mdx-js/mdx';
-import { Glob } from 'bun';
 import YAML from 'js-yaml';
 
-import { clientManifestFile } from '@/private/shell/constants';
 import type { ClientChunks } from '@/private/shell/types';
-import { scanExports, wrapClientExport } from '@/private/shell/utils';
+import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import type * as esbuild from 'esbuild';
 
-export const getClientReferenceLoader: (
-  environment: 'development' | 'production',
-) => esbuild.Plugin = (environment) => ({
+export const getClientReferenceLoader: (clientChunks: ClientChunks) => esbuild.Plugin = (
+  clientChunks,
+) => ({
   name: 'Client Reference Loader',
   async setup(build) {
-    let clientChunks: ClientChunks | null = null;
-    let clientChunksTime: Date | null = null;
-
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
       let contents = await Bun.file(source.path).text();
       let loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
-
-      const clientChunksUpdated = (await stat(clientManifestFile)).mtime;
-
-      // Read client chunk metadata from manifest file, but only if the file has been
-      // updated, which allows us to avoid unnecessary file system reads.
-      if (!clientChunksTime || clientChunksUpdated > clientChunksTime) {
-        const file = Bun.file(clientManifestFile);
-
-        clientChunks = JSON.parse(await file.text());
-        clientChunksTime = clientChunksUpdated;
-      }
-
-      if (!clientChunks) throw new Error('No client chunks available');
 
       const transpiler = new Bun.Transpiler({ loader });
       const exports = scanExports(transpiler, contents);
@@ -48,11 +29,11 @@ export const getClientReferenceLoader: (
       contents = contents.replaceAll(/export /g, '');
 
       const relativeSourcePath = path.relative(process.cwd(), source.path);
-      const clientChunk = clientChunks[relativeSourcePath];
-      if (!clientChunk) throw new Error(`Missing client chunk for ${relativeSourcePath}`);
+      const chunkId = generateUniqueId();
+      clientChunks.set(source.path, chunkId);
 
       for (const exportItem of exports) {
-        contents += `${wrapClientExport(exportItem, { id: clientChunk, path: relativeSourcePath })}\n`;
+        contents += `${wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath })}\n`;
 
         const usableName = exportItem.originalName
           ? `${exportItem.originalName} as ${exportItem.name}`
@@ -68,7 +49,7 @@ export const getClientReferenceLoader: (
         return source.path.endsWith(`.${extension}`);
       });
 
-      if (requiresTranspilation && environment !== 'production') {
+      if (requiresTranspilation) {
         const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
 
         contents = `${newContents}\n${transpiler.transformSync(contents)}`;
@@ -92,22 +73,20 @@ export const getClientChunkLoader: (clientChunks: ClientChunks) => esbuild.Plugi
       let contents = await Bun.file(source.path).text();
       const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
 
-      const chunkId = generateUniqueId();
-      const relativeSourcePath = path.relative(process.cwd(), source.path);
-      clientChunks[relativeSourcePath] = chunkId;
+      const chunkId = clientChunks.get(source.path);
 
       const transpiler = new Bun.Transpiler({ loader });
       const exports = scanExports(transpiler, contents);
 
       contents += `
-          window.BLADE_CHUNKS["${chunkId}"] = {
-            ${exports
-              .map((exportItem) => {
-                return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
-              })
-              .join('\n')}
-          };
-        `;
+                        window.BLADE_CHUNKS["${chunkId}"] = {
+                          ${exports
+                            .map((exportItem) => {
+                              return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
+                            })
+                            .join('\n')}
+                        };
+                      `;
 
       return {
         contents,
@@ -117,40 +96,22 @@ export const getClientChunkLoader: (clientChunks: ClientChunks) => esbuild.Plugi
   },
 });
 
-export const getClientComponentLoader: (projects: string[]) => esbuild.Plugin = (
-  projects,
-) => ({
-  name: 'Client Component Loader',
+export const getFileListLoader: () => esbuild.Plugin = () => ({
+  name: 'File List Loader',
   setup(build) {
-    build.onResolve({ filter: /^client-list$/ }, (source) => {
-      return { path: source.path, namespace: 'dynamic-client-list' };
+    build.onResolve({ filter: /^server-list$/ }, (source) => {
+      return { path: source.path, namespace: 'dynamic-list' };
     });
 
-    build.onLoad(
-      { filter: /^client-list$/, namespace: 'dynamic-client-list' },
-      async () => {
-        const glob = new Glob('**/*.client.{js,jsx,ts,tsx}');
+    build.onLoad({ filter: /^server-list$/, namespace: 'dynamic-list' }, async () => {
+      const contents = await getFileList();
 
-        // Prevent duplicate files.
-        const files = new Set();
-
-        for (const directory of projects) {
-          for await (const file of glob.scan({
-            cwd: directory,
-            absolute: true,
-          })) {
-            files.add(file);
-          }
-        }
-
-        return {
-          contents: Array.from(files)
-            .map((file) => `import "${file}";`)
-            .join('\n'),
-          loader: 'tsx',
-        };
-      },
-    );
+      return {
+        contents,
+        loader: 'tsx',
+        resolveDir: process.cwd(),
+      };
+    });
   },
 });
 

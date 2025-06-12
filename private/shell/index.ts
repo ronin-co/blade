@@ -5,14 +5,7 @@ import { $ } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
 import { defaultDeploymentProvider, frameworkDirectory } from '@/private/shell/constants';
-import {
-  cleanUp,
-  getFileList,
-  logSpinner,
-  scanExports,
-  setEnvironmentVariables,
-  wrapClientExport,
-} from '@/private/shell/utils';
+import { cleanUp, logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
 import * as esbuild from 'esbuild';
 
 import {
@@ -20,7 +13,11 @@ import {
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
+import {
+  getClientChunkLoader,
+  getClientReferenceLoader,
+  getFileListLoader,
+} from '@/private/shell/loaders';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -155,63 +152,8 @@ if (isBuilding || isDeveloping) {
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: outputDirectory,
     plugins: [
-      {
-        name: 'test',
-        setup(build) {
-          build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
-            let contents = await Bun.file(source.path).text();
-            const loader = path.extname(source.path).slice(1) as
-              | 'js'
-              | 'jsx'
-              | 'ts'
-              | 'tsx';
-
-            const chunkId = clientChunks.get(source.path);
-
-            console.log('CLIENT CHUNK 1', source.path);
-
-            const transpiler = new Bun.Transpiler({ loader });
-            const exports = scanExports(transpiler, contents);
-
-            contents += `
-                  window.BLADE_CHUNKS["${chunkId}"] = {
-                    ${exports
-                      .map((exportItem) => {
-                        return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
-                      })
-                      .join('\n')}
-                  };
-                `;
-
-            return {
-              contents,
-              loader,
-            };
-          });
-        },
-      },
-
-      {
-        name: 'File List Loader',
-        setup(build) {
-          build.onResolve({ filter: /^server-list$/ }, (source) => {
-            return { path: source.path, namespace: 'dynamic-list' };
-          });
-
-          build.onLoad(
-            { filter: /^server-list$/, namespace: 'dynamic-list' },
-            async () => {
-              const contents = await getFileList();
-
-              return {
-                contents,
-                loader: 'tsx',
-                resolveDir: process.cwd(),
-              };
-            },
-          );
-        },
-      },
+      getClientChunkLoader(clientChunks),
+      getFileListLoader(),
 
       {
         name: 'end-log',
@@ -235,87 +177,8 @@ if (isBuilding || isDeveloping) {
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: outputDirectory,
     plugins: [
-      {
-        name: 'test',
-        setup(build) {
-          build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
-            let contents = await Bun.file(source.path).text();
-            let loader = path.extname(source.path).slice(1) as
-              | 'js'
-              | 'jsx'
-              | 'ts'
-              | 'tsx';
-
-            const transpiler = new Bun.Transpiler({ loader });
-            const exports = scanExports(transpiler, contents);
-
-            contents +=
-              "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
-            contents +=
-              "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
-
-            contents = contents.replaceAll(/export default function/g, 'function');
-            contents = contents.replaceAll(/export default (.*)/g, '');
-            contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
-            contents = contents.replaceAll(/export /g, '');
-
-            const relativeSourcePath = path.relative(process.cwd(), source.path);
-            const chunkId = generateUniqueId();
-            clientChunks.set(source.path, chunkId);
-
-            for (const exportItem of exports) {
-              contents += `${wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath })}\n`;
-
-              const usableName = exportItem.originalName
-                ? `${exportItem.originalName} as ${exportItem.name}`
-                : exportItem.name;
-
-              contents +=
-                exportItem.name === 'default'
-                  ? `export default ${exportItem.originalName};`
-                  : `export { ${usableName} };`;
-            }
-
-            const requiresTranspilation = ['jsx', 'ts', 'tsx'].some((extension) => {
-              return source.path.endsWith(`.${extension}`);
-            });
-
-            if (requiresTranspilation) {
-              const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
-
-              contents = `${newContents}\n${transpiler.transformSync(contents)}`;
-              loader = 'js';
-            }
-
-            return {
-              contents,
-              loader,
-            };
-          });
-        },
-      },
-
-      {
-        name: 'File List Loader',
-        setup(build) {
-          build.onResolve({ filter: /^server-list$/ }, (source) => {
-            return { path: source.path, namespace: 'dynamic-list' };
-          });
-
-          build.onLoad(
-            { filter: /^server-list$/, namespace: 'dynamic-list' },
-            async () => {
-              const contents = await getFileList();
-
-              return {
-                contents,
-                loader: 'tsx',
-                resolveDir: process.cwd(),
-              };
-            },
-          );
-        },
-      },
+      getClientReferenceLoader(clientChunks),
+      getFileListLoader(),
 
       {
         name: 'trigger-second-build',
