@@ -16,12 +16,6 @@ import {
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
-import {
-  getClientReferenceLoader,
-  getFileListLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
 import { mapProviderInlineDefinitions } from '@/private/shell/utils/providers';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
