@@ -1,22 +1,25 @@
 #!/usr/bin/env bun
-
-import fs from 'node:fs/promises'
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { $ } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
 import { frameworkDirectory } from '@/private/shell/constants';
-import { cleanUp, logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
+import {
+  cleanUp,
+  logSpinner,
+  scanExports,
+  setEnvironmentVariables,
+  wrapClientExport,
+} from '@/private/shell/utils';
 import * as esbuild from 'esbuild';
 
 import {
-  defaultDeploymentProvider,
   loggingPrefixes,
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
-import { mapProviderInlineDefinitions } from '@/private/shell/utils/providers';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -144,35 +147,123 @@ if (isBuilding || isDeveloping) {
   const output = await esbuild.build({
     entryPoints: [
       path.join(serverInputFolder, `${provider}.js?server`),
-      path.join(serverInputFolder, `${provider}.js?client`)
+      path.join(serverInputFolder, `${provider}.js?client`),
     ],
     outdir: outputDirectory,
     plugins: [
-        {
-    name: 'conditional-xform',
-      setup(build) {
-        // 1. Detect the “?xform” entry and resolve it into a special namespace:
-        build.onResolve({ filter: /\?client$/ }, args => ({
-          path:    args.path.replace(/\?client$/, ''),
-          namespace: 'client',
-        }))
+      {
+        name: 'conditional-xform',
+        setup(build) {
+          // 1. Detect the “?xform” entry and resolve it into a special namespace:
+          build.onResolve({ filter: /\?client$/ }, (args) => ({
+            path: args.path.replace(/\?client$/, ''),
+            namespace: 'client',
+          }));
 
-        // 2. For every module in that namespace, run your transform:
-        build.onLoad({ filter: /.*/, namespace: 'client' }, async args => {
-          const source = await fs.readFile(args.path, 'utf8')
-          console.log('SOURCE', source)
-          return { contents: source, loader: 'ts' }
-        })
+          build.onResolve({ filter: /\?server$/ }, (args) => ({
+            path: args.path.replace(/\?server$/, ''),
+            namespace: 'server',
+          }));
 
-        // 3. Everything else (including the “?full” entry and its deps) uses the default JS loader.
-      }
-  }
+          const clientChunks = new Map<string, string>();
+
+          build.onLoad(
+            { filter: /\.client.(js|jsx|ts|tsx)?$/, namespace: 'client' },
+            async (source) => {
+              let contents = await Bun.file(source.path).text();
+              const loader = path.extname(source.path).slice(1) as
+                | 'js'
+                | 'jsx'
+                | 'ts'
+                | 'tsx';
+
+              const chunkId = generateUniqueId();
+              clientChunks.set(source.path, chunkId);
+
+              const transpiler = new Bun.Transpiler({ loader });
+              const exports = scanExports(transpiler, contents);
+
+              contents += `
+                  window.BLADE_CHUNKS["${chunkId}"] = {
+                    ${exports
+                      .map((exportItem) => {
+                        return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
+                      })
+                      .join('\n')}
+                  };
+                `;
+
+              return {
+                contents,
+                loader,
+              };
+            },
+          );
+
+          build.onLoad(
+            { filter: /\.client.(js|jsx|ts|tsx)?$/, namespace: 'server' },
+            async (source) => {
+              let contents = await Bun.file(source.path).text();
+              let loader = path.extname(source.path).slice(1) as
+                | 'js'
+                | 'jsx'
+                | 'ts'
+                | 'tsx';
+
+              const transpiler = new Bun.Transpiler({ loader });
+              const exports = scanExports(transpiler, contents);
+
+              contents +=
+                "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
+              contents +=
+                "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
+
+              contents = contents.replaceAll(/export default function/g, 'function');
+              contents = contents.replaceAll(/export default (.*)/g, '');
+              contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
+              contents = contents.replaceAll(/export /g, '');
+
+              const relativeSourcePath = path.relative(process.cwd(), source.path);
+              const clientChunk = clientChunks.get(source.path);
+              if (!clientChunk)
+                throw new Error(`Missing client chunk for ${relativeSourcePath}`);
+
+              for (const exportItem of exports) {
+                contents += `${wrapClientExport(exportItem, { id: clientChunk, path: relativeSourcePath })}\n`;
+
+                const usableName = exportItem.originalName
+                  ? `${exportItem.originalName} as ${exportItem.name}`
+                  : exportItem.name;
+
+                contents +=
+                  exportItem.name === 'default'
+                    ? `export default ${exportItem.originalName};`
+                    : `export { ${usableName} };`;
+              }
+
+              const requiresTranspilation = ['jsx', 'ts', 'tsx'].some((extension) => {
+                return source.path.endsWith(`.${extension}`);
+              });
+
+              if (requiresTranspilation) {
+                const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
+
+                contents = `${newContents}\n${transpiler.transformSync(contents)}`;
+                loader = 'js';
+              }
+
+              return {
+                contents,
+                loader,
+              };
+            },
+          );
+
+          // 3. Everything else (including the “?full” entry and its deps) uses the default JS loader.
+        },
+      },
     ],
-    entryNames: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}`,
-    minify: true,
-    sourcemap: 'external',
-    target: provider === 'vercel' ? 'node' : 'esnext',
-    define: mapProviderInlineDefinitions(provider),
+    entryNames: '[dir]/[name]-[hash]',
   });
 
   console.log(output);
