@@ -115,8 +115,35 @@ const DocsLayout = ({
 }) => {
   const [theme] = useCookie<Theme>('theme');
 
+  const title = 'Blade Documentation';
+  const description = 'Build instant web apps.';
+
   useMetadata({
     htmlClassName: theme === 'dark' ? 'dark' : undefined,
+    title,
+    icon: 'https://blade.im/static/black.png',
+    openGraph: {
+      title,
+      description,
+      siteName: title,
+      images: [
+        {
+          url: 'https://blade.im/static/banner.png',
+          width: 1280,
+          height: 720,
+        },
+      ],
+    },
+    x: {
+      title,
+      description,
+      card: 'summary_large_image',
+      // `creator` is the author and `site` is the site on which a post was
+      // shared. In our case, we'll use the same handle for both of them.
+      creator: '@ronin',
+      site: '@ronin',
+      images: ['https://blade.im/static/banner.png'],
+    },
   });
 
   return (
