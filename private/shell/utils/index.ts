@@ -1,13 +1,13 @@
 import fs from 'node:fs';
-import path from 'node:path';
-
 import { cp, exists, readdir, rm } from 'node:fs/promises';
+import path from 'node:path';
 import {
   compile as compileTailwind,
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { BuildOutput, Transpiler } from 'bun';
+import * as esbuild from 'esbuild';
 import ora from 'ora';
 
 import {
@@ -23,10 +23,10 @@ import {
   styleInputFile,
 } from '@/private/shell/constants';
 import {
-  getClientChunkLoader,
-  getClientComponentLoader,
-  getMdxLoader,
-  getReactAriaLoader,
+  getClientChunkLoaderES,
+  getClientComponentLoaderES,
+  getMdxLoaderES,
+  getReactAriaLoaderES,
 } from '@/private/shell/loaders';
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
@@ -251,6 +251,15 @@ export const handleBuildLogs = (output: BuildOutput) => {
   }
 };
 
+/**
+ * Prints the logs of a build to the terminal, since Bun doesn't do that automatically.
+ *
+ * @param output A build output object.
+ */
+export const handleBuildLogsES = (output: esbuild.BuildResult) => {
+  console.log(output);
+};
+
 export const prepareClientAssets = async (
   environment: 'development' | 'production',
   bundleId: string,
@@ -271,18 +280,18 @@ export const prepareClientAssets = async (
   const isDefaultProvider = provider === defaultDeploymentProvider;
   const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
 
-  const output = await Bun.build({
-    entrypoints: [clientInputFile],
+  const output = await esbuild.build({
+    entryPoints: [clientInputFile],
     outdir: clientOutputDirectory,
     plugins: [
-      getClientComponentLoader(projects),
-      getClientChunkLoader(clientChunks),
-      getMdxLoader(environment),
-      getReactAriaLoader(),
+      getClientComponentLoaderES(projects),
+      getClientChunkLoaderES(clientChunks),
+      getMdxLoaderES(environment),
+      getReactAriaLoaderES(),
     ],
     sourcemap: 'external',
     target: 'browser',
-    naming: path.basename(getOutputFile(bundleId, 'js')),
+    entryNames: path.basename(getOutputFile(bundleId, 'js')),
     minify: environment === 'production',
     // When using a serverless deployment provider, inline plain-text environment
     // variables in the client bundles.
@@ -293,7 +302,7 @@ export const prepareClientAssets = async (
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
 
-  handleBuildLogs(output);
+  handleBuildLogsES(output);
 
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 

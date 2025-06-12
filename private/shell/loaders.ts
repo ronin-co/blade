@@ -9,6 +9,7 @@ import { clientManifestFile } from '@/private/shell/constants';
 import type { ClientChunks } from '@/private/shell/types';
 import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
+import type * as esbuild from 'esbuild';
 
 export const getClientReferenceLoader: (
   environment: 'development' | 'production',
@@ -116,6 +117,40 @@ export const getClientChunkLoader: (clientChunks: ClientChunks) => BunPlugin = (
   },
 });
 
+export const getClientChunkLoaderES: (clientChunks: ClientChunks) => esbuild.Plugin = (
+  clientChunks,
+) => ({
+  name: 'Client Chunk Loader',
+  async setup(build) {
+    build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
+      let contents = await Bun.file(source.path).text();
+      const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
+
+      const chunkId = generateUniqueId();
+      const relativeSourcePath = path.relative(process.cwd(), source.path);
+      clientChunks[relativeSourcePath] = chunkId;
+
+      const transpiler = new Bun.Transpiler({ loader });
+      const exports = scanExports(transpiler, contents);
+
+      contents += `
+          window.BLADE_CHUNKS["${chunkId}"] = {
+            ${exports
+              .map((exportItem) => {
+                return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
+              })
+              .join('\n')}
+          };
+        `;
+
+      return {
+        contents,
+        loader,
+      };
+    });
+  },
+});
+
 export const getFileListLoader: (onResolve: boolean) => BunPlugin = (onResolve) => ({
   name: 'File List Loader',
   setup(build) {
@@ -148,6 +183,43 @@ export const getFileListLoader: (onResolve: boolean) => BunPlugin = (onResolve) 
 });
 
 export const getClientComponentLoader: (projects: string[]) => BunPlugin = (
+  projects,
+) => ({
+  name: 'Client Component Loader',
+  setup(build) {
+    build.onResolve({ filter: /^client-list$/ }, (source) => {
+      return { path: source.path, namespace: 'dynamic-client-list' };
+    });
+
+    build.onLoad(
+      { filter: /^client-list$/, namespace: 'dynamic-client-list' },
+      async () => {
+        const glob = new Glob('**/*.client.{js,jsx,ts,tsx}');
+
+        // Prevent duplicate files.
+        const files = new Set();
+
+        for (const directory of projects) {
+          for await (const file of glob.scan({
+            cwd: directory,
+            absolute: true,
+          })) {
+            files.add(file);
+          }
+        }
+
+        return {
+          contents: Array.from(files)
+            .map((file) => `import "${file}";`)
+            .join('\n'),
+          loader: 'tsx',
+        };
+      },
+    );
+  },
+});
+
+export const getClientComponentLoaderES: (projects: string[]) => esbuild.Plugin = (
   projects,
 ) => ({
   name: 'Client Component Loader',
@@ -218,6 +290,40 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
   },
 });
 
+export const getMdxLoaderES: (
+  environment: 'development' | 'production',
+) => esbuild.Plugin = (environment) => ({
+  name: 'MDX Loader',
+  setup(build) {
+    build.onLoad({ filter: /\.mdx$/ }, async (source) => {
+      const contents = await Bun.file(source.path).text();
+
+      const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
+
+      const yaml = contents.match(yamlPattern);
+      let mdxContents = contents;
+
+      if (yaml) {
+        const yamlData = YAML.load(yaml[1]);
+        const hook = `import { useMetadata } from '@ronin/blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
+
+        mdxContents = contents.replace(yaml[0], hook);
+      }
+
+      const mdx = await compile(mdxContents, {
+        development: environment === 'development',
+      });
+
+      const tsx = String(mdx.value);
+
+      return {
+        contents: tsx,
+        loader: 'tsx',
+      };
+    });
+  },
+});
+
 // TODO: Move this into a config file or plugin.
 //
 // This ensures that no unnecessary localizations are included in the client bundle,
@@ -225,6 +331,39 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
 //
 // https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
 export const getReactAriaLoader: () => BunPlugin = () => ({
+  name: 'React Aria Loader',
+  setup(build) {
+    build.onLoad(
+      {
+        filter:
+          /(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/(.*)\/[a-zA-Z]{2}-[a-zA-Z]{2}\.(js|mjs)$/,
+      },
+      async (source) => {
+        const { name } = path.parse(source.path);
+
+        if (name === 'en-US') {
+          return {
+            contents: await Bun.file(source.path).text(),
+            loader: 'js',
+          };
+        }
+
+        return {
+          contents: 'const removedLocale = undefined;\nexport default removedLocale;',
+          loader: 'js',
+        };
+      },
+    );
+  },
+});
+
+// TODO: Move this into a config file or plugin.
+//
+// This ensures that no unnecessary localizations are included in the client bundle,
+// which would otherwise increase the bundle size.
+//
+// https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
+export const getReactAriaLoaderES: () => esbuild.Plugin = () => ({
   name: 'React Aria Loader',
   setup(build) {
     build.onLoad(
