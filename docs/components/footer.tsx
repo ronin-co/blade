@@ -27,7 +27,7 @@ export const Footer = () => {
           rel="noreferrer"
           target="_blank">
           <Edit className="h-4 w-4" />
-          <span>Edit this page on GitHub</span>
+          <span>Edit this page</span>
         </a>
       </div>
 
