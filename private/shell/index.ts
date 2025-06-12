@@ -7,6 +7,7 @@ import getPort, { portNumbers } from 'get-port';
 import { frameworkDirectory } from '@/private/shell/constants';
 import {
   cleanUp,
+  getFileList,
   logSpinner,
   scanExports,
   setEnvironmentVariables,
@@ -144,10 +145,10 @@ if (isBuilding || isDeveloping) {
 
   await cleanUp();
 
-  const output = await esbuild.build({
+  await esbuild.build({
     entryPoints: [
-      path.join(serverInputFolder, `${provider}.js?server`),
       path.join(serverInputFolder, `${provider}.js?client`),
+      path.join(serverInputFolder, `${provider}.js?server`),
     ],
     outdir: outputDirectory,
     bundle: true,
@@ -162,10 +163,50 @@ if (isBuilding || isDeveloping) {
             namespace: 'client',
           }));
 
+          build.onResolve({ filter: /.*/, namespace: 'client' }, async (args) => {
+            if (args.path === 'server-list') {
+              return {
+                path: args.path,
+                namespace: 'dynamic-list-client',
+              };
+            }
+
+            const result = await build.resolve(args.path, {
+              kind: args.kind,
+              resolveDir: args.resolveDir,
+              importer: args.importer,
+            });
+
+            return {
+              path: result.path,
+              namespace: 'client', // ← re-use the same namespace
+            };
+          });
+
           build.onResolve({ filter: /\?server$/ }, (args) => ({
             path: args.path.replace(/\?server$/, ''),
             namespace: 'server',
           }));
+
+          build.onResolve({ filter: /.*/, namespace: 'server' }, async (args) => {
+            if (args.path === 'server-list') {
+              return {
+                path: args.path,
+                namespace: 'dynamic-list-server',
+              };
+            }
+
+            const result = await build.resolve(args.path, {
+              kind: args.kind,
+              resolveDir: args.resolveDir,
+              importer: args.importer,
+            });
+
+            return {
+              path: result.path,
+              namespace: 'server', // ← re-use the same namespace
+            };
+          });
 
           const clientChunks = new Map<string, string>();
 
@@ -181,6 +222,8 @@ if (isBuilding || isDeveloping) {
 
               const chunkId = generateUniqueId();
               clientChunks.set(source.path, chunkId);
+
+              console.log('CLIENT CHUNK 1', source.path);
 
               const transpiler = new Bun.Transpiler({ loader });
               const exports = scanExports(transpiler, contents);
@@ -227,7 +270,7 @@ if (isBuilding || isDeveloping) {
 
               const relativeSourcePath = path.relative(process.cwd(), source.path);
               const clientChunk = clientChunks.get(source.path);
-              console.log('CLIENT CHUNK', source.path, clientChunk);
+              console.log('CLIENT CHUNK 2', source.path, clientChunk);
               if (!clientChunk)
                 throw new Error(`Missing client chunk for ${relativeSourcePath}`);
 
@@ -266,14 +309,66 @@ if (isBuilding || isDeveloping) {
             const contents = await Bun.file(source.path).text();
             const loader = path.extname(source.path).slice(1) as 'js';
 
-            return { contents, loader, resolveDir: path.dirname(source.path) };
+            return {
+              contents,
+              loader: loader.replace('mjs', 'js'),
+              resolveDir: path.dirname(source.path),
+            };
           });
 
           build.onLoad({ filter: /.*/, namespace: 'server' }, async (source) => {
             const contents = await Bun.file(source.path).text();
             const loader = path.extname(source.path).slice(1) as 'js';
 
-            return { contents, loader, resolveDir: path.dirname(source.path) };
+            return {
+              contents,
+              loader: loader.replace('mjs', 'js'),
+              resolveDir: path.dirname(source.path),
+            };
+          });
+
+          build.onLoad(
+            { filter: /^server-list$/, namespace: 'dynamic-list-client' },
+            async () => {
+              const contents = await getFileList('client');
+
+              return {
+                contents,
+                loader: 'tsx',
+                resolveDir: process.cwd(),
+              };
+            },
+          );
+
+          build.onLoad(
+            { filter: /^server-list$/, namespace: 'dynamic-list-server' },
+            async () => {
+              const contents = await getFileList('server');
+
+              return {
+                contents,
+                loader: 'tsx',
+                resolveDir: process.cwd(),
+              };
+            },
+          );
+
+          build.onResolve({ filter: /^client:(.*)$/ }, (args) => {
+            // strip off the prefix and hand back a namespace
+            const newPath = args.path.replace('client:', '');
+            return {
+              path: newPath,
+              namespace: 'client',
+            };
+          });
+
+          build.onResolve({ filter: /^server:(.*)$/ }, (args) => {
+            // strip off the prefix and hand back a namespace
+            const newPath = args.path.replace('server:', '');
+            return {
+              path: newPath,
+              namespace: 'server',
+            };
           });
 
           // 3. Everything else (including the “?full” entry and its deps) uses the default JS loader.
@@ -282,6 +377,4 @@ if (isBuilding || isDeveloping) {
     ],
     entryNames: '[dir]/[name]-[hash]',
   });
-
-  console.log(output);
 }

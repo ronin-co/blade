@@ -7,7 +7,7 @@ import YAML from 'js-yaml';
 
 import { clientManifestFile } from '@/private/shell/constants';
 import type { ClientChunks } from '@/private/shell/types';
-import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
+import { scanExports, wrapClientExport } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import type * as esbuild from 'esbuild';
 
@@ -112,24 +112,6 @@ export const getClientChunkLoader: (clientChunks: ClientChunks) => esbuild.Plugi
       return {
         contents,
         loader,
-      };
-    });
-  },
-});
-
-export const getFileListLoader: () => esbuild.Plugin = () => ({
-  name: 'File List Loader',
-  setup(build) {
-    build.onResolve({ filter: /^server-list$/ }, (source) => {
-      return { path: source.path, namespace: 'dynamic-list' };
-    });
-
-    build.onLoad({ filter: /^server-list$/, namespace: 'dynamic-list' }, async () => {
-      const contents = await getFileList();
-
-      return {
-        contents,
-        loader: 'tsx',
       };
     });
   },
