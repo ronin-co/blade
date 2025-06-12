@@ -45,11 +45,7 @@ const crawlDirectory = async (directory: string): Promise<string[]> => {
   return files.map((file) => (path.extname(file) === '' ? `${file}/` : file));
 };
 
-const getImportList = async (
-  type: 'client' | 'server',
-  directoryName: string,
-  directoryPath: string,
-) => {
+const getImportList = async (directoryName: string, directoryPath: string) => {
   const files = (await exists(directoryPath)) ? await crawlDirectory(directoryPath) : [];
 
   const importList = [];
@@ -63,7 +59,7 @@ const getImportList = async (
     if (filePath.endsWith('/')) {
       exportList[filePath.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
     } else {
-      importList.push(`import * as ${variableName} from '${type}:${filePathFull}';`);
+      importList.push(`import * as ${variableName} from '${filePathFull}';`);
       exportList[filePath] = variableName;
     }
   }
@@ -78,11 +74,9 @@ const getImportList = async (
   return code;
 };
 
-export const getFileList = async (type: 'client' | 'server'): Promise<string> => {
+export const getFileList = async (): Promise<string> => {
   const directories = Object.entries(directoriesToParse);
-  const importPromises = directories.map(([name, path]) =>
-    getImportList(type, name, path),
-  );
+  const importPromises = directories.map(([name, path]) => getImportList(name, path));
   const imports = await Promise.all(importPromises);
   const routerExists = await exists(routerInputFile);
 

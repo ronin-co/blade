@@ -4,7 +4,7 @@ import { parseArgs } from 'node:util';
 import { $ } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
-import { frameworkDirectory } from '@/private/shell/constants';
+import { defaultDeploymentProvider, frameworkDirectory } from '@/private/shell/constants';
 import {
   cleanUp,
   getFileList,
@@ -145,192 +145,87 @@ if (isBuilding || isDeveloping) {
 
   await cleanUp();
 
-  await esbuild.build({
-    entryPoints: [
-      path.join(serverInputFolder, `${provider}.js?client`),
-      path.join(serverInputFolder, `${provider}.js?server`),
-    ],
-    outdir: outputDirectory,
+  const clientChunks = new Map<string, string>();
+
+  const serverBuild = await esbuild.context({
+    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
+    entryNames: `[dir]/${defaultDeploymentProvider}`,
+    sourcemap: 'external',
     bundle: true,
     nodePaths: [path.join(process.cwd(), 'node_modules')],
+    outdir: outputDirectory,
     plugins: [
       {
-        name: 'conditional-xform',
+        name: 'test',
         setup(build) {
-          // 1. Detect the “?xform” entry and resolve it into a special namespace:
-          build.onResolve({ filter: /\?client$/ }, (args) => ({
-            path: args.path.replace(/\?client$/, ''),
-            namespace: 'client',
-          }));
+          build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
+            let contents = await Bun.file(source.path).text();
+            let loader = path.extname(source.path).slice(1) as
+              | 'js'
+              | 'jsx'
+              | 'ts'
+              | 'tsx';
 
-          build.onResolve({ filter: /.*/, namespace: 'client' }, async (args) => {
-            if (args.path === 'server-list') {
-              return {
-                path: args.path,
-                namespace: 'dynamic-list-client',
-              };
-            }
+            const transpiler = new Bun.Transpiler({ loader });
+            const exports = scanExports(transpiler, contents);
 
-            const result = await build.resolve(args.path, {
-              kind: args.kind,
-              resolveDir: args.resolveDir,
-              importer: args.importer,
-            });
+            contents +=
+              "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
+            contents +=
+              "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
 
-            return {
-              path: result.path,
-              namespace: 'client', // ← re-use the same namespace
-            };
-          });
+            contents = contents.replaceAll(/export default function/g, 'function');
+            contents = contents.replaceAll(/export default (.*)/g, '');
+            contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
+            contents = contents.replaceAll(/export /g, '');
 
-          build.onResolve({ filter: /\?server$/ }, (args) => ({
-            path: args.path.replace(/\?server$/, ''),
-            namespace: 'server',
-          }));
+            const relativeSourcePath = path.relative(process.cwd(), source.path);
+            const chunkId = generateUniqueId();
+            clientChunks.set(source.path, chunkId);
 
-          build.onResolve({ filter: /.*/, namespace: 'server' }, async (args) => {
-            if (args.path === 'server-list') {
-              return {
-                path: args.path,
-                namespace: 'dynamic-list-server',
-              };
-            }
+            for (const exportItem of exports) {
+              contents += `${wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath })}\n`;
 
-            const result = await build.resolve(args.path, {
-              kind: args.kind,
-              resolveDir: args.resolveDir,
-              importer: args.importer,
-            });
-
-            return {
-              path: result.path,
-              namespace: 'server', // ← re-use the same namespace
-            };
-          });
-
-          const clientChunks = new Map<string, string>();
-
-          build.onLoad(
-            { filter: /\.client.(js|jsx|ts|tsx)?$/, namespace: 'client' },
-            async (source) => {
-              let contents = await Bun.file(source.path).text();
-              const loader = path.extname(source.path).slice(1) as
-                | 'js'
-                | 'jsx'
-                | 'ts'
-                | 'tsx';
-
-              const chunkId = generateUniqueId();
-              clientChunks.set(source.path, chunkId);
-
-              console.log('CLIENT CHUNK 1', source.path);
-
-              const transpiler = new Bun.Transpiler({ loader });
-              const exports = scanExports(transpiler, contents);
-
-              contents += `
-                  window.BLADE_CHUNKS["${chunkId}"] = {
-                    ${exports
-                      .map((exportItem) => {
-                        return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
-                      })
-                      .join('\n')}
-                  };
-                `;
-
-              return {
-                contents,
-                loader,
-              };
-            },
-          );
-
-          build.onLoad(
-            { filter: /\.client.(js|jsx|ts|tsx)?$/, namespace: 'server' },
-            async (source) => {
-              let contents = await Bun.file(source.path).text();
-              let loader = path.extname(source.path).slice(1) as
-                | 'js'
-                | 'jsx'
-                | 'ts'
-                | 'tsx';
-
-              const transpiler = new Bun.Transpiler({ loader });
-              const exports = scanExports(transpiler, contents);
+              const usableName = exportItem.originalName
+                ? `${exportItem.originalName} as ${exportItem.name}`
+                : exportItem.name;
 
               contents +=
-                "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
-              contents +=
-                "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
+                exportItem.name === 'default'
+                  ? `export default ${exportItem.originalName};`
+                  : `export { ${usableName} };`;
+            }
 
-              contents = contents.replaceAll(/export default function/g, 'function');
-              contents = contents.replaceAll(/export default (.*)/g, '');
-              contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
-              contents = contents.replaceAll(/export /g, '');
+            const requiresTranspilation = ['jsx', 'ts', 'tsx'].some((extension) => {
+              return source.path.endsWith(`.${extension}`);
+            });
 
-              const relativeSourcePath = path.relative(process.cwd(), source.path);
-              const clientChunk = clientChunks.get(source.path);
-              console.log('CLIENT CHUNK 2', source.path, clientChunk);
-              if (!clientChunk)
-                throw new Error(`Missing client chunk for ${relativeSourcePath}`);
+            if (requiresTranspilation) {
+              const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
 
-              for (const exportItem of exports) {
-                contents += `${wrapClientExport(exportItem, { id: clientChunk, path: relativeSourcePath })}\n`;
-
-                const usableName = exportItem.originalName
-                  ? `${exportItem.originalName} as ${exportItem.name}`
-                  : exportItem.name;
-
-                contents +=
-                  exportItem.name === 'default'
-                    ? `export default ${exportItem.originalName};`
-                    : `export { ${usableName} };`;
-              }
-
-              const requiresTranspilation = ['jsx', 'ts', 'tsx'].some((extension) => {
-                return source.path.endsWith(`.${extension}`);
-              });
-
-              if (requiresTranspilation) {
-                const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
-
-                contents = `${newContents}\n${transpiler.transformSync(contents)}`;
-                loader = 'js';
-              }
-
-              return {
-                contents,
-                loader,
-              };
-            },
-          );
-
-          build.onLoad({ filter: /.*/, namespace: 'client' }, async (source) => {
-            const contents = await Bun.file(source.path).text();
-            const loader = path.extname(source.path).slice(1) as 'js';
+              contents = `${newContents}\n${transpiler.transformSync(contents)}`;
+              loader = 'js';
+            }
 
             return {
               contents,
-              loader: loader.replace('mjs', 'js'),
-              resolveDir: path.dirname(source.path),
+              loader,
             };
           });
+        },
+      },
 
-          build.onLoad({ filter: /.*/, namespace: 'server' }, async (source) => {
-            const contents = await Bun.file(source.path).text();
-            const loader = path.extname(source.path).slice(1) as 'js';
-
-            return {
-              contents,
-              loader: loader.replace('mjs', 'js'),
-              resolveDir: path.dirname(source.path),
-            };
+      {
+        name: 'File List Loader',
+        setup(build) {
+          build.onResolve({ filter: /^server-list$/ }, (source) => {
+            return { path: source.path, namespace: 'dynamic-list' };
           });
 
           build.onLoad(
-            { filter: /^server-list$/, namespace: 'dynamic-list-client' },
+            { filter: /^server-list$/, namespace: 'dynamic-list' },
             async () => {
-              const contents = await getFileList('client');
+              const contents = await getFileList();
 
               return {
                 contents,
@@ -339,42 +234,243 @@ if (isBuilding || isDeveloping) {
               };
             },
           );
-
-          build.onLoad(
-            { filter: /^server-list$/, namespace: 'dynamic-list-server' },
-            async () => {
-              const contents = await getFileList('server');
-
-              return {
-                contents,
-                loader: 'tsx',
-                resolveDir: process.cwd(),
-              };
-            },
-          );
-
-          build.onResolve({ filter: /^client:(.*)$/ }, (args) => {
-            // strip off the prefix and hand back a namespace
-            const newPath = args.path.replace('client:', '');
-            return {
-              path: newPath,
-              namespace: 'client',
-            };
-          });
-
-          build.onResolve({ filter: /^server:(.*)$/ }, (args) => {
-            // strip off the prefix and hand back a namespace
-            const newPath = args.path.replace('server:', '');
-            return {
-              path: newPath,
-              namespace: 'server',
-            };
-          });
-
-          // 3. Everything else (including the “?full” entry and its deps) uses the default JS loader.
         },
       },
     ],
-    entryNames: '[dir]/[name]-[hash]',
   });
+
+  await serverBuild.rebuild();
+
+  // await esbuild.build({
+  //   entryPoints: [
+  //     path.join(serverInputFolder, `${provider}.js?client`),
+  //     path.join(serverInputFolder, `${provider}.js?server`),
+  //   ],
+  //   outdir: outputDirectory,
+  //   bundle: true,
+  //   nodePaths: [path.join(process.cwd(), 'node_modules')],
+  //   plugins: [
+  //     {
+  //       name: 'conditional-xform',
+  //       setup(build) {
+  //         // 1. Detect the “?xform” entry and resolve it into a special namespace:
+  //         build.onResolve({ filter: /\?client$/ }, (args) => ({
+  //           path: args.path.replace(/\?client$/, ''),
+  //           namespace: 'client',
+  //         }));
+
+  //         build.onResolve({ filter: /.*/, namespace: 'client' }, async (args) => {
+  //           if (args.path === 'server-list') {
+  //             return {
+  //               path: args.path,
+  //               namespace: 'dynamic-list-client',
+  //             };
+  //           }
+
+  //           const result = await build.resolve(args.path, {
+  //             kind: args.kind,
+  //             resolveDir: args.resolveDir,
+  //             importer: args.importer,
+  //           });
+
+  //           return {
+  //             path: result.path,
+  //             namespace: 'client', // ← re-use the same namespace
+  //           };
+  //         });
+
+  //         build.onResolve({ filter: /\?server$/ }, (args) => ({
+  //           path: args.path.replace(/\?server$/, ''),
+  //           namespace: 'server',
+  //         }));
+
+  //         build.onResolve({ filter: /.*/, namespace: 'server' }, async (args) => {
+  //           if (args.path === 'server-list') {
+  //             return {
+  //               path: args.path,
+  //               namespace: 'dynamic-list-server',
+  //             };
+  //           }
+
+  //           const result = await build.resolve(args.path, {
+  //             kind: args.kind,
+  //             resolveDir: args.resolveDir,
+  //             importer: args.importer,
+  //           });
+
+  //           return {
+  //             path: result.path,
+  //             namespace: 'server', // ← re-use the same namespace
+  //           };
+  //         });
+
+  //         const clientChunks = new Map<string, string>();
+
+  //         build.onLoad(
+  //           { filter: /\.client.(js|jsx|ts|tsx)?$/, namespace: 'client' },
+  //           async (source) => {
+  //             let contents = await Bun.file(source.path).text();
+  //             const loader = path.extname(source.path).slice(1) as
+  //               | 'js'
+  //               | 'jsx'
+  //               | 'ts'
+  //               | 'tsx';
+
+  //             const chunkId = generateUniqueId();
+  //             clientChunks.set(source.path, chunkId);
+
+  //             console.log('CLIENT CHUNK 1', source.path);
+
+  //             const transpiler = new Bun.Transpiler({ loader });
+  //             const exports = scanExports(transpiler, contents);
+
+  //             contents += `
+  //                 window.BLADE_CHUNKS["${chunkId}"] = {
+  //                   ${exports
+  //                     .map((exportItem) => {
+  //                       return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
+  //                     })
+  //                     .join('\n')}
+  //                 };
+  //               `;
+
+  //             return {
+  //               contents,
+  //               loader,
+  //             };
+  //           },
+  //         );
+
+  //         build.onLoad(
+  //           { filter: /\.client.(js|jsx|ts|tsx)?$/, namespace: 'server' },
+  //           async (source) => {
+  //             let contents = await Bun.file(source.path).text();
+  //             let loader = path.extname(source.path).slice(1) as
+  //               | 'js'
+  //               | 'jsx'
+  //               | 'ts'
+  //               | 'tsx';
+
+  //             const transpiler = new Bun.Transpiler({ loader });
+  //             const exports = scanExports(transpiler, contents);
+
+  //             contents +=
+  //               "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
+  //             contents +=
+  //               "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
+
+  //             contents = contents.replaceAll(/export default function/g, 'function');
+  //             contents = contents.replaceAll(/export default (.*)/g, '');
+  //             contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
+  //             contents = contents.replaceAll(/export /g, '');
+
+  //             const relativeSourcePath = path.relative(process.cwd(), source.path);
+  //             const clientChunk = clientChunks.get(source.path);
+  //             console.log('CLIENT CHUNK 2', source.path, clientChunk);
+  //             if (!clientChunk)
+  //               throw new Error(`Missing client chunk for ${relativeSourcePath}`);
+
+  //             for (const exportItem of exports) {
+  //               contents += `${wrapClientExport(exportItem, { id: clientChunk, path: relativeSourcePath })}\n`;
+
+  //               const usableName = exportItem.originalName
+  //                 ? `${exportItem.originalName} as ${exportItem.name}`
+  //                 : exportItem.name;
+
+  //               contents +=
+  //                 exportItem.name === 'default'
+  //                   ? `export default ${exportItem.originalName};`
+  //                   : `export { ${usableName} };`;
+  //             }
+
+  //             const requiresTranspilation = ['jsx', 'ts', 'tsx'].some((extension) => {
+  //               return source.path.endsWith(`.${extension}`);
+  //             });
+
+  //             if (requiresTranspilation) {
+  //               const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
+
+  //               contents = `${newContents}\n${transpiler.transformSync(contents)}`;
+  //               loader = 'js';
+  //             }
+
+  //             return {
+  //               contents,
+  //               loader,
+  //             };
+  //           },
+  //         );
+
+  //         build.onLoad({ filter: /.*/, namespace: 'client' }, async (source) => {
+  //           const contents = await Bun.file(source.path).text();
+  //           const loader = path.extname(source.path).slice(1) as 'js';
+
+  //           return {
+  //             contents,
+  //             loader: loader.replace('mjs', 'js'),
+  //             resolveDir: path.dirname(source.path),
+  //           };
+  //         });
+
+  //         build.onLoad({ filter: /.*/, namespace: 'server' }, async (source) => {
+  //           const contents = await Bun.file(source.path).text();
+  //           const loader = path.extname(source.path).slice(1) as 'js';
+
+  //           return {
+  //             contents,
+  //             loader: loader.replace('mjs', 'js'),
+  //             resolveDir: path.dirname(source.path),
+  //           };
+  //         });
+
+  //         build.onLoad(
+  //           { filter: /^server-list$/, namespace: 'dynamic-list-client' },
+  //           async () => {
+  //             const contents = await getFileList('client');
+
+  //             return {
+  //               contents,
+  //               loader: 'tsx',
+  //               resolveDir: process.cwd(),
+  //             };
+  //           },
+  //         );
+
+  //         build.onLoad(
+  //           { filter: /^server-list$/, namespace: 'dynamic-list-server' },
+  //           async () => {
+  //             const contents = await getFileList('server');
+
+  //             return {
+  //               contents,
+  //               loader: 'tsx',
+  //               resolveDir: process.cwd(),
+  //             };
+  //           },
+  //         );
+
+  //         build.onResolve({ filter: /^client:(.*)$/ }, (args) => {
+  //           // strip off the prefix and hand back a namespace
+  //           const newPath = args.path.replace('client:', '');
+  //           return {
+  //             path: newPath,
+  //             namespace: 'client',
+  //           };
+  //         });
+
+  //         build.onResolve({ filter: /^server:(.*)$/ }, (args) => {
+  //           // strip off the prefix and hand back a namespace
+  //           const newPath = args.path.replace('server:', '');
+  //           return {
+  //             path: newPath,
+  //             namespace: 'server',
+  //           };
+  //         });
+
+  //         // 3. Everything else (including the “?full” entry and its deps) uses the default JS loader.
+  //       },
+  //     },
+  //   ],
+  //   entryNames: '[dir]/[name]-[hash]',
+  // });
 }
