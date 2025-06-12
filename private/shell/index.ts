@@ -1,11 +1,18 @@
 #!/usr/bin/env bun
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { $, type SpawnOptions } from 'bun';
+import { $ } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
 import { frameworkDirectory, loggingPrefixes } from '@/private/shell/constants';
-import { logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
+import {
+  cleanUp,
+  logSpinner,
+  prepareClientAssets,
+  prepareServerAssets,
+  setEnvironmentVariables,
+} from '@/private/shell/utils';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -127,40 +134,14 @@ setEnvironmentVariables({
 
 const serverFile = path.join(import.meta.dirname, 'listener.js');
 
-const childProcessConfig: SpawnOptions.OptionsObject = {
-  stdin: 'inherit',
-  stdout: 'inherit',
-  stderr: 'inherit',
-  env: {
-    ...import.meta.env,
-    FORCE_COLOR: '3',
-  },
-};
+if (isBuilding || isDeveloping) {
+  const provider = import.meta.env.__BLADE_PROVIDER;
+  const bundleId = generateUniqueId();
 
-if (isServing) {
-  await import(serverFile);
-} else if (isBuilding || isDeveloping) {
-  if (isBuilding) {
-    // We need to spawn a child process because `Bun.build` requires `BUN_ENV` to be set
-    // when the process starts, and since we don't want to require `BUN_ENV` to be set
-    // when starting `blade build`, we need a child process that we can set this
-    // environment variable on.
-    const builder = Bun.spawn(
-      ['bun', path.join(__dirname, 'builder.js')],
-      childProcessConfig,
-    );
+  await cleanUp();
 
-    // Wait for the process to exit and obtain its exit code.
-    const exitCode = await builder.exited;
-
-    // If the exit code isn't `0`, an error has occurred during the build and we
-    // therefore want to exit the parent process with an error code too.
-    if (exitCode !== 0) process.exit(1);
-  } else {
-    // We need to spawn a child process because we want to take advantage of Bun's
-    // hot-reloading feature, which refreshes the process whenever files are changing.
-    // Since we don't want the client build above to be restarted every time, we need to
-    // isolate the server execution.
-    Bun.spawn(['bun', '--hot', serverFile], childProcessConfig);
-  }
+  await prepareClientAssets('production', bundleId, provider);
+  await prepareServerAssets(provider);
 }
+
+await import(serverFile);
