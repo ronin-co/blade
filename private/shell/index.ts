@@ -13,6 +13,7 @@ import {
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
+import { serve } from '@/private/shell/listener';
 import {
   getClientChunkLoader,
   getClientReferenceLoader,
@@ -135,9 +136,10 @@ setEnvironmentVariables({
   isServing,
   isLoggingQueries: values.queries || false,
   enableServiceWorker,
-  port,
   projects,
 });
+
+const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
 
 if (isBuilding || isDeveloping) {
   const provider = import.meta.env.__BLADE_PROVIDER;
@@ -153,6 +155,7 @@ if (isBuilding || isDeveloping) {
     bundle: true,
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: outputDirectory,
+    minify: environment === 'production',
     plugins: [
       getClientChunkLoader(clientChunks),
       getFileListLoader(),
@@ -180,6 +183,7 @@ if (isBuilding || isDeveloping) {
     bundle: true,
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: outputDirectory,
+    minify: environment === 'production',
     plugins: [
       getClientReferenceLoader(clientChunks),
       getFileListLoader(),
@@ -204,3 +208,5 @@ if (isBuilding || isDeveloping) {
   await serverBuild.rebuild();
   await serverBuild.watch();
 }
+
+await serve(environment, port);

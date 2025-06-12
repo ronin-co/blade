@@ -145,7 +145,6 @@ export const setEnvironmentVariables = (options: {
   isServing: boolean;
   isLoggingQueries: boolean;
   enableServiceWorker: boolean;
-  port: number;
   projects: string[];
 }) => {
   if (import.meta.env['BLADE_ENV']) {
@@ -190,11 +189,6 @@ export const setEnvironmentVariables = (options: {
   // This variable is used internally by BLADE to determine how much information should
   // be logged to the terminal.
   import.meta.env['__BLADE_DEBUG_LEVEL'] = options.isLoggingQueries ? 'verbose' : 'error';
-
-  // The port on which the development server or production server will run. It is
-  // determined outside the actual worker script because it should remain the same
-  // whenever the worker script is re-evaluated during development.
-  import.meta.env['__BLADE_PORT'] = String(options.port);
 
   // The directories that contain the source code of the application.
   import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
