@@ -1,3 +1,5 @@
+import { highlight } from 'sugar-high';
+
 import { CopyToClipboard } from '@/components/copy.client';
 
 interface CodeBlockProps extends React.ComponentPropsWithoutRef<'pre'> {
@@ -13,7 +15,10 @@ export const CodeBlock = (props: CodeBlockProps) => {
       <pre
         {...restProps}
         className="not-prose relative my-0! overflow-x-auto whitespace-pre-wrap rounded-lg border p-5 text-sm">
-        <code className="bg-none">{children}</code>
+        <code
+          className="bg-none"
+          dangerouslySetInnerHTML={{ __html: highlight(children) }}
+        />
         <div className="absolute top-3 right-2">
           <CopyToClipboard content={children as string} />
         </div>
