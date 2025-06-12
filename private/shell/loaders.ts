@@ -79,14 +79,14 @@ export const getClientChunkLoader: (clientChunks: ClientChunks) => esbuild.Plugi
       const exports = scanExports(transpiler, contents);
 
       contents += `
-                        window.BLADE_CHUNKS["${chunkId}"] = {
-                          ${exports
-                            .map((exportItem) => {
-                              return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
-                            })
-                            .join('\n')}
-                        };
-                      `;
+        window.BLADE_CHUNKS["${chunkId}"] = {
+          ${exports
+            .map((exportItem) => {
+              return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
+            })
+            .join('\n')}
+        };
+      `;
 
       return {
         contents,
