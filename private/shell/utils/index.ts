@@ -290,8 +290,7 @@ export const prepareClientAssets = async (
       getReactAriaLoaderES(),
     ],
     sourcemap: 'external',
-    target: 'browser',
-    entryNames: path.basename(getOutputFile(bundleId, 'js')),
+    entryNames: path.basename(getOutputFile(bundleId)),
     minify: environment === 'production',
     // When using a serverless deployment provider, inline plain-text environment
     // variables in the client bundles.
