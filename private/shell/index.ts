@@ -150,6 +150,8 @@ if (isBuilding || isDeveloping) {
       path.join(serverInputFolder, `${provider}.js?client`),
     ],
     outdir: outputDirectory,
+    bundle: true,
+    nodePaths: [path.join(process.cwd(), 'node_modules')],
     plugins: [
       {
         name: 'conditional-xform',
@@ -225,6 +227,7 @@ if (isBuilding || isDeveloping) {
 
               const relativeSourcePath = path.relative(process.cwd(), source.path);
               const clientChunk = clientChunks.get(source.path);
+              console.log('CLIENT CHUNK', source.path, clientChunk);
               if (!clientChunk)
                 throw new Error(`Missing client chunk for ${relativeSourcePath}`);
 
@@ -258,6 +261,20 @@ if (isBuilding || isDeveloping) {
               };
             },
           );
+
+          build.onLoad({ filter: /.*/, namespace: 'client' }, async (source) => {
+            const contents = await Bun.file(source.path).text();
+            const loader = path.extname(source.path).slice(1) as 'js';
+
+            return { contents, loader, resolveDir: path.dirname(source.path) };
+          });
+
+          build.onLoad({ filter: /.*/, namespace: 'server' }, async (source) => {
+            const contents = await Bun.file(source.path).text();
+            const loader = path.extname(source.path).slice(1) as 'js';
+
+            return { contents, loader, resolveDir: path.dirname(source.path) };
+          });
 
           // 3. Everything else (including the “?full” entry and its deps) uses the default JS loader.
         },
