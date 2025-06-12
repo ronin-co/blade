@@ -45,10 +45,10 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
       getMdxLoader('production'),
       getReactAriaLoader(),
     ],
-    naming: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}.js`,
+    entryNames: `[dir]/${provider.endsWith('-worker') ? provider : defaultDeploymentProvider}`,
     minify: true,
     sourcemap: 'external',
-    target: provider === 'vercel' ? 'node' : 'browser',
+    target: provider === 'vercel' ? 'node' : 'esnext',
     define: mapProviderInlineDefinitions(provider),
   });
 
