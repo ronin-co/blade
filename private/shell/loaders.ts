@@ -8,9 +8,7 @@ import { getFileList, scanExports, wrapClientExport } from '@/private/shell/util
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import type * as esbuild from 'esbuild';
 
-export const getClientReferenceLoader: (clientChunks: ClientChunks) => esbuild.Plugin = (
-  clientChunks,
-) => ({
+export const getClientReferenceLoader = (clientChunks: ClientChunks): esbuild.Plugin => ({
   name: 'Client Reference Loader',
   async setup(build) {
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
@@ -64,9 +62,7 @@ export const getClientReferenceLoader: (clientChunks: ClientChunks) => esbuild.P
   },
 });
 
-export const getClientChunkLoader: (clientChunks: ClientChunks) => esbuild.Plugin = (
-  clientChunks,
-) => ({
+export const getClientChunkLoader = (clientChunks: ClientChunks): esbuild.Plugin => ({
   name: 'Client Chunk Loader',
   async setup(build) {
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
@@ -96,7 +92,7 @@ export const getClientChunkLoader: (clientChunks: ClientChunks) => esbuild.Plugi
   },
 });
 
-export const getFileListLoader: () => esbuild.Plugin = () => ({
+export const getFileListLoader = (): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     build.onResolve({ filter: /^server-list$/ }, (source) => {
@@ -115,38 +111,39 @@ export const getFileListLoader: () => esbuild.Plugin = () => ({
   },
 });
 
-export const getMdxLoader: (environment: 'development' | 'production') => esbuild.Plugin =
-  (environment) => ({
-    name: 'MDX Loader',
-    setup(build) {
-      build.onLoad({ filter: /\.mdx$/ }, async (source) => {
-        const contents = await Bun.file(source.path).text();
+export const getMdxLoader = (
+  environment: 'development' | 'production',
+): esbuild.Plugin => ({
+  name: 'MDX Loader',
+  setup(build) {
+    build.onLoad({ filter: /\.mdx$/ }, async (source) => {
+      const contents = await Bun.file(source.path).text();
 
-        const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
+      const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
 
-        const yaml = contents.match(yamlPattern);
-        let mdxContents = contents;
+      const yaml = contents.match(yamlPattern);
+      let mdxContents = contents;
 
-        if (yaml) {
-          const yamlData = YAML.load(yaml[1]);
-          const hook = `import { useMetadata } from '@ronin/blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
+      if (yaml) {
+        const yamlData = YAML.load(yaml[1]);
+        const hook = `import { useMetadata } from '@ronin/blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
 
-          mdxContents = contents.replace(yaml[0], hook);
-        }
+        mdxContents = contents.replace(yaml[0], hook);
+      }
 
-        const mdx = await compile(mdxContents, {
-          development: environment === 'development',
-        });
-
-        const tsx = String(mdx.value);
-
-        return {
-          contents: tsx,
-          loader: 'tsx',
-        };
+      const mdx = await compile(mdxContents, {
+        development: environment === 'development',
       });
-    },
-  });
+
+      const tsx = String(mdx.value);
+
+      return {
+        contents: tsx,
+        loader: 'tsx',
+      };
+    });
+  },
+});
 
 // TODO: Move this into a config file or plugin.
 //
@@ -154,7 +151,7 @@ export const getMdxLoader: (environment: 'development' | 'production') => esbuil
 // which would otherwise increase the bundle size.
 //
 // https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
-export const getReactAriaLoader: () => esbuild.Plugin = () => ({
+export const getReactAriaLoader = (): esbuild.Plugin => ({
   name: 'React Aria Loader',
   setup(build) {
     build.onLoad(
