@@ -1,8 +1,8 @@
-import { useLocation } from '@ronin/blade/hooks';
+import { useCookie, useLocation } from '@ronin/blade/hooks';
 import { Edit } from 'lucide-react';
 
 import { Icons } from '@/components/icons';
-import { ThemeToggle } from '@/components/theme-toggle.client';
+import { type Theme, ThemeToggle } from '@/components/theme-toggle.client';
 import { Button } from '@/components/ui/button';
 
 function getEditUrl(location: URL): string {
@@ -17,6 +17,8 @@ function getEditUrl(location: URL): string {
 export const Footer = () => {
   const location = useLocation();
   const pathname = getEditUrl(location);
+
+  const [theme] = useCookie<Theme>('theme');
 
   return (
     <footer className="mx-auto w-full max-w-2xl space-y-10 pb-16">
@@ -37,7 +39,7 @@ export const Footer = () => {
         </p>
 
         <div className="flex gap-4">
-          <ThemeToggle />
+          <ThemeToggle initial={theme} />
 
           <Button
             asChild={true}
