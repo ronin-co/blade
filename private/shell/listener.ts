@@ -33,7 +33,7 @@ if (environment === 'development') {
   await prepareClientAssets('development', bundleId, defaultDeploymentProvider);
 
   plugin(getClientReferenceLoader(environment));
-  plugin(getFileListLoader(false));
+  plugin(getFileListLoader());
   plugin(getMdxLoader(environment));
   plugin(getReactAriaLoader());
 } else {

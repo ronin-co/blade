@@ -1,4 +1,5 @@
 import path from 'node:path';
+import * as esbuild from 'esbuild';
 
 import {
   defaultDeploymentProvider,
@@ -35,12 +36,12 @@ await prepareClientAssets('production', bundleId, provider);
 const serverSpinner = logSpinner('Performing server build (production)').start();
 
 const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
-  const output = await Bun.build({
-    entrypoints: [path.join(serverInputFolder, `${provider}.js`)],
+  const output = await esbuild.build({
+    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
     outdir: outputDirectory,
     plugins: [
       getClientReferenceLoader('production'),
-      getFileListLoader(true),
+      getFileListLoader(),
       getMdxLoader('production'),
       getReactAriaLoader(),
     ],
@@ -52,11 +53,6 @@ const buildEntrypoint = async (provider: DeploymentProvider): Promise<void> => {
   });
 
   handleBuildLogs(output);
-
-  if (!output.success) {
-    serverSpinner.fail();
-    process.exit(1);
-  }
 };
 
 await Promise.all([buildEntrypoint(provider), buildEntrypoint('service-worker')]);

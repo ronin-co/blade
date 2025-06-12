@@ -6,7 +6,7 @@ import {
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
-import type { BuildOutput, Transpiler } from 'bun';
+import type { Transpiler } from 'bun';
 import * as esbuild from 'esbuild';
 import ora from 'ora';
 
@@ -23,10 +23,10 @@ import {
   styleInputFile,
 } from '@/private/shell/constants';
 import {
-  getClientChunkLoaderES,
-  getClientComponentLoaderES,
-  getMdxLoaderES,
-  getReactAriaLoaderES,
+  getClientChunkLoader,
+  getClientComponentLoader,
+  getMdxLoader,
+  getReactAriaLoader,
 } from '@/private/shell/loaders';
 import type { ClientChunks, FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
@@ -231,32 +231,11 @@ export const cleanUp = async () => {
 };
 
 /**
- * Prints the logs of a build to the terminal, since Bun doesn't do that automatically.
+ * Prints the logs of a build to the terminal.
  *
  * @param output A build output object.
  */
-export const handleBuildLogs = (output: BuildOutput) => {
-  for (const log of output.logs) {
-    // Bun logs a warning when it encounters a `sideEffects` property in `package.json`
-    // containing a glob (a wildcard), because Bun doesn't support those yet. We want to
-    // silence this warning, unless it is requested to be logged explicitly.
-    if (
-      log.message.includes('wildcard sideEffects') &&
-      Bun.env['__BLADE_DEBUG_LEVEL'] !== 'verbose'
-    )
-      return;
-
-    // Print the log to the terminal.
-    console.log(log);
-  }
-};
-
-/**
- * Prints the logs of a build to the terminal, since Bun doesn't do that automatically.
- *
- * @param output A build output object.
- */
-export const handleBuildLogsES = (output: esbuild.BuildResult) => {
+export const handleBuildLogs = (output: esbuild.BuildResult) => {
   console.log(output);
 };
 
@@ -284,10 +263,10 @@ export const prepareClientAssets = async (
     entryPoints: [clientInputFile],
     outdir: clientOutputDirectory,
     plugins: [
-      getClientComponentLoaderES(projects),
-      getClientChunkLoaderES(clientChunks),
-      getMdxLoaderES(environment),
-      getReactAriaLoaderES(),
+      getClientComponentLoader(projects),
+      getClientChunkLoader(clientChunks),
+      getMdxLoader(environment),
+      getReactAriaLoader(),
     ],
     sourcemap: 'external',
     entryNames: path.basename(getOutputFile(bundleId)),
@@ -301,7 +280,7 @@ export const prepareClientAssets = async (
 
   await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
 
-  handleBuildLogsES(output);
+  handleBuildLogs(output);
 
   const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
 
