@@ -115,12 +115,12 @@ const DocsLayout = ({
 }) => {
   const [theme] = useCookie<Theme>('theme');
 
-  const title = 'RONIN';
+  const title = 'Blade Documentation';
   const description = 'Build instant web apps.';
 
   useMetadata({
     htmlClassName: theme === 'dark' ? 'dark' : undefined,
-    title: 'Blade documentation',
+    title,
     icon: 'https://ronin.co/static/black.png',
     openGraph: {
       title,
