@@ -71,16 +71,6 @@ html {
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
-
-	--sh-class: #79B8FF;
-	--sh-comment: #a19595;
-	--sh-entity: #249a97;
-	--sh-identifier: #B392F0;
-	--sh-jsxliterals: #6266d1;
-	--sh-keyword: #f47067;
-	--sh-property: #79B8FF;
-	--sh-sign: #8996a3;
-	--sh-string: #00a99a;
 }
 
 .dark {
