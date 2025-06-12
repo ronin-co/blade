@@ -835,6 +835,7 @@ const jsxPropsParents = new WeakMap();
 const jsxChildrenParents = new WeakMap();
 
 function attemptResolveElement(request, type, key, ref, props) {
+  /*
   if (ref !== null && ref !== undefined) {
     // When the ref moves to the regular props object this will implicitly
     // throw for functions. We could probably relax it to a DEV warning for other
@@ -843,6 +844,7 @@ function attemptResolveElement(request, type, key, ref, props) {
       'Refs cannot be used in Server Components, nor passed to Client Components.',
     );
   }
+  */
   jsxPropsParents.set(props, type);
 
   if (typeof props.children === 'object' && props.children !== null) {
