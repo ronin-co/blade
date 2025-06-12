@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { type Server, plugin } from 'bun';
+import type { Server } from 'bun';
 import chalk from 'chalk';
 
 import {
@@ -9,34 +9,13 @@ import {
   publicDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
-import {
-  getClientReferenceLoader,
-  getFileListLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import {
-  cleanUp,
-  getClientEnvironmentVariables,
-  prepareClientAssets,
-} from '@/private/shell/utils';
+import { getClientEnvironmentVariables } from '@/private/shell/utils';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 const environment = Bun.env['BLADE_ENV'];
 const port = Bun.env['__BLADE_PORT'];
 
-if (environment === 'development') {
-  const bundleId = generateUniqueId();
-
-  await cleanUp();
-  await prepareClientAssets('development', bundleId, defaultDeploymentProvider);
-
-  plugin(getClientReferenceLoader(environment));
-  plugin(getFileListLoader());
-  plugin(getMdxLoader(environment));
-  plugin(getReactAriaLoader());
-} else {
+if (environment === 'production') {
   // Prevent the process from exiting when an exception occurs.
   process.on('uncaughtException', (error) => {
     console.error('An uncaught exception has occurred:', error);
