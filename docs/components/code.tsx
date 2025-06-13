@@ -66,10 +66,9 @@ const TypeScriptKeywords = new Set([
   'yield',
 ]);
 
-type SupportedLanguages = 'bash' | 'ts' | 'tsx' | 'typescript';
+type SupportedLanguages = 'ts' | 'tsx' | 'typescript';
 
 const MAPPED_LANGUAGE_KEYWORDS = {
-  bash: new Set<string>([]),
   ts: TypeScriptKeywords,
   tsx: TypeScriptKeywords,
   typescript: TypeScriptKeywords,
