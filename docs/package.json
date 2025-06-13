@@ -24,6 +24,7 @@
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510",
     "shiki": "3.6.0",
+    "sugar-high": "0.9.3",
     "tailwind-merge": "3.3.0",
     "tw-animate-css": "1.3.3"
   },
