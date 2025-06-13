@@ -1,7 +1,8 @@
+import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
-import { InvalidResponseError } from 'ronin/utils';
+import { ClientError } from 'ronin/utils';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import { runQueries, toDashCase } from '@/private/server/utils/data';
@@ -131,16 +132,10 @@ app.post('/api', async (c) => {
     const triggerFile = triggers[triggerSlug];
 
     if (!triggerFile || !triggerFile['exposed']) {
-      return c.json(
-        {
-          error: {
-            message: 'No endpoint available for the provided query.',
-            code: 'MISSING_ENDPOINT',
-            schema: schemaSlug,
-          },
-        },
-        400,
-      );
+      throw new ClientError({
+        message: 'Please provide a trigger that is marked as `exposed`.',
+        code: 'TRIGGER_REQUIRED',
+      });
     }
   }
 
@@ -148,9 +143,9 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = (await runQueries(c, { default: queries }, triggers))['default'];
+    results = (await runQueries(c, { default: queries }, triggers, 'all'))['default'];
   } catch (err) {
-    if (err instanceof TriggerError || err instanceof InvalidResponseError) {
+    if (err instanceof TriggerError || err instanceof ClientError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
       const error: Record<string, unknown> = {};
 
@@ -204,6 +199,18 @@ app.post('*', async (c) => {
   if (options?.queries) {
     const list = options.queries;
     existingCollected.queries = list;
+
+    // Only accept DML write queries to be provided from the client.
+    for (const { query } of list) {
+      const queryType = Object.keys(JSON.parse(query))[0] as QueryType;
+
+      if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
+        throw new ClientError({
+          message: 'Only write queries shall be provided from the client.',
+          code: 'TRIGGER_REQUIRED',
+        });
+      }
+    }
   }
 
   return renderReactTree(new URL(c.req.url), c, false, options, existingCollected);
@@ -212,6 +219,18 @@ app.post('*', async (c) => {
 // Handle errors that occurred during the request lifecycle.
 app.onError((err, c) => {
   console.error(err);
+
+  // This error might be thrown by the framework (above), or by the client.
+  if (err instanceof ClientError && err.code === 'TRIGGER_REQUIRED') {
+    const body = {
+      error: {
+        message: 'No endpoint available for the provided query.',
+        code: 'MISSING_ENDPOINT',
+      },
+    };
+
+    return c.json(body, 400);
+  }
 
   const message = 'An internal error occurred. Please try again later.';
   const status = 500;
