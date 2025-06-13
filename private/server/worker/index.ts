@@ -1,3 +1,4 @@
+import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
@@ -15,7 +16,6 @@ import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
-import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 
 type Bindings = {
   ASSETS: {
