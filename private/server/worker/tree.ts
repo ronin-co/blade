@@ -7,7 +7,7 @@ import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
 import type { FormattedResults, Query } from 'ronin/types';
-import { InvalidResponseError } from 'ronin/utils';
+import { ClientError } from 'ronin/utils';
 import { serializeError } from 'serialize-error';
 import { pages as pageList, triggers as triggerList } from 'server-list';
 
@@ -154,8 +154,10 @@ const obtainQueryResults = async (
     if (
       err instanceof TriggerError ||
       // Raise up errors about databases not existing, because they will be caught at a
-      // higher level and handled accordingly.
-      (err instanceof InvalidResponseError && err.code !== 'AUTH_INVALID_ACCESS')
+      // higher level and handled accordingly. Also do the same for cases in which
+      // triggers are required and missing (essential security measure).
+      (err instanceof ClientError &&
+        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code))
     ) {
       const serializedError = serializeError(err);
 
@@ -585,7 +587,7 @@ const renderReactTree = async (
         // This is necessary because both of them might be accessed directly through URL
         // paths, such as `/[space]/explore/[model]` on the RONIN dashboard.
         if (
-          err instanceof InvalidResponseError &&
+          err instanceof ClientError &&
           (err.code === 'AUTH_INVALID_ACCESS' || err.code === 'MODEL_NOT_FOUND')
         ) {
           // If the current page is already a 404 (defined in the app), log the error and
