@@ -1,9 +1,6 @@
 import { MultipleWithInstructionsError } from '@ronin/blade/server/utils/errors';
 
-import type {
-  ResolvingAddTrigger,
-  ResolvingGetTrigger,
-} from '@ronin/blade/universal/types';
+import type { ResolvingAddTrigger, ResolvingGetTrigger } from '@ronin/blade/types';
 
 interface Post {
   body: string;
