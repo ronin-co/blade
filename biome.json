@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.2/schema.json",
   "files": {
-    "include": ["./**/*.ts", "./**/*.tsx", "./**/*.css"],
+    "include": ["./**/*.ts", "./**/*.tsx"],
     "ignore": ["node_modules/", "bun.lockb", "tsconfig.json"]
   },
   "formatter": {

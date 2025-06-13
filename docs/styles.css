@@ -28,8 +28,6 @@ html {
 		@apply leading-relaxed [&:not(:first-child)]:mt-4 dark:text-[#9E9E9E] text-[#3E3E3E]
 	}
 
-
-
 	code:not(pre code) {
 		@apply bg-muted relative rounded-md px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] outline-none dark:text-[#9E9E9E];
 	}
