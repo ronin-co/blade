@@ -18,6 +18,7 @@ export const CopyToClipboard = ({ content }: { content: string }) => {
     <Tooltip>
       <TooltipTrigger>
         <Button
+          asChild={true}
           variant="ghost"
           size="icon"
           onClick={handleCopy}>
