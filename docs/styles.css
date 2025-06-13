@@ -72,15 +72,15 @@ html {
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
 
-	--sh-class: #79B8FF;
-	--sh-comment: #a19595;
-	--sh-entity: #249a97;
-	--sh-identifier: #B392F0;
-	--sh-jsxliterals: #6266d1;
-	--sh-keyword: #f47067;
-	--sh-property: #79B8FF;
-	--sh-sign: #8996a3;
-	--sh-string: #00a99a;
+	--sh-class: var(--color-blue-400);
+	--sh-comment: var(--color-zinc-400);
+	--sh-entity: var(--color-green-400);
+	--sh-identifier: var(--color-zinc-500);
+	--sh-jsxliterals: var(--color-zinc-800);
+	--sh-keyword: var(--color-rose-400);
+	--sh-property: var(--color-violet-400);
+	--sh-sign: var(--color-zinc-500);
+	--sh-string: var(--color-sky-300);
 }
 
 .dark {
@@ -117,15 +117,10 @@ html {
 	--sidebar-border: oklch(0.269 0 0);
 	--sidebar-ring: oklch(0.439 0 0);
 
-	--sh-class: #79B8FF;
-	--sh-comment: #a19595;
-	--sh-entity: #249a97;
-	--sh-identifier: #B392F0;
-	--sh-jsxliterals: #6266d1;
-	--sh-keyword: #f47067;
-	--sh-property: #79B8FF;
-	--sh-sign: #8996a3;
-	--sh-string: #00a99a;
+	--sh-class: var(--color-sky-300);
+	--sh-comment: var(--color-zinc-500);
+	--sh-identifier: #ffffff;
+	--sh-jsxliterals: var(--color-zinc-500);
 }
 
 @theme inline {
