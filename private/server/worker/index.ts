@@ -1,8 +1,8 @@
-import { DML_QUERY_TYPES_WRITE, RoninError } from '@ronin/compiler';
+import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
-import { InvalidResponseError } from 'ronin/utils';
+import { ClientError } from 'ronin/utils';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import { runQueries, toDashCase } from '@/private/server/utils/data';
@@ -132,9 +132,9 @@ app.post('/api', async (c) => {
     const triggerFile = triggers[triggerSlug];
 
     if (!triggerFile || !triggerFile['exposed']) {
-      throw new RoninError({
+      throw new ClientError({
         message: 'Please provide a trigger that is marked as `exposed`.',
-        code: 'TRIGGER_NOT_FOUND',
+        code: 'TRIGGER_REQUIRED',
       });
     }
   }
@@ -145,7 +145,7 @@ app.post('/api', async (c) => {
   try {
     results = (await runQueries(c, { default: queries }, triggers, 'all'))['default'];
   } catch (err) {
-    if (err instanceof TriggerError || err instanceof InvalidResponseError) {
+    if (err instanceof TriggerError || err instanceof ClientError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
       const error: Record<string, unknown> = {};
 
@@ -205,9 +205,9 @@ app.post('*', async (c) => {
       const queryType = Object.keys(JSON.parse(query))[0] as QueryType;
 
       if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
-        throw new RoninError({
+        throw new ClientError({
           message: 'Only read queries shall be provided from the client.',
-          code: 'TRIGGER_NOT_FOUND',
+          code: 'TRIGGER_REQUIRED',
         });
       }
     }
@@ -220,7 +220,8 @@ app.post('*', async (c) => {
 app.onError((err, c) => {
   console.error(err);
 
-  if (err instanceof RoninError && err.code === 'TRIGGER_NOT_FOUND') {
+  // This error might be thrown by the framework (above), or by the client.
+  if (err instanceof ClientError && err.code === 'TRIGGER_REQUIRED') {
     const body = {
       error: {
         message: 'No endpoint available for the provided query.',

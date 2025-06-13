@@ -9,7 +9,7 @@
         "@ronin/syntax": "0.2.43",
         "@tailwindcss/node": "4.1.6",
         "@tailwindcss/oxide": "4.1.6",
-        "ronin": "6.7.1",
+        "ronin": "6.7.4",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -744,7 +744,7 @@
 
     "rollup": ["rollup@4.41.2", "", { "dependencies": { "@types/estree": "1.0.7" }, "optionalDependencies": { "@rollup/rollup-android-arm-eabi": "4.41.2", "@rollup/rollup-android-arm64": "4.41.2", "@rollup/rollup-darwin-arm64": "4.41.2", "@rollup/rollup-darwin-x64": "4.41.2", "@rollup/rollup-freebsd-arm64": "4.41.2", "@rollup/rollup-freebsd-x64": "4.41.2", "@rollup/rollup-linux-arm-gnueabihf": "4.41.2", "@rollup/rollup-linux-arm-musleabihf": "4.41.2", "@rollup/rollup-linux-arm64-gnu": "4.41.2", "@rollup/rollup-linux-arm64-musl": "4.41.2", "@rollup/rollup-linux-loongarch64-gnu": "4.41.2", "@rollup/rollup-linux-powerpc64le-gnu": "4.41.2", "@rollup/rollup-linux-riscv64-gnu": "4.41.2", "@rollup/rollup-linux-riscv64-musl": "4.41.2", "@rollup/rollup-linux-s390x-gnu": "4.41.2", "@rollup/rollup-linux-x64-gnu": "4.41.2", "@rollup/rollup-linux-x64-musl": "4.41.2", "@rollup/rollup-win32-arm64-msvc": "4.41.2", "@rollup/rollup-win32-ia32-msvc": "4.41.2", "@rollup/rollup-win32-x64-msvc": "4.41.2", "fsevents": "~2.3.2" }, "bin": { "rollup": "dist/bin/rollup" } }, "sha512-6VwIRjxJPRGfwtHnBWrApOrFposYNARbBUnBzWSBYutdukosTadkxSB1prmEd95jhiJ1uWtZOD3sDx7qfVwu4A=="],
 
-    "ronin": ["ronin@6.7.1", "", { "dependencies": { "@ronin/cli": "0.3.19", "@ronin/compiler": "0.18.9", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.43" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-3YTTzAprbv7qYnhLX5/xVJEux61dyZcMHLWWfsvH08aNPIv+ZtoockgDq097lrnzFL2fXI9EDw3gb4zALTwzdA=="],
+    "ronin": ["ronin@6.7.4", "", { "dependencies": { "@ronin/cli": "0.3.19", "@ronin/compiler": "0.18.10", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.43" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-bYNbdEhP5BnDuxjISy9bGvwFhsgCGIUB33nILS3xHD7hQ6A70KojE+GUmLDSP3Qnm00SEjTXTRRCUWQGYyWInQ=="],
 
     "run-applescript": ["run-applescript@7.0.0", "", {}, "sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A=="],
 
@@ -925,6 +925,8 @@
     "parse-entities/@types/unist": ["@types/unist@2.0.11", "", {}, "sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA=="],
 
     "rollup/@types/estree": ["@types/estree@1.0.7", "", {}, "sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ=="],
+
+    "ronin/@ronin/compiler": ["@ronin/compiler@0.18.10", "", { "peerDependencies": { "@ronin/engine": ">=0.1.23" } }, "sha512-mNmCDZq4qfK8N+BLShT30CqlH3KAYaN4ls70c1jv5DEGYNLJ3EG+fK02vfCp/aAtrwcJCpUFlAEFCxCuZTrc1A=="],
 
     "string-width-cjs/emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 
