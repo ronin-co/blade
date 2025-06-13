@@ -154,8 +154,10 @@ const obtainQueryResults = async (
     if (
       err instanceof TriggerError ||
       // Raise up errors about databases not existing, because they will be caught at a
-      // higher level and handled accordingly.
-      (err instanceof ClientError && err.code !== 'AUTH_INVALID_ACCESS')
+      // higher level and handled accordingly. Also do the same for cases in which
+      // triggers are required and missing (essential security measure).
+      (err instanceof ClientError &&
+        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code))
     ) {
       const serializedError = serializeError(err);
 
