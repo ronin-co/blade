@@ -15,6 +15,7 @@ import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
+import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 
 type Bindings = {
   ASSETS: {
@@ -204,6 +205,22 @@ app.post('*', async (c) => {
   if (options?.queries) {
     const list = options.queries;
     existingCollected.queries = list;
+
+    // Only accept DML write queries to be provided from the client.
+    for (const query of list) {
+      const queryType = Object.keys(query)[0] as QueryType;
+
+      if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
+        const body = {
+          error: {
+            message: 'No endpoint available for the provided query.',
+            code: 'MISSING_ENDPOINT',
+          },
+        };
+
+        return c.json(body, 400);
+      }
+    }
   }
 
   return renderReactTree(new URL(c.req.url), c, false, options, existingCollected);
