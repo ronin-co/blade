@@ -18,7 +18,7 @@ export function ThemeToggle(props: ThemeToggleProps) {
     const updatedTheme = themeCookie === 'dark' ? 'light' : 'dark';
 
     setTheme(updatedTheme);
-    setThemeCookie(updatedTheme, { client: true, path: '/' });
+    setThemeCookie(updatedTheme, { client: true });
 
     if (document.documentElement.classList.contains('dark' satisfies Theme)) {
       document.documentElement.classList.remove('dark');
@@ -37,7 +37,7 @@ export function ThemeToggle(props: ThemeToggleProps) {
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initialTheme = systemPrefersDark ? 'dark' : 'light';
     setTheme(initialTheme);
-    setThemeCookie(initialTheme, { client: true, path: '/' });
+    setThemeCookie(initialTheme, { client: true });
   }, []);
 
   return (
