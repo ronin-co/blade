@@ -206,7 +206,7 @@ app.post('*', async (c) => {
 
       if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
         throw new ClientError({
-          message: 'Only read queries shall be provided from the client.',
+          message: 'Only write queries shall be provided from the client.',
           code: 'TRIGGER_REQUIRED',
         });
       }
