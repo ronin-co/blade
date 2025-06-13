@@ -92,7 +92,7 @@ export const CodeBlock = (props: CodeBlockProps) => {
     <div className="relative">
       <pre
         {...restProps}
-        className="not-prose relative my-0! overflow-x-auto whitespace-pre-wrap rounded-lg border p-5 text-sm">
+        className="not-prose relative my-0! overflow-x-auto rounded-lg border p-5 text-sm">
         <code
           className="bg-none"
           dangerouslySetInnerHTML={{ __html: html }}
