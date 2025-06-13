@@ -82,6 +82,7 @@ const runQueriesWithTime = async (
     requestContext,
     queries,
     triggers,
+    'write',
   );
 
   const end = Date.now();

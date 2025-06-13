@@ -4,12 +4,12 @@
     "": {
       "name": "@ronin/blade",
       "dependencies": {
-        "@ronin/compiler": "0.18.8",
+        "@ronin/compiler": "0.18.9",
         "@ronin/react": "0.1.4",
         "@ronin/syntax": "0.2.43",
         "@tailwindcss/node": "4.1.6",
         "@tailwindcss/oxide": "4.1.6",
-        "ronin": "6.6.17",
+        "ronin": "6.7.1",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -228,7 +228,7 @@
 
     "@ronin/codegen": ["@ronin/codegen@1.7.4", "", { "dependencies": { "typescript": "5.7.3" } }, "sha512-snvGHHjiy66mcVm6KG3lHXIq3U/yze1SgNoSZzrKq9vHTG4thkulbnXOXRWjagnFH2HPv0xcQQNW7a8VT0XjZg=="],
 
-    "@ronin/compiler": ["@ronin/compiler@0.18.8", "", { "peerDependencies": { "@ronin/engine": ">=0.1.23" } }, "sha512-9IvxXVmaoT+5ECsUBTkIY6N2GdC8o3HpmfpHYjyMTDXYhg0mrxg8Jgf1cisg/PxFyoOTOr5fkMzZ7nyueH+KvA=="],
+    "@ronin/compiler": ["@ronin/compiler@0.18.9", "", { "peerDependencies": { "@ronin/engine": ">=0.1.23" } }, "sha512-6h1YGdpcD/hUlrS4Mm9NvG+MlWcaPZ/+eaALSvxBXxxWb4dWcwtrtAU9/X3eZusSOa3MT6fbP3i1vDLdLWo/JA=="],
 
     "@ronin/engine": ["@ronin/engine@0.1.23", "", { "dependencies": { "zod": "3.24.1" } }, "sha512-QDeikl4YEBFHEdful9+x5e8lLrxXvjhubJEYxnFfM7SJoFC9OxoE+Dq4g6mVzRuCI+gN+Odkdy3gd2ARr7eXFg=="],
 
@@ -744,7 +744,7 @@
 
     "rollup": ["rollup@4.41.2", "", { "dependencies": { "@types/estree": "1.0.7" }, "optionalDependencies": { "@rollup/rollup-android-arm-eabi": "4.41.2", "@rollup/rollup-android-arm64": "4.41.2", "@rollup/rollup-darwin-arm64": "4.41.2", "@rollup/rollup-darwin-x64": "4.41.2", "@rollup/rollup-freebsd-arm64": "4.41.2", "@rollup/rollup-freebsd-x64": "4.41.2", "@rollup/rollup-linux-arm-gnueabihf": "4.41.2", "@rollup/rollup-linux-arm-musleabihf": "4.41.2", "@rollup/rollup-linux-arm64-gnu": "4.41.2", "@rollup/rollup-linux-arm64-musl": "4.41.2", "@rollup/rollup-linux-loongarch64-gnu": "4.41.2", "@rollup/rollup-linux-powerpc64le-gnu": "4.41.2", "@rollup/rollup-linux-riscv64-gnu": "4.41.2", "@rollup/rollup-linux-riscv64-musl": "4.41.2", "@rollup/rollup-linux-s390x-gnu": "4.41.2", "@rollup/rollup-linux-x64-gnu": "4.41.2", "@rollup/rollup-linux-x64-musl": "4.41.2", "@rollup/rollup-win32-arm64-msvc": "4.41.2", "@rollup/rollup-win32-ia32-msvc": "4.41.2", "@rollup/rollup-win32-x64-msvc": "4.41.2", "fsevents": "~2.3.2" }, "bin": { "rollup": "dist/bin/rollup" } }, "sha512-6VwIRjxJPRGfwtHnBWrApOrFposYNARbBUnBzWSBYutdukosTadkxSB1prmEd95jhiJ1uWtZOD3sDx7qfVwu4A=="],
 
-    "ronin": ["ronin@6.6.17", "", { "dependencies": { "@ronin/cli": "0.3.19", "@ronin/compiler": "0.18.8", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.43" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-7lWVAFZy++ltqQ/CCXP5chiji6Z5YT+GbddQOk0DFzKuC6EI3X3y2oC/yYy8o2NSsrQ9QNXyfpHnHlAnZGX1eA=="],
+    "ronin": ["ronin@6.7.1", "", { "dependencies": { "@ronin/cli": "0.3.19", "@ronin/compiler": "0.18.9", "@ronin/engine": "0.1.23", "@ronin/syntax": "0.2.43" }, "bin": { "ronin": "dist/bin/index.js" } }, "sha512-3YTTzAprbv7qYnhLX5/xVJEux61dyZcMHLWWfsvH08aNPIv+ZtoockgDq097lrnzFL2fXI9EDw3gb4zALTwzdA=="],
 
     "run-applescript": ["run-applescript@7.0.0", "", {}, "sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A=="],
 

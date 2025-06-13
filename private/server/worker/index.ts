@@ -1,3 +1,4 @@
+import { DML_QUERY_TYPES_WRITE, RoninError } from '@ronin/compiler';
 import { getCookie } from 'hono/cookie';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
@@ -131,16 +132,10 @@ app.post('/api', async (c) => {
     const triggerFile = triggers[triggerSlug];
 
     if (!triggerFile || !triggerFile['exposed']) {
-      return c.json(
-        {
-          error: {
-            message: 'No endpoint available for the provided query.',
-            code: 'MISSING_ENDPOINT',
-            schema: schemaSlug,
-          },
-        },
-        400,
-      );
+      throw new RoninError({
+        message: 'Please provide a trigger that is marked as `exposed`.',
+        code: 'TRIGGER_NOT_FOUND',
+      });
     }
   }
 
@@ -148,7 +143,7 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = (await runQueries(c, { default: queries }, triggers))['default'];
+    results = (await runQueries(c, { default: queries }, triggers, 'all'))['default'];
   } catch (err) {
     if (err instanceof TriggerError || err instanceof InvalidResponseError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
@@ -204,6 +199,18 @@ app.post('*', async (c) => {
   if (options?.queries) {
     const list = options.queries;
     existingCollected.queries = list;
+
+    // Only accept DML write queries to be provided from the client.
+    for (const { query } of list) {
+      const queryType = Object.keys(JSON.parse(query))[0] as QueryType;
+
+      if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
+        throw new RoninError({
+          message: 'Only read queries shall be provided from the client.',
+          code: 'TRIGGER_NOT_FOUND',
+        });
+      }
+    }
   }
 
   return renderReactTree(new URL(c.req.url), c, false, options, existingCollected);
@@ -212,6 +219,17 @@ app.post('*', async (c) => {
 // Handle errors that occurred during the request lifecycle.
 app.onError((err, c) => {
   console.error(err);
+
+  if (err instanceof RoninError && err.code === 'TRIGGER_NOT_FOUND') {
+    const body = {
+      error: {
+        message: 'No endpoint available for the provided query.',
+        code: 'MISSING_ENDPOINT',
+      },
+    };
+
+    return c.json(body, 400);
+  }
 
   const message = 'An internal error occurred. Please try again later.';
   const status = 500;
