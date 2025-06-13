@@ -148,7 +148,7 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = (await runQueries(c, { default: queries }, triggers))['default'];
+    results = (await runQueries(c, { default: queries }, triggers, 'all'))['default'];
   } catch (err) {
     if (err instanceof TriggerError || err instanceof InvalidResponseError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
