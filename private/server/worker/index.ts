@@ -207,8 +207,8 @@ app.post('*', async (c) => {
     existingCollected.queries = list;
 
     // Only accept DML write queries to be provided from the client.
-    for (const query of list) {
-      const queryType = Object.keys(query)[0] as QueryType;
+    for (const { query } of list) {
+      const queryType = Object.keys(JSON.parse(query))[0] as QueryType;
 
       if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
         const body = {
