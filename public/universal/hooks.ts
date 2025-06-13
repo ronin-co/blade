@@ -165,7 +165,8 @@ const useCookie = <T extends string | null>(
       components.push(`max-age=${DEFAULT_COOKIE_MAX_AGE}`);
     }
 
-    if (options?.path) components.push(`path=${options.path}`);
+    const path = options?.path || '/';
+    components.push(`path=${path}`);
 
     document.cookie = components.join('; ');
   };
