@@ -1,4 +1,4 @@
-import { useCookie, useLocation } from '@ronin/blade/hooks';
+import { useLocation } from '@ronin/blade/hooks';
 import { Edit } from 'lucide-react';
 
 import { Icons } from '@/components/icons';
@@ -14,11 +14,13 @@ function getEditUrl(location: URL): string {
   return location.pathname;
 }
 
-export const Footer = () => {
+interface FooterProps {
+  theme?: Theme | null;
+}
+
+export const Footer = (props: FooterProps) => {
   const location = useLocation();
   const pathname = getEditUrl(location);
-
-  const [theme] = useCookie<Theme>('theme');
 
   return (
     <footer className="mx-auto w-full max-w-2xl space-y-10 pb-16">
@@ -39,7 +41,7 @@ export const Footer = () => {
         </p>
 
         <div className="flex gap-4">
-          <ThemeToggle initial={theme} />
+          <ThemeToggle initial={props.theme} />
 
           <Button
             asChild={true}
