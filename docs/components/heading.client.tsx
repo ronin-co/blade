@@ -1,16 +1,39 @@
 import { Button } from '@/components/ui/button';
 import { LinkIcon } from 'lucide-react';
-import type { JSX } from 'react';
+import { type JSX, type ReactNode, isValidElement } from 'react';
 
 interface HeadingProps {
-  children: React.ReactNode;
+  children: ReactNode;
   level: 1 | 2 | 3 | 4 | 5 | 6;
 }
+
+// Helper function to extract text content from React nodes.
+const extractTextContent = (node: ReactNode): string => {
+  if (typeof node === 'string' || typeof node === 'number') {
+    return String(node);
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(extractTextContent).join('');
+  }
+
+  if (isValidElement(node)) {
+    return extractTextContent((node.props as any).children);
+  }
+
+  return '';
+};
 
 export const Heading = ({ children, level, ...props }: HeadingProps) => {
   const HeadingComponent = `h${level}` as keyof JSX.IntrinsicElements;
 
-  const id = children?.toString()?.toLowerCase();
+  const textContent = extractTextContent(children);
+  const id = textContent
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 
   return (
     <a

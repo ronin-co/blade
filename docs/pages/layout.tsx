@@ -1,11 +1,15 @@
 import type { CodeProps } from '@/components/code';
 import { Code } from '@/components/code';
+import { useCookie } from '@ronin/blade/hooks';
+
 import { Footer } from '@/components/footer';
 import { Heading } from '@/components/heading.client';
 import { Navbar } from '@/components/navbar';
 import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
 import { useMetadata } from '@ronin/blade/server/hooks';
+
+import type { Theme } from '@/components/theme-toggle.client';
 
 type MenuItem = {
   id: string;
@@ -109,7 +113,38 @@ const DocsLayout = ({
 }: {
   children: React.ReactNode;
 }) => {
-  useMetadata({ htmlClassName: 'dark' });
+  const [theme] = useCookie<Theme>('theme');
+
+  const title = 'Blade Documentation';
+  const description = 'Build instant web apps.';
+
+  useMetadata({
+    htmlClassName: theme === 'dark' ? 'dark' : undefined,
+    title,
+    icon: 'https://blade.im/static/black.png',
+    openGraph: {
+      title,
+      description,
+      siteName: title,
+      images: [
+        {
+          url: 'https://blade.im/static/banner.png',
+          width: 1280,
+          height: 720,
+        },
+      ],
+    },
+    x: {
+      title,
+      description,
+      card: 'summary_large_image',
+      // `creator` is the author and `site` is the site on which a post was
+      // shared. In our case, we'll use the same handle for both of them.
+      creator: '@ronin',
+      site: '@ronin',
+      images: ['https://blade.im/static/banner.png'],
+    },
+  });
 
   return (
     <>

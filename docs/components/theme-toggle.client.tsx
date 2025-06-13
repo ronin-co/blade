@@ -1,53 +1,57 @@
+import { useCookie } from '@ronin/blade/hooks';
 import { MoonIcon, SunIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
+import { useCallback, useEffect, useState } from 'react';
 
-export function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+import { Button } from '@/components/ui/button';
 
-  useEffect(() => {
-    // Check if theme is stored in localStorage
-    const storedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+export type Theme = 'light' | 'dark';
 
-    // Check system preference
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+interface ThemeToggleProps {
+  initial?: Theme | null;
+}
 
-    // Use stored theme or system preference
-    const initialTheme = storedTheme || (systemPrefersDark ? 'dark' : 'light');
+export function ThemeToggle(props: ThemeToggleProps) {
+  const [theme, setTheme] = useState<Theme | null>(props.initial ?? null);
+  const [themeCookie, setThemeCookie] = useCookie<Theme>('theme');
 
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
+  const toggleTheme = useCallback((): void => {
+    const updatedTheme = themeCookie === 'dark' ? 'light' : 'dark';
 
-  const applyTheme = (newTheme: 'light' | 'dark') => {
-    const html = document.documentElement;
+    setTheme(updatedTheme);
+    setThemeCookie(updatedTheme, { client: true });
 
-    if (newTheme === 'dark') {
-      html.classList.add('dark');
+    if (document.documentElement.classList.contains('dark' satisfies Theme)) {
+      document.documentElement.classList.remove('dark');
     } else {
-      html.classList.remove('dark');
+      document.documentElement.classList.add('dark');
+    }
+  }, [themeCookie, setThemeCookie]);
+
+  // Set the initial theme based on the user's system preference if no cookie is set.
+  useEffect(() => {
+    if (themeCookie) {
+      setTheme(themeCookie);
+      return;
     }
 
-    localStorage.setItem('theme', newTheme);
-  };
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    applyTheme(newTheme);
-  };
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = systemPrefersDark ? 'dark' : 'light';
+    setTheme(initialTheme);
+    setThemeCookie(initialTheme, { client: true });
+  }, []);
 
   return (
     <Button
-      variant="ghost"
-      className="group/toggle h-8 w-8 px-0"
-      onClick={toggleTheme}>
-      <SunIcon
-        className={`h-4 w-4 transition-opacity ${theme === 'dark' ? 'opacity-100' : 'opacity-0'}`}
-      />
-      <MoonIcon
-        className={`absolute h-4 w-4 transition-opacity ${theme === 'light' ? 'opacity-100' : 'opacity-0'}`}
-      />
+      className="group/toggle h-8 w-8 cursor-pointer px-0"
+      onClick={toggleTheme}
+      size="icon"
+      variant="ghost">
+      {theme === 'dark' ? (
+        <MoonIcon className="h-4 w-4 text-black dark:text-white" />
+      ) : null}
+      {theme === 'light' ? (
+        <SunIcon className="h-4 w-4 text-black dark:text-white" />
+      ) : null}
       <span className="sr-only">Toggle theme</span>
     </Button>
   );

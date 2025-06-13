@@ -1,10 +1,10 @@
 import { Metallic } from '@/components/metallic';
 
 export const Logo = () => (
-  <Metallic className="font-mono text-white text-xl">
+  <Metallic className="font-mono text-xl">
     <a
       href="/"
-      className="font-mono text-white">
+      className="font-mono">
       blade
     </a>
   </Metallic>

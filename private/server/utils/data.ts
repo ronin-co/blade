@@ -1,3 +1,4 @@
+import type { Query, ResultRecord } from '@ronin/compiler';
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
 import type { Context, ExecutionContext } from 'hono';
 import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
@@ -5,7 +6,6 @@ import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
 import type { TriggersList } from '@/private/server/types';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
-import type { Query, ResultRecord } from '@ronin/compiler';
 
 /**
  * A minimal mock implementation of the `ExecutionContext` interface.
@@ -57,7 +57,8 @@ const getWaitUntil = (context: Context): ((promise: Promise<unknown>) => void) =
  */
 export const getRoninOptions = (
   c: Context,
-  triggers?: TriggersList,
+  triggers: TriggersList,
+  requireTriggers: 'all' | 'write',
 ): QueryHandlerOptions => {
   const dataFetcher: typeof fetch = async (input, init) => {
     // Normalize the parameters of the surrounding function, as the first argument might
@@ -94,6 +95,7 @@ export const getRoninOptions = (
     triggers,
     fetch: dataFetcher,
     waitUntil: getWaitUntil(c),
+    requireTriggers,
   };
 };
 
@@ -110,9 +112,10 @@ export const getRoninOptions = (
 export const runQueries = <T extends ResultRecord>(
   c: Context,
   queries: Record<string, Array<Query>>,
-  triggers: TriggersList = {},
+  triggers: TriggersList,
+  requireTriggers: 'all' | 'write',
 ): Promise<Record<string, FormattedResults<T>>> => {
-  return runQueriesOnRonin<T>(queries, getRoninOptions(c, triggers));
+  return runQueriesOnRonin<T>(queries, getRoninOptions(c, triggers, requireTriggers));
 };
 
 /**

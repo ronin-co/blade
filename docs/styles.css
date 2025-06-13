@@ -3,7 +3,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 body,
 html {
@@ -25,15 +25,15 @@ html {
 	}
 
 	p {
-		@apply leading-relaxed [&:not(:first-child)]:mt-1 text-[#9E9E9E]
+		@apply leading-relaxed [&:not(:first-child)]:mt-4 dark:text-[#9E9E9E] text-[#3E3E3E]
 	}
 
 	code:not(pre code) {
-		@apply bg-muted relative rounded-md px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] outline-none text-[#9E9E9E];
+		@apply bg-muted relative rounded-md px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] outline-none dark:text-[#9E9E9E];
 	}
 
 	a:not([data-heading]) {
-		@apply text-[#F2F2F2] underline hover:decoration-2;
+		@apply dark:text-[#F2F2F2] underline hover:decoration-2;
 	}
 }
 
@@ -71,6 +71,16 @@ html {
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
+
+	--sh-class: var(--color-blue-400);
+	--sh-comment: var(--color-zinc-400);
+	--sh-entity: var(--color-green-400);
+	--sh-identifier: var(--color-zinc-500);
+	--sh-jsxliterals: var(--color-zinc-800);
+	--sh-keyword: var(--color-rose-400);
+	--sh-property: var(--color-violet-400);
+	--sh-sign: var(--color-zinc-500);
+	--sh-string: var(--color-sky-300);
 }
 
 .dark {
@@ -106,6 +116,11 @@ html {
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(0.269 0 0);
 	--sidebar-ring: oklch(0.439 0 0);
+
+	--sh-class: var(--color-sky-300);
+	--sh-comment: var(--color-zinc-500);
+	--sh-identifier: #ffffff;
+	--sh-jsxliterals: var(--color-zinc-500);
 }
 
 @theme inline {
