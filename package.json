@@ -62,7 +62,7 @@
     "@ronin/syntax": "0.2.43",
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
-    "ronin": "6.7.0"
+    "ronin": "6.7.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
