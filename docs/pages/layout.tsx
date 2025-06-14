@@ -121,6 +121,7 @@ const DocsLayout = ({
   useMetadata({
     htmlClassName: theme === 'dark' ? 'dark' : undefined,
     title,
+    description,
     icon: 'https://blade.im/static/black.png',
     openGraph: {
       title,
