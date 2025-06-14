@@ -1,18 +1,17 @@
 import fs from 'node:fs';
-import path from 'node:path';
-
 import { cp, exists, readdir, rm } from 'node:fs/promises';
+import path from 'node:path';
 import {
   compile as compileTailwind,
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
-import type { BuildOutput, Transpiler } from 'bun';
+import type { Transpiler } from 'bun';
+import * as esbuild from 'esbuild';
 import ora from 'ora';
 
 import {
   clientInputFile,
-  clientManifestFile,
   clientOutputDirectory,
   defaultDeploymentProvider,
   directoriesToParse,
@@ -22,13 +21,8 @@ import {
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
-import {
-  getClientChunkLoader,
-  getClientComponentLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import type { ClientChunks, FileError } from '@/private/shell/types';
+import { getMdxLoader, getReactAriaLoader } from '@/private/shell/loaders';
+import type { FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
 import type { Asset, DeploymentProvider } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
@@ -144,7 +138,6 @@ export const setEnvironmentVariables = (options: {
   isServing: boolean;
   isLoggingQueries: boolean;
   enableServiceWorker: boolean;
-  port: number;
   projects: string[];
 }) => {
   if (import.meta.env['BLADE_ENV']) {
@@ -190,11 +183,6 @@ export const setEnvironmentVariables = (options: {
   // be logged to the terminal.
   import.meta.env['__BLADE_DEBUG_LEVEL'] = options.isLoggingQueries ? 'verbose' : 'error';
 
-  // The port on which the development server or production server will run. It is
-  // determined outside the actual worker script because it should remain the same
-  // whenever the worker script is re-evaluated during development.
-  import.meta.env['__BLADE_PORT'] = String(options.port);
-
   // The directories that contain the source code of the application.
   import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
 };
@@ -231,24 +219,12 @@ export const cleanUp = async () => {
 };
 
 /**
- * Prints the logs of a build to the terminal, since Bun doesn't do that automatically.
+ * Prints the logs of a build to the terminal.
  *
  * @param output A build output object.
  */
-export const handleBuildLogs = (output: BuildOutput) => {
-  for (const log of output.logs) {
-    // Bun logs a warning when it encounters a `sideEffects` property in `package.json`
-    // containing a glob (a wildcard), because Bun doesn't support those yet. We want to
-    // silence this warning, unless it is requested to be logged explicitly.
-    if (
-      log.message.includes('wildcard sideEffects') &&
-      Bun.env['__BLADE_DEBUG_LEVEL'] !== 'verbose'
-    )
-      return;
-
-    // Print the log to the terminal.
-    console.log(log);
-  }
+export const handleBuildLogs = (output: esbuild.BuildResult) => {
+  console.log(output);
 };
 
 export const prepareClientAssets = async (
@@ -260,7 +236,6 @@ export const prepareClientAssets = async (
     `Performing client build${environment === 'production' ? ' (production)' : ''}`,
   ).start();
 
-  const clientChunks: ClientChunks = {};
   const clientEnvironmentVariables = Object.entries(getClientEnvironmentVariables()).map(
     ([key, value]) => {
       return [`import.meta.env.${key}`, JSON.stringify(value)];
@@ -271,18 +246,12 @@ export const prepareClientAssets = async (
   const isDefaultProvider = provider === defaultDeploymentProvider;
   const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
 
-  const output = await Bun.build({
-    entrypoints: [clientInputFile],
+  const output = await esbuild.build({
+    entryPoints: [clientInputFile],
     outdir: clientOutputDirectory,
-    plugins: [
-      getClientComponentLoader(projects),
-      getClientChunkLoader(clientChunks),
-      getMdxLoader(environment),
-      getReactAriaLoader(),
-    ],
+    plugins: [getMdxLoader(environment), getReactAriaLoader()],
     sourcemap: 'external',
-    target: 'browser',
-    naming: path.basename(getOutputFile(bundleId, 'js')),
+    entryNames: path.basename(getOutputFile(bundleId)),
     minify: environment === 'production',
     // When using a serverless deployment provider, inline plain-text environment
     // variables in the client bundles.
@@ -290,8 +259,6 @@ export const prepareClientAssets = async (
       ? undefined
       : Object.fromEntries(clientEnvironmentVariables),
   });
-
-  await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
 
   handleBuildLogs(output);
 

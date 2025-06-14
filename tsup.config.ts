@@ -9,7 +9,6 @@ export default defineConfig({
 
     // These files are used internally by Blade.
     './private/shell/index.ts',
-    './private/shell/builder.ts',
     './private/shell/listener.ts',
     './private/client/index.ts',
     './private/server/worker/providers/*.ts',
