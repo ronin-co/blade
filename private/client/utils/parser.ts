@@ -1,9 +1,3 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates (partially).
- *
- * Forked and modified from: https://github.com/facebook/react
- */
-
 import type { ReactElement, ReactNode } from 'react';
 
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
@@ -66,17 +60,6 @@ Chunk.prototype = Object.create(Promise.prototype);
 Chunk.prototype.then = function (resolve, reject) {
   // If we have resolved content, we try to initialize it first, which might put us back
   // into one of the other states.
-
-  // The status might have changed after initialization.
-  switch (this.status) {
-    case RESOLVED_MODEL:
-      initializeModelChunk(this);
-      break;
-
-    case RESOLVED_MODULE:
-      initializeModuleChunk(this);
-      break;
-  }
 
   switch (this.status) {
     case INITIALIZED:
@@ -232,23 +215,6 @@ const initializeModelChunk = (chunk: Chunk) => {
   } finally {
     initializingChunk = prevChunk;
     initializingChunkBlockedModel = prevBlocked;
-  }
-};
-
-const initializeModuleChunk = (chunk: Chunk) => {
-  try {
-    const moduleExports =
-      window['BLADE_CHUNKS'][chunk.value?.chunks[0] as unknown as string];
-    const value = moduleExports[chunk.value?.name as unknown as string] as Chunk['value'];
-    const initializedChunk = chunk;
-
-    initializedChunk.status = INITIALIZED;
-    initializedChunk.value = value;
-  } catch (error) {
-    const erroredChunk = chunk;
-
-    erroredChunk.status = ERRORED;
-    erroredChunk.reason = error as Error;
   }
 };
 
