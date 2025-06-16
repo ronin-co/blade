@@ -3,11 +3,8 @@ import type { ReactElement, ReactNode } from 'react';
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 const PENDING = 'pending';
-const BLOCKED = 'blocked';
 const RESOLVED_MODEL = 'resolved_model';
-const RESOLVED_MODULE = 'resolved_module';
 const INITIALIZED = 'fulfilled';
-const ERRORED = 'rejected';
 
 declare class Chunk {
   constructor(
@@ -17,13 +14,7 @@ declare class Chunk {
     response: Chunk['_response'],
   );
 
-  status:
-    | typeof PENDING
-    | typeof BLOCKED
-    | typeof RESOLVED_MODEL
-    | typeof RESOLVED_MODULE
-    | typeof INITIALIZED
-    | typeof ERRORED;
+  status: typeof PENDING | typeof RESOLVED_MODEL | typeof INITIALIZED;
   value: {
     chunks: number[];
     name: string;
@@ -66,8 +57,7 @@ Chunk.prototype.then = function (resolve, reject) {
       resolve?.(this.value);
       break;
 
-    case PENDING:
-    case BLOCKED:
+    default:
       if (resolve) {
         if (this.value === null) this.value = [] as unknown as Chunk['value'];
         if (Array.isArray(this.value)) this.value?.push(resolve);
@@ -78,10 +68,6 @@ Chunk.prototype.then = function (resolve, reject) {
         if (Array.isArray(this.reason)) this.reason?.push(reject);
       }
 
-      break;
-
-    default:
-      reject?.(this.reason);
       break;
   }
 };
