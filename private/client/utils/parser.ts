@@ -433,15 +433,14 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
   }
 };
 
-const resolveModule = (response: ChunkResponse, id: number) => {
+const resolveModule = (response: ChunkResponse, id: number, model: string) => {
   const chunks = response._chunks;
-
   const chunk = getChunk(response, id);
+  const moduleReference = parseModel(response, model);
 
   try {
-    const moduleExports =
-      window['BLADE_CHUNKS'][chunk.value?.chunks[0] as unknown as string];
-    const value = moduleExports[chunk.value?.name as unknown as string] as Chunk['value'];
+    const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
+    const value = moduleExports[moduleReference.name] as Chunk['value'];
     const initializedChunk = chunk;
 
     initializedChunk.status = INITIALIZED;
@@ -489,7 +488,7 @@ const processFullRow = (response: ChunkResponse, row: string) => {
 
   switch (tag) {
     case 'I': {
-      resolveModule(response, id);
+      resolveModule(response, id, row.substring(colon + 2));
       return;
     }
 
