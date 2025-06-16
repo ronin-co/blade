@@ -318,52 +318,10 @@ const getChunk = (response: ChunkResponse, id: number): Chunk => {
   return chunk;
 };
 
-const createModelResolver = (
-  chunk: Chunk,
-  parentObject: Record<string, string>,
-  key: string,
-) => {
-  let blocked: Chunk;
-
-  if (initializingChunkBlockedModel) {
-    blocked = initializingChunkBlockedModel;
-    blocked.deps++;
-  } else {
-    blocked = initializingChunkBlockedModel = {
-      deps: 1,
-      value: null,
-    } as Chunk;
-  }
-
-  return (value: string) => {
-    parentObject[key] = value;
-    blocked.deps--;
-
-    if (blocked.deps === 0) {
-      if (chunk.status !== BLOCKED) return;
-
-      const resolveListeners = chunk.value as unknown as ((
-        reason: Chunk['value'] | Error,
-      ) => void)[];
-      const initializedChunk = chunk;
-
-      initializedChunk.status = INITIALIZED;
-      initializedChunk.value = blocked.value;
-
-      if (resolveListeners !== null) {
-        wakeChunk(resolveListeners, blocked.value);
-      }
-    }
-  };
-};
-
-const createModelReject = (chunk: Chunk) => (error: Error) =>
-  triggerErrorOnChunk(chunk, error);
-
 const parseModelString = (
   response: ChunkResponse,
-  parentObject: Record<string, string>,
-  key: string,
+  _parentObject: Record<string, string>,
+  _key: string,
   value: string,
 ) => {
   if (value === '$') return REACT_ELEMENT_TYPE;
@@ -384,30 +342,9 @@ const parseModelString = (
       const id = Number.parseInt(value.substring(1), 16);
       const chunk = getChunk(response, id);
 
-      // The status might have changed after initialization.
-      switch (chunk.status) {
-        case RESOLVED_MODEL:
-          initializeModelChunk(chunk);
-          break;
-
-        case RESOLVED_MODULE:
-          initializeModuleChunk(chunk);
-          break;
-      }
-
       switch (chunk.status) {
         case INITIALIZED:
           return chunk.value;
-
-        case PENDING:
-        case BLOCKED: {
-          const parentChunk = initializingChunk as Chunk;
-          chunk.then(
-            createModelResolver(parentChunk, parentObject, key),
-            createModelReject(parentChunk),
-          );
-          return null;
-        }
 
         default:
           throw chunk.reason;
