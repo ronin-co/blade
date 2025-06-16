@@ -1,13 +1,24 @@
 #!/usr/bin/env bun
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { $ } from 'bun';
+import { $, type Server } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
-import { defaultDeploymentProvider, frameworkDirectory } from '@/private/shell/constants';
-import { cleanUp, logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
+import {
+  defaultDeploymentProvider,
+  frameworkDirectory,
+  publicDirectory,
+} from '@/private/shell/constants';
+import {
+  cleanUp,
+  getClientEnvironmentVariables,
+  logSpinner,
+  prepareStyles,
+  setEnvironmentVariables,
+} from '@/private/shell/utils';
 import * as esbuild from 'esbuild';
 
+import { cp, exists } from 'node:fs/promises';
 import {
   loggingPrefixes,
   outputDirectory,
@@ -27,6 +38,9 @@ import {
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
+import type { Asset } from '@/private/universal/types/util';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -148,14 +162,28 @@ setEnvironmentVariables({
 const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
 const provider = import.meta.env.__BLADE_PROVIDER;
 
+let server: Server | undefined;
+
 if (isBuilding || isDeveloping) {
+  const bundleId = generateUniqueId();
+
   await cleanUp();
 
   const clientChunks = new Map<string, string>();
 
+  const clientEnvironmentVariables = Object.entries(getClientEnvironmentVariables()).map(
+    ([key, value]) => {
+      return [`import.meta.env.${key}`, JSON.stringify(value)];
+    },
+  );
+
+  const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
+  const isDefaultProvider = provider === defaultDeploymentProvider;
+  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
+
   const clientBuild = await esbuild.context({
     entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
-    entryNames: '[dir]/client.js',
+    entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
     sourcemap: 'external',
     bundle: true,
     nodePaths: [path.join(process.cwd(), 'node_modules')],
@@ -170,15 +198,56 @@ if (isBuilding || isDeveloping) {
       {
         name: 'end-log',
         setup(build) {
-          build.onEnd((result) => {
-            // Only rebuild client if server build succeeded
+          build.onEnd(async (result) => {
             if (result.errors.length === 0) {
+              const chunkFile = Bun.file(
+                path.join(outputDirectory, getOutputFile(bundleId, 'js')),
+              );
+
+              const chunkFilePrefix = [
+                isDefaultProvider ? '' : 'if(!import.meta.env){import.meta.env={}};',
+                `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
+                `window['BLADE_BUNDLE']='${bundleId}';`,
+                await chunkFile.text(),
+              ].join('');
+
+              await Bun.write(chunkFile, chunkFilePrefix);
+
+              await prepareStyles(environment, projects, bundleId);
+
+              // Copy hard-coded static assets into output directory.
+              if (await exists(publicDirectory))
+                await cp(publicDirectory, outputDirectory, { recursive: true });
+
+              const assets = new Array<Asset>(
+                { type: 'js', source: getOutputFile(bundleId, 'js') },
+                { type: 'css', source: getOutputFile(bundleId, 'css') },
+              );
+
+              // In production, load the service worker script.
+              if (enableServiceWorker) {
+                assets.push({ type: 'worker', source: '/service-worker.js' });
+              }
+
+              import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
+              import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
+
               console.log('Built client');
+
+              // Revalidate the client.
+              if (server) {
+                server.publish('development', 'revalidate');
+              }
             }
           });
         },
       },
     ],
+    // When using a serverless deployment provider, inline plain-text environment
+    // variables in the client bundles.
+    define: isDefaultProvider
+      ? undefined
+      : Object.fromEntries(clientEnvironmentVariables),
   });
 
   const serverBuild = await esbuild.context({
@@ -232,4 +301,7 @@ if (isBuilding || isDeveloping) {
     }
   }
 }
-await serve(environment, port);
+
+if (isDeveloping || isServing) {
+  server = await serve(environment, port);
+}

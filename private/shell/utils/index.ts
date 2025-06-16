@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { cp, exists, readdir, rm } from 'node:fs/promises';
+import { exists, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import {
   compile as compileTailwind,
@@ -7,24 +7,18 @@ import {
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { Transpiler } from 'bun';
-import * as esbuild from 'esbuild';
+import type * as esbuild from 'esbuild';
 import ora from 'ora';
 
 import {
-  clientInputFile,
-  clientOutputDirectory,
-  defaultDeploymentProvider,
   directoriesToParse,
   loggingPrefixes,
   outputDirectory,
-  publicDirectory,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
-import { getMdxLoader, getReactAriaLoader } from '@/private/shell/loaders';
 import type { FileError } from '@/private/shell/types';
 import { getProvider } from '@/private/shell/utils/providers';
-import type { Asset, DeploymentProvider } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -227,74 +221,6 @@ export const handleBuildLogs = (output: esbuild.BuildResult) => {
   console.log(output);
 };
 
-export const prepareClientAssets = async (
-  environment: 'development' | 'production',
-  bundleId: string,
-  provider: DeploymentProvider,
-) => {
-  const clientSpinner = logSpinner(
-    `Performing client build${environment === 'production' ? ' (production)' : ''}`,
-  ).start();
-
-  const clientEnvironmentVariables = Object.entries(getClientEnvironmentVariables()).map(
-    ([key, value]) => {
-      return [`import.meta.env.${key}`, JSON.stringify(value)];
-    },
-  );
-
-  const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
-  const isDefaultProvider = provider === defaultDeploymentProvider;
-  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
-
-  const output = await esbuild.build({
-    entryPoints: [clientInputFile],
-    outdir: clientOutputDirectory,
-    plugins: [getMdxLoader(environment), getReactAriaLoader()],
-    sourcemap: 'external',
-    entryNames: path.basename(getOutputFile(bundleId)),
-    minify: environment === 'production',
-    // When using a serverless deployment provider, inline plain-text environment
-    // variables in the client bundles.
-    define: isDefaultProvider
-      ? undefined
-      : Object.fromEntries(clientEnvironmentVariables),
-  });
-
-  handleBuildLogs(output);
-
-  const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
-
-  const chunkFilePrefix = [
-    isDefaultProvider ? '' : 'if(!import.meta.env){import.meta.env={}};',
-    `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
-    `window['BLADE_BUNDLE']='${bundleId}';`,
-    await chunkFile.text(),
-  ].join('');
-
-  await Bun.write(chunkFile, chunkFilePrefix);
-
-  await prepareStyles(environment, projects, bundleId);
-
-  // Copy hard-coded static assets into output directory.
-  if (await exists(publicDirectory))
-    await cp(publicDirectory, outputDirectory, { recursive: true });
-
-  const assets = new Array<Asset>(
-    { type: 'js', source: getOutputFile(bundleId, 'js') },
-    { type: 'css', source: getOutputFile(bundleId, 'css') },
-  );
-
-  // In production, load the service worker script.
-  if (enableServiceWorker) {
-    assets.push({ type: 'worker', source: '/service-worker.js' });
-  }
-
-  import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
-  import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
-
-  clientSpinner.succeed();
-};
-
 /**
  * Compiles the Tailwind CSS stylesheet for the application.
  *
@@ -304,7 +230,7 @@ export const prepareClientAssets = async (
  *
  * @returns A promise that resolves when the styles have been prepared.
  */
-const prepareStyles = async (
+export const prepareStyles = async (
   environment: 'development' | 'production',
   projects: Array<string>,
   bundleId: string,

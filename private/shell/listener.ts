@@ -12,7 +12,10 @@ import {
 import { getClientEnvironmentVariables } from '@/private/shell/utils';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
-export const serve = async (environment: 'development' | 'production', port: number) => {
+export const serve = async (
+  environment: 'development' | 'production',
+  port: number,
+): Promise<Server> => {
   if (environment === 'production') {
     // Prevent the process from exiting when an exception occurs.
     process.on('uncaughtException', (error) => {
@@ -103,16 +106,9 @@ export const serve = async (environment: 'development' | 'production', port: num
         : undefined,
   });
 
-  if (environment === 'development') {
-    // Trigger a revalidation from the client-side whenever the process starts, as the
-    // process is restarted whenever server-side code changes.
-    //
-    // When the process starts the first time and there aren't yet any clients subscribed
-    // to the WebSocket topic, this will just do nothing.
-    server.publish('development', 'revalidate');
-  }
-
   console.log(
     `${loggingPrefixes.info} Serving app on ${chalk.underline(`http://localhost:${port}`)}\n`,
   );
+
+  return server;
 };
