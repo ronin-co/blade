@@ -99,56 +99,14 @@ const createPendingChunk = (response: ChunkResponse) =>
 const createErrorChunk = (response: ChunkResponse, error: Error) =>
   new Chunk(ERRORED, null, error, response);
 
-const createResolvedModelChunk = (response: ChunkResponse, value: string) => {
-  return new Chunk(RESOLVED_MODEL, value as unknown as Chunk['value'], null, response);
-};
-
-const wakeChunk = (
-  listeners: ((reason: Chunk['value'] | Error) => void)[],
-  value: Chunk['value'] | Error,
-) => {
-  for (let i = 0; i < listeners.length; i++) {
-    const listener = listeners[i];
-    listener(value);
-  }
-};
-
-const wakeChunkIfInitialized = (
-  chunk: Chunk,
-  resolveListeners: ((reason: Chunk['value'] | Error) => void)[],
-  rejectListeners: ((reason: Chunk['value'] | Error) => void)[],
-) => {
-  switch (chunk.status) {
-    case INITIALIZED:
-      wakeChunk(resolveListeners, chunk.value);
-      break;
-
-    case PENDING:
-    case BLOCKED:
-      chunk.value = resolveListeners as unknown as Chunk['value'];
-      chunk.reason = rejectListeners;
-      break;
-
-    case ERRORED:
-      if (rejectListeners) {
-        wakeChunk(rejectListeners, chunk.reason as unknown as Chunk['value']);
-      }
-
-      break;
-  }
-};
-
 const triggerErrorOnChunk = (chunk: Chunk, error: Error) => {
   // We already resolved. We didn't expect to see this.
   if (chunk.status !== PENDING && chunk.status !== BLOCKED) return;
 
-  const listeners = chunk.reason as ((reason: Chunk['value'] | Error) => void)[];
   const erroredChunk = chunk;
 
   erroredChunk.status = ERRORED;
   erroredChunk.reason = error;
-
-  if (listeners !== null) wakeChunk(listeners, error);
 };
 
 const resolveModelChunk = (chunk: Chunk, value: string) => {
@@ -158,63 +116,23 @@ const resolveModelChunk = (chunk: Chunk, value: string) => {
   const resolveListeners = chunk.value as unknown as ((
     reason: Chunk['value'] | Error,
   ) => void)[];
-  const rejectListeners = chunk.reason as unknown as ((
-    reason: Chunk['value'] | Error,
-  ) => void)[];
   const resolvedChunk = chunk;
 
   resolvedChunk.status = RESOLVED_MODEL;
   resolvedChunk.value = value as unknown as Chunk['value'];
 
   if (resolveListeners !== null) {
-    // This is unfortunate that we're reading this eagerly if we already have listeners
-    // attached since they might no longer be rendered or might not be the highest
-    // priority. The status might have changed after initialization.
-    initializeModelChunk(resolvedChunk);
-    wakeChunkIfInitialized(chunk, resolveListeners, rejectListeners);
-  }
-};
-
-let initializingChunk: Chunk | null = null;
-let initializingChunkBlockedModel: Chunk | null = null;
-
-const initializeModelChunk = (chunk: Chunk) => {
-  const prevChunk = initializingChunk;
-  const prevBlocked = initializingChunkBlockedModel;
-
-  initializingChunk = chunk;
-  initializingChunkBlockedModel = null;
-
-  try {
     const value = parseModel(chunk._response, chunk.value as unknown as string);
 
-    if (
-      initializingChunkBlockedModel !== null &&
-      (initializingChunkBlockedModel as Chunk).deps > 0
-    ) {
-      (initializingChunkBlockedModel as Chunk).value = value;
-      // We discovered new dependencies on modules that are not yet resolved. We have to
-      // go the BLOCKED state until they're resolved.
+    const initializedChunk = chunk;
 
-      const blockedChunk = chunk;
+    initializedChunk.status = INITIALIZED;
+    initializedChunk.value = value;
 
-      blockedChunk.status = BLOCKED;
-      blockedChunk.value = null;
-      blockedChunk.reason = null;
-    } else {
-      const initializedChunk = chunk;
-
-      initializedChunk.status = INITIALIZED;
-      initializedChunk.value = value;
+    for (let i = 0; i < resolveListeners.length; i++) {
+      const listener = resolveListeners[i];
+      listener(value);
     }
-  } catch (error) {
-    const erroredChunk = chunk;
-
-    erroredChunk.status = ERRORED;
-    erroredChunk.reason = error as Error;
-  } finally {
-    initializingChunk = prevChunk;
-    initializingChunkBlockedModel = prevBlocked;
   }
 };
 
@@ -331,8 +249,6 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
 
   if (chunk) {
     resolveModelChunk(chunk, model);
-  } else {
-    chunks.set(id, createResolvedModelChunk(response, model));
   }
 };
 
