@@ -107,7 +107,7 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
     const resolveListeners = chunk.value;
 
     if (resolveListeners !== null) {
-      const value = parseModel(chunk._response, model);
+      const value = parseModel(chunk._response, chunk.value);
 
       for (let i = 0; i < resolveListeners.length; i++) {
         const listener = resolveListeners[i];
