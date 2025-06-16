@@ -5,6 +5,7 @@ import { $, type Server } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
 import {
+  clientOutputDirectory,
   defaultDeploymentProvider,
   frameworkDirectory,
   publicDirectory,
@@ -187,7 +188,7 @@ if (isBuilding || isDeveloping) {
     sourcemap: 'external',
     bundle: true,
     nodePaths: [path.join(process.cwd(), 'node_modules')],
-    outdir: outputDirectory,
+    outdir: clientOutputDirectory,
     minify: environment === 'production',
     plugins: [
       getClientChunkLoader(clientChunks),
@@ -277,7 +278,10 @@ if (isBuilding || isDeveloping) {
         },
       },
     ],
-    define: mapProviderInlineDefinitions(provider),
+
+    // In production, we want to inline environment variables.
+    define:
+      environment === 'production' ? mapProviderInlineDefinitions(provider) : undefined,
   });
 
   await serverBuild.rebuild();
