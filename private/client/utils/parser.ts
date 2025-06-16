@@ -113,8 +113,6 @@ const parseModel = (
 
 const createPendingChunk = (response: ChunkResponse) =>
   new Chunk(PENDING, null, null, response);
-const createBlockedChunk = (response: ChunkResponse) =>
-  new Chunk(BLOCKED, null, null, response);
 const createErrorChunk = (response: ChunkResponse, error: Error) =>
   new Chunk(ERRORED, null, error, response);
 
@@ -190,27 +188,6 @@ const resolveModelChunk = (chunk: Chunk, value: string) => {
     // attached since they might no longer be rendered or might not be the highest
     // priority. The status might have changed after initialization.
     initializeModelChunk(resolvedChunk);
-    wakeChunkIfInitialized(chunk, resolveListeners, rejectListeners);
-  }
-};
-
-const resolveModuleChunk = (chunk: Chunk, value: Chunk['value']) => {
-  // We already resolved. We didn't expect to see this.
-  if (chunk.status !== PENDING && chunk.status !== BLOCKED) return;
-
-  const resolveListeners = chunk.value as unknown as ((
-    reason: Chunk['value'] | Error,
-  ) => void)[];
-  const rejectListeners = chunk.reason as unknown as ((
-    reason: Chunk['value'] | Error,
-  ) => void)[];
-  const resolvedChunk = chunk;
-
-  resolvedChunk.status = RESOLVED_MODULE;
-  resolvedChunk.value = value;
-
-  if (resolveListeners !== null) {
-    initializeModuleChunk(resolvedChunk);
     wakeChunkIfInitialized(chunk, resolveListeners, rejectListeners);
   }
 };
@@ -456,25 +433,27 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
   }
 };
 
-const resolveModule = (response: ChunkResponse, id: number, model: string) => {
+const resolveModule = (response: ChunkResponse, id: number) => {
   const chunks = response._chunks;
-  const chunk = chunks.get(id);
-  const moduleReference = parseModel(response, model);
 
-  let blockedChunk: any;
+  const chunk = getChunk(response, id);
 
-  if (chunk) {
-    // This can't actually happen because we don't have any forward references to modules.
-    blockedChunk = chunk;
-    blockedChunk.status = BLOCKED;
-  } else {
-    // Technically, we should just treat promise as the chunk in this case. Because it'll
-    // just behave as any other promise.
-    blockedChunk = createBlockedChunk(response);
-    chunks.set(id, blockedChunk);
+  try {
+    const moduleExports =
+      window['BLADE_CHUNKS'][chunk.value?.chunks[0] as unknown as string];
+    const value = moduleExports[chunk.value?.name as unknown as string] as Chunk['value'];
+    const initializedChunk = chunk;
+
+    initializedChunk.status = INITIALIZED;
+    initializedChunk.value = value;
+  } catch (error) {
+    const erroredChunk = chunk;
+
+    erroredChunk.status = ERRORED;
+    erroredChunk.reason = error as Error;
   }
 
-  resolveModuleChunk(blockedChunk, moduleReference);
+  chunks.set(id, chunk);
 };
 
 const resolveErrorDev = (
@@ -510,7 +489,7 @@ const processFullRow = (response: ChunkResponse, row: string) => {
 
   switch (tag) {
     case 'I': {
-      resolveModule(response, id, row.substring(colon + 2));
+      resolveModule(response, id);
       return;
     }
 
