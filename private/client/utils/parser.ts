@@ -163,18 +163,6 @@ const createElement = (
   return element;
 };
 
-const getChunk = (response: ChunkResponse, id: number): Chunk => {
-  const chunks = response._chunks;
-  let chunk = chunks.get(id);
-
-  if (!chunk) {
-    chunk = createPendingChunk(response);
-    chunks.set(id, chunk);
-  }
-
-  return chunk;
-};
-
 const parseModelString = (
   response: ChunkResponse,
   _parentObject: Record<string, string>,
@@ -197,15 +185,9 @@ const parseModelString = (
     default: {
       // We assume that anything else is a reference ID.
       const id = Number.parseInt(value.substring(1), 16);
-      const chunk = getChunk(response, id);
+      const chunk = response._chunks.get(id);
 
-      switch (chunk.status) {
-        case INITIALIZED:
-          return chunk.value;
-
-        default:
-          throw chunk.reason;
-      }
+      return chunk!.value;
     }
   }
 };
@@ -250,22 +232,15 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
 
 const resolveModule = (response: ChunkResponse, id: number, model: string) => {
   const chunks = response._chunks;
-  const chunk = getChunk(response, id);
+  const chunk = createPendingChunk(response);
   const moduleReference = parseModel(response, model);
 
-  try {
-    const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
-    const value = moduleExports[moduleReference.name] as Chunk['value'];
-    const initializedChunk = chunk;
+  const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
+  const value = moduleExports[moduleReference.name] as Chunk['value'];
+  const initializedChunk = chunk;
 
-    initializedChunk.status = INITIALIZED;
-    initializedChunk.value = value;
-  } catch (error) {
-    const erroredChunk = chunk;
-
-    erroredChunk.status = ERRORED;
-    erroredChunk.reason = error as Error;
-  }
+  initializedChunk.status = INITIALIZED;
+  initializedChunk.value = value;
 
   chunks.set(id, chunk);
 };
@@ -393,5 +368,8 @@ export const createFromReadableStream = (stream: ReadableStream): Promise<ReactN
 
   startReadingFromStream(response, stream);
 
-  return getChunk(response, 0) as unknown as Promise<ReactNode>;
+  const chunk = createPendingChunk(response);
+  response._chunks.set(0, chunk);
+
+  return chunk as unknown as Promise<ReactNode>;
 };
