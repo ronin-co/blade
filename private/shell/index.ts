@@ -164,6 +164,7 @@ const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
 const provider = import.meta.env.__BLADE_PROVIDER;
 
 let server: Server | undefined;
+let serverModule: Promise<any> = Promise.resolve(null);
 
 if (isBuilding || isDeveloping) {
   const bundleId = generateUniqueId();
@@ -235,11 +236,6 @@ if (isBuilding || isDeveloping) {
               import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
               console.log('Built client');
-
-              // Revalidate the client.
-              if (server) {
-                server.publish('development', 'revalidate');
-              }
             }
           });
         },
@@ -274,7 +270,18 @@ if (isBuilding || isDeveloping) {
             // Only rebuild client if server build succeeded
             if (result.errors.length === 0) {
               console.log('Built server');
+
+              // Start evaluating the server module immediately.
+              serverModule = import(
+                path.join(outputDirectory, `${defaultDeploymentProvider}.js`)
+              );
+
               await clientBuild.rebuild();
+
+              // Revalidate the client.
+              if (server) {
+                server.publish('development', 'revalidate');
+              }
             }
           });
         },
@@ -310,5 +317,5 @@ if (isBuilding || isDeveloping) {
 
 if (isDeveloping || isServing) {
   console.log('SERVE NOW');
-  server = await serve(environment, port);
+  server = await serve(environment, port, serverModule);
 }

@@ -1,13 +1,10 @@
-import path from 'node:path';
 import type { Server } from 'bun';
 import chalk from 'chalk';
 
 import {
-  defaultDeploymentProvider,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-  serverInputFolder,
 } from '@/private/shell/constants';
 import { getClientEnvironmentVariables } from '@/private/shell/utils';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
@@ -15,6 +12,7 @@ import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 export const serve = async (
   environment: 'development' | 'production',
   port: number,
+  serverModule: Promise<any>,
 ): Promise<Server> => {
   if (environment === 'production') {
     // Prevent the process from exiting when an exception occurs.
@@ -27,13 +25,6 @@ export const serve = async (
       console.error('An uncaught rejection has occurred:', reason, promise);
     });
   }
-
-  const requestHandler = await import(
-    path.join(
-      environment === 'development' ? serverInputFolder : outputDirectory,
-      `${defaultDeploymentProvider}.js`,
-    )
-  );
 
   const assetHeaders: Record<string, string> =
     environment === 'production'
@@ -93,6 +84,7 @@ export const serve = async (
 
       if (publicFileExists) return new Response(publicFile);
 
+      const requestHandler = await serverModule;
       return requestHandler.default.fetch(request, {}, {});
     },
     websocket:
