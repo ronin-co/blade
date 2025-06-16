@@ -183,6 +183,19 @@ if (isBuilding || isDeveloping) {
   const isDefaultProvider = provider === defaultDeploymentProvider;
   const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
 
+  const assets = new Array<Asset>(
+    { type: 'js', source: getOutputFile(bundleId, 'js') },
+    { type: 'css', source: getOutputFile(bundleId, 'css') },
+  );
+
+  // In production, load the service worker script.
+  if (enableServiceWorker) {
+    assets.push({ type: 'worker', source: '/service-worker.js' });
+  }
+
+  import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
+  import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
+
   const clientBuild = await esbuild.context({
     entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
     entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
@@ -221,19 +234,6 @@ if (isBuilding || isDeveloping) {
               // Copy hard-coded static assets into output directory.
               if (await exists(publicDirectory))
                 await cp(publicDirectory, outputDirectory, { recursive: true });
-
-              const assets = new Array<Asset>(
-                { type: 'js', source: getOutputFile(bundleId, 'js') },
-                { type: 'css', source: getOutputFile(bundleId, 'css') },
-              );
-
-              // In production, load the service worker script.
-              if (enableServiceWorker) {
-                assets.push({ type: 'worker', source: '/service-worker.js' });
-              }
-
-              import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
-              import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
               console.log('Built client');
             }
