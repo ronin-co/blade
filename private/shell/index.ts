@@ -187,6 +187,7 @@ if (isBuilding || isDeveloping) {
     entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
     sourcemap: 'external',
     bundle: true,
+    format: 'esm',
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: clientOutputDirectory,
     minify: environment === 'production',
@@ -256,6 +257,7 @@ if (isBuilding || isDeveloping) {
     entryNames: `[dir]/${defaultDeploymentProvider}`,
     sourcemap: 'external',
     bundle: true,
+    format: 'esm',
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: outputDirectory,
     minify: environment === 'production',
@@ -307,5 +309,6 @@ if (isBuilding || isDeveloping) {
 }
 
 if (isDeveloping || isServing) {
+  console.log('SERVE NOW');
   server = await serve(environment, port);
 }
