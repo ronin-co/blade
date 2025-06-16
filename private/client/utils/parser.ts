@@ -48,28 +48,9 @@ function Chunk(
 // TODO: This doesn't return a new Promise chain unlike the real `.then`.
 Chunk.prototype = Object.create(Promise.prototype);
 
-Chunk.prototype.then = function (resolve, reject) {
-  // If we have resolved content, we try to initialize it first, which might put us back
-  // into one of the other states.
-
-  switch (this.status) {
-    case INITIALIZED:
-      resolve?.(this.value);
-      break;
-
-    default:
-      if (resolve) {
-        if (this.value === null) this.value = [] as unknown as Chunk['value'];
-        if (Array.isArray(this.value)) this.value?.push(resolve);
-      }
-
-      if (reject) {
-        if (this.reason === null) this.reason = [];
-        if (Array.isArray(this.reason)) this.reason?.push(reject);
-      }
-
-      break;
-  }
+Chunk.prototype.then = function (resolve) {
+  if (this.value === null) this.value = [] as unknown as Chunk['value'];
+  if (Array.isArray(this.value)) this.value?.push(resolve);
 };
 
 const parseModel = (
