@@ -109,33 +109,6 @@ const triggerErrorOnChunk = (chunk: Chunk, error: Error) => {
   erroredChunk.reason = error;
 };
 
-const resolveModelChunk = (chunk: Chunk, value: string) => {
-  // We already resolved. We didn't expect to see this.
-  if (chunk.status !== PENDING) return;
-
-  const resolveListeners = chunk.value as unknown as ((
-    reason: Chunk['value'] | Error,
-  ) => void)[];
-  const resolvedChunk = chunk;
-
-  resolvedChunk.status = RESOLVED_MODEL;
-  resolvedChunk.value = value as unknown as Chunk['value'];
-
-  if (resolveListeners !== null) {
-    const value = parseModel(chunk._response, chunk.value as unknown as string);
-
-    const initializedChunk = chunk;
-
-    initializedChunk.status = INITIALIZED;
-    initializedChunk.value = value;
-
-    for (let i = 0; i < resolveListeners.length; i++) {
-      const listener = resolveListeners[i];
-      listener(value);
-    }
-  }
-};
-
 const reportGlobalError = (response: ChunkResponse, error: Error) => {
   response._chunks.forEach((chunk: Chunk) => {
     // If this chunk was already resolved or errored, it won't trigger an error but if it
@@ -248,7 +221,30 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
   const chunk = chunks.get(id);
 
   if (chunk) {
-    resolveModelChunk(chunk, model);
+    // We already resolved. We didn't expect to see this.
+    if (chunk.status !== PENDING) return;
+
+    const resolveListeners = chunk.value as unknown as ((
+      reason: Chunk['value'] | Error,
+    ) => void)[];
+    const resolvedChunk = chunk;
+
+    resolvedChunk.status = RESOLVED_MODEL;
+    resolvedChunk.value = model as unknown as Chunk['value'];
+
+    if (resolveListeners !== null) {
+      const value = parseModel(chunk._response, chunk.value as unknown as string);
+
+      const initializedChunk = chunk;
+
+      initializedChunk.status = INITIALIZED;
+      initializedChunk.value = value;
+
+      for (let i = 0; i < resolveListeners.length; i++) {
+        const listener = resolveListeners[i];
+        listener(value);
+      }
+    }
   }
 };
 
