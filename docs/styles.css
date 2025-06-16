@@ -3,7 +3,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark {    
+    &:where(.dark, .dark *) {
+        @slot;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        &:not(:where(.light, .light *)) {
+            @slot;
+        }
+    }
+}
 
 body,
 html {

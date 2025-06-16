@@ -1,17 +1,29 @@
 import { useCookie } from '@ronin/blade/hooks';
-import { MoonIcon, SunIcon } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { Monitor, MoonIcon, SunIcon } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from './ui/button';
 
-export type Theme = 'light' | 'dark';
+import type { LucideProps } from 'lucide-react';
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+
+export type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeToggleProps {
   initial?: Theme | null;
 }
 
+const MAPPED_THEME_ICON = {
+  dark: MoonIcon,
+  light: SunIcon,
+  system: Monitor,
+} satisfies Record<
+  Theme,
+  ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>
+>;
+
 export function ThemeToggle(props: ThemeToggleProps) {
-  const [theme, setTheme] = useState<Theme | null>(props.initial ?? null);
+  const [theme, setTheme] = useState<Theme>(props.initial ?? 'system');
   const [themeCookie, setThemeCookie] = useCookie<Theme>('theme');
 
   const toggleTheme = useCallback((): void => {
@@ -22,23 +34,14 @@ export function ThemeToggle(props: ThemeToggleProps) {
 
     if (document.documentElement.classList.contains('dark' satisfies Theme)) {
       document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
     } else {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
     }
   }, [themeCookie, setThemeCookie]);
 
-  // Set the initial theme based on the user's system preference if no cookie is set.
-  useEffect(() => {
-    if (themeCookie) {
-      setTheme(themeCookie);
-      return;
-    }
-
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = systemPrefersDark ? 'dark' : 'light';
-    setTheme(initialTheme);
-    setThemeCookie(initialTheme, { client: true });
-  }, []);
+  const Icon = MAPPED_THEME_ICON[theme ?? 'system'];
 
   return (
     <Button
@@ -46,12 +49,7 @@ export function ThemeToggle(props: ThemeToggleProps) {
       onClick={toggleTheme}
       size="icon"
       variant="ghost">
-      {theme === 'dark' ? (
-        <MoonIcon className="h-4 w-4 text-black dark:text-white" />
-      ) : null}
-      {theme === 'light' ? (
-        <SunIcon className="h-4 w-4 text-black dark:text-white" />
-      ) : null}
+      <Icon className="h-4 w-4 text-black dark:text-white" />
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
