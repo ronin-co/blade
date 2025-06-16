@@ -96,26 +96,6 @@ const parseModel = (
 
 const createPendingChunk = (response: ChunkResponse) =>
   new Chunk(PENDING, null, null, response);
-const createErrorChunk = (response: ChunkResponse, error: Error) =>
-  new Chunk(ERRORED, null, error, response);
-
-const triggerErrorOnChunk = (chunk: Chunk, error: Error) => {
-  // We already resolved. We didn't expect to see this.
-  if (chunk.status !== PENDING && chunk.status !== BLOCKED) return;
-
-  const erroredChunk = chunk;
-
-  erroredChunk.status = ERRORED;
-  erroredChunk.reason = error;
-};
-
-const reportGlobalError = (response: ChunkResponse, error: Error) => {
-  response._chunks.forEach((chunk: Chunk) => {
-    // If this chunk was already resolved or errored, it won't trigger an error but if it
-    // wasn't then we need to because we won't be getting any new data to resolve it.
-    if (chunk.status === PENDING) triggerErrorOnChunk(chunk, error);
-  });
-};
 
 const createElement = (
   type: ReactElement['type'],
@@ -245,30 +225,6 @@ const resolveModule = (response: ChunkResponse, id: number, model: string) => {
   chunks.set(id, chunk);
 };
 
-const resolveErrorDev = (
-  response: ChunkResponse,
-  id: number,
-  digest: string,
-  message: string,
-  stack: Error['stack'],
-) => {
-  const details = message || 'A Server Components error occurred without a message';
-  const error: Error & { digest?: string } = new Error(details);
-
-  error.stack = stack;
-  error.digest = digest;
-
-  const errorWithDigest = error;
-  const chunks = response._chunks;
-  const chunk = chunks.get(id);
-
-  if (chunk) {
-    triggerErrorOnChunk(chunk, errorWithDigest);
-  } else {
-    chunks.set(id, createErrorChunk(response, errorWithDigest));
-  }
-};
-
 const processFullRow = (response: ChunkResponse, row: string) => {
   if (row === '') return;
 
@@ -279,13 +235,6 @@ const processFullRow = (response: ChunkResponse, row: string) => {
   switch (tag) {
     case 'I': {
       resolveModule(response, id, row.substring(colon + 2));
-      return;
-    }
-
-    case 'E': {
-      const errorInfo = JSON.parse(row.substring(colon + 2));
-      resolveErrorDev(response, id, errorInfo.digest, errorInfo.message, errorInfo.stack);
-
       return;
     }
 
@@ -345,17 +294,15 @@ const startReadingFromStream = (response: ChunkResponse, stream: ReadableStream)
       // In case there are any remaining unresolved chunks, they won't be resolved now,
       // so we need to issue an error to those. Ideally, we should be able to early bail
       // out if we kept a ref count of pending chunks.
-      reportGlobalError(response, new Error('Connection closed.'));
+      new Error('Connection closed.');
       return;
     }
 
     processBinaryChunk(response, value);
-    return reader.read().then(progress).catch(error);
+    return reader.read().then(progress);
   };
 
-  const error = (err: Error) => reportGlobalError(response, err);
-
-  reader.read().then(progress).catch(error);
+  reader.read().then(progress);
 };
 
 export const createFromReadableStream = (stream: ReadableStream): Promise<ReactNode> => {
