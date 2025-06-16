@@ -2,89 +2,11 @@ import type { ReactElement, ReactNode } from 'react';
 
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
-const PENDING = 'pending';
-const BLOCKED = 'blocked';
-const RESOLVED_MODEL = 'resolved_model';
-const RESOLVED_MODULE = 'resolved_module';
-const INITIALIZED = 'fulfilled';
-const ERRORED = 'rejected';
-
-declare class Chunk {
-  constructor(
-    status: Chunk['status'],
-    value: Chunk['value'],
-    reason: Chunk['reason'],
-    response: Chunk['_response'],
-  );
-
-  status:
-    | typeof PENDING
-    | typeof BLOCKED
-    | typeof RESOLVED_MODEL
-    | typeof RESOLVED_MODULE
-    | typeof INITIALIZED
-    | typeof ERRORED;
-  value: {
-    chunks: number[];
-    name: string;
-  } | null;
-  reason: Error | ((reason: any) => unknown)[] | null;
-  _response: ChunkResponse;
-  deps: number;
-
-  then: (...args: Parameters<typeof Promise.prototype.then>) => void;
-}
 interface ChunkResponse {
-  _chunks: Map<number, Chunk>;
+  _chunks: Map<number, any>;
   _partialRow: string;
   _fromJSON?: Parameters<typeof JSON.parse>[1];
 }
-
-// We subclass `Promise.prototype` so that we get other methods like `.catch`.
-function Chunk(
-  this: Chunk,
-  status: Chunk['status'],
-  value: Chunk['value'],
-  reason: Chunk['reason'],
-  response: Chunk['_response'],
-) {
-  this.status = status;
-  this.value = value;
-  this.reason = reason;
-  this._response = response;
-}
-
-// TODO: This doesn't return a new Promise chain unlike the real `.then`.
-Chunk.prototype = Object.create(Promise.prototype);
-
-Chunk.prototype.then = function (resolve, reject) {
-  // If we have resolved content, we try to initialize it first, which might put us back
-  // into one of the other states.
-
-  switch (this.status) {
-    case INITIALIZED:
-      resolve?.(this.value);
-      break;
-
-    case PENDING:
-    case BLOCKED:
-      if (resolve) {
-        if (this.value === null) this.value = [] as unknown as Chunk['value'];
-        if (Array.isArray(this.value)) this.value?.push(resolve);
-      }
-
-      if (reject) {
-        if (this.reason === null) this.reason = [];
-        if (Array.isArray(this.reason)) this.reason?.push(reject);
-      }
-
-      break;
-
-    default:
-      reject?.(this.reason);
-      break;
-  }
-};
 
 const parseModel = (
   response: ChunkResponse,
@@ -93,9 +15,6 @@ const parseModel = (
   chunks: number[];
   name: string;
 } => JSON.parse(json, response._fromJSON);
-
-const createPendingChunk = (response: ChunkResponse) =>
-  new Chunk(PENDING, null, null, response);
 
 const createElement = (
   type: ReactElement['type'],
@@ -183,24 +102,12 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
   const chunk = chunks.get(id);
 
   if (chunk) {
-    // We already resolved. We didn't expect to see this.
-    if (chunk.status !== PENDING) return;
+    chunks.set(id, model);
 
-    const resolveListeners = chunk.value as unknown as ((
-      reason: Chunk['value'] | Error,
-    ) => void)[];
-    const resolvedChunk = chunk;
-
-    resolvedChunk.status = RESOLVED_MODEL;
-    resolvedChunk.value = model as unknown as Chunk['value'];
+    const resolveListeners = chunk.value;
 
     if (resolveListeners !== null) {
-      const value = parseModel(chunk._response, chunk.value as unknown as string);
-
-      const initializedChunk = chunk;
-
-      initializedChunk.status = INITIALIZED;
-      initializedChunk.value = value;
+      const value = parseModel(chunk._response, chunk.value);
 
       for (let i = 0; i < resolveListeners.length; i++) {
         const listener = resolveListeners[i];
@@ -212,17 +119,12 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
 
 const resolveModule = (response: ChunkResponse, id: number, model: string) => {
   const chunks = response._chunks;
-  const chunk = createPendingChunk(response);
   const moduleReference = parseModel(response, model);
 
   const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
-  const value = moduleExports[moduleReference.name] as Chunk['value'];
-  const initializedChunk = chunk;
+  const value = moduleExports[moduleReference.name];
 
-  initializedChunk.status = INITIALIZED;
-  initializedChunk.value = value;
-
-  chunks.set(id, chunk);
+  chunks.set(id, value);
 };
 
 const processFullRow = (response: ChunkResponse, row: string) => {
@@ -315,7 +217,7 @@ export const createFromReadableStream = (stream: ReadableStream): Promise<ReactN
 
   startReadingFromStream(response, stream);
 
-  const chunk = createPendingChunk(response);
+  const chunk = new Promise(() => {});
   response._chunks.set(0, chunk);
 
   return chunk as unknown as Promise<ReactNode>;
