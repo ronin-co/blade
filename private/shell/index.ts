@@ -5,6 +5,7 @@ import { $, type Server } from 'bun';
 import getPort, { portNumbers } from 'get-port';
 
 import {
+  clientInputFile,
   clientOutputDirectory,
   defaultDeploymentProvider,
   frameworkDirectory,
@@ -197,7 +198,7 @@ if (isBuilding || isDeveloping) {
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
   const clientBuild = await esbuild.context({
-    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
+    entryPoints: [clientInputFile],
     entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
     sourcemap: 'external',
     bundle: true,
