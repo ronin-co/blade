@@ -6,13 +6,14 @@ const PENDING = 'pending';
 const RESOLVED_MODEL = 'resolved_model';
 const INITIALIZED = 'fulfilled';
 
+interface ChunkResponse {
+  _chunks: Map<number, Chunk>;
+  _partialRow: string;
+  _fromJSON?: Parameters<typeof JSON.parse>[1];
+}
+
 declare class Chunk {
-  constructor(
-    status: Chunk['status'],
-    value: Chunk['value'],
-    reason: Chunk['reason'],
-    response: Chunk['_response'],
-  );
+  constructor(status: Chunk['status'], value: Chunk['value'], reason: Chunk['reason']);
 
   status: typeof PENDING | typeof RESOLVED_MODEL | typeof INITIALIZED;
   value: {
@@ -20,15 +21,9 @@ declare class Chunk {
     name: string;
   } | null;
   reason: Error | ((reason: any) => unknown)[] | null;
-  _response: ChunkResponse;
   deps: number;
 
   then: (...args: Parameters<typeof Promise.prototype.then>) => void;
-}
-interface ChunkResponse {
-  _chunks: Map<number, Chunk>;
-  _partialRow: string;
-  _fromJSON?: Parameters<typeof JSON.parse>[1];
 }
 
 // We subclass `Promise.prototype` so that we get other methods like `.catch`.
@@ -37,12 +32,10 @@ function Chunk(
   status: Chunk['status'],
   value: Chunk['value'],
   reason: Chunk['reason'],
-  response: Chunk['_response'],
 ) {
   this.status = status;
   this.value = value;
   this.reason = reason;
-  this._response = response;
 }
 
 // TODO: This doesn't return a new Promise chain unlike the real `.then`.
@@ -61,8 +54,7 @@ const parseModel = (
   name: string;
 } => JSON.parse(json, response._fromJSON);
 
-const createPendingChunk = (response: ChunkResponse) =>
-  new Chunk(PENDING, null, null, response);
+const createPendingChunk = () => new Chunk(PENDING, null, null);
 
 const createElement = (
   type: ReactElement['type'],
@@ -162,7 +154,7 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
     resolvedChunk.value = model as unknown as Chunk['value'];
 
     if (resolveListeners !== null) {
-      const value = parseModel(chunk._response, chunk.value as unknown as string);
+      const value = parseModel(response, chunk.value as unknown as string);
 
       const initializedChunk = chunk;
 
@@ -179,7 +171,7 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
 
 const resolveModule = (response: ChunkResponse, id: number, model: string) => {
   const chunks = response._chunks;
-  const chunk = createPendingChunk(response);
+  const chunk = createPendingChunk();
   const moduleReference = parseModel(response, model);
 
   const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
@@ -282,7 +274,7 @@ export const createFromReadableStream = (stream: ReadableStream): Promise<ReactN
 
   startReadingFromStream(response, stream);
 
-  const chunk = createPendingChunk(response);
+  const chunk = createPendingChunk();
   response._chunks.set(0, chunk);
 
   return chunk as unknown as Promise<ReactNode>;
