@@ -120,9 +120,10 @@ export const getFileListLoader: (onResolve: boolean) => BunPlugin = (onResolve) 
   name: 'File List Loader',
   setup(build) {
     if (onResolve) {
-      build.onResolve({ filter: /^server-list$/ }, (source) => {
-        return { path: source.path, namespace: 'dynamic-list' };
-      });
+      build.onResolve({ filter: /^server-list$/ }, (source) => ({
+        path: source.path,
+        namespace: 'dynamic-list',
+      }));
 
       build.onLoad({ filter: /^server-list$/, namespace: 'dynamic-list' }, async () => {
         const contents = await getFileList();
