@@ -7,7 +7,6 @@ import { $ } from 'bun';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
-import type { WSContext } from 'hono/ws';
 
 import {
   clientInputFile,
@@ -19,7 +18,7 @@ import {
   publicDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
-import { serve } from '@/private/shell/listener';
+import { type Server, serve } from '@/private/shell/listener';
 import {
   getClientChunkLoader,
   getClientReferenceLoader,
@@ -163,8 +162,7 @@ setEnvironmentVariables({
 const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
 const provider = import.meta.env.__BLADE_PROVIDER;
 
-let webSocketContext: WSContext | undefined;
-let serverModule: Promise<any> = Promise.resolve(null);
+const server: Server = {};
 
 if (isBuilding || isDeveloping) {
   const bundleId = generateUniqueId();
@@ -198,16 +196,21 @@ if (isBuilding || isDeveloping) {
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
 
-  const clientBuild = await esbuild.context({
-    entryPoints: [clientInputFile],
-    entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
+  const buildOptions: esbuild.BuildOptions = {
     sourcemap: 'external',
     bundle: true,
     format: 'esm',
     jsx: 'automatic',
     nodePaths: [path.join(process.cwd(), 'node_modules')],
-    outdir: clientOutputDirectory,
     minify: environment === 'production',
+    plugins: [getFileListLoader(), getMdxLoader('production'), getReactAriaLoader()],
+  };
+
+  const clientBuild = await esbuild.context({
+    ...buildOptions,
+    entryPoints: [clientInputFile],
+    entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
+    outdir: clientOutputDirectory,
     banner: {
       js: [
         'if(!import.meta.env){import.meta.env={}};',
@@ -216,13 +219,10 @@ if (isBuilding || isDeveloping) {
       ].join(''),
     },
     plugins: [
+      ...(buildOptions.plugins || []),
       getClientChunkLoader(clientChunks),
-      getFileListLoader(),
-      getMdxLoader('production'),
-      getReactAriaLoader(),
-
       {
-        name: 'end-log',
+        name: 'Init Loader',
         setup(build) {
           build.onEnd(async (result) => {
             if (result.errors.length === 0) {
@@ -237,23 +237,15 @@ if (isBuilding || isDeveloping) {
   });
 
   const serverBuild = await esbuild.context({
+    ...buildOptions,
     entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
     entryNames: `[dir]/${defaultDeploymentProvider}`,
-    sourcemap: 'external',
-    bundle: true,
-    format: 'esm',
-    jsx: 'automatic',
-    nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: outputDirectory,
-    minify: environment === 'production',
     plugins: [
+      ...(buildOptions.plugins || []),
       getClientReferenceLoader(clientChunks),
-      getFileListLoader(),
-      getMdxLoader('production'),
-      getReactAriaLoader(),
-
       {
-        name: 'trigger-second-build',
+        name: 'Init Loader',
         setup(build) {
           build.onStart(() => {
             spinner.start();
@@ -263,14 +255,14 @@ if (isBuilding || isDeveloping) {
             // Only rebuild client if server build succeeded
             if (result.errors.length === 0) {
               // Start evaluating the server module immediately.
-              serverModule = import(
+              server.module = import(
                 path.join(outputDirectory, `${defaultDeploymentProvider}.js`)
               );
 
               await clientBuild.rebuild();
 
               // Revalidate the client.
-              if (webSocketContext) webSocketContext.send('revalidate');
+              if (server.channel) server.channel.send('revalidate');
             }
           });
         },
@@ -339,5 +331,5 @@ if (isBuilding || isDeveloping) {
 }
 
 if (isDeveloping || isServing) {
-  webSocketContext = await serve(environment, port, serverModule);
+  await serve(server, environment, port);
 }
