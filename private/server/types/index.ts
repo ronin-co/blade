@@ -29,11 +29,16 @@ import type {
 
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
+import type { Toc } from '@stefanprobst/rehype-extract-toc';
+
+export type { Toc };
 
 export type TreeItem = {
+  tableOfContents?: Toc;
   components?: Record<string, ComponentType<unknown>>;
   default: FunctionComponent<{
     components?: Record<string, ComponentType<unknown>>;
+    tableOfContents?: Toc;
   }>;
 };
 
