@@ -19,13 +19,14 @@ export const CopyToClipboard = ({ content }: { content: string }) => {
       <TooltipTrigger>
         <Button
           asChild={true}
+          className="h-6 w-6 cursor-pointer p-1.5"
           variant="ghost"
           size="icon"
           onClick={handleCopy}>
           {isCopied ? (
-            <CheckIcon className="h-4 w-4 rounded-none" />
+            <CheckIcon className="rounded-sm" />
           ) : (
-            <CopyIcon className="h-4 w-4 rounded-none" />
+            <CopyIcon className="rounded-sm" />
           )}
         </Button>
       </TooltipTrigger>
