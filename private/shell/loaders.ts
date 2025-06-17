@@ -1,12 +1,11 @@
 import path from 'node:path';
-
 import { compile } from '@mdx-js/mdx';
+import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 
 import type { ClientChunks } from '@/private/shell/types';
 import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
-import type * as esbuild from 'esbuild';
 
 export const getClientReferenceLoader = (clientChunks: ClientChunks): esbuild.Plugin => ({
   name: 'Client Reference Loader',

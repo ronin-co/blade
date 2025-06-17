@@ -7,7 +7,6 @@ import {
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { Transpiler } from 'bun';
-import type * as esbuild from 'esbuild';
 import ora from 'ora';
 
 import {
@@ -210,15 +209,6 @@ export const cleanUp = async () => {
   }
 
   removalSpinner.succeed();
-};
-
-/**
- * Prints the logs of a build to the terminal.
- *
- * @param output A build output object.
- */
-export const handleBuildLogs = (output: esbuild.BuildResult) => {
-  console.log(output);
 };
 
 /**

@@ -1,7 +1,10 @@
 #!/usr/bin/env bun
+
+import { cp, exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { $, type Server } from 'bun';
+import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
 import {
@@ -9,21 +12,9 @@ import {
   clientOutputDirectory,
   defaultDeploymentProvider,
   frameworkDirectory,
-  publicDirectory,
-} from '@/private/shell/constants';
-import {
-  cleanUp,
-  getClientEnvironmentVariables,
-  logSpinner,
-  prepareStyles,
-  setEnvironmentVariables,
-} from '@/private/shell/utils';
-import * as esbuild from 'esbuild';
-
-import { cp, exists } from 'node:fs/promises';
-import {
   loggingPrefixes,
   outputDirectory,
+  publicDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
 import { serve } from '@/private/shell/listener';
@@ -34,6 +25,13 @@ import {
   getMdxLoader,
   getReactAriaLoader,
 } from '@/private/shell/loaders';
+import {
+  cleanUp,
+  getClientEnvironmentVariables,
+  logSpinner,
+  prepareStyles,
+  setEnvironmentVariables,
+} from '@/private/shell/utils';
 import {
   mapProviderInlineDefinitions,
   transformToCloudflareOutput,
