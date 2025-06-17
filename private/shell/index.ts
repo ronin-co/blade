@@ -3,10 +3,11 @@
 import { cp, exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { $, type Server } from 'bun';
+import { $ } from 'bun';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
+import type { WSContext } from 'hono/ws';
 
 import {
   clientInputFile,
@@ -162,7 +163,7 @@ setEnvironmentVariables({
 const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
 const provider = import.meta.env.__BLADE_PROVIDER;
 
-let server: Server | undefined;
+let webSocketContext: WSContext | undefined;
 let serverModule: Promise<any> = Promise.resolve(null);
 
 if (isBuilding || isDeveloping) {
@@ -285,9 +286,7 @@ if (isBuilding || isDeveloping) {
               await clientBuild.rebuild();
 
               // Revalidate the client.
-              if (server) {
-                server.publish('development', 'revalidate');
-              }
+              if (webSocketContext) webSocketContext.send('revalidate');
             }
           });
         },
@@ -352,5 +351,5 @@ if (isBuilding || isDeveloping) {
 }
 
 if (isDeveloping || isServing) {
-  server = await serve(environment, port, serverModule);
+  webSocketContext = await serve(environment, port, serverModule);
 }

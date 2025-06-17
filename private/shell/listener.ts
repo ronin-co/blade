@@ -1,19 +1,22 @@
-import type { Server } from 'bun';
+import { serve as serveApp } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { createNodeWebSocket } from '@hono/node-ws';
 import chalk from 'chalk';
+import { Hono } from 'hono';
+import type { WSContext } from 'hono/ws';
 
 import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
 } from '@/private/shell/constants';
-import { getClientEnvironmentVariables } from '@/private/shell/utils';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export const serve = async (
   environment: 'development' | 'production',
   port: number,
   serverModule: Promise<any>,
-): Promise<Server> => {
+): Promise<WSContext> => {
   if (environment === 'production') {
     // Prevent the process from exiting when an exception occurs.
     process.on('uncaughtException', (error) => {
@@ -26,81 +29,34 @@ export const serve = async (
     });
   }
 
-  const assetHeaders: Record<string, string> =
-    environment === 'production'
-      ? {
-          'Cache-Control': 'public, max-age=31536000, immutable',
-        }
-      : {};
+  let webSocketContext: WSContext | undefined;
+  const app = new Hono();
+  const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
-  const server: Server = Bun.serve({
-    port,
-    development: environment === 'development',
-    fetch: async (request) => {
-      let pathname: string;
+  if (environment === 'development') {
+    app.get(
+      '/_blade/reload',
+      upgradeWebSocket(() => ({
+        onOpen: (_event, socket) => (webSocketContext = socket),
+      })),
+    );
+  }
 
-      try {
-        ({ pathname } = new URL(request.url));
-      } catch (_err) {
-        // If the request URL is malformed, reject the request. For example, this can
-        // happen if the request is missing a `Host` header. The correct response in such
-        // a scenario is defined here:
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host
-        return new Response('Bad Request', { status: 400 });
-      }
+  app.use('/*', serveStatic({ root: publicDirectory }));
+  app.use(`/${CLIENT_ASSET_PREFIX}/*`, serveStatic({ root: outputDirectory }));
 
-      // Enable WebSockets for automatically triggering revalidation when files are updated
-      // during development.
-      if (environment === 'development' && pathname.startsWith('/_blade/reload')) {
-        return server.upgrade(request);
-      }
-
-      const outputFile = Bun.file(outputDirectory + pathname);
-      const publicFile = Bun.file(publicDirectory + pathname);
-
-      const [outputFileExists, publicFileExists] = await Promise.all([
-        outputFile.exists(),
-        publicFile.exists(),
-      ]);
-
-      if (outputFileExists) {
-        if (pathname.startsWith(CLIENT_ASSET_PREFIX) && pathname.endsWith('.js')) {
-          const fileContents = await outputFile.text();
-          const variables = `import.meta.env=${JSON.stringify(getClientEnvironmentVariables())};`;
-          const newFileContents = variables + fileContents;
-
-          return new Response(newFileContents, {
-            headers: {
-              'Content-Type': outputFile.type,
-              ...assetHeaders,
-            },
-          });
-        }
-
-        return new Response(outputFile, {
-          headers: { ...assetHeaders },
-        });
-      }
-
-      if (publicFileExists) return new Response(publicFile);
-
-      const requestHandler = await serverModule;
-      return requestHandler.default.fetch(request, {}, {});
-    },
-    websocket:
-      environment === 'development'
-        ? {
-            open: (socket) => socket.subscribe('development'),
-            close: (socket) => socket.unsubscribe('development'),
-            // We don't care about incoming messages, but the type requires this.
-            message() {},
-          }
-        : undefined,
+  app.use('*', async (_c, next) => {
+    await serverModule;
+    await next();
   });
+  app.route('/', serverModule as unknown as Hono);
+
+  const server = serveApp({ fetch: app.fetch, port });
+  if (environment === 'development') injectWebSocket(server);
 
   console.log(
     `${loggingPrefixes.info} Serving app on ${chalk.underline(`http://localhost:${port}`)}\n`,
   );
 
-  return server;
+  return webSocketContext as WSContext;
 };
