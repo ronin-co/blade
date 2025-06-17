@@ -77,12 +77,7 @@ const createElement = (
   return element;
 };
 
-const parseModelString = (
-  response: ChunkResponse,
-  _parentObject: Record<string, string>,
-  _key: string,
-  value: string,
-): ChunkValue => {
+const parseModelString = (response: ChunkResponse, value: string): ChunkValue => {
   if (value === '$') return REACT_ELEMENT_TYPE;
   if (value[0] !== '$') return value;
 
@@ -108,7 +103,6 @@ const parseModelString = (
 };
 
 const parseModelTuple = (
-  _response: ChunkResponse,
   value:
     | [symbol, ReactElement['type'], ReactElement['key'], ReactElement['props']]
     | unknown,
@@ -186,17 +180,11 @@ const processBinaryChunk = (response: ChunkResponse, defaultChunk: Buffer) => {
 };
 
 const createFromJSONCallback =
-  (response: ChunkResponse) => (key: string, value: unknown) => {
+  // The unused argument here is needed for `JSON.parse`.
+  (response: ChunkResponse) => (_key: string, value: unknown) => {
     // We can't use `.bind` here because we need the "this" value.
-    if (typeof value === 'string')
-      return parseModelString(
-        response,
-        this as unknown as Record<string, string>,
-        key,
-        value,
-      );
-    if (typeof value === 'object' && value !== null)
-      return parseModelTuple(response, value);
+    if (typeof value === 'string') return parseModelString(response, value);
+    if (typeof value === 'object' && value !== null) return parseModelTuple(value);
 
     return value;
   };
