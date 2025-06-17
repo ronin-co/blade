@@ -15,7 +15,6 @@ declare class Chunk {
     chunks: number[];
     name: string;
   } | null;
-  deps: number;
 
   then: (...args: Parameters<typeof Promise.prototype.then>) => void;
 }
@@ -41,7 +40,7 @@ const parseModel = (
   name: string;
 } => JSON.parse(json, response._fromJSON);
 
-const createPendingChunk = () => new Chunk();
+const createPendingChunk = () => new Chunk(null);
 
 const createElement = (
   type: ReactElement['type'],
