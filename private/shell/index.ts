@@ -194,7 +194,7 @@ if (isBuilding || isDeveloping) {
   import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
-  const spinner = logSpinner(
+  let spinner = logSpinner(
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
 
@@ -326,7 +326,8 @@ if (isBuilding || isDeveloping) {
         if (!eventMessage) return;
 
         const relativePath = path.relative(process.cwd(), eventPath);
-        console.log(`${loggingPrefixes.info} ${eventMessage}: ${relativePath}`);
+
+        spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
         serverBuild.rebuild();
       });
   } else {
