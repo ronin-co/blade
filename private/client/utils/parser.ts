@@ -60,13 +60,6 @@ const createElement = (
     _owner: null,
   };
 
-  Object.defineProperty(element._store, 'validated', {
-    configurable: false,
-    enumerable: false,
-    writable: true,
-    value: true, // This element has already been validated on the server.
-  });
-
   Object.defineProperty(element, '_self', {
     configurable: false,
     enumerable: false,
