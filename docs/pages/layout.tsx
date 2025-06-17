@@ -119,7 +119,7 @@ const DocsLayout = ({
   const description = 'Build instant web apps.';
 
   useMetadata({
-    htmlClassName: theme ?? undefined,
+    htmlClassName: theme && ['dark', 'light'].includes(theme) ? theme : undefined,
     title,
     description,
     icon: 'https://blade.im/static/black.png',
