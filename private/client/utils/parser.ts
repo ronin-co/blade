@@ -81,19 +81,23 @@ const parseModelString = (
   if (value[0] !== '$') return value;
 
   switch (value[1]) {
-    // This was an escaped string value.
     case '$': {
       return value.substring(1);
     }
-
     case 'S': {
       return Symbol.for(value.substring(2));
     }
-
     default: {
-      // We assume that anything else is a reference ID.
       const id = Number.parseInt(value.substring(1), 16);
-      return response._chunks.get(id);
+      const chunk = response._chunks.get(id);
+      if (!chunk) {
+        throw new Error(`Missing chunk with id: ${id}`);
+      }
+      // We need to return the resolved value, not the Promise
+      if ((chunk as any)._result !== undefined) {
+        return (chunk as any)._result;
+      }
+      throw chunk;
     }
   }
 };
@@ -110,6 +114,7 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
 
   if (chunk) {
     const value = parseModel(response, model);
+    (chunk as any)._result = value;
     (chunk as any).resolve(value);
   }
 };
@@ -122,6 +127,7 @@ const resolveModule = (response: ChunkResponse, id: number, model: string) => {
   const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
   const value = moduleExports[moduleReference.name];
 
+  (chunk as any)._result = value;
   (chunk as any).resolve(value);
   chunks.set(id, chunk);
 };
