@@ -43,10 +43,16 @@ export const serve = async (
     );
   }
 
+  const clientPathPrefix = new RegExp(`^${CLIENT_ASSET_PREFIX}`);
   app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
   app.use(
     `${CLIENT_ASSET_PREFIX}/*`,
-    serveStatic({ root: path.basename(outputDirectory) }),
+    serveStatic({
+      // It's extremely important for requests to be scoped to the client output
+      // directory, since server code could otherwise be read.
+      root: path.join(path.basename(outputDirectory), CLIENT_ASSET_PREFIX),
+      rewriteRequestPath: (path) => path.replace(clientPathPrefix, ''),
+    }),
   );
 
   app.all('*', async (c) => {
