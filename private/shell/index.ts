@@ -298,7 +298,7 @@ if (isBuilding || isDeveloping) {
 
   await serverBuild.rebuild();
 
-  if (isDeveloping) await serverBuild.watch();
+  // if (isDeveloping) await serverBuild.watch();
 
   if (isBuilding) {
     switch (provider) {
