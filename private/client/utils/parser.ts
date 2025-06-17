@@ -3,30 +3,10 @@ import type { ReactElement, ReactNode } from 'react';
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 interface ChunkResponse {
-  _chunks: Map<number, Chunk>;
+  _chunks: Map<number, Promise<any>>;
   _partialRow: string;
   _fromJSON?: Parameters<typeof JSON.parse>[1];
 }
-
-declare class Chunk {
-  constructor(value: Chunk['value']);
-
-  value: {
-    chunks: number[];
-    name: string;
-  } | null;
-
-  then: (...args: Parameters<typeof Promise.prototype.then>) => void;
-}
-
-// We subclass `Promise.prototype` so that we get other methods like `.catch`.
-function Chunk(this: Chunk) {
-  this.value = null;
-}
-
-Chunk.prototype.then = function (resolve) {
-  this.value = [resolve] as unknown as Chunk['value'];
-};
 
 const parseModel = (
   response: ChunkResponse,
@@ -36,7 +16,14 @@ const parseModel = (
   name: string;
 } => JSON.parse(json, response._fromJSON);
 
-const createPendingChunk = () => new Chunk(null);
+const createPendingChunk = () => {
+  let resolve!: (value: any) => void;
+  const promise = new Promise<any>((r) => {
+    resolve = r;
+  });
+  (promise as any).resolve = resolve;
+  return promise;
+};
 
 const createElement = (
   type: ReactElement['type'],
@@ -106,9 +93,7 @@ const parseModelString = (
     default: {
       // We assume that anything else is a reference ID.
       const id = Number.parseInt(value.substring(1), 16);
-      const chunk = response._chunks.get(id);
-
-      return chunk!.value;
+      return response._chunks.get(id);
     }
   }
 };
@@ -124,20 +109,8 @@ const resolveModel = (response: ChunkResponse, id: number, model: string) => {
   const chunk = chunks.get(id);
 
   if (chunk) {
-    const resolveListeners = chunk.value as unknown as ((
-      reason: Chunk['value'] | Error,
-    ) => void)[];
-    chunk.value = model as unknown as Chunk['value'];
-
-    if (resolveListeners !== null) {
-      const value = parseModel(response, chunk.value as unknown as string);
-      chunk.value = value;
-
-      for (let i = 0; i < resolveListeners.length; i++) {
-        const listener = resolveListeners[i];
-        listener(value);
-      }
-    }
+    const value = parseModel(response, model);
+    (chunk as any).resolve(value);
   }
 };
 
@@ -147,9 +120,9 @@ const resolveModule = (response: ChunkResponse, id: number, model: string) => {
   const moduleReference = parseModel(response, model);
 
   const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
-  const value = moduleExports[moduleReference.name] as Chunk['value'];
+  const value = moduleExports[moduleReference.name];
 
-  chunk.value = value;
+  (chunk as any).resolve(value);
   chunks.set(id, chunk);
 };
 
@@ -246,5 +219,5 @@ export const createFromReadableStream = (stream: ReadableStream): Promise<ReactN
   const chunk = createPendingChunk();
   response._chunks.set(0, chunk);
 
-  return chunk as unknown as Promise<ReactNode>;
+  return chunk as Promise<ReactNode>;
 };
