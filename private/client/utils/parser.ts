@@ -2,7 +2,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
-// Define the shape of a chunk's resolved value
+/** The shape of a chunk's resolved value. */
 type ChunkValue =
   | {
       chunks: number[];
@@ -14,7 +14,7 @@ type ChunkValue =
   | symbol
   | null;
 
-// Define the shape of an enhanced Promise that includes our custom properties
+/** The shape of an enhanced Promise that includes our custom properties. */
 interface EnhancedPromise<T> extends Promise<T> {
   resolve: (value: T) => void;
   _result?: T;
@@ -58,11 +58,6 @@ const createElement = (
     props: props,
     // Record the component responsible for creating this element.
     _owner: null,
-
-    // We don't really need to add any of these but keeping them for good measure.
-    // Unfortunately, `_store` is enumerable in jest matchers so for equality to work, we
-    // need to keep it or make `_store` non-enumerable in the other file.
-    _store: {},
   };
 
   Object.defineProperty(element._store, 'validated', {
@@ -222,9 +217,6 @@ const startReadingFromStream = (response: ChunkResponse, stream: ReadableStream)
     const { done, value } = chunk;
 
     if (done) {
-      // In case there are any remaining unresolved chunks, they won't be resolved now,
-      // so we need to issue an error to those. Ideally, we should be able to early bail
-      // out if we kept a ref count of pending chunks.
       new Error('Connection closed.');
       return;
     }
