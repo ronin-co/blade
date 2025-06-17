@@ -346,7 +346,7 @@ const getRenderingTree = (
   let toc: Toc = [];
 
   for (const [path, leaf] of leaves.entries()) {
-    toc = toc.concat(leaf.tableOfContents || []);
+    toc = leaf.tableOfContents || [];
     if (!path.includes('layout.')) continue;
     components = { ...components, ...leaf.components };
   }
