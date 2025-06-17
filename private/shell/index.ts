@@ -180,7 +180,6 @@ if (isBuilding || isDeveloping) {
   );
 
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
-  const isDefaultProvider = provider === defaultDeploymentProvider;
 
   const assets = new Array<Asset>(
     { type: 'js', source: getOutputFile(bundleId, 'js') },
@@ -209,6 +208,13 @@ if (isBuilding || isDeveloping) {
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     outdir: clientOutputDirectory,
     minify: environment === 'production',
+    banner: {
+      js: [
+        'if(!import.meta.env){import.meta.env={}};',
+        `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
+        `window['BLADE_BUNDLE']='${bundleId}';`,
+      ].join(''),
+    },
     plugins: [
       getClientChunkLoader(clientChunks),
       getFileListLoader(),
@@ -220,36 +226,14 @@ if (isBuilding || isDeveloping) {
         setup(build) {
           build.onEnd(async (result) => {
             if (result.errors.length === 0) {
-              const chunkFile = Bun.file(
-                path.join(outputDirectory, getOutputFile(bundleId, 'js')),
-              );
-
-              const chunkFilePrefix = [
-                isDefaultProvider ? '' : 'if(!import.meta.env){import.meta.env={}};',
-                `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
-                `window['BLADE_BUNDLE']='${bundleId}';`,
-                await chunkFile.text(),
-              ].join('');
-
-              await Bun.write(chunkFile, chunkFilePrefix);
-
               await prepareStyles(environment, projects, bundleId);
-
-              // Copy hard-coded static assets into output directory.
-              if (await exists(publicDirectory))
-                await cp(publicDirectory, outputDirectory, { recursive: true });
-
               spinner.succeed();
             }
           });
         },
       },
     ],
-    // When using a serverless deployment provider, inline plain-text environment
-    // variables in the client bundles.
-    define: isDefaultProvider
-      ? undefined
-      : Object.fromEntries(clientEnvironmentVariables),
+    define: Object.fromEntries(clientEnvironmentVariables),
   });
 
   const serverBuild = await esbuild.context({
@@ -332,6 +316,10 @@ if (isBuilding || isDeveloping) {
   } else {
     // Stop the build contexts.
     await Promise.all([clientBuild.dispose(), serverBuild.dispose()]);
+
+    // Copy hard-coded static assets into output directory.
+    if (await exists(publicDirectory))
+      await cp(publicDirectory, outputDirectory, { recursive: true });
 
     switch (provider) {
       case 'cloudflare': {
