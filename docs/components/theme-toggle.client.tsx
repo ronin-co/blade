@@ -2,7 +2,7 @@ import { useCookie } from '@ronin/blade/hooks';
 import { Monitor, MoonIcon, SunIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 import type { LucideProps } from 'lucide-react';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
