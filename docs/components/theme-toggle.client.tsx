@@ -41,7 +41,7 @@ export function ThemeToggle(props: ThemeToggleProps) {
     }
   }, [themeCookie, setThemeCookie]);
 
-  const Icon = MAPPED_THEME_ICON[theme ?? 'system'];
+  const Icon = MAPPED_THEME_ICON[theme] ?? Monitor;
 
   return (
     <Button
