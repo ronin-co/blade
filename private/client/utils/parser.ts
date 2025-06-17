@@ -24,9 +24,6 @@ function Chunk(this: Chunk) {
   this.value = null;
 }
 
-// TODO: This doesn't return a new Promise chain unlike the real `.then`.
-Chunk.prototype = Object.create(Promise.prototype);
-
 Chunk.prototype.then = function (resolve) {
   this.value = [resolve] as unknown as Chunk['value'];
 };
