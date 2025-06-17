@@ -4,6 +4,7 @@ import { cp, exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { $, type Server } from 'bun';
+import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
@@ -300,8 +301,34 @@ if (isBuilding || isDeveloping) {
 
   await serverBuild.rebuild();
 
+  const ignored = ['node_modules', '.git', '.blade', '.husky', '.vercel'];
+
+  const events: Record<
+    Exclude<EmitArgsWithName[0], 'all' | 'raw' | 'ready' | 'error'>,
+    string
+  > = {
+    add: 'File added',
+    change: 'File changed',
+    unlink: 'File removed',
+    addDir: 'Directory added',
+    unlinkDir: 'Directory removed',
+  };
+
   if (isDeveloping) {
-    // await serverBuild.watch();
+    chokidar
+      .watch(process.cwd(), {
+        ignored: (path) => ignored.some((item) => path.includes(item)),
+        ignoreInitial: true,
+      })
+      .on('all', (event, eventPath) => {
+        const eventMessage =
+          event in events ? events[event as keyof typeof events] : null;
+        if (!eventMessage) return;
+
+        const relativePath = path.relative(process.cwd(), eventPath);
+        console.log(`${loggingPrefixes.info} ${eventMessage}: ${relativePath}`);
+        serverBuild.rebuild();
+      });
   } else {
     // Stop the build contexts.
     await Promise.all([clientBuild.dispose(), serverBuild.dispose()]);
