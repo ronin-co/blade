@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { createNodeWebSocket } from '@hono/node-ws';
@@ -42,14 +43,16 @@ export const serve = async (
     );
   }
 
-  app.use('/*', serveStatic({ root: publicDirectory }));
-  app.use(`/${CLIENT_ASSET_PREFIX}/*`, serveStatic({ root: outputDirectory }));
+  app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
+  app.use(
+    `${CLIENT_ASSET_PREFIX}/*`,
+    serveStatic({ root: path.basename(outputDirectory) }),
+  );
 
-  app.use('*', async (_c, next) => {
-    await serverModule;
-    await next();
+  app.all('*', async (c) => {
+    const worker = await serverModule;
+    return worker.default.fetch(c.req.raw);
   });
-  app.route('/', serverModule as unknown as Hono);
 
   const server = serveApp({ fetch: app.fetch, port });
   if (environment === 'development') injectWebSocket(server);
