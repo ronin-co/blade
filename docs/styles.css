@@ -34,6 +34,12 @@ html {
 		@apply dark:text-white;
 	}
 
+	h2,
+	h3,
+	h4 {
+		@apply scroll-mt-20;
+	}
+
 	p {
 		@apply leading-relaxed [&:not(:first-child)]:my-2 dark:text-[#9E9E9E] text-[#3E3E3E]
 	}
