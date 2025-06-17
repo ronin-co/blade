@@ -28,8 +28,7 @@ function Chunk(this: Chunk) {
 Chunk.prototype = Object.create(Promise.prototype);
 
 Chunk.prototype.then = function (resolve) {
-  if (this.value === null) this.value = [] as unknown as Chunk['value'];
-  if (Array.isArray(this.value)) this.value?.push(resolve);
+  this.value = [resolve] as unknown as Chunk['value'];
 };
 
 const parseModel = (
