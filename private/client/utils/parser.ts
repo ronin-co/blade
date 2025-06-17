@@ -2,8 +2,26 @@ import type { ReactElement, ReactNode } from 'react';
 
 const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
+// Define the shape of a chunk's resolved value
+type ChunkValue =
+  | {
+      chunks: number[];
+      name: string;
+    }
+  | ReactElement
+  | ReactNode
+  | string
+  | symbol
+  | null;
+
+// Define the shape of an enhanced Promise that includes our custom properties
+interface EnhancedPromise<T> extends Promise<T> {
+  resolve: (value: T) => void;
+  _result?: T;
+}
+
 interface ChunkResponse {
-  _chunks: Map<number, Promise<any>>;
+  _chunks: Map<number, EnhancedPromise<ChunkValue>>;
   _partialRow: string;
   _fromJSON?: Parameters<typeof JSON.parse>[1];
 }
@@ -16,12 +34,12 @@ const parseModel = (
   name: string;
 } => JSON.parse(json, response._fromJSON);
 
-const createPendingChunk = () => {
-  let resolve!: (value: any) => void;
-  const promise = new Promise<any>((r) => {
+const createPendingChunk = (): EnhancedPromise<ChunkValue> => {
+  let resolve!: (value: ChunkValue) => void;
+  const promise = new Promise<ChunkValue>((r) => {
     resolve = r;
-  });
-  (promise as any).resolve = resolve;
+  }) as EnhancedPromise<ChunkValue>;
+  promise.resolve = resolve;
   return promise;
 };
 
@@ -76,7 +94,7 @@ const parseModelString = (
   _parentObject: Record<string, string>,
   _key: string,
   value: string,
-) => {
+): ChunkValue => {
   if (value === '$') return REACT_ELEMENT_TYPE;
   if (value[0] !== '$') return value;
 
@@ -93,42 +111,48 @@ const parseModelString = (
       if (!chunk) {
         throw new Error(`Missing chunk with id: ${id}`);
       }
-      // We need to return the resolved value, not the Promise
-      if ((chunk as any)._result !== undefined) {
-        return (chunk as any)._result;
+      if (chunk._result !== undefined) {
+        return chunk._result;
       }
       throw chunk;
     }
   }
 };
 
-const parseModelTuple = (_response: ChunkResponse, value: any) => {
-  return value[0] === REACT_ELEMENT_TYPE
+const parseModelTuple = (
+  _response: ChunkResponse,
+  value:
+    | [symbol, ReactElement['type'], ReactElement['key'], ReactElement['props']]
+    | unknown,
+): ReactElement | unknown => {
+  return Array.isArray(value) && value[0] === REACT_ELEMENT_TYPE
     ? createElement(value[1], value[2], value[3])
     : value;
 };
 
-const resolveModel = (response: ChunkResponse, id: number, model: string) => {
+const resolveModel = (response: ChunkResponse, id: number, model: string): void => {
   const chunks = response._chunks;
   const chunk = chunks.get(id);
 
   if (chunk) {
     const value = parseModel(response, model);
-    (chunk as any)._result = value;
-    (chunk as any).resolve(value);
+    chunk._result = value;
+    chunk.resolve(value);
   }
 };
 
-const resolveModule = (response: ChunkResponse, id: number, model: string) => {
+const resolveModule = (response: ChunkResponse, id: number, model: string): void => {
   const chunks = response._chunks;
   const chunk = createPendingChunk();
   const moduleReference = parseModel(response, model);
 
-  const moduleExports = window['BLADE_CHUNKS'][moduleReference.chunks[0]];
+  const moduleExports = (
+    window as unknown as { BLADE_CHUNKS: Record<number, Record<string, ChunkValue>> }
+  )['BLADE_CHUNKS'][moduleReference.chunks[0]];
   const value = moduleExports[moduleReference.name];
 
-  (chunk as any)._result = value;
-  (chunk as any).resolve(value);
+  chunk._result = value;
+  chunk.resolve(value);
   chunks.set(id, chunk);
 };
 
