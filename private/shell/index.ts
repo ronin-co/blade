@@ -300,9 +300,12 @@ if (isBuilding || isDeveloping) {
 
   await serverBuild.rebuild();
 
-  // if (isDeveloping) await serverBuild.watch();
+  if (isDeveloping) {
+    // await serverBuild.watch();
+  } else {
+    // Stop the build contexts.
+    await Promise.all([clientBuild.dispose(), serverBuild.dispose()]);
 
-  if (isBuilding) {
     switch (provider) {
       case 'cloudflare': {
         await transformToCloudflareOutput();
