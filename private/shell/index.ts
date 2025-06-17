@@ -155,7 +155,6 @@ setEnvironmentVariables({
   isBuilding,
   isServing,
   isLoggingQueries: values.queries || false,
-  enableServiceWorker,
   projects,
 });
 
@@ -180,7 +179,6 @@ if (isBuilding || isDeveloping) {
 
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
   const isDefaultProvider = provider === defaultDeploymentProvider;
-  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
 
   const assets = new Array<Asset>(
     { type: 'js', source: getOutputFile(bundleId, 'js') },
@@ -194,6 +192,10 @@ if (isBuilding || isDeveloping) {
 
   import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
   import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
+
+  const spinner = logSpinner(
+    `Building${environment === 'production' ? ' for production' : ''}`,
+  );
 
   const clientBuild = await esbuild.context({
     entryPoints: [clientInputFile],
@@ -235,7 +237,7 @@ if (isBuilding || isDeveloping) {
               if (await exists(publicDirectory))
                 await cp(publicDirectory, outputDirectory, { recursive: true });
 
-              console.log('Built client');
+              spinner.succeed();
             }
           });
         },
@@ -267,11 +269,13 @@ if (isBuilding || isDeveloping) {
       {
         name: 'trigger-second-build',
         setup(build) {
+          build.onStart(() => {
+            spinner.start();
+          });
+
           build.onEnd(async (result) => {
             // Only rebuild client if server build succeeded
             if (result.errors.length === 0) {
-              console.log('Built server');
-
               // Start evaluating the server module immediately.
               serverModule = import(
                 path.join(outputDirectory, `${defaultDeploymentProvider}.js`)
@@ -317,6 +321,5 @@ if (isBuilding || isDeveloping) {
 }
 
 if (isDeveloping || isServing) {
-  console.log('SERVE NOW');
   server = await serve(environment, port, serverModule);
 }

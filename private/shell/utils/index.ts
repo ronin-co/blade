@@ -130,7 +130,6 @@ export const setEnvironmentVariables = (options: {
   isBuilding: boolean;
   isServing: boolean;
   isLoggingQueries: boolean;
-  enableServiceWorker: boolean;
   projects: string[];
 }) => {
   if (import.meta.env['BLADE_ENV']) {
@@ -144,7 +143,6 @@ export const setEnvironmentVariables = (options: {
   // Get the current provider based on the environment variables.
   const provider = getProvider();
   import.meta.env.__BLADE_PROVIDER = provider;
-  import.meta.env.__BLADE_SERVICE_WORKER = options.enableServiceWorker ? 'true' : 'false';
 
   if (provider === 'cloudflare') {
     import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
