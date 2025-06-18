@@ -96,7 +96,7 @@ if (isInitializing) {
     logSpinner(
       `Failed to create example app. A directory named \`${projectName}\` already exists`,
     ).fail();
-    process.exit();
+    process.exit(1);
   }
 
   // Copy all the files from the example app to the target directory.
@@ -108,6 +108,7 @@ if (isInitializing) {
   } catch (error) {
     logSpinner('Failed to create example app').fail();
     console.error(error);
+    process.exit(1);
   }
 
   // Attempt to initialize a new Git repository in the target directory.
@@ -118,6 +119,7 @@ if (isInitializing) {
   } catch (error) {
     logSpinner('Failed to initialize git repository. Is git installed?').fail();
     console.error(error);
+    process.exit(1);
   }
 
   logSpinner('Created example app').succeed();
