@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { spawnSync } from 'node:child_process';
 import { cp, exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -8,6 +9,7 @@ import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
+import { spawn } from 'node:child_process';
 import {
   clientInputFile,
   clientOutputDirectory,
@@ -97,9 +99,10 @@ if (isInitializing) {
     console.error(error);
   }
 
-  try {
-    await $`cd ${targetDirectory} && git init`.quiet();
-  } catch (error) {
+  const { error } = spawnSync('git', ['init'], {
+    cwd: targetDirectory,
+  });
+  if (error) {
     logSpinner('Failed to initialize git repository. Is git installed?').fail();
     console.error(error);
   }
