@@ -23,7 +23,11 @@ html {
 
 .docs-content {
 	h1 {
-		@apply scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl;
+		@apply scroll-m-20 text-4xl sm:text-3xl xl:text-4xl;
+	}
+
+	h2 {
+		@apply text-2xl sm:text-xl xl:text-2xl;
 	}
 
 	h1,
@@ -31,13 +35,13 @@ html {
 	h3,
 	h4,
 	strong {
-		@apply dark:text-white;
+		@apply font-semibold tracking-tight dark:text-white;
 	}
 
 	h2,
 	h3,
 	h4 {
-		@apply scroll-mt-20;
+		@apply scroll-mt-25;
 	}
 
 	p {

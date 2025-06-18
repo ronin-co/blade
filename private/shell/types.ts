@@ -1,6 +1,6 @@
 export type FileError = { code: string };
 
-export type ClientChunks = { [key: string]: string };
+export type ClientChunks = Map<string, string>;
 
 type ServerlessFunctionConfig = {
   environment?: Array<Record<string, string>>;

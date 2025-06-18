@@ -1,39 +1,20 @@
 import path from 'node:path';
-
-import { stat } from 'node:fs/promises';
 import { compile } from '@mdx-js/mdx';
-import { type BunPlugin, Glob } from 'bun';
+import withToc from '@stefanprobst/rehype-extract-toc';
+import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
+import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 
-import { clientManifestFile } from '@/private/shell/constants';
 import type { ClientChunks } from '@/private/shell/types';
 import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 
-export const getClientReferenceLoader: (
-  environment: 'development' | 'production',
-) => BunPlugin = (environment) => ({
+export const getClientReferenceLoader = (clientChunks: ClientChunks): esbuild.Plugin => ({
   name: 'Client Reference Loader',
   async setup(build) {
-    let clientChunks: ClientChunks | null = null;
-    let clientChunksTime: Date | null = null;
-
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
       let contents = await Bun.file(source.path).text();
       let loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
-
-      const clientChunksUpdated = (await stat(clientManifestFile)).mtime;
-
-      // Read client chunk metadata from manifest file, but only if the file has been
-      // updated, which allows us to avoid unnecessary file system reads.
-      if (!clientChunksTime || clientChunksUpdated > clientChunksTime) {
-        const file = Bun.file(clientManifestFile);
-
-        clientChunks = JSON.parse(await file.text());
-        clientChunksTime = clientChunksUpdated;
-      }
-
-      if (!clientChunks) throw new Error('No client chunks available');
 
       const transpiler = new Bun.Transpiler({ loader });
       const exports = scanExports(transpiler, contents);
@@ -47,11 +28,11 @@ export const getClientReferenceLoader: (
       contents = contents.replaceAll(/export /g, '');
 
       const relativeSourcePath = path.relative(process.cwd(), source.path);
-      const clientChunk = clientChunks[relativeSourcePath];
-      if (!clientChunk) throw new Error(`Missing client chunk for ${relativeSourcePath}`);
+      const chunkId = generateUniqueId();
+      clientChunks.set(source.path, chunkId);
 
       for (const exportItem of exports) {
-        contents += `${wrapClientExport(exportItem, { id: clientChunk, path: relativeSourcePath })}\n`;
+        contents += `${wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath })}\n`;
 
         const usableName = exportItem.originalName
           ? `${exportItem.originalName} as ${exportItem.name}`
@@ -67,7 +48,7 @@ export const getClientReferenceLoader: (
         return source.path.endsWith(`.${extension}`);
       });
 
-      if (requiresTranspilation && environment !== 'production') {
+      if (requiresTranspilation) {
         const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
 
         contents = `${newContents}\n${transpiler.transformSync(contents)}`;
@@ -82,31 +63,27 @@ export const getClientReferenceLoader: (
   },
 });
 
-export const getClientChunkLoader: (clientChunks: ClientChunks) => BunPlugin = (
-  clientChunks,
-) => ({
+export const getClientChunkLoader = (clientChunks: ClientChunks): esbuild.Plugin => ({
   name: 'Client Chunk Loader',
   async setup(build) {
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
       let contents = await Bun.file(source.path).text();
       const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
 
-      const chunkId = generateUniqueId();
-      const relativeSourcePath = path.relative(process.cwd(), source.path);
-      clientChunks[relativeSourcePath] = chunkId;
+      const chunkId = clientChunks.get(source.path);
 
       const transpiler = new Bun.Transpiler({ loader });
       const exports = scanExports(transpiler, contents);
 
       contents += `
-          window.BLADE_CHUNKS["${chunkId}"] = {
-            ${exports
-              .map((exportItem) => {
-                return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
-              })
-              .join('\n')}
-          };
-        `;
+        window.BLADE_CHUNKS["${chunkId}"] = {
+          ${exports
+            .map((exportItem) => {
+              return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
+            })
+            .join('\n')}
+        };
+      `;
 
       return {
         contents,
@@ -116,78 +93,28 @@ export const getClientChunkLoader: (clientChunks: ClientChunks) => BunPlugin = (
   },
 });
 
-export const getFileListLoader: (onResolve: boolean) => BunPlugin = (onResolve) => ({
+export const getFileListLoader = (): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
-    if (onResolve) {
-      build.onResolve({ filter: /^server-list$/ }, (source) => ({
-        path: source.path,
-        namespace: 'dynamic-list',
-      }));
+    build.onResolve({ filter: /^server-list$/ }, (source) => {
+      return { path: source.path, namespace: 'dynamic-list' };
+    });
 
-      build.onLoad({ filter: /^server-list$/, namespace: 'dynamic-list' }, async () => {
-        const contents = await getFileList();
-
-        return {
-          contents,
-          loader: 'tsx',
-        };
-      });
-
-      return;
-    }
-
-    build.module('server-list', async () => {
+    build.onLoad({ filter: /^server-list$/, namespace: 'dynamic-list' }, async () => {
       const contents = await getFileList();
 
       return {
         contents,
         loader: 'tsx',
+        resolveDir: process.cwd(),
       };
     });
   },
 });
 
-export const getClientComponentLoader: (projects: string[]) => BunPlugin = (
-  projects,
-) => ({
-  name: 'Client Component Loader',
-  setup(build) {
-    build.onResolve({ filter: /^client-list$/ }, (source) => {
-      return { path: source.path, namespace: 'dynamic-client-list' };
-    });
-
-    build.onLoad(
-      { filter: /^client-list$/, namespace: 'dynamic-client-list' },
-      async () => {
-        const glob = new Glob('**/*.client.{js,jsx,ts,tsx}');
-
-        // Prevent duplicate files.
-        const files = new Set();
-
-        for (const directory of projects) {
-          for await (const file of glob.scan({
-            cwd: directory,
-            absolute: true,
-          })) {
-            files.add(file);
-          }
-        }
-
-        return {
-          contents: Array.from(files)
-            .map((file) => `import "${file}";`)
-            .join('\n'),
-          loader: 'tsx',
-        };
-      },
-    );
-  },
-});
-
-export const getMdxLoader: (environment: 'development' | 'production') => BunPlugin = (
-  environment,
-) => ({
+export const getMdxLoader = (
+  environment: 'development' | 'production',
+): esbuild.Plugin => ({
   name: 'MDX Loader',
   setup(build) {
     build.onLoad({ filter: /\.mdx$/ }, async (source) => {
@@ -207,6 +134,7 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
 
       const mdx = await compile(mdxContents, {
         development: environment === 'development',
+        rehypePlugins: [withToc, withTocExport],
       });
 
       const tsx = String(mdx.value);
@@ -225,7 +153,7 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
 // which would otherwise increase the bundle size.
 //
 // https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
-export const getReactAriaLoader: () => BunPlugin = () => ({
+export const getReactAriaLoader = (): esbuild.Plugin => ({
   name: 'React Aria Loader',
   setup(build) {
     build.onLoad(
