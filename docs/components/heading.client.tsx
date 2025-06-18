@@ -40,7 +40,7 @@ export const Heading = ({ children, level, ...props }: HeadingProps) => {
       data-heading={true}
       href={`#${id}`}
       id={id}
-      className="group -ml-11 not-prose relative flex items-center gap-2">
+      className="group -ml-11 not-prose relative mt-4 flex items-center gap-2">
       <Button
         variant="ghost"
         size="sm"

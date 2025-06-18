@@ -27,7 +27,7 @@ html {
 	}
 
 	h2 {
-		@apply mt-4 text-2xl sm:text-xl xl:text-2xl;
+		@apply text-2xl sm:text-xl xl:text-2xl;
 	}
 
 	h1,
