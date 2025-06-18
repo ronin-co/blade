@@ -1,5 +1,7 @@
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
+import withToc from '@stefanprobst/rehype-extract-toc';
+import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 
@@ -132,6 +134,7 @@ export const getMdxLoader = (
 
       const mdx = await compile(mdxContents, {
         development: environment === 'development',
+        rehypePlugins: [withToc, withTocExport],
       });
 
       const tsx = String(mdx.value);

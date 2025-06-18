@@ -60,6 +60,7 @@
     "@ronin/compiler": "0.18.9",
     "@ronin/react": "0.1.4",
     "@ronin/syntax": "0.2.43",
+    "@stefanprobst/rehype-extract-toc": "3.0.0",
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
     "esbuild": "0.25.5",
