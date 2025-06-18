@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 
-import { spawnSync } from 'node:child_process';
+import { exec } from 'node:child_process';
 import { cp, exists } from 'node:fs/promises';
 import path from 'node:path';
-import { parseArgs } from 'node:util';
+import { parseArgs, promisify } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
@@ -83,6 +83,8 @@ const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
 const enableServiceWorker = values.sw;
 
+const execAsync = promisify(exec);
+
 if (isInitializing) {
   const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
   const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
@@ -105,10 +107,11 @@ if (isInitializing) {
     console.error(error);
   }
 
-  const { error } = spawnSync('git', ['init'], {
-    cwd: targetDirectory,
-  });
-  if (error) {
+  try {
+    await execAsync('git init', {
+      cwd: targetDirectory,
+    });
+  } catch (error) {
     logSpinner('Failed to initialize git repository. Is git installed?').fail();
     console.error(error);
   }
