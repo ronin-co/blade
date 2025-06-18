@@ -90,16 +90,19 @@ if (isInitializing) {
   const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
   const targetDirectory = path.join(process.cwd(), projectName);
 
+  // If a project with the same name already exists, we should not overwrite it.
   const targetDirExists = await exists(targetDirectory);
   if (targetDirExists) {
     logSpinner(
-      `Failed to initialize example app. A directory named \`${projectName}\` already exists`,
+      `Failed to create example app. A directory named \`${projectName}\` already exists`,
     ).fail();
     process.exit();
   }
 
+  // Copy all the files from the example app to the target directory.
   try {
     await cp(originDirectory, targetDirectory, {
+      errorOnExist: true,
       recursive: true,
     });
   } catch (error) {
@@ -107,25 +110,13 @@ if (isInitializing) {
     console.error(error);
   }
 
+  // Attempt to initialize a new Git repository in the target directory.
   try {
     await execAsync('git init', {
       cwd: targetDirectory,
     });
   } catch (error) {
     logSpinner('Failed to initialize git repository. Is git installed?').fail();
-    console.error(error);
-  }
-
-  try {
-    await Bun.write(
-      path.join(targetDirectory, '.gitignore'),
-      `node_modules
-      .env
-      .blade
-      `,
-    );
-  } catch (error) {
-    logSpinner('Failed to create .gitignore').fail();
     console.error(error);
   }
 
