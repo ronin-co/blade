@@ -10,6 +10,7 @@ import { Navbar } from '@/components/navbar';
 import { Sidebar } from '@/components/sidebar';
 import { TableOfContentsSidebar } from '@/components/table-of-contents.client';
 import type { Theme } from '@/components/theme-toggle.client';
+import { cn } from '@/lib/utils';
 
 type MenuItem = {
   id: string;
@@ -121,7 +122,10 @@ const DocsLayout = ({
   const description = 'Build instant web apps.';
 
   useMetadata({
-    htmlClassName: theme && ['dark', 'light'].includes(theme) ? theme : undefined,
+    htmlClassName: cn(
+      'scroll-smooth antialiased',
+      theme && ['dark', 'light'].includes(theme) ? theme : undefined,
+    ),
     title,
     description,
     icon: 'https://blade.im/static/black.png',
