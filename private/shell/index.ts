@@ -88,6 +88,14 @@ if (isInitializing) {
   const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
   const targetDirectory = path.join(process.cwd(), projectName);
 
+  const targetDirExists = await exists(targetDirectory);
+  if (targetDirExists) {
+    logSpinner(
+      `Failed to initialize example app. A directory named ${projectName} already exists`,
+    ).fail();
+    process.exit();
+  }
+
   try {
     await cp(originDirectory, targetDirectory, {
       recursive: true,
