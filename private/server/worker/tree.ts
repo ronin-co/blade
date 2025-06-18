@@ -1,3 +1,4 @@
+import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
 import getValue from 'get-value';
 import type { Context } from 'hono';
@@ -342,17 +343,23 @@ const getRenderingTree = (
 ) => {
   let element: ReactNode = null;
   let components: Record<string, React.ComponentType<unknown>> = {};
+  let toc: Toc = [];
 
   for (const [path, leaf] of leaves.entries()) {
+    toc = leaf.tableOfContents || [];
     if (!path.includes('layout.')) continue;
     components = { ...components, ...leaf.components };
   }
 
   for (const [, leaf] of leaves.entries()) {
     if (element) {
-      element = React.createElement(leaf.default, { components }, element);
+      element = React.createElement(
+        leaf.default,
+        { components, tableOfContents: toc },
+        element,
+      );
     } else {
-      element = React.createElement(leaf.default, { components });
+      element = React.createElement(leaf.default, { components, tableOfContents: toc });
     }
   }
 

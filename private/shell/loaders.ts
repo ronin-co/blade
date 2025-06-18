@@ -2,6 +2,8 @@ import path from 'node:path';
 
 import { stat } from 'node:fs/promises';
 import { compile } from '@mdx-js/mdx';
+import withToc from '@stefanprobst/rehype-extract-toc';
+import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
 import { type BunPlugin, Glob } from 'bun';
 import YAML from 'js-yaml';
 
@@ -206,6 +208,7 @@ export const getMdxLoader: (environment: 'development' | 'production') => BunPlu
 
       const mdx = await compile(mdxContents, {
         development: environment === 'development',
+        rehypePlugins: [withToc, withTocExport],
       });
 
       const tsx = String(mdx.value);
