@@ -26,6 +26,7 @@ export type {
   FollowingSetTrigger,
   Triggers,
   TriggerOptions,
+  TableOfContents,
 } from '@/private/server/types';
 
 export type * from 'ronin';
