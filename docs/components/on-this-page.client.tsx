@@ -1,3 +1,4 @@
+import { cn, slugify } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
 interface Heading {
@@ -21,7 +22,7 @@ export const OnThisPage = () => {
 
       // Generate an ID if the heading doesn't have one.
       if (!id) {
-        id = `heading-${index}`;
+        id = slugify(heading.textContent || `heading-${index}`);
         heading.id = id;
       }
 
@@ -73,16 +74,6 @@ export const OnThisPage = () => {
     };
   }, [headings]);
 
-  const handleClick = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  };
-
   if (headings.length === 0) {
     return null;
   }
@@ -120,10 +111,14 @@ export const OnThisPage = () => {
                     data-sidebar="menu-button"
                     data-size="default"
                     data-active={activeId === heading.id ? 'true' : 'false'}
-                    onClick={() => handleClick(heading.id)}
-                    className={`peer/menu-button ${
-                      activeId === heading.id ? 'text-primary' : 'text-muted-foreground'
-                    } after:-inset-y-1 relative flex h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 items-center gap-2 overflow-visible rounded-md p-2 text-left font-medium text-[0.8rem] outline-hidden ring-sidebar-ring transition-[width,height,padding,color] after:absolute after:inset-x-0 after:z-0 after:rounded-md hover:text-primary focus-visible:ring-2 active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:border-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0`}
+                    onClick={() => {
+                      const url = new URL(`#${heading.id}`, window.location.href);
+                      window.location.href = url.href;
+                    }}
+                    className={cn(
+                      activeId === heading.id ? 'text-primary' : 'text-muted-foreground',
+                      'peer/menu-button after:-inset-y-1 relative flex h-[30px] 3xl:fixed:w-full w-fit 3xl:fixed:max-w-48 cursor-pointer items-center gap-2 overflow-visible rounded-md p-2 text-left font-medium text-[0.8rem] outline-hidden ring-sidebar-ring transition-[width,height,padding,color] after:absolute after:inset-x-0 after:z-0 after:rounded-md hover:text-primary focus-visible:ring-2 active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:border-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
+                    )}
                     style={{
                       paddingLeft: `${0.5 + (heading.level - 1) * 0.5}rem`,
                     }}>

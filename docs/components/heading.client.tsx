@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { slugify } from '@/lib/utils';
 import { LinkIcon } from 'lucide-react';
 import { type JSX, type ReactNode, isValidElement } from 'react';
 
@@ -28,12 +29,7 @@ export const Heading = ({ children, level, ...props }: HeadingProps) => {
   const HeadingComponent = `h${level}` as keyof JSX.IntrinsicElements;
 
   const textContent = extractTextContent(children);
-  const id = textContent
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+  const id = slugify(textContent);
 
   return (
     <a
