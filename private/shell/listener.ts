@@ -1,140 +1,73 @@
 import path from 'node:path';
-import { type Server, plugin } from 'bun';
+import { serve as serveApp } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { createNodeWebSocket } from '@hono/node-ws';
 import chalk from 'chalk';
+import { Hono } from 'hono';
+import type { WSContext } from 'hono/ws';
 
 import {
-  defaultDeploymentProvider,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
-  serverInputFolder,
 } from '@/private/shell/constants';
-import {
-  getClientReferenceLoader,
-  getFileListLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import {
-  cleanUp,
-  getClientEnvironmentVariables,
-  prepareClientAssets,
-} from '@/private/shell/utils';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
 
-const environment = Bun.env['BLADE_ENV'];
-const port = Bun.env['__BLADE_PORT'];
-
-if (environment === 'development') {
-  const bundleId = generateUniqueId();
-
-  await cleanUp();
-  await prepareClientAssets('development', bundleId, defaultDeploymentProvider);
-
-  plugin(getClientReferenceLoader(environment));
-  plugin(getFileListLoader(false));
-  plugin(getMdxLoader(environment));
-  plugin(getReactAriaLoader());
-} else {
-  // Prevent the process from exiting when an exception occurs.
-  process.on('uncaughtException', (error) => {
-    console.error('An uncaught exception has occurred:', error);
-  });
-
-  // Prevent the process from exiting when a rejection occurs.
-  process.on('unhandledRejection', (reason, promise) => {
-    console.error('An uncaught rejection has occurred:', reason, promise);
-  });
+export interface Server {
+  module?: Promise<{ default: Hono }>;
+  channel?: WSContext;
 }
 
-const requestHandler = await import(
-  path.join(
-    environment === 'development' ? serverInputFolder : outputDirectory,
-    `${defaultDeploymentProvider}.js`,
-  )
-);
+export const serve = async (
+  serverContext: Server,
+  environment: 'development' | 'production',
+  port: number,
+) => {
+  if (environment === 'production') {
+    // Prevent the process from exiting when an exception occurs.
+    process.on('uncaughtException', (error) => {
+      console.error('An uncaught exception has occurred:', error);
+    });
 
-const assetHeaders: Record<string, string> =
-  environment === 'production'
-    ? {
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      }
-    : {};
+    // Prevent the process from exiting when a rejection occurs.
+    process.on('unhandledRejection', (reason, promise) => {
+      console.error('An uncaught rejection has occurred:', reason, promise);
+    });
+  }
 
-const server: Server = Bun.serve({
-  port,
-  development: environment === 'development',
-  fetch: async (request) => {
-    let pathname: string;
+  const app = new Hono();
+  const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
-    try {
-      ({ pathname } = new URL(request.url));
-    } catch (_err) {
-      // If the request URL is malformed, reject the request. For example, this can
-      // happen if the request is missing a `Host` header. The correct response in such
-      // a scenario is defined here:
-      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host
-      return new Response('Bad Request', { status: 400 });
-    }
+  if (environment === 'development') {
+    app.get(
+      '/_blade/reload',
+      upgradeWebSocket(() => ({
+        onOpen: (_event, socket) => (serverContext.channel = socket),
+      })),
+    );
+  }
 
-    // Enable WebSockets for automatically triggering revalidation when files are updated
-    // during development.
-    if (environment === 'development' && pathname.startsWith('/_blade/reload')) {
-      return server.upgrade(request);
-    }
+  const clientPathPrefix = new RegExp(`^${CLIENT_ASSET_PREFIX}`);
+  app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
+  app.use(
+    `${CLIENT_ASSET_PREFIX}/*`,
+    serveStatic({
+      // It's extremely important for requests to be scoped to the client output.
+      // directory, since server code could otherwise be read.
+      root: path.join(path.basename(outputDirectory), CLIENT_ASSET_PREFIX),
+      rewriteRequestPath: (path) => path.replace(clientPathPrefix, ''),
+    }),
+  );
 
-    const outputFile = Bun.file(outputDirectory + pathname);
-    const publicFile = Bun.file(publicDirectory + pathname);
+  app.all('*', async (c) => {
+    const worker = await serverContext.module;
+    return worker!.default.fetch(c.req.raw);
+  });
 
-    const [outputFileExists, publicFileExists] = await Promise.all([
-      outputFile.exists(),
-      publicFile.exists(),
-    ]);
+  const server = serveApp({ fetch: app.fetch, port });
+  if (environment === 'development') injectWebSocket(server);
 
-    if (outputFileExists) {
-      if (pathname.startsWith(CLIENT_ASSET_PREFIX) && pathname.endsWith('.js')) {
-        const fileContents = await outputFile.text();
-        const variables = `import.meta.env=${JSON.stringify(getClientEnvironmentVariables())};`;
-        const newFileContents = variables + fileContents;
-
-        return new Response(newFileContents, {
-          headers: {
-            'Content-Type': outputFile.type,
-            ...assetHeaders,
-          },
-        });
-      }
-
-      return new Response(outputFile, {
-        headers: { ...assetHeaders },
-      });
-    }
-
-    if (publicFileExists) return new Response(publicFile);
-
-    return requestHandler.default.fetch(request, {}, {});
-  },
-  websocket:
-    environment === 'development'
-      ? {
-          open: (socket) => socket.subscribe('development'),
-          close: (socket) => socket.unsubscribe('development'),
-          // We don't care about incoming messages, but the type requires this.
-          message() {},
-        }
-      : undefined,
-});
-
-if (environment === 'development') {
-  // Trigger a revalidation from the client-side whenever the process starts, as the
-  // process is restarted whenever server-side code changes.
-  //
-  // When the process starts the first time and there aren't yet any clients subscribed
-  // to the WebSocket topic, this will just do nothing.
-  server.publish('development', 'revalidate');
-}
-
-console.log(
-  `${loggingPrefixes.info} Serving app on ${chalk.underline(`http://localhost:${port}`)}\n`,
-);
+  console.log(
+    `${loggingPrefixes.info} Serving app on ${chalk.underline(`http://localhost:${port}`)}\n`,
+  );
+};

@@ -1,18 +1,47 @@
 #!/usr/bin/env bun
 
-import { watch } from 'node:fs';
-import { exists } from 'node:fs/promises';
+import { cp, exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { $, type SpawnOptions } from 'bun';
+import { $ } from 'bun';
+import chokidar, { type EmitArgsWithName } from 'chokidar';
+import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
 import {
+  clientInputFile,
+  clientOutputDirectory,
+  defaultDeploymentProvider,
   frameworkDirectory,
   loggingPrefixes,
-  pagesDirectory,
+  outputDirectory,
+  publicDirectory,
+  serverInputFolder,
 } from '@/private/shell/constants';
-import { logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
+import { type Server, serve } from '@/private/shell/listener';
+import {
+  getClientChunkLoader,
+  getClientReferenceLoader,
+  getFileListLoader,
+  getMdxLoader,
+  getReactAriaLoader,
+} from '@/private/shell/loaders';
+import {
+  cleanUp,
+  getClientEnvironmentVariables,
+  logSpinner,
+  prepareStyles,
+  setEnvironmentVariables,
+} from '@/private/shell/utils';
+import {
+  mapProviderInlineDefinitions,
+  transformToCloudflareOutput,
+  transformToNetlifyOutput,
+  transformToVercelBuildOutput,
+} from '@/private/shell/utils/providers';
+import type { Asset } from '@/private/universal/types/util';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -127,101 +156,180 @@ setEnvironmentVariables({
   isBuilding,
   isServing,
   isLoggingQueries: values.queries || false,
-  enableServiceWorker,
-  port,
   projects,
 });
 
-const serverFile = path.join(import.meta.dirname, 'listener.js');
+const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
+const provider = import.meta.env.__BLADE_PROVIDER;
 
-const childProcessConfig: SpawnOptions.OptionsObject = {
-  stdin: 'inherit',
-  stdout: 'inherit',
-  stderr: 'inherit',
-  env: {
-    ...import.meta.env,
-    FORCE_COLOR: '3',
-  },
-};
+const server: Server = {};
 
-if (isServing) {
-  await import(serverFile);
-} else if (isBuilding || isDeveloping) {
-  if (isBuilding) {
-    // We need to spawn a child process because `Bun.build` requires `BUN_ENV` to be set
-    // when the process starts, and since we don't want to require `BUN_ENV` to be set
-    // when starting `blade build`, we need a child process that we can set this
-    // environment variable on.
-    const builder = Bun.spawn(
-      ['bun', path.join(__dirname, 'builder.js')],
-      childProcessConfig,
-    );
+if (isBuilding || isDeveloping) {
+  const bundleId = generateUniqueId();
 
-    // Wait for the process to exit and obtain its exit code.
-    const exitCode = await builder.exited;
+  await cleanUp();
 
-    // If the exit code isn't `0`, an error has occurred during the build and we
-    // therefore want to exit the parent process with an error code too.
-    if (exitCode !== 0) process.exit(1);
+  const clientChunks = new Map<string, string>();
+
+  const clientEnvironmentVariables = Object.entries(getClientEnvironmentVariables()).map(
+    ([key, value]) => {
+      return [`import.meta.env.${key}`, JSON.stringify(value)];
+    },
+  );
+
+  const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
+
+  const assets = new Array<Asset>(
+    { type: 'js', source: getOutputFile(bundleId, 'js') },
+    { type: 'css', source: getOutputFile(bundleId, 'css') },
+  );
+
+  // In production, load the service worker script.
+  if (enableServiceWorker) {
+    assets.push({ type: 'worker', source: '/service-worker.js' });
+  }
+
+  import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
+  import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
+
+  let spinner = logSpinner(
+    `Building${environment === 'production' ? ' for production' : ''}`,
+  );
+
+  const buildOptions: esbuild.BuildOptions = {
+    sourcemap: 'external',
+    bundle: true,
+    format: 'esm',
+    jsx: 'automatic',
+    nodePaths: [path.join(process.cwd(), 'node_modules')],
+    minify: environment === 'production',
+    plugins: [getFileListLoader(), getMdxLoader('production'), getReactAriaLoader()],
+  };
+
+  const clientBuild = await esbuild.context({
+    ...buildOptions,
+    entryPoints: [clientInputFile],
+    entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
+    outdir: clientOutputDirectory,
+    banner: {
+      js: [
+        'if(!import.meta.env){import.meta.env={}};',
+        `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
+        `window['BLADE_BUNDLE']='${bundleId}';`,
+      ].join(''),
+    },
+    plugins: [
+      ...(buildOptions.plugins || []),
+      getClientChunkLoader(clientChunks),
+      {
+        name: 'Init Loader',
+        setup(build) {
+          build.onEnd(async (result) => {
+            if (result.errors.length === 0) {
+              await prepareStyles(environment, projects, bundleId);
+              spinner.succeed();
+            }
+          });
+        },
+      },
+    ],
+    define: Object.fromEntries(clientEnvironmentVariables),
+  });
+
+  const serverBuild = await esbuild.context({
+    ...buildOptions,
+    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
+    entryNames: `[dir]/${defaultDeploymentProvider}`,
+    outdir: outputDirectory,
+    plugins: [
+      ...(buildOptions.plugins || []),
+      getClientReferenceLoader(clientChunks),
+      {
+        name: 'Init Loader',
+        setup(build) {
+          build.onStart(() => {
+            spinner.start();
+          });
+
+          build.onEnd(async (result) => {
+            // Only rebuild client if server build succeeded.
+            if (result.errors.length === 0) {
+              // Start evaluating the server module immediately.
+              server.module = import(
+                path.join(outputDirectory, `${defaultDeploymentProvider}.js`)
+              );
+
+              await clientBuild.rebuild();
+
+              // Revalidate the client.
+              if (server.channel) server.channel.send('revalidate');
+            }
+          });
+        },
+      },
+    ],
+
+    // In production, we want to inline environment variables.
+    define:
+      environment === 'production' ? mapProviderInlineDefinitions(provider) : undefined,
+  });
+
+  await serverBuild.rebuild();
+
+  const ignored = ['node_modules', '.git', '.blade', '.husky', '.vercel'];
+
+  const events: Record<
+    Exclude<EmitArgsWithName[0], 'all' | 'raw' | 'ready' | 'error'>,
+    string
+  > = {
+    add: 'File added',
+    change: 'File changed',
+    unlink: 'File removed',
+    addDir: 'Directory added',
+    unlinkDir: 'Directory removed',
+  };
+
+  if (isDeveloping) {
+    chokidar
+      .watch(process.cwd(), {
+        ignored: (path) => ignored.some((item) => path.includes(item)),
+        ignoreInitial: true,
+      })
+      .on('all', (event, eventPath) => {
+        const eventMessage =
+          event in events ? events[event as keyof typeof events] : null;
+        if (!eventMessage) return;
+
+        const relativePath = path.relative(process.cwd(), eventPath);
+
+        spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
+        serverBuild.rebuild();
+      });
   } else {
-    // We need to spawn a child process because we want to take advantage of Bun's
-    // hot-reloading feature, which refreshes the process whenever files are changing.
-    // Since we don't want the client build above to be restarted every time, we need to
-    // isolate the server execution.
-    Bun.spawn(['bun', '--hot', serverFile], childProcessConfig);
+    // Stop the build contexts.
+    await Promise.all([clientBuild.dispose(), serverBuild.dispose()]);
 
-    // In Bun, every file that is processed by a custom Bun loader is not being watched
-    // by Bun, since the loader could load the file from any path that Bun might not be
-    // aware of.
-    //
-    // That's why, for those files, we need custom file watchers, which we can delete
-    // once Bun has added support for exposing a path to watch from Bun loaders, so that
-    // Bun can watch them itself.
-    //
-    // Below, we are watching the two directories that can contain the affected files.
-    // Watching all directories would mean setting up file watchers for ignored paths
-    // like `node_modules`, which we don't want to do. We could of course filter them out
-    // in the event callback, but the file watchers would still exist and consume
-    // resources unnecessarily.
-    //
-    // More details: https://linear.app/ronin/issue/RON-924
-    const handleFileChange: Parameters<typeof watch>[1] = async (_, filename) => {
-      if (
-        !filename?.includes('.client.') &&
-        !filename?.endsWith('.mdx') &&
-        !filename?.endsWith('.css') &&
-        filename !== '.env'
-      )
-        return;
+    // Copy hard-coded static assets into output directory.
+    if (await exists(publicDirectory))
+      await cp(publicDirectory, outputDirectory, { recursive: true });
 
-      const indexTsx = path.join(pagesDirectory, 'index.tsx');
-      if (await exists(indexTsx)) {
-        const file = Bun.file(indexTsx);
-        await Bun.write(file, await file.text());
-        return;
+    switch (provider) {
+      case 'cloudflare': {
+        await transformToCloudflareOutput();
+        break;
       }
-
-      const indexMdx = path.join(pagesDirectory, 'index.mdx');
-      if (await exists(indexMdx)) {
-        const file = Bun.file(indexMdx);
-        await Bun.write(file, await file.text());
+      case 'netlify': {
+        await transformToNetlifyOutput();
+        break;
       }
-    };
-
-    for (const project of projects) {
-      const pagePath = path.join(project, 'pages');
-      const componentPath = path.join(project, 'components');
-      const cssPath = path.join(project, 'styles.css');
-      const envPath = path.join(project, '.env');
-
-      watch(pagePath, { recursive: true }, handleFileChange);
-
-      if (await exists(componentPath)) {
-        watch(componentPath, { recursive: true }, handleFileChange);
+      case 'vercel': {
+        await transformToVercelBuildOutput();
+        break;
       }
-
-      if (await exists(cssPath)) watch(cssPath, {}, handleFileChange);
-      if (await exists(envPath)) watch(envPath, {}, handleFileChange);
     }
   }
+}
+
+if (isDeveloping || isServing) {
+  await serve(server, environment, port);
 }

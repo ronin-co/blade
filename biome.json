@@ -95,7 +95,8 @@
         "noEvolvingTypes": "off",
         "noEmptyBlockStatements": "off",
         "noThenProperty": "off",
-        "noRedeclare": "off"
+        "noRedeclare": "off",
+        "noAssignInExpressions": "off"
       }
     }
   },

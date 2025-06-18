@@ -1,5 +1,11 @@
 import type { Query } from '@ronin/compiler';
 import {
+  type AddQuery,
+  QUERY_SYMBOLS,
+  type RemoveQuery,
+  type SetQuery,
+} from '@ronin/compiler';
+import {
   type DeepCallable,
   type PromiseTuple,
   type SyntaxItem,
@@ -29,12 +35,6 @@ import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import logger from '@/private/universal/utils/logs';
 import { useLocation, usePopulatePathname, useRedirect } from '@/public/universal/hooks';
-import {
-  type AddQuery,
-  QUERY_SYMBOLS,
-  type RemoveQuery,
-  type SetQuery,
-} from '@ronin/compiler';
 
 interface MutationOptions {
   /** Display a different page once the queries have run. */
