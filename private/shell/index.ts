@@ -252,7 +252,7 @@ if (isBuilding || isDeveloping) {
           });
 
           build.onEnd(async (result) => {
-            // Only rebuild client if server build succeeded
+            // Only rebuild client if server build succeeded.
             if (result.errors.length === 0) {
               // Start evaluating the server module immediately.
               server.module = import(
