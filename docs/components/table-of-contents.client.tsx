@@ -1,4 +1,5 @@
 import { TableOfContentsItem } from '@/components/toc-item.client';
+import { slugify } from '@/lib/utils';
 import type { TableOfContents } from '@ronin/blade/types';
 import { useEffect, useState } from 'react';
 
@@ -48,7 +49,7 @@ export const TableOfContentsSidebar = ({
 
     allHeadings.forEach((item) => {
       if (item.value) {
-        const element = document.getElementById(item.value);
+        const element = document.getElementById(slugify(item.value));
         if (element) {
           observer.observe(element);
         }
