@@ -88,12 +88,14 @@ if (isInitializing) {
   const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
   const targetDirectory = path.join(process.cwd(), projectName);
 
-  const { success, stderr } = Bun.spawnSync([
-    'cp',
-    '-r',
-    originDirectory,
-    targetDirectory,
-  ]);
+  try {
+    await cp(originDirectory, targetDirectory, {
+      recursive: true,
+    });
+  } catch (error) {
+    logSpinner('Failed to create example app').fail();
+    console.error(error);
+  }
 
   try {
     await $`cd ${targetDirectory} && git init`.quiet();
@@ -115,12 +117,7 @@ if (isInitializing) {
     console.error(error);
   }
 
-  if (success) {
-    logSpinner('Created example app').succeed();
-  } else {
-    logSpinner('Failed to create example app').fail();
-    console.error(stderr);
-  }
+  logSpinner('Created example app').succeed();
 
   process.exit();
 }
