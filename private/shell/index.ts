@@ -93,7 +93,7 @@ if (isInitializing) {
   const targetDirExists = await exists(targetDirectory);
   if (targetDirExists) {
     logSpinner(
-      `Failed to initialize example app. A directory named ${projectName} already exists`,
+      `Failed to initialize example app. A directory named \`${projectName}\` already exists`,
     ).fail();
     process.exit();
   }
