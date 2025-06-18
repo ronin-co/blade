@@ -94,13 +94,13 @@ html {
 
 	--sh-class: var(--color-blue-400);
 	--sh-comment: var(--color-zinc-400);
-	--sh-entity: var(--color-green-400);
-	--sh-identifier: var(--color-zinc-500);
+	--sh-entity: var(--color-green-600);
+	--sh-identifier: var(--color-zinc-700);
 	--sh-jsxliterals: var(--color-zinc-800);
-	--sh-keyword: var(--color-rose-400);
-	--sh-property: var(--color-violet-400);
-	--sh-sign: var(--color-zinc-500);
-	--sh-string: var(--color-sky-300);
+	--sh-keyword: var(--color-rose-500);
+	--sh-property: var(--color-violet-500);
+	--sh-sign: var(--color-zinc-700);
+	--sh-string: var(--color-blue-400);
 }
 
 @variant dark {
@@ -137,10 +137,13 @@ html {
 	--sidebar-border: oklch(0.269 0 0);
 	--sidebar-ring: oklch(0.439 0 0);
 
-	--sh-class: var(--color-sky-300);
 	--sh-comment: var(--color-zinc-500);
-	--sh-identifier: #ffffff;
-	--sh-jsxliterals: var(--color-zinc-500);
+	--sh-entity: var(--color-green-400);
+	--sh-identifier: var(--color-white);
+	--sh-jsxliterals: var(--color-zinc-400);
+	--sh-keyword: var(--color-rose-400);
+	--sh-property: var(--color-violet-400);
+	--sh-sign: var(--color-zinc-700);
 }
 
 @theme inline {
