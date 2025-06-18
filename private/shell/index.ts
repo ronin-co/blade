@@ -4,12 +4,10 @@ import { spawnSync } from 'node:child_process';
 import { cp, exists } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { $ } from 'bun';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
-import { spawn } from 'node:child_process';
 import {
   clientInputFile,
   clientOutputDirectory,
