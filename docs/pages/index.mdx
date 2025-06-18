@@ -67,37 +67,60 @@ API of Blade revolves around the concept of [Hooks](https://react.dev/reference/
 
 ## Get Started
 
-To get started with RONIN after signing up, first [define a model](/docs/models) and apply it to your database.
+Start building your first application with Blade by installing [Bun](https://bun.sh), which is a JavaScript runtime that powers Blade.
 
-Next, to query your RONIN database, start by creating a new App (such as “Website”) in the “Apps” section of your space on the dashboard (left sidebar), which will provide you with a token.
+Afterward, run the following command to create a new example application:
 
-After that, install the [RONIN client](https://www.npmjs.com/package/ronin) on your project:
-
-```bash title="Terminal"
-npm install ronin
+```bash
+bunx @ronin/blade init
 ```
 
-<AlertCard>
-  RONIN currently only supports [Bun](https://bun.sh) during development.
-</AlertCard>
+A new directory named `blade-example` will be created as a result, which contains your newly created application.
 
-Once the package is installed, make sure to define a `RONIN_TOKEN` environment variable on your project that contains the App Token you've created on the dashboard. The RONIN client will automatically make use of this environment variable to authenticate your queries (you can alternatively pass the token using [config](/docs/client)).
+To start developing it, you can now run this command:
 
-Lastly, you can then start sending [queries](/docs/queries) to your RONIN database:
-
-```ts
-import { add } from 'ronin';
-
-await add.account.with({
-    name: 'Elaine Jones',
-    handle: 'elaine',
-});
+```bash
+bun run dev
 ```
 
-In the example above, we're adding a new record for the "account" model. Depending on the models you've added to your database, make sure to replace "account" with the slug of the model you've added. Additionally, the fields must match the fields you've defined on your respective model.
+That's it! 🎉 You can now start working on your application.
 
-That's it! You can now start using RONIN to build your application!
+## Data Storage
 
-Next up, we recommend learning more about the [RONIN query syntax](/docs/queries), which allows you to construct the ideal database queries for your project.
+While Blade supports any fast edge database (zero config support for third-party databases is being worked on), the fastest way to get started is to sign up to [RONIN](https://ronin.co) — an SQLite-powered edge database.
 
-Feel free to join our [Discord community](https://discord.gg/ronin) if you have any questions or need help getting started. The RONIN team would be happy to guide you in realtime.
+After signing up, you will be provided with a `RONIN_TOKEN` environment variable, which contains the token that can be used to access your SQLite database.
+
+Next, add this environment variable to your Blade application, using a `.env` file:
+
+```txt
+RONIN_TOKEN=xxxxxx
+```
+
+Once you've placed this file in the root directory of your project, Blade will automatically read it and use it to access your origin SQLite database, from which it will then automatically retrieve data as needed.
+
+Since every newly created database on RONIN already contains example data, you can now open the `pages/index.tsx` file of your Blade application and start querying the data:
+
+```tsx
+import { use } from '@ronin/blade/server/hooks';
+
+const Page = () => {
+  const posts = use.posts();
+
+  return (
+    <div>
+      {posts.map(post => <h1>{post.title}</h1>)}
+    </div>
+  );
+};
+
+export default Page;
+```
+
+Since the hook for reading data is reactive, it will automatically update if you write an update somewhere else in your application with the [`useMutation`](/hooks#usemetadata-server) hook. Similarily, it is automatically revalidated in the background as well, to ensure that the data is always fresh.
+
+To add more kinds of data to your database, you can continue with defining a [model](/models), which is essentially how tables are defined when using Blade. Whenever you apply a model, it immediately becomes available for querying, as shown with the `post` model above.
+
+Now you can also start adding data to your application! 🚀
+
+Feel free to join our [Discord community](https://discord.gg/ronin) if you have questions or need help getting started. The team would be happy to help you out in realtime.
