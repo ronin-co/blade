@@ -88,7 +88,7 @@ export const CodeBlock = (props: CodeBlockProps) => {
   });
 
   return (
-    <div className="relative my-6">
+    <div className="relative my-3">
       <pre
         {...restProps}
         className="not-prose relative my-0! overflow-x-auto rounded-lg border p-5 text-sm">

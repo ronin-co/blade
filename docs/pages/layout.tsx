@@ -7,6 +7,7 @@ import { Heading } from '@/components/heading.client';
 import { Navbar } from '@/components/navbar';
 import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
+import { cn } from '@/lib/utils';
 import { useMetadata } from '@ronin/blade/server/hooks';
 
 import type { Theme } from '@/components/theme-toggle.client';
@@ -119,7 +120,10 @@ const DocsLayout = ({
   const description = 'Build instant web apps.';
 
   useMetadata({
-    htmlClassName: theme && ['dark', 'light'].includes(theme) ? theme : undefined,
+    htmlClassName: cn(
+      'scroll-smooth antialiased',
+      theme && ['dark', 'light'].includes(theme) ? theme : undefined,
+    ),
     title,
     description,
     icon: 'https://blade.im/static/black.png',
