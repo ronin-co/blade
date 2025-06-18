@@ -41,7 +41,7 @@ html {
 	h2,
 	h3,
 	h4 {
-		@apply scroll-mt-20;
+		@apply scroll-mt-25;
 	}
 
 	p {
