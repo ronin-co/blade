@@ -144,4 +144,4 @@ EXPOSE 3000/tcp
 ENTRYPOINT [ "bun", "run", "serve" ]
 ```
 
-To deploy a Docker container, you could, for example, sign up to [Fly](https://fly.io), then run `bunx @ronin/blade init` to create a new [example app](https://github.com/ronin-co/blade/tree/main/examples/basic) with Blade, add the `Dockfile` to the directory, and lastly run `fly launch` to deploy your app. Fly will automatically detect the file and proceed with deploying your app.
+To deploy a Docker container, you could, for example, create a new account on [Fly](https://fly.io), then run `bunx @ronin/blade init` to create a new [example app](https://github.com/ronin-co/blade/tree/main/examples/basic) with Blade, add the `Dockfile` to the directory, and lastly run `fly launch` to deploy your app. Fly will automatically detect the file and proceed with deploying your app.
