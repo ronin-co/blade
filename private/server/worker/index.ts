@@ -45,7 +45,8 @@ app.use('*', async (c, next) => {
   // before the pages.
   if (
     typeof c.env?.['ASSETS'] !== 'undefined' &&
-    (requestPath.startsWith(CLIENT_ASSET_PREFIX) || requestPath.startsWith('/static'))
+    (requestPath.startsWith(`/${CLIENT_ASSET_PREFIX}`) ||
+      requestPath.startsWith('/static'))
   ) {
     const newRequest = new Request(requestOrigin + requestPath, c.req.raw);
     const response = await c.env['ASSETS'].fetch(newRequest);

@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { cp, exists } from 'node:fs/promises';
+import { cp, exists, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { $ } from 'bun';
@@ -10,7 +10,6 @@ import getPort, { portNumbers } from 'get-port';
 
 import {
   clientInputFile,
-  clientOutputDirectory,
   defaultDeploymentProvider,
   frameworkDirectory,
   loggingPrefixes,
@@ -37,6 +36,7 @@ import {
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
+import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
@@ -166,11 +166,11 @@ if (isBuilding || isDeveloping) {
     entryPoints: [
       {
         in: clientInputFile,
-        out: clientOutputDirectory,
+        out: path.join(CLIENT_ASSET_PREFIX, 'main'),
       },
       {
-        in: path.join(serverInputFolder, `${provider}.js`),
-        out: outputDirectory,
+        in: path.join(serverInputFolder, `${defaultDeploymentProvider}.js`),
+        out: defaultDeploymentProvider,
       },
     ],
     outdir: outputDirectory,
@@ -207,6 +207,18 @@ if (isBuilding || isDeveloping) {
 
           build.onEnd(async (result) => {
             if (result.errors.length === 0) {
+              const clientOutputDir = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
+              const clientBundle = path.join(clientOutputDir, 'main.js');
+              const clientSourcemap = path.join(clientOutputDir, 'main.js.map');
+
+              await Promise.all([
+                rename(clientBundle, path.join(clientOutputDir, `main.${bundleId}.js`)),
+                rename(
+                  clientSourcemap,
+                  path.join(clientOutputDir, `main.${bundleId}.js.map`),
+                ),
+              ]);
+
               await prepareStyles(environment, projects, bundleId as string);
               spinner.succeed();
 

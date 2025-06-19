@@ -2,8 +2,6 @@ import path from 'node:path';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
-
 export const pagesDirectory = path.resolve(process.cwd(), 'pages');
 export const componentsDirectory = path.resolve(process.cwd(), 'components');
 export const triggersDirectory = path.resolve(process.cwd(), 'triggers');
@@ -17,7 +15,6 @@ export const directoriesToParse = {
 };
 
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
-export const clientOutputDirectory = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
 
 // The path at which people can define a custom Hono app that Blade will mount.
 export const routerInputFile = path.join(process.cwd(), 'router.ts');

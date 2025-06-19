@@ -44,5 +44,5 @@ export const populatePathSegments = (
 };
 
 export const getOutputFile = (bundleId: string, type?: 'js' | 'css') => {
-  return `${CLIENT_ASSET_PREFIX}/main.${bundleId}${type ? `.${type}` : ''}`;
+  return `/${CLIENT_ASSET_PREFIX}/main.${bundleId}${type ? `.${type}` : ''}`;
 };
