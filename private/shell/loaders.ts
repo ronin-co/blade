@@ -5,34 +5,32 @@ import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 
-import type { ClientChunks } from '@/private/shell/types';
 import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 
-export const getClientReferenceLoader = (clientChunks: ClientChunks): esbuild.Plugin => ({
+export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
-  async setup(build) {
+  setup(build) {
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
       let contents = await Bun.file(source.path).text();
-      let loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
+      const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
 
       const transpiler = new Bun.Transpiler({ loader });
       const exports = scanExports(transpiler, contents);
 
       contents += "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
       contents += "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
+      contents += "const isNetlify = typeof Netlify !== 'undefined';\n";
 
       contents = contents.replaceAll(/export default function/g, 'function');
       contents = contents.replaceAll(/export default (.*)/g, '');
       contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
       contents = contents.replaceAll(/export /g, '');
 
-      const relativeSourcePath = path.relative(process.cwd(), source.path);
       const chunkId = generateUniqueId();
-      clientChunks.set(source.path, chunkId);
 
       for (const exportItem of exports) {
-        contents += `${wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath })}\n`;
+        contents += `${wrapClientExport(exportItem, chunkId)}\n`;
 
         const usableName = exportItem.originalName
           ? `${exportItem.originalName} as ${exportItem.name}`
@@ -43,47 +41,6 @@ export const getClientReferenceLoader = (clientChunks: ClientChunks): esbuild.Pl
             ? `export default ${exportItem.originalName};`
             : `export { ${usableName} };`;
       }
-
-      const requiresTranspilation = ['jsx', 'ts', 'tsx'].some((extension) => {
-        return source.path.endsWith(`.${extension}`);
-      });
-
-      if (requiresTranspilation) {
-        const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
-
-        contents = `${newContents}\n${transpiler.transformSync(contents)}`;
-        loader = 'js';
-      }
-
-      return {
-        contents,
-        loader,
-      };
-    });
-  },
-});
-
-export const getClientChunkLoader = (clientChunks: ClientChunks): esbuild.Plugin => ({
-  name: 'Client Chunk Loader',
-  async setup(build) {
-    build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
-      let contents = await Bun.file(source.path).text();
-      const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
-
-      const chunkId = clientChunks.get(source.path);
-
-      const transpiler = new Bun.Transpiler({ loader });
-      const exports = scanExports(transpiler, contents);
-
-      contents += `
-        window.BLADE_CHUNKS["${chunkId}"] = {
-          ${exports
-            .map((exportItem) => {
-              return `"${exportItem.name}": ${exportItem.originalName || exportItem.name},`;
-            })
-            .join('\n')}
-        };
-      `;
 
       return {
         contents,
