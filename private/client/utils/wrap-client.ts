@@ -30,6 +30,7 @@ export const wrapClientComponent = (component: Component, name: string) => {
       },
     );
   } else {
+    if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
     window.BLADE_CHUNKS[chunkId] = { [name]: component };
   }
 };

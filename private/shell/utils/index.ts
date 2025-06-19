@@ -82,25 +82,22 @@ export const wrapClientExport = (
 
   return `
   if (typeof window === 'undefined' || isNetlify) {
-
     try {
-    Object.defineProperties(
-      ${internalName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${internalName}.render : ${internalName},
-      {
-        $$typeof: { value: CLIENT_REFERENCE },
-        name: { value: '${externalName}' },
-        chunk: { value: '${chunk.id}' },
-        id: { value: '${chunk.path}' }
-      }
-    );
-  } catch (err) {}
-
-
+      Object.defineProperties(
+        ${internalName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${internalName}.render : ${internalName},
+        {
+          $$typeof: { value: CLIENT_REFERENCE },
+          name: { value: '${externalName}' },
+          chunk: { value: '${chunk.id}' },
+          id: { value: '${chunk.path}' }
+        }
+      );
+    } catch (err) {}
   } else {
-
+    if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
     if (!window.BLADE_CHUNKS["${chunk.id}"]) window.BLADE_CHUNKS["${chunk.id}"] = {};
-    window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${internalName};
 
+    window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${internalName};
   }
   `;
 };
