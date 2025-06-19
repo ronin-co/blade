@@ -27,11 +27,10 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
       contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
       contents = contents.replaceAll(/export /g, '');
 
-      const relativeSourcePath = path.relative(process.cwd(), source.path);
       const chunkId = generateUniqueId();
 
       for (const exportItem of exports) {
-        contents += `${wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath })}\n`;
+        contents += `${wrapClientExport(exportItem, chunkId)}\n`;
 
         const usableName = exportItem.originalName
           ? `${exportItem.originalName} as ${exportItem.name}`

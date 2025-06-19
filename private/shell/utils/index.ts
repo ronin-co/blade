@@ -73,10 +73,7 @@ export const getFileList = async (): Promise<string> => {
   return file;
 };
 
-export const wrapClientExport = (
-  exportItem: ExportItem,
-  chunk: { id: string; path: string },
-) => {
+export const wrapClientExport = (exportItem: ExportItem, chunkId: string) => {
   const internalName = exportItem.originalName || exportItem.name;
   const externalName = exportItem.name;
 
@@ -88,16 +85,16 @@ export const wrapClientExport = (
         {
           $$typeof: { value: CLIENT_REFERENCE },
           name: { value: '${externalName}' },
-          chunk: { value: '${chunk.id}' },
-          id: { value: '${chunk.path}' }
+          chunk: { value: '${chunkId}' },
+          id: { value: '${chunkId}' }
         }
       );
     } catch (err) {}
   } else {
     if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
-    if (!window.BLADE_CHUNKS["${chunk.id}"]) window.BLADE_CHUNKS["${chunk.id}"] = {};
+    if (!window.BLADE_CHUNKS["${chunkId}"]) window.BLADE_CHUNKS["${chunkId}"] = {};
 
-    window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${internalName};
+    window.BLADE_CHUNKS["${chunkId}"]["${externalName}"] = ${internalName};
   }
   `;
 };
