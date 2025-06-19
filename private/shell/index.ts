@@ -173,6 +173,7 @@ if (isBuilding || isDeveloping) {
         out: outputDirectory,
       },
     ],
+    outdir: outputDirectory,
     sourcemap: 'external',
     bundle: true,
     format: 'esm',
@@ -198,7 +199,7 @@ if (isBuilding || isDeveloping) {
 
           build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => {
             return {
-              contents: `export const BUNDLE_ID = "${bundleId}";`,
+              contents: `export const bundleId = "${bundleId}";`,
               loader: 'ts',
               resolveDir: process.cwd(),
             };
@@ -230,6 +231,8 @@ if (isBuilding || isDeveloping) {
       provider,
     }),
   });
+
+  await mainBuild.rebuild();
 
   const ignored = ['node_modules', '.git', '.blade', '.husky', '.vercel'];
 

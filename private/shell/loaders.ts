@@ -10,13 +10,17 @@ import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
-  async setup(build) {
+  setup(build) {
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
       let contents = await Bun.file(source.path).text();
-      let loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
+      const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
 
       const transpiler = new Bun.Transpiler({ loader });
       const exports = scanExports(transpiler, contents);
+
+      contents += "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
+      contents += "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
+      contents += "const isNetlify = typeof Netlify !== 'undefined';\n";
 
       contents = contents.replaceAll(/export default function/g, 'function');
       contents = contents.replaceAll(/export default (.*)/g, '');
@@ -37,17 +41,6 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           exportItem.name === 'default'
             ? `export default ${exportItem.originalName};`
             : `export { ${usableName} };`;
-      }
-
-      const requiresTranspilation = ['jsx', 'ts', 'tsx'].some((extension) => {
-        return source.path.endsWith(`.${extension}`);
-      });
-
-      if (requiresTranspilation) {
-        const newContents = `import { jsxDEV as jsxDEV_7x81h0kn, Fragment as Fragment_8vg9x3sq } from "react/jsx-dev-runtime";`;
-
-        contents = `${newContents}\n${transpiler.transformSync(contents)}`;
-        loader = 'js';
       }
 
       return {
