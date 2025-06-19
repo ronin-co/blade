@@ -23,7 +23,7 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
     link.as = type;
     link.onload = resolve;
     link.onerror = reject;
-    link.href = getOutputFile(bundleId, type === 'style' ? 'css' : 'js');
+    link.href = `/${getOutputFile(bundleId, type === 'style' ? 'css' : 'js')}`;
 
     document.head.appendChild(link);
   });

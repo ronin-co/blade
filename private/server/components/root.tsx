@@ -27,8 +27,8 @@ const metadataNames: Record<string, string> = {
 };
 
 const ASSETS = new Array<Asset>(
-  { type: 'js', source: getOutputFile(bundleId, 'js') },
-  { type: 'css', source: getOutputFile(bundleId, 'css') },
+  { type: 'js', source: `/${getOutputFile(bundleId, 'js')}` },
+  { type: 'css', source: `/${getOutputFile(bundleId, 'css')}` },
 );
 
 // In production, load the service worker script.

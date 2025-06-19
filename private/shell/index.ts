@@ -36,8 +36,8 @@ import {
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -166,7 +166,7 @@ if (isBuilding || isDeveloping) {
     entryPoints: [
       {
         in: clientInputFile,
-        out: path.join(CLIENT_ASSET_PREFIX, 'main'),
+        out: getOutputFile('init'),
       },
       {
         in: path.join(serverInputFolder, `${defaultDeploymentProvider}.js`),
@@ -207,15 +207,20 @@ if (isBuilding || isDeveloping) {
 
           build.onEnd(async (result) => {
             if (result.errors.length === 0) {
-              const clientOutputDir = path.join(outputDirectory, CLIENT_ASSET_PREFIX);
-              const clientBundle = path.join(clientOutputDir, 'main.js');
-              const clientSourcemap = path.join(clientOutputDir, 'main.js.map');
+              const clientBundle = path.join(
+                outputDirectory,
+                getOutputFile('init', 'js'),
+              );
+              const clientSourcemap = path.join(
+                outputDirectory,
+                getOutputFile('init', 'js.map'),
+              );
 
               await Promise.all([
-                rename(clientBundle, path.join(clientOutputDir, `main.${bundleId}.js`)),
+                rename(clientBundle, clientBundle.replace('init.js', `${bundleId}.js`)),
                 rename(
                   clientSourcemap,
-                  path.join(clientOutputDir, `main.${bundleId}.js.map`),
+                  clientSourcemap.replace('init.js.map', `${bundleId}.js.map`),
                 ),
               ]);
 
