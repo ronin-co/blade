@@ -136,10 +136,12 @@ RUN bun run build
 
 FROM oven/bun:1.2.5 AS release
 COPY --from=build /usr/src/app/node_modules node_modules
-COPY --from=build /usr/src/app/packages/private/.blade .blade
-COPY --from=build /usr/src/app/packages/private/package.json .
+COPY --from=build /usr/src/app/.blade .blade
+COPY --from=build /usr/src/app/package.json .
 
 USER bun
 EXPOSE 3000/tcp
 ENTRYPOINT [ "bun", "run", "serve" ]
 ```
+
+To deploy a Docker container, you could, for example, create a new account on [Fly](https://fly.io), then run `bunx @ronin/blade init` to create a new [example app](https://github.com/ronin-co/blade/tree/main/examples/basic) with Blade, add the `Dockfile` to the directory, and lastly run `fly launch` to deploy your app. Fly will automatically detect the file and proceed with deploying your app.
