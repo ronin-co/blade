@@ -117,3 +117,29 @@ Note that Blade does not support terminating TLS (HTTPS) connections, so you mus
 proxy in front of your application that takes care of that for you. Platforms such as
 Fly.io, for example, do so automatically. Additionally, Blade does not perform compression
 and thereby requires providers to do so.
+
+Here's a full example of a Dockerfile for deploying Blade:
+
+```txt
+FROM oven/bun:1.2.5 as base
+WORKDIR /usr/src/app
+
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lock /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
+
+FROM base AS build
+COPY --from=install /temp/dev/node_modules node_modules
+COPY . .
+RUN bun run build
+
+FROM oven/bun:1.2.5 AS release
+COPY --from=build /usr/src/app/node_modules node_modules
+COPY --from=build /usr/src/app/packages/private/.blade .blade
+COPY --from=build /usr/src/app/packages/private/package.json .
+
+USER bun
+EXPOSE 3000/tcp
+ENTRYPOINT [ "bun", "run", "serve" ]
+```
