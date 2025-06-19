@@ -254,9 +254,13 @@ if (isBuilding || isDeveloping) {
           build.onEnd(async (result) => {
             // Only rebuild client if server build succeeded.
             if (result.errors.length === 0) {
-              // Start evaluating the server module immediately.
+              // Start evaluating the server module immediately. We're passing a query
+              // parameter in order to skip the import cache.
               server.module = import(
-                path.join(outputDirectory, `${defaultDeploymentProvider}.js`)
+                path.join(
+                  outputDirectory,
+                  `${defaultDeploymentProvider}.js?t=${Date.now()}`,
+                )
               );
 
               await clientBuild.rebuild();
