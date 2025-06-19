@@ -145,10 +145,9 @@ export const composeEnvironmentVariables = (options: {
   isBuilding: boolean;
   isServing: boolean;
   isLoggingQueries: boolean;
-  projects: string[];
   provider: DeploymentProvider;
 }): Record<string, string> => {
-  const { provider } = options;
+  const { provider, isBuilding, isServing, isLoggingQueries } = options;
 
   const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
     return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
@@ -186,18 +185,14 @@ export const composeEnvironmentVariables = (options: {
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
-  const environment =
-    options.isBuilding || options.isServing ? 'production' : 'development';
+  const environment = isBuilding || isServing ? 'production' : 'development';
   defined['NODE_ENV'] = environment;
   defined['BUN_ENV'] = environment;
   defined['BLADE_ENV'] = environment;
 
   // This variable is used internally by BLADE to determine how much information should
   // be logged to the terminal.
-  defined['__BLADE_DEBUG_LEVEL'] = options.isLoggingQueries ? 'verbose' : 'error';
-
-  // The directories that contain the source code of the application.
-  defined['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
+  defined['__BLADE_DEBUG_LEVEL'] = isLoggingQueries ? 'verbose' : 'error';
 
   const mapped = Object.entries(defined).map(([key, value]) => {
     return [`import.meta.env.${key}`, JSON.stringify(value)];

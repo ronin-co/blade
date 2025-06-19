@@ -160,8 +160,6 @@ if (isBuilding || isDeveloping) {
 
   await cleanUp();
 
-  const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
-
   const assets = new Array<Asset>(
     { type: 'js', source: getOutputFile(bundleId, 'js') },
     { type: 'css', source: getOutputFile(bundleId, 'css') },
@@ -230,8 +228,6 @@ if (isBuilding || isDeveloping) {
       isBuilding,
       isServing,
       isLoggingQueries: values.queries || false,
-
-      projects,
       provider,
     }),
   });

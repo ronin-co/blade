@@ -14,8 +14,6 @@ declare module 'bun' {
     __BLADE_ASSETS: string;
     __BLADE_ASSETS_ID: string;
     __BLADE_DEBUG_LEVEL: 'verbose' | 'error';
-    __BLADE_PORT: string;
-    __BLADE_PROJECTS: string;
     __BLADE_PROVIDER: import('./util').DeploymentProvider;
   }
 }
