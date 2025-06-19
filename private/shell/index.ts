@@ -230,6 +230,7 @@ if (isBuilding || isDeveloping) {
       isBuilding,
       isServing,
       isLoggingQueries: values.queries || false,
+
       projects,
       provider,
     }),
