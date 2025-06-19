@@ -20,7 +20,6 @@ import {
 } from '@/private/shell/constants';
 import { type Server, serve } from '@/private/shell/listener';
 import {
-  getClientChunkLoader,
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
@@ -31,10 +30,9 @@ import {
   getClientEnvironmentVariables,
   logSpinner,
   prepareStyles,
-  setEnvironmentVariables,
 } from '@/private/shell/utils';
 import {
-  mapProviderInlineDefinitions,
+  getProvider,
   transformToCloudflareOutput,
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
@@ -152,15 +150,8 @@ if (await tsConfig.exists()) {
   }
 }
 
-setEnvironmentVariables({
-  isBuilding,
-  isServing,
-  isLoggingQueries: values.queries || false,
-  projects,
-});
-
 const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
-const provider = import.meta.env.__BLADE_PROVIDER;
+const provider = getProvider();
 
 const server: Server = {};
 
@@ -168,14 +159,6 @@ if (isBuilding || isDeveloping) {
   const bundleId = generateUniqueId();
 
   await cleanUp();
-
-  const clientChunks = new Map<string, string>();
-
-  const clientEnvironmentVariables = Object.entries(getClientEnvironmentVariables()).map(
-    ([key, value]) => {
-      return [`import.meta.env.${key}`, JSON.stringify(value)];
-    },
-  );
 
   const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
 
@@ -196,54 +179,28 @@ if (isBuilding || isDeveloping) {
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
 
-  const buildOptions: esbuild.BuildOptions = {
+  const mainBuild = await esbuild.context({
+    entryPoints: [
+      {
+        in: clientInputFile,
+        out: clientOutputDirectory,
+      },
+      {
+        in: path.join(serverInputFolder, `${provider}.js`),
+        out: outputDirectory,
+      },
+    ],
     sourcemap: 'external',
     bundle: true,
     format: 'esm',
     jsx: 'automatic',
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     minify: environment === 'production',
-    plugins: [getFileListLoader(), getMdxLoader('production'), getReactAriaLoader()],
-  };
-
-  const clientBuild = await esbuild.context({
-    ...buildOptions,
-    entryPoints: [clientInputFile],
-    entryNames: `[dir]/${path.basename(getOutputFile(bundleId))}`,
-    outdir: clientOutputDirectory,
-    banner: {
-      js: [
-        'if(!import.meta.env){import.meta.env={}};',
-        `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
-        `window['BLADE_BUNDLE']='${bundleId}';`,
-      ].join(''),
-    },
     plugins: [
-      ...(buildOptions.plugins || []),
-      getClientChunkLoader(clientChunks),
-      {
-        name: 'Init Loader',
-        setup(build) {
-          build.onEnd(async (result) => {
-            if (result.errors.length === 0) {
-              await prepareStyles(environment, projects, bundleId);
-              spinner.succeed();
-            }
-          });
-        },
-      },
-    ],
-    define: Object.fromEntries(clientEnvironmentVariables),
-  });
-
-  const serverBuild = await esbuild.context({
-    ...buildOptions,
-    entryPoints: [path.join(serverInputFolder, `${provider}.js`)],
-    entryNames: `[dir]/${defaultDeploymentProvider}`,
-    outdir: outputDirectory,
-    plugins: [
-      ...(buildOptions.plugins || []),
-      getClientReferenceLoader(clientChunks),
+      getFileListLoader(),
+      getMdxLoader('production'),
+      getReactAriaLoader(),
+      getClientReferenceLoader(),
       {
         name: 'Init Loader',
         setup(build) {
@@ -252,15 +209,15 @@ if (isBuilding || isDeveloping) {
           });
 
           build.onEnd(async (result) => {
-            // Only rebuild client if server build succeeded.
             if (result.errors.length === 0) {
+              await prepareStyles(environment, projects, bundleId);
+              spinner.succeed();
+
               // We're passing a query parameter in order to skip the import cache.
               const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
 
               // Start evaluating the server module immediately.
               server.module = import(path.join(outputDirectory, moduleName));
-
-              await clientBuild.rebuild();
 
               // Revalidate the client.
               if (server.channel) server.channel.send('revalidate');
@@ -269,13 +226,14 @@ if (isBuilding || isDeveloping) {
         },
       },
     ],
-
-    // In production, we want to inline environment variables.
-    define:
-      environment === 'production' ? mapProviderInlineDefinitions(provider) : undefined,
+    define: getClientEnvironmentVariables({
+      isBuilding,
+      isServing,
+      isLoggingQueries: values.queries || false,
+      projects,
+      provider,
+    }),
   });
-
-  await serverBuild.rebuild();
 
   const ignored = ['node_modules', '.git', '.blade', '.husky', '.vercel'];
 
@@ -304,11 +262,11 @@ if (isBuilding || isDeveloping) {
         const relativePath = path.relative(process.cwd(), eventPath);
 
         spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
-        serverBuild.rebuild();
+        mainBuild.rebuild();
       });
   } else {
-    // Stop the build contexts.
-    await Promise.all([clientBuild.dispose(), serverBuild.dispose()]);
+    // Stop the build context.
+    await mainBuild.dispose();
 
     // Copy hard-coded static assets into output directory.
     if (await exists(publicDirectory))

@@ -17,7 +17,7 @@ import {
   styleInputFile,
 } from '@/private/shell/constants';
 import type { FileError } from '@/private/shell/types';
-import { getProvider } from '@/private/shell/utils/providers';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -80,7 +80,15 @@ export const wrapClientExport = (
   const internalName = exportItem.originalName || exportItem.name;
   const externalName = exportItem.name;
 
-  return `try {
+  return `
+  const CLIENT_REFERENCE = Symbol.for('react.client.reference');
+  const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
+   
+  const isNetlify = typeof Netlify !== 'undefined';
+
+  if (typeof window === 'undefined' || isNetlify) {
+
+    try {
     Object.defineProperties(
       ${internalName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${internalName}.render : ${internalName},
       {
@@ -90,7 +98,16 @@ export const wrapClientExport = (
         id: { value: '${chunk.path}' }
       }
     );
-  } catch (err) {}`;
+  } catch (err) {}
+
+
+  } else {
+
+    if (!window.BLADE_CHUNKS["${chunk.id}"]) window.BLADE_CHUNKS["${chunk.id}"] = {};
+    window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${internalName};
+
+  }
+  `;
 };
 
 interface ExportItem {
@@ -124,15 +141,22 @@ export const scanExports = (transpiler: Transpiler, code: string): ExportItem[] 
   });
 };
 
-// Collect the list of variables that will automatically be replaced in the client and
-// server bundles.
-export const setEnvironmentVariables = (options: {
+export const getClientEnvironmentVariables = (options: {
   isBuilding: boolean;
   isServing: boolean;
   isLoggingQueries: boolean;
   projects: string[];
-}) => {
-  if (import.meta.env['BLADE_ENV']) {
+  provider: DeploymentProvider;
+}): Record<string, string> => {
+  const { provider } = options;
+
+  const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
+    return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
+  }) as Array<[string, string]>;
+
+  const defined = Object.fromEntries(filteredVariables);
+
+  if (Bun.env['BLADE_ENV']) {
     let message = `${loggingPrefixes.error} The \`BLADE_ENV\` environment variable is provided by BLADE`;
     message += ` and cannot be overwritten. Using the \`blade\` command for "development"`;
     message += ` and \`blade build\` for "production" will automatically infer the value.`;
@@ -140,50 +164,46 @@ export const setEnvironmentVariables = (options: {
     process.exit(0);
   }
 
-  // Get the current provider based on the environment variables.
-  const provider = getProvider();
-  import.meta.env.__BLADE_PROVIDER = provider;
+  defined['__BLADE_PROVIDER'] = provider;
 
   if (provider === 'cloudflare') {
-    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
-    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
   }
 
   if (provider === 'netlify') {
-    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
-    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
   }
 
   if (provider === 'vercel') {
-    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'];
-    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'] ?? '';
   }
 
-  import.meta.env.BLADE_DATA_WORKER ??= 'https://data.ronin.co';
-  import.meta.env.BLADE_STORAGE_WORKER ??= 'https://storage.ronin.co';
+  defined['BLADE_DATA_WORKER'] ??= 'https://data.ronin.co';
+  defined['BLADE_STORAGE_WORKER'] ??= 'https://storage.ronin.co';
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
   const environment =
     options.isBuilding || options.isServing ? 'production' : 'development';
-  import.meta.env['NODE_ENV'] = environment;
-  import.meta.env['BUN_ENV'] = environment;
-  import.meta.env['BLADE_ENV'] = environment;
+  defined['NODE_ENV'] = environment;
+  defined['BUN_ENV'] = environment;
+  defined['BLADE_ENV'] = environment;
 
   // This variable is used internally by BLADE to determine how much information should
   // be logged to the terminal.
-  import.meta.env['__BLADE_DEBUG_LEVEL'] = options.isLoggingQueries ? 'verbose' : 'error';
+  defined['__BLADE_DEBUG_LEVEL'] = options.isLoggingQueries ? 'verbose' : 'error';
 
   // The directories that contain the source code of the application.
-  import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
-};
+  defined['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
 
-export const getClientEnvironmentVariables = () => {
-  const filteredVariables = Object.entries(import.meta.env).filter(([key]) => {
-    return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
+  const mapped = Object.entries(defined).map(([key, value]) => {
+    return [`import.meta.env.${key}`, JSON.stringify(value)];
   });
 
-  return Object.fromEntries(filteredVariables);
+  return Object.fromEntries(mapped);
 };
 
 export const logSpinner = (text: string) => {
