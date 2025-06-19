@@ -37,9 +37,7 @@ import {
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
-import type { Asset } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
-import { getOutputFile } from '@/private/universal/utils/paths';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -156,26 +154,13 @@ const provider = getProvider();
 const server: Server = {};
 
 if (isBuilding || isDeveloping) {
-  const bundleId = generateUniqueId();
-
   await cleanUp();
-
-  const assets = new Array<Asset>(
-    { type: 'js', source: getOutputFile(bundleId, 'js') },
-    { type: 'css', source: getOutputFile(bundleId, 'css') },
-  );
-
-  // In production, load the service worker script.
-  if (enableServiceWorker) {
-    assets.push({ type: 'worker', source: '/service-worker.js' });
-  }
-
-  import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
-  import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
 
   let spinner = logSpinner(
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
+
+  let bundleId: string | undefined;
 
   const mainBuild = await esbuild.context({
     entryPoints: [
@@ -203,12 +188,25 @@ if (isBuilding || isDeveloping) {
         name: 'Init Loader',
         setup(build) {
           build.onStart(() => {
+            bundleId = generateUniqueId();
             spinner.start();
+          });
+
+          build.onResolve({ filter: /^build-meta$/ }, (source) => {
+            return { path: source.path, namespace: 'dynamic-meta' };
+          });
+
+          build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => {
+            return {
+              contents: `export const BUNDLE_ID = "${bundleId}";`,
+              loader: 'ts',
+              resolveDir: process.cwd(),
+            };
           });
 
           build.onEnd(async (result) => {
             if (result.errors.length === 0) {
-              await prepareStyles(environment, projects, bundleId);
+              await prepareStyles(environment, projects, bundleId as string);
               spinner.succeed();
 
               // We're passing a query parameter in order to skip the import cache.
@@ -228,6 +226,7 @@ if (isBuilding || isDeveloping) {
       isBuilding,
       isServing,
       isLoggingQueries: values.queries || false,
+      enableServiceWorker,
       provider,
     }),
   });

@@ -1,3 +1,4 @@
+import { bundleId } from 'build-meta';
 import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
@@ -8,6 +9,7 @@ import type { PageMetadata, RecursiveRequired, ValueOf } from '@/private/server/
 import { getSerializableContext } from '@/private/universal/context';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { Asset } from '@/private/universal/types/util';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 const metadataNames: Record<string, string> = {
   colorScheme: 'color-scheme',
@@ -24,8 +26,16 @@ const metadataNames: Record<string, string> = {
   'openGraph.siteName': 'og:site_name',
 };
 
-// Perform the parsing once instead of on every render.
-const ASSETS = JSON.parse(import.meta.env.__BLADE_ASSETS) as Array<Asset>;
+const ASSETS = new Array<Asset>(
+  { type: 'js', source: getOutputFile(bundleId, 'js') },
+  { type: 'css', source: getOutputFile(bundleId, 'css') },
+);
+
+// In production, load the service worker script.
+if (import.meta.env['__BLADE_SERVICE_WORKER'] === 'true') {
+  ASSETS.push({ type: 'worker', source: '/service-worker.js' });
+}
+
 const SERVICE_WORKER = ASSETS.find((asset) => asset.type === 'worker');
 
 interface RootProps {

@@ -145,9 +145,11 @@ export const composeEnvironmentVariables = (options: {
   isBuilding: boolean;
   isServing: boolean;
   isLoggingQueries: boolean;
+  enableServiceWorker: boolean;
   provider: DeploymentProvider;
 }): Record<string, string> => {
-  const { provider, isBuilding, isServing, isLoggingQueries } = options;
+  const { provider, isBuilding, isServing, isLoggingQueries, enableServiceWorker } =
+    options;
 
   const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
     return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
@@ -164,6 +166,7 @@ export const composeEnvironmentVariables = (options: {
   }
 
   defined['__BLADE_PROVIDER'] = provider;
+  defined['__BLADE_SERVICE_WORKER'] = enableServiceWorker.toString();
 
   if (provider === 'cloudflare') {
     defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
