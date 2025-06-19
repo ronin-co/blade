@@ -1,3 +1,4 @@
+import { bundleId } from 'build-meta';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
@@ -22,7 +23,7 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
     link.as = type;
     link.onload = resolve;
     link.onerror = reject;
-    link.href = getOutputFile(bundleId, type === 'style' ? 'css' : 'js');
+    link.href = `/${getOutputFile(bundleId, type === 'style' ? 'css' : 'js')}`;
 
     document.head.appendChild(link);
   });
@@ -57,7 +58,7 @@ const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
-    'X-Client-Bundle-Id': window['BLADE_BUNDLE'],
+    'X-Client-Bundle-Id': bundleId,
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });

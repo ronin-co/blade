@@ -23,33 +23,6 @@ export const getProvider = (): DeploymentProvider => {
 };
 
 /**
- * Inline environment variables for runtime environments like Cloudflare, which do not
- * implement support for `import.meta.env`.
- *
- * @param provider - The deployment provider to evaluate.
- *
- * @returns An object of environment variables to be inlined.
- */
-export const mapProviderInlineDefinitions = (
-  provider: DeploymentProvider,
-): Record<string, string> => {
-  if (provider === 'edge-worker') {
-    return {
-      'import.meta.env.__BLADE_ASSETS': JSON.stringify(import.meta.env.__BLADE_ASSETS),
-      'import.meta.env.__BLADE_ASSETS_ID': JSON.stringify(
-        import.meta.env.__BLADE_ASSETS_ID,
-      ),
-    };
-  }
-
-  return Object.fromEntries(
-    Object.entries(import.meta.env)
-      .filter(([key]) => key.startsWith('BLADE_') || key.startsWith('__BLADE_'))
-      .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
-  );
-};
-
-/**
  * Transform to Vercel build output API.
  *
  * @description This function is designed to run after a production build
