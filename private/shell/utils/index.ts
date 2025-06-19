@@ -141,7 +141,7 @@ export const scanExports = (transpiler: Transpiler, code: string): ExportItem[] 
   });
 };
 
-export const getClientEnvironmentVariables = (options: {
+export const composeEnvironmentVariables = (options: {
   isBuilding: boolean;
   isServing: boolean;
   isLoggingQueries: boolean;

@@ -27,7 +27,7 @@ import {
 } from '@/private/shell/loaders';
 import {
   cleanUp,
-  getClientEnvironmentVariables,
+  composeEnvironmentVariables,
   logSpinner,
   prepareStyles,
 } from '@/private/shell/utils';
@@ -226,7 +226,7 @@ if (isBuilding || isDeveloping) {
         },
       },
     ],
-    define: getClientEnvironmentVariables({
+    define: composeEnvironmentVariables({
       isBuilding,
       isServing,
       isLoggingQueries: values.queries || false,
