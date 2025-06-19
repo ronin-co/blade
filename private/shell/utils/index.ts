@@ -85,8 +85,7 @@ export const wrapClientExport = (exportItem: ExportItem, chunkId: string) => {
         {
           $$typeof: { value: CLIENT_REFERENCE },
           name: { value: '${externalName}' },
-          chunk: { value: '${chunkId}' },
-          id: { value: '${chunkId}' }
+          chunk: { value: '${chunkId}' }
         }
       );
     } catch (err) {}
