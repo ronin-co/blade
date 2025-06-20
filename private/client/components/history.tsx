@@ -76,10 +76,6 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       // Establish a new connection.
       ws = new WebSocket(url.href);
 
-      ws.addEventListener('open', () => {
-        console.log('CONNECTED');
-      });
-
       // If the connection was closed unexpectedly, try to reconnect.
       ws.addEventListener('error', () => connect(), { once: true });
 
