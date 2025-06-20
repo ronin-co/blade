@@ -230,7 +230,9 @@ if (isBuilding || isDeveloping) {
               // We're passing a query parameter in order to skip the import cache.
               const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
 
-              // Start evaluating the server module immediately (no `await`).
+              // Start evaluating the server module immediately. We're not using `await`
+              // to ensure that the client revalidation can begin before the module has
+              // been evaluated entirely.
               server.module = import(path.join(outputDirectory, moduleName));
 
               // Revalidate the client.
@@ -284,8 +286,9 @@ if (isBuilding || isDeveloping) {
     await mainBuild.dispose();
 
     // Copy hard-coded static assets into output directory.
-    if (await exists(publicDirectory))
+    if (await exists(publicDirectory)) {
       await cp(publicDirectory, outputDirectory, { recursive: true });
+    }
 
     switch (provider) {
       case 'cloudflare': {
@@ -305,5 +308,12 @@ if (isBuilding || isDeveloping) {
 }
 
 if (isDeveloping || isServing) {
+  const moduleName = path.join(outputDirectory, `${defaultDeploymentProvider}.js`);
+
+  // Initialize the edge worker. Using `await` here is essential, since we don't want the
+  // first request in production to get slown down by the evaluation of the module.
+  server.module = await import(moduleName);
+
+  // Listen on a port and serve the edge worker.
   await serve(server, environment, port);
 }
