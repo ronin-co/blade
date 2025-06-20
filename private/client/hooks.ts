@@ -133,6 +133,9 @@ export const usePageTransition = () => {
           // It's critical that this happens inside the promise that is being handled by
           // the queue and not outside the queue, otherwise the queue will already start
           // working on the next item after the current one finishes.
+          //
+          // Note that it's absolutely fine for the queue to be destroyed completely,
+          // since the new client chunks will mount an entirely new queue.
           pageTransitionQueue.pause();
           pageTransitionQueue.clear();
 
