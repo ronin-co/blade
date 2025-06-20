@@ -45,7 +45,7 @@ export const Navbar = ({ items }: { items: SidebarItem }) => {
               rel="noreferrer"
               className="w-fit px-0">
               <Icons.gitHub className="h-4 w-4" />
-              <span className="text-muted-foreground text-xs tabular-nums">197</span>
+              <span className="text-muted-foreground text-xs tabular-nums">213</span>
               <span className="sr-only">GitHub</span>
             </a>
           </Button>
