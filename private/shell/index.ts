@@ -284,8 +284,9 @@ if (isBuilding || isDeveloping) {
     await mainBuild.dispose();
 
     // Copy hard-coded static assets into output directory.
-    if (await exists(publicDirectory))
+    if (await exists(publicDirectory)) {
       await cp(publicDirectory, outputDirectory, { recursive: true });
+    }
 
     switch (provider) {
       case 'cloudflare': {
@@ -305,5 +306,12 @@ if (isBuilding || isDeveloping) {
 }
 
 if (isDeveloping || isServing) {
+  const moduleName = path.join(outputDirectory, `${defaultDeploymentProvider}.js`);
+
+  // Initialize the edge worker. Using `await` here is essential, since we don't want the
+  // first request in production to get slown down by the evaluation of the module.
+  server.module = await import(moduleName);
+
+  // Listen on a port and serve the edge worker.
   await serve(server, environment, port);
 }
