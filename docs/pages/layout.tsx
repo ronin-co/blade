@@ -62,11 +62,6 @@ const menuItems: SidebarItem = {
       name: 'Deploying',
       href: '/deploying',
     },
-    {
-      id: 'mdx',
-      name: 'MDX',
-      href: '/mdx',
-    },
   ],
   Queries: [
     {
