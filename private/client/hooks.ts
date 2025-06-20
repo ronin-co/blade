@@ -94,6 +94,16 @@ export const usePageTransition = () => {
       };
     }
 
+    if (!window.navigator.onLine) {
+      if (type === 'automatic') {
+        return () => {
+          logger.info('Skipping automatic page transition because device is not online.');
+        };
+      }
+
+      throw new Error('Device is not online to perform manual page transition');
+    }
+
     const ongoingManualAmount = pageTransitionQueue.sizeBy({ priority: 1 });
     const ongoingAutomaticAmount = pageTransitionQueue.sizeBy({ priority: 0 });
 
@@ -159,21 +169,6 @@ export const useRevalidation = <T extends RevalidationReason>() => {
 
   return (reason: T) => {
     const privateLocation = privateLocationRef.current;
-    const filesUpdated = reason === 'files updated';
-
-    // Prevent revalidation if one of the following is true:
-    //
-    // - The device is no longer online.
-    // - The document doesn't have focus.
-    // - Pagination is currently happening somewhere on the page.
-    //
-    // If files were updated during development, however, we always want to force a
-    // revalidation regardless.
-    if ((!window.navigator.onLine || !document.hasFocus()) && !filesUpdated) {
-      logger.info(`Skipping revalidation (${reason})`);
-      return;
-    }
-
     const path = privateLocation.pathname + privateLocation.search + privateLocation.hash;
 
     logger.info(`Revalidating ${path} (${reason})`);
