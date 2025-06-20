@@ -14,6 +14,7 @@ import type { RevalidationReason } from '@/private/client/types/util';
 import fetchPage, { type FetchedPage } from '@/private/client/utils/fetch-page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
+import { IS_DEV } from '@/private/universal/utils/constants';
 import logger from '@/private/universal/utils/logs';
 import { usePopulatePathname } from '@/public/universal/hooks';
 
@@ -58,7 +59,11 @@ export const usePageTransition = () => {
 
       // If the page was already loaded on the client and it's not older than 10 seconds,
       // we can just render it directly without having to fetch it again.
-      if (cacheEntry && cacheEntry.time > maxAge) {
+      //
+      // However, this should only happen in production. During development, we are
+      // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
+      // in production, caching a page for 10 seconds makes sense.
+      if (cacheEntry && cacheEntry.time > maxAge && !IS_DEV) {
         return () => window['BLADE_ROOT']!.render(cacheEntry.body);
       }
     }
@@ -89,6 +94,16 @@ export const usePageTransition = () => {
       };
     }
 
+    if (!window.navigator.onLine) {
+      if (type === 'automatic') {
+        return () => {
+          logger.info('Skipping automatic page transition because device is not online.');
+        };
+      }
+
+      throw new Error('Device is not online to perform manual page transition');
+    }
+
     const ongoingManualAmount = pageTransitionQueue.sizeBy({ priority: 1 });
     const ongoingAutomaticAmount = pageTransitionQueue.sizeBy({ priority: 0 });
 
@@ -102,15 +117,39 @@ export const usePageTransition = () => {
       pageTransitionQueue.clear();
     }
 
-    const pagePromise = pageTransitionQueue.add(() => fetchPage(path, options), {
-      priority: type === 'manual' ? 1 : 0,
-    });
+    const pagePromise = pageTransitionQueue.add(
+      async () => {
+        const page = await fetchPage(path, options);
+
+        // If the client bundles have changed, don't proceed, since `fetchPage` will
+        // retrieve the latest bundles fresh in that case.
+        if (!page) {
+          // Immediately destroy the page queue, since we now know that the server has
+          // changed, so we cannot continue processing any further requests from the old
+          // client chunks. We have to do this inside the promise of the current function
+          // and not after it resolves, since the queue would otherwise immediately start
+          // working on the other queue items.
+          //
+          // It's critical that this happens inside the promise that is being handled by
+          // the queue and not outside the queue, otherwise the queue will already start
+          // working on the next item after the current one finishes.
+          //
+          // Note that it's absolutely fine for the queue to be destroyed completely,
+          // since the new client chunks will mount an entirely new queue.
+          pageTransitionQueue.pause();
+          pageTransitionQueue.clear();
+
+          return null;
+        }
+
+        return page;
+      },
+      { priority: type === 'manual' ? 1 : 0 },
+    );
 
     const pagePromiseChain = pagePromise.then((page) => {
-      if (!page) {
-        logger.info('Skipping page transition because it timed out or crashed.');
-        return;
-      }
+      // Do nothing if no page is available. Logging already happens earlier.
+      if (!page) return;
 
       // As soon as possible, store the page in the cache.
       if (cacheable) cache.current.set(path, page);
@@ -154,21 +193,6 @@ export const useRevalidation = <T extends RevalidationReason>() => {
 
   return (reason: T) => {
     const privateLocation = privateLocationRef.current;
-    const filesUpdated = reason === 'files updated';
-
-    // Prevent revalidation if one of the following is true:
-    //
-    // - The device is no longer online.
-    // - The document doesn't have focus.
-    // - Pagination is currently happening somewhere on the page.
-    //
-    // If files were updated during development, however, we always want to force a
-    // revalidation regardless.
-    if ((!window.navigator.onLine || !document.hasFocus()) && !filesUpdated) {
-      logger.info(`Skipping revalidation (${reason})`);
-      return;
-    }
-
     const path = privateLocation.pathname + privateLocation.search + privateLocation.hash;
 
     logger.info(`Revalidating ${path} (${reason})`);

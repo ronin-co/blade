@@ -17,7 +17,7 @@ import {
   publicDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
-import { type Server, serve } from '@/private/shell/listener';
+import { type ServerState, serve } from '@/private/shell/listener';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -148,10 +148,10 @@ if (await tsConfig.exists()) {
   }
 }
 
-const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
+const environment = isBuilding || isServing ? 'production' : 'development';
 const provider = getProvider();
 
-const server: Server = {};
+const server: ServerState = {};
 
 if (isBuilding || isDeveloping) {
   await cleanUp();
@@ -230,22 +230,21 @@ if (isBuilding || isDeveloping) {
               // We're passing a query parameter in order to skip the import cache.
               const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
 
-              // Start evaluating the server module immediately.
+              // Start evaluating the server module immediately (no `await`).
               server.module = import(path.join(outputDirectory, moduleName));
 
               // Revalidate the client.
-              if (server.channel) server.channel.send('revalidate');
+              if (server.channel) server.channel.publish('development', 'revalidate');
             }
           });
         },
       },
     ],
     define: composeEnvironmentVariables({
-      isBuilding,
-      isServing,
       isLoggingQueries: values.queries || false,
       enableServiceWorker,
       provider,
+      environment,
     }),
   });
 

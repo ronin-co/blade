@@ -1,10 +1,8 @@
 import path from 'node:path';
-import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { createNodeWebSocket } from '@hono/node-ws';
+import type { Server } from 'bun';
 import chalk from 'chalk';
 import { Hono } from 'hono';
-import type { WSContext } from 'hono/ws';
 
 import {
   loggingPrefixes,
@@ -13,13 +11,13 @@ import {
 } from '@/private/shell/constants';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
-export interface Server {
+export interface ServerState {
   module?: Promise<{ default: Hono }>;
-  channel?: WSContext;
+  channel?: Server;
 }
 
 export const serve = async (
-  serverContext: Server,
+  serverState: ServerState,
   environment: 'development' | 'production',
   port: number,
 ) => {
@@ -36,16 +34,6 @@ export const serve = async (
   }
 
   const app = new Hono();
-  const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
-
-  if (environment === 'development') {
-    app.get(
-      '/_blade/reload',
-      upgradeWebSocket(() => ({
-        onOpen: (_event, socket) => (serverContext.channel = socket),
-      })),
-    );
-  }
 
   const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
   app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
@@ -60,12 +48,42 @@ export const serve = async (
   );
 
   app.all('*', async (c) => {
-    const worker = await serverContext.module;
+    const worker = await serverState.module;
     return worker!.default.fetch(c.req.raw);
   });
 
-  const server = serveApp({ fetch: app.fetch, port });
-  if (environment === 'development') injectWebSocket(server);
+  serverState.channel = Bun.serve({
+    port,
+    development: environment === 'development',
+    fetch: (request) => {
+      let pathname: string;
+
+      try {
+        ({ pathname } = new URL(request.url));
+      } catch (_err) {
+        // If the request URL is malformed, reject the request. For example, this can
+        // happen if the request is missing a `Host` header. The correct response in such
+        // a scenario is defined here:
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host
+        return new Response('Bad Request', { status: 400 });
+      }
+
+      // Enable WebSockets for automatically triggering revalidation when files are updated
+      // during development.
+      if (environment === 'development' && pathname.startsWith('/_blade/reload')) {
+        serverState.channel!.upgrade(request);
+        return;
+      }
+
+      return app.fetch(request, {});
+    },
+    websocket: {
+      open: (socket) => socket.subscribe('development'),
+      close: (socket) => socket.unsubscribe('development'),
+      // We don't care about incoming messages, but the type requires this.
+      message() {},
+    },
+  });
 
   console.log(
     `${loggingPrefixes.info} Serving app on ${chalk.underline(`http://localhost:${port}`)}\n`,
