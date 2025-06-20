@@ -8,7 +8,6 @@ import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
 import { IS_DEV } from '@/private/universal/utils/constants';
 import { usePopulatePathname } from '@/public/universal/hooks';
-import { hc } from 'hono/client';
 
 interface HistoryContentProps {
   children: ReactNode;
@@ -59,6 +58,16 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   useEffect(() => {
     if (!IS_DEV) return;
 
+    // Here we default to the origin available in the browser, because BLADE might
+    // locally sit behind a proxy that terminates TLS, in which case the origin protocol
+    // would be `http` if we make use of the location provided by `usePrivateLocation`,
+    // since that comes from the server.
+    const url = new URL(window.location.origin);
+
+    // This also replaces `https` with `wss` automatically.
+    url.protocol = url.protocol.replace('http', 'ws');
+    url.pathname = '';
+
     let ws: WebSocket;
 
     const connect = () => {
@@ -66,21 +75,14 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       if (ws) ws.close();
 
       // Establish a new connection.
-      //
-      // Here we default to the origin available in the browser, because BLADE might
-      // locally sit behind a proxy that terminates TLS, in which case the origin protocol
-      // would be `http` if we make use of the location provided by `usePrivateLocation`,
-      // since that comes from the server.
-      const client = hc(window.location.origin);
-      ws = client['ws'].$ws(0);
+      console.log(url.href.slice(-1));
+      ws = new WebSocket('ws://localhost:3000');
 
-      ws.addEventListener(
-        'open',
-        () => {
-          console.log('CONNECTED');
-        },
-        { once: true },
-      );
+      console.log('INIT');
+
+      ws.addEventListener('open', () => {
+        console.log('CONNECTED');
+      });
 
       // If the connection was closed unexpectedly, try to reconnect.
       ws.addEventListener('error', () => connect(), { once: true });
@@ -91,7 +93,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
 
     connect();
     return () => ws.close();
-  }, [revalidate]);
+  }, []);
 
   // Update the records on the current page while looking at the window. The update
   // should be performed every 5 seconds, but to ensure that there are never two updates
