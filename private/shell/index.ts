@@ -230,7 +230,7 @@ if (isBuilding || isDeveloping) {
               // We're passing a query parameter in order to skip the import cache.
               const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
 
-              // Start evaluating the server module immediately.
+              // Start evaluating the server module immediately (no `await`).
               server.module = import(path.join(outputDirectory, moduleName));
 
               // Revalidate the client.
