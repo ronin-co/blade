@@ -117,13 +117,35 @@ export const usePageTransition = () => {
       pageTransitionQueue.clear();
     }
 
-    const pagePromise = pageTransitionQueue.add(() => fetchPage(path, options), {
-      priority: type === 'manual' ? 1 : 0,
-    });
+    const pagePromise = pageTransitionQueue.add(
+      async () => {
+        const page = await fetchPage(path, options);
+
+        // If the client bundles have changed, don't proceed, since `fetchPage` will
+        // retrieve the latest bundles fresh in that case.
+        if (!page) {
+          // Immediately destroy the page queue, since we now know that the server has
+          // changed, so we cannot continue processing any further requests from the old
+          // client chunks. We have to do this inside the promise of the current function
+          // and not after it resolves, since the queue would otherwise immediately start
+          // working on the other queue items.
+          //
+          // It's critical that this happens inside the promise that is being handled by
+          // the queue and not outside the queue, otherwise the queue will already start
+          // working on the next item after the current one finishes.
+          pageTransitionQueue.pause();
+          pageTransitionQueue.clear();
+
+          return null;
+        }
+
+        return page;
+      },
+      { priority: type === 'manual' ? 1 : 0 },
+    );
 
     const pagePromiseChain = pagePromise.then((page) => {
-      // We shouldn't log anything here, because `fetchPage` is expected to log the
-      // reason for why a page wasn't fetched if it returns `null`.
+      // Do nothing if no page is available. Logging already happens earlier.
       if (!page) return;
 
       // As soon as possible, store the page in the cache.

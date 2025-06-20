@@ -9,7 +9,9 @@ if (!window['BLADE_ROOT']) {
   const path = location.pathname + location.search + location.hash;
 
   fetchPage(path).then((page) => {
-    if (!page) throw new Error('Fetched page missing for initial render.');
+    // If the client bundles have changed since they were downloaded, don't proceed,
+    // since `fetchPage` will retrieve the latest bundles fresh in that case.
+    if (!page) return;
 
     window['BLADE_ROOT'] = hydrateRoot(document, page.body, {
       onRecoverableError(error, errorInfo) {

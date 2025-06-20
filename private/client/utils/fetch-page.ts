@@ -35,6 +35,14 @@ export interface FetchedPage {
   time: number;
 }
 
+/**
+ * Resolves a new page from the server-side of Blade.
+ *
+ * @param path - The path of the page.
+ * @param options - Additional options for how to resolve the page.
+ *
+ * @returns Either a page or `null` if the server has changed.
+ */
 const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
@@ -66,16 +74,7 @@ const fetchPage = async (
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
   // be caught and rendered further upwards in the code.
-  if (!response.ok) {
-    // TODO: If the response is JSON, that means it was already handled and reported by
-    // BLADE on the server-side, so we do not need to report it again on the client-side.
-    if (response.headers.get('Content-Type') === 'application/json') {
-      console.error(await response.json());
-      return null;
-    }
-
-    throw new Error(await response.text());
-  }
+  if (!response.ok) throw new Error(await response.text());
 
   const serverBundleId = response.headers.get('X-Server-Bundle-Id');
   if (!response.body) throw new Error('Missing response body on client.');
