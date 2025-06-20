@@ -66,7 +66,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
 
     // This also replaces `https` with `wss` automatically.
     url.protocol = url.protocol.replace('http', 'ws');
-    url.pathname = '';
+    url.port = (Number(url.port) + 1).toString();
 
     let ws: WebSocket;
 
@@ -75,14 +75,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       if (ws) ws.close();
 
       // Establish a new connection.
-      console.log(url.href.slice(-1));
-      ws = new WebSocket('ws://localhost:3000');
-
-      console.log('INIT');
-
-      ws.addEventListener('open', () => {
-        console.log('CONNECTED');
-      });
+      ws = new WebSocket(url.href);
 
       // If the connection was closed unexpectedly, try to reconnect.
       ws.addEventListener('error', () => connect(), { once: true });

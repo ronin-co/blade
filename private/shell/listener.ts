@@ -1,10 +1,10 @@
 import path from 'node:path';
 import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { createNodeWebSocket } from '@hono/node-ws';
 import chalk from 'chalk';
 import { Hono } from 'hono';
 import type { WSContext } from 'hono/ws';
+import { WebSocketServer } from 'ws';
 
 import {
   loggingPrefixes,
@@ -36,16 +36,6 @@ export const serve = async (
   }
 
   const app = new Hono();
-  const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
-
-  if (environment === 'development') {
-    app.get(
-      '/ws',
-      upgradeWebSocket(() => ({
-        onOpen: (_event, socket) => (serverContext.channel = socket),
-      })),
-    );
-  }
 
   const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
   app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
@@ -64,8 +54,15 @@ export const serve = async (
     return worker!.default.fetch(c.req.raw);
   });
 
-  const server = serveApp({ fetch: app.fetch, port });
-  if (environment === 'development') injectWebSocket(server);
+  serveApp({ fetch: app.fetch, port });
+
+  if (environment === 'development') {
+    const webSocketServer = new WebSocketServer({ port: port + 1 });
+
+    webSocketServer.on('open', (socket) => {
+      serverContext.channel = socket;
+    });
+  }
 
   console.log(
     `${loggingPrefixes.info} Serving app on ${chalk.underline(`http://localhost:${port}`)}\n`,
