@@ -36,7 +36,7 @@ export const Heading = ({ children, level, ...props }: HeadingProps) => {
       data-heading={true}
       href={`#${id}`}
       id={id}
-      className="group -ml-11 not-prose relative mt-4 flex scroll-mt-25 items-center gap-2">
+      className="group -ml-11 not-prose relative flex scroll-mt-25 items-center gap-2 [&:not(:first-child)]:mt-4">
       <Button
         variant="ghost"
         size="sm"
