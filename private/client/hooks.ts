@@ -14,6 +14,7 @@ import type { RevalidationReason } from '@/private/client/types/util';
 import fetchPage, { type FetchedPage } from '@/private/client/utils/fetch-page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
+import { IS_DEV } from '@/private/universal/utils/constants';
 import logger from '@/private/universal/utils/logs';
 import { usePopulatePathname } from '@/public/universal/hooks';
 
@@ -58,7 +59,11 @@ export const usePageTransition = () => {
 
       // If the page was already loaded on the client and it's not older than 10 seconds,
       // we can just render it directly without having to fetch it again.
-      if (cacheEntry && cacheEntry.time > maxAge) {
+      //
+      // However, this should only happen in production. During development, we are
+      // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
+      // in production, caching a page for 10 seconds makes sense.
+      if (cacheEntry && cacheEntry.time > maxAge && !IS_DEV) {
         return () => window['BLADE_ROOT']!.render(cacheEntry.body);
       }
     }
