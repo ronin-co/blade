@@ -8,6 +8,7 @@ import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
 import { IS_DEV } from '@/private/universal/utils/constants';
 import { usePopulatePathname } from '@/public/universal/hooks';
+import { hc } from 'hono/client';
 
 interface HistoryContentProps {
   children: ReactNode;
@@ -58,36 +59,38 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   useEffect(() => {
     if (!IS_DEV) return;
 
-    // Here we default to the origin available in the browser, because BLADE might
-    // locally sit behind a proxy that terminates TLS, in which case the origin protocol
-    // would be `http` if we make use of the location provided by `usePrivateLocation`,
-    // since that comes from the server.
-    const url = new URL('/_blade/reload', window.location.origin);
+    let ws: WebSocket;
 
-    // This also replaces `https` with `wss` automatically.
-    url.protocol = url.protocol.replace('http', 'ws');
+    const connect = () => {
+      // Close the old connection if there is one available.
+      if (ws) ws.close();
 
-    const refresh = () => revalidate('files updated');
-    let ws = new WebSocket(url.toString());
+      // Establish a new connection.
+      //
+      // Here we default to the origin available in the browser, because BLADE might
+      // locally sit behind a proxy that terminates TLS, in which case the origin protocol
+      // would be `http` if we make use of the location provided by `usePrivateLocation`,
+      // since that comes from the server.
+      const client = hc(window.location.origin);
+      ws = client['ws'].$ws(0);
 
-    // If the connection was closed unexpectedly, try to reconnect.
-    const reconnect = () => {
-      removeListeners();
-      ws = new WebSocket(url.toString());
+      ws.addEventListener(
+        'open',
+        () => {
+          console.log('CONNECTED');
+        },
+        { once: true },
+      );
+
+      // If the connection was closed unexpectedly, try to reconnect.
+      ws.addEventListener('error', () => connect(), { once: true });
+
+      // Trigger a revalidation for every message.
+      ws.addEventListener('message', () => revalidate('files updated'), { once: true });
     };
 
-    ws.addEventListener('close', reconnect);
-    ws.addEventListener('message', refresh);
-
-    const removeListeners = () => {
-      ws.removeEventListener('close', reconnect);
-      ws.removeEventListener('message', refresh);
-    };
-
-    return () => {
-      removeListeners();
-      ws.close();
-    };
+    connect();
+    return () => ws.close();
   }, [revalidate]);
 
   // Update the records on the current page while looking at the window. The update
