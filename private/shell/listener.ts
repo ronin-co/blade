@@ -40,7 +40,7 @@ export const serve = async (
 
   if (environment === 'development') {
     app.get(
-      '/ws',
+      '/_blade/reload',
       upgradeWebSocket(() => ({
         onOpen: (_event, socket) => (serverContext.channel = socket),
       })),

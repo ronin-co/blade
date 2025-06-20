@@ -62,11 +62,10 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     // locally sit behind a proxy that terminates TLS, in which case the origin protocol
     // would be `http` if we make use of the location provided by `usePrivateLocation`,
     // since that comes from the server.
-    const url = new URL(window.location.origin);
+    const url = new URL('/_blade/reload', window.location.origin);
 
     // This also replaces `https` with `wss` automatically.
     url.protocol = url.protocol.replace('http', 'ws');
-    url.pathname = '';
 
     let ws: WebSocket;
 
@@ -75,10 +74,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       if (ws) ws.close();
 
       // Establish a new connection.
-      console.log(url.href.slice(-1));
-      ws = new WebSocket('ws://localhost:3000');
-
-      console.log('INIT');
+      ws = new WebSocket(url.href);
 
       ws.addEventListener('open', () => {
         console.log('CONNECTED');
