@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
+import logger from '@/private/universal/utils/logs';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 /**
@@ -137,6 +138,9 @@ const fetchPage = async (
     document.head.appendChild(newScript);
     oldScript.remove();
   }
+
+  // Print debugging information.
+  logger.info('Mounted new client bundles');
 
   // Since the updated DOM will mount a new instance of React, we don't want to proceed
   // with rendering the updated page using the old React instance.

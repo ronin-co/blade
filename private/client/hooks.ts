@@ -122,10 +122,9 @@ export const usePageTransition = () => {
     });
 
     const pagePromiseChain = pagePromise.then((page) => {
-      if (!page) {
-        logger.info('Skipping page transition because it timed out or crashed.');
-        return;
-      }
+      // We shouldn't log anything here, because `fetchPage` is expected to log the
+      // reason for why a page wasn't fetched if it returns `null`.
+      if (!page) return;
 
       // As soon as possible, store the page in the cache.
       if (cacheable) cache.current.set(path, page);
