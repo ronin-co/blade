@@ -314,6 +314,6 @@ if (isDeveloping || isServing) {
   // first request in production to get slown down by the evaluation of the module.
   server.module = await import(moduleName);
 
-  // Listen on a port and serve the edge worker.
+  // Listen on a port and serve the worker.
   await serve(server, environment, port);
 }
