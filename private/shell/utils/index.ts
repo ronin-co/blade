@@ -129,14 +129,12 @@ export const scanExports = (transpiler: Transpiler, code: string): ExportItem[] 
 };
 
 export const composeEnvironmentVariables = (options: {
-  isBuilding: boolean;
-  isServing: boolean;
+  environment: 'development' | 'production';
   isLoggingQueries: boolean;
   enableServiceWorker: boolean;
   provider: DeploymentProvider;
 }): Record<string, string> => {
-  const { provider, isBuilding, isServing, isLoggingQueries, enableServiceWorker } =
-    options;
+  const { provider, environment, isLoggingQueries, enableServiceWorker } = options;
 
   const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
     return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
@@ -175,7 +173,6 @@ export const composeEnvironmentVariables = (options: {
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
-  const environment = isBuilding || isServing ? 'production' : 'development';
   defined['NODE_ENV'] = environment;
   defined['BUN_ENV'] = environment;
   defined['BLADE_ENV'] = environment;

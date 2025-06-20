@@ -148,7 +148,7 @@ if (await tsConfig.exists()) {
   }
 }
 
-const environment = import.meta.env['BUN_ENV'] as 'production' | 'development';
+const environment = isBuilding || isServing ? 'production' : 'development';
 const provider = getProvider();
 
 const server: Server = {};
@@ -241,11 +241,10 @@ if (isBuilding || isDeveloping) {
       },
     ],
     define: composeEnvironmentVariables({
-      isBuilding,
-      isServing,
       isLoggingQueries: values.queries || false,
       enableServiceWorker,
       provider,
+      environment,
     }),
   });
 
