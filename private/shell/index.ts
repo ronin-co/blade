@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { cp, exists, rename } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { $ } from 'bun';
@@ -276,11 +277,16 @@ if (isBuilding || isDeveloping) {
   };
 
   if (isDeveloping) {
+    const isWsl =
+      process.platform === 'linux' && os.release().toLowerCase().includes('microsoft');
+
     chokidar
       .watch(process.cwd(), {
         ignored: (path) => ignored.some((item) => path.includes(item)),
         ignoreInitial: true,
-        usePolling: true,
+
+        // On WSL (Linux on Windows), we need to use polling for reliable file watching.
+        usePolling: isWsl,
       })
       .on('all', (event, eventPath) => {
         const eventMessage =
