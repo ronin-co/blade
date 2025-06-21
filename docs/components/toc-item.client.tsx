@@ -1,5 +1,6 @@
-import { slugify } from '@/lib/utils';
 import type { TableOfContents } from '@ronin/blade/types';
+
+import { slugify } from '@/lib/utils';
 
 export const TableOfContentsItem = ({
   heading,
