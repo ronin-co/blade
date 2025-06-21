@@ -1,4 +1,5 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
+import { bundleId } from 'build-meta';
 import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
 import getValue from 'get-value';
 import type { Context } from 'hono';
@@ -346,7 +347,9 @@ const getRenderingTree = (
   let toc: Toc = [];
 
   for (const [path, leaf] of leaves.entries()) {
-    toc = leaf.tableOfContents || [];
+    if (leaf.tableOfContents && leaf.tableOfContents.length > 0) {
+      toc = leaf.tableOfContents;
+    }
     if (!path.includes('layout.')) continue;
     components = { ...components, ...leaf.components };
   }
@@ -740,7 +743,7 @@ const renderReactTree = async (
   const clientBundle = c.req.raw.headers.get('X-Client-Bundle-Id');
 
   // The ID of the main bundle currently available on the server.
-  const serverBundle = import.meta.env.__BLADE_ASSETS_ID;
+  const serverBundle = bundleId;
 
   // If the application is being rendered for the first time, we want to render it as
   // static markup. The same should happen if a new main bundle is available on the

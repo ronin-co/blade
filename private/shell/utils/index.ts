@@ -1,36 +1,23 @@
 import fs from 'node:fs';
+import { exists, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
-
-import { cp, exists, readdir, rm } from 'node:fs/promises';
 import {
   compile as compileTailwind,
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
-import type { BuildOutput, Transpiler } from 'bun';
+import type { Transpiler } from 'bun';
 import ora from 'ora';
 
 import {
-  clientInputFile,
-  clientManifestFile,
-  clientOutputDirectory,
-  defaultDeploymentProvider,
   directoriesToParse,
   loggingPrefixes,
   outputDirectory,
-  publicDirectory,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
-import {
-  getClientChunkLoader,
-  getClientComponentLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import type { ClientChunks, FileError } from '@/private/shell/types';
-import { getProvider } from '@/private/shell/utils/providers';
-import type { Asset, DeploymentProvider } from '@/private/universal/types/util';
+import type { FileError } from '@/private/shell/types';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 const crawlDirectory = async (directory: string): Promise<string[]> => {
@@ -86,24 +73,28 @@ export const getFileList = async (): Promise<string> => {
   return file;
 };
 
-export const wrapClientExport = (
-  exportItem: ExportItem,
-  chunk: { id: string; path: string },
-) => {
+export const wrapClientExport = (exportItem: ExportItem, chunkId: string) => {
   const internalName = exportItem.originalName || exportItem.name;
   const externalName = exportItem.name;
 
-  return `try {
-    Object.defineProperties(
-      ${internalName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${internalName}.render : ${internalName},
-      {
-        $$typeof: { value: CLIENT_REFERENCE },
-        name: { value: '${externalName}' },
-        chunk: { value: '${chunk.id}' },
-        id: { value: '${chunk.path}' }
-      }
-    );
-  } catch (err) {}`;
+  return `
+    if (typeof window === 'undefined' || isNetlify) {
+      try {
+        Object.defineProperties(
+          ${internalName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${internalName}.render : ${internalName},
+          {
+            $$typeof: { value: CLIENT_REFERENCE },
+            name: { value: '${externalName}' },
+            chunk: { value: '${chunkId}' }
+          }
+        );
+      } catch (err) {}
+    } else {
+      if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
+      if (!window.BLADE_CHUNKS["${chunkId}"]) window.BLADE_CHUNKS["${chunkId}"] = {};
+      window.BLADE_CHUNKS["${chunkId}"]["${externalName}"] = ${internalName};
+    }
+  `;
 };
 
 interface ExportItem {
@@ -137,17 +128,21 @@ export const scanExports = (transpiler: Transpiler, code: string): ExportItem[] 
   });
 };
 
-// Collect the list of variables that will automatically be replaced in the client and
-// server bundles.
-export const setEnvironmentVariables = (options: {
-  isBuilding: boolean;
-  isServing: boolean;
+export const composeEnvironmentVariables = (options: {
+  environment: 'development' | 'production';
   isLoggingQueries: boolean;
   enableServiceWorker: boolean;
-  port: number;
-  projects: string[];
-}) => {
-  if (import.meta.env['BLADE_ENV']) {
+  provider: DeploymentProvider;
+}): Record<string, string> => {
+  const { provider, environment, isLoggingQueries, enableServiceWorker } = options;
+
+  const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
+    return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
+  }) as Array<[string, string]>;
+
+  const defined = Object.fromEntries(filteredVariables);
+
+  if (Bun.env['BLADE_ENV']) {
     let message = `${loggingPrefixes.error} The \`BLADE_ENV\` environment variable is provided by BLADE`;
     message += ` and cannot be overwritten. Using the \`blade\` command for "development"`;
     message += ` and \`blade build\` for "production" will automatically infer the value.`;
@@ -155,56 +150,42 @@ export const setEnvironmentVariables = (options: {
     process.exit(0);
   }
 
-  // Get the current provider based on the environment variables.
-  const provider = getProvider();
-  import.meta.env.__BLADE_PROVIDER = provider;
-  import.meta.env.__BLADE_SERVICE_WORKER = options.enableServiceWorker ? 'true' : 'false';
+  defined['__BLADE_PROVIDER'] = provider;
+  defined['__BLADE_SERVICE_WORKER'] = enableServiceWorker.toString();
 
   if (provider === 'cloudflare') {
-    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
-    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
   }
 
   if (provider === 'netlify') {
-    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
-    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
   }
 
   if (provider === 'vercel') {
-    import.meta.env['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'];
-    import.meta.env['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'];
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'] ?? '';
   }
 
-  import.meta.env.BLADE_DATA_WORKER ??= 'https://data.ronin.co';
-  import.meta.env.BLADE_STORAGE_WORKER ??= 'https://storage.ronin.co';
+  defined['BLADE_DATA_WORKER'] ??= 'https://data.ronin.co';
+  defined['BLADE_STORAGE_WORKER'] ??= 'https://storage.ronin.co';
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
-  const environment =
-    options.isBuilding || options.isServing ? 'production' : 'development';
-  import.meta.env['NODE_ENV'] = environment;
-  import.meta.env['BUN_ENV'] = environment;
-  import.meta.env['BLADE_ENV'] = environment;
+  defined['NODE_ENV'] = environment;
+  defined['BUN_ENV'] = environment;
+  defined['BLADE_ENV'] = environment;
 
   // This variable is used internally by BLADE to determine how much information should
   // be logged to the terminal.
-  import.meta.env['__BLADE_DEBUG_LEVEL'] = options.isLoggingQueries ? 'verbose' : 'error';
+  defined['__BLADE_DEBUG_LEVEL'] = isLoggingQueries ? 'verbose' : 'error';
 
-  // The port on which the development server or production server will run. It is
-  // determined outside the actual worker script because it should remain the same
-  // whenever the worker script is re-evaluated during development.
-  import.meta.env['__BLADE_PORT'] = String(options.port);
-
-  // The directories that contain the source code of the application.
-  import.meta.env['__BLADE_PROJECTS'] = JSON.stringify(options.projects);
-};
-
-export const getClientEnvironmentVariables = () => {
-  const filteredVariables = Object.entries(import.meta.env).filter(([key]) => {
-    return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
+  const mapped = Object.entries(defined).map(([key, value]) => {
+    return [`import.meta.env.${key}`, JSON.stringify(value)];
   });
 
-  return Object.fromEntries(filteredVariables);
+  return Object.fromEntries(mapped);
 };
 
 export const logSpinner = (text: string) => {
@@ -231,104 +212,6 @@ export const cleanUp = async () => {
 };
 
 /**
- * Prints the logs of a build to the terminal, since Bun doesn't do that automatically.
- *
- * @param output A build output object.
- */
-export const handleBuildLogs = (output: BuildOutput) => {
-  for (const log of output.logs) {
-    // Bun logs a warning when it encounters a `sideEffects` property in `package.json`
-    // containing a glob (a wildcard), because Bun doesn't support those yet. We want to
-    // silence this warning, unless it is requested to be logged explicitly.
-    if (
-      log.message.includes('wildcard sideEffects') &&
-      Bun.env['__BLADE_DEBUG_LEVEL'] !== 'verbose'
-    )
-      return;
-
-    // Print the log to the terminal.
-    console.log(log);
-  }
-};
-
-export const prepareClientAssets = async (
-  environment: 'development' | 'production',
-  bundleId: string,
-  provider: DeploymentProvider,
-) => {
-  const clientSpinner = logSpinner(
-    `Performing client build${environment === 'production' ? ' (production)' : ''}`,
-  ).start();
-
-  const clientChunks: ClientChunks = {};
-  const clientEnvironmentVariables = Object.entries(getClientEnvironmentVariables()).map(
-    ([key, value]) => {
-      return [`import.meta.env.${key}`, JSON.stringify(value)];
-    },
-  );
-
-  const projects = JSON.parse(import.meta.env['__BLADE_PROJECTS']) as string[];
-  const isDefaultProvider = provider === defaultDeploymentProvider;
-  const enableServiceWorker = import.meta.env.__BLADE_SERVICE_WORKER === 'true';
-
-  const output = await Bun.build({
-    entrypoints: [clientInputFile],
-    outdir: clientOutputDirectory,
-    plugins: [
-      getClientComponentLoader(projects),
-      getClientChunkLoader(clientChunks),
-      getMdxLoader(environment),
-      getReactAriaLoader(),
-    ],
-    sourcemap: 'external',
-    target: 'browser',
-    naming: path.basename(getOutputFile(bundleId, 'js')),
-    minify: environment === 'production',
-    // When using a serverless deployment provider, inline plain-text environment
-    // variables in the client bundles.
-    define: isDefaultProvider
-      ? undefined
-      : Object.fromEntries(clientEnvironmentVariables),
-  });
-
-  await Bun.write(clientManifestFile, JSON.stringify(clientChunks, null, 2));
-
-  handleBuildLogs(output);
-
-  const chunkFile = Bun.file(path.join(outputDirectory, getOutputFile(bundleId, 'js')));
-
-  const chunkFilePrefix = [
-    isDefaultProvider ? '' : 'if(!import.meta.env){import.meta.env={}};',
-    `if(!window['BLADE_CHUNKS']){window['BLADE_CHUNKS']={}};`,
-    `window['BLADE_BUNDLE']='${bundleId}';`,
-    await chunkFile.text(),
-  ].join('');
-
-  await Bun.write(chunkFile, chunkFilePrefix);
-
-  await prepareStyles(environment, projects, bundleId);
-
-  // Copy hard-coded static assets into output directory.
-  if (await exists(publicDirectory))
-    await cp(publicDirectory, outputDirectory, { recursive: true });
-
-  const assets = new Array<Asset>(
-    { type: 'js', source: getOutputFile(bundleId, 'js') },
-    { type: 'css', source: getOutputFile(bundleId, 'css') },
-  );
-
-  // In production, load the service worker script.
-  if (enableServiceWorker) {
-    assets.push({ type: 'worker', source: '/service-worker.js' });
-  }
-
-  import.meta.env['__BLADE_ASSETS'] = JSON.stringify(assets);
-  import.meta.env['__BLADE_ASSETS_ID'] = bundleId;
-
-  clientSpinner.succeed();
-};
-
-/**
  * Compiles the Tailwind CSS stylesheet for the application.
  *
  * @param environment - The environment in which the application is running.
@@ -337,7 +220,7 @@ export const prepareClientAssets = async (
  *
  * @returns A promise that resolves when the styles have been prepared.
  */
-const prepareStyles = async (
+export const prepareStyles = async (
   environment: 'development' | 'production',
   projects: Array<string>,
   bundleId: string,

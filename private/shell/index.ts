@@ -1,18 +1,43 @@
 #!/usr/bin/env bun
 
-import { watch } from 'node:fs';
-import { exists } from 'node:fs/promises';
+import { cp, exists, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { $, type SpawnOptions } from 'bun';
+import { $ } from 'bun';
+import chokidar, { type EmitArgsWithName } from 'chokidar';
+import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
 import {
+  clientInputFile,
+  defaultDeploymentProvider,
   frameworkDirectory,
   loggingPrefixes,
-  pagesDirectory,
+  outputDirectory,
+  publicDirectory,
+  serverInputFolder,
 } from '@/private/shell/constants';
-import { logSpinner, setEnvironmentVariables } from '@/private/shell/utils';
+import { type ServerState, serve } from '@/private/shell/listener';
+import {
+  getClientReferenceLoader,
+  getFileListLoader,
+  getMdxLoader,
+  getReactAriaLoader,
+} from '@/private/shell/loaders';
+import {
+  cleanUp,
+  composeEnvironmentVariables,
+  logSpinner,
+  prepareStyles,
+} from '@/private/shell/utils';
+import {
+  getProvider,
+  transformToCloudflareOutput,
+  transformToNetlifyOutput,
+  transformToVercelBuildOutput,
+} from '@/private/shell/utils/providers';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -123,105 +148,182 @@ if (await tsConfig.exists()) {
   }
 }
 
-setEnvironmentVariables({
-  isBuilding,
-  isServing,
-  isLoggingQueries: values.queries || false,
-  enableServiceWorker,
-  port,
-  projects,
-});
+const environment = isBuilding || isServing ? 'production' : 'development';
+const provider = getProvider();
 
-const serverFile = path.join(import.meta.dirname, 'listener.js');
+const server: ServerState = {};
 
-const childProcessConfig: SpawnOptions.OptionsObject = {
-  stdin: 'inherit',
-  stdout: 'inherit',
-  stderr: 'inherit',
-  env: {
-    ...import.meta.env,
-    FORCE_COLOR: '3',
-  },
-};
+if (isBuilding || isDeveloping) {
+  await cleanUp();
 
-if (isServing) {
-  await import(serverFile);
-} else if (isBuilding || isDeveloping) {
-  if (isBuilding) {
-    // We need to spawn a child process because `Bun.build` requires `BUN_ENV` to be set
-    // when the process starts, and since we don't want to require `BUN_ENV` to be set
-    // when starting `blade build`, we need a child process that we can set this
-    // environment variable on.
-    const builder = Bun.spawn(
-      ['bun', path.join(__dirname, 'builder.js')],
-      childProcessConfig,
-    );
+  let spinner = logSpinner(
+    `Building${environment === 'production' ? ' for production' : ''}`,
+  );
 
-    // Wait for the process to exit and obtain its exit code.
-    const exitCode = await builder.exited;
+  let bundleId: string | undefined;
 
-    // If the exit code isn't `0`, an error has occurred during the build and we
-    // therefore want to exit the parent process with an error code too.
-    if (exitCode !== 0) process.exit(1);
+  const entryPoints: esbuild.BuildOptions['entryPoints'] = [
+    {
+      in: clientInputFile,
+      out: getOutputFile('init'),
+    },
+    {
+      in: path.join(serverInputFolder, `${provider}.js`),
+      out: defaultDeploymentProvider,
+    },
+  ];
+
+  if (enableServiceWorker) {
+    entryPoints.push({
+      in: path.join(serverInputFolder, 'service-worker.js'),
+      out: 'service-worker',
+    });
+  }
+
+  const mainBuild = await esbuild.context({
+    entryPoints,
+    outdir: outputDirectory,
+    sourcemap: 'external',
+    bundle: true,
+    platform: provider === 'vercel' ? 'node' : 'browser',
+    format: 'esm',
+    jsx: 'automatic',
+    nodePaths: [path.join(process.cwd(), 'node_modules')],
+    minify: environment === 'production',
+    plugins: [
+      getFileListLoader(),
+      getMdxLoader('production'),
+      getReactAriaLoader(),
+      getClientReferenceLoader(),
+      {
+        name: 'Init Loader',
+        setup(build) {
+          build.onStart(() => {
+            bundleId = generateUniqueId();
+            spinner.start();
+          });
+
+          build.onResolve({ filter: /^build-meta$/ }, (source) => {
+            return { path: source.path, namespace: 'dynamic-meta' };
+          });
+
+          build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => {
+            return {
+              contents: `export const bundleId = "${bundleId}";`,
+              loader: 'ts',
+              resolveDir: process.cwd(),
+            };
+          });
+
+          build.onEnd(async (result) => {
+            if (result.errors.length === 0) {
+              const clientBundle = path.join(
+                outputDirectory,
+                getOutputFile('init', 'js'),
+              );
+              const clientSourcemap = path.join(
+                outputDirectory,
+                getOutputFile('init', 'js.map'),
+              );
+
+              await Promise.all([
+                rename(clientBundle, clientBundle.replace('init.js', `${bundleId}.js`)),
+                rename(
+                  clientSourcemap,
+                  clientSourcemap.replace('init.js.map', `${bundleId}.js.map`),
+                ),
+              ]);
+
+              await prepareStyles(environment, projects, bundleId as string);
+              spinner.succeed();
+
+              // We're passing a query parameter in order to skip the import cache.
+              const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
+
+              // Start evaluating the server module immediately. We're not using `await`
+              // to ensure that the client revalidation can begin before the module has
+              // been evaluated entirely.
+              server.module = import(path.join(outputDirectory, moduleName));
+
+              // Revalidate the client.
+              if (server.channel) server.channel.publish('development', 'revalidate');
+            }
+          });
+        },
+      },
+    ],
+    define: composeEnvironmentVariables({
+      isLoggingQueries: values.queries || false,
+      enableServiceWorker,
+      provider,
+      environment,
+    }),
+  });
+
+  await mainBuild.rebuild();
+
+  const ignored = ['node_modules', '.git', '.blade', '.husky', '.vercel'];
+
+  const events: Record<
+    Exclude<EmitArgsWithName[0], 'all' | 'raw' | 'ready' | 'error'>,
+    string
+  > = {
+    add: 'File added',
+    change: 'File changed',
+    unlink: 'File removed',
+    addDir: 'Directory added',
+    unlinkDir: 'Directory removed',
+  };
+
+  if (isDeveloping) {
+    chokidar
+      .watch(process.cwd(), {
+        ignored: (path) => ignored.some((item) => path.includes(item)),
+        ignoreInitial: true,
+      })
+      .on('all', (event, eventPath) => {
+        const eventMessage =
+          event in events ? events[event as keyof typeof events] : null;
+        if (!eventMessage) return;
+
+        const relativePath = path.relative(process.cwd(), eventPath);
+
+        spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
+        mainBuild.rebuild();
+      });
   } else {
-    // We need to spawn a child process because we want to take advantage of Bun's
-    // hot-reloading feature, which refreshes the process whenever files are changing.
-    // Since we don't want the client build above to be restarted every time, we need to
-    // isolate the server execution.
-    Bun.spawn(['bun', '--hot', serverFile], childProcessConfig);
+    // Stop the build context.
+    await mainBuild.dispose();
 
-    // In Bun, every file that is processed by a custom Bun loader is not being watched
-    // by Bun, since the loader could load the file from any path that Bun might not be
-    // aware of.
-    //
-    // That's why, for those files, we need custom file watchers, which we can delete
-    // once Bun has added support for exposing a path to watch from Bun loaders, so that
-    // Bun can watch them itself.
-    //
-    // Below, we are watching the two directories that can contain the affected files.
-    // Watching all directories would mean setting up file watchers for ignored paths
-    // like `node_modules`, which we don't want to do. We could of course filter them out
-    // in the event callback, but the file watchers would still exist and consume
-    // resources unnecessarily.
-    //
-    // More details: https://linear.app/ronin/issue/RON-924
-    const handleFileChange: Parameters<typeof watch>[1] = async (_, filename) => {
-      if (
-        !filename?.includes('.client.') &&
-        !filename?.endsWith('.mdx') &&
-        !filename?.endsWith('.css') &&
-        filename !== '.env'
-      )
-        return;
+    // Copy hard-coded static assets into output directory.
+    if (await exists(publicDirectory)) {
+      await cp(publicDirectory, outputDirectory, { recursive: true });
+    }
 
-      const indexTsx = path.join(pagesDirectory, 'index.tsx');
-      if (await exists(indexTsx)) {
-        const file = Bun.file(indexTsx);
-        await Bun.write(file, await file.text());
-        return;
+    switch (provider) {
+      case 'cloudflare': {
+        await transformToCloudflareOutput();
+        break;
       }
-
-      const indexMdx = path.join(pagesDirectory, 'index.mdx');
-      if (await exists(indexMdx)) {
-        const file = Bun.file(indexMdx);
-        await Bun.write(file, await file.text());
+      case 'netlify': {
+        await transformToNetlifyOutput();
+        break;
       }
-    };
-
-    for (const project of projects) {
-      const pagePath = path.join(project, 'pages');
-      const componentPath = path.join(project, 'components');
-      const cssPath = path.join(project, 'styles.css');
-      const envPath = path.join(project, '.env');
-
-      watch(pagePath, { recursive: true }, handleFileChange);
-
-      if (await exists(componentPath)) {
-        watch(componentPath, { recursive: true }, handleFileChange);
+      case 'vercel': {
+        await transformToVercelBuildOutput();
+        break;
       }
-
-      if (await exists(cssPath)) watch(cssPath, {}, handleFileChange);
-      if (await exists(envPath)) watch(envPath, {}, handleFileChange);
     }
   }
+}
+
+if (isDeveloping || isServing) {
+  const moduleName = path.join(outputDirectory, `${defaultDeploymentProvider}.js`);
+
+  // Initialize the edge worker. Using `await` here is essential, since we don't want the
+  // first request in production to get slown down by the evaluation of the module.
+  server.module = await import(moduleName);
+
+  // Listen on a port and serve the edge worker.
+  await serve(server, environment, port);
 }

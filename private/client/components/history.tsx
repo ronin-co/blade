@@ -67,28 +67,25 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     // This also replaces `https` with `wss` automatically.
     url.protocol = url.protocol.replace('http', 'ws');
 
-    const refresh = () => revalidate('files updated');
-    let ws = new WebSocket(url.toString());
+    let ws: WebSocket;
 
-    // If the connection was closed unexpectedly, try to reconnect.
-    const reconnect = () => {
-      removeListeners();
-      ws = new WebSocket(url.toString());
+    const connect = () => {
+      // Close the old connection if there is one available.
+      if (ws) ws.close();
+
+      // Establish a new connection.
+      ws = new WebSocket(url.href);
+
+      // If the connection was closed unexpectedly, try to reconnect.
+      ws.addEventListener('error', () => connect(), { once: true });
+
+      // Trigger a revalidation for every message.
+      ws.addEventListener('message', () => revalidate('files updated'), { once: true });
     };
 
-    ws.addEventListener('close', reconnect);
-    ws.addEventListener('message', refresh);
-
-    const removeListeners = () => {
-      ws.removeEventListener('close', reconnect);
-      ws.removeEventListener('message', refresh);
-    };
-
-    return () => {
-      removeListeners();
-      ws.close();
-    };
-  }, [revalidate]);
+    connect();
+    return () => ws.close();
+  }, []);
 
   // Update the records on the current page while looking at the window. The update
   // should be performed every 5 seconds, but to ensure that there are never two updates

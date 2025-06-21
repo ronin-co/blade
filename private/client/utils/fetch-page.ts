@@ -1,9 +1,11 @@
+import { bundleId } from 'build-meta';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
+import logger from '@/private/universal/utils/logs';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 /**
@@ -22,7 +24,7 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
     link.as = type;
     link.onload = resolve;
     link.onerror = reject;
-    link.href = getOutputFile(bundleId, type === 'style' ? 'css' : 'js');
+    link.href = `/${getOutputFile(bundleId, type === 'style' ? 'css' : 'js')}`;
 
     document.head.appendChild(link);
   });
@@ -33,6 +35,14 @@ export interface FetchedPage {
   time: number;
 }
 
+/**
+ * Resolves a new page from the server-side of Blade.
+ *
+ * @param path - The path of the page.
+ * @param options - Additional options for how to resolve the page.
+ *
+ * @returns Either a page or `null` if the server has changed.
+ */
 const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
@@ -57,23 +67,14 @@ const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
-    'X-Client-Bundle-Id': window['BLADE_BUNDLE'],
+    'X-Client-Bundle-Id': bundleId,
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
   // be caught and rendered further upwards in the code.
-  if (!response.ok) {
-    // TODO: If the response is JSON, that means it was already handled and reported by
-    // BLADE on the server-side, so we do not need to report it again on the client-side.
-    if (response.headers.get('Content-Type') === 'application/json') {
-      console.error(await response.json());
-      return null;
-    }
-
-    throw new Error(await response.text());
-  }
+  if (!response.ok) throw new Error(await response.text());
 
   const serverBundleId = response.headers.get('X-Server-Bundle-Id');
   if (!response.body) throw new Error('Missing response body on client.');
@@ -136,6 +137,9 @@ const fetchPage = async (
     document.head.appendChild(newScript);
     oldScript.remove();
   }
+
+  // Print debugging information.
+  logger.info('Mounted new client bundles');
 
   // Since the updated DOM will mount a new instance of React, we don't want to proceed
   // with rendering the updated page using the old React instance.
