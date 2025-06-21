@@ -162,17 +162,26 @@ if (isBuilding || isDeveloping) {
 
   let bundleId: string | undefined;
 
+  const entryPoints: esbuild.BuildOptions['entryPoints'] = [
+    {
+      in: clientInputFile,
+      out: getOutputFile('init'),
+    },
+    {
+      in: path.join(serverInputFolder, `${provider}.js`),
+      out: defaultDeploymentProvider,
+    },
+  ];
+
+  if (enableServiceWorker) {
+    entryPoints.push({
+      in: path.join(serverInputFolder, 'service-worker.js'),
+      out: 'service-worker',
+    });
+  }
+
   const mainBuild = await esbuild.context({
-    entryPoints: [
-      {
-        in: clientInputFile,
-        out: getOutputFile('init'),
-      },
-      {
-        in: path.join(serverInputFolder, `${provider}.js`),
-        out: defaultDeploymentProvider,
-      },
-    ],
+    entryPoints,
     outdir: outputDirectory,
     sourcemap: 'external',
     bundle: true,
