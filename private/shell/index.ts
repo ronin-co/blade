@@ -280,6 +280,7 @@ if (isBuilding || isDeveloping) {
       .watch(process.cwd(), {
         ignored: (path) => ignored.some((item) => path.includes(item)),
         ignoreInitial: true,
+        usePolling: true,
       })
       .on('all', (event, eventPath) => {
         const eventMessage =
