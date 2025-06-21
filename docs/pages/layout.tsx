@@ -1,16 +1,16 @@
+import { useCookie } from '@ronin/blade/hooks';
+import { useMetadata } from '@ronin/blade/server/hooks';
+import type { TableOfContents } from '@ronin/blade/types';
+
 import type { CodeProps } from '@/components/code';
 import { Code } from '@/components/code';
-import { useCookie } from '@ronin/blade/hooks';
-
 import { Footer } from '@/components/footer';
 import { Heading } from '@/components/heading.client';
 import { Navbar } from '@/components/navbar';
-import { OnThisPage } from '@/components/on-this-page.client';
 import { Sidebar } from '@/components/sidebar';
-import { cn } from '@/lib/utils';
-import { useMetadata } from '@ronin/blade/server/hooks';
-
+import { TableOfContentsSidebar } from '@/components/table-of-contents.client';
 import type { Theme } from '@/components/theme-toggle.client';
+import { cn } from '@/lib/utils';
 
 type MenuItem = {
   id: string;
@@ -111,8 +111,10 @@ interface HeadingProps {
 
 const DocsLayout = ({
   children,
+  tableOfContents,
 }: {
   children: React.ReactNode;
+  tableOfContents: TableOfContents;
 }) => {
   const [theme] = useCookie<Theme>('theme');
 
@@ -162,7 +164,7 @@ const DocsLayout = ({
           {children}
         </div>
         <div className="fixed top-24 right-20 w-40">
-          <OnThisPage />
+          <TableOfContentsSidebar tableOfContents={tableOfContents} />
         </div>
         <div className="mt-16">
           <Footer theme={theme} />
