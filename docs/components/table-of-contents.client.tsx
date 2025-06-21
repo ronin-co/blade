@@ -1,7 +1,8 @@
-import { TableOfContentsItem } from '@/components/toc-item.client';
-import { slugify } from '@/lib/utils';
 import type { TableOfContents } from '@ronin/blade/types';
 import { useEffect, useState } from 'react';
+
+import { TableOfContentsItem } from '@/components/toc-item.client';
+import { slugify } from '@/lib/utils';
 
 export const TableOfContentsSidebar = ({
   tableOfContents,
