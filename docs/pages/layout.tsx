@@ -48,11 +48,6 @@ const menuItems: SidebarItem = {
       href: '/api-routes',
     },
     {
-      id: 'types',
-      name: 'Types',
-      href: '/types',
-    },
-    {
       id: 'client',
       name: 'Client',
       href: '/client',
