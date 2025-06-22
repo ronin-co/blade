@@ -13,12 +13,15 @@ export const TableOfContentsItem = ({
   const hash = slugify(heading.value);
 
   const handleHeadingClick: MouseEventHandler = (event) => {
+    // Prevent the browser from using the default scrolling effect.
     event.preventDefault();
-    const element = document.getElementById(hash);
 
     // Attach the hash to the current URL.
     document.location.hash = hash;
 
+    const element = document.getElementById(hash);
+
+    // Smoothly scroll to the element instead of scrolling abruptly.
     if (element) {
       element.scrollIntoView({
         behavior: 'smooth',
