@@ -137,7 +137,7 @@ export const composeEnvironmentVariables = (options: {
   const { provider, environment, isLoggingQueries, enableServiceWorker } = options;
 
   const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
-    return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
+    return key.startsWith('BLADE_');
   }) as Array<[string, string]>;
 
   const defined = Object.fromEntries(filteredVariables);
