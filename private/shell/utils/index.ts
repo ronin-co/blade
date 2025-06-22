@@ -181,8 +181,20 @@ export const composeEnvironmentVariables = (options: {
   // be logged to the terminal.
   defined['__BLADE_DEBUG_LEVEL'] = isLoggingQueries ? 'verbose' : 'error';
 
-  const mapped = Object.entries(defined).map(([key, value]) => {
-    return [`import.meta.env.${key}`, JSON.stringify(value)];
+  const mapped = Object.entries(defined).flatMap(([key, value]) => {
+    const stringValue = JSON.stringify(value);
+
+    return [
+      // This is how environment variables should be defined when using Blade and relies
+      // on web standards instead of runtime-specific APIs.
+      [`import.meta.env.${key}`, stringValue],
+
+      // This is how environment variables are defined in Node.js (and runtimes that
+      // provide Node.js compatibility), so we support this only for the purpose of
+      // backward compatibility, ensuring that people can import any package they want,
+      // even if that package doesn't support `import.meta.env` yet.
+      [`process.env.${key}`, stringValue],
+    ];
   });
 
   return Object.fromEntries(mapped);
