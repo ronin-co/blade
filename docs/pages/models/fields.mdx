@@ -4,24 +4,23 @@ title: Fields
 
 # Fields
 
-In RONIN, you define the structure of your data using models.
-They consist of fields, which define the format of your data. Fields can have
-different types, which decide the kind of values they can store.
+In Blade, you define the structure of your data using models. They consist of fields,
+which define the format of your data. Fields can have different types, which decide the
+kind of values they can store.
 
-In traditional (relational) databases, the respective equivalent to a model
-would be a "table", and the equivalent to a field would be a "column". While
-RONIN is powered by a relational data layer ([SQLite](https://www.sqlite.org/)),
-data is exposed to clients in the form of objects (records) instead of lists of
-values (rows), which naturally makes the concept of tables and columns inapplicable.
+In traditional (relational) databases, the respective equivalent to a model would be a
+"table", and the equivalent to a field would be a "column". While Blade is powered by a
+relational data layer ([SQLite](https://www.sqlite.org/)), data is exposed in the form of
+objects (records) instead of lists of values (rows), which naturally makes the concept of
+tables and columns inapplicable.
 
 ## Field Types
 
-RONIN supports a range of different field types for storing various kinds of values.
+Blade supports a range of different field types for storing various kinds of values.
 Below, you can find a complete overview.
 
-Unless a default value is provided for a field, its value will be `null` by
-default. This value can also be set explicitly by the client if the field is not
-marked as "Required".
+Unless a default value is provided for a field, its value will be `null` by default. This
+value can also be set explicitly by the client if the field is not marked as "Required".
 
 ### String
 
@@ -29,134 +28,139 @@ The value is stored as a UTF-8 string of text in SQLite ([TEXT](https://www.sqli
 
 ### Boolean
 
-The value is stored as a signed integer (`1` for `true`, `0` for `false`) in SQLite ([INTEGER](https://www.sqlite.org/datatype3.html)).
+The value is stored as a signed integer (`1` for `true`, `0` for `false`) in SQLite
+([INTEGER](https://www.sqlite.org/datatype3.html)).
 
 ### Number
 
-The value is stored as a 8-byte IEEE floating point number in SQLite ([REAL](https://www.sqlite.org/datatype3.html)).
+The value is stored as a 8-byte IEEE floating point number in SQLite
+([REAL](https://www.sqlite.org/datatype3.html)).
 
-If no decimal digits are provided when storing a value, a single decimal digit is set as `0` by default. Following the behavior of JavaScript, if all decimal digits in the stored value are zero, the value is returned to the client as an integer, otherwise as a floating point number.
+If no decimal digits are provided when storing a value, a single decimal digit is set as
+`0` by default. Following the behavior of JavaScript, if all decimal digits in the stored
+value are zero, the value is returned to the client as an integer, otherwise as a
+floating point number.
 
 ### Date
 
-The value is stored as a 2-byte signed integer in SQLite ([INTEGER](https://www.sqlite.org/datatype3.html)), representing the number of milliseconds that have elapsed since the start of the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
+The value is stored as a 2-byte signed integer in SQLite
+([INTEGER](https://www.sqlite.org/datatype3.html)), representing the number of
+milliseconds that have elapsed since the start of the
+[Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
 
 #### Timezones
 
-All date values are stored and returned using the [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) timezone. To convert a given date into a specific timezone, please perform the conversion on the client. This follows the increasingly common "multi-player" need of web applications, where multiple users from different timezones might consume the same data.
+All date values are stored and returned using the
+[UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) timezone. To convert a
+given date into a specific timezone, please perform the conversion on the client. This
+follows the increasingly common "multi-player" need of web applications, where multiple
+users from different timezones might consume the same data.
 
-It is generally not advised to store any timezones alongside `Date` fields in your database, since users of web apps typically move freely across timezones, which means that the timezone in which the date is displayed must depend on the current location of the client and not be static.
+It is generally not advised to store any timezones alongside `Date` fields in your
+database, since users of web apps typically move freely across timezones, which means
+that the timezone in which the date is displayed must depend on the current location of
+the client and not be static.
 
-If you explicitly need to store a timezone alongside a UTC date, you can use a `String` field to store the identifier of the timezone, and a `Date` field to store the date itself.
+If you explicitly need to store a timezone alongside a UTC date, you can use a `String`
+field to store the identifier of the timezone separately, and a `Date` field to store the
+date itself.
 
 ### Blob
 
-The value is stored in a separate S3-like blob storage, which allows any theoretical size for binary data.
+The value is stored in a separate S3-like blob storage, which allows any theoretical
+size for binary data.
 
-On the client, blob values can be provided in any of the supported formats, such as `Blob`, `File`, `ArrayBuffer`, `ReadableStream`, or the Node.js primitive `Buffer`, which are all internally converted into a single stream of binary data that is stored on disk, without any metadata, in the blob storage.
+On the client, blob values can be provided in any of the supported formats, such as
+`Blob`, `File`, `ArrayBuffer`, `ReadableStream`, or the Node.js primitive `Buffer`,
+which are all internally converted into a single stream of binary data that is stored on
+disk, without any metadata, in the blob storage.
 
-Any potential file metadata is stored as a UTF-8 string of JSON text in SQLite ([TEXT](https://www.sqlite.org/datatype3.html)).
+Any potential file metadata is stored as a UTF-8 string of JSON text in SQLite
+([TEXT](https://www.sqlite.org/datatype3.html)).
 
 ### JSON
 
-The value is stored as a UTF-8 string of text in SQLite ([TEXT](https://www.sqlite.org/datatype3.html)).
+The value is stored as a UTF-8 string of text in SQLite
+([TEXT](https://www.sqlite.org/datatype3.html)).
 
-When the value is provided as a JavaScript object or array, it is automatically serialized to a JSON text string with no indentation, whitespace, and newlines (following the behavior of `JSON.stringify({...})` with no additional arguments in JavaScript), before being stored in the database. When the value is retrieved from the database, it is automatically parsed from JSON to a JavaScript object.
+When the value is provided as a JavaScript object or array, it is automatically
+serialized to a JSON text string with no indentation, whitespace, and newlines
+(following the behavior of `JSON.stringify({...})` with no additional arguments in
+JavaScript), before being stored in the database. When the value is retrieved from the
+database, it is automatically parsed from JSON to a JavaScript object.
 
-The field type can only contain valid object or array notations and `null`. Primitive values that are normally supported by JSON, such as strings, numbers, or booleans are not allowed and must be stored using their respective dedicated field types in RONIN.
-
-### Nested fields
-
-Nested fields allow you to define structured, hierarchical data within your models where the exact structure is known beforehand. This provides a type-safe way to work with complex objects while maintaining data integrity.
-
-Unlike JSON fields (which are better suited for data with unknown or flexible structures), nested fields define a specific schema for your hierarchical data. This approach enables efficient querying and validation of nested properties.
-
-Nested fields are defined using dot notation in the field names, where each segment represents a level in the object hierarchy. For example:
-
-```ts
-import { model, string } from 'ronin';
-
-const user = model({
-  slug: 'User',
-  fields: {
-    "address.street": string(),
-    "address.city": string(),
-    "address.state": string(),
-    "address.zip": string(),
-  },
-});
-```
-
-When working with nested fields in your application, they behave like regular typed objects, providing the same type safety and autocompletion benefits you'd expect in TypeScript. RONIN optimizes the storage and handling of nested fields to ensure efficient data operations.
+The field type can only contain valid object or array notations and `null`. Primitive
+values that are normally supported by JSON, such as strings, numbers, or booleans are not
+allowed and must be stored using their respective dedicated field types in your database.
 
 ### Link
 
-In order to establish a relation between a parent model and a child model, you
-can add fields of type "Link" to the child model, which RONIN will then use
-to store relations between the records of those models whenever records are
-created or updated.
+In order to establish a relation between a parent model and a child model, you can add
+fields of type "Link" to the child model, which Blade will then use to store relations
+between the records of those models whenever records are created or updated.
 
-For example, if your application requires a concept of "Teams" that contain
-"Members" you could create a model called "Team" which would be the parent
-model, and a model called "Member" which would be the child model. They
-are separate models and have different fields, but they relate to each other.
+For example, if your application requires a concept of "Teams" that contain "Members" you
+could create a model called "Team" which would be the parent model, and a model called
+"Member" which would be the child model. They are separate models and have different
+fields, but they relate to each other.
 
-To establish a relation between both models (or rather between the records of
-both models), you can add a new field of type "Reference" to the "Member"
-model, which could have an arbitrary name and slug. For the purpose of the
-aforementioned example, however, you could use "Team" as the field name, and
-"team" as the field slug, such that the field can be used to reference the
-parent team of every member.
+To establish a relation between both models (or rather between the records of both
+models), you can add a new field of type "Reference" to the "Member" model, which could
+have an arbitrary name and slug. For the purpose of the aforementioned example, however,
+you could use "Team" as the field name, and "team" as the field slug, such that the field
+can be used to reference the parent team of every member.
 
 #### Link Actions
 
-Once you've established relations between your records, it is essential for the
-stability and reliability of your application to avoid any inconsistency issues
-among those relations. Like this, you prevent your application from ending up
-in a state that it does not expect, which would cause breakage.
+Once you've established relations between your records, it is essential for the stability
+and reliability of your application to avoid any inconsistency issues among those
+relations. Like this, you prevent your application from ending up in a state that it does
+not expect, which would cause breakage.
 
-As an example, if a "Team" inside your application gets deleted, all the
-"Member" records that relate to it would now point to a non-existing record,
-which your application should not have to handle.
+As an example, if a "Team" inside your application gets deleted, all the "Member" records
+that relate to it would now point to a non-existing record, which your application should
+not have to handle.
 
-RONIN solves this by making it possible to define "Actions" for fields of type
-"Reference" which are executed whenever a given action is performed on the
-parent record. Namely, the following actions are available:
+Blade solves this by making it possible to define "Actions" for fields of type "Link"
+which are executed whenever a given action is performed on the parent record. Namely, the
+following actions are available:
 
-- **None:** No actions will be performed. This
-  option is not recommended unless your application prevents the aforementioned
-  kinds of inconsistency issues itself.
+- `NO ACTION`: No actions will be performed. This option is not recommended unless your
+  application prevents the aforementioned kinds of inconsistency issues itself.
 
-- **Cascade:** If the selected kind of action (such as "Delete" or "Update") is
-  performed on the parent record, the action will be propagated down to all the
-  child records that have referenced the parent record. For example, if
-  "Cascade on Delete" is selected, and the parent record is deleted, all child
-  records will be deleted as well. Similarly if "Cascade on Update" is selected,
-  and the parent record is updated, the exact modification applied to the parent
-  record will also be applied to the child records.
+- `CASCADE`: If the selected kind of action (such as "Delete" or "Update") is performed
+  on the parent record, the action will be propagated down to all the child records that
+  have referenced the parent record. For example, if "Cascade on Delete" is selected, and
+  the parent record is deleted, all child records will be deleted as well. Similarly if
+  "Cascade on Update" is selected, and the parent record is updated, the exact
+  modification applied to the parent record will also be applied to the child records.
 
-- **Clear:** If the selected kind of action (such as "Delete" or "Update") is
-  performed, the value of the "Reference" field in the child record will be
-  cleared, meaning reset back to its original value of `null`. For example, if
-  "Clear on Delete" is selected, and the parent record is deleted; the
-  "Reference" field on the child records that established the relation will be
-  cleared automatically.
+- `SET NULL`: If the selected kind of action (such as "Delete" or "Update") is performed,
+  the value of the Link field in the child record will be set to `null`. For example, if
+  "Clear on Delete" is selected, and the parent record is deleted; the Link field on the
+  child records that established the relation will be cleared automatically.
 
-- **Restrict:** Prevents the selected kind of action (such as "Delete" or
-  "Update") from being performed entirely. If the action is performed, the query
-  performing the action will result in an error.
+- `SET DEFAULT`: If the selected kind of action (such as "Delete" or "Update") is
+  performed, the value of the Link field in the child record will be set to the value
+  configured as the field's default value.
 
-It is important to note that, at the moment, Reference Actions can only be set
-**when a field is added** and can no longer be modified after the field has
-been added. This is a limitation that will be removed in the future.
+- `RESTRICT`: Prevents the selected kind of action (such as "Delete" or "Update") from
+  being performed entirely. If the action is performed, the query performing the action
+  will result in an error.
+
+It is important to note that, at the moment, Link Actions can only be set **when a field
+is added** and can no longer be modified after the field has been added. This is a
+limitation that will be removed in the future.
 
 ## Default Fields
 
-Every record contains several default fields that are managed automatically by RONIN.
+Every record contains several default fields that are managed automatically by Blade.
 
 ### ID
 
-The most important default field generated by RONIN (whenever a new record is created) is the “ID” field, which has the slug id and contains an identifier of the record that is unique within your entire space (across all models).
+The most important default field generated by Blade (whenever a new record is created) is
+the “ID” field, which has the slug id and contains an identifier of the record that is
+unique within your entire space (across all models).
 
 For example, such an ID might look like this:
 
@@ -174,11 +178,16 @@ The ID always consists of the following parts:
 
 #### Customizing IDs
 
-In order to change the ID Prefix from `rec` (which is short for “record”) to any other letter sequence of your choice, you may do so using the “ID Prefix” field in the “Settings” section of your model on the dashboard. For example, you might use the prefix `acc` for a model named “Account”.
+In order to change the ID Prefix from `rec` (which is short for “record”) to any other
+letter sequence of your choice, you may do so by defining the `idPrefix` attribute of
+your model. For example, you might use the prefix `acc` for a model named “Account”.
 
-However, please note that changing this setting only applies to records created after you’ve updated the setting, so you may need to run a manual migration, or create a new model with the right ID Prefix set from the beginning.
+However, please note that changing this setting only applies to records created after
+you’ve updated the setting, so you may need to run a manual migration, or create a new
+model with the right ID Prefix set from the beginning.
 
-If this isn’t enough for you, you may also overwrite the `id` field entirely, by passing it when adding or updating a record:
+If this isn’t enough for you, you may also overwrite the `id` field entirely, by passing
+it when adding or updating a record:
 
 ```ts
 await add.account.with({
@@ -188,11 +197,13 @@ await add.account.with({
 });
 ```
 
-In favor of consistency (within the RONIN platform, but also among different services available on the web), we recommend sticking to the default format.
+In favor of consistency (within your database, but also among different services
+available on the web), we recommend sticking to the default format.
 
 ### Metadata
 
-Whenever a record is created or updated, RONIN automatically stores and updates a `ronin` field that contains meta-information about the record:
+Whenever a record is created or updated, Blade automatically stores and updates a
+`ronin` field that contains meta-information about the record:
 
 ```ts
 interface Metadata {
@@ -203,7 +214,8 @@ interface Metadata {
 }
 ```
 
-Although this information is entirely **read-only** (and therefore cannot be overwritten), you may use it to filter or order records when querying:
+Although this information is entirely **read-only** (and therefore cannot be
+overwritten), you may use it to filter or order records when querying:
 
 ```ts
 await get.blogPosts.orderedBy.ascending(['ronin.createdAt']);
@@ -211,4 +223,39 @@ await get.blogPosts.orderedBy.ascending(['ronin.createdAt']);
 await get.blogPosts.with.ronin.createdAt.lessThan(new Date());
 ```
 
-Note that, even though they might look like record references, the `ronin.createdBy` and `ronin.updatedBy` fields are managed automatically and internally by RONIN, just like all the other field that are nested into `ronin`, which means you won’t be able to resolve them using the `using` query instruction.
+Note that, even though they might look like record references, the `ronin.createdBy`
+and `ronin.updatedBy` fields are managed automatically and internally by Blade, just
+like all the other field that are nested into `ronin`, which means you won’t be able to
+resolve them using the `using` query instruction.
+
+## Nested Fields
+
+To define structured, hierarchical data within your models where the exact structure is
+known beforehand, you can use nested fields. This provides a type-safe way to work with
+complex objects while maintaining data integrity.
+
+Unlike JSON fields (which are better suited for data with unknown or flexible structures),
+nested fields define a specific schema for your hierarchical data. This approach enables
+efficient querying and validation of nested properties.
+
+Nested fields are defined using dot notation in the field names, where each segment
+represents a level in the object hierarchy. For example:
+
+```ts
+import { model, string } from '@ronin/blade/schema';
+
+const user = model({
+  slug: 'User',
+  fields: {
+    "address.street": string(),
+    "address.city": string(),
+    "address.state": string(),
+    "address.zip": string(),
+  },
+});
+```
+
+When working with nested fields in your application, they behave like regular typed
+objects, providing the same type safety and autocompletion benefits you'd expect in
+TypeScript. Blade optimizes the storage and handling of nested fields to ensure efficient
+data operations.
