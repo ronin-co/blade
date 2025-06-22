@@ -170,6 +170,7 @@ export const composeEnvironmentVariables = (options: {
 
   defined['BLADE_DATA_WORKER'] ??= 'https://data.ronin.co';
   defined['BLADE_STORAGE_WORKER'] ??= 'https://storage.ronin.co';
+  defined['RONIN_TOKEN'] = Bun.env['RONIN_TOKEN'] ?? '';
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
