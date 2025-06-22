@@ -170,11 +170,14 @@ const DocsLayout = ({
           <Footer theme={theme} />
         </div>
       </div>
-      <script
-        data-cf-beacon='{"token": "173532820a6a4edbb501f7ff2305ab48"}'
-        defer={true}
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-      />
+
+      {import.meta.env.BLADE_ENV === 'production' && (
+        <script
+          data-cf-beacon='{"token": "173532820a6a4edbb501f7ff2305ab48"}'
+          defer={true}
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+        />
+      )}
     </>
   );
 };
