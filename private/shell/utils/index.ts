@@ -137,7 +137,7 @@ export const composeEnvironmentVariables = (options: {
   const { provider, environment, isLoggingQueries, enableServiceWorker } = options;
 
   const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
-    return key.startsWith('BLADE_PUBLIC_') || key === 'BLADE_ENV';
+    return key.startsWith('BLADE_');
   }) as Array<[string, string]>;
 
   const defined = Object.fromEntries(filteredVariables);
@@ -170,6 +170,7 @@ export const composeEnvironmentVariables = (options: {
 
   defined['BLADE_DATA_WORKER'] ??= 'https://data.ronin.co';
   defined['BLADE_STORAGE_WORKER'] ??= 'https://storage.ronin.co';
+  defined['RONIN_TOKEN'] = Bun.env['RONIN_TOKEN'] ?? '';
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
@@ -181,8 +182,20 @@ export const composeEnvironmentVariables = (options: {
   // be logged to the terminal.
   defined['__BLADE_DEBUG_LEVEL'] = isLoggingQueries ? 'verbose' : 'error';
 
-  const mapped = Object.entries(defined).map(([key, value]) => {
-    return [`import.meta.env.${key}`, JSON.stringify(value)];
+  const mapped = Object.entries(defined).flatMap(([key, value]) => {
+    const stringValue = JSON.stringify(value);
+
+    return [
+      // This is how environment variables should be defined when using Blade and relies
+      // on web standards instead of runtime-specific APIs.
+      [`import.meta.env.${key}`, stringValue],
+
+      // This is how environment variables are defined in Node.js (and runtimes that
+      // provide Node.js compatibility), so we support this only for the purpose of
+      // backward compatibility, ensuring that people can import any package they want,
+      // even if that package doesn't support `import.meta.env` yet.
+      [`process.env.${key}`, stringValue],
+    ];
   });
 
   return Object.fromEntries(mapped);
