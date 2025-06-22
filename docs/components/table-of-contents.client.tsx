@@ -1,8 +1,21 @@
 import type { TableOfContents } from '@ronin/blade/types';
+import type { TocEntry } from '@stefanprobst/rehype-extract-toc';
 import { useEffect, useState } from 'react';
 
 import { TableOfContentsItem } from '@/components/toc-item.client';
 import { slugify } from '@/lib/utils';
+
+const stripFirstLevel = (nodes: Array<TocEntry>): Array<TocEntry> => {
+  // Recursively decrement depth and rebuild children.
+  const lift = (n: TocEntry): TocEntry => ({
+    depth: n.depth - 1,
+    value: n.value,
+    children: n.children?.map(lift),
+  });
+
+  // For each top-level node, grab its children (if any), lift them, and flatten.
+  return nodes.flatMap((n) => n.children?.map(lift) ?? []);
+};
 
 export const TableOfContentsSidebar = ({
   tableOfContents,
@@ -66,6 +79,8 @@ export const TableOfContentsSidebar = ({
     return null;
   }
 
+  const children = stripFirstLevel(tableOfContents);
+
   return (
     <div className="sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-var(--header-height)-var(--footer-height))] w-[--sidebar-width] flex-col bg-transparent text-sidebar-foreground lg:flex">
       <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-2 pb-12 group-data-[collapsible=icon]:overflow-hidden">
@@ -87,7 +102,7 @@ export const TableOfContentsSidebar = ({
               data-slot="sidebar-menu"
               data-sidebar="menu"
               className="flex w-full min-w-0 flex-col gap-0.5">
-              {tableOfContents.map((heading) => (
+              {children.map((heading) => (
                 <TableOfContentsItem
                   key={heading.value}
                   heading={heading}

@@ -4,17 +4,42 @@ title: API Routes
 
 # API Routes
 
-Blade automatically generates REST API routes at `/api` for your [triggers](https://ronin.co/docs/models/triggers) if you define the following in the file of your triggers:
+Reading data in Blade happens through the [`use`](/hooks#use-server) hook in layouts and
+pages, while modifying data happens through the [`useMutation`](/hooks#usemutation-client) hook
+in interactive components.
+
+To run arbitrary code on the server for reads or mutations, [Triggers](/models/triggers)
+can be used (most commonly Triggers of type "During").
+
+This means that all interactions with the server from the client are happening through
+mutations. As a result, no REST APIs are required to be written.
+
+The only case in which you should therefore consider exposing a REST API is if you would
+like other clients (such as an iOS app or a third-party app) to access your application.
+For those cases, Blade automatically generates a REST API at the URL path `/api` that
+exposes your [Triggers](/models/triggers) through an auto-generated request schema, which
+can be enabled by adding this export to your Trigger file:
 
 ```typescript
 export const exposed = true;
 ```
 
-API routes should only be used if you need to interact with your app from a client that is not the browser. For example, if you are also building a native iOS app, you could send HTTP requests to the auto-generated REST API from there.
+In general, you should never interact with those APIs from your Blade application, since
+reading data from an API on the client-side causes a network waterfall and thereby a
+loading animation. Additionally, writing data through an API requires custom client-side
+state management, which Blade is designed to abstract away through its mutation syntax
+and automatic state management.
 
-On the client side of the application you've built using Blade (within the browser), however, you should always make use of [useMutation](#usemutation-client) instead, which guarantees that all read queries on the page are revalidated upon a mutation, avoiding the need for custom client-side data state management.
+Furthermore, Blade performs numerous internal optimizations for the [`use`](/hooks#use-server)
+and [`useMutation`](/hooks#usemutation-client) hooks, such as combining all queries of a
+page render (even across layouts) into a single database transaction for maximum
+performance efficiency.
 
-#### Custom API Routes
+## Custom API Routes
+
+It is highly recommended to rely on Blade's auto-generated REST APIs if you would like
+to expose your application's data to third-party clients, in order to keep your codebase
+as clean as possible.
 
 In the rare case that you need to mount an API with a specific request signature to your Blade application, you can add a `router.ts` file at the root of your application and place a [Hono](https://hono.dev) app inside of it, which will then be mounted by Blade:
 

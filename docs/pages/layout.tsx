@@ -48,19 +48,14 @@ const menuItems: SidebarItem = {
       href: '/api-routes',
     },
     {
-      id: 'types',
-      name: 'Types',
-      href: '/types',
+      id: 'deploying',
+      name: 'Deploying',
+      href: '/deploying',
     },
     {
       id: 'client',
       name: 'Client',
       href: '/client',
-    },
-    {
-      id: 'deploying',
-      name: 'Deploying',
-      href: '/deploying',
     },
   ],
   Queries: [
@@ -170,11 +165,14 @@ const DocsLayout = ({
           <Footer theme={theme} />
         </div>
       </div>
-      <script
-        data-cf-beacon='{"token": "173532820a6a4edbb501f7ff2305ab48"}'
-        defer={true}
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-      />
+
+      {import.meta.env.BLADE_ENV === 'production' && (
+        <script
+          data-cf-beacon='{"token": "173532820a6a4edbb501f7ff2305ab48"}'
+          defer={true}
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+        />
+      )}
     </>
   );
 };

@@ -100,6 +100,38 @@ navigator.languages; // See MDN docs
 navigator.geoLocation; // See MDN docs (currently under construction)
 ```
 
+## `useCookie`
+
+Allows for reading and writing cookies. On the server, cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins. On the client, they modify the cookies stored in the browser directly.
+
+```tsx
+import { useCookie } from '@ronin/blade/hooks';
+
+const Page = () => {
+    const [tokenCookie, setTokenCookie] = useCookie('token');
+
+    if (!tokenCookie) setTokenCooke('a-value');
+
+    return <div>I am a page</div>;
+};
+```
+
+The following options are available:
+
+```tsx
+setCookie('a-value', {
+    // By default, cookies are set as HTTP-only. To let JavaScript access them in the
+    // browser, you can set this option to `true`.
+    client: false,
+
+    // By default, cookies receive a path value of "/". You can customize it using this
+    // option if needed.
+    path: '/'
+});
+```
+
+The max age of cookies currently defaults to 365 days, which is not yet customizable.
+
 ## `useMutation` (Client)
 
 Allows for performing data mutations and updates all `use` queries accordingly.
@@ -370,38 +402,6 @@ const [accounts, posts] = useBatch(() => [
 To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
 
 If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
-
-## `useCookie`
-
-Allows for reading and writing cookies on the server. The cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins.
-
-```tsx
-import { useCookie } from '@ronin/blade/hooks';
-
-const Page = () => {
-    const [tokenCookie, setTokenCookie] = useCookie('token');
-
-    if (!tokenCookie) setTokenCooke('a-value');
-
-    return <div>I am a page</div>;
-};
-```
-
-The following options are available:
-
-```tsx
-setCookie('a-value', {
-    // By default, cookies are set as HTTP-only. To let JavaScript access them in the
-    // browser, you can set this option to `true`.
-    client: false,
-
-    // By default, cookies receive a path value of "/". You can customize it using this
-    // option if needed.
-    path: '/'
-});
-```
-
-The max age of cookies currently defaults to 365 days, which is not yet customizable.
 
 ## `useMetadata` (Server)
 

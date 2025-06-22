@@ -4,8 +4,6 @@ title: TypeScript Client
 
 # TypeScript Client
 
-<div>
-
 By default, the `ronin` [package](https://www.npmjs.com/package/ronin) on npm does not require any configuration to function, which is partially due to the fact that the most important piece of configuration (the App Token) is loaded from the `RONIN_TOKEN` environment variable automatically:
 
 ```ts
@@ -98,17 +96,3 @@ const reviews = await ronin.get.reviews();
 ```
 
 If your environment requires you to pass the App Token configuration option explicitly, we strongly recommend initializing the `ronin` package only once and then passing around the initialized instance to keep your code as clean as possible.
-
-## Rendering Rich Text Fields
-
-Next to many other field types, RONIN also has a field type called the “Rich Text”.
-
-This field acts like an editor inside RONIN, allowing you to write long structured content such as product descriptions, blog posts, or even complete news articles.
-
-When saving the Rich Text field inside the RONIN dashboard, its contents are saved in a format called “Prosemirror JSON”.
-
-To render the field's contents inside your application, you can parse the format manually or use a library such as [tiptap/html](https://tiptap.dev/docs/editor/api/utilities/html) or [prosemirror-to-html-js](https://github.com/enVolt/prosemirror-to-html#prosemirror-to-html-js).
-
-A custom, more lightweight renderer crafted especially for content saved inside RONIN (which the docs you are reading are currently already using, as RONIN … uses RONIN) is being worked on.
-
-</div>
