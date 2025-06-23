@@ -1,6 +1,6 @@
 {
   "name": "create-blade",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "type": "module",
   "description": "Create a new Blade project",
   "repository": {
@@ -14,7 +14,9 @@
   "bin": {
     "create-blade": "./dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
