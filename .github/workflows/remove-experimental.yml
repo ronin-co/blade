@@ -8,13 +8,9 @@ on:
 
 jobs:
   remove-experimental:
-    strategy:
-      matrix:
-        package:
-          - blade
     uses: ronin-co/actions/.github/workflows/remove-experimental.yml@main
     with:
       branch_name: ${{ github.event.pull_request.head.ref }}
-      package_dir: './packages/${{ matrix.package }}'
+      package_dir: './packages/blade'
     secrets:
       NPM_TOKEN_READ_AND_WRITE: ${{ secrets.NPM_TOKEN_READ_AND_WRITE }}
