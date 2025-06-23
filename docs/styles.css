@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
-@plugin "@tailwindcss/typography";
+
+
 
 @custom-variant dark {
     &:where(.dark, .dark *) {
@@ -15,46 +15,16 @@
     }
 }
 
+@font-face {
+	font-family: "Inter";
+	src: url("/static/inter.ttf") format("truetype");
+	font-display: swap;
+}
+
 body,
 html {
 	@apply bg-black overscroll-none;
-	font-family: "Geist", sans-serif;
-}
-
-.docs-content {
-	h1 {
-		@apply scroll-m-20 text-4xl sm:text-3xl xl:text-4xl;
-	}
-
-	h2 {
-		@apply text-2xl sm:text-xl xl:text-2xl;
-	}
-
-	h1,
-	h2,
-	h3,
-	h4,
-	strong {
-		@apply font-semibold tracking-tight dark:text-white;
-	}
-
-	h2,
-	h3,
-	h4 {
-		@apply scroll-mt-25;
-	}
-
-	p {
-		@apply leading-relaxed [&:not(:first-child)]:my-2 dark:text-[#9E9E9E] text-[#3E3E3E]
-	}
-
-	code:not(pre code) {
-		@apply bg-muted relative rounded-md px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] outline-none dark:text-[#9E9E9E];
-	}
-
-	a:not([data-heading]) {
-		@apply dark:text-[#F2F2F2] underline hover:decoration-2;
-	}
+	font-family: "Inter", sans-serif;
 }
 
 :root {

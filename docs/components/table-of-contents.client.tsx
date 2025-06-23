@@ -1,46 +1,92 @@
+import { cn, slugify } from '@/lib/utils';
+import { Link } from '@ronin/blade/client/components';
 import type { TableOfContents } from '@ronin/blade/types';
-import type { TocEntry } from '@stefanprobst/rehype-extract-toc';
 import { useEffect, useState } from 'react';
 
-import { TableOfContentsItem } from '@/components/toc-item.client';
-import { slugify } from '@/lib/utils';
+export const TableOfContentsSidebarItem = ({
+  item,
+  active,
+  indent,
+}: {
+  item: TableOfContents[number];
+  active: string;
+  indent: number;
+}) => {
+  const slug = slugify(item.value);
 
-const stripFirstLevel = (nodes: Array<TocEntry>): Array<TocEntry> => {
-  // Recursively decrement depth and rebuild children.
-  const lift = (n: TocEntry): TocEntry => ({
-    depth: n.depth - 1,
-    value: n.value,
-    children: n.children?.map(lift),
-  });
+  const onClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    document.location.hash = slug;
 
-  // For each top-level node, grab its children (if any), lift them, and flatten.
-  return nodes.flatMap((n) => n.children?.map(lift) ?? []);
+    const element = document.getElementById(slug);
+
+    if (element)
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+  };
+
+  return (
+    <div
+      className={cn('flex flex-col gap-0.5', {
+        'pl-3': indent === 1,
+        'pl-6': indent === 2,
+      })}>
+      <Link
+        key={item.value}
+        href={`#${slug}`}
+        onClick={onClick}
+        className={cn(
+          '-mx-2.5 block cursor-pointer rounded-md px-2.5 py-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:bg-accent hover:text-primary hover:duration-0',
+          {
+            'bg-accent text-primary': active === slug,
+          },
+        )}>
+        <span>{item.value}</span>
+      </Link>
+
+      {item.children && (
+        <div className="flex flex-col gap-0.5">
+          {item.children.map((child) => (
+            <TableOfContentsSidebarItem
+              key={child.value}
+              item={child}
+              active={active}
+              indent={indent + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
-export const TableOfContentsSidebar = ({
-  tableOfContents,
-}: { tableOfContents: TableOfContents }) => {
+export const TableOfContentsSidebar = ({ toc }: { toc: TableOfContents }) => {
   const [activeId, setActiveId] = useState<string>('');
+
+  // If there are no headings, don't render the sidebar.
+  if (!toc || toc.length === 0) return null;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
+        // Abort if there are no entries.
         if (entries.length === 0) return;
 
-        // Find the heading that's most visible.
+        // Find the heading closest to the top of the viewport.
         let mostVisible = entries[0];
         let maxRatio = entries[0]?.intersectionRatio || 0;
 
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.intersectionRatio > maxRatio) {
             maxRatio = entry.intersectionRatio;
             mostVisible = entry;
           }
-        });
-
-        if (mostVisible?.isIntersecting) {
-          setActiveId(mostVisible.target.id);
         }
+
+        // Update the active item.
+        if (mostVisible?.isIntersecting) setActiveId(mostVisible.target.id);
       },
       {
         rootMargin: '-80px 0px -80% 0px',
@@ -59,57 +105,37 @@ export const TableOfContentsSidebar = ({
       }, []);
     };
 
-    const allHeadings = flattenHeadings(tableOfContents);
+    const allHeadings = flattenHeadings(toc);
 
-    allHeadings.forEach((item) => {
+    for (const item of allHeadings) {
       if (item.value) {
         const element = document.getElementById(slugify(item.value));
         if (element) {
           observer.observe(element);
         }
       }
-    });
+    }
 
     return () => {
       observer.disconnect();
     };
-  }, [tableOfContents]);
-
-  if (tableOfContents.length === 0) {
-    return null;
-  }
-
-  const children = stripFirstLevel(tableOfContents);
+  }, [toc]);
 
   return (
-    <div className="sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-var(--header-height)-var(--footer-height))] w-[--sidebar-width] flex-col bg-transparent text-sidebar-foreground lg:flex">
-      <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-2 pb-12 group-data-[collapsible=icon]:overflow-hidden">
-        <div
-          data-slot="sidebar-group"
-          data-sidebar="group"
-          className="relative flex w-full min-w-0 flex-col p-2">
-          <div
-            data-slot="sidebar-group-label"
-            data-sidebar="group-label"
-            className="group-data-[collapsible=icon]:-mt-8 flex h-8 shrink-0 items-center rounded-md px-2 font-medium text-muted-foreground text-xs outline-hidden ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 group-data-[collapsible=icon]:opacity-0 [&>svg]:size-4 [&>svg]:shrink-0">
-            On This Page
-          </div>
-          <div
-            data-slot="sidebar-group-content"
-            data-sidebar="group-content"
-            className="w-full text-sm">
-            <ul
-              data-slot="sidebar-menu"
-              data-sidebar="menu"
-              className="flex w-full min-w-0 flex-col gap-0.5">
-              {children.map((heading) => (
-                <TableOfContentsItem
-                  key={heading.value}
-                  heading={heading}
-                  activeId={activeId}
-                />
-              ))}
-            </ul>
+    <div className="sticky hidden w-full lg:block">
+      <div className="flex flex-col gap-2">
+        <p className="font-medium text-muted-foreground/60 text-xs">On This Page</p>
+
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex w-full flex-col gap-0.5">
+            {toc.map((item) => (
+              <TableOfContentsSidebarItem
+                key={item.value}
+                item={item}
+                active={activeId}
+                indent={0}
+              />
+            ))}
           </div>
         </div>
       </div>

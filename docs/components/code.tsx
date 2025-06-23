@@ -110,6 +110,7 @@ export interface CodeProps {
   children: React.ReactElement | Array<React.ReactElement>;
   className?: string;
 }
+
 export const Code = (props: CodeProps) => {
   if (props.children === null) return;
 

@@ -5,12 +5,13 @@ import type { TableOfContents } from '@ronin/blade/types';
 import type { CodeProps } from '@/components/code';
 import { Code } from '@/components/code';
 import { Footer } from '@/components/footer';
-import { Heading } from '@/components/heading.client';
-import { Navbar } from '@/components/navbar';
+import { Heading } from '@/components/heading';
+import { Navbar } from '@/components/navbar.client';
 import { Sidebar } from '@/components/sidebar';
 import { TableOfContentsSidebar } from '@/components/table-of-contents.client';
 import type { Theme } from '@/components/theme-toggle.client';
 import { cn } from '@/lib/utils';
+import type { ComponentProps } from 'react';
 
 type MenuItem = {
   id: string;
@@ -150,20 +151,24 @@ const DocsLayout = ({
 
   return (
     <>
-      <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
-        <Navbar items={menuItems} />
-        <div className="fixed top-24 left-6 w-fit">
-          <Sidebar items={menuItems} />
+      <div className="flex min-h-svh flex-col bg-background">
+        <Navbar />
+
+        <div className="flex w-full items-start justify-center gap-x-12 px-8 lg:px-6">
+          <div className="sticky top-18 mt-24 hidden w-48 sm:block lg:w-64">
+            <Sidebar items={menuItems} />
+          </div>
+
+          <div className="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-12 pb-24 text-neutral-800 2xl:max-w-4xl dark:text-neutral-300">
+            {children}
+          </div>
+
+          <div className="sticky top-18 mt-24 hidden w-48 lg:w-64 xl:block">
+            <TableOfContentsSidebar toc={tableOfContents} />
+          </div>
         </div>
-        <div className="docs-content prose mx-auto flex w-full min-w-0 max-w-2xl flex-1 flex-col px-4 py-6 text-neutral-800 md:px-0 dark:text-neutral-300">
-          {children}
-        </div>
-        <div className="fixed top-24 right-20 w-40">
-          <TableOfContentsSidebar tableOfContents={tableOfContents} />
-        </div>
-        <div className="mt-16">
-          <Footer theme={theme} />
-        </div>
+
+        <Footer theme={theme} />
       </div>
 
       {import.meta.env.BLADE_ENV === 'production' && (
@@ -213,6 +218,24 @@ export const components = {
   h6: (props: HeadingProps) => (
     <Heading
       level={6}
+      {...props}
+    />
+  ),
+  p: (props: ComponentProps<'p'>) => (
+    <p
+      className="my-2 text-muted-foreground"
+      {...props}
+    />
+  ),
+  ul: (props: ComponentProps<'ul'>) => (
+    <ul
+      className="mb-4 list-disc pl-6 text-muted-foreground"
+      {...props}
+    />
+  ),
+  li: (props: ComponentProps<'li'>) => (
+    <li
+      className="mb-2 text-muted-foreground"
       {...props}
     />
   ),
