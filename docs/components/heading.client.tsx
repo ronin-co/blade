@@ -60,7 +60,7 @@ export const Heading = ({ children, level, ...props }: HeadingProps) => {
         data-heading={true}
         href={`#${id}`}
         id={id}
-        className={clsx('font-semibold', {
+        className={clsx('scroll-mt-24 font-semibold', {
           'text-3xl': level === 1,
           'text-2xl': level === 2,
           'text-xl': level === 3,
