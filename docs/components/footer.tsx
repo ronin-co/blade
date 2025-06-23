@@ -22,7 +22,7 @@ export const Footer = (props: FooterProps) => {
 
   return (
     <footer className="flex w-full items-start justify-center gap-x-12 border-border border-t bg-background px-8 py-6 lg:px-6">
-      <div className="hidden w-48 shrink-0 md:block lg:w-64" />
+      <div className="hidden w-48 shrink-0 md:block" />
 
       <div className="flex w-full max-w-3xl flex-col justify-between gap-2 sm:flex-row sm:items-center 2xl:max-w-4xl">
         <p className="flex flex-row items-center gap-1 font-medium text-muted-foreground text-xs">
@@ -65,7 +65,7 @@ export const Footer = (props: FooterProps) => {
         </div>
       </div>
 
-      <div className="hidden w-48 shrink-0 lg:w-64 xl:block" />
+      <div className="hidden w-48 shrink-0 xl:block" />
     </footer>
   );
 };

@@ -156,7 +156,7 @@ const DocsLayout = ({
         <Header nav={NAV} />
 
         <div className="flex w-full items-start justify-center gap-x-12 px-8 lg:px-6">
-          <div className="sticky top-22 mt-24 hidden w-48 sm:block lg:w-64">
+          <div className="sticky top-22 mt-24 hidden w-48 sm:block">
             <Nav nav={NAV} />
           </div>
 
@@ -164,7 +164,7 @@ const DocsLayout = ({
             {children}
           </div>
 
-          <div className="sticky top-22 mt-24 hidden w-48 lg:w-64 xl:block">
+          <div className="sticky top-22 mt-24 hidden w-48 xl:block">
             <TableOfContentsSidebar toc={tableOfContents} />
           </div>
         </div>
