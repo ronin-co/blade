@@ -21,7 +21,7 @@ export const Footer = (props: FooterProps) => {
   const pathname = getEditUrl(location);
 
   return (
-    <footer className="flex w-full items-start justify-center gap-x-12 border-border border-t bg-background px-8 py-6 lg:px-6">
+    <footer className="flex w-full items-start justify-center gap-x-12 border-border border-t bg-background px-8 py-6 lg:gap-x-16 lg:px-6">
       <div className="hidden w-48 shrink-0 md:block" />
 
       <div className="flex w-full max-w-3xl flex-col justify-between gap-2 sm:flex-row sm:items-center 2xl:max-w-4xl">

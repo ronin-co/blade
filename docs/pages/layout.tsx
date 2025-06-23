@@ -155,7 +155,7 @@ const DocsLayout = ({
       <div className="flex min-h-svh flex-col bg-background">
         <Header nav={NAV} />
 
-        <div className="flex w-full items-start justify-center gap-x-12 px-8 lg:px-6">
+        <div className="flex w-full items-start justify-center gap-x-12 px-8 lg:gap-x-16 lg:px-6">
           <div className="sticky top-22 mt-24 hidden w-48 sm:block">
             <Nav nav={NAV} />
           </div>

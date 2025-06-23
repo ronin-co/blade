@@ -24,7 +24,7 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 flex w-full items-start justify-center gap-x-12 border-b bg-background px-8 transition-all duration-200 lg:px-6',
+        'sticky top-0 z-50 flex w-full items-start justify-center gap-x-12 border-b bg-background px-8 transition-all duration-200 lg:gap-x-16 lg:px-6',
         {
           'py-5': !scrolled,
           'py-3': scrolled,
