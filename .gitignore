@@ -6,3 +6,6 @@ dist
 
 # Code coverage report
 coverage
+
+# Turborepo
+.turbo

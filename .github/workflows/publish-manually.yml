@@ -19,6 +19,7 @@ jobs:
     uses: ronin-co/actions/.github/workflows/publish-manually.yml@main
     with:
       version_type: ${{ inputs.version_type }}
+      workspaces: true
     secrets:
       NPM_TOKEN_READ_AND_WRITE: ${{ secrets.NPM_TOKEN_READ_AND_WRITE }}
       ORG_GH_APP_ID: ${{ secrets.ORG_GH_RONIN_APP_ID }}
