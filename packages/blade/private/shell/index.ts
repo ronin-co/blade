@@ -85,7 +85,7 @@ const execAsync = promisify(exec);
 
 if (isInitializing) {
   const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
-  const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
+  const originDirectory = path.join(frameworkDirectory, '..', 'examples', 'basic');
   const targetDirectory = path.join(process.cwd(), projectName);
 
   const { stderr } = await execAsync(`cp -r ${originDirectory} ${targetDirectory}`);
