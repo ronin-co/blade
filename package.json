@@ -12,7 +12,7 @@
     "typecheck": "turbo typecheck"
   },
   "packageManager": "bun@1.2.16",
-  "workspaces": ["docs/", "examples/*", "packages/*"],
+  "workspaces": ["packages/*"],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.17",
