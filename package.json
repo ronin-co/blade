@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo build",
     "check": "biome check --error-on-warnings",
+    "dev": "turbo dev --filter='./packages/*' --concurrency 24",
     "format": "biome format --write",
     "lint": "biome lint",
     "prepare": "turbo build --filter='@ronin/blade'",
