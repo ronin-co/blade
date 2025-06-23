@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import { exists, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -237,12 +236,9 @@ export const prepareStyles = async (
     ? await inputFile.text()
     : `@import 'tailwindcss';`;
 
-  const basePath = isPackageLinked()
-    ? path.join(process.cwd(), 'node_modules', '@ronin/blade')
-    : process.cwd();
   const compiler = await compileTailwind(input, {
     onDependency(_path) {},
-    base: basePath,
+    base: process.cwd(),
   });
 
   const scanner = new TailwindScanner({
@@ -259,13 +255,4 @@ export const prepareStyles = async (
 
   const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
   await Bun.write(tailwindOutput, optimizedStyles.code);
-};
-
-export const isPackageLinked = () => {
-  const packagePath = path.join(process.cwd(), 'node_modules', '@ronin/blade');
-  try {
-    return fs.lstatSync(packagePath).isSymbolicLink();
-  } catch {
-    return false;
-  }
 };
