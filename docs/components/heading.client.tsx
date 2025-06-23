@@ -1,7 +1,7 @@
 import { Icons } from '@/components/icons';
 import { slugify } from '@/lib/utils';
 import { clsx } from 'clsx';
-import { type JSX, type ReactNode, isValidElement } from 'react';
+import { type JSX, type ReactNode, isValidElement, useState } from 'react';
 
 interface HeadingProps {
   children: ReactNode;
@@ -31,16 +31,29 @@ export const Heading = ({ children, level, ...props }: HeadingProps) => {
   const textContent = extractTextContent(children);
   const id = slugify(textContent);
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    navigator.clipboard.writeText(`${window.location.href}#${id}`);
+    setCopied(true);
+
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   return (
     <span className="group relative mb-6 flex flex-row items-center [&:not(:first-child)]:mt-10">
       <button
         type="button"
         aria-label="Copy link to clipboard"
         className="-left-8 absolute cursor-pointer p-1 text-muted-foreground opacity-0 transition duration-200 hover:text-primary group-hover:opacity-100 group-hover:duration-0"
-        onClick={() => {
-          navigator.clipboard.writeText(window.location.href);
-        }}>
-        <Icons.Quote className="size-4.5" />
+        onClick={handleCopy}>
+        {copied ? (
+          <Icons.Check className="size-4.5" />
+        ) : (
+          <Icons.Quote className="size-4.5" />
+        )}
       </button>
 
       <a

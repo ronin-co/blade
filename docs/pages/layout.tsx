@@ -6,7 +6,7 @@ import type { CodeProps } from '@/components/code.client';
 import { Code } from '@/components/code.client';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header.client';
-import { Heading } from '@/components/heading';
+import { Heading } from '@/components/heading.client';
 import { Nav, type NavGroup } from '@/components/nav';
 import { TableOfContentsSidebar } from '@/components/table-of-contents.client';
 import type { Theme } from '@/components/theme-toggle.client';
