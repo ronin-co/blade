@@ -1,8 +1,8 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "files": {
     "include": ["./**/*.ts", "./**/*.tsx"],
-    "ignore": ["node_modules/", "bun.lockb", "tsconfig.json"]
+    "ignore": ["node_modules/", "bun.lockb", "bun.lock", "tsconfig.json"]
   },
   "formatter": {
     "enabled": true,
