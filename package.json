@@ -5,7 +5,7 @@
     "build": "turbo build",
     "check": "biome check --error-on-warnings",
     "dev": "turbo dev --concurrency 24",
-    "format": "biome check --write && biome format --write",
+    "format": "biome format --write",
     "lint": "biome lint",
     "prepare": "turbo build --filter='@ronin/blade'",
     "test": "turbo test",
