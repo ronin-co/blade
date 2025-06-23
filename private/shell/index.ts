@@ -91,13 +91,6 @@ if (isInitializing) {
   const { stderr } = await execAsync(`cp -r ${originDirectory} ${targetDirectory}`);
 
   try {
-    await execAsync(`cd ${targetDirectory} && git init`);
-  } catch (error) {
-    logSpinner('Failed to initialize git repository. Is git installed?').fail();
-    console.error(error);
-  }
-
-  try {
     await Bun.write(
       path.join(targetDirectory, '.gitignore'),
       'node_modules\n.env\n.blade',
