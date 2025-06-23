@@ -7,7 +7,7 @@ export const componentsDirectory = path.resolve(process.cwd(), 'components');
 export const triggersDirectory = path.resolve(process.cwd(), 'triggers');
 export const publicDirectory = path.resolve(process.cwd(), 'public');
 
-export const frameworkDirectory = path.join(__dirname, '..');
+export const frameworkDirectory = path.join(__dirname, '..', '..', '..');
 
 export const directoriesToParse = {
   pages: pagesDirectory,
