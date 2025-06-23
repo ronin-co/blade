@@ -3,7 +3,11 @@
   "version": "0.9.3",
   "type": "module",
   "description": "React at the edge.",
-  "repository": "ronin-co/blade",
+  "repository": {
+    "directory": "packages/blade",
+    "url": "ronin-co/blade",
+    "type": "git"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -12,14 +16,10 @@
   },
   "files": ["dist", "examples/basic/**/*"],
   "scripts": {
-    "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
-    "lint:biome": "biome check --error-on-warnings",
-    "lint:tsc": "tsc --pretty",
-    "format": "biome check --write && biome format --write",
+    "typecheck": "tsc --pretty",
     "test": "vitest",
     "build": "tsup",
-    "dev": "tsup --watch",
-    "prepare": "bun run build"
+    "dev": "tsup --watch"
   },
   "exports": {
     "./client/": "./dist/public/client/",
@@ -51,7 +51,6 @@
     "ronin": "6.7.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
     "@hono/node-server": "1.14.4",
     "@mdx-js/mdx": "3.0.1",
     "@types/async-retry": "1.4.8",

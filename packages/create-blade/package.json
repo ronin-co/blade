@@ -1,0 +1,28 @@
+{
+  "name": "create-blade",
+  "version": "0.9.3",
+  "type": "module",
+  "description": "Create a new Blade project",
+  "repository": {
+    "directory": "packages/create-blade",
+    "url": "ronin-co/blade",
+    "type": "git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "create-blade": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --pretty"
+  },
+  "keywords": [],
+  "author": "ronin",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {}
+}

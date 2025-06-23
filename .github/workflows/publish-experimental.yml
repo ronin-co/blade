@@ -11,8 +11,13 @@ permissions:
 
 jobs:
   publish-experimental:
+    strategy:
+      matrix:
+        package:
+          - blade
+          - create-blade
     uses: ronin-co/actions/.github/workflows/publish-experimental.yml@main
     with:
-      package_dir: './packages/blade'
+      package_dir: './packages/${{ matrix.package }}'
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN_READ_AND_WRITE }}
