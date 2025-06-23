@@ -1,10 +1,10 @@
 {
-  "name": "@ronin/blade",
-  "version": "0.9.3",
+  "name": "create-blade",
+  "version": "0.0.0",
   "type": "module",
-  "description": "React at the edge.",
-  "repository": {
-    "directory": "packages/blade",
+  "description": "TODO",
+    "repository": {
+    "directory": "packages/create-blade",
     "url": "ronin-co/blade",
     "type": "git"
   },
@@ -12,9 +12,9 @@
     "access": "public"
   },
   "bin": {
-    "blade": "./dist/private/shell/index.js"
+    "create-blade": "./dist/index.js"
   },
-  "files": ["dist", "../../examples/basic/**/*"],
+  "files": ["dist"],
   "scripts": {
     "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
     "lint:biome": "biome check --error-on-warnings",
