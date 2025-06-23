@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         package:
-          - create-blade
           - blade
+          - create-blade
     uses: ronin-co/actions/.github/workflows/publish-experimental.yml@main
     with:
       package_dir: './packages/${{ matrix.package }}'
