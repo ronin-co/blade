@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import { exists, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -13,6 +12,7 @@ import {
   directoriesToParse,
   loggingPrefixes,
   outputDirectory,
+  pagesDirectory,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
@@ -54,11 +54,13 @@ const getImportList = async (directoryName: string, directoryPath: string) => {
   return code;
 };
 
-export const getFileList = async (): Promise<string> => {
-  const directories = Object.entries(directoriesToParse);
+export const getFileList = async (full?: boolean): Promise<string> => {
+  const directories = Object.entries(
+    full ? directoriesToParse : { pages: pagesDirectory },
+  );
   const importPromises = directories.map(([name, path]) => getImportList(name, path));
   const imports = await Promise.all(importPromises);
-  const routerExists = await exists(routerInputFile);
+  const routerExists = full ? await exists(routerInputFile) : false;
 
   if (await exists(routerInputFile)) {
     imports.push(`import { default as honoRouter } from '${routerInputFile}';`);
@@ -68,7 +70,12 @@ export const getFileList = async (): Promise<string> => {
 
   file += '\n\n';
   file += `const router = ${routerExists ? 'honoRouter' : 'null'};\n`;
-  file += 'export { pages, triggers, router };\n';
+
+  if (full) {
+    file += 'export { pages, triggers, router };\n';
+  } else {
+    file += 'export { pages };\n';
+  }
 
   return file;
 };
@@ -237,12 +244,9 @@ export const prepareStyles = async (
     ? await inputFile.text()
     : `@import 'tailwindcss';`;
 
-  const basePath = isPackageLinked()
-    ? path.join(process.cwd(), 'node_modules', '@ronin/blade')
-    : process.cwd();
   const compiler = await compileTailwind(input, {
     onDependency(_path) {},
-    base: basePath,
+    base: process.cwd(),
   });
 
   const scanner = new TailwindScanner({
@@ -259,13 +263,4 @@ export const prepareStyles = async (
 
   const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
   await Bun.write(tailwindOutput, optimizedStyles.code);
-};
-
-export const isPackageLinked = () => {
-  const packagePath = path.join(process.cwd(), 'node_modules', '@ronin/blade');
-  try {
-    return fs.lstatSync(packagePath).isSymbolicLink();
-  } catch {
-    return false;
-  }
 };
