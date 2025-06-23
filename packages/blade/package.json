@@ -3,7 +3,11 @@
   "version": "0.9.3",
   "type": "module",
   "description": "React at the edge.",
-  "repository": "ronin-co/blade",
+  "repository": {
+    "directory": "packages/blade",
+    "url": "ronin-co/blade",
+    "type": "git"
+  },
   "publishConfig": {
     "access": "public"
   },
