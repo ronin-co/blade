@@ -179,6 +179,8 @@ if (isBuilding || isDeveloping) {
     jsx: 'automatic',
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     minify: environment === 'production',
+    // TODO: Remove this once `@ronin/engine` no longer relies on it.
+    external: ['node:events'],
     plugins: [
       getFileListLoader(),
       getMdxLoader('production'),

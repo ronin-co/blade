@@ -54,18 +54,24 @@ export const getFileListLoader = (): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     build.onResolve({ filter: /^server-list$/ }, (source) => {
-      return { path: source.path, namespace: 'dynamic-list' };
+      return { path: source.path, namespace: 'server-imports' };
     });
 
-    build.onLoad({ filter: /^server-list$/, namespace: 'dynamic-list' }, async () => {
-      const contents = await getFileList();
+    build.onLoad({ filter: /^server-list$/, namespace: 'server-imports' }, async () => ({
+      contents: await getFileList(true),
+      loader: 'tsx',
+      resolveDir: process.cwd(),
+    }));
 
-      return {
-        contents,
-        loader: 'tsx',
-        resolveDir: process.cwd(),
-      };
+    build.onResolve({ filter: /^client-list$/ }, (source) => {
+      return { path: source.path, namespace: 'client-imports' };
     });
+
+    build.onLoad({ filter: /^client-list$/, namespace: 'client-imports' }, async () => ({
+      contents: await getFileList(),
+      loader: 'tsx',
+      resolveDir: process.cwd(),
+    }));
   },
 });
 

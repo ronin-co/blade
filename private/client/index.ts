@@ -1,4 +1,4 @@
-import 'server-list';
+import 'client-list';
 import { hydrateRoot } from 'react-dom/client';
 
 import '@/private/client/components/history';
