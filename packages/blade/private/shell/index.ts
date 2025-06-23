@@ -6,7 +6,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { parseArgs } from 'node:util';
-import { $ } from 'bun';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
@@ -90,13 +89,6 @@ if (isInitializing) {
   const targetDirectory = path.join(process.cwd(), projectName);
 
   const { stderr } = await execAsync(`cp -r ${originDirectory} ${targetDirectory}`);
-
-  try {
-    await $`cd ${targetDirectory} && git init`.quiet();
-  } catch (error) {
-    logSpinner('Failed to initialize git repository. Is git installed?').fail();
-    console.error(error);
-  }
 
   try {
     await Bun.write(
