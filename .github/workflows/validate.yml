@@ -11,5 +11,3 @@ on:
 jobs:
   validate:
     uses: ronin-co/actions/.github/workflows/validate.yml@main
-    with:
-      package_dir: './packages/blade'
