@@ -35,7 +35,7 @@ export const Nav = ({
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  '-mx-2.5 block cursor-pointer rounded-md px-2.5 py-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:bg-accent hover:text-primary hover:duration-0',
+                  '-ml-2.5 block cursor-pointer rounded-md px-2.5 py-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:bg-accent hover:text-primary hover:duration-0',
                   {
                     'bg-accent text-primary': item.href === location.pathname,
                   },

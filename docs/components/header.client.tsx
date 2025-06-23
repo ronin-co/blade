@@ -1,7 +1,7 @@
 import { Icons } from '@/components/icons';
 import type { NavGroup } from '@/components/nav';
 import { NavSheet } from '@/components/nav-sheet';
-import { Snippet } from '@/components/snippet';
+import { Snippet } from '@/components/snippet.client';
 import { cn } from '@/lib/utils';
 import { type FunctionComponent, useEffect, useState } from 'react';
 
@@ -35,7 +35,7 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
       <div className="flex w-full max-w-3xl flex-row items-center justify-between 2xl:max-w-4xl">
         <a
           className={cn(
-            '-ml-3 group font-medium font-mono text-muted-foreground/60 tracking-tight transition-all duration-200 hover:text-muted-foreground hover:duration-0',
+            '-ml-2.5 group font-medium font-mono text-muted-foreground/60 tracking-tight transition-all duration-200 hover:text-muted-foreground hover:duration-0',
             {
               'text-lg': !scrolled,
               'text-base': scrolled,
@@ -53,6 +53,8 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
         </a>
 
         <div className="flex flex-row items-center gap-2">
+          <Snippet />
+
           <a
             className="flex flex-row items-center gap-1.5 rounded-md border border-transparent px-3 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:py-1 sm:pr-2 sm:pl-1.5"
             href="https://github.com/ronin-co/blade"
@@ -62,8 +64,6 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
 
             <span className="">230</span>
           </a>
-
-          <Snippet />
 
           <div className="block sm:hidden">
             <NavSheet

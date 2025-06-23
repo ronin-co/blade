@@ -2,8 +2,8 @@ import { useCookie } from '@ronin/blade/hooks';
 import { useMetadata } from '@ronin/blade/server/hooks';
 import type { TableOfContents } from '@ronin/blade/types';
 
-import type { CodeProps } from '@/components/code';
-import { Code } from '@/components/code';
+import type { CodeProps } from '@/components/code.client';
+import { Code } from '@/components/code.client';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header.client';
 import { Heading } from '@/components/heading';
