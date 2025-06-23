@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         package:
+          - create-blade
           - blade
     uses: ronin-co/actions/.github/workflows/remove-experimental.yml@main
     with:
