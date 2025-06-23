@@ -84,7 +84,6 @@ const enableServiceWorker = values.sw;
 const execAsync = promisify(exec);
 
 if (isInitializing) {
-  console.log(frameworkDirectory);
   const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
   const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
   const targetDirectory = path.join(process.cwd(), projectName);
