@@ -19,8 +19,7 @@
     "typecheck": "tsc --pretty",
     "test": "vitest",
     "build": "tsup",
-    "dev": "tsup --watch",
-    "prepare": "bun run build"
+    "dev": "tsup --watch"
   },
   "exports": {
     "./client/": "./dist/public/client/",
