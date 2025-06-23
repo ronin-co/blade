@@ -150,4 +150,41 @@ export const Icons = {
       />
     </svg>
   ),
+  Menu: (props: IconProps) => (
+    <svg
+      {...props}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Menu"
+      role="img">
+      <path
+        d="M3 12H21M3 6H21M3 18H21"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  Close: (props: IconProps) => (
+    <svg
+      {...props}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Close"
+      role="img">
+      <path
+        d="M5 5L19 19M19 5L5 19"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
 };

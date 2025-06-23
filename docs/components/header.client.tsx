@@ -1,9 +1,11 @@
 import { Icons } from '@/components/icons';
-import {} from '@/components/ui/breadcrumb';
+import type { NavGroup } from '@/components/nav';
+import { NavSheet } from '@/components/nav-sheet';
+import { Snippet } from '@/components/snippet';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { type FunctionComponent, useEffect, useState } from 'react';
 
-export const Navbar = () => {
+export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export const Navbar = () => {
           )}
           href="/">
           <span
-            className={cn('transition duration-200', {
+            className={cn('transition-opacity duration-200', {
               'opacity-0': scrolled,
             })}>
             @
@@ -52,7 +54,7 @@ export const Navbar = () => {
 
         <div className="flex flex-row items-center gap-2">
           <a
-            className="flex flex-row items-center gap-1.5 rounded-md border border-transparent py-1 pr-2 pl-1.5 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0"
+            className="flex flex-row items-center gap-1.5 rounded-md border border-transparent px-3 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:py-1 sm:pr-2 sm:pl-1.5"
             href="https://github.com/ronin-co/blade"
             target="_blank"
             rel="noreferrer">
@@ -61,13 +63,14 @@ export const Navbar = () => {
             <span className="">230</span>
           </a>
 
-          <button
-            type="button"
-            className="hidden cursor-pointer flex-row items-center gap-1.5 rounded-md border border-transparent py-1 pr-2 pl-1.5 font-medium font-mono text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:flex">
-            <Icons.Terminal className="size-4" />
+          <Snippet />
 
-            <span>bun x @ronin/blade init</span>
-          </button>
+          <div className="block sm:hidden">
+            <NavSheet
+              nav={nav}
+              scrolled={scrolled}
+            />
+          </div>
         </div>
       </div>
 
