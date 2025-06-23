@@ -191,6 +191,8 @@ if (isBuilding || isDeveloping) {
     jsx: 'automatic',
     nodePaths: [path.join(process.cwd(), 'node_modules')],
     minify: environment === 'production',
+    // TODO: Remove this once `@ronin/engine` no longer relies on it.
+    external: ['node:events'],
     plugins: [
       getFileListLoader(),
       getMdxLoader('production'),
@@ -250,46 +252,6 @@ if (isBuilding || isDeveloping) {
               if (server.channel) server.channel.publish('development', 'revalidate');
             }
           });
-        },
-      },
-      {
-        name: 'node-events-dynamic-import',
-        setup(build) {
-          // Intercept resolution of "node:events"
-          build.onResolve({ filter: /^node:events$/ }, (args) => ({
-            path: args.path,
-            namespace: 'node-events-dynamic',
-          }));
-
-          // Provide a dynamic module: real import in Node, stub in browser
-          build.onLoad({ filter: /.*/, namespace: 'node-events-dynamic' }, () => ({
-            loader: 'js',
-            contents: `
-// Create a dynamic import function via Function constructor
-const dynamicImport = new Function('moduleName', 'return import(moduleName)');
-
-// Choose real or fake EventEmitter
-let EE;
-if (typeof window === 'undefined') {
-  // Server: dynamically load built-in module
-  const mod = await dynamicImport('node:events');
-  EE = mod.EventEmitter;
-} else {
-  // Browser: fake minimal EventEmitter class
-  EE = class EventEmitter {
-    constructor() {}
-    on() {}
-    once() {}
-    off() {}
-    emit() {}
-    addListener() {}
-    removeListener() {}
-  };
-}
-
-export const EventEmitter = EE;
-`,
-          }));
         },
       },
     ],

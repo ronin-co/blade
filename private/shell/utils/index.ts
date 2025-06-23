@@ -12,6 +12,7 @@ import {
   directoriesToParse,
   loggingPrefixes,
   outputDirectory,
+  pagesDirectory,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
@@ -53,11 +54,13 @@ const getImportList = async (directoryName: string, directoryPath: string) => {
   return code;
 };
 
-export const getFileList = async (): Promise<string> => {
-  const directories = Object.entries(directoriesToParse);
+export const getFileList = async (full?: boolean): Promise<string> => {
+  const directories = Object.entries(
+    full ? directoriesToParse : { pages: pagesDirectory },
+  );
   const importPromises = directories.map(([name, path]) => getImportList(name, path));
   const imports = await Promise.all(importPromises);
-  const routerExists = await exists(routerInputFile);
+  const routerExists = full ? await exists(routerInputFile) : false;
 
   if (await exists(routerInputFile)) {
     imports.push(`import { default as honoRouter } from '${routerInputFile}';`);
@@ -67,7 +70,12 @@ export const getFileList = async (): Promise<string> => {
 
   file += '\n\n';
   file += `const router = ${routerExists ? 'honoRouter' : 'null'};\n`;
-  file += 'export { pages, triggers, router };\n';
+
+  if (full) {
+    file += 'export { pages, triggers, router };\n';
+  } else {
+    file += 'export { pages };\n';
+  }
 
   return file;
 };

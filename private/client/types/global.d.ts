@@ -1,4 +1,4 @@
-interface Window {
+declare interface Window {
   // It's extremely important that this remains a global instead of a variable exported
   // from a file, as it must remain persistent across different script loads performed by
   // the browser.
@@ -6,4 +6,8 @@ interface Window {
 
   // Contains a list of all the chunks that were loaded on the client so far.
   BLADE_CHUNKS: Record<string, Record<string, unknown>>;
+}
+
+declare module 'client-list' {
+  export const pages: import('./index').PageList;
 }
