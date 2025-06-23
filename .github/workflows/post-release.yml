@@ -1,0 +1,20 @@
+name: Post Release
+
+on:
+  release:
+    types:
+     - published
+
+jobs:
+  post-to-discord:
+    name: Post Release to Discord
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Post release to Discord
+        uses: SethCohen/github-releases-to-discord@v1
+        with:
+          color: "16777215" #FFFFFF
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
