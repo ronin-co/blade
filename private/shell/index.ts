@@ -1,10 +1,11 @@
 #!/usr/bin/env bun
 
+import { exec } from 'node:child_process';
 import { cp, exists, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { promisify } from 'node:util';
 import { parseArgs } from 'node:util';
-import { $ } from 'bun';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
@@ -80,20 +81,17 @@ const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
 const enableServiceWorker = values.sw;
 
+const execAsync = promisify(exec);
+
 if (isInitializing) {
   const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
-  const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
+  const originDirectory = path.join(frameworkDirectory, '..', 'examples', 'basic');
   const targetDirectory = path.join(process.cwd(), projectName);
 
-  const { success, stderr } = Bun.spawnSync([
-    'cp',
-    '-r',
-    originDirectory,
-    targetDirectory,
-  ]);
+  const { stderr } = await execAsync(`cp -r ${originDirectory} ${targetDirectory}`);
 
   try {
-    await $`cd ${targetDirectory} && git init`.quiet();
+    await execAsync(`cd ${targetDirectory} && git init`);
   } catch (error) {
     logSpinner('Failed to initialize git repository. Is git installed?').fail();
     console.error(error);
@@ -102,21 +100,18 @@ if (isInitializing) {
   try {
     await Bun.write(
       path.join(targetDirectory, '.gitignore'),
-      `node_modules
-      .env
-      .blade
-      `,
+      'node_modules\n.env\n.blade',
     );
   } catch (error) {
     logSpinner('Failed to create .gitignore').fail();
     console.error(error);
   }
 
-  if (success) {
-    logSpinner('Created example app').succeed();
-  } else {
+  if (stderr) {
     logSpinner('Failed to create example app').fail();
     console.error(stderr);
+  } else {
+    logSpinner('Created example app').succeed();
   }
 
   process.exit();
