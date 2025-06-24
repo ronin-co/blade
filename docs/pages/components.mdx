@@ -63,7 +63,7 @@ One of those optimizations is that images are **displayed instantaneously**, whi
 
 ### Image Metadata
 
-When retrieving records that contain fields of type "Blob", you will be provided with a value that looks similar to the following for each of those fields:
+When retrieving records that contain fields of type “Blob”, you will be provided with a value that looks similar to the following for each of those fields:
 
 ```ts
 export interface Blob {
@@ -122,7 +122,7 @@ module.exports = {
 };
 ```
 
-If you aren't using Next.js, you may render the placeholder like so:
+If you aren’t using Next.js, you may render the placeholder like so:
 
 ```tsx
 <img src={field.placeholder.base64} />
@@ -170,7 +170,7 @@ Since all of the options mentioned above can be provided to the `src` URL of the
 <img src={`${src}?w=200&h=400&blur=40`} />
 ```
 
-If you're using [Next.js](https://nextjs.org/), you can use a [custom image loader](https://nextjs.org/docs/app/api-reference/components/image#loader) to accomplish the same:
+If you’re using [Next.js](https://nextjs.org/), you can use a [custom image loader](https://nextjs.org/docs/app/api-reference/components/image#loader) to accomplish the same:
 
 ```tsx
 const imageLoader = ({ src, width, quality }: { src: string; width: number; quality: number }) => {
@@ -187,4 +187,4 @@ const imageLoader = ({ src, width, quality }: { src: string; width: number; qual
 />;
 ```
 
-As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from RONIN when the record is retrieved. This field (as mentioned in the "Image Placeholder" section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.
+As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from RONIN when the record is retrieved. This field (as mentioned in the “Image Placeholder” section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.
