@@ -68,6 +68,18 @@ export const TableOfContentsSidebar = ({ toc }: { toc: TableOfContents }) => {
   // If there are no headings, don't render the sidebar.
   if (!toc || toc.length === 0) return null;
 
+  // Parse the provided Table of Contents and elevate all headings nested under the first
+  // level heading to the first level.
+  const adjustedToc = toc.reduce((acc, item) => {
+    if (item.depth === 1) {
+      acc.push(...(item.children ?? []));
+    } else {
+      acc.push(item);
+    }
+
+    return acc;
+  }, [] as TableOfContents);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -94,22 +106,10 @@ export const TableOfContentsSidebar = ({ toc }: { toc: TableOfContents }) => {
       },
     );
 
-    // Flatten the tree structure to get all headings
-    const flattenHeadings = (items: TableOfContents): TableOfContents => {
-      return items.reduce((acc: TableOfContents, item) => {
-        acc.push(item);
-        if (item.children && item.children.length > 0) {
-          acc.push(...flattenHeadings(item.children));
-        }
-        return acc;
-      }, []);
-    };
-
-    const allHeadings = flattenHeadings(toc);
-
-    for (const item of allHeadings) {
+    for (const item of adjustedToc) {
       if (item.value) {
         const element = document.getElementById(slugify(item.value));
+
         if (element) {
           observer.observe(element);
         }
@@ -119,7 +119,7 @@ export const TableOfContentsSidebar = ({ toc }: { toc: TableOfContents }) => {
     return () => {
       observer.disconnect();
     };
-  }, [toc]);
+  }, [adjustedToc]);
 
   return (
     <div className="sticky hidden w-full lg:block">
@@ -128,7 +128,7 @@ export const TableOfContentsSidebar = ({ toc }: { toc: TableOfContents }) => {
 
         <div className="flex w-full flex-col gap-2">
           <div className="flex w-full flex-col gap-0.5">
-            {toc.map((item) => (
+            {adjustedToc.map((item) => (
               <TableOfContentsSidebarItem
                 key={item.value}
                 item={item}
