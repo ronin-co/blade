@@ -98,7 +98,11 @@ const Link = ({
   const destination = populatePathname(href, segments);
   const linkEventHandlers = useLinkEvents(destination);
 
-  const eventHandlers = prefetch
+  const shouldPrefetch =
+    prefetch &&
+    !(destination.startsWith('https://') || destination.startsWith('http://'));
+
+  const eventHandlers = shouldPrefetch
     ? linkEventHandlers
     : { onClick: linkEventHandlers.onClick };
 

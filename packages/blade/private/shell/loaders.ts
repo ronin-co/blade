@@ -1,3 +1,4 @@
+import { exists } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
@@ -5,7 +6,13 @@ import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 
-import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
+import {
+  type TotalFileList,
+  crawlDirectory,
+  getFileList,
+  scanExports,
+  wrapClientExport,
+} from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
@@ -51,15 +58,49 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (): esbuild.Plugin => ({
+export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
+    const files: TotalFileList = new Map();
+
+    const directories = [
+      ['pages', path.join(process.cwd(), 'pages')],
+      ['triggers', path.join(process.cwd(), 'triggers')],
+      ['components', path.join(process.cwd(), 'components')],
+    ];
+
+    const extraProjects = projects.slice(1);
+    const componentDirectories = ['components'];
+
+    for (let index = 0; index < extraProjects.length; index++) {
+      const project = extraProjects[index];
+      const exportName = `components${index}`;
+
+      directories.push([exportName, path.join(project, 'components')]);
+      componentDirectories.push(exportName);
+    }
+
+    build.onStart(async () => {
+      await Promise.all(
+        directories.map(async ([directoryName, directoryPath]) => {
+          const results = (await exists(directoryPath))
+            ? await crawlDirectory(directoryPath)
+            : [];
+          const finalResults = directoryName.startsWith('components')
+            ? results.filter((item) => item.relativePath.includes('.client'))
+            : results;
+
+          files.set(directoryName, finalResults);
+        }),
+      );
+    });
+
     build.onResolve({ filter: /^server-list$/ }, (source) => {
       return { path: source.path, namespace: 'server-imports' };
     });
 
     build.onLoad({ filter: /^server-list$/, namespace: 'server-imports' }, async () => ({
-      contents: await getFileList(true),
+      contents: await getFileList(files, ['pages', 'triggers']),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
@@ -69,7 +110,7 @@ export const getFileListLoader = (): esbuild.Plugin => ({
     });
 
     build.onLoad({ filter: /^client-list$/, namespace: 'client-imports' }, async () => ({
-      contents: await getFileList(),
+      contents: await getFileList(files, componentDirectories),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));

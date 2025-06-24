@@ -182,7 +182,7 @@ if (isBuilding || isDeveloping) {
     // TODO: Remove this once `@ronin/engine` no longer relies on it.
     external: ['node:events'],
     plugins: [
-      getFileListLoader(),
+      getFileListLoader(projects),
       getMdxLoader('production'),
       getReactAriaLoader(),
       getClientReferenceLoader(),
