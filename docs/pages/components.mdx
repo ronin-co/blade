@@ -63,7 +63,7 @@ One of those optimizations is that images are **displayed instantaneously**, whi
 
 ### Image Metadata
 
-When retrieving records that contain fields of type “Blob”, you will be provided with a value that looks similar to the following for each of those fields:
+When retrieving records that contain fields of type "Blob", you will be provided with a value that looks similar to the following for each of those fields:
 
 ```ts
 export interface Blob {
@@ -122,7 +122,7 @@ module.exports = {
 };
 ```
 
-If you aren’t using Next.js, you may render the placeholder like so:
+If you aren't using Next.js, you may render the placeholder like so:
 
 ```tsx
 <img src={field.placeholder.base64} />
@@ -134,17 +134,29 @@ To ensure that the final image finishes loading as quickly as possible, it is re
 
 Other additional options can be used as well, in order to guarantee the most ideal experience possible:
 
-- w: The desired pixel width of the image.
+<ParamField path="w" type="number">
+    The desired pixel width of the image.
+</ParamField>
 
-- h: The desired pixel height of the image.
+<ParamField path="h" type="number">
+    The desired pixel height of the image.
+</ParamField>
 
-- q: The desired quality of the image (number between 1 and 100).
+<ParamField path="q" type="number">
+    The desired quality of the image (number between 1 and 100).
+</ParamField>
 
-- fm: The file format of the image (`avif`, `webp`, `png`, or `jpeg`).
+<ParamField path="fm" type="avif | webp | png | jpeg">
+    The file format of the image.
+</ParamField>
 
-- fit: How the image should be fit to its frame (`cover`, `contain`, `inside`, `outside`, `fill`).
+<ParamField path="fit" type="cover | contain | inside | outside | fill">
+    How the image should be fit to its frame.
+</ParamField>
 
-- blur: The strength of a [gaussian blur](https://en.wikipedia.org/wiki/Gaussian_blur) effect applied to the image (number between 0.3 and 1000).
+<ParamField path="blur" type="number">
+    The strength of a [gaussian blur](https://en.wikipedia.org/wiki/Gaussian_blur) effect applied to the image (number between 0.3 and 1000).
+</ParamField>
 
 ### Download
 
@@ -158,7 +170,7 @@ Since all of the options mentioned above can be provided to the `src` URL of the
 <img src={`${src}?w=200&h=400&blur=40`} />
 ```
 
-If you’re using [Next.js](https://nextjs.org/), you can use a [custom image loader](https://nextjs.org/docs/app/api-reference/components/image#loader) to accomplish the same:
+If you're using [Next.js](https://nextjs.org/), you can use a [custom image loader](https://nextjs.org/docs/app/api-reference/components/image#loader) to accomplish the same:
 
 ```tsx
 const imageLoader = ({ src, width, quality }: { src: string; width: number; quality: number }) => {
@@ -175,4 +187,4 @@ const imageLoader = ({ src, width, quality }: { src: string; width: number; qual
 />;
 ```
 
-As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from RONIN when the record is retrieved. This field (as mentioned in the “Image Placeholder” section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.
+As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from RONIN when the record is retrieved. This field (as mentioned in the "Image Placeholder" section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.
