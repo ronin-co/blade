@@ -37,8 +37,8 @@ export const NavSheet = ({
                 },
               )}
               href="/">
-              <span>ronin/</span>
               <span className="font-semibold text-primary">blade</span>
+              <span>.im</span>
             </a>
           </SheetClose>
 

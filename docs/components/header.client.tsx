@@ -42,8 +42,8 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
             },
           )}
           href="/">
-          <span>ronin/</span>
           <span className="font-semibold text-primary">blade</span>
+          <span>.im</span>
         </a>
 
         <div className="flex flex-row items-center gap-2">
