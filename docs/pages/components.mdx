@@ -134,17 +134,29 @@ To ensure that the final image finishes loading as quickly as possible, it is re
 
 Other additional options can be used as well, in order to guarantee the most ideal experience possible:
 
-- w: The desired pixel width of the image.
+<ParamField path="w" type="number">
+    The desired pixel width of the image.
+</ParamField>
 
-- h: The desired pixel height of the image.
+<ParamField path="h" type="number">
+    The desired pixel height of the image.
+</ParamField>
 
-- q: The desired quality of the image (number between 1 and 100).
+<ParamField path="q" type="number">
+    The desired quality of the image (number between 1 and 100).
+</ParamField>
 
-- fm: The file format of the image (`avif`, `webp`, `png`, or `jpeg`).
+<ParamField path="fm" type="avif | webp | png | jpeg">
+    The file format of the image.
+</ParamField>
 
-- fit: How the image should be fit to its frame (`cover`, `contain`, `inside`, `outside`, `fill`).
+<ParamField path="fit" type="cover | contain | inside | outside | fill">
+    How the image should be fit to its frame.
+</ParamField>
 
-- blur: The strength of a [gaussian blur](https://en.wikipedia.org/wiki/Gaussian_blur) effect applied to the image (number between 0.3 and 1000).
+<ParamField path="blur" type="number">
+    The strength of a [gaussian blur](https://en.wikipedia.org/wiki/Gaussian_blur) effect applied to the image (number between 0.3 and 1000).
+</ParamField>
 
 ### Download
 
