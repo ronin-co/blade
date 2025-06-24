@@ -16,5 +16,4 @@ jobs:
       - name: Post release to Discord
         uses: SethCohen/github-releases-to-discord@v1
         with:
-          color: "16777215" #FFFFFF
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
