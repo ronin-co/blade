@@ -6,7 +6,7 @@ import { highlight } from 'sugar-high';
 export const InlineCode = (props: React.ComponentPropsWithoutRef<'code'>) => {
   return (
     <code
-      className="rounded-md bg-accent px-1.5 py-0.5 font-mono text-sm"
+      className="rounded-md bg-accent px-1.5 py-0.5 font-mono"
       {...props}
     />
   );
