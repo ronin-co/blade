@@ -99,7 +99,8 @@ const Link = ({
   const linkEventHandlers = useLinkEvents(destination);
 
   const shouldPrefetch =
-    prefetch && (destination.startsWith('https://') || destination.startsWith('http://'));
+    prefetch &&
+    !(destination.startsWith('https://') || destination.startsWith('http://'));
 
   const eventHandlers = shouldPrefetch
     ? linkEventHandlers
