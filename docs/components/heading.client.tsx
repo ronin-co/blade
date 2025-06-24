@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
+import { Icons } from '@/components/icons';
 import { slugify } from '@/lib/utils';
-import { LinkIcon } from 'lucide-react';
-import { type JSX, type ReactNode, isValidElement } from 'react';
+import { clsx } from 'clsx';
+import { type JSX, type ReactNode, isValidElement, useState } from 'react';
 
 interface HeadingProps {
   children: ReactNode;
@@ -26,30 +26,50 @@ const extractTextContent = (node: ReactNode): string => {
 };
 
 export const Heading = ({ children, level, ...props }: HeadingProps) => {
-  const HeadingComponent = `h${level}` as keyof JSX.IntrinsicElements;
+  const NativeHeading = `h${level}` as keyof JSX.IntrinsicElements;
 
   const textContent = extractTextContent(children);
   const id = slugify(textContent);
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    navigator.clipboard.writeText(`${window.location.href}#${id}`);
+    setCopied(true);
+
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   return (
-    <a
-      data-heading={true}
-      href={`#${id}`}
-      id={id}
-      className="group -ml-11 not-prose relative flex scroll-mt-25 items-center gap-2 [&:not(:first-child)]:mt-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="cursor-pointer text-muted-foreground opacity-0 transition duration-200 hover:text-primary group-hover:opacity-100 "
-        onClick={() => {
-          navigator.clipboard.writeText(`${window.location.href}`);
-        }}>
-        <LinkIcon
-          width={12}
-          height={12}
-        />
-      </Button>
-      <HeadingComponent {...props}>{children}</HeadingComponent>
-    </a>
+    <span className="group relative mb-6 flex flex-row items-center [&:not(:first-child)]:mt-10">
+      <button
+        type="button"
+        aria-label="Copy link to clipboard"
+        className="-left-8 absolute cursor-pointer p-1 text-muted-foreground opacity-0 transition duration-200 hover:text-primary group-hover:opacity-100 group-hover:duration-0"
+        onClick={handleCopy}>
+        {copied ? (
+          <Icons.Check className="size-4.5" />
+        ) : (
+          <Icons.Quote className="size-4.5" />
+        )}
+      </button>
+
+      <a
+        data-heading={true}
+        href={`#${id}`}
+        id={id}
+        className={clsx('scroll-mt-24 font-semibold', {
+          'text-3xl': level === 1,
+          'text-2xl': level === 2,
+          'text-xl': level === 3,
+          'text-lg': level === 4,
+          'text-base': level === 5,
+          'text-sm': level === 6,
+        })}>
+        <NativeHeading {...props}>{children}</NativeHeading>
+      </a>
+    </span>
   );
 };
