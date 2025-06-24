@@ -14,17 +14,10 @@
         }
     }
 }
-
-@font-face {
-	font-family: "Inter";
-	src: url("/static/inter.ttf") format("truetype");
-	font-display: swap;
-}
-
 body,
 html {
-	@apply bg-black overscroll-none;
-	font-family: "Inter", sans-serif;
+	@apply bg-background overscroll-none;
+	font-family: "ui-sans-serif", "-apple-system", "system-ui", "sans-serif";
 }
 
 :root {
