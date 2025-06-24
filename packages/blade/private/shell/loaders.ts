@@ -68,7 +68,13 @@ export const getFileListLoader = (): esbuild.Plugin => ({
     build.onStart(async () => {
       await Promise.all(
         directories.map(async ([directoryName, directoryPath]) => {
-          files.set(directoryName, await crawlDirectory(directoryPath));
+          const results = await crawlDirectory(directoryPath);
+          const finalResults =
+            directoryName === 'components'
+              ? results.filter((item) => item.relativePath.includes('.client'))
+              : results;
+
+          files.set(directoryName, finalResults);
         }),
       );
     });

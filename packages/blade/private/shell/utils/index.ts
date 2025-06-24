@@ -25,7 +25,8 @@ interface FileItem {
   relativePath: string;
 }
 
-export type FileList = Array<FileItem>;
+type FileList = Array<FileItem>;
+
 export type DirToParse = keyof typeof directoriesToParse;
 export type TotalFileList = Map<DirToParse, FileList>;
 
