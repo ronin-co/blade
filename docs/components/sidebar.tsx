@@ -15,6 +15,9 @@ export const Sidebar = ({
   return (
     <div className="sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-var(--header-height)-var(--footer-height))] w-(--sidebar-width) flex-col bg-transparent text-sidebar-foreground lg:flex">
       <div className="no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-2 pb-12 group-data-[collapsible=icon]:overflow-hidden">
+        <Link href="https://www.google.com">
+          <a>click me</a>
+        </Link>
         <div
           data-slot="sidebar-group"
           data-sidebar="group"

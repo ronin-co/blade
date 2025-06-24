@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 
 import { getParentDirectories } from '@/private/server/utils/paths';
 import { getEntry, getPathSegments } from '@/private/server/worker/pages';
+import { isSameOrigin } from '@/public/client/components';
 import { examplePage, pages } from './fixtures/pages';
 
 test('get entry path of non-index page', () => {
@@ -215,4 +216,37 @@ test('render page', () => {
   const result = component ? component({}) : null;
 
   expect(result).toBeNull();
+});
+
+test('isSameOrigin should return true for same-origin URLs', () => {
+  const currentURL = 'https://example.com/page';
+
+  expect(isSameOrigin('/about', currentURL)).toBe(true);
+  expect(isSameOrigin('https://example.com/contact', currentURL)).toBe(true);
+  expect(isSameOrigin('https://example.com:443/blog', currentURL)).toBe(true);
+  expect(isSameOrigin('https://example.com/page?param=value', currentURL)).toBe(true);
+});
+
+test('isSameOrigin should return false for cross-origin URLs', () => {
+  const currentURL = 'https://example.com/page';
+
+  expect(isSameOrigin('https://other.com/page', currentURL)).toBe(false);
+  expect(isSameOrigin('http://example.com/page', currentURL)).toBe(false);
+  expect(isSameOrigin('https://subdomain.example.com/page', currentURL)).toBe(false);
+  expect(isSameOrigin('https://example.com:8080/page', currentURL)).toBe(false);
+});
+
+test('isSameOrigin should handle relative URLs correctly', () => {
+  const currentURL = 'https://example.com:3000/page';
+
+  expect(isSameOrigin('/about', currentURL)).toBe(true);
+  expect(isSameOrigin('./relative', currentURL)).toBe(true);
+  expect(isSameOrigin('../parent', currentURL)).toBe(true);
+});
+
+test('isSameOrigin should handle invalid URLs gracefully', () => {
+  const currentURL = 'https://example.com/page';
+
+  expect(isSameOrigin('not-a-url', currentURL)).toBe(false);
+  expect(isSameOrigin('', currentURL)).toBe(false);
 });
