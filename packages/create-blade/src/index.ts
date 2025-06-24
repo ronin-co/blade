@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 import pkg from '@/package.json';
@@ -20,7 +22,7 @@ Options:
 async function main(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 
-  const { values } = parseArgs({
+  const { positionals, values } = parseArgs({
     allowPositionals: true,
     args: process.argv,
     options: {
@@ -56,6 +58,22 @@ async function main(): Promise<void> {
   if (!TEMPLATES.includes(values.template as Template)) {
     console.error(loggingPrefixes.error, `Invalid template "${values.template}"`);
     console.error(loggingPrefixes.error, 'Available templates:', TEMPLATES.join(', '));
+    process.exit(1);
+  }
+
+  // Note that we're slicing out the first two positionals,
+  // which are the command name and the script name.
+  const projectName = positionals.slice(2).at(-1) ?? 'blade-example';
+
+  if (existsSync(path.join(process.cwd(), projectName))) {
+    console.error(
+      loggingPrefixes.error,
+      `A directory named \`${projectName}\` already exists.`,
+    );
+    console.error(
+      loggingPrefixes.error,
+      'Please choose a different name or remove the existing directory.',
+    );
     process.exit(1);
   }
 
