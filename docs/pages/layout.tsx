@@ -2,102 +2,104 @@ import { useCookie } from '@ronin/blade/hooks';
 import { useMetadata } from '@ronin/blade/server/hooks';
 import type { TableOfContents } from '@ronin/blade/types';
 
-import type { CodeProps } from '@/components/code';
-import { Code } from '@/components/code';
+import type { CodeProps } from '@/components/code.client';
+import { Code, InlineCode } from '@/components/code.client';
 import { Footer } from '@/components/footer';
+import { Header } from '@/components/header.client';
 import { Heading } from '@/components/heading.client';
-import { Navbar } from '@/components/navbar';
-import { Sidebar } from '@/components/sidebar';
+import { Nav, type NavGroup } from '@/components/nav';
 import { TableOfContentsSidebar } from '@/components/table-of-contents.client';
 import type { Theme } from '@/components/theme-toggle.client';
 import { cn } from '@/lib/utils';
+import type { ComponentProps } from 'react';
 
-type MenuItem = {
-  id: string;
-  name: string;
-  href: string;
-};
-
-export type SidebarItem = { [key: string]: MenuItem[] };
-
-const menuItems: SidebarItem = {
-  'Get Started': [
-    {
-      id: 'introduction',
-      name: 'Introduction',
-      href: '/',
-    },
-    {
-      id: 'hooks',
-      name: 'Hooks',
-      href: '/hooks',
-    },
-    {
-      id: 'components',
-      name: 'Components',
-      href: '/components',
-    },
-    {
-      id: 'pages',
-      name: 'Pages',
-      href: '/pages',
-    },
-    {
-      id: 'api',
-      name: 'API Routes',
-      href: '/api-routes',
-    },
-    {
-      id: 'deploying',
-      name: 'Deploying',
-      href: '/deploying',
-    },
-    {
-      id: 'client',
-      name: 'Client',
-      href: '/client',
-    },
-  ],
-  Queries: [
-    {
-      id: 'queries',
-      name: 'Overview',
-      href: '/queries',
-    },
-    {
-      id: 'crud',
-      name: 'CRUD',
-      href: '/queries/crud',
-    },
-    {
-      id: 'instructions',
-      name: 'Instructions',
-      href: '/queries/instructions',
-    },
-    {
-      id: 'functions',
-      name: 'Functions',
-      href: '/queries/functions',
-    },
-  ],
-  Models: [
-    {
-      id: 'models',
-      name: 'Overview',
-      href: '/models',
-    },
-    {
-      id: 'Fields',
-      name: 'Fields',
-      href: '/models/fields',
-    },
-    {
-      id: 'triggers',
-      name: 'Triggers',
-      href: '/models/triggers',
-    },
-  ],
-};
+const NAV: Array<NavGroup> = [
+  {
+    name: 'Get Started',
+    items: [
+      {
+        id: 'introduction',
+        name: 'Introduction',
+        href: '/',
+      },
+      {
+        id: 'hooks',
+        name: 'Hooks',
+        href: '/hooks',
+      },
+      {
+        id: 'components',
+        name: 'Components',
+        href: '/components',
+      },
+      {
+        id: 'pages',
+        name: 'Pages',
+        href: '/pages',
+      },
+      {
+        id: 'api',
+        name: 'API Routes',
+        href: '/api-routes',
+      },
+      {
+        id: 'deploying',
+        name: 'Deploying',
+        href: '/deploying',
+      },
+      {
+        id: 'client',
+        name: 'Client',
+        href: '/client',
+      },
+    ],
+  },
+  {
+    name: 'Queries',
+    items: [
+      {
+        id: 'queries',
+        name: 'Overview',
+        href: '/queries',
+      },
+      {
+        id: 'crud',
+        name: 'CRUD',
+        href: '/queries/crud',
+      },
+      {
+        id: 'instructions',
+        name: 'Instructions',
+        href: '/queries/instructions',
+      },
+      {
+        id: 'functions',
+        name: 'Functions',
+        href: '/queries/functions',
+      },
+    ],
+  },
+  {
+    name: 'Models',
+    items: [
+      {
+        id: 'models',
+        name: 'Overview',
+        href: '/models',
+      },
+      {
+        id: 'Fields',
+        name: 'Fields',
+        href: '/models/fields',
+      },
+      {
+        id: 'triggers',
+        name: 'Triggers',
+        href: '/models/triggers',
+      },
+    ],
+  },
+];
 
 interface HeadingProps {
   children: React.ReactNode;
@@ -150,20 +152,24 @@ const DocsLayout = ({
 
   return (
     <>
-      <div className="relative z-10 flex min-h-svh w-full flex-col bg-background">
-        <Navbar items={menuItems} />
-        <div className="fixed top-24 left-6 w-fit">
-          <Sidebar items={menuItems} />
+      <div className="flex min-h-svh flex-col bg-background">
+        <Header nav={NAV} />
+
+        <div className="flex w-full items-start justify-center gap-x-12 px-8 lg:gap-x-16 lg:px-6">
+          <div className="sticky top-24 hidden w-48 sm:block">
+            <Nav nav={NAV} />
+          </div>
+
+          <div className="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-12 pb-24 text-neutral-800 2xl:max-w-4xl dark:text-neutral-300">
+            {children}
+          </div>
+
+          <div className="sticky top-24 hidden w-48 xl:block">
+            <TableOfContentsSidebar toc={tableOfContents} />
+          </div>
         </div>
-        <div className="docs-content prose mx-auto flex w-full min-w-0 max-w-2xl flex-1 flex-col px-4 py-6 text-neutral-800 md:px-0 dark:text-neutral-300">
-          {children}
-        </div>
-        <div className="fixed top-24 right-20 w-40">
-          <TableOfContentsSidebar tableOfContents={tableOfContents} />
-        </div>
-        <div className="mt-16">
-          <Footer theme={theme} />
-        </div>
+
+        <Footer theme={theme} />
       </div>
 
       {import.meta.env.BLADE_ENV === 'production' && (
@@ -180,6 +186,7 @@ const DocsLayout = ({
 // biome-ignore lint/nursery/useComponentExportOnlyModules: This is needed for the docs.
 export const components = {
   pre: (props: CodeProps) => <Code {...props} />,
+  code: (props: CodeProps) => <InlineCode {...props} />,
   h1: (props: HeadingProps) => (
     <Heading
       level={1}
@@ -213,6 +220,24 @@ export const components = {
   h6: (props: HeadingProps) => (
     <Heading
       level={6}
+      {...props}
+    />
+  ),
+  p: (props: ComponentProps<'p'>) => (
+    <p
+      className="my-2 text-muted-foreground"
+      {...props}
+    />
+  ),
+  ul: (props: ComponentProps<'ul'>) => (
+    <ul
+      className="mb-4 list-disc pl-6 text-muted-foreground"
+      {...props}
+    />
+  ),
+  li: (props: ComponentProps<'li'>) => (
+    <li
+      className="mb-2 text-muted-foreground"
       {...props}
     />
   ),
