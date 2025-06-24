@@ -1,5 +1,4 @@
 import * as SheetPrimitive from '@radix-ui/react-dialog';
-import { XIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -82,10 +81,6 @@ function SheetContent({
         )}
         {...props}>
         {children}
-        <SheetPrimitive.Close className="absolute top-7 right-8 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
-          <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>
   );
