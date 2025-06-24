@@ -1,5 +1,5 @@
-import { useParams } from '@ronin/blade/hooks';
-import { use, useMetadata } from '@ronin/blade/server/hooks';
+import { useParams } from 'blade/hooks';
+import { use, useMetadata } from 'blade/server/hooks';
 
 const Page = () => {
   const { id } = useParams();

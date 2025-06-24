@@ -1,6 +1,6 @@
 import { cn, slugify } from '@/lib/utils';
-import { Link } from '@ronin/blade/client/components';
-import type { TableOfContents } from '@ronin/blade/types';
+import { Link } from 'blade/client/components';
+import type { TableOfContents } from 'blade/types';
 import { useEffect, useState } from 'react';
 
 export const TableOfContentsSidebarItem = ({
