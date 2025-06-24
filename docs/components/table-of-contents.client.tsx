@@ -38,9 +38,9 @@ export const TableOfContentsSidebarItem = ({
         href={`#${slug}`}
         onClick={onClick}
         className={cn(
-          '-ml-2.5 block cursor-pointer rounded-md px-2.5 py-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:bg-accent hover:text-primary hover:duration-0',
+          '-ml-2.5 block cursor-pointer rounded-md px-2.5 py-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:text-primary hover:duration-0',
           {
-            'bg-accent text-primary': active === slug,
+            'text-primary': active === slug,
           },
         )}>
         <span>{item.value}</span>
