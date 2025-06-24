@@ -36,7 +36,7 @@ export const ParamField = ({
                   size="sm"
                   className="-ml-11 [.expandable-content_&]:-ml-[2.1rem] flex cursor-pointer items-center border-0 py-2 text-muted-foreground opacity-0 transition duration-200 hover:text-primary group-hover/param-head:opacity-100"
                   onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.href}#${paramId}`);
+                    navigator.clipboard.writeText(`${window.location.href}`);
                   }}>
                   <LinkIcon
                     width={12}
