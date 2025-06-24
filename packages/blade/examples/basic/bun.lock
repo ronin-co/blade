@@ -4,7 +4,7 @@
     "": {
       "name": "basic-example",
       "dependencies": {
-        "@ronin/blade": "0.9.0",
+        "@ronin/blade": "0.9.5",
         "react": "0.0.0-experimental-df12d7eac-20230510",
         "react-dom": "0.0.0-experimental-df12d7eac-20230510",
       },
@@ -113,7 +113,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@ronin/blade": ["@ronin/blade@0.9.0", "", { "dependencies": { "@ronin/compiler": "0.18.9", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "esbuild": "0.25.5", "ronin": "6.7.4" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-G+Grus0JuTXmAR8Xf1fpB1D4eGncSXIs/V4RBbFfFFAUZ+wRfLIeJ9C//8BGdI4G5OkTTWx+A8tE84rjLdl2mw=="],
+    "@ronin/blade": ["@ronin/blade@0.9.5", "", { "dependencies": { "@ronin/compiler": "0.18.9", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "esbuild": "0.25.5", "ronin": "6.7.4" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-N+tceGmE+WKg6W7B6UQZWlIK9e+4cCXcBeLs2QJiodFYs+FwqyCfMyxThv4LchgyUGR9YOIZpjBlh9+1Ksyelw=="],
 
     "@ronin/cli": ["@ronin/cli@0.3.19", "", { "dependencies": { "@dprint/formatter": "0.4.1", "@dprint/typescript": "0.93.3", "@iarna/toml": "2.2.5", "@inquirer/prompts": "7.2.3", "chalk-template": "1.1.0", "get-port": "7.1.0", "ini": "5.0.0", "json5": "2.2.3", "open": "10.1.0", "ora": "8.1.1", "resolve-from": "5.0.0" }, "peerDependencies": { "@ronin/codegen": ">=1.7.4", "@ronin/compiler": ">=0.18.8", "@ronin/engine": ">=0.1.23", "@ronin/syntax": ">=0.2.42" } }, "sha512-2M34NVDR/FRcjwhSFKMOVnI0uY0VFqrwotK7P+hQRwiOhE9juTsIPpNBSXPQwHRQBbHdoCxm1udibspDMphBXA=="],
 
