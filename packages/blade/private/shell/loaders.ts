@@ -1,3 +1,4 @@
+import { exists } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
@@ -78,7 +79,9 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
     build.onStart(async () => {
       await Promise.all(
         directories.map(async ([directoryName, directoryPath]) => {
-          const results = await crawlDirectory(directoryPath);
+          const results = (await exists(directoryPath))
+            ? await crawlDirectory(directoryPath)
+            : [];
           const finalResults = directoryName.startsWith('components')
             ? results.filter((item) => item.relativePath.includes('.client'))
             : results;
