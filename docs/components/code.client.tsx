@@ -3,12 +3,21 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { highlight } from 'sugar-high';
 
+export const InlineCode = (props: React.ComponentPropsWithoutRef<'code'>) => {
+  return (
+    <code
+      className="rounded-md bg-accent px-1.5 py-0.5 font-mono text-sm"
+      {...props}
+    />
+  );
+};
+
 /**
  * This Set is a fork of the official JavaScript keywords preset.
  * The reason for this is that we are adding TypeScript keywords to the set.
  * @see https://github.com/huozhi/sugar-high/blob/main/lib/index.js#L4-L46
  */
-const TypeScriptKeywords = new Set([
+const TYPESCRIPT_KEYWORDS = new Set([
   'abstract',
   'as',
   'asserts',
@@ -70,9 +79,9 @@ const TypeScriptKeywords = new Set([
 type SupportedLanguages = 'ts' | 'tsx' | 'typescript';
 
 const MAPPED_LANGUAGE_KEYWORDS = {
-  ts: TypeScriptKeywords,
-  tsx: TypeScriptKeywords,
-  typescript: TypeScriptKeywords,
+  ts: TYPESCRIPT_KEYWORDS,
+  tsx: TYPESCRIPT_KEYWORDS,
+  typescript: TYPESCRIPT_KEYWORDS,
 } satisfies Record<SupportedLanguages, Set<string>>;
 
 interface CodeBlockProps extends React.ComponentPropsWithoutRef<'pre'> {
