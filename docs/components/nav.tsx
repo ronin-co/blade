@@ -1,5 +1,5 @@
-import { Link } from '@ronin/blade/client/components';
-import { useLocation } from '@ronin/blade/hooks';
+import { Link } from 'blade/client/components';
+import { useLocation } from 'blade/hooks';
 
 import { cn } from '@/lib/utils';
 

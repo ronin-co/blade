@@ -428,7 +428,7 @@ export const usePaginationBuffer = <T>(
  *
  * @example
  * ```tsx
- * import { useQueryState } from '@ronin/blade/client/hooks';
+ * import { useQueryState } from 'blade/client/hooks';
  *
  * export default () => {
  *  const [hello, setHello] = useQueryState('hello');

@@ -1,15 +1,12 @@
 {
-  "name": "@ronin/blade",
-  "version": "0.9.7",
+  "name": "blade",
+  "version": "3.3.3",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
     "directory": "packages/blade",
     "url": "ronin-co/blade",
     "type": "git"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "bin": {
     "blade": "./dist/private/shell/index.js"

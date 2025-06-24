@@ -6,7 +6,7 @@ export const Snippet = () => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText('bun x @ronin/blade init');
+    navigator.clipboard.writeText('bunx blade init');
     setCopied(true);
 
     setTimeout(() => setCopied(false), 1500);
@@ -39,7 +39,7 @@ export const Snippet = () => {
           </span>
         </span>
 
-        <span>bun x @ronin/blade init</span>
+        <span>bunx blade init</span>
       </span>
 
       <span

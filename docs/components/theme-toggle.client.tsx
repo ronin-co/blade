@@ -1,4 +1,4 @@
-import { useCookie } from '@ronin/blade/hooks';
+import { useCookie } from 'blade/hooks';
 import { useCallback, useState } from 'react';
 
 import { Icons } from '@/components/icons';

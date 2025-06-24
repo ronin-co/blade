@@ -1,4 +1,4 @@
-import { useLocation } from '@ronin/blade/hooks';
+import { useLocation } from 'blade/hooks';
 
 import { Icons } from '@/components/icons';
 import { type Theme, ThemeToggle } from '@/components/theme-toggle.client';
