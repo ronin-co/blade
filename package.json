@@ -7,7 +7,7 @@
     "dev": "turbo dev --filter='./packages/*' --concurrency 24",
     "format": "biome format --write",
     "lint": "biome lint",
-    "prepare": "turbo build --filter='@ronin/blade'",
+    "prepare": "turbo build --filter='blade'",
     "test": "turbo test",
     "typecheck": "turbo typecheck"
   },
