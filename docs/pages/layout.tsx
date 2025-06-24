@@ -1,6 +1,6 @@
-import { useCookie } from '@ronin/blade/hooks';
-import { useMetadata } from '@ronin/blade/server/hooks';
-import type { TableOfContents } from '@ronin/blade/types';
+import { useCookie } from 'blade/hooks';
+import { useMetadata } from 'blade/server/hooks';
+import type { TableOfContents } from 'blade/types';
 
 import type { CodeProps } from '@/components/code.client';
 import { Code, InlineCode } from '@/components/code.client';
