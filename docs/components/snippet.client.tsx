@@ -44,13 +44,14 @@ export const Snippet = () => {
 
       <span
         className={cn(
-          'pointer-events-none absolute inset-0 flex items-center justify-center text-green-700 transition-opacity duration-200 group-hover:duration-0 dark:text-green-400',
+          'pointer-events-none absolute inset-0 flex items-center justify-center space-x-1 text-green-700 transition-opacity duration-200 group-hover:duration-0 dark:text-green-400',
           {
             'opacity-0': !copied,
             'opacity-100': copied,
           },
         )}>
         <Icons.Check className="size-4" />
+        <span>Copied to clipboard</span>
       </span>
     </button>
   );
