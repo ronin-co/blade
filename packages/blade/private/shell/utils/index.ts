@@ -9,7 +9,6 @@ import type { Transpiler } from 'bun';
 import ora from 'ora';
 
 import {
-  type directoriesToParse,
   loggingPrefixes,
   outputDirectory,
   routerInputFile,
@@ -27,8 +26,7 @@ interface FileItem {
 
 type FileList = Array<FileItem>;
 
-export type DirToParse = keyof typeof directoriesToParse;
-export type TotalFileList = Map<DirToParse, FileList>;
+export type TotalFileList = Map<string, FileList>;
 
 export const crawlDirectory = async (directoryPath: string): Promise<FileList> => {
   const files = await readdir(directoryPath, { recursive: true });
@@ -68,7 +66,7 @@ const getImportList = async (directoryName: string, files: FileList) => {
 
 export const getFileList = async (
   files: TotalFileList,
-  directories: Array<DirToParse>,
+  directories: Array<string>,
   router?: boolean,
 ): Promise<string> => {
   const importPromises = directories.map((name) => getImportList(name, files.get(name)!));

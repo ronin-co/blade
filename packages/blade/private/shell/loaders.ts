@@ -5,9 +5,7 @@ import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 
-import { directoriesToParse } from '@/private/shell/constants';
 import {
-  type DirToParse,
   type TotalFileList,
   crawlDirectory,
   getFileList,
@@ -59,20 +57,31 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (): esbuild.Plugin => ({
+export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
-    const directories = Object.entries(directoriesToParse) as Array<[DirToParse, string]>;
+
+    const directories = [
+      ['pages', path.join(process.cwd(), 'pages')],
+      ['triggers', path.join(process.cwd(), 'triggers')],
+      ['components', path.join(process.cwd(), 'components')],
+    ];
+
+    const extraProjects = projects.slice(1);
+
+    for (let index = 0; index < extraProjects.length; index++) {
+      const project = extraProjects[index];
+      directories.push([`components${index}`, path.join(project, 'components')]);
+    }
 
     build.onStart(async () => {
       await Promise.all(
         directories.map(async ([directoryName, directoryPath]) => {
           const results = await crawlDirectory(directoryPath);
-          const finalResults =
-            directoryName === 'components'
-              ? results.filter((item) => item.relativePath.includes('.client'))
-              : results;
+          const finalResults = directoryName.startsWith('components')
+            ? results.filter((item) => item.relativePath.includes('.client'))
+            : results;
 
           files.set(directoryName, finalResults);
         }),
