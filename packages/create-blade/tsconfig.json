@@ -27,8 +27,8 @@
 
     // Extra config
     "paths": {
-      "@/private/*": ["./private/*"],
-      "@/public/*": ["./public/*"]
+      "@/*": ["./src/*"],
+      "@/package.json": ["./package.json"]
     }
   },
   "exclude": ["./examples/**/*", "./docs/**/*"]
