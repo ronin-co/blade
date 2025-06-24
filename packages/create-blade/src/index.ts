@@ -7,8 +7,15 @@ import pkg from '@/package.json';
 import { logSpinner, loggingPrefixes } from '@/utils/log';
 
 const TEMPLATES = ['advanced', 'basic'] as const;
-
 type Template = (typeof TEMPLATES)[number];
+
+const HELP_MESSAGE = `
+Usage: create-blade [name] [options]
+
+Options:
+  -v, --version           Output the current version of create-blade.
+  -h, --help              Display this help message.
+`;
 
 async function main(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -42,13 +49,7 @@ async function main(): Promise<void> {
   }
 
   if (values.help) {
-    console.log(`
-Usage: create-blade [directory] [options]
-
-Options:
-  -v, --version           Output the current version of create-blade.
-  -h, --help              Display this help message.
-`);
+    console.log(HELP_MESSAGE);
     process.exit(0);
   }
 
