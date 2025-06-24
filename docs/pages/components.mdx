@@ -2,6 +2,8 @@
 title: Components
 ---
 
+import { ParamField } from '@/components/param-field';
+
 # Components
 
 ## `Link`
@@ -16,16 +18,24 @@ import { Link } from '@ronin/blade/client/components';
 <Link href="/another-page"><a>click me</a></Link>
 ```
 
-The following props are available:
+### Props
 
-- `href`: A string or `URL` object containing the pathname and search params of the
-  destination page.
-- `segments`: An object containing key/value pairs of dynamic segments that should be
-  used to populate the `href`. For example, if the `href` is `/teams/[handle]` and the
-  `segments` prop is `{ handle: 'engineering' }`, the destination page would be
-  `/teams/engineering`.
-- `prefetch`: A boolean indicating whether the link should be prefetched. Defaults to
-  `true`. Read more about prefetching below.
+<ParamField path="href" type="string" isRequired>
+    A string or `URL` object containing the pathname and search params of the
+    destination page.
+</ParamField>
+
+<ParamField path="segments" type="object">
+    An object containing key/value pairs of dynamic segments that should be
+    used to populate the `href`. For example, if the `href` is `/teams/[handle]` and the
+    `segments` prop is `{ handle: 'engineering' }`, the destination page would be
+    `/teams/engineering`.
+</ParamField>
+
+<ParamField path="prefetch" type="boolean" defaultValue="true">
+    A boolean indicating whether the link should be prefetched. Read more about prefetching below.
+</ParamField>
+
 - Additionally, all attributes of
   [anchor elements](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a)
   are supported as props of `Link` and will be forwarded to the underlying auto-generated
