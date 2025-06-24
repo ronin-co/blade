@@ -44,6 +44,9 @@ export const serve = async (
       // directory, since server code could otherwise be read.
       root: path.join(path.basename(outputDirectory), CLIENT_ASSET_PREFIX),
       rewriteRequestPath: (path) => path.replace(clientPathPrefix, ''),
+      onFound: (_path, c) => {
+        c.header('Cache-Control', 'public, max-age=31536000, immutable');
+      },
     }),
   );
 
