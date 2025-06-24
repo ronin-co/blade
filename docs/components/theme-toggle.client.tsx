@@ -18,8 +18,6 @@ export function ThemeToggle(props: ThemeToggleProps) {
       setCurrentTheme(theme);
       setThemeCookie(theme, { client: true });
 
-      console.log({ theme });
-
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
         document.documentElement.classList.remove('light');
