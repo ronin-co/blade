@@ -13,7 +13,7 @@ Mimics [document.location](https://developer.mozilla.org/en-US/docs/Web/API/Docu
 Unlike in `document.location`, however, the URL is not populated, so dynamic path segments of pages will not be populated with their respective value.
 
 ```tsx
-import { useLocation } from '@ronin/blade/hooks';
+import { useLocation } from 'blade/hooks';
 
 const location = useLocation();
 ```
@@ -25,7 +25,7 @@ Exposes the keys and values of all parameters (dynamic path segments) present in
 For example, if the URL being accessed is `/elaine` and the page is named `[handle].tsx`, the returned object would be `{ handle: 'elaine' }`.
 
 ```tsx
-import { useParams } from '@ronin/blade/hooks';
+import { useParams } from 'blade/hooks';
 
 const params = useParams();
 ```
@@ -35,7 +35,7 @@ const params = useParams();
 Used to transition to a different page.
 
 ```tsx
-import { useRedirect } from '@ronin/blade/hooks';
+import { useRedirect } from 'blade/hooks';
 
 const redirect = useRedirect();
 
@@ -66,7 +66,7 @@ As mentioned in the docs for `useLocation()`, dynamic path segments (such as `/[
 To populate them, you can pass the pathname to the `usePopulatePathname()` hook.
 
 ```tsx
-import { usePopulatePathname } from '@ronin/blade/hooks';
+import { usePopulatePathname } from 'blade/hooks';
 
 const populatePathname = usePopulatePathname();
 
@@ -91,7 +91,7 @@ populatePathname('/[handle]', {
 Mimics [window.navigator](https://developer.mozilla.org/en-US/docs/Web/API/Window/navigator) and thereby exposes an object containing details about the current user agent.
 
 ```tsx
-import { useNavigator } from '@ronin/blade/hooks';
+import { useNavigator } from 'blade/hooks';
 
 const navigator = useNavigator();
 
@@ -105,7 +105,7 @@ navigator.geoLocation; // See MDN docs (currently under construction)
 Allows for reading and writing cookies. On the server, cookies are attached to the headers of the resulting HTTP request before the JSX stream of React elements begins. On the client, they modify the cookies stored in the browser directly.
 
 ```tsx
-import { useCookie } from '@ronin/blade/hooks';
+import { useCookie } from 'blade/hooks';
 
 const Page = () => {
     const [tokenCookie, setTokenCookie] = useCookie('token');
@@ -139,7 +139,7 @@ Allows for performing data mutations and updates all `use` queries accordingly.
 The function exposes all [write query types](https://ronin.co/docs/queries/types) available on RONIN, but any other data source may be used as well.
 
 ```tsx
-import { useMutation } from '@ronin/blade/client/hooks';
+import { useMutation } from 'blade/client/hooks';
 
 const { set, add, remove, batch } = useMutation();
 
@@ -190,7 +190,7 @@ Allows for paginating a read query and thereby modifies the result of the respec
 For example, you might use the following read query in your page (on the server):
 
 ```tsx
-import { use } from '@ronin/blade/server/hooks';
+import { use } from 'blade/server/hooks';
 import SomeComponent from './components/test.client';
 
 const Page = () => {
@@ -203,7 +203,7 @@ const Page = () => {
 Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then paginate the list of records you've retrieved like this:
 
 ```tsx
-import { usePagination } from '@ronin/blade/client/hooks';
+import { usePagination } from 'blade/client/hooks';
 
 export const SomeComponent = ({ records, recordsNextPage }) => {
     const { paginate, resetPagination } = usePagination(recordsNextPage);
@@ -248,7 +248,7 @@ When displaying a list of records, `usePaginationBuffer` automates this for you.
 For example, you might use the following read query in your page (on the server):
 
 ```tsx
-import { use } from '@ronin/blade/server/hooks';
+import { use } from 'blade/server/hooks';
 import SomeComponent from './components/test.client';
 
 const Page = () => {
@@ -265,7 +265,7 @@ const Page = () => {
 Within `SomeComponent` (which must be a client component, identified through `.client` in its name), you could then concatenate the list of records like so:
 
 ```tsx
-import { usePagination, usePaginationBuffer } from '@ronin/blade/client/hooks';
+import { usePagination, usePaginationBuffer } from 'blade/client/hooks';
 
 export const SomeComponent = ({ children: defaultChildren, nextPage, previousPage }) => {
     const { paginate, resetPagination } = usePagination(nextPage);
@@ -313,7 +313,7 @@ In the rare scenario that you need to capture the click event of a link element 
 For example, if a drag-and-drop system is used, it might want to use those event handlers for different purposes (detecting whether an element is being dragged or dropped), so it could fire the ones provided by Blade at a different time.
 
 ```tsx
-import { useLinkEvents } from '@ronin/blade/client/hooks';
+import { useLinkEvents } from 'blade/client/hooks';
 
 const eventHandlers = useLinkEvents('/pathname');
 
@@ -333,7 +333,7 @@ For example, if your application contains a list of items within the interface, 
 In those kinds of scenarios, you can add the `useQueryState` hook, which essentially auto-generates a `useState` hook that depends on a query parameter in the URL. Reading the value of the hook therefore reads the value of the query parameter in the URL, and setting the value of the hook therefore also updates the value of the query parameter in the URL — all without you needing to write extra code.
 
 ```tsx
-import { useQueryState } from '@ronin/blade/client/hooks';
+import { useQueryState } from 'blade/client/hooks';
 
 const ClientComponent = () => {
     const [hello, setHello] = useQueryState('hello');
@@ -358,7 +358,7 @@ Specifically, the hook reflects the full capabilities of the [RONIN query syntax
 By default, if you provide a `RONIN_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using [triggers](https://ronin.co/docs/models/triggers) instead.
 
 ```tsx
-import { use } from '@ronin/blade/server/hooks';
+import { use } from 'blade/server/hooks';
 
 const Page = () => {
     // "accounts" would be the name of your model.
@@ -371,7 +371,7 @@ const Page = () => {
 The queries you provide can be as complex as you would like them to be (see the [query syntax docs](https://ronin.co/docs/queries) for more details on what you can do):
 
 ```tsx
-import { use } from '@ronin/blade/server/hooks';
+import { use } from 'blade/server/hooks';
 
 const records = use.members({
     with: {
@@ -391,7 +391,7 @@ The queries of your page and its surrounding layouts are executed as a single da
 To run multiple queries within a single layout or page, the `useBatch` hook can be used:
 
 ```tsx
-import { useBatch } from '@ronin/blade/server/hooks';
+import { useBatch } from 'blade/server/hooks';
 
 const [accounts, posts] = useBatch(() => [
     use.accounts(),
@@ -408,7 +408,7 @@ If the same read query is used in different layouts surrounding a page or the pa
 Allows for defining the metadata of a layout or page and thereby populates the [head](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/head) element of the rendered page with metadata elements.
 
 ```tsx
-import { useMetadata } from '@ronin/blade/server/hooks';
+import { useMetadata } from 'blade/server/hooks';
 
 const Page = () => {
     useMetadata({
@@ -467,7 +467,7 @@ In scenarios where you must explicitly access the result of a mutation on the se
 This interface will likely be moved into a different position within the programmatic API in the future.
 
 ```tsx
-import { useMutationResult } from '@ronin/blade/server/hooks';
+import { useMutationResult } from 'blade/server/hooks';
 
 const updatedRecords = useMutationResult();
 ```
@@ -477,7 +477,7 @@ const updatedRecords = useMutationResult();
 Allows for parsing [JSON Web Tokens](https://jwt.io) without blocking the page render.
 
 ```tsx
-import { useJWT } from '@ronin/blade/server/hooks';
+import { useJWT } from 'blade/server/hooks';
 
 const payload = useJWT(token, secret);
 ```

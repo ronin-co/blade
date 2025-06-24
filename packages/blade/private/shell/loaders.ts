@@ -132,7 +132,7 @@ export const getMdxLoader = (
 
       if (yaml) {
         const yamlData = YAML.load(yaml[1]);
-        const hook = `import { useMetadata } from '@ronin/blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
+        const hook = `import { useMetadata } from 'blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
 
         mdxContents = contents.replace(yaml[0], hook);
       }

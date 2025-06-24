@@ -41,7 +41,7 @@ To get started with Blade, first make sure you have [Bun](https://bun.sh) instal
 Next, create a new app with this command:
 
 ```bash
-bunx @ronin/blade init
+bunx blade init
 ```
 
 Afterward, enter the newly created directory and install the dependencies:
@@ -87,10 +87,10 @@ Once that's done, link the package to make it available to all of your local pro
 bun link
 ```
 
-Inside your project, you can then run the following command, which is similar to `bun add @ronin/blade` or `npm install @ronin/blade`, except that it doesn't install `@ronin/blade` from npm, but instead uses your local clone of the package:
+Inside your project, you can then run the following command, which is similar to `bun add blade` or `npm install blade`, except that it doesn't install `blade` from npm, but instead uses your local clone of the package:
 
 ```bash
-bun link @ronin/blade
+bun link blade
 ```
 
 If your project is not yet compatible with [Bun](https://bun.sh), feel free to replace all of the occurrences of the word `bun` in the commands above with `npm` instead.
