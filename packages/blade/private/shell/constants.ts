@@ -12,7 +12,8 @@ export const frameworkDirectory = path.join(__dirname, '..', '..', '..');
 export const directoriesToParse = {
   pages: pagesDirectory,
   triggers: triggersDirectory,
-};
+  components: componentsDirectory,
+} as const;
 
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
 

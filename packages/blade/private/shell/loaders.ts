@@ -5,7 +5,15 @@ import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 
-import { getFileList, scanExports, wrapClientExport } from '@/private/shell/utils';
+import { directoriesToParse } from '@/private/shell/constants';
+import {
+  type DirToParse,
+  type TotalFileList,
+  crawlDirectory,
+  getFileList,
+  scanExports,
+  wrapClientExport,
+} from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
@@ -54,12 +62,23 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
 export const getFileListLoader = (): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
+    const files: TotalFileList = new Map();
+    const directories = Object.entries(directoriesToParse) as Array<[DirToParse, string]>;
+
+    build.onStart(async () => {
+      await Promise.all(
+        directories.map(async ([directoryName, directoryPath]) => {
+          files.set(directoryName, await crawlDirectory(directoryPath));
+        }),
+      );
+    });
+
     build.onResolve({ filter: /^server-list$/ }, (source) => {
       return { path: source.path, namespace: 'server-imports' };
     });
 
     build.onLoad({ filter: /^server-list$/, namespace: 'server-imports' }, async () => ({
-      contents: await getFileList(true),
+      contents: await getFileList(files, ['pages', 'triggers']),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
@@ -69,7 +88,7 @@ export const getFileListLoader = (): esbuild.Plugin => ({
     });
 
     build.onLoad({ filter: /^client-list$/, namespace: 'client-imports' }, async () => ({
-      contents: await getFileList(),
+      contents: await getFileList(files, ['components']),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
