@@ -70,10 +70,14 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
     ];
 
     const extraProjects = projects.slice(1);
+    const componentDirectories = ['components'];
 
     for (let index = 0; index < extraProjects.length; index++) {
       const project = extraProjects[index];
-      directories.push([`components${index}`, path.join(project, 'components')]);
+      const exportName = `components${index}`;
+
+      directories.push([exportName, path.join(project, 'components')]);
+      componentDirectories.push(exportName);
     }
 
     build.onStart(async () => {
@@ -106,7 +110,7 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
     });
 
     build.onLoad({ filter: /^client-list$/, namespace: 'client-imports' }, async () => ({
-      contents: await getFileList(files, ['components']),
+      contents: await getFileList(files, componentDirectories),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
