@@ -35,19 +35,13 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
       <div className="flex w-full max-w-3xl flex-row items-center justify-between 2xl:max-w-4xl">
         <a
           className={cn(
-            '-ml-2.5 group font-medium font-mono text-muted-foreground/60 tracking-tight transition-all duration-200 hover:text-muted-foreground hover:duration-0',
+            'group font-medium font-mono text-muted-foreground/60 tracking-tight transition-all duration-200 hover:text-muted-foreground hover:duration-0',
             {
               'text-lg': !scrolled,
               'text-base': scrolled,
             },
           )}
           href="/">
-          <span
-            className={cn('transition-opacity duration-200', {
-              'opacity-0': scrolled,
-            })}>
-            @
-          </span>
           <span>ronin/</span>
           <span className="font-semibold text-primary">blade</span>
         </a>
