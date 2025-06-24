@@ -18,7 +18,7 @@ interface LinkURL extends Omit<Partial<InstanceType<typeof URL>>, 'search'> {
  *
  * @returns `true` if the URLs are on the same origin, `false` otherwise.
  */
-export const isSameOrigin = (destination: string, currentURL: string): boolean => {
+const isSameOrigin = (destination: string, currentURL: string): boolean => {
   try {
     const destURL = new URL(destination, currentURL);
     const currentURLObj = new URL(currentURL);
