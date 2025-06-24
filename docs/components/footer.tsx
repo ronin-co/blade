@@ -1,9 +1,7 @@
 import { useLocation } from '@ronin/blade/hooks';
-import { Edit } from 'lucide-react';
 
 import { Icons } from '@/components/icons';
 import { type Theme, ThemeToggle } from '@/components/theme-toggle.client';
-import { Button } from '@/components/ui/button';
 
 function getEditUrl(location: URL): string {
   if (location.pathname === '/') return '/index';
@@ -23,42 +21,51 @@ export const Footer = (props: FooterProps) => {
   const pathname = getEditUrl(location);
 
   return (
-    <footer className="mx-auto w-full max-w-2xl space-y-10 pb-16">
-      <div className="flex flex-col items-center justify-between gap-5 border-zinc-900/5 sm:flex-row">
-        <a
-          className="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-          href={`https://github.com/ronin-co/blade/edit/main/docs/pages${pathname}.mdx`}
-          rel="noreferrer"
-          target="_blank">
-          <Edit className="h-4 w-4" />
-          <span>Edit this page</span>
-        </a>
-      </div>
+    <footer className="flex w-full items-start justify-center gap-x-12 border-border border-t bg-background px-8 py-6 lg:gap-x-16 lg:px-6">
+      <div className="hidden w-48 shrink-0 md:block" />
 
-      <div className="flex flex-col items-center justify-between gap-5 border-zinc-900/5 border-t pt-8 sm:flex-row dark:border-white/5">
-        <p className="text-xs text-zinc-600 dark:text-zinc-400">
-          &copy; Copyright {new Date().getFullYear()}. All rights reserved.
+      <div className="flex w-full max-w-3xl flex-col justify-between gap-2 sm:flex-row sm:items-center 2xl:max-w-4xl">
+        <p className="flex flex-row items-center gap-1 font-medium text-muted-foreground text-xs">
+          <a
+            className="transition duration-200 hover:text-primary hover:duration-0"
+            href="https://ronin.co"
+            rel="noreferrer"
+            target="_blank">
+            &copy; RONIN {new Date().getFullYear()}.
+          </a>
+          <span>All rights reserved.</span>
         </p>
 
-        <div className="flex gap-4">
+        <div className="flex flex-row items-center gap-2">
+          <a
+            className="mr-auto font-medium text-muted-foreground text-xs transition duration-200 hover:text-primary hover:duration-0 sm:mr-4"
+            href={`https://github.com/ronin-co/blade/edit/main/docs/pages${pathname}.mdx`}
+            rel="noreferrer"
+            target="_blank">
+            Edit on GitHub
+          </a>
+
           <ThemeToggle initial={props.theme} />
 
-          <Button
-            asChild={true}
-            className="group/toggle h-8 w-8 px-2"
-            size="icon"
-            variant="ghost">
-            <a
-              className="w-fit px-0"
-              href="https://github.com/ronin-co/blade"
-              rel="noreferrer"
-              target="_blank">
-              <Icons.gitHub className="h-4 w-4" />
-              <span className="sr-only">GitHub</span>
-            </a>
-          </Button>
+          <a
+            className="rounded-md p-1.5 text-muted-foreground transition duration-200 hover:bg-accent hover:text-primary hover:duration-0"
+            href="https://discord.gg/wHP3z77Yrf"
+            rel="noreferrer"
+            target="_blank">
+            <Icons.Discord className="size-4.5" />
+          </a>
+
+          <a
+            className="rounded-md p-1.5 text-muted-foreground transition duration-200 hover:bg-accent hover:text-primary hover:duration-0"
+            href="https://github.com/ronin-co/blade"
+            rel="noreferrer"
+            target="_blank">
+            <Icons.GitHub className="size-4.5" />
+          </a>
         </div>
       </div>
+
+      <div className="hidden w-48 shrink-0 xl:block" />
     </footer>
   );
 };
