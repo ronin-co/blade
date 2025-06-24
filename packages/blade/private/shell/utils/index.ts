@@ -9,10 +9,8 @@ import type { Transpiler } from 'bun';
 import ora from 'ora';
 
 import {
-  directoriesToParse,
   loggingPrefixes,
   outputDirectory,
-  pagesDirectory,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
@@ -20,27 +18,39 @@ import type { FileError } from '@/private/shell/types';
 import type { DeploymentProvider } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
-const crawlDirectory = async (directory: string): Promise<string[]> => {
-  const files = await readdir(directory, { recursive: true });
-  return files.map((file) => (path.extname(file) === '' ? `${file}/` : file));
+interface FileItem {
+  type: 'FILE' | 'DIRECTORY';
+  absolutePath: string;
+  relativePath: string;
+}
+
+type FileList = Array<FileItem>;
+
+export type TotalFileList = Map<string, FileList>;
+
+export const crawlDirectory = async (directoryPath: string): Promise<FileList> => {
+  const files = await readdir(directoryPath, { recursive: true });
+
+  return files.map((file) => ({
+    type: path.extname(file) === '' ? 'DIRECTORY' : 'FILE',
+    absolutePath: path.join(directoryPath, file),
+    relativePath: file,
+  }));
 };
 
-const getImportList = async (directoryName: string, directoryPath: string) => {
-  const files = (await exists(directoryPath)) ? await crawlDirectory(directoryPath) : [];
-
+const getImportList = async (directoryName: string, files: FileList) => {
   const importList = [];
   const exportList: { [key: string]: string } = {};
 
   for (let index = 0; index < files.length; index++) {
-    const filePath = files[index] as (typeof files)[number];
-    const filePathFull = path.join(directoryPath, filePath);
+    const file = files[index];
     const variableName = directoryName + index;
 
-    if (filePath.endsWith('/')) {
-      exportList[filePath.slice(0, filePath.length - 1)] = `'DIRECTORY'`;
+    if (file.type === 'DIRECTORY') {
+      exportList[file.relativePath] = `'DIRECTORY'`;
     } else {
-      importList.push(`import * as ${variableName} from '${filePathFull}';`);
-      exportList[filePath] = variableName;
+      importList.push(`import * as ${variableName} from '${file.absolutePath}';`);
+      exportList[file.relativePath] = variableName;
     }
   }
 
@@ -54,28 +64,24 @@ const getImportList = async (directoryName: string, directoryPath: string) => {
   return code;
 };
 
-export const getFileList = async (full?: boolean): Promise<string> => {
-  const directories = Object.entries(
-    full ? directoriesToParse : { pages: pagesDirectory },
-  );
-  const importPromises = directories.map(([name, path]) => getImportList(name, path));
+export const getFileList = async (
+  files: TotalFileList,
+  directories: Array<string>,
+  router?: boolean,
+): Promise<string> => {
+  const importPromises = directories.map((name) => getImportList(name, files.get(name)!));
   const imports = await Promise.all(importPromises);
-  const routerExists = full ? await exists(routerInputFile) : false;
+  const routerExists = router ? await exists(routerInputFile) : false;
 
-  if (await exists(routerInputFile)) {
+  if (routerExists) {
     imports.push(`import { default as honoRouter } from '${routerInputFile}';`);
   }
 
   let file = imports.join('\n\n');
 
   file += '\n\n';
-  file += `const router = ${routerExists ? 'honoRouter' : 'null'};\n`;
-
-  if (full) {
-    file += 'export { pages, triggers, router };\n';
-  } else {
-    file += 'export { pages };\n';
-  }
+  file += `export const router = ${routerExists ? 'honoRouter' : 'null'};\n`;
+  file += `export { ${directories.join(', ')} };\n`;
 
   return file;
 };
