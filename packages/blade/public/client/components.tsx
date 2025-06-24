@@ -11,31 +11,6 @@ interface LinkURL extends Omit<Partial<InstanceType<typeof URL>>, 'search'> {
 }
 
 /**
- * Checks if a URL is on the same origin as the current URL.
- *
- * @param destination - The destination URL to check.
- * @param currentURL - The currently active URL.
- *
- * @returns `true` if the URLs are on the same origin, `false` otherwise.
- */
-const isSameOrigin = (destination: string, currentURL: string): boolean => {
-  try {
-    const destURL = new URL(destination, currentURL);
-    const currentURLObj = new URL(currentURL);
-
-    // Check if protocol, hostname, and port are the same.
-    return (
-      destURL.protocol === currentURLObj.protocol &&
-      destURL.hostname === currentURLObj.hostname &&
-      destURL.port === currentURLObj.port
-    );
-  } catch {
-    // If URL parsing fails, assume it's not the same origin.
-    return false;
-  }
-};
-
-/**
  * Normalizes a `LinkURL` object to a `URL` instance.
  *
  * @param url - The `LinkURL` or `URL` object to normalize.
@@ -123,8 +98,8 @@ const Link = ({
   const destination = populatePathname(href, segments);
   const linkEventHandlers = useLinkEvents(destination);
 
-  // Only prefetch if explicitly enabled AND the destination is on the same origin.
-  const shouldPrefetch = prefetch && isSameOrigin(destination, universalContext.url);
+  const shouldPrefetch =
+    prefetch && (destination.startsWith('https://') || destination.startsWith('http://'));
 
   const eventHandlers = shouldPrefetch
     ? linkEventHandlers
