@@ -72,7 +72,7 @@ Start building your first application with Blade by installing [Bun](https://bun
 Afterward, run the following command to create a new example application:
 
 ```bash
-bunx @ronin/blade init
+bunx blade init
 ```
 
 A new directory named `blade-example` will be created as a result, which contains your newly created application.
@@ -102,7 +102,7 @@ Once you've placed this file in the root directory of your project, Blade will a
 Since every newly created database on RONIN already contains example data, you can now open the `pages/index.tsx` file of your Blade application and start querying the data:
 
 ```tsx
-import { use } from '@ronin/blade/server/hooks';
+import { use } from 'blade/server/hooks';
 
 const Page = () => {
   const posts = use.posts();

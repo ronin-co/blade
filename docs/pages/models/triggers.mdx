@@ -29,7 +29,7 @@ touch ./triggers/account.ts
 Afterward, you can export a trigger from the file:
 
 ```ts
-import type { AddTrigger } from '@ronin/blade/types';
+import type { AddTrigger } from 'blade/types';
 
 export const add: AddTrigger = (query) => {
   query.with.handle = query.with.name.toLowerCase();
