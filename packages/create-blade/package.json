@@ -23,7 +23,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --pretty"
   },
-  "keywords": [],
+  "keywords": ["blade", "cli", "create", "react"],
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {},
