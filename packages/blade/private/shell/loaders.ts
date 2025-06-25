@@ -45,6 +45,8 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
 
       const exports: Array<ExportItem> = [];
 
+      console.log('TEST', ast)
+
       walkSimple(ast, {
         ExportNamedDeclaration(node) {
           // Ignore `export ... from ...` statements.

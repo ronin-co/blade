@@ -57,9 +57,13 @@
     "@ronin/react": "0.1.4",
     "@ronin/syntax": "0.2.43",
     "@stefanprobst/rehype-extract-toc": "3.0.0",
+    "@sveltejs/acorn-typescript": "1.0.5",
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
+    "acorn": "8.15.0",
+    "acorn-walk": "8.3.4",
     "esbuild": "0.25.5",
+    "magic-string": "0.30.17",
     "ronin": "6.7.4"
   },
   "devDependencies": {
