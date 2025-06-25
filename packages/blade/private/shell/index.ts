@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { cp, rename } from 'node:fs/promises';
+import { cp, readFile, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -95,7 +95,7 @@ const tsConfig = path.join(process.cwd(), 'tsconfig.json');
 // If a `tsconfig.json` file exists that contains a `references` field, we should include
 // files from the referenced projects as well.
 if (await exists(tsConfig)) {
-  const tsConfigContents = await import(tsConfig);
+  const tsConfigContents = JSON.parse(await readFile(tsConfig, 'utf-8'));
   const { references } = tsConfigContents || {};
 
   if (references && Array.isArray(references) && references.length > 0) {
@@ -204,7 +204,7 @@ if (isBuilding || isDeveloping) {
               server.module = import(path.join(outputDirectory, moduleName));
 
               // Revalidate the client.
-              if (server.channel) server.channel.publish('development', 'revalidate');
+              if (server.channel) server.channel.send('revalidate');
             }
           });
         },

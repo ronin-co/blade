@@ -33,7 +33,6 @@ import {
 } from '@/private/client/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
-import logger from '@/private/universal/utils/logs';
 import { useLocation, usePopulatePathname, useRedirect } from '@/public/universal/hooks';
 
 interface MutationOptions {
@@ -295,11 +294,11 @@ export const usePagination = (
     const privateLocation = privateLocationRef.current;
 
     if (!privateLocation.searchParams.has('page')) {
-      logger.info(`Cannot reset pagination because it isn't active.`);
+      console.debug(`Cannot reset pagination because it isn't active.`);
       return;
     }
 
-    logger.info('Pagination was reset');
+    console.debug('Pagination was reset');
 
     // Remove the `?page` query parameter from the URL if it is present.
     const newSearchParams = new URLSearchParams(privateLocation.searchParams);
@@ -312,7 +311,9 @@ export const usePagination = (
   if (!nextPage) {
     return {
       paginate: () => {
-        logger.info('Pagination did not occur because no further records are available.');
+        console.debug(
+          'Pagination did not occur because no further records are available.',
+        );
       },
       resetPagination,
     };
@@ -322,7 +323,7 @@ export const usePagination = (
     const privateLocation = privateLocationRef.current;
 
     if (loadingMore.current) {
-      logger.info('Pagination did not occur again because it is already ongoing.');
+      console.debug('Pagination did not occur again because it is already ongoing.');
       return;
     }
 

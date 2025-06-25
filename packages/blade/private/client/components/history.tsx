@@ -6,7 +6,7 @@ import type { DeferredPromises, RevalidationReason } from '@/private/client/type
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
-import { IS_DEV } from '@/private/universal/utils/constants';
+import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 import { usePopulatePathname } from '@/public/universal/hooks';
 
 interface HistoryContentProps {
@@ -56,7 +56,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   // Revalidate the current page whenever the code of the server bundle gets updated
   // during development. This happens whenever client or server components are changed.
   useEffect(() => {
-    if (!IS_DEV) return;
+    if (!IS_CLIENT_DEV) return;
 
     // Here we default to the origin available in the browser, because BLADE might
     // locally sit behind a proxy that terminates TLS, in which case the origin protocol
