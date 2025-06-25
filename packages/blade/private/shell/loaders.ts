@@ -40,7 +40,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
       const exportList: Array<ExportItem> = [];
 
       for (const node of ast.body) {
-        // Skip remote re-exports (export * from ...) and types (export type).
+        // Skip remote re-exports (`export * from ...`) and types (`export type`).
         if (
           node.type === 'ExportAllDeclaration' ||
           (node.type === 'ExportNamedDeclaration' &&
@@ -49,12 +49,12 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           continue;
         }
 
-        // Handle named exports
+        // Handle named exports.
         if (node.type === 'ExportNamedDeclaration') {
           const decl = node.declaration;
 
           if (decl) {
-            // Record function/class/var exports
+            // Record function/class/var exports.
             const name = extractDeclarationName(decl);
 
             if (name && decl.type !== 'VariableDeclaration') {
@@ -67,10 +67,10 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
               }
             }
 
-            // Remove only the `export ` prefix so the declaration remains
+            // Remove only the `export ` prefix so the declaration remains.
             ms.remove(node.range[0], decl.range[0]);
           } else {
-            // Pure `export { foo, bar }` — drop the whole statement
+            // Pure `export { foo, bar }` — drop the whole statement.
             for (const spec of node.specifiers) {
               const localName = extractDeclarationName(spec.local as TSESTree.Node) || '';
               const exportedName =
@@ -81,10 +81,11 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           }
         }
 
-        // Handle default exports
+        // Handle default exports.
         else if (node.type === 'ExportDefaultDeclaration') {
           const decl = node.declaration;
-          // 1) Pure identifier re-export: Remove whole statement
+
+          // Pure identifier re-export: Remove whole statement.
           if (decl.type === 'Identifier') {
             const name = decl.name;
             exportList.push({ localName: name, externalName: 'default' });
@@ -92,7 +93,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
             continue;
           }
 
-          // 2) Anonymous default (e.g. export default () => {}) → const __default_export =
+          // Anonymous default (e.g. `export default () => {}`).
           const localName = extractDeclarationName(decl) || '__default_export';
           if (localName === '__default_export') {
             ms.overwrite(
@@ -104,14 +105,14 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
             continue;
           }
 
-          // 3) Named default declaration (function/class) → drop only the `export default` prefix
+          // Named default declaration (function/class).
           ms.remove(node.range[0], node.range[0] + 'export default'.length);
 
           exportList.push({ localName, externalName: 'default' });
         }
       }
 
-      // Append property assignments and re-exports
+      // Append property assignments and re-exports.
       for (const exp of exportList) {
         ms.append(
           `\n${wrapClientExport(exp, { id: chunkId, path: relativeSourcePath })}`,
@@ -123,11 +124,6 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           ms.append(`\nexport { ${exp.localName} as ${exp.externalName} };`);
         }
       }
-
-      console.log('----------------');
-      console.log('SOURCE', source.path);
-      console.log(ms.toString());
-      console.log('----------------');
 
       return {
         contents: ms.toString(),
