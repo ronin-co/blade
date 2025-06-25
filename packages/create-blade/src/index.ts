@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 import { existsSync } from 'node:fs';
+import { cp } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 import pkg from '@/package.json';
@@ -67,19 +69,30 @@ async function main(): Promise<void> {
   const projectName = positionals.slice(2).at(-1) ?? 'blade-example';
 
   if (existsSync(path.join(process.cwd(), projectName))) {
-    console.error(
-      loggingPrefixes.error,
-      `A directory named \`${projectName}\` already exists.`,
-    );
-    console.error(
-      loggingPrefixes.error,
-      'Please choose a different name or remove the existing directory.',
-    );
+    logSpinner(
+      `Failed to create example app. A directory named \`${projectName}\` already exists`,
+    ).fail();
     process.exit(1);
   }
 
-  const spinner = logSpinner('Creating a new Blade project...').start();
-  spinner.succeed();
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const directory = {
+    origin: path.join(__dirname, '..', 'templates', values.template),
+    target: path.join(process.cwd(), projectName),
+  };
+
+  try {
+    await cp(directory.origin, directory.target, {
+      errorOnExist: true,
+      recursive: true,
+    });
+    logSpinner('Successfully created example app').succeed();
+  } catch (error) {
+    logSpinner('Failed to create example app').fail();
+    console.error(error);
+    process.exit(1);
+  }
 }
 
 main().catch(console.error);
