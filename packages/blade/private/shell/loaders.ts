@@ -3,55 +3,117 @@ import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
 import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
+import { tsPlugin as TypeScriptParser } from '@sveltejs/acorn-typescript';
+import { Parser } from 'acorn';
+import { simple as walkSimple } from 'acorn-walk';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
+import MagicString from 'magic-string';
 
 import {
+  type ExportItem,
   type TotalFileList,
   crawlDirectory,
   getFileList,
-  scanExports,
   wrapClientExport,
 } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
+
+const parser = Parser.extend(TypeScriptParser({ jsx: true }));
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
   setup(build) {
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
-      let contents = await readFile(source.path, 'utf-8');
+      const rawContents = await readFile(source.path, 'utf8');
       const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
-
-      const transpiler = new Bun.Transpiler({ loader });
-      const exports = scanExports(transpiler, contents);
-
-      contents += "const CLIENT_REFERENCE = Symbol.for('react.client.reference');\n";
-      contents += "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');\n";
-      contents += "const isNetlify = typeof Netlify !== 'undefined';\n";
-
-      contents = contents.replaceAll(/export default function/g, 'function');
-      contents = contents.replaceAll(/export default (.*)/g, '');
-      contents = contents.replaceAll(/export {([\s\S]*?)}/g, '');
-      contents = contents.replaceAll(/export /g, '');
-
       const relativeSourcePath = path.relative(process.cwd(), source.path);
       const chunkId = generateUniqueId();
 
-      for (const exportItem of exports) {
-        contents += `${wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath })}\n`;
+      const contents = [
+        "const CLIENT_REFERENCE = Symbol.for('react.client.reference');",
+        "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');",
+        "const isNetlify = typeof Netlify !== 'undefined';",
+        rawContents,
+      ].join('\n');
 
-        const usableName = exportItem.originalName
-          ? `${exportItem.originalName} as ${exportItem.name}`
-          : exportItem.name;
+      const ast = parser.parse(contents, {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      });
+      const ms = new MagicString(contents);
 
-        contents +=
-          exportItem.name === 'default'
-            ? `export default ${exportItem.originalName};`
-            : `export { ${usableName} };`;
-      }
+      const exports: Array<ExportItem> = [];
+
+      walkSimple(ast, {
+        ExportNamedDeclaration(node) {
+          // Ignore `export ... from ...` statements.
+          if (node.source) return;
+
+          // Handle declaration-based exports.
+          if (node.declaration) {
+            const decl = node.declaration;
+
+            if (decl.type === 'VariableDeclaration') {
+              for (const d of decl.declarations) {
+                if (d.id.type === 'Identifier') {
+                  exports.push({ localName: d.id.name, exportedName: d.id.name });
+                }
+              }
+            } else if (
+              (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration') &&
+              decl.id
+            ) {
+              exports.push({ localName: decl.id.name, exportedName: decl.id.name });
+            }
+
+            // Remove the "export " keyword.
+            ms.remove(node.start, node.declaration.start);
+          }
+
+          // Handle specifier-based local exports.
+          if (node.specifiers.length > 0) {
+            for (const spec of node.specifiers) {
+              if (
+                spec.local.type === 'Identifier' &&
+                spec.exported.type === 'Identifier'
+              ) {
+                exports.push({
+                  localName: spec.local.name,
+                  exportedName: spec.exported.name,
+                });
+              }
+            }
+            ms.remove(node.start, node.end);
+          }
+        },
+        ExportDefaultDeclaration(node) {
+          const decl = node.declaration;
+          // Only handle default exports that reference an existing identifier.
+          if (decl.type === 'Identifier') {
+            exports.push({ localName: decl.name, exportedName: 'default' });
+            ms.remove(node.start, node.start + 'export default '.length);
+          }
+        },
+      });
+
+      // Build property assignment lines.
+      const assignmentLines = exports.map((exportItem) => {
+        return wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath });
+      });
+
+      // Build local re-export lines.
+      const exportLines = exports.map(({ localName, exportedName }) => {
+        if (exportedName === 'default') return `export default ${localName};`;
+        if (localName === exportedName) return `export { ${localName} };`;
+        return `export { ${localName} as ${exportedName} };`;
+      });
+
+      // Append property assignments and local re-exports.
+      ms.append(`\n${assignmentLines.join('\n')}\n${exportLines.join('\n')}`);
 
       return {
-        contents,
+        contents: ms.toString(),
         loader,
       };
     });

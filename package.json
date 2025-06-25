@@ -15,7 +15,11 @@
   "workspaces": ["packages/*"],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@sveltejs/acorn-typescript": "1.0.5",
     "@types/bun": "1.2.17",
+    "acorn": "8.15.0",
+    "acorn-walk": "8.3.4",
+    "magic-string": "0.30.17",
     "turbo": "2.5.4"
   }
 }
