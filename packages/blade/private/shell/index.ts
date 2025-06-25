@@ -88,7 +88,26 @@ if (isInitializing) {
   const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
   const targetDirectory = path.join(process.cwd(), projectName);
 
-  const { stderr } = await execAsync(`cp -r ${originDirectory} ${targetDirectory}`);
+  // If a project with the same name already exists, we should not overwrite it.
+  const targetDirExists = await exists(targetDirectory);
+  if (targetDirExists) {
+    logSpinner(
+      `Failed to create example app. A directory named \`${projectName}\` already exists`,
+    ).fail();
+    process.exit(1);
+  }
+
+  try {
+    await cp(originDirectory, targetDirectory, {
+      errorOnExist: true,
+      recursive: true,
+    });
+    logSpinner('Created example app').succeed();
+  } catch (error) {
+    logSpinner('Failed to create example app').fail();
+    console.error(error);
+    process.exit(1);
+  }
 
   try {
     await Bun.write(
@@ -98,13 +117,6 @@ if (isInitializing) {
   } catch (error) {
     logSpinner('Failed to create .gitignore').fail();
     console.error(error);
-  }
-
-  if (stderr) {
-    logSpinner('Failed to create example app').fail();
-    console.error(stderr);
-  } else {
-    logSpinner('Created example app').succeed();
   }
 
   process.exit();
