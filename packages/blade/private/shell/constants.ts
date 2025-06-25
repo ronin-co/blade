@@ -1,6 +1,6 @@
 import path from 'node:path';
+import { gradient } from '@ronin/blade-utils/string';
 import chalk from 'chalk';
-import gradient from 'gradient-string';
 
 export const publicDirectory = path.resolve(process.cwd(), 'public');
 export const outputDirectory = path.resolve(process.cwd(), '.blade');

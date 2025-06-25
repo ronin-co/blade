@@ -6,9 +6,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import pkg from '@/package.json';
+import { logSpinner, loggingPrefixes } from '@ronin/blade-utils/log';
 
-import { logSpinner, loggingPrefixes } from '@/utils/log';
+import pkg from '@/package.json';
 
 const TEMPLATES = ['advanced', 'basic'] as const;
 type Template = (typeof TEMPLATES)[number];

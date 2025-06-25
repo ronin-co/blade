@@ -14,10 +14,7 @@
   "bin": {
     "create-blade": "./dist/index.js"
   },
-  "files": [
-    "dist",
-    "templates/**/*"
-  ],
+  "files": ["dist", "templates/**/*"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -26,6 +23,11 @@
   "keywords": ["blade", "cli", "create", "react"],
   "author": "ronin",
   "license": "Apache-2.0",
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@ronin/blade-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "8.5.0",
+    "typescript": "5.8.3"
+  }
 }
