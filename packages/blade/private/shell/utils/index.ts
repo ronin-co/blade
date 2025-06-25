@@ -77,7 +77,7 @@ export const getFileList = async (
   const routerExists = router ? await exists(routerInputFile) : false;
 
   if (routerExists) {
-    // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows)
+    // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).
     const normalizedRouterPath = routerInputFile.replace(/\\/g, '/');
     imports.push(`import { default as honoRouter } from '${normalizedRouterPath}';`);
   }
