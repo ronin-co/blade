@@ -49,8 +49,12 @@ const getImportList = async (directoryName: string, files: FileList) => {
     if (file.type === 'DIRECTORY') {
       exportList[file.relativePath] = `'DIRECTORY'`;
     } else {
-      // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows)
+      // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).
       const normalizedPath = file.absolutePath.replace(/\\/g, '/');
+      console.log('normalizedPath', normalizedPath);
+      console.log('file.absolutePath', file.absolutePath);
+      console.log('file.relativePath', file.relativePath);
+      console.log('--------------------------------');
       importList.push(`import * as ${variableName} from '${normalizedPath}';`);
       exportList[file.relativePath] = variableName;
     }
