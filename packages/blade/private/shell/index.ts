@@ -7,6 +7,7 @@ import { parseArgs } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
+import dotenv from 'dotenv';
 
 import {
   clientInputFile,
@@ -47,6 +48,9 @@ if (!process.env['npm_lifecycle_event']) {
   );
   process.exit(0);
 }
+
+// Load the `.env` file.
+dotenv.config();
 
 const { values, positionals } = parseArgs({
   args: process.argv,
