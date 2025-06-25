@@ -1,10 +1,8 @@
 #!/usr/bin/env bun
 
-import { exec } from 'node:child_process';
 import { cp, exists, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { promisify } from 'node:util';
 import { parseArgs } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
@@ -80,8 +78,6 @@ const isBuilding = positionals.includes('build');
 const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
 const enableServiceWorker = values.sw;
-
-const execAsync = promisify(exec);
 
 if (isInitializing) {
   const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
