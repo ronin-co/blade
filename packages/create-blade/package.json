@@ -1,6 +1,6 @@
 {
   "name": "create-blade",
-  "version": "3.3.6",
+  "version": "3.4.0",
   "type": "module",
   "description": "Create a new Blade project",
   "repository": {
@@ -23,7 +23,12 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --pretty"
   },
-  "keywords": ["blade", "cli", "create", "react"],
+  "keywords": [
+    "blade",
+    "cli",
+    "create",
+    "react"
+  ],
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {

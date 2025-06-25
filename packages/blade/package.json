@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.3.6",
+  "version": "3.4.0",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -11,7 +11,9 @@
   "bin": {
     "blade": "./dist/private/shell/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "typecheck": "tsc --pretty",
     "test": "vitest",
