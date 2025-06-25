@@ -31,5 +31,5 @@
       "@/package.json": ["./package.json"]
     }
   },
-  "exclude": ["./examples/**/*", "./docs/**/*"]
+  "exclude": ["templates/**/*"]
 }

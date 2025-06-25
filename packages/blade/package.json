@@ -11,10 +11,7 @@
   "bin": {
     "blade": "./dist/private/shell/index.js"
   },
-  "files": [
-    "dist",
-    "examples/basic/**/*"
-  ],
+  "files": ["dist"],
   "scripts": {
     "typecheck": "tsc --pretty",
     "test": "vitest",
