@@ -31,11 +31,14 @@ export type TotalFileList = Map<string, FileList>;
 export const crawlDirectory = async (directoryPath: string): Promise<FileList> => {
   const files = await readdir(directoryPath, { recursive: true });
 
-  return files.map((file) => ({
-    type: path.extname(file) === '' ? 'DIRECTORY' : 'FILE',
-    absolutePath: path.posix.join(directoryPath.replace(/\\/g, '/'), file),
-    relativePath: file.replace(/\\/g, '/'),
-  }));
+  return files.map((file) => {
+    const normalizedFilePath = file.replace(/\\/g, '/');
+    return {
+      type: path.extname(file) === '' ? 'DIRECTORY' : 'FILE',
+      absolutePath: path.posix.join(directoryPath, normalizedFilePath),
+      relativePath: normalizedFilePath,
+    };
+  });
 };
 
 const getImportList = async (directoryName: string, files: FileList) => {
