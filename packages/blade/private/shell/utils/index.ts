@@ -6,6 +6,7 @@ import {
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import ora from 'ora';
+import type { AST } from '@typescript-eslint/typescript-estree';
 
 import {
   loggingPrefixes,
@@ -90,15 +91,15 @@ export const getFileList = async (
 };
 
 export interface ExportItem {
-  exportedName: string;
   localName: string;
+  externalName: string;
 }
 
 export const wrapClientExport = (
   exportItem: ExportItem,
   chunk: { id: string; path: string },
 ) => {
-  const { exportedName, localName } = exportItem;
+  const { externalName, localName } = exportItem;
 
   return `
     if (typeof window === 'undefined' || isNetlify) {
@@ -107,7 +108,7 @@ export const wrapClientExport = (
           ${localName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${localName}.render : ${localName},
           {
             $$typeof: { value: CLIENT_REFERENCE },
-            name: { value: '${exportedName}' },
+            name: { value: '${externalName}' },
             chunk: { value: '${chunk.id}' },
             id: { value: '${chunk.path}' }
           }
@@ -116,9 +117,22 @@ export const wrapClientExport = (
     } else {
       if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
       if (!window.BLADE_CHUNKS["${chunk.id}"]) window.BLADE_CHUNKS["${chunk.id}"] = {};
-      window.BLADE_CHUNKS["${chunk.id}"]["${exportedName}"] = ${localName};
+      window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${localName};
     }
   `;
+};
+
+export const extractName = (
+  node: AST<{ jsx: true }>['body'][number] extends { declaration: infer D } ? D : any,
+): string | null => {
+  if (!node) return null;
+  if (node.type === 'Identifier') {
+    return node.name;
+  }
+  if ('id' in node && node.id?.type === 'Identifier') {
+    return node.id.name;
+  }
+  return null;
 };
 
 export const composeEnvironmentVariables = (options: {

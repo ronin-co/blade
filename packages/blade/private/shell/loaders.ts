@@ -3,23 +3,20 @@ import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
 import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
-import { tsPlugin as TypeScriptParser } from '@sveltejs/acorn-typescript';
-import { Parser } from 'acorn';
-import { simple as walkSimple } from 'acorn-walk';
+import { parse } from '@typescript-eslint/typescript-estree';
+import MagicString from 'magic-string';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
-import MagicString from 'magic-string';
 
 import {
   type ExportItem,
   type TotalFileList,
   crawlDirectory,
+  extractName,
   getFileList,
   wrapClientExport,
 } from '@/private/shell/utils';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
-
-const parser = Parser.extend(TypeScriptParser({ jsx: true }));
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
@@ -37,82 +34,91 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
         rawContents,
       ].join('\n');
 
-      const ast = parser.parse(contents, {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      });
+      const ast = parse(contents, { range: true, loc: true, jsx: true });
       const ms = new MagicString(contents);
-
       const exports: Array<ExportItem> = [];
 
-      console.log('TEST', ast)
+      for (const node of ast.body) {
+        // Leave remote re-exports untouched
+        if (
+          node.type === 'ExportAllDeclaration' ||
+          (node.type === 'ExportNamedDeclaration' && node.source)
+        ) {
+          continue;
+        }
 
-      walkSimple(ast, {
-        ExportNamedDeclaration(node) {
-          // Ignore `export ... from ...` statements.
-          if (node.source) return;
-
-          // Handle declaration-based exports.
+        // Named exports (local)
+        if (node.type === 'ExportNamedDeclaration') {
           if (node.declaration) {
             const decl = node.declaration;
-
-            if (decl.type === 'VariableDeclaration') {
-              for (const d of decl.declarations) {
-                if (d.id.type === 'Identifier') {
-                  exports.push({ localName: d.id.name, exportedName: d.id.name });
-                }
-              }
-            } else if (
+            // handle function/class declarations
+            if (
               (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration') &&
               decl.id
             ) {
-              exports.push({ localName: decl.id.name, exportedName: decl.id.name });
+              exports.push({ localName: decl.id.name, externalName: decl.id.name });
             }
-
-            // Remove the "export " keyword.
-            ms.remove(node.start, node.declaration.start);
-          }
-
-          // Handle specifier-based local exports.
-          if (node.specifiers.length > 0) {
-            for (const spec of node.specifiers) {
-              if (
-                spec.local.type === 'Identifier' &&
-                spec.exported.type === 'Identifier'
-              ) {
-                exports.push({
-                  localName: spec.local.name,
-                  exportedName: spec.exported.name,
-                });
+            // handle variable declarations
+            else if (decl.type === 'VariableDeclaration') {
+              for (const d of decl.declarations) {
+                if (d.id.type === 'Identifier') {
+                  exports.push({ localName: d.id.name, externalName: d.id.name });
+                }
               }
             }
-            ms.remove(node.start, node.end);
           }
-        },
-        ExportDefaultDeclaration(node) {
+          // specifier list: export { a as b }
+          if (node.specifiers.length > 0) {
+            for (const spec of node.specifiers) {
+              const localName =
+                spec.local.type === 'Identifier'
+                  ? spec.local.name
+                  : String((spec.local as any).value);
+              const externalName =
+                spec.exported.type === 'Identifier'
+                  ? spec.exported.name
+                  : String((spec.exported as any).value);
+              exports.push({ localName, externalName });
+            }
+          }
+          ms.remove(node.range[0], node.range[1]);
+        }
+
+        // Default export
+        else if (node.type === 'ExportDefaultDeclaration') {
           const decl = node.declaration;
-          // Only handle default exports that reference an existing identifier.
-          if (decl.type === 'Identifier') {
-            exports.push({ localName: decl.name, exportedName: 'default' });
-            ms.remove(node.start, node.start + 'export default '.length);
+          const name = extractName(decl) || '__default_export';
+          // if it was a named function/class, drop 'export default'
+          if (name !== '__default_export' && name !== (decl as any).name) {
+            ms.remove(node.range[0], node.range[0] + 'export default'.length);
           }
-        },
-      });
+          // for anonymous/default, rewrite to const
+          if (name === '__default_export') {
+            ms.overwrite(
+              node.range[0],
+              node.range[0] + 'export default'.length,
+              `const ${name} =`,
+            );
+          }
+          exports.push({ localName: name, externalName: 'default' });
+          ms.remove(node.range[0], node.range[0] + 'export default'.length);
+        }
+      }
 
-      // Build property assignment lines.
-      const assignmentLines = exports.map((exportItem) => {
-        return wrapClientExport(exportItem, { id: chunkId, path: relativeSourcePath });
-      });
+      // Append property assignments and re-exports
+      for (const exp of exports) {
+        ms.append(
+          `\n${wrapClientExport(exp, { id: chunkId, path: relativeSourcePath })}`,
+        );
 
-      // Build local re-export lines.
-      const exportLines = exports.map(({ localName, exportedName }) => {
-        if (exportedName === 'default') return `export default ${localName};`;
-        if (localName === exportedName) return `export { ${localName} };`;
-        return `export { ${localName} as ${exportedName} };`;
-      });
-
-      // Append property assignments and local re-exports.
-      ms.append(`\n${assignmentLines.join('\n')}\n${exportLines.join('\n')}`);
+        if (exp.externalName === 'default') {
+          ms.append(`\nexport { ${exp.localName} as default };`);
+        } else if (exp.localName === exp.externalName) {
+          ms.append(`\nexport { ${exp.localName} };`);
+        } else {
+          ms.append(`\nexport { ${exp.localName} as ${exp.externalName} };`);
+        }
+      }
 
       return {
         contents: ms.toString(),
