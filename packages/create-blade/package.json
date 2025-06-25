@@ -15,16 +15,25 @@
     "create-blade": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "templates/**/*"
   ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --pretty"
   },
-  "keywords": [],
+  "keywords": ["blade", "cli", "create", "react"],
   "author": "ronin",
   "license": "Apache-2.0",
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "chalk": "5.4.1",
+    "gradient-string": "3.0.0",
+    "ora": "8.2.0"
+  },
+  "devDependencies": {
+    "@types/gradient-string": "1.1.6",
+    "tsup": "8.5.0",
+    "typescript": "5.8.3"
+  }
 }
