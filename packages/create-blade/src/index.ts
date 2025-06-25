@@ -23,8 +23,6 @@ Options:
 `;
 
 async function main(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 0));
-
   const { positionals, values } = parseArgs({
     allowPositionals: true,
     args: process.argv,
