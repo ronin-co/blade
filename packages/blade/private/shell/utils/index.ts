@@ -1,4 +1,4 @@
-import { exists, readdir, rm, writeFile } from 'node:fs/promises';
+import { exists, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   compile as compileTailwind,
@@ -249,9 +249,8 @@ export const prepareStyles = async (
     return projects.map((project) => path.join(project, directory));
   });
 
-  const inputFile = Bun.file(styleInputFile);
-  const input = (await inputFile.exists())
-    ? await inputFile.text()
+  const input = (await exists(styleInputFile))
+    ? await readFile(styleInputFile, 'utf8')
     : `@import 'tailwindcss';`;
 
   const compiler = await compileTailwind(input, {
