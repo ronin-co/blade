@@ -36,7 +36,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
 
       const ast = parse(contents, { range: true, loc: true, jsx: true });
       const ms = new MagicString(contents);
-      const exportsList: Array<ExportItem> = [];
+      const exportList: Array<ExportItem> = [];
 
       for (const node of ast.body) {
         // Skip remote re-exports.
@@ -54,13 +54,13 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
             // Function or class declaration
             const name = extractName(decl);
             if (name && decl.type !== 'VariableDeclaration') {
-              exportsList.push({ localName: name, externalName: name });
+              exportList.push({ localName: name, externalName: name });
             }
             // Variable declarations
             else if (decl.type === 'VariableDeclaration') {
               for (const d of decl.declarations) {
                 if (d.id.type === 'Identifier') {
-                  exportsList.push({ localName: d.id.name, externalName: d.id.name });
+                  exportList.push({ localName: d.id.name, externalName: d.id.name });
                 }
               }
             }
@@ -69,7 +69,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           for (const spec of node.specifiers) {
             const localName = extractName(spec.local as TSESTree.Node) || '';
             const exportedName = extractName(spec.exported as TSESTree.Node) || '';
-            exportsList.push({ localName, externalName: exportedName });
+            exportList.push({ localName, externalName: exportedName });
           }
           ms.remove(node.range[0], node.range[1]);
         }
@@ -89,19 +89,17 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
             // drop `export default` for named declarations
             ms.remove(node.range[0], node.range[0] + 'export default'.length);
           }
-          exportsList.push({ localName, externalName: 'default' });
+          exportList.push({ localName, externalName: 'default' });
         }
       }
 
       // Append property assignments and re-exports
-      for (const exp of exports) {
+      for (const exp of exportList) {
         ms.append(
           `\n${wrapClientExport(exp, { id: chunkId, path: relativeSourcePath })}`,
         );
 
-        if (exp.externalName === 'default') {
-          ms.append(`\nexport { ${exp.localName} as default };`);
-        } else if (exp.localName === exp.externalName) {
+        if (exp.localName === exp.externalName) {
           ms.append(`\nexport { ${exp.localName} };`);
         } else {
           ms.append(`\nexport { ${exp.localName} as ${exp.externalName} };`);
