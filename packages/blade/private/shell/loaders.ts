@@ -51,28 +51,30 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
         if (node.type === 'ExportNamedDeclaration') {
           const decl = node.declaration;
           if (decl) {
-            // Function or class declaration
+            // Record function/class/var exports
             const name = extractDeclarationName(decl);
             if (name && decl.type !== 'VariableDeclaration') {
               exportList.push({ localName: name, externalName: name });
-            }
-            // Variable declarations
-            else if (decl.type === 'VariableDeclaration') {
+            } else if (decl.type === 'VariableDeclaration') {
               for (const d of decl.declarations) {
                 if (d.id.type === 'Identifier') {
                   exportList.push({ localName: d.id.name, externalName: d.id.name });
                 }
               }
             }
+
+            // Remove only the `export ` prefix so the declaration remains
+            ms.remove(node.range[0], decl.range[0]);
+          } else {
+            // Pure `export { foo, bar }` — drop the whole statement
+            for (const spec of node.specifiers) {
+              const localName = extractDeclarationName(spec.local as TSESTree.Node) || '';
+              const exportedName =
+                extractDeclarationName(spec.exported as TSESTree.Node) || '';
+              exportList.push({ localName, externalName: exportedName });
+            }
+            ms.remove(node.range[0], node.range[1]);
           }
-          // Specifiers
-          for (const spec of node.specifiers) {
-            const localName = extractDeclarationName(spec.local as TSESTree.Node) || '';
-            const exportedName =
-              extractDeclarationName(spec.exported as TSESTree.Node) || '';
-            exportList.push({ localName, externalName: exportedName });
-          }
-          ms.remove(node.range[0], node.range[1]);
         }
 
         // Handle default exports
