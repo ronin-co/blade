@@ -16,7 +16,7 @@
   },
   "files": [
     "dist",
-    "examples/**/*"
+    "templates/**/*"
   ],
   "scripts": {
     "build": "tsup",

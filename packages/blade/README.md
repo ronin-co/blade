@@ -14,7 +14,7 @@ A [React](https://react.dev) framework for building instant web apps.
 - **Web Standard Compliant** (outputs a req/res worker + static files that run anywhere — also runs in containers)
 - **No Data Waterfalls** (queries are collected across layouts and pages to ensure a single DB transaction)
 - **Instant Prod Builds** (no compiler, only relies on Bun and loaders)
-- **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/examples/basic) to get Blade to run)
+- **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/packages/create-blade/templates/basic) to get Blade to run)
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
 - **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [ready], and more soon)
 
@@ -32,7 +32,7 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 
 ## Temporary Limitation
 
-The experimental React version defined in the [examples](https://github.com/ronin-co/blade/tree/main/examples/basic) is currently required. Support for the "stable" release channel of React will follow very soon.
+The experimental React version defined in the [templates](https://github.com/ronin-co/blade/tree/main/packages/create-blade/templates/basic) is currently required. Support for the "stable" release channel of React will follow very soon.
 
 ## Setup
 
