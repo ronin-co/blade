@@ -3,5 +3,3 @@ declare module 'server-list' {
   export const triggers: import('./index').TriggersList;
   export const router: import('hono').Hono | null;
 }
-
-declare const self: ServiceWorkerGlobalScope;
