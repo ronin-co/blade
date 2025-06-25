@@ -51,7 +51,7 @@ export const Snippet = () => {
           },
         )}>
         <Icons.Check className="size-4" />
-        <span>Copied</span>
+        <span>Copied!</span>
       </span>
     </button>
   );
