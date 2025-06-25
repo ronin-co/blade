@@ -35,7 +35,10 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
     const normalizedFilePath = file.replace(/\\/g, '/');
     return {
       type: path.extname(file) === '' ? 'DIRECTORY' : 'FILE',
-      absolutePath: path.posix.join(directoryPath, normalizedFilePath),
+      absolutePath: path.posix.join(
+        directoryPath.replace(/\\/g, '/'),
+        normalizedFilePath,
+      ),
       relativePath: normalizedFilePath,
     };
   });
