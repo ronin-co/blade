@@ -3,7 +3,6 @@ import chalk from 'chalk';
 import gradient from 'gradient-string';
 
 export const publicDirectory = path.resolve(process.cwd(), 'public');
-export const frameworkDirectory = path.join(__dirname, '..', '..', '..');
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
 
 // The path at which people can define a custom Hono app that Blade will mount.
