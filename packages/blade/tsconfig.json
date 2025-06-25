@@ -30,6 +30,5 @@
       "@/private/*": ["./private/*"],
       "@/public/*": ["./public/*"]
     }
-  },
-  "exclude": ["./examples/**/*", "./docs/**/*"]
+  }
 }

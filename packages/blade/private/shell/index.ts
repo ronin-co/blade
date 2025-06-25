@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { cp, exists, rename, writeFile } from 'node:fs/promises';
+import { cp, exists, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -11,7 +11,6 @@ import getPort, { portNumbers } from 'get-port';
 import {
   clientInputFile,
   defaultDeploymentProvider,
-  frameworkDirectory,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
@@ -73,50 +72,10 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
 });
 
-const isInitializing = positionals.includes('init');
 const isBuilding = positionals.includes('build');
 const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
 const enableServiceWorker = values.sw;
-
-if (isInitializing) {
-  const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
-  const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
-  const targetDirectory = path.join(process.cwd(), projectName);
-
-  // If a project with the same name already exists, we should not overwrite it.
-  const targetDirExists = await exists(targetDirectory);
-  if (targetDirExists) {
-    logSpinner(
-      `Failed to create example app. A directory named \`${projectName}\` already exists`,
-    ).fail();
-    process.exit(1);
-  }
-
-  try {
-    await cp(originDirectory, targetDirectory, {
-      errorOnExist: true,
-      recursive: true,
-    });
-    logSpinner('Created example app').succeed();
-  } catch (error) {
-    logSpinner('Failed to create example app').fail();
-    console.error(error);
-    process.exit(1);
-  }
-
-  try {
-    await writeFile(
-      path.join(targetDirectory, '.gitignore'),
-      'node_modules\n.env\n.blade',
-    );
-  } catch (error) {
-    logSpinner('Failed to create .gitignore').fail();
-    console.error(error);
-  }
-
-  process.exit();
-}
 
 let port = Number.parseInt(values.port);
 
