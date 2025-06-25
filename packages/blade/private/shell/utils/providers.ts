@@ -1,8 +1,8 @@
 import { exists, mkdir, rename, rmdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { logSpinner } from '@ronin/blade-utils/log';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
+import { logSpinner } from '@/private/shell/utils';
 
 import type {
   VercelConfig,

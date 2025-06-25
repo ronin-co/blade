@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { gradient } from './string';
+import { gradient } from '@/utils/string';
 
 import type { Ora } from 'ora';
 

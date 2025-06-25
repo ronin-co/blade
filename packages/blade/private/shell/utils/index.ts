@@ -1,12 +1,12 @@
 import { exists, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { logSpinner } from '@ronin/blade-utils/log';
 import {
   compile as compileTailwind,
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { Transpiler } from 'bun';
+import ora from 'ora';
 
 import {
   loggingPrefixes,
@@ -209,6 +209,15 @@ export const composeEnvironmentVariables = (options: {
   });
 
   return Object.fromEntries(mapped);
+};
+
+export const logSpinner = (text: string) => {
+  return ora({
+    prefixText: loggingPrefixes.info,
+    text,
+    // Make CTRL+C work as expected.
+    discardStdin: false,
+  });
 };
 
 export const cleanUp = async () => {

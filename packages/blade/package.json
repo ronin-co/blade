@@ -27,18 +27,30 @@
   },
   "typesVersions": {
     "*": {
-      "client/*": ["./dist/public/client/*"],
-      "server/*": ["./dist/public/server/*"],
-      "hooks": ["./dist/public/universal/hooks"],
-      "schema": ["./dist/public/universal/schema"],
-      "types": ["./dist/public/universal/types"]
+      "client/*": [
+        "./dist/public/client/*"
+      ],
+      "server/*": [
+        "./dist/public/server/*"
+      ],
+      "hooks": [
+        "./dist/public/universal/hooks"
+      ],
+      "schema": [
+        "./dist/public/universal/schema"
+      ],
+      "types": [
+        "./dist/public/universal/types"
+      ]
     }
   },
-  "keywords": ["react", "framework"],
+  "keywords": [
+    "react",
+    "framework"
+  ],
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ronin/blade-utils": "workspace:*",
     "@ronin/compiler": "0.18.9",
     "@ronin/react": "0.1.4",
     "@ronin/syntax": "0.2.43",
@@ -56,6 +68,7 @@
     "@types/cookie": "0.6.0",
     "@types/flat": "5.0.5",
     "@types/get-value": "3.0.5",
+    "@types/gradient-string": "1.1.6",
     "@types/js-yaml": "4.0.9",
     "@types/react": "18.3.6",
     "@types/react-dom": "18.3.0",
@@ -69,8 +82,10 @@
     "flat": "6.0.1",
     "get-port": "7.1.0",
     "get-value": "3.0.1",
+    "gradient-string": "2.0.2",
     "hono": "4.7.11",
     "js-yaml": "4.1.0",
+    "ora": "8.1.0",
     "p-queue": "8.0.1",
     "radash": "12.1.0",
     "serialize-error": "11.0.3",

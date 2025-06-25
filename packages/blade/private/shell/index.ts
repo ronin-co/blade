@@ -4,7 +4,6 @@ import { cp, exists, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { logSpinner } from '@ronin/blade-utils/log';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
@@ -27,6 +26,7 @@ import {
 import {
   cleanUp,
   composeEnvironmentVariables,
+  logSpinner,
   prepareStyles,
 } from '@/private/shell/utils';
 import {

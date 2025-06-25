@@ -41,7 +41,7 @@ const rgbToAnsi = (r: number, g: number, b: number): string =>
  *
  * @example
  * ```ts
- * import { gradient } from '@ronin/blade-utils/string';
+ * import { gradient } from 'path/to/gradient';
  *
  * const custom = gradient(['#ff5f6d', '#ffc371']);
  * console.log(custom('Hello World!'));
