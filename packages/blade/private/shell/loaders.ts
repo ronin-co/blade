@@ -31,7 +31,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
         "const CLIENT_REFERENCE = Symbol.for('react.client.reference');",
         "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');",
         "const isNetlify = typeof Netlify !== 'undefined';",
-        "", // Empty line
+        '', // Empty line
         rawContents,
       ].join('\n');
 
@@ -52,9 +52,11 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
         // Handle named exports
         if (node.type === 'ExportNamedDeclaration') {
           const decl = node.declaration;
+
           if (decl) {
             // Record function/class/var exports
             const name = extractDeclarationName(decl);
+
             if (name && decl.type !== 'VariableDeclaration') {
               exportList.push({ localName: name, externalName: name });
             } else if (decl.type === 'VariableDeclaration') {
@@ -82,18 +84,29 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
         // Handle default exports
         else if (node.type === 'ExportDefaultDeclaration') {
           const decl = node.declaration;
+          // 1) Pure identifier re-export: Remove whole statement
+          if (decl.type === 'Identifier') {
+            const name = decl.name;
+            exportList.push({ localName: name, externalName: 'default' });
+            ms.remove(node.range[0], node.range[1]);
+            continue;
+          }
+
+          // 2) Anonymous default (e.g. export default () => {}) → const __default_export =
           const localName = extractDeclarationName(decl) || '__default_export';
           if (localName === '__default_export') {
-            // anonymous default: replace export default with const
             ms.overwrite(
               node.range[0],
               node.range[0] + 'export default'.length,
               `const ${localName} =`,
             );
-          } else {
-            // drop `export default` for named declarations
-            ms.remove(node.range[0], node.range[0] + 'export default'.length);
+
+            continue;
           }
+
+          // 3) Named default declaration (function/class) → drop only the `export default` prefix
+          ms.remove(node.range[0], node.range[0] + 'export default'.length);
+
           exportList.push({ localName, externalName: 'default' });
         }
       }
