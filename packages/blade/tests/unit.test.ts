@@ -216,34 +216,3 @@ test('render page', () => {
 
   expect(result).toBeNull();
 });
-
-test('normalize Windows paths for import statements', () => {
-  // Mock the getImportList function to test path normalization
-  const mockFiles = [
-    {
-      type: 'FILE' as const,
-      absolutePath: 'C:\\Users\\corne\\ronin\\blade-example\\pages\\index.tsx',
-      relativePath: 'pages\\index.tsx',
-    },
-    {
-      type: 'FILE' as const,
-      absolutePath: 'C:\\Users\\corne\\ronin\\blade-example\\pages\\about.tsx',
-      relativePath: 'pages\\about.tsx',
-    },
-    {
-      type: 'DIRECTORY' as const,
-      absolutePath: 'C:\\Users\\corne\\ronin\\blade-example\\components',
-      relativePath: 'components',
-    },
-  ];
-
-  // Test the path normalization logic directly
-  const normalizedPaths = mockFiles
-    .filter((file) => file.type === 'FILE')
-    .map((file) => file.absolutePath.replace(/\\/g, '/'));
-
-  expect(normalizedPaths).toEqual([
-    'C:/Users/corne/ronin/blade-example/pages/index.tsx',
-    'C:/Users/corne/ronin/blade-example/pages/about.tsx',
-  ]);
-});
