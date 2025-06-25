@@ -161,17 +161,16 @@ if (isBuilding || isDeveloping) {
             spinner.start();
           });
 
-          build.onResolve({ filter: /^build-meta$/ }, (source) => {
-            return { path: source.path, namespace: 'dynamic-meta' };
-          });
+          build.onResolve({ filter: /^build-meta$/ }, (source) => ({
+            path: source.path,
+            namespace: 'dynamic-meta',
+          }));
 
-          build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => {
-            return {
-              contents: `export const bundleId = "${bundleId}";`,
-              loader: 'ts',
-              resolveDir: process.cwd(),
-            };
-          });
+          build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => ({
+            contents: `export const bundleId = "${bundleId}";`,
+            loader: 'ts',
+            resolveDir: process.cwd(),
+          }));
 
           build.onEnd(async (result) => {
             if (result.errors.length === 0) {
