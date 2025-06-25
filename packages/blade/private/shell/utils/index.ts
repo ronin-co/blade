@@ -1,4 +1,4 @@
-import { exists, readdir, rm } from 'node:fs/promises';
+import { exists, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   compile as compileTailwind,
@@ -153,13 +153,13 @@ export const composeEnvironmentVariables = (options: {
 }): Record<string, string> => {
   const { provider, environment, isLoggingQueries, enableServiceWorker } = options;
 
-  const filteredVariables = Object.entries(Bun.env).filter(([key]) => {
+  const filteredVariables = Object.entries(process.env).filter(([key]) => {
     return key.startsWith('BLADE_');
   }) as Array<[string, string]>;
 
   const defined = Object.fromEntries(filteredVariables);
 
-  if (Bun.env['BLADE_ENV']) {
+  if (process.env['BLADE_ENV']) {
     let message = `${loggingPrefixes.error} The \`BLADE_ENV\` environment variable is provided by BLADE`;
     message += ` and cannot be overwritten. Using the \`blade\` command for "development"`;
     message += ` and \`blade build\` for "production" will automatically infer the value.`;
@@ -171,23 +171,23 @@ export const composeEnvironmentVariables = (options: {
   defined['__BLADE_SERVICE_WORKER'] = enableServiceWorker.toString();
 
   if (provider === 'cloudflare') {
-    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['CF_PAGES_BRANCH'] ?? '';
-    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['CF_PAGES_COMMIT_SHA'] ?? '';
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = process.env['CF_PAGES_BRANCH'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = process.env['CF_PAGES_COMMIT_SHA'] ?? '';
   }
 
   if (provider === 'netlify') {
-    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['BRANCH'] ?? '';
-    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['COMMIT_REF'] ?? '';
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = process.env['BRANCH'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = process.env['COMMIT_REF'] ?? '';
   }
 
   if (provider === 'vercel') {
-    defined['BLADE_PUBLIC_GIT_BRANCH'] = Bun.env['VERCEL_GIT_COMMIT_REF'] ?? '';
-    defined['BLADE_PUBLIC_GIT_COMMIT'] = Bun.env['VERCEL_GIT_COMMIT_SHA'] ?? '';
+    defined['BLADE_PUBLIC_GIT_BRANCH'] = process.env['VERCEL_GIT_COMMIT_REF'] ?? '';
+    defined['BLADE_PUBLIC_GIT_COMMIT'] = process.env['VERCEL_GIT_COMMIT_SHA'] ?? '';
   }
 
   defined['BLADE_DATA_WORKER'] ??= 'https://data.ronin.co';
   defined['BLADE_STORAGE_WORKER'] ??= 'https://storage.ronin.co';
-  defined['RONIN_TOKEN'] = Bun.env['RONIN_TOKEN'] ?? '';
+  defined['RONIN_TOKEN'] = process.env['RONIN_TOKEN'] ?? '';
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
@@ -249,9 +249,8 @@ export const prepareStyles = async (
     return projects.map((project) => path.join(project, directory));
   });
 
-  const inputFile = Bun.file(styleInputFile);
-  const input = (await inputFile.exists())
-    ? await inputFile.text()
+  const input = (await exists(styleInputFile))
+    ? await readFile(styleInputFile, 'utf8')
     : `@import 'tailwindcss';`;
 
   const compiler = await compileTailwind(input, {
@@ -272,5 +271,5 @@ export const prepareStyles = async (
   });
 
   const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
-  await Bun.write(tailwindOutput, optimizedStyles.code);
+  await writeFile(tailwindOutput, optimizedStyles.code);
 };

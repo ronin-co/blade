@@ -1,4 +1,4 @@
-import { exists } from 'node:fs/promises';
+import { exists, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
@@ -19,7 +19,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
   setup(build) {
     build.onLoad({ filter: /\.client.(js|jsx|ts|tsx)?$/ }, async (source) => {
-      let contents = await Bun.file(source.path).text();
+      let contents = await readFile(source.path, 'utf-8');
       const loader = path.extname(source.path).slice(1) as 'js' | 'jsx' | 'ts' | 'tsx';
 
       const transpiler = new Bun.Transpiler({ loader });
@@ -123,7 +123,7 @@ export const getMdxLoader = (
   name: 'MDX Loader',
   setup(build) {
     build.onLoad({ filter: /\.mdx$/ }, async (source) => {
-      const contents = await Bun.file(source.path).text();
+      const contents = await readFile(source.path, 'utf8');
 
       const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
 
@@ -171,7 +171,7 @@ export const getReactAriaLoader = (): esbuild.Plugin => ({
 
         if (name === 'en-US') {
           return {
-            contents: await Bun.file(source.path).text(),
+            contents: await readFile(source.path),
             loader: 'js',
           };
         }
