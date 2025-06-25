@@ -15,8 +15,9 @@ const HELP_MESSAGE = `
 Usage: create-blade [name] [options]
 
 Options:
-  -v, --version           Output the current version of create-blade.
-  -h, --help              Display this help message.
+  -h, --help                  Display this help message.
+  -T, --template <name>       Specify the template to use (default: basic).
+  -v, --version               Output the current version of create-blade.
 `;
 
 async function main(): Promise<void> {
