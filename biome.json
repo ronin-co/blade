@@ -2,7 +2,7 @@
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "files": {
     "include": ["./**/*.ts", "./**/*.tsx"],
-    "ignore": ["node_modules/", "bun.lockb", "bun.lock", "tsconfig.json"]
+    "ignore": ["node_modules/", "bun.lock", "tsconfig.json"]
   },
   "formatter": {
     "enabled": true,
@@ -84,7 +84,8 @@
         "useThrowOnlyError": "off",
         "useForOf": "off",
         "noArguments": "off",
-        "noNamespaceImport": "off"
+        "noNamespaceImport": "off",
+        "noNamespace": "off"
       },
       "suspicious": {
         "all": true,

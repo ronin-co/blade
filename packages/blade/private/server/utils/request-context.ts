@@ -1,7 +1,7 @@
 import UserAgentParser from 'ua-parser-js';
 
 import type { GeoLocation, UserAgent } from '@/private/universal/types/util';
-import { IS_DEV } from '@/private/universal/utils/constants';
+import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 
 export const getRequestGeoLocation = (request: Request): GeoLocation => {
   const coordinates = request.headers.get('Ronin-Client-Coordinates');
@@ -25,7 +25,7 @@ export const getRequestGeoLocation = (request: Request): GeoLocation => {
 
   // During local development, we don't have access to the client's location, so we would
   // like to provide default values.
-  if (IS_DEV) {
+  if (IS_SERVER_DEV) {
     geoLocation.country = 'DE';
     geoLocation.region = 'DEBE';
     geoLocation.city = 'Berlin';

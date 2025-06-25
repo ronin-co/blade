@@ -1,20 +1,21 @@
-import path from 'node:path';
+import { resolve, join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 
-export const publicDirectory = path.resolve(process.cwd(), 'public');
-export const outputDirectory = path.resolve(process.cwd(), '.blade');
+const currentFilePath = fileURLToPath(import.meta.url);
+const currentDirPath = dirname(currentFilePath);
+
+export const publicDirectory = resolve(process.cwd(), 'public');
+export const outputDirectory = resolve(process.cwd(), '.blade');
 
 // The path at which people can define a custom Hono app that Blade will mount.
-export const routerInputFile = path.join(process.cwd(), 'router.ts');
+export const routerInputFile = join(process.cwd(), 'router.ts');
 
-export const styleInputFile = path.join(process.cwd(), 'styles.css');
-export const clientInputFile = require.resolve('./private/client/index.js');
+export const styleInputFile = join(process.cwd(), 'styles.css');
+export const clientInputFile = join(currentDirPath, '../client/index.js');
 
-const serverInputFile = require.resolve(
-  './private/server/worker/providers/edge-worker.js',
-);
-export const serverInputFolder = path.dirname(serverInputFile);
+export const serverInputFolder = join(currentDirPath, '../server/worker/providers');
 
 export const loggingPrefixes = {
   info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
