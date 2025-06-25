@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises';
+import { exists, mkdir, rename, rmdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
@@ -38,28 +38,28 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
   const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
-  const vercelOutputDirExists = await fs.exists(vercelOutputDir);
-  if (vercelOutputDirExists) await fs.rmdir(vercelOutputDir, { recursive: true });
+  const vercelOutputDirExists = await exists(vercelOutputDir);
+  if (vercelOutputDirExists) await rmdir(vercelOutputDir, { recursive: true });
 
   await Promise.all([
-    fs.mkdir(staticFilesDir, { recursive: true }),
-    fs.mkdir(functionDir, { recursive: true }),
+    mkdir(staticFilesDir, { recursive: true }),
+    mkdir(functionDir, { recursive: true }),
   ]);
 
-  await fs.rename(outputDirectory, staticFilesDir);
+  await rename(outputDirectory, staticFilesDir);
 
   await Promise.all([
-    fs.rename(
+    rename(
       path.join(staticFilesDir, `${defaultDeploymentProvider}.js`),
       path.join(functionDir, 'worker.mjs'),
     ),
 
-    fs.rename(
+    rename(
       path.join(staticFilesDir, `${defaultDeploymentProvider}.js.map`),
       path.join(functionDir, 'worker.mjs.map'),
     ),
 
-    Bun.write(
+    writeFile(
       path.join(vercelOutputDir, 'config.json'),
       JSON.stringify({
         version: 3,
@@ -74,7 +74,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
         ],
       } satisfies VercelConfig),
     ),
-    Bun.write(
+    writeFile(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
         handler: 'worker.mjs',
@@ -96,7 +96,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   ).start();
 
   const promises = new Array<Promise<unknown>>(
-    Bun.write(
+    writeFile(
       path.join(outputDirectory, '.assetsignore'),
       ['edge-worker.js', 'edge-worker.js.map', '_routes.json'].join('\n'),
     ),
@@ -107,16 +107,16 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   const jsoncConfig = path.join(process.cwd(), 'wrangler.jsonc');
   const tomlConfig = path.join(process.cwd(), 'wrangler.toml');
   const [jsonConfigExists, jsoncConfigExists, tomlConfigExists] = await Promise.all([
-    fs.exists(jsonConfig),
-    fs.exists(jsoncConfig),
-    fs.exists(tomlConfig),
+    exists(jsonConfig),
+    exists(jsoncConfig),
+    exists(tomlConfig),
   ]);
 
   if (!jsonConfigExists && !jsoncConfigExists && !tomlConfigExists) {
     spinner.info('No Wrangler config found, creating a new one...');
     const currentDirectoryName = path.basename(process.cwd());
     promises.push(
-      Bun.write(
+      writeFile(
         jsoncConfig,
         JSON.stringify(
           {
@@ -151,10 +151,10 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
-  const netlifyOutputDirExists = await fs.exists(netlifyOutputDir);
-  if (netlifyOutputDirExists) await fs.rmdir(netlifyOutputDir, { recursive: true });
+  const netlifyOutputDirExists = await exists(netlifyOutputDir);
+  if (netlifyOutputDirExists) await rmdir(netlifyOutputDir, { recursive: true });
 
-  await fs.mkdir(edgeFunctionDir, { recursive: true });
+  await mkdir(edgeFunctionDir, { recursive: true });
 
   // Since edge functions do not offer a `preferStatic` option, we need to manually
   // provide a list of all static assets to not be routed to the edge function.
@@ -166,15 +166,15 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   }
 
   await Promise.all([
-    fs.rename(
+    rename(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
       path.join(edgeFunctionDir, 'worker.mjs'),
     ),
-    fs.rename(
+    rename(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
       path.join(edgeFunctionDir, 'worker.mjs.map'),
     ),
-    Bun.write(
+    writeFile(
       path.join(edgeFunctionDir, 'index.mjs'),
       `export { default } from './worker.mjs';
 export const config = {

@@ -1,4 +1,4 @@
-import { exists, readdir, rm } from 'node:fs/promises';
+import { exists, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   compile as compileTailwind,
@@ -272,5 +272,5 @@ export const prepareStyles = async (
   });
 
   const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
-  await Bun.write(tailwindOutput, optimizedStyles.code);
+  await writeFile(tailwindOutput, optimizedStyles.code);
 };
