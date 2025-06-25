@@ -6,12 +6,28 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
+import chalk from 'chalk';
+import gradient from 'gradient-string';
+import ora from 'ora';
+
 import pkg from '@/package.json';
 
-import { logSpinner, loggingPrefixes } from '@/utils/log';
+import type { Ora } from 'ora';
 
 const TEMPLATES = ['advanced', 'basic'] as const;
 type Template = (typeof TEMPLATES)[number];
+
+const LOG_PREFIX = {
+  info: `${chalk.bold(gradient(['#473b7b', '#3584a7', '#30d2be'])('BLADE'))} `,
+  error: `${chalk.bold(gradient(['#930024', '#d4143e'])('ERROR'))}  `,
+};
+const logSpinner = (text: string): Ora =>
+  ora({
+    // Make CTRL+C work as expected.
+    discardStdin: false,
+    prefixText: LOG_PREFIX.info,
+    text,
+  });
 
 const HELP_MESSAGE = `
 Usage: create-blade [name] [options]
@@ -57,8 +73,8 @@ async function main(): Promise<void> {
   }
 
   if (!TEMPLATES.includes(values.template as Template)) {
-    console.error(loggingPrefixes.error, `Invalid template "${values.template}"`);
-    console.error(loggingPrefixes.error, 'Available templates:', TEMPLATES.join(', '));
+    console.error(LOG_PREFIX.error, `Invalid template "${values.template}"`);
+    console.error(LOG_PREFIX.error, 'Available templates:', TEMPLATES.join(', '));
     process.exit(1);
   }
 
