@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { cp, exists, rename } from 'node:fs/promises';
+import { cp, exists, rename, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -41,7 +41,7 @@ import { getOutputFile } from '@/private/universal/utils/paths';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
-if (!Bun.env['npm_lifecycle_event']) {
+if (!process.env['npm_lifecycle_event']) {
   console.error(
     `${loggingPrefixes.error} The package must be installed locally, not globally.`,
   );
@@ -49,7 +49,7 @@ if (!Bun.env['npm_lifecycle_event']) {
 }
 
 const { values, positionals } = parseArgs({
-  args: Bun.argv,
+  args: process.argv,
   options: {
     debug: {
       type: 'boolean',
@@ -61,7 +61,7 @@ const { values, positionals } = parseArgs({
     },
     port: {
       type: 'string',
-      default: Bun.env['PORT'] || '3000',
+      default: process.env['PORT'] || '3000',
     },
     sw: {
       type: 'boolean',
@@ -106,7 +106,7 @@ if (isInitializing) {
   }
 
   try {
-    await Bun.write(
+    await writeFile(
       path.join(targetDirectory, '.gitignore'),
       'node_modules\n.env\n.blade',
     );
@@ -130,12 +130,12 @@ if (isDeveloping) {
 }
 
 const projects = [process.cwd()];
-const tsConfig = Bun.file(path.join(process.cwd(), 'tsconfig.json'));
+const tsConfig = path.join(process.cwd(), 'tsconfig.json');
 
 // If a `tsconfig.json` file exists that contains a `references` field, we should include
 // files from the referenced projects as well.
-if (await tsConfig.exists()) {
-  const tsConfigContents = await tsConfig.json();
+if (await exists(tsConfig)) {
+  const tsConfigContents = await import(tsConfig);
   const { references } = tsConfigContents || {};
 
   if (references && Array.isArray(references) && references.length > 0) {
