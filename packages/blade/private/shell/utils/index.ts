@@ -33,8 +33,8 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
 
   return files.map((file) => ({
     type: path.extname(file) === '' ? 'DIRECTORY' : 'FILE',
-    absolutePath: path.join(directoryPath, file),
-    relativePath: file,
+    absolutePath: path.posix.join(directoryPath.replace(/\\/g, '/'), file),
+    relativePath: file.replace(/\\/g, '/'),
   }));
 };
 
@@ -49,9 +49,7 @@ const getImportList = async (directoryName: string, files: FileList) => {
     if (file.type === 'DIRECTORY') {
       exportList[file.relativePath] = `'DIRECTORY'`;
     } else {
-      // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).
-      const normalizedPath = file.absolutePath.replace(/\\/g, '/');
-      importList.push(`import * as ${variableName} from '${normalizedPath}';`);
+      importList.push(`import * as ${variableName} from '${file.absolutePath}';`);
       exportList[file.relativePath] = variableName;
     }
   }
@@ -76,9 +74,7 @@ export const getFileList = async (
   const routerExists = router ? await exists(routerInputFile) : false;
 
   if (routerExists) {
-    // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).
-    const normalizedRouterPath = routerInputFile.replace(/\\/g, '/');
-    imports.push(`import { default as honoRouter } from '${normalizedRouterPath}';`);
+    imports.push(`import { default as honoRouter } from '${routerInputFile}';`);
   }
 
   let file = imports.join('\n\n');

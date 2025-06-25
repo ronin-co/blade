@@ -7,7 +7,7 @@ export const frameworkDirectory = path.join(__dirname, '..', '..', '..');
 export const outputDirectory = path.resolve(process.cwd(), '.blade');
 
 // The path at which people can define a custom Hono app that Blade will mount.
-export const routerInputFile = path.join(process.cwd(), 'router.ts');
+export const routerInputFile = path.posix.join(process.cwd(), 'router.ts');
 
 export const styleInputFile = path.join(process.cwd(), 'styles.css');
 export const clientInputFile = require.resolve('./private/client/index.js');
