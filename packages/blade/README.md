@@ -41,7 +41,7 @@ To get started with Blade, first make sure you have [Bun](https://bun.sh) instal
 Next, create a new app with this command:
 
 ```bash
-bunx blade init
+bun create blade
 ```
 
 Afterward, enter the newly created directory and install the dependencies:
