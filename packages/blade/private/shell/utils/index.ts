@@ -51,10 +51,15 @@ const getImportList = async (directoryName: string, files: FileList) => {
     } else {
       // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).
       const normalizedPath = file.absolutePath.replace(/\\/g, '/');
-      console.log('normalizedPath', normalizedPath);
-      console.log('file.absolutePath', file.absolutePath);
-      console.log('file.relativePath', file.relativePath);
-      console.log('--------------------------------');
+      console.error('normalizedPath', normalizedPath);
+      console.error('file.absolutePath', file.absolutePath);
+      console.error('file.relativePath', file.relativePath);
+      console.error('--------------------------------');
+      Bun.write(
+        'test.txt',
+        `${normalizedPath}\n${directoryName}\n${variableName}\n${file.absolutePath}`,
+      );
+
       importList.push(`import * as ${variableName} from '${normalizedPath}';`);
       exportList[file.relativePath] = variableName;
     }
@@ -75,6 +80,11 @@ export const getFileList = async (
   directories: Array<string>,
   router?: boolean,
 ): Promise<string> => {
+  console.error('files', files);
+  console.error('directories', directories);
+  console.error('router', router);
+  console.error('--------------------------------');
+  Bun.write('test2.txt', `${files}\n${directories}\n${router}`);
   const importPromises = directories.map((name) => getImportList(name, files.get(name)!));
   const imports = await Promise.all(importPromises);
   const routerExists = router ? await exists(routerInputFile) : false;
