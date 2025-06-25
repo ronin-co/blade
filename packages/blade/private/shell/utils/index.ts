@@ -5,8 +5,8 @@ import {
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
-import type { Transpiler } from 'bun';
 import ora from 'ora';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
 import {
   loggingPrefixes,
@@ -90,18 +90,22 @@ export const getFileList = async (
   return file;
 };
 
+export interface ExportItem {
+  localName: string;
+  externalName: string;
+}
+
 export const wrapClientExport = (
   exportItem: ExportItem,
   chunk: { id: string; path: string },
 ) => {
-  const internalName = exportItem.originalName || exportItem.name;
-  const externalName = exportItem.name;
+  const { externalName, localName } = exportItem;
 
   return `
     if (typeof window === 'undefined' || isNetlify) {
       try {
         Object.defineProperties(
-          ${internalName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${internalName}.render : ${internalName},
+          ${localName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${localName}.render : ${localName},
           {
             $$typeof: { value: CLIENT_REFERENCE },
             name: { value: '${externalName}' },
@@ -113,40 +117,24 @@ export const wrapClientExport = (
     } else {
       if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
       if (!window.BLADE_CHUNKS["${chunk.id}"]) window.BLADE_CHUNKS["${chunk.id}"] = {};
-      window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${internalName};
+      window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${localName};
     }
   `;
 };
 
-interface ExportItem {
-  name: string;
-  originalName: string | null;
-}
-
-export const scanExports = (transpiler: Transpiler, code: string): ExportItem[] => {
-  const { exports: fileExports } = transpiler.scan(code);
-  const defaultExportName = fileExports.includes('default')
-    ? // Named default export — e.g. `export default Test;`
-      code.match(/export default (\w+);/)?.[1] ||
-      // Function default export — e.g. `export default function Graph() {}`
-      code.match(/export default function (\w+)\(\) {/)?.[1]
-    : null;
-
-  return fileExports.map((name) => {
-    const namedRegExp = new RegExp(`export\\s*{\\s*(\\w+)\\s*as\\s*${name}\\s*}`, 'g');
-    const namedMatches = namedRegExp.exec(code);
-    const originalName =
-      name === 'default'
-        ? (defaultExportName as string)
-        : namedMatches
-          ? namedMatches[1]
-          : null;
-
-    return {
-      name,
-      originalName,
-    };
-  });
+export const extractDeclarationName = (
+  node: TSESTree.Node | null | undefined,
+): string | null => {
+  if (!node) return null;
+  switch (node.type) {
+    case 'Identifier':
+      return node.name;
+    case 'Literal':
+      return String((node as TSESTree.Literal).value);
+    default:
+      if ('id' in node && node.id?.type === 'Identifier') return node.id.name;
+      return null;
+  }
 };
 
 export const composeEnvironmentVariables = (options: {
