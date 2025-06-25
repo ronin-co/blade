@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import { cp, exists, rename } from 'node:fs/promises';
 import os from 'node:os';

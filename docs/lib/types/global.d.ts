@@ -1,5 +1,5 @@
-declare module 'bun' {
-  interface Env {
+declare namespace NodeJS {
+  interface ProcessEnv {
     BLADE_ENV: 'production' | 'development';
   }
 }
