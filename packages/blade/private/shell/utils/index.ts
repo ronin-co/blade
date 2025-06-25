@@ -122,7 +122,9 @@ export const wrapClientExport = (
   `;
 };
 
-export const extractName = (node: TSESTree.Node | null | undefined): string | null => {
+export const extractDeclarationName = (
+  node: TSESTree.Node | null | undefined,
+): string | null => {
   if (!node) return null;
   switch (node.type) {
     case 'Identifier':

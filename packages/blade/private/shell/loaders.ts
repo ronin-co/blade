@@ -3,16 +3,16 @@ import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
 import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
-import { parse, type TSESTree } from '@typescript-eslint/typescript-estree';
-import MagicString from 'magic-string';
+import { type TSESTree, parse } from '@typescript-eslint/typescript-estree';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
+import MagicString from 'magic-string';
 
 import {
   type ExportItem,
   type TotalFileList,
   crawlDirectory,
-  extractName,
+  extractDeclarationName,
   getFileList,
   wrapClientExport,
 } from '@/private/shell/utils';
@@ -52,7 +52,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           const decl = node.declaration;
           if (decl) {
             // Function or class declaration
-            const name = extractName(decl);
+            const name = extractDeclarationName(decl);
             if (name && decl.type !== 'VariableDeclaration') {
               exportList.push({ localName: name, externalName: name });
             }
@@ -67,8 +67,9 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           }
           // Specifiers
           for (const spec of node.specifiers) {
-            const localName = extractName(spec.local as TSESTree.Node) || '';
-            const exportedName = extractName(spec.exported as TSESTree.Node) || '';
+            const localName = extractDeclarationName(spec.local as TSESTree.Node) || '';
+            const exportedName =
+              extractDeclarationName(spec.exported as TSESTree.Node) || '';
             exportList.push({ localName, externalName: exportedName });
           }
           ms.remove(node.range[0], node.range[1]);
@@ -77,7 +78,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
         // Handle default exports
         else if (node.type === 'ExportDefaultDeclaration') {
           const decl = node.declaration;
-          const localName = extractName(decl) || '__default_export';
+          const localName = extractDeclarationName(decl) || '__default_export';
           if (localName === '__default_export') {
             // anonymous default: replace export default with const
             ms.overwrite(
