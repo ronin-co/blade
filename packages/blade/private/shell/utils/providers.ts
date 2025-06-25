@@ -1,8 +1,8 @@
-import { exists, mkdir, readdir, rename, rmdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, rename, rmdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
-import { logSpinner } from '@/private/shell/utils';
+import { exists, logSpinner } from '@/private/shell/utils';
 
 import type {
   VercelConfig,

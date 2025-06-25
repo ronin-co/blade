@@ -1,12 +1,12 @@
-import { exists, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { constants, access, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   compile as compileTailwind,
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
-import ora from 'ora';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import ora from 'ora';
 
 import {
   loggingPrefixes,
@@ -221,6 +221,18 @@ export const cleanUp = async () => {
 
   removalSpinner.succeed();
 };
+
+/**
+ * Checks if a file or directory exists.
+ *
+ * @param path - The file or directory to check for.
+ *
+ * @returns A boolean indicating whether the file or directory exists.
+ */
+export const exists = (path: string) =>
+  access(path, constants.F_OK)
+    .then(() => true)
+    .catch(() => false);
 
 /**
  * Compiles the Tailwind CSS stylesheet for the application.

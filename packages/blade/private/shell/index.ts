@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { cp, exists, rename } from 'node:fs/promises';
+import { cp, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -26,6 +26,7 @@ import {
 import {
   cleanUp,
   composeEnvironmentVariables,
+  exists,
   logSpinner,
   prepareStyles,
 } from '@/private/shell/utils';
