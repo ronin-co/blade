@@ -3,7 +3,7 @@ import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
 import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
-import { parse } from '@typescript-eslint/typescript-estree';
+import { parse, type TSESTree } from '@typescript-eslint/typescript-estree';
 import MagicString from 'magic-string';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
@@ -36,10 +36,10 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
 
       const ast = parse(contents, { range: true, loc: true, jsx: true });
       const ms = new MagicString(contents);
-      const exports: Array<ExportItem> = [];
+      const exportsList: Array<ExportItem> = [];
 
       for (const node of ast.body) {
-        // Leave remote re-exports untouched
+        // Skip remote re-exports.
         if (
           node.type === 'ExportAllDeclaration' ||
           (node.type === 'ExportNamedDeclaration' && node.source)
@@ -47,61 +47,49 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           continue;
         }
 
-        // Named exports (local)
+        // Handle named exports
         if (node.type === 'ExportNamedDeclaration') {
-          if (node.declaration) {
-            const decl = node.declaration;
-            // handle function/class declarations
-            if (
-              (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration') &&
-              decl.id
-            ) {
-              exports.push({ localName: decl.id.name, externalName: decl.id.name });
+          const decl = node.declaration;
+          if (decl) {
+            // Function or class declaration
+            const name = extractName(decl);
+            if (name && decl.type !== 'VariableDeclaration') {
+              exportsList.push({ localName: name, externalName: name });
             }
-            // handle variable declarations
+            // Variable declarations
             else if (decl.type === 'VariableDeclaration') {
               for (const d of decl.declarations) {
                 if (d.id.type === 'Identifier') {
-                  exports.push({ localName: d.id.name, externalName: d.id.name });
+                  exportsList.push({ localName: d.id.name, externalName: d.id.name });
                 }
               }
             }
           }
-          // specifier list: export { a as b }
-          if (node.specifiers.length > 0) {
-            for (const spec of node.specifiers) {
-              const localName =
-                spec.local.type === 'Identifier'
-                  ? spec.local.name
-                  : String((spec.local as any).value);
-              const externalName =
-                spec.exported.type === 'Identifier'
-                  ? spec.exported.name
-                  : String((spec.exported as any).value);
-              exports.push({ localName, externalName });
-            }
+          // Specifiers
+          for (const spec of node.specifiers) {
+            const localName = extractName(spec.local as TSESTree.Node) || '';
+            const exportedName = extractName(spec.exported as TSESTree.Node) || '';
+            exportsList.push({ localName, externalName: exportedName });
           }
           ms.remove(node.range[0], node.range[1]);
         }
 
-        // Default export
+        // Handle default exports
         else if (node.type === 'ExportDefaultDeclaration') {
           const decl = node.declaration;
-          const name = extractName(decl) || '__default_export';
-          // if it was a named function/class, drop 'export default'
-          if (name !== '__default_export' && name !== (decl as any).name) {
-            ms.remove(node.range[0], node.range[0] + 'export default'.length);
-          }
-          // for anonymous/default, rewrite to const
-          if (name === '__default_export') {
+          const localName = extractName(decl) || '__default_export';
+          if (localName === '__default_export') {
+            // anonymous default: replace export default with const
             ms.overwrite(
               node.range[0],
               node.range[0] + 'export default'.length,
-              `const ${name} =`,
+              `const ${localName} =`,
             );
+          } else {
+            // drop `export default` for named declarations
+            ms.remove(node.range[0], node.range[0] + 'export default'.length);
           }
-          exports.push({ localName: name, externalName: 'default' });
-          ms.remove(node.range[0], node.range[0] + 'export default'.length);
+          exportsList.push({ localName, externalName: 'default' });
         }
       }
 

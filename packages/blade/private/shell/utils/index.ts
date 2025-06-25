@@ -6,7 +6,7 @@ import {
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import ora from 'ora';
-import type { AST } from '@typescript-eslint/typescript-estree';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
 import {
   loggingPrefixes,
@@ -122,17 +122,17 @@ export const wrapClientExport = (
   `;
 };
 
-export const extractName = (
-  node: AST<{ jsx: true }>['body'][number] extends { declaration: infer D } ? D : any,
-): string | null => {
+export const extractName = (node: TSESTree.Node | null | undefined): string | null => {
   if (!node) return null;
-  if (node.type === 'Identifier') {
-    return node.name;
+  switch (node.type) {
+    case 'Identifier':
+      return node.name;
+    case 'Literal':
+      return String((node as TSESTree.Literal).value);
+    default:
+      if ('id' in node && node.id?.type === 'Identifier') return node.id.name;
+      return null;
   }
-  if ('id' in node && node.id?.type === 'Identifier') {
-    return node.id.name;
-  }
-  return null;
 };
 
 export const composeEnvironmentVariables = (options: {
