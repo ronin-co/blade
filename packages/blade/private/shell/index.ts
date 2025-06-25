@@ -1,10 +1,8 @@
 #!/usr/bin/env bun
 
-import { exec } from 'node:child_process';
 import { cp, exists, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { promisify } from 'node:util';
 import { parseArgs } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
@@ -13,7 +11,6 @@ import getPort, { portNumbers } from 'get-port';
 import {
   clientInputFile,
   defaultDeploymentProvider,
-  frameworkDirectory,
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
@@ -75,40 +72,10 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
 });
 
-const isInitializing = positionals.includes('init');
 const isBuilding = positionals.includes('build');
 const isServing = positionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
 const enableServiceWorker = values.sw;
-
-const execAsync = promisify(exec);
-
-if (isInitializing) {
-  const projectName = positionals[positionals.indexOf('init') + 1] ?? 'blade-example';
-  const originDirectory = path.join(frameworkDirectory, 'examples', 'basic');
-  const targetDirectory = path.join(process.cwd(), projectName);
-
-  const { stderr } = await execAsync(`cp -r ${originDirectory} ${targetDirectory}`);
-
-  try {
-    await Bun.write(
-      path.join(targetDirectory, '.gitignore'),
-      'node_modules\n.env\n.blade',
-    );
-  } catch (error) {
-    logSpinner('Failed to create .gitignore').fail();
-    console.error(error);
-  }
-
-  if (stderr) {
-    logSpinner('Failed to create example app').fail();
-    console.error(stderr);
-  } else {
-    logSpinner('Created example app').succeed();
-  }
-
-  process.exit();
-}
 
 let port = Number.parseInt(values.port);
 
