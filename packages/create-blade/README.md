@@ -9,5 +9,5 @@ yarn create blade
 # or
 pnpm create blade
 # or
-bunx create-blade
+bun create-blade
 ```
