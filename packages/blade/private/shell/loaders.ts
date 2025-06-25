@@ -39,10 +39,11 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
       const exportList: Array<ExportItem> = [];
 
       for (const node of ast.body) {
-        // Skip remote re-exports.
+        // Skip remote re-exports (export * from ...) and types (export type).
         if (
           node.type === 'ExportAllDeclaration' ||
-          (node.type === 'ExportNamedDeclaration' && node.source)
+          (node.type === 'ExportNamedDeclaration' &&
+            (node.source || node.exportKind === 'type'))
         ) {
           continue;
         }
@@ -108,6 +109,11 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
           ms.append(`\nexport { ${exp.localName} as ${exp.externalName} };`);
         }
       }
+
+      console.log('----------------');
+      console.log('SOURCE', source.path);
+      console.log(ms.toString());
+      console.log('----------------');
 
       return {
         contents: ms.toString(),
