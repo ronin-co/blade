@@ -66,13 +66,13 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
         routes: [
           {
             handle: 'filesystem',
-          },
-          {
-            src: '^/(.*)$',
             headers: {
               'cache-control': 'public, max-age=31536000, immutable',
             },
-            continue: true,
+          },
+          {
+            src: '^(?:/(.*?))?/?$',
+            dest: 'worker',
           },
         ],
       } satisfies VercelConfig),
