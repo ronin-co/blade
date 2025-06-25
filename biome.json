@@ -58,7 +58,8 @@
         "useGuardForIn": "off",
         "noHeadElement": "off",
         "noExportedImports": "off",
-        "noDocumentCookie": "off"
+        "noDocumentCookie": "off",
+        "noProcessEnv": "off"
       },
       "performance": {
         "all": true,

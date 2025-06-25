@@ -43,7 +43,7 @@ import { getOutputFile } from '@/private/universal/utils/paths';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
-if (!Bun.env['npm_lifecycle_event']) {
+if (!process.env['npm_lifecycle_event']) {
   console.error(
     `${loggingPrefixes.error} The package must be installed locally, not globally.`,
   );
@@ -51,7 +51,7 @@ if (!Bun.env['npm_lifecycle_event']) {
 }
 
 const { values, positionals } = parseArgs({
-  args: Bun.argv,
+  args: process.argv,
   options: {
     debug: {
       type: 'boolean',
@@ -63,7 +63,7 @@ const { values, positionals } = parseArgs({
     },
     port: {
       type: 'string',
-      default: Bun.env['PORT'] || '3000',
+      default: process.env['PORT'] || '3000',
     },
     sw: {
       type: 'boolean',

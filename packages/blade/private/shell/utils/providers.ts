@@ -16,9 +16,9 @@ import type { DeploymentProvider } from '@/private/universal/types/util';
  * @returns A string representing the provider name.
  */
 export const getProvider = (): DeploymentProvider => {
-  if (Bun.env['WORKERS_CI']) return 'cloudflare';
-  if (Bun.env['NETLIFY']) return 'netlify';
-  if (Bun.env['VERCEL']) return 'vercel';
+  if (process.env['WORKERS_CI']) return 'cloudflare';
+  if (process.env['NETLIFY']) return 'netlify';
+  if (process.env['VERCEL']) return 'vercel';
   return defaultDeploymentProvider;
 };
 
