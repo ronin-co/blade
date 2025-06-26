@@ -85,7 +85,8 @@
         "useForOf": "off",
         "noArguments": "off",
         "noNamespaceImport": "off",
-        "noNamespace": "off"
+        "noNamespace": "off",
+        "noImplicitBoolean": "off"
       },
       "suspicious": {
         "all": true,
