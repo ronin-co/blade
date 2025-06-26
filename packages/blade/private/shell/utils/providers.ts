@@ -1,4 +1,5 @@
-import { exists, mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
@@ -38,7 +39,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
   const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
-  const vercelOutputDirExists = await exists(vercelOutputDir);
+  const vercelOutputDirExists = existsSync(vercelOutputDir);
   if (vercelOutputDirExists) await rm(vercelOutputDir, { recursive: true });
 
   await Promise.all([
