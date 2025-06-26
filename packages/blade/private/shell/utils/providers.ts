@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
@@ -105,13 +105,13 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
 
   // Check if a any Wrangler config exists, and if not create one.
   const jsonConfig = path.join(process.cwd(), 'wrangler.json');
+  const jsonConfigExists = existsSync(jsonConfig);
+
   const jsoncConfig = path.join(process.cwd(), 'wrangler.jsonc');
+  const jsoncConfigExists = existsSync(jsoncConfig);
+
   const tomlConfig = path.join(process.cwd(), 'wrangler.toml');
-  const [jsonConfigExists, jsoncConfigExists, tomlConfigExists] = await Promise.all([
-    exists(jsonConfig),
-    exists(jsoncConfig),
-    exists(tomlConfig),
-  ]);
+  const tomlConfigExists = existsSync(tomlConfig);
 
   if (!jsonConfigExists && !jsoncConfigExists && !tomlConfigExists) {
     spinner.info('No Wrangler config found, creating a new one...');
@@ -152,7 +152,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
-  const netlifyOutputDirExists = await exists(netlifyOutputDir);
+  const netlifyOutputDirExists = existsSync(netlifyOutputDir);
   if (netlifyOutputDirExists) await rm(netlifyOutputDir, { recursive: true });
 
   await mkdir(edgeFunctionDir, { recursive: true });
@@ -160,10 +160,10 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   // Since edge functions do not offer a `preferStatic` option, we need to manually
   // provide a list of all static assets to not be routed to the edge function.
   const staticAssets = new Array<string>();
-  const glob = new Bun.Glob('./**/*');
-  for await (const file of glob.scan(outputDirectory)) {
-    if (file.startsWith('/_worker') || file.endsWith('.map')) continue;
-    staticAssets.push(file.replaceAll('./', '/'));
+  const files = await readdir(outputDirectory, { recursive: true });
+  for (const file of files) {
+    if (file.startsWith('_worker') || file.endsWith('.map')) continue;
+    staticAssets.push(`/${file}`);
   }
 
   await Promise.all([
