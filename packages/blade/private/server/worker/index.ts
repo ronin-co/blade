@@ -50,7 +50,6 @@ app.use('*', async (c, next) => {
   ) {
     const newRequest = new Request(requestOrigin + requestPath, c.req.raw);
     const response = await c.env['ASSETS'].fetch(newRequest);
-    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
 
     if (response.status !== 404) return response;
   }
