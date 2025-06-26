@@ -1,8 +1,9 @@
-import { mkdir, readdir, rename, rmdir, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
-import { exists, logSpinner } from '@/private/shell/utils';
+import { logSpinner } from '@/private/shell/utils';
 
 import type {
   VercelConfig,
@@ -38,8 +39,8 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
   const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
-  const vercelOutputDirExists = await exists(vercelOutputDir);
-  if (vercelOutputDirExists) await rmdir(vercelOutputDir, { recursive: true });
+  const vercelOutputDirExists = existsSync(vercelOutputDir);
+  if (vercelOutputDirExists) await rm(vercelOutputDir, { recursive: true });
 
   await Promise.all([
     mkdir(staticFilesDir, { recursive: true }),
@@ -64,6 +65,14 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
       JSON.stringify({
         version: 3,
         routes: [
+          {
+            src: '^/.*$',
+            headers: {
+              'cache-control': 'public, max-age=31536000, immutable',
+              'Cache-Control': 'public, max-age=31536000, immutable',
+            },
+            continue: true,
+          },
           {
             handle: 'filesystem',
           },
@@ -104,13 +113,13 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
 
   // Check if a any Wrangler config exists, and if not create one.
   const jsonConfig = path.join(process.cwd(), 'wrangler.json');
+  const jsonConfigExists = existsSync(jsonConfig);
+
   const jsoncConfig = path.join(process.cwd(), 'wrangler.jsonc');
+  const jsoncConfigExists = existsSync(jsoncConfig);
+
   const tomlConfig = path.join(process.cwd(), 'wrangler.toml');
-  const [jsonConfigExists, jsoncConfigExists, tomlConfigExists] = await Promise.all([
-    exists(jsonConfig),
-    exists(jsoncConfig),
-    exists(tomlConfig),
-  ]);
+  const tomlConfigExists = existsSync(tomlConfig);
 
   if (!jsonConfigExists && !jsoncConfigExists && !tomlConfigExists) {
     spinner.info('No Wrangler config found, creating a new one...');
@@ -151,8 +160,8 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
-  const netlifyOutputDirExists = await exists(netlifyOutputDir);
-  if (netlifyOutputDirExists) await rmdir(netlifyOutputDir, { recursive: true });
+  const netlifyOutputDirExists = existsSync(netlifyOutputDir);
+  if (netlifyOutputDirExists) await rm(netlifyOutputDir, { recursive: true });
 
   await mkdir(edgeFunctionDir, { recursive: true });
 
