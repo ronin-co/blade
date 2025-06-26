@@ -3,10 +3,10 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { RootClientContext } from '@/private/client/context';
 import { usePageTransition, useRevalidation } from '@/private/client/hooks';
 import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
+import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
-import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 import { usePopulatePathname } from '@/public/universal/hooks';
 
 interface HistoryContentProps {
@@ -20,9 +20,10 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   const revalidate = useRevalidation<RevalidationReason>();
   const revalidationInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { pathname, search, hash } = usePrivateLocation();
+  const { pathname, search } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
   const populatedPathname = populatePathname(pathname);
+  const mounted = useRef(false);
 
   // Navigate to different pages whenever the "Previous" and "Next" history actions in
   // the browser are used.
@@ -103,9 +104,15 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   // Ensure that the address bar is updated whenever the page changes, but only if this
   // is desired by the trigger of the page change.
   useLayoutEffect(() => {
+    // Don't fire for the first mount.
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+
     if (universalContext.addressBarInSync)
-      history.pushState({}, '', populatedPathname + search + hash);
-  }, [populatedPathname + search + hash]);
+      history.pushState({}, '', populatedPathname + search);
+  }, [populatedPathname + search]);
 
   // Ensure that the scroll position is reset whenever the page changes.
   //
