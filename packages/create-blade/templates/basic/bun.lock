@@ -4,7 +4,7 @@
     "": {
       "name": "basic-example",
       "dependencies": {
-        "blade": "3.4.4",
+        "blade": "3.4.6",
         "react": "0.0.0-experimental-df12d7eac-20230510",
         "react-dom": "0.0.0-experimental-df12d7eac-20230510",
       },
@@ -197,7 +197,7 @@
 
     "balanced-match": ["balanced-match@1.0.2", "", {}, "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw=="],
 
-    "blade": ["blade@3.4.4", "", { "dependencies": { "@hono/node-ws": "1.2.0", "@ronin/compiler": "0.18.9", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "@typescript-eslint/typescript-estree": "8.35.0", "dotenv": "16.5.0", "esbuild": "0.25.5", "gradient-string": "3.0.0", "ronin": "6.7.4" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-5i1nUCvmwf+bEh7Aw3+TSLuvrZ3HI0e4aUPqowDy2LLgxiEtF5cJqBAqoL1l5y8BND9G+0X+S2usoXs37CK5FQ=="],
+    "blade": ["blade@3.4.6", "", { "dependencies": { "@hono/node-ws": "1.2.0", "@ronin/compiler": "0.18.9", "@ronin/react": "0.1.4", "@ronin/syntax": "0.2.43", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "@typescript-eslint/typescript-estree": "8.35.0", "dotenv": "16.5.0", "esbuild": "0.25.5", "gradient-string": "3.0.0", "ronin": "6.7.4" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-uR4fXLnMlZta2Iwf/rbHTl0D5GZ93P1PXqlWTe9OqeFBRDC2hcA3lrx8VpipGqJp94kpx5xURFxcU4H/1xhjcg=="],
 
     "brace-expansion": ["brace-expansion@2.0.2", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ=="],
 
