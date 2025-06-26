@@ -1,5 +1,5 @@
-declare module 'bun' {
-  interface Env {
+declare namespace NodeJS {
+  interface ProcessEnv {
     // Can be provided manually.
     BLADE_DATA_WORKER: string;
     BLADE_STORAGE_WORKER: string;

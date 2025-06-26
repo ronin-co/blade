@@ -1,8 +1,10 @@
 import path from 'node:path';
+import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import type { Server } from 'bun';
+import { createNodeWebSocket } from '@hono/node-ws';
 import chalk from 'chalk';
 import { Hono } from 'hono';
+import type { WSContext } from 'hono/ws';
 
 import {
   loggingPrefixes,
@@ -13,7 +15,7 @@ import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export interface ServerState {
   module?: Promise<{ default: Hono }>;
-  channel?: Server;
+  channel?: WSContext;
 }
 
 export const serve = async (
@@ -34,6 +36,14 @@ export const serve = async (
   }
 
   const app = new Hono();
+  const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
+
+  app.get(
+    '/_blade/reload',
+    upgradeWebSocket(() => ({
+      onOpen: (_event, channel) => (serverState.channel = channel),
+    })),
+  );
 
   const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
   app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
@@ -55,37 +65,23 @@ export const serve = async (
     return worker!.default.fetch(c.req.raw);
   });
 
-  serverState.channel = Bun.serve({
-    port,
-    development: environment === 'development',
-    fetch: (request) => {
-      let pathname: string;
+  const server = serveApp({ fetch: app.fetch, port });
+  injectWebSocket(server);
 
-      try {
-        ({ pathname } = new URL(request.url));
-      } catch (_err) {
-        // If the request URL is malformed, reject the request. For example, this can
-        // happen if the request is missing a `Host` header. The correct response in such
-        // a scenario is defined here:
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host
-        return new Response('Bad Request', { status: 400 });
+  process.on('SIGINT', () => {
+    server.close();
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', () => {
+    server.close((err) => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
       }
 
-      // Enable WebSockets for automatically triggering revalidation when files are updated
-      // during development.
-      if (environment === 'development' && pathname.startsWith('/_blade/reload')) {
-        serverState.channel!.upgrade(request);
-        return;
-      }
-
-      return app.fetch(request, {});
-    },
-    websocket: {
-      open: (socket) => socket.subscribe('development'),
-      close: (socket) => socket.unsubscribe('development'),
-      // We don't care about incoming messages, but the type requires this.
-      message() {},
-    },
+      process.exit(0);
+    });
   });
 
   console.log(

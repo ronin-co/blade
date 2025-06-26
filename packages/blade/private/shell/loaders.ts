@@ -1,4 +1,4 @@
-import { exists, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
@@ -12,6 +12,7 @@ import {
   type ExportItem,
   type TotalFileList,
   crawlDirectory,
+  exists,
   extractDeclarationName,
   getFileList,
   wrapClientExport,

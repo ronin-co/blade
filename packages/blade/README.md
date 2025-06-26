@@ -13,10 +13,10 @@ A [React](https://react.dev) framework for building instant web apps.
 - **Client & Server Components** (code is not shipped to the client by default, unless you opt in)
 - **Web Standard Compliant** (outputs a req/res worker + static files that run anywhere — also runs in containers)
 - **No Data Waterfalls** (queries are collected across layouts and pages to ensure a single DB transaction)
-- **Instant Prod Builds** (no compiler, only relies on Bun and loaders)
+- **Instant Prod Builds** (powered by [esbuild](https://esbuild.github.io)'s Go compiler)
 - **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/packages/create-blade/templates/basic) to get Blade to run)
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
-- **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [ready], and more soon)
+- **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [ready], and more)
 
 Blade works most efficiently when using [RONIN](https://ronin.co) — a globally replicable database powered by SQLite. Blade is and will always be usable with any other data source as well, however you will see performance drawbacks if that datasource isn't equally fast.
 
@@ -36,25 +36,23 @@ The experimental React version defined in the [templates](https://github.com/ron
 
 ## Setup
 
-To get started with Blade, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
-
-Next, create a new app with this command:
+To get started with Blade, create a new app with this command:
 
 ```bash
-bun create blade
+npm create blade
 ```
 
 Afterward, enter the newly created directory and install the dependencies:
 
 ```bash
 cd blade-example
-bun install
+npm install
 ```
 
 Lastly, start the development server:
 
 ```bash
-bun run dev
+npm run dev
 ```
 
 ## Deploying
@@ -73,9 +71,7 @@ Check out [the documentation](https://blade.im) for more details.
 
 ## Contributing
 
-To start contributing code, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
-
-Next, [clone the repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) and install its dependencies:
+To start contributing code, [clone the repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) and install its dependencies:
 
 ```bash
 bun install

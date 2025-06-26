@@ -14,9 +14,8 @@ import type { RevalidationReason } from '@/private/client/types/util';
 import fetchPage, { type FetchedPage } from '@/private/client/utils/fetch-page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
-import { IS_DEV } from '@/private/universal/utils/constants';
-import logger from '@/private/universal/utils/logs';
 import { usePopulatePathname } from '@/public/universal/hooks';
+import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**
@@ -63,7 +62,7 @@ export const usePageTransition = () => {
       // However, this should only happen in production. During development, we are
       // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
       // in production, caching a page for 10 seconds makes sense.
-      if (cacheEntry && cacheEntry.time > maxAge && !IS_DEV) {
+      if (cacheEntry && cacheEntry.time > maxAge && !IS_CLIENT_DEV) {
         return () => window['BLADE_ROOT']!.render(cacheEntry.body);
       }
     }
@@ -88,7 +87,7 @@ export const usePageTransition = () => {
       (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0)
     ) {
       return () => {
-        logger.info(
+        console.debug(
           'Skipping automatic page transition because of other pending page transitions.',
         );
       };
@@ -97,7 +96,9 @@ export const usePageTransition = () => {
     if (!window.navigator.onLine) {
       if (type === 'automatic') {
         return () => {
-          logger.info('Skipping automatic page transition because device is not online.');
+          console.debug(
+            'Skipping automatic page transition because device is not online.',
+          );
         };
       }
 
@@ -158,7 +159,7 @@ export const usePageTransition = () => {
       // have already been started. If that's the case, we want to skip the current
       // update to prevent the UI from temporarily regressing to an older state.
       if (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0) {
-        logger.info(
+        console.debug(
           'Skipping page transition because of a newer pending page transition.',
         );
         return;
@@ -195,7 +196,7 @@ export const useRevalidation = <T extends RevalidationReason>() => {
     const privateLocation = privateLocationRef.current;
     const path = privateLocation.pathname + privateLocation.search + privateLocation.hash;
 
-    logger.info(`Revalidating ${path} (${reason})`);
+    console.debug(`Revalidating ${path} (${reason})`);
 
     transitionPage(path, 'automatic')();
   };

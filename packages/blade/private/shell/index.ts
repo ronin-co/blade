@@ -1,12 +1,13 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
-import { cp, exists, rename } from 'node:fs/promises';
+import { cp, readFile, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
+import dotenv from 'dotenv';
 
 import {
   clientInputFile,
@@ -26,6 +27,7 @@ import {
 import {
   cleanUp,
   composeEnvironmentVariables,
+  exists,
   logSpinner,
   prepareStyles,
 } from '@/private/shell/utils';
@@ -46,6 +48,9 @@ if (!process.env['npm_lifecycle_event']) {
   );
   process.exit(0);
 }
+
+// Load the `.env` file.
+dotenv.config();
 
 const { values, positionals } = parseArgs({
   args: process.argv,
@@ -94,7 +99,7 @@ const tsConfig = path.join(process.cwd(), 'tsconfig.json');
 // If a `tsconfig.json` file exists that contains a `references` field, we should include
 // files from the referenced projects as well.
 if (await exists(tsConfig)) {
-  const tsConfigContents = await import(tsConfig);
+  const tsConfigContents = JSON.parse(await readFile(tsConfig, 'utf-8'));
   const { references } = tsConfigContents || {};
 
   if (references && Array.isArray(references) && references.length > 0) {
@@ -161,17 +166,16 @@ if (isBuilding || isDeveloping) {
             spinner.start();
           });
 
-          build.onResolve({ filter: /^build-meta$/ }, (source) => {
-            return { path: source.path, namespace: 'dynamic-meta' };
-          });
+          build.onResolve({ filter: /^build-meta$/ }, (source) => ({
+            path: source.path,
+            namespace: 'dynamic-meta',
+          }));
 
-          build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => {
-            return {
-              contents: `export const bundleId = "${bundleId}";`,
-              loader: 'ts',
-              resolveDir: process.cwd(),
-            };
-          });
+          build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => ({
+            contents: `export const bundleId = "${bundleId}";`,
+            loader: 'ts',
+            resolveDir: process.cwd(),
+          }));
 
           build.onEnd(async (result) => {
             if (result.errors.length === 0) {
@@ -204,7 +208,7 @@ if (isBuilding || isDeveloping) {
               server.module = import(path.join(outputDirectory, moduleName));
 
               // Revalidate the client.
-              if (server.channel) server.channel.publish('development', 'revalidate');
+              if (server.channel) server.channel.send('revalidate');
             }
           });
         },

@@ -1,8 +1,8 @@
-import { exists, mkdir, rename, rmdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, rename, rmdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
-import { logSpinner } from '@/private/shell/utils';
+import { exists, logSpinner } from '@/private/shell/utils';
 
 import type {
   VercelConfig,
@@ -162,10 +162,10 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   // Since edge functions do not offer a `preferStatic` option, we need to manually
   // provide a list of all static assets to not be routed to the edge function.
   const staticAssets = new Array<string>();
-  const glob = new Bun.Glob('./**/*');
-  for await (const file of glob.scan(outputDirectory)) {
-    if (file.startsWith('/_worker') || file.endsWith('.map')) continue;
-    staticAssets.push(file.replaceAll('./', '/'));
+  const files = await readdir(outputDirectory, { recursive: true });
+  for (const file of files) {
+    if (file.startsWith('_worker') || file.endsWith('.map')) continue;
+    staticAssets.push(`/${file}`);
   }
 
   await Promise.all([

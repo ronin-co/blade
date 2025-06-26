@@ -38,8 +38,9 @@ import type {
   QueryItemRead,
   QueryItemWrite,
 } from '@/private/universal/types/util';
-import { DEFAULT_PAGE_PATH, IS_DEV } from '@/private/universal/utils/constants';
+import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
+import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 
 const pages: PageList = {
   ...pageList,
@@ -451,7 +452,7 @@ const renderReactTree = async (
   existingCollected?: Collected,
 ): Promise<Response> => {
   // See https://github.com/ronin-co/blade/pull/31 for more details.
-  if (!IS_DEV) url.protocol = 'https';
+  if (!IS_SERVER_DEV) url.protocol = 'https';
 
   const pathSegments = getPathSegments(url.pathname);
   const entry = getEntry(pages, pathSegments, {

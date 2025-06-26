@@ -106,6 +106,9 @@ interface HeadingProps {
   id?: string;
 }
 
+const title = 'Blade';
+const description = 'Build instant web apps.';
+
 const DocsLayout = ({
   children,
   tableOfContents,
@@ -114,9 +117,6 @@ const DocsLayout = ({
   tableOfContents: TableOfContents;
 }) => {
   const [theme] = useCookie<Theme>('theme');
-
-  const title = 'Blade Documentation';
-  const description = 'Build instant web apps.';
 
   useMetadata({
     htmlClassName: cn(
