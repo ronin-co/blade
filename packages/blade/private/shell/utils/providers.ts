@@ -75,6 +75,10 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
             },
             continue: true,
           },
+          {
+            src: '^(?:/(.*?))?/?$',
+            dest: 'worker',
+          },
         ],
       } satisfies VercelConfig),
     ),
