@@ -85,7 +85,7 @@ const Root = ({ children, serverContext }: RootProps) => {
                     key={source}
                     type="module"
                     className="blade-script"
-                    async={true}
+                    async
                   />
                 );
               case 'worker':
