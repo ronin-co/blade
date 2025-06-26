@@ -1,7 +1,11 @@
 import { mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
+import {
+  defaultCacheControl,
+  defaultDeploymentProvider,
+  outputDirectory,
+} from '@/private/shell/constants';
 import { exists, logSpinner } from '@/private/shell/utils';
 
 import type {
@@ -67,8 +71,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
           {
             src: '^/.*$',
             headers: {
-              'cache-control': 'public, max-age=31536000, immutable',
-              'Cache-Control': 'public, max-age=31536000, immutable',
+              'Cache-Control': defaultCacheControl,
             },
             continue: true,
           },
@@ -110,7 +113,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
     ),
     writeFile(
       path.join(outputDirectory, '_headers'),
-      '/*\n\tCache-Control: public, max-age=31536000, immutable',
+      `/*\n\tCache-Control: ${defaultCacheControl}`,
     ),
   );
 
@@ -193,6 +196,23 @@ export const config = {
       path: "/*",
       excludedPath: ${JSON.stringify(staticAssets)},
 };`,
+    ),
+    writeFile(
+      path.join(netlifyOutputDir, 'config.json'),
+      JSON.stringify(
+        {
+          headers: [
+            {
+              for: '/*',
+              values: {
+                'Cache-Control': defaultCacheControl,
+              },
+            },
+          ],
+        },
+        null,
+        4,
+      ),
     ),
   ]);
 

@@ -1,4 +1,4 @@
-import { resolve, join, dirname } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
@@ -22,4 +22,5 @@ export const loggingPrefixes = {
   error: `${chalk.bold(gradient(['#930024', '#d4143e'])('ERROR'))}  `,
 };
 
+export const defaultCacheControl = 'public, max-age=31536000, immutable';
 export const defaultDeploymentProvider = 'edge-worker';
