@@ -1,4 +1,4 @@
-import { exists, mkdir, rename, rmdir, writeFile } from 'node:fs/promises';
+import { exists, mkdir, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
@@ -39,7 +39,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
   const vercelOutputDirExists = await exists(vercelOutputDir);
-  if (vercelOutputDirExists) await rmdir(vercelOutputDir, { recursive: true });
+  if (vercelOutputDirExists) await rm(vercelOutputDir, { recursive: true });
 
   await Promise.all([
     mkdir(staticFilesDir, { recursive: true }),
@@ -152,7 +152,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
 
   const netlifyOutputDirExists = await exists(netlifyOutputDir);
-  if (netlifyOutputDirExists) await rmdir(netlifyOutputDir, { recursive: true });
+  if (netlifyOutputDirExists) await rm(netlifyOutputDir, { recursive: true });
 
   await mkdir(edgeFunctionDir, { recursive: true });
 
