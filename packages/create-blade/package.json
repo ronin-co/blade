@@ -1,6 +1,6 @@
 {
   "name": "create-blade",
-  "version": "3.4.3",
+  "version": "3.4.5",
   "type": "module",
   "description": "Create a new Blade project",
   "repository": {

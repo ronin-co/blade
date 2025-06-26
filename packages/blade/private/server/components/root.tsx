@@ -85,6 +85,8 @@ const Root = ({ children, serverContext }: RootProps) => {
                     key={source}
                     type="module"
                     className="blade-script"
+                    // Don't block the parsing of the remaining HTML, CSS, etc.
+                    async
                   />
                 );
               case 'worker':
