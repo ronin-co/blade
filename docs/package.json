@@ -1,6 +1,7 @@
 {
   "name": "docs",
   "version": "0.0.1",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "blade",
@@ -16,7 +17,7 @@
     "@radix-ui/react-separator": "1.1.7",
     "@radix-ui/react-slot": "1.2.3",
     "@radix-ui/react-tooltip": "1.2.7",
-    "blade": "3.3.3",
+    "blade": "3.4.3",
     "@tabler/icons-react": "3.34.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
