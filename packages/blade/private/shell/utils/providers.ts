@@ -108,6 +108,10 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
       path.join(outputDirectory, '.assetsignore'),
       ['edge-worker.js', 'edge-worker.js.map', '_routes.json'].join('\n'),
     ),
+    writeFile(
+      path.join(outputDirectory, '_headers'),
+      '/*\n\tCache-Control: public, max-age=31536000, immutable',
+    ),
   );
 
   // Check if a any Wrangler config exists, and if not create one.
