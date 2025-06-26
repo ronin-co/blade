@@ -81,6 +81,22 @@ export const TableOfContentsSidebar = ({ toc }: { toc: TableOfContents }) => {
   }, [] as TableOfContents);
 
   useEffect(() => {
+    // Flatten the `adjustedToc` to include all nested children.
+    const flattenToc = (items: TableOfContents): TableOfContents => {
+      const flattened: TableOfContents = [];
+
+      for (const item of items) {
+        flattened.push(item);
+        if (item.children) {
+          flattened.push(...flattenToc(item.children));
+        }
+      }
+
+      return flattened;
+    };
+
+    const flattenedToc = flattenToc(adjustedToc);
+
     const observer = new IntersectionObserver(
       (entries) => {
         // Abort if there are no entries.
@@ -106,7 +122,7 @@ export const TableOfContentsSidebar = ({ toc }: { toc: TableOfContents }) => {
       },
     );
 
-    for (const item of adjustedToc) {
+    for (const item of flattenedToc) {
       if (item.value) {
         const element = document.getElementById(slugify(item.value));
 
