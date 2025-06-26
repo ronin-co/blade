@@ -199,20 +199,16 @@ export const config = {
     ),
     writeFile(
       path.join(netlifyOutputDir, 'config.json'),
-      JSON.stringify(
-        {
-          headers: [
-            {
-              for: '/*',
-              values: {
-                'Cache-Control': defaultCacheControl,
-              },
+      JSON.stringify({
+        headers: [
+          {
+            for: '/*',
+            values: {
+              'Cache-Control': defaultCacheControl,
             },
-          ],
-        },
-        null,
-        4,
-      ),
+          },
+        ],
+      }),
     ),
   ]);
 
