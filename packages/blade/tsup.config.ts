@@ -50,6 +50,6 @@ export default defineConfig({
   define: {
     // Deno does not support `global` and certain dependencies that Blade uses are
     // using `global`, so we're aliasing it ourselves.
-    global: 'globalThis'
-  }
+    global: 'globalThis',
+  },
 });
