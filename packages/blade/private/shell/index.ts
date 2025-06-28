@@ -212,7 +212,6 @@ if (isBuilding || isDeveloping) {
               // Revalidate the client.
               if (server.reloadChannel) server.reloadChannel.send('revalidate');
             } else {
-
               // Parse build error
               const mappedError = result.errors.map((error) => {
                 const location = {
@@ -229,7 +228,10 @@ if (isBuilding || isDeveloping) {
               });
 
               // Broadcast error state to client
-              if (server.stateChannel) server.stateChannel.send(createStateMessage('build-error', JSON.stringify(mappedError)));
+              if (server.stateChannel)
+                server.stateChannel.send(
+                  createStateMessage('build-error', JSON.stringify(mappedError)),
+                );
             }
           });
         },

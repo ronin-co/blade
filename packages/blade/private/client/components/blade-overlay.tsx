@@ -11,33 +11,31 @@ interface ErrorBadgeProps {
   count: number;
 }
 
-
-
 const ErrorBadge = ({ count }: ErrorBadgeProps) => {
   if (count === 0) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      bottom: '1rem',
-      left: '4.5rem',
-      backgroundColor: 'red',
-      color: 'white',
-      borderRadius: '50%',
-      width: '1.5rem',
-      height: '1.5rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '0.75rem',
-      fontWeight: 'bold',
-      zIndex: 51
-    }}>
+    <div
+      style={{
+        position: 'fixed',
+        bottom: '1rem',
+        left: '4.5rem',
+        backgroundColor: 'red',
+        color: 'white',
+        borderRadius: '50%',
+        width: '1.5rem',
+        height: '1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '0.75rem',
+        fontWeight: 'bold',
+        zIndex: 51,
+      }}>
       {count}
     </div>
   );
-}
-
+};
 
 const Floating = () => {
   const { showModal } = useErrorModal();
@@ -60,7 +58,7 @@ const Floating = () => {
       switch (event.type) {
         case 'build-error':
           console.log(event);
-          const errorMessages: BuildError[] = JSON.parse(event.message)
+          const errorMessages: BuildError[] = JSON.parse(event.message);
           /**
            * TODO: Make the Modal able to show multiple error messages
            */
@@ -76,8 +74,7 @@ ${errorMessage.location.suggestion ? `Suggestion: ${errorMessage.location.sugges
           console.log('unsupported');
           break;
       }
-    }
-
+    };
 
     let ws: WebSocket;
 
@@ -96,12 +93,11 @@ ${errorMessage.location.suggestion ? `Suggestion: ${errorMessage.location.sugges
         const data = JSON.parse(event.data) as StateMessage;
         stateHandler(data);
       });
-
     };
 
     connect();
     return () => ws.close();
-  }, [])
+  }, []);
 
   return (
     <div
@@ -113,13 +109,14 @@ ${errorMessage.location.suggestion ? `Suggestion: ${errorMessage.location.sugges
         height: '3rem',
         backgroundColor: 'black',
         borderRadius: '50%',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        boxShadow:
+          '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         zIndex: 50,
-        cursor: 'pointer'
+        cursor: 'pointer',
       }}
     />
-  )
-}
+  );
+};
 
 const BladeOverlay = () => {
   const { isVisible } = useErrorModal();
@@ -135,7 +132,7 @@ const BladeOverlay = () => {
       </div>
     </>
   );
-}
+};
 
 const WrappedBladeOverlay = () => (
   <ErrorModalProvider>

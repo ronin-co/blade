@@ -32,13 +32,14 @@ const ErrorModalProvider = ({ children }: ErrorModalProviderProps) => {
   };
 
   return (
-    <ErrorModalContext.Provider value={{
-      isVisible,
-      title,
-      message,
-      showModal,
-      hideModal
-    }}>
+    <ErrorModalContext.Provider
+      value={{
+        isVisible,
+        title,
+        message,
+        showModal,
+        hideModal,
+      }}>
       {children}
     </ErrorModalContext.Provider>
   );

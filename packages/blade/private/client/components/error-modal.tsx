@@ -5,7 +5,7 @@ const ErrorModal = () => {
   const { title, message, hideModal } = useErrorModal();
 
   return (
-    <div 
+    <div
       style={{
         position: 'fixed',
         top: 0,
@@ -17,11 +17,10 @@ const ErrorModal = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 9999
+        zIndex: 9999,
       }}
-      onClick={hideModal}
-    >
-      <div 
+      onClick={hideModal}>
+      <div
         style={{
           position: 'relative',
           width: '90%',
@@ -31,43 +30,45 @@ const ErrorModal = () => {
           borderRadius: '12px',
           padding: '2rem',
           boxShadow: '0 0 30px rgba(255, 0, 0, 0.3), 0 0 60px rgba(255, 0, 0, 0.15)',
-          animation: 'pulse 2s ease-in-out infinite alternate'
+          animation: 'pulse 2s ease-in-out infinite alternate',
         }}
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         {/* Error Content */}
         <div style={{ color: '#fff', textAlign: 'center' }}>
-          <h2 style={{ 
-            margin: '0 0 1rem 0', 
-            fontSize: '1.5rem', 
-            fontWeight: 'bold',
-            color: '#ff4444'
-          }}>
+          <h2
+            style={{
+              margin: '0 0 1rem 0',
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: '#ff4444',
+            }}>
             {title}
           </h2>
-          
-          <div style={{
-            backgroundColor: '#000',
-            border: '1px solid #444',
-            borderRadius: '6px',
-            padding: '1rem',
-            marginBottom: '1rem',
-            fontFamily: 'monospace',
-            fontSize: '0.875rem',
-            textAlign: 'left',
-            overflow: 'auto',
-            maxHeight: '300px',
-            whiteSpace: 'pre-wrap'
-          }}>
+
+          <div
+            style={{
+              backgroundColor: '#000',
+              border: '1px solid #444',
+              borderRadius: '6px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              fontFamily: 'monospace',
+              fontSize: '0.875rem',
+              textAlign: 'left',
+              overflow: 'auto',
+              maxHeight: '300px',
+              whiteSpace: 'pre-wrap',
+            }}>
             {message}
           </div>
-          
-          <div style={{
-            display: 'flex',
-            gap: '1rem',
-            justifyContent: 'center'
-          }}>
-            <button 
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center',
+            }}>
+            <button
               style={{
                 backgroundColor: '#333',
                 color: '#fff',
@@ -75,16 +76,15 @@ const ErrorModal = () => {
                 borderRadius: '4px',
                 padding: '0.5rem 1rem',
                 cursor: 'pointer',
-                fontSize: '0.875rem'
+                fontSize: '0.875rem',
               }}
-              onClick={hideModal}
-            >
+              onClick={hideModal}>
               Close
             </button>
           </div>
         </div>
       </div>
-      
+
       <style>{`
         @keyframes pulse {
           0% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.3), 0 0 60px rgba(255, 0, 0, 0.15); }
