@@ -208,10 +208,11 @@ if (isBuilding || isDeveloping) {
               server.module = import(path.join(outputDirectory, moduleName));
 
               // Revalidate the client.
-              if (server.channel) server.channel.send('revalidate');
-            }else{
-               // Broadcast error to client
-               if (server.channel) server.channel.send(`error:${JSON.stringify(result.errors)}`);
+              if (server.reloadChannel) server.reloadChannel.send('revalidate');
+            } else {
+              // Broadcast error to client
+              if (server.stateChannel)
+                server.stateChannel.send(`error:${JSON.stringify(result.errors)}`);
             }
           });
         },
@@ -260,11 +261,13 @@ if (isBuilding || isDeveloping) {
         const relativePath = path.relative(process.cwd(), eventPath);
 
         spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
-        
-        mainBuild.rebuild().catch(()=>{
-          console.log(`\n${loggingPrefixes.info} ✘ Build failed! Please check the following errors\n`);
-          spinner.fail()
-          spinner.stop()
+
+        mainBuild.rebuild().catch(() => {
+          console.log(
+            `\n${loggingPrefixes.info} ✘ Build failed! Please check the following errors\n`,
+          );
+          spinner.fail();
+          spinner.stop();
         });
       });
   } else {

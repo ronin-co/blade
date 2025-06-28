@@ -15,7 +15,8 @@ import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export interface ServerState {
   module?: Promise<{ default: Hono }>;
-  channel?: WSContext;
+  reloadChannel?: WSContext;
+  stateChannel?: WSContext;
 }
 
 export const serve = async (
@@ -41,7 +42,14 @@ export const serve = async (
   app.get(
     '/_blade/reload',
     upgradeWebSocket(() => ({
-      onOpen: (_event, channel) => (serverState.channel = channel),
+      onOpen: (_event, channel) => (serverState.reloadChannel = channel),
+    })),
+  );
+
+  app.get(
+    '/_blade/state',
+    upgradeWebSocket(() => ({
+      onOpen: (_event, channel) => (serverState.stateChannel = channel),
     })),
   );
 
