@@ -209,6 +209,9 @@ if (isBuilding || isDeveloping) {
 
               // Revalidate the client.
               if (server.channel) server.channel.send('revalidate');
+            }else{
+               // Broadcast error to client
+               if (server.channel) server.channel.send(`error:${JSON.stringify(result.errors)}`);
             }
           });
         },
@@ -257,7 +260,12 @@ if (isBuilding || isDeveloping) {
         const relativePath = path.relative(process.cwd(), eventPath);
 
         spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
-        mainBuild.rebuild();
+        
+        mainBuild.rebuild().catch(()=>{
+          console.log(`\n${loggingPrefixes.info} ✘ Build failed! Please check the following errors\n`);
+          spinner.fail()
+          spinner.stop()
+        });
       });
   } else {
     // Stop the build context.
