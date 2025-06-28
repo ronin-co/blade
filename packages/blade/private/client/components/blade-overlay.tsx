@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { wrapClientComponent } from '../utils/wrap-client';
 
 interface ErrorBadgeProps{
@@ -29,21 +28,9 @@ const ErrorBadge = ({ count }: ErrorBadgeProps) => {
   );
 }
 
-
-const BladeOverlay = () => {
-  const [count, setCount] = useState(0);
-
-  const handleClick = () => {
-    setCount(prev => prev + 1);
-  };
-
+const Floating = () => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'row' }}>
-      <ErrorBadge count={count} />
-      
-      {/* Circle */}
-      <div 
-        onClick={handleClick}
+     <div 
         style={{
           position: 'fixed',
           bottom: '1rem',
@@ -57,6 +44,16 @@ const BladeOverlay = () => {
           cursor: 'pointer'
         }}
       />
+  )
+}
+
+const BladeOverlay = () => {
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'row' }}>
+      <ErrorBadge count={0} />
+      <Floating />
+      
     </div>
   );
 }

@@ -2,6 +2,7 @@ import 'client-list';
 import { hydrateRoot } from 'react-dom/client';
 
 import '@/private/client/components/history';
+import '@/private/client/components/blade-overlay';
 import '@/public/client/components';
 import fetchPage from '@/private/client/utils/fetch-page';
 
