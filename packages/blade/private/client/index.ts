@@ -3,6 +3,7 @@ import { hydrateRoot } from 'react-dom/client';
 
 import '@/private/client/components/history';
 import '@/private/client/components/blade-overlay';
+import '@/private/client/components/error-modal';
 import '@/public/client/components';
 import fetchPage from '@/private/client/utils/fetch-page';
 
