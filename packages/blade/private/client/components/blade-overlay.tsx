@@ -58,6 +58,10 @@ import type BuildError from '@/private/universal/utils/build-error';
 //   );
 // };
 
+/**
+ * BladeOverlay is a bubble indicator component used to display
+ * visual notifications for build errors, client errors, and other statuses.
+ */
 const BladeOverlay = () => {
   const { isVisible, showModal } = useErrorModal();
 
@@ -66,6 +70,9 @@ const BladeOverlay = () => {
     // locally sit behind a proxy that terminates TLS, in which case the origin protocol
     // would be `http` if we make use of the location provided by `usePrivateLocation`,
     // since that comes from the server.
+
+    // This endpoint can be used to send multiple stages of statuses like build-pending to indicate
+    // it's in a build process, or failures in server, etc.
     const url = new URL('/_blade/state', window.location.origin);
 
     // This also replaces `https` with `wss` automatically.

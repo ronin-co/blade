@@ -212,7 +212,7 @@ if (isBuilding || isDeveloping) {
               // Revalidate the client.
               if (server.reloadChannel) server.reloadChannel.send('revalidate');
             } else {
-              // Parse build error
+              // Transform esbuild errors into a standardized format for client display
               const mappedError = result.errors.map((error) => {
                 const location = {
                   file: error.location?.file,

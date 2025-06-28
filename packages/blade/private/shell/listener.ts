@@ -46,6 +46,8 @@ export const serve = async (
     })),
   );
 
+  // This endpoint can be used to send multiple stages of statuses like build-pending to indicate
+  // it's in a build process, or failures in server, etc.
   app.get(
     '/_blade/state',
     upgradeWebSocket(() => ({
