@@ -126,10 +126,14 @@ const BladeOverlay = () => {
   return (
     <>
       {isVisible && <ErrorModal />}
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
+      {/*
+       * I made this hidden now because there is no actual usage for it right now, but it's a base foundation
+       * for both client errors and server errors to be shown here or even more like changing configs etc..
+       */}
+      {/* <div style={{ display: 'flex', flexDirection: 'row' }}>
         <ErrorBadge count={0} />
         <Floating />
-      </div>
+      </div> */}
     </>
   );
 };
