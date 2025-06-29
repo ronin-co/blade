@@ -176,7 +176,7 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
     });
 
     build.onLoad({ filter: /^server-list$/, namespace: 'server-imports' }, async () => ({
-      contents: await getFileList(files, ['pages', 'triggers']),
+      contents: await getFileList(files, ['pages', 'triggers'], true),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
