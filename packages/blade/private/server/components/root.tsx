@@ -3,6 +3,7 @@ import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
 import { History } from '@/private/client/components/history';
+import { BladeOverlay } from '@/private/client/components/blade-overlay';
 import { composeWorkerRegistration } from '@/private/client/utils/service-worker';
 import { RootServerContext, type ServerContext } from '@/private/server/context';
 import type { PageMetadata, RecursiveRequired, ValueOf } from '@/private/server/types';
@@ -191,6 +192,7 @@ const Root = ({ children, serverContext }: RootProps) => {
       <body
         suppressHydrationWarning={true}
         className={metadata.bodyClassName}>
+        <BladeOverlay />
         <RootServerContext.Provider value={serverContext}>
           <History universalContext={getSerializableContext(serverContext)}>
             {children}
