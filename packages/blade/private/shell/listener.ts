@@ -15,8 +15,7 @@ import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export interface ServerState {
   module?: Promise<{ default: Hono }>;
-  reloadChannel?: WSContext;
-  stateChannel?: WSContext;
+  channel?: WSContext;
 }
 
 export const serve = async (
@@ -42,16 +41,7 @@ export const serve = async (
   app.get(
     '/_blade/reload',
     upgradeWebSocket(() => ({
-      onOpen: (_event, channel) => (serverState.reloadChannel = channel),
-    })),
-  );
-
-  // This endpoint can be used to send multiple stages of statuses like build-pending to indicate
-  // it's in a build process, or failures in server, etc.
-  app.get(
-    '/_blade/state',
-    upgradeWebSocket(() => ({
-      onOpen: (_event, channel) => (serverState.stateChannel = channel),
+      onOpen: (_event, channel) => (serverState.channel = channel),
     })),
   );
 

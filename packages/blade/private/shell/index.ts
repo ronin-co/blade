@@ -210,7 +210,7 @@ if (isBuilding || isDeveloping) {
               server.module = import(path.join(outputDirectory, moduleName));
 
               // Revalidate the client.
-              if (server.reloadChannel) server.reloadChannel.send('revalidate');
+              if (server.channel) server.channel.send('revalidate');
             } else {
               // Transform esbuild errors into a standardized format for client display
               const mappedError = result.errors.map((error) => {
@@ -227,11 +227,8 @@ if (isBuilding || isDeveloping) {
                 } as BuildError;
               });
 
-              // Broadcast error state to client
-              if (server.stateChannel)
-                server.stateChannel.send(
-                  createStateMessage('build-error', JSON.stringify(mappedError)),
-                );
+              // Save the build error to server state
+              
             }
           });
         },
