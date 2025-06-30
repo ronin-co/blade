@@ -5,9 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
+import dotenv from 'dotenv';
 import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
-import dotenv from 'dotenv';
 
 import {
   clientInputFile,
@@ -214,6 +214,9 @@ if (isBuilding || isDeveloping) {
         },
       },
     ],
+    banner: {
+      js: 'if(!import.meta.env){import.meta.env={}};',
+    },
     define: composeEnvironmentVariables({
       isLoggingQueries: values.queries || false,
       enableServiceWorker,
