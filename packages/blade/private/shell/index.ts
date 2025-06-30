@@ -39,7 +39,6 @@ import {
 } from '@/private/shell/utils/providers';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
-import { createStateMessage } from '@/private/universal/utils/state-msg';
 import type BuildError from '@/private/universal/utils/build-error';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
@@ -283,13 +282,15 @@ if (isBuilding || isDeveloping) {
 
         spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
 
-        mainBuild.rebuild().catch(() => {
+        try {
+          mainBuild.rebuild();
+        } catch {
+          spinner.fail();
+          spinner.stop();
           console.log(
             `\n${loggingPrefixes.info} ✘ Build failed! Please check the following errors\n`,
           );
-          spinner.fail();
-          spinner.stop();
-        });
+        }
       });
   } else {
     // Stop the build context.
