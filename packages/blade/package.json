@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.4.8",
+  "version": "3.4.11",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -64,7 +64,7 @@
     "dotenv": "16.5.0",
     "esbuild": "0.25.5",
     "gradient-string": "3.0.0",
-    "ronin": "6.7.7"
+    "ronin": "6.7.8"
   },
   "devDependencies": {
     "@hono/node-server": "1.14.4",
