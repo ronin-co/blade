@@ -215,6 +215,8 @@ if (isBuilding || isDeveloping) {
       },
     ],
     banner: {
+      // Prevent a crash for missing environment variables by ensuring that
+      // `import.meta.env` is defined.
       js: 'if(!import.meta.env){import.meta.env={}};',
     },
     define: composeEnvironmentVariables({
