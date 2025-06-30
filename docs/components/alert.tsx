@@ -5,8 +5,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 export function AlertCard({ children }: { children: React.ReactNode }) {
   return (
     <Alert
-      variant="warning"
-      className="not-prose">
+      className="not-prose items-center"
+      variant="warning">
       <TriangleAlertIcon />
       <AlertDescription>{children}</AlertDescription>
     </Alert>
