@@ -7,57 +7,6 @@ import { ErrorModal } from '@/private/client/components/error-modal';
 import type { StateMessage } from '@/private/universal/utils/state-msg';
 import type BuildError from '@/private/universal/utils/build-error';
 
-// interface ErrorBadgeProps {
-//   count: number;
-// }
-
-// const ErrorBadge = ({ count }: ErrorBadgeProps) => {
-//   if (count === 0) return null;
-
-//   return (
-//     <div
-//       style={{
-//         position: 'fixed',
-//         bottom: '1rem',
-//         left: '4.5rem',
-//         backgroundColor: 'red',
-//         color: 'white',
-//         borderRadius: '50%',
-//         width: '1.5rem',
-//         height: '1.5rem',
-//         display: 'flex',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//         fontSize: '0.75rem',
-//         fontWeight: 'bold',
-//         zIndex: 51,
-//       }}>
-//       {count}
-//     </div>
-//   );
-// };
-
-// const Floating = () => {
-
-//   return (
-//     <div
-//       style={{
-//         position: 'fixed',
-//         bottom: '1rem',
-//         left: '1rem',
-//         width: '3rem',
-//         height: '3rem',
-//         backgroundColor: 'black',
-//         borderRadius: '50%',
-//         boxShadow:
-//           '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-//         zIndex: 50,
-//         cursor: 'pointer',
-//       }}
-//     />
-//   );
-// };
-
 /**
  * BladeOverlay is a bubble indicator component used to display
  * visual notifications for build errors, client errors, and other statuses.
@@ -132,14 +81,6 @@ ${errorMessage.location.suggestion ? `Suggestion: ${errorMessage.location.sugges
   return (
     <>
       {isVisible && <ErrorModal />}
-      {/*
-       * I made this hidden now because there is no actual usage for it right now, but it's a base foundation
-       * for both client errors and server errors to be shown here or even more like changing configs etc..
-       */}
-      {/* <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <ErrorBadge count={0} />
-        <Floating />
-      </div> */}
     </>
   );
 };
