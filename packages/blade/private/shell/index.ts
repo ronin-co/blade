@@ -39,7 +39,8 @@ import {
 } from '@/private/shell/utils/providers';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
-import type BuildError from '@/private/universal/utils/build-error';
+import type BuildError from '@/private/universal/types/build-error';
+import { sessionState } from '@/private/universal/state/session';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -208,6 +209,9 @@ if (isBuilding || isDeveloping) {
               // been evaluated entirely.
               server.module = import(path.join(outputDirectory, moduleName));
 
+              // Update the build status to session state
+              sessionState.set({ type: 'ok', message: null });
+              
               // Revalidate the client.
               if (server.channel) server.channel.send('revalidate');
             } else {
@@ -226,8 +230,14 @@ if (isBuilding || isDeveloping) {
                 } as BuildError;
               });
 
-              // Save the build error to server state
+              // Update the build status to session state
+              sessionState.set({
+                type: 'build-error',
+                message: mappedError,
+              });
               
+              // Revalidate the client.
+              if (server.channel) server.channel.send('revalidate');
             }
           });
         },
@@ -282,15 +292,15 @@ if (isBuilding || isDeveloping) {
 
         spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
 
-        try {
-          mainBuild.rebuild();
-        } catch {
+        mainBuild.rebuild().catch(() => {
+          // This catch pervent the server from crashing on build errors.
+
           spinner.fail();
           spinner.stop();
           console.log(
             `\n${loggingPrefixes.info} ✘ Build failed! Please check the following errors\n`,
           );
-        }
+        });
       });
   } else {
     // Stop the build context.

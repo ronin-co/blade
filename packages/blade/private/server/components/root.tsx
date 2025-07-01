@@ -10,6 +10,8 @@ import { getSerializableContext } from '@/private/universal/context';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { Asset } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
+import { ErrorModal } from '@/private/client/components/error-modal';
+// import { ErrorModal } from '@/private/client/components/error-modal';
 
 const metadataNames: Record<string, string> = {
   colorScheme: 'color-scheme',
@@ -44,7 +46,8 @@ interface RootProps {
 }
 
 const Root = ({ children, serverContext }: RootProps) => {
-  const { metadata } = serverContext.collected;
+  const { metadata, devState: state } = serverContext.collected;
+
 
   const currentLocation = usePrivateLocation();
 
@@ -191,6 +194,34 @@ const Root = ({ children, serverContext }: RootProps) => {
       <body
         suppressHydrationWarning={true}
         className={metadata.bodyClassName}>
+        {(() => {
+          switch (state?.type) {
+            case 'ok':
+              return null;
+            case 'build-error':
+              const errorMessage = state.message[0];
+              const richErrorMessage = `
+                    Error message: ${errorMessage.errorMessage}
+                    File ${errorMessage.location.file} Line ${errorMessage.location.line}: ${errorMessage.location.text}
+                    ${errorMessage.location.suggestion ? `Suggestion: ${errorMessage.location.suggestion}` : ''}
+              `.trim();
+              return (
+                <ErrorModal
+                  title="Build Error"
+                  message={richErrorMessage}
+                />
+              );
+            default:
+              return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+                    <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
+                    <p className="text-gray-700">Something bad is happening.</p>
+                  </div>
+                </div>
+              );
+          }
+        })()}
         <RootServerContext.Provider value={serverContext}>
           <History universalContext={getSerializableContext(serverContext)}>
             {children}

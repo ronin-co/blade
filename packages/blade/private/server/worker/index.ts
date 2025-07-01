@@ -26,6 +26,7 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', async (c, next) => {
+
   const requestURL = new URL(c.req.url);
 
   // - `requestOrigin` might be `https://ronin.co`
@@ -111,6 +112,7 @@ app.post('/api', async (c) => {
       queries: [],
       metadata: {},
       jwts: {},
+      devState: undefined
     },
     currentLeafIndex: null,
   };
@@ -191,10 +193,14 @@ app.post('*', async (c) => {
     }
   }
 
+  const incoming = c.req.raw as any;
+  const state = incoming.__state;
+
   const existingCollected: Collected = {
     queries: [],
     metadata: {},
     jwts: {},
+    devState: state
   };
 
   if (options?.queries) {

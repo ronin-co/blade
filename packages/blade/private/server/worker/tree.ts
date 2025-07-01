@@ -41,6 +41,7 @@ import type {
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
+import type { State } from '@/private/universal/types/state';
 
 const pages: PageList = {
   ...pageList,
@@ -210,6 +211,7 @@ export interface Collected {
       algo: Parameters<typeof verify>[2];
     }
   >;
+  devState?: State
 }
 
 interface CollectedRunnable extends Pick<Collected, 'queries' | 'jwts'> {}

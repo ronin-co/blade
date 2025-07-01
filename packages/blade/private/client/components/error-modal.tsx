@@ -1,9 +1,11 @@
-import { useErrorModal } from '@/private/client/hooks/error-modal';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 
-const ErrorModal = () => {
-  const { title, message, hideModal } = useErrorModal();
+interface ErrorModalProps {
+  title: string;
+  message: string;
+}
 
+const ErrorModal = ({ title, message }: ErrorModalProps) => {
   return (
     <div
       style={{
@@ -18,8 +20,7 @@ const ErrorModal = () => {
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 9999,
-      }}
-      onClick={hideModal}>
+      }}>
       <div
         style={{
           position: 'relative',
@@ -67,21 +68,7 @@ const ErrorModal = () => {
               display: 'flex',
               gap: '1rem',
               justifyContent: 'center',
-            }}>
-            <button
-              style={{
-                backgroundColor: '#333',
-                color: '#fff',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                padding: '0.5rem 1rem',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-              }}
-              onClick={hideModal}>
-              Close
-            </button>
-          </div>
+            }}></div>
         </div>
       </div>
 
