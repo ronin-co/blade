@@ -54,10 +54,37 @@ Blade application as close to your users as possible.
 To get started, create a Cloudflare account, create a new Workers project, select the
 Git repository that contains your Blade application, and follow the instructions on screen.
 
-Blade will automatically detect Cloudflare based on the presence of the `WORKERS_CI`
-environment variable (which Cloudflare provides by default) and adjust its build output
-accordingly. You can also provide the environment variable yourself if you want to test
-the build output locally: `WORKERS_CI=1 blade build`.
+By default, Blade provides a zero-configuration deployment experience for Cloudflare Workers,
+so no additional setup is required, and Blade will automatically detect the Cloudflare
+environment (via the `WORKERS_CI` environment variable) to adjust its build output accordingly.
+
+However, it is recommended to create a `wrangler.jsonc` configuration file and commit it 
+to your repository. This ensures your deployment settings are explicit, versioned, and 
+easily reproducible across environments and team members. You can also use this file to 
+customize your deployment as needed.
+
+To test the build output locally, you can set the environment variable yourself:
+```bash
+WORKERS_CI=1 blade build
+```
+Or you can create the `wrangler.jsonc` file by hand that looks similar to the following:
+
+```json
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "YOUR_PROJECT_NAME",
+	"main": ".blade/edge-worker.js",
+	"compatibility_date": "2025-06-30",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".blade/",
+	},
+	"build": {
+		"command": "npm run build"
+	}
+}
+```
 
 ### Netlify
 
