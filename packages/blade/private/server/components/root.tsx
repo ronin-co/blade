@@ -198,11 +198,11 @@ const Root = ({ children, serverContext }: RootProps) => {
               return null;
             case 'build-error':
               const errorMessage = state.message[0];
-              const richErrorMessage = `
-                    Error message: ${errorMessage.errorMessage}
-                    File ${errorMessage.location.file} Line ${errorMessage.location.line}: ${errorMessage.location.text}
-                    ${errorMessage.location.suggestion ? `Suggestion: ${errorMessage.location.suggestion}` : ''}
-              `.trim();
+              const richErrorMessage = [
+                `Error message: ${errorMessage.errorMessage}`,
+                `File ${errorMessage.location.file} Line ${errorMessage.location.line}: ${errorMessage.location.text}`,
+                errorMessage.location.suggestion ? `Suggestion: ${errorMessage.location.suggestion}` : ''
+              ].filter(Boolean).join('\n');
               return (
                 <ErrorModal
                   title="Build Error"
