@@ -139,7 +139,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
             name: currentDirectoryName,
             main: '.blade/edge-worker.js',
             compatibility_date: '2025-06-02',
-            compatibility_flags: ['nodejs_compat'],
+            compatibility_flags: [],
             assets: {
               binding: 'ASSETS',
               directory: '.blade/',
