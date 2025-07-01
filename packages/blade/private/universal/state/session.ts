@@ -8,7 +8,7 @@ import type { State } from '@/private/universal/types/state';
  *    + Cannot be used inside isolated worker modules.
  *    + Used to persist build errors and misc state across rebuilds.
  */
- 
+
 /**
  * Unique symbol to store singleton on globalThis.
  */

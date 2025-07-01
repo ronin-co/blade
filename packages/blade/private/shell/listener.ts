@@ -12,7 +12,7 @@ import {
   publicDirectory,
 } from '@/private/shell/constants';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
-import { sessionState } from '../universal/state/session';
+import { sessionState } from '@/private/universal/state/session';
 
 export interface ServerState {
   module?: Promise<{ default: Hono }>;
@@ -71,7 +71,7 @@ export const serve = async (
      * between the shell and the evaluated worker module.
      * Used exclusively during development to forward build error state
      * into the SSR rendering pipeline.
-    */
+     */
     const devState = sessionState.get();
     (c.req.raw as any).__state = devState;
 

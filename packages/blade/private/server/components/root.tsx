@@ -48,7 +48,6 @@ interface RootProps {
 const Root = ({ children, serverContext }: RootProps) => {
   const { metadata, devState: state } = serverContext.collected;
 
-
   const currentLocation = usePrivateLocation();
 
   const flatMetadata = Object.entries(
@@ -212,9 +211,7 @@ const Root = ({ children, serverContext }: RootProps) => {
                 />
               );
             default:
-              return (
-                null
-              );
+              return null;
           }
         })()}
         <RootServerContext.Provider value={serverContext}>

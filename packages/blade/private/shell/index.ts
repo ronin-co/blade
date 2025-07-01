@@ -211,7 +211,7 @@ if (isBuilding || isDeveloping) {
 
               // Update the build status to session state
               sessionState.set({ type: 'ok', message: null });
-              
+
               // Revalidate the client.
               if (server.channel) server.channel.send('revalidate');
             } else {
@@ -235,7 +235,7 @@ if (isBuilding || isDeveloping) {
                 type: 'build-error',
                 message: mappedError,
               });
-              
+
               // Revalidate the client.
               if (server.channel) server.channel.send('revalidate');
             }

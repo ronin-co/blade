@@ -211,7 +211,7 @@ export interface Collected {
       algo: Parameters<typeof verify>[2];
     }
   >;
-  devState?: State
+  devState?: State;
 }
 
 interface CollectedRunnable extends Pick<Collected, 'queries' | 'jwts'> {}

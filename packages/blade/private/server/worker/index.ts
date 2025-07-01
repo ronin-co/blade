@@ -27,7 +27,6 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', async (c, next) => {
-
   const requestURL = new URL(c.req.url);
 
   // - `requestOrigin` might be `https://ronin.co`
@@ -113,7 +112,7 @@ app.post('/api', async (c) => {
       queries: [],
       metadata: {},
       jwts: {},
-      devState: undefined
+      devState: undefined,
     },
     currentLeafIndex: null,
   };
@@ -198,11 +197,11 @@ app.post('*', async (c) => {
    * Reads the injected dev-only state from the raw request.
    *
    * This value is set by the shell before passing the request to the evaluated worker.
-   * It's the only bridge for transferring in-memory state like build errors into the 
+   * It's the only bridge for transferring in-memory state like build errors into the
    * worker’s runtime, especially useful during SSR in development.
    */
-  let state = undefined
-  if (IS_CLIENT_DEV){
+  let state = undefined;
+  if (IS_CLIENT_DEV) {
     const incoming = c.req.raw as any;
     state = incoming.__state;
   }
@@ -211,7 +210,7 @@ app.post('*', async (c) => {
     queries: [],
     metadata: {},
     jwts: {},
-    devState: state
+    devState: state,
   };
 
   if (options?.queries) {
