@@ -16,6 +16,7 @@ import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
+import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 
 type Bindings = {
   ASSETS: {
@@ -193,8 +194,18 @@ app.post('*', async (c) => {
     }
   }
 
-  const incoming = c.req.raw as any;
-  const state = incoming.__state;
+  /**
+   * Reads the injected dev-only state from the raw request.
+   *
+   * This value is set by the shell before passing the request to the evaluated worker.
+   * It's the only bridge for transferring in-memory state like build errors into the 
+   * worker’s runtime, especially useful during SSR in development.
+   */
+  let state = undefined
+  if (IS_CLIENT_DEV){
+    const incoming = c.req.raw as any;
+    state = incoming.__state;
+  }
 
   const existingCollected: Collected = {
     queries: [],

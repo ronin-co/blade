@@ -213,12 +213,7 @@ const Root = ({ children, serverContext }: RootProps) => {
               );
             default:
               return (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                  <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                    <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
-                    <p className="text-gray-700">Something bad is happening.</p>
-                  </div>
-                </div>
+                null
               );
           }
         })()}
