@@ -11,7 +11,6 @@ import { usePrivateLocation } from '@/private/universal/hooks';
 import type { Asset } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
 import { ErrorModal } from '@/private/client/components/error-modal';
-// import { ErrorModal } from '@/private/client/components/error-modal';
 
 const metadataNames: Record<string, string> = {
   colorScheme: 'color-scheme',
