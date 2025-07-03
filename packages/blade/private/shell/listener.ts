@@ -3,7 +3,6 @@ import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import chalk from 'chalk';
 import { Hono } from 'hono';
-import type { SSEStreamingApi } from 'hono/streaming';
 
 import {
   loggingPrefixes,
@@ -12,15 +11,7 @@ import {
 } from '@/private/shell/constants';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
-export interface ServerState {
-  module?: Promise<{ default: Hono; channel: SSEStreamingApi }>;
-}
-
-export const serve = async (
-  serverState: ServerState,
-  environment: 'development' | 'production',
-  port: number,
-) => {
+export const serve = async (environment: 'development' | 'production', port: number) => {
   if (environment === 'production') {
     // Prevent the process from exiting when an exception occurs.
     process.on('uncaughtException', (error) => {
@@ -51,8 +42,8 @@ export const serve = async (
   );
 
   app.all('*', async (c) => {
-    const worker = await serverState.module;
-    return worker!.default.fetch(c.req.raw);
+    const worker = await globalThis.SHELL_SERVER_STATE;
+    return worker.default.fetch(c.req.raw);
   });
 
   const server = serveApp({ fetch: app.fetch, port });

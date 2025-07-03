@@ -170,22 +170,15 @@ app.post('/api', async (c) => {
 if (projectRouter) app.route('/', projectRouter);
 
 let id = 0;
-let channel: SSEStreamingApi;
+const channels = new Map<string, SSEStreamingApi>();
 
 // Handle the initial render (first byte).
 app.get('*', (c) => {
   if (c.req.header('accept') === 'text/event-stream') {
     const url = new URL(c.req.url);
-    const bundleId = url.searchParams.get('bundleId') as string;
-    url.searchParams.delete('bundleId');
-
-    c.req.raw.headers.set('X-Client-Bundle-Id', bundleId);
-
-    console.log('DAVID');
 
     return streamSSE(c, async (stream) => {
-      console.log('MARK');
-      channel = stream;
+      channels.set(url.pathname + url.search, stream);
 
       await stream.writeSSE({
         data: 'testing',
@@ -284,4 +277,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export { app, channel };
+export { app, channels };

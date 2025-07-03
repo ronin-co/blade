@@ -17,7 +17,7 @@ import {
   publicDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
-import { type ServerState, serve } from '@/private/shell/listener';
+import { serve } from '@/private/shell/listener';
 import {
   getClientReferenceLoader,
   getFileListLoader,
@@ -112,8 +112,6 @@ if (await exists(tsConfig)) {
 const environment = isBuilding || isServing ? 'production' : 'development';
 const provider = getProvider();
 
-const server: ServerState = {};
-
 if (isBuilding || isDeveloping) {
   await cleanUp();
 
@@ -205,11 +203,9 @@ if (isBuilding || isDeveloping) {
               // Start evaluating the server module immediately. We're not using `await`
               // to ensure that the client revalidation can begin before the module has
               // been evaluated entirely.
-              if (server.module) {
-                const currentModule = await server.module;
-                await currentModule.channel.close();
-              }
-              server.module = import(path.join(outputDirectory, moduleName));
+              globalThis.SHELL_SERVER_STATE = import(
+                path.join(outputDirectory, moduleName)
+              );
             }
           });
         },
@@ -296,8 +292,8 @@ if (isDeveloping || isServing) {
 
   // Initialize the edge worker. Using `await` here is essential, since we don't want the
   // first request in production to get slown down by the evaluation of the module.
-  server.module = await import(moduleName);
+  globalThis.SHELL_SERVER_STATE = await import(moduleName);
 
   // Listen on a port and serve the edge worker.
-  await serve(server, environment, port);
+  await serve(environment, port);
 }
