@@ -42,7 +42,7 @@ export const serve = async (environment: 'development' | 'production', port: num
   );
 
   app.all('*', async (c) => {
-    const worker = await globalThis.SHELL_SERVER_STATE;
+    const worker = await globalThis.SHELL_STATE;
     return worker.default.fetch(c.req.raw);
   });
 

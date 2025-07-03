@@ -203,9 +203,7 @@ if (isBuilding || isDeveloping) {
               // Start evaluating the server module immediately. We're not using `await`
               // to ensure that the client revalidation can begin before the module has
               // been evaluated entirely.
-              globalThis.SHELL_SERVER_STATE = import(
-                path.join(outputDirectory, moduleName)
-              );
+              globalThis.SHELL_STATE = import(path.join(outputDirectory, moduleName));
             }
           });
         },
@@ -292,7 +290,7 @@ if (isDeveloping || isServing) {
 
   // Initialize the edge worker. Using `await` here is essential, since we don't want the
   // first request in production to get slown down by the evaluation of the module.
-  globalThis.SHELL_SERVER_STATE = await import(moduleName);
+  globalThis.SHELL_STATE = await import(moduleName);
 
   // Listen on a port and serve the edge worker.
   await serve(environment, port);
