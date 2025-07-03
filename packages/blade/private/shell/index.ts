@@ -205,6 +205,10 @@ if (isBuilding || isDeveloping) {
               // Start evaluating the server module immediately. We're not using `await`
               // to ensure that the client revalidation can begin before the module has
               // been evaluated entirely.
+              if (server.module) {
+                const currentModule = await server.module;
+                await currentModule.channel.close();
+              }
               server.module = import(path.join(outputDirectory, moduleName));
             }
           });

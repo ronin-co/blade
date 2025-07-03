@@ -1,6 +1,6 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { getCookie } from 'hono/cookie';
-import { streamSSE } from 'hono/streaming';
+import { type SSEStreamingApi, streamSSE } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
@@ -170,21 +170,28 @@ app.post('/api', async (c) => {
 if (projectRouter) app.route('/', projectRouter);
 
 let id = 0;
+let channel: SSEStreamingApi;
 
 // Handle the initial render (first byte).
 app.get('*', (c) => {
   if (c.req.header('accept') === 'text/event-stream') {
+    const url = new URL(c.req.url);
+    const bundleId = url.searchParams.get('bundleId') as string;
+    url.searchParams.delete('bundleId');
+
+    c.req.raw.headers.set('X-Client-Bundle-Id', bundleId);
+
+    console.log('DAVID');
+
     return streamSSE(c, async (stream) => {
-      while (true) {
-        const response = await renderReactTree(new URL(c.req.url), c, false);
-        // stream.pipe(response.body!);
-        await stream.writeSSE({
-          data: response.text(),
-          event: 'time-update',
-          id: String(id++),
-        });
-        await stream.sleep(500);
-      }
+      console.log('MARK');
+      channel = stream;
+
+      await stream.writeSSE({
+        data: 'testing',
+        event: 'time-update',
+        id: String(id++),
+      });
     });
   }
 
@@ -277,4 +284,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export default app;
+export { app, channel };

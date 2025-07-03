@@ -3,6 +3,7 @@ import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import chalk from 'chalk';
 import { Hono } from 'hono';
+import type { SSEStreamingApi } from 'hono/streaming';
 
 import {
   loggingPrefixes,
@@ -12,7 +13,7 @@ import {
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export interface ServerState {
-  module?: Promise<{ default: Hono }>;
+  module?: Promise<{ default: Hono; channel: SSEStreamingApi }>;
 }
 
 export const serve = async (

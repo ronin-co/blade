@@ -91,6 +91,9 @@ const fetchPage = async (
     };
   }
 
+  // Do not render
+  return null;
+
   // Otherwise, if the server did provide a new bundle, that means the client-side
   // instance of React is outdated and needs to be replaced with a new one.
 
