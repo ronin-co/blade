@@ -3,7 +3,6 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { RootClientContext } from '@/private/client/context';
 import { usePageTransition, useRevalidation } from '@/private/client/hooks';
 import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
-import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
@@ -53,40 +52,6 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     window.addEventListener('online', wentOnline);
     return () => window.removeEventListener('online', wentOnline);
   }, [revalidate]);
-
-  // Revalidate the current page whenever the code of the server bundle gets updated
-  // during development. This happens whenever client or server components are changed.
-  useEffect(() => {
-    if (!IS_CLIENT_DEV) return;
-
-    // Here we default to the origin available in the browser, because BLADE might
-    // locally sit behind a proxy that terminates TLS, in which case the origin protocol
-    // would be `http` if we make use of the location provided by `usePrivateLocation`,
-    // since that comes from the server.
-    const url = new URL('/_blade/reload', window.location.origin);
-
-    // This also replaces `https` with `wss` automatically.
-    url.protocol = url.protocol.replace('http', 'ws');
-
-    let ws: WebSocket;
-
-    const connect = () => {
-      // Close the old connection if there is one available.
-      if (ws) ws.close();
-
-      // Establish a new connection.
-      ws = new WebSocket(url.href);
-
-      // If the connection was closed unexpectedly, try to reconnect.
-      ws.addEventListener('error', () => connect(), { once: true });
-
-      // Trigger a revalidation for every message.
-      ws.addEventListener('message', () => revalidate('files updated'), { once: true });
-    };
-
-    connect();
-    return () => ws.close();
-  }, []);
 
   // Update the records on the current page while looking at the window. The update
   // should be performed every 5 seconds, but to ensure that there are never two updates

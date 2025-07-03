@@ -1,10 +1,8 @@
 import path from 'node:path';
 import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { createNodeWebSocket } from '@hono/node-ws';
 import chalk from 'chalk';
 import { Hono } from 'hono';
-import type { WSContext } from 'hono/ws';
 
 import {
   loggingPrefixes,
@@ -15,7 +13,6 @@ import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export interface ServerState {
   module?: Promise<{ default: Hono }>;
-  channel?: WSContext;
 }
 
 export const serve = async (
@@ -36,14 +33,6 @@ export const serve = async (
   }
 
   const app = new Hono();
-  const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
-
-  app.get(
-    '/_blade/reload',
-    upgradeWebSocket(() => ({
-      onOpen: (_event, channel) => (serverState.channel = channel),
-    })),
-  );
 
   const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
   app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
@@ -66,7 +55,6 @@ export const serve = async (
   });
 
   const server = serveApp({ fetch: app.fetch, port });
-  injectWebSocket(server);
 
   process.on('SIGINT', () => {
     server.close();

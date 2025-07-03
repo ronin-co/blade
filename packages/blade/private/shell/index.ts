@@ -206,9 +206,6 @@ if (isBuilding || isDeveloping) {
               // to ensure that the client revalidation can begin before the module has
               // been evaluated entirely.
               server.module = import(path.join(outputDirectory, moduleName));
-
-              // Revalidate the client.
-              if (server.channel) server.channel.send('revalidate');
             }
           });
         },
