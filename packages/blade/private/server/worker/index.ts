@@ -1,5 +1,6 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { getCookie } from 'hono/cookie';
+import { stream, streamSSE, streamText } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
@@ -169,7 +170,20 @@ app.post('/api', async (c) => {
 if (projectRouter) app.route('/', projectRouter);
 
 // Handle the initial render (first byte).
-app.get('*', (c) => renderReactTree(new URL(c.req.url), c, true));
+app.get('*', (c) => {
+  if (c.req.header('accept') === 'text/event-stream') {
+    return stream(c, async (stream) => {
+      // Write a process to be executed when aborted.
+      stream.onAbort(() => {
+        console.log('Aborted!');
+      });
+      // Write a Uint8Array.
+      await stream.write(new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]));
+    });
+  }
+
+  return renderReactTree(new URL(c.req.url), c, true);
+});
 
 // Handle client side navigation.
 app.post('*', async (c) => {

@@ -3,6 +3,7 @@ import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 're
 import { RootClientContext } from '@/private/client/context';
 import { usePageTransition, useRevalidation } from '@/private/client/hooks';
 import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
+import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
@@ -52,6 +53,24 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     window.addEventListener('online', wentOnline);
     return () => window.removeEventListener('online', wentOnline);
   }, [revalidate]);
+
+  // Apply page updates triggered by the server.
+  useEffect(() => {
+    if (!IS_CLIENT_DEV) return;
+
+    // Here we default to the origin available in the browser, because BLADE might
+    // locally sit behind a proxy that terminates TLS, in which case the origin protocol
+    // would be `http` if we make use of the location provided by `usePrivateLocation`,
+    // since that comes from the server.
+    const eventSource = new EventSource(window.location.href);
+
+    const handleMessage: EventListener = (message) => {
+      console.log(message);
+    };
+
+    eventSource.addEventListener('message', handleMessage);
+    return () => eventSource.removeEventListener('message', handleMessage);
+  }, []);
 
   // Update the records on the current page while looking at the window. The update
   // should be performed every 5 seconds, but to ensure that there are never two updates
