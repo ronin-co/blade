@@ -176,9 +176,10 @@ app.get('*', (c) => {
   if (c.req.header('accept') === 'text/event-stream') {
     return streamSSE(c, async (stream) => {
       while (true) {
-        const message = `It is ${new Date().toISOString()}`;
+        const response = await renderReactTree(new URL(c.req.url), c, false);
+        // stream.pipe(response.body!);
         await stream.writeSSE({
-          data: message,
+          data: response.text(),
           event: 'time-update',
           id: String(id++),
         });

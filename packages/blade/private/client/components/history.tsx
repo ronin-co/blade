@@ -65,11 +65,12 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     const eventSource = new EventSource(window.location.href);
 
     const handleMessage: EventListener = (message) => {
-      console.log(message);
+      // @ts-expect-error No error
+      console.log(message.data);
     };
 
-    eventSource.addEventListener('message', handleMessage);
-    return () => eventSource.removeEventListener('message', handleMessage);
+    eventSource.addEventListener('time-update', handleMessage);
+    return () => eventSource.removeEventListener('time-update', handleMessage);
   }, []);
 
   // Update the records on the current page while looking at the window. The update
