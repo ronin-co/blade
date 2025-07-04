@@ -66,7 +66,7 @@ export const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
-    'X-Session-Id': window['BLADE_SESSION'],
+    'X-Session-Id': window['BLADE_SESSION'] as string,
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });
@@ -112,6 +112,7 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
   if (!root) throw new Error('Missing React root');
   root.unmount();
   window['BLADE_ROOT'] = null;
+  window['BLADE_SESSION'] = null;
 
   const parser = new DOMParser();
   const newDocument = parser.parseFromString(newMarkup, 'text/html');

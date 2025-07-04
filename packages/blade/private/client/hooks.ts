@@ -12,7 +12,7 @@ import {
 import { RootClientContext } from '@/private/client/context';
 import type { RevalidationReason } from '@/private/client/types/util';
 import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
-import { type FetchedPage, fetchPage } from '@/private/client/utils/fetch-page';
+import { type FetchedPage, fetchPage } from '@/private/client/utils/page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { usePopulatePathname } from '@/public/universal/hooks';

@@ -5,7 +5,7 @@ import { RootClientContext } from '@/private/client/context';
 import { usePageTransition, useRevalidation } from '@/private/client/hooks';
 import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
 import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
-import { mountNewBundle } from '@/private/client/utils/fetch-page';
+import { mountNewBundle } from '@/private/client/utils/page';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
@@ -68,7 +68,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
 
     // Inform the server about the page that is currently being viewed. Whenever the
     // client retrieves a new page, the session will be updated on the server.
-    url.searchParams.set('id', window['BLADE_SESSION']);
+    url.searchParams.set('id', window['BLADE_SESSION'] as string);
     url.searchParams.set('url', window.location.pathname + window.location.search);
     url.searchParams.set('bundleId', bundleId);
 
