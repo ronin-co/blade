@@ -1,11 +1,8 @@
-import { bundleId } from 'build-meta';
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { RootClientContext } from '@/private/client/context';
 import { usePageTransition, useRevalidation } from '@/private/client/hooks';
 import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
-import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
-import { mountNewBundle } from '@/private/client/utils/page';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
@@ -55,40 +52,6 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     window.addEventListener('online', wentOnline);
     return () => window.removeEventListener('online', wentOnline);
   }, [revalidate]);
-
-  // Apply page updates triggered by the server.
-  useEffect(() => {
-    if (!IS_CLIENT_DEV) return;
-
-    // Here we default to the origin available in the browser, because BLADE might
-    // locally sit behind a proxy that terminates TLS, in which case the origin protocol
-    // would be `http` if we make use of the location provided by `usePrivateLocation`,
-    // since that comes from the server.
-    const url = new URL('/_blade/session', window.location.origin);
-
-    // Inform the server about the page that is currently being viewed. Whenever the
-    // client retrieves a new page, the session will be updated on the server.
-    url.searchParams.set('id', window['BLADE_SESSION'] as string);
-    url.searchParams.set('url', window.location.pathname + window.location.search);
-    url.searchParams.set('bundleId', bundleId);
-
-    // Open the event stream.
-    const eventSource = new EventSource(url, { withCredentials: true });
-
-    const handleMessage = (message: MessageEvent) => {
-      const [_id, serverBundleId] = message.lastEventId.split('-');
-
-      if (message.type === 'update-bundle') {
-        mountNewBundle(serverBundleId, message.data);
-        return;
-      }
-    };
-
-    eventSource.addEventListener('update', handleMessage);
-    eventSource.addEventListener('update-bundle', handleMessage);
-
-    return () => eventSource.close();
-  }, []);
 
   // Update the records on the current page while looking at the window. The update
   // should be performed every 5 seconds, but to ensure that there are never two updates
