@@ -3,24 +3,27 @@ import type { FormattedResults } from 'ronin/types';
 
 import type { UniversalContext } from '@/private/universal/context';
 
+/**
+ * A browser session is synonymous to an open browser tab. Every new tab that gets opened
+ * results in a new browser session.
+ *
+ * The browser session contains server-side state about the page that was last visited,
+ * which is defined through `url` and `headers`. In other words, the currently active
+ * page of the browser session is defined like this.
+ *
+ * Blade uses this information to push updates from the server to the client.
+ */
 export interface BrowserSession {
-  /**
-   * A unique identifier of a particular browser session. A browser session is synonymous
-   * to a browser tab that is open. Every new tab that gets opened, even if it is for the
-   * same page, results in a new browser session.
-   *
-   * The browser session persists, even if the page changes. If the `url` (the page) or the
-   * `headers` changes, the properties will simply be updated.
-   */
+  /** A unique identifier of the current browser session. */
   id: string;
-
-  /**
-   * The meta information of a particular browser session. It includes the meta information
-   * of the last request that the client made to the server, which is used internally to
-   * construct pages that are then pushed to the client.
-   */
+  /** The URL of the last client-to-server request. */
   url: URL;
+  /** The headers of the last client-to-server request. */
   headers: Headers;
+  /**
+   * An always-open connection between the server and the client, through which updates
+   * can be pushed.
+   */
   stream: SSEStreamingApi;
 }
 
