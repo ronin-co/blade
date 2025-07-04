@@ -755,9 +755,6 @@ const renderReactTree = async (
     session.headers = request.headers;
   }
 
-  // The ID of the main bundle currently available on the server.
-  headers.set('X-Server-Bundle-Id', bundleId);
-
   const body = await renderShell(initial, renderingLeaves, serverContext);
 
   if (initial) {
@@ -767,6 +764,8 @@ const renderReactTree = async (
   } else {
     headers.set('Content-Type', 'application/json');
     headers.set('X-Update-Time', serverContext.lastUpdate.toString());
+    // The ID of the main bundle currently available on the server.
+    headers.set('X-Server-Bundle-Id', bundleId);
   }
 
   return new Response(body, { headers });

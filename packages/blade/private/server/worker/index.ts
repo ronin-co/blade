@@ -184,7 +184,7 @@ const flushUpdate = async (
   });
 
   await stream.writeSSE({
-    id: String(id++),
+    id: `${String(id++)}-${bundleId}`,
     event: initial ? 'update-bundle' : 'update',
     data: page.text(),
   });

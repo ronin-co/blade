@@ -78,13 +78,13 @@ export const fetchPage = async (
   const serverBundleId = response.headers.get('X-Server-Bundle-Id');
   if (!response.body) throw new Error('Missing response body on client.');
 
+  const updateTime = response.headers.get('X-Update-Time');
+  if (!updateTime) throw new Error('Missing response headers on client.');
+
   // If the bundles used on the client are the same as the ones available on the server,
   // the server will not provide a new bundle, which means we can just proceed with
   // rendering the page using the existing React instance.
   if (bundleId === serverBundleId) {
-    const updateTime = response.headers.get('X-Update-Time');
-    if (!updateTime) throw new Error('Missing response headers on client.');
-
     return {
       body: await createFromReadableStream(response.body),
       time: Number.parseInt(updateTime),

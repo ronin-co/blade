@@ -5,6 +5,7 @@ import { RootClientContext } from '@/private/client/context';
 import { usePageTransition, useRevalidation } from '@/private/client/hooks';
 import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
 import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
+import { mountNewBundle } from '@/private/client/utils/fetch-page';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
@@ -75,7 +76,12 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     const eventSource = new EventSource(url, { withCredentials: true });
 
     const handleMessage = (message: MessageEvent) => {
-      console.log(message.type);
+      const [_id, serverBundleId] = message.lastEventId.split('-');
+
+      if (message.type === 'update-bundle') {
+        mountNewBundle(serverBundleId, message.data);
+        return;
+      }
     };
 
     eventSource.addEventListener('update', handleMessage);
