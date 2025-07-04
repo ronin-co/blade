@@ -191,12 +191,17 @@ export const composeEnvironmentVariables = (options: {
   // be logged to the terminal.
   defined['__BLADE_DEBUG_LEVEL'] = isLoggingQueries ? 'verbose' : 'error';
 
-  const mapped = Object.entries(defined).map(([key, value]) => {
-    const stringValue = JSON.stringify(value);
-    return [`import.meta.env.${key}`, stringValue];
-  });
+  const mapped = Object.fromEntries(
+    Object.entries(defined).map(([key, value]) => {
+      const stringValue = JSON.stringify(value);
+      return [`import.meta.env.${key}`, stringValue];
+    }),
+  );
 
-  return Object.fromEntries(mapped);
+  // This is the only `process.env` environment variable that we want to replace.
+  mapped['process.env.NODE_ENV'] = JSON.stringify(environment);
+
+  return mapped;
 };
 
 export const logSpinner = (text: string) => {
