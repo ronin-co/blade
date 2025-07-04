@@ -1,8 +1,11 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { bundleId } from 'build-meta';
-import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
+import {
+  type CookieSerializeOptions,
+  parse as parseCookies,
+  serialize as serializeCookie,
+} from 'cookie';
 import getValue from 'get-value';
-import { getCookie } from 'hono/cookie';
 import { verify } from 'hono/jwt';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -462,7 +465,9 @@ const renderReactTree = async (
     forceNativeError: options.forceNativeError,
   });
 
-  const incomingCookies = structuredClone(getCookie(c));
+  const incomingCookies = structuredClone(
+    parseCookies(request.headers.get('cookie') || ''),
+  );
 
   if (entry.errorPage) {
     // When an error page is rendered, the address bar should still show the URL of the
@@ -741,7 +746,7 @@ const renderReactTree = async (
   }
 
   // The ID of the main bundle currently being used on the client.
-  const clientBundle = c.req.raw.headers.get('X-Client-Bundle-Id');
+  const clientBundle = request.headers.get('X-Client-Bundle-Id');
 
   // The ID of the main bundle currently available on the server.
   const serverBundle = bundleId;
