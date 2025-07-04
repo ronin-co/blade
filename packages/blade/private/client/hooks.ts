@@ -1,6 +1,7 @@
 import Queue from 'p-queue';
 import {
   type MutableRefObject,
+  type ReactNode,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -12,7 +13,7 @@ import {
 import { RootClientContext } from '@/private/client/context';
 import type { RevalidationReason } from '@/private/client/types/util';
 import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
-import { type FetchedPage, fetchPage } from '@/private/client/utils/page';
+import { fetchPage } from '@/private/client/utils/page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { usePopulatePathname } from '@/public/universal/hooks';
@@ -28,7 +29,7 @@ export interface RootTransitionOptions extends PageFetchingOptions {
 const pageTransitionQueue = new Queue({ concurrency: 1 });
 
 export const usePageTransition = () => {
-  const cache = useRef(new Map<string, FetchedPage>());
+  const cache = useRef(new Map<string, { body: ReactNode; time: number }>());
 
   const clientContext = useContext(RootClientContext);
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
@@ -153,7 +154,7 @@ export const usePageTransition = () => {
       if (!page) return;
 
       // As soon as possible, store the page in the cache.
-      if (cacheable) cache.current.set(path, page);
+      if (cacheable) cache.current.set(path, { body: page, time: Date.now() });
 
       // By the time we're ready to render the new page, a newer page transition might
       // have already been started. If that's the case, we want to skip the current
@@ -175,7 +176,7 @@ export const usePageTransition = () => {
         if (!page) return;
 
         // Render the page.
-        window['BLADE_ROOT']!.render(page.body);
+        window['BLADE_ROOT']!.render(page);
       });
     };
   };

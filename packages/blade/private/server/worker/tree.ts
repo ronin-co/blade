@@ -763,7 +763,6 @@ const renderReactTree = async (
     headers.set('Document-Policy', 'js-profiling');
   } else {
     headers.set('Content-Type', 'application/json');
-    headers.set('X-Update-Time', serverContext.lastUpdate.toString());
     // The ID of the main bundle currently available on the server.
     headers.set('X-Server-Bundle-Id', bundleId);
   }

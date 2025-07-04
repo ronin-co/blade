@@ -29,11 +29,6 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
   });
 };
 
-export interface FetchedPage {
-  body: ReactNode;
-  time: number;
-}
-
 /**
  * Resolves a new page from the server-side of Blade.
  *
@@ -45,7 +40,7 @@ export interface FetchedPage {
 export const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
-): Promise<FetchedPage | null> => {
+): Promise<ReactNode | null> => {
   let body = null;
 
   if (options && Object.keys(options).length > 0) {
@@ -78,18 +73,10 @@ export const fetchPage = async (
   const serverBundleId = response.headers.get('X-Server-Bundle-Id');
   if (!response.body) throw new Error('Missing response body on client.');
 
-  const updateTime = response.headers.get('X-Update-Time');
-  if (!updateTime) throw new Error('Missing response headers on client.');
-
   // If the bundles used on the client are the same as the ones available on the server,
   // the server will not provide a new bundle, which means we can just proceed with
   // rendering the page using the existing React instance.
-  if (bundleId === serverBundleId) {
-    return {
-      body: await createFromReadableStream(response.body),
-      time: Number.parseInt(updateTime),
-    };
-  }
+  if (bundleId === serverBundleId) return createFromReadableStream(response.body);
 
   // If they are not the same, do not try to render. The client chunks will be updated
   // by the browser session endpoint.
