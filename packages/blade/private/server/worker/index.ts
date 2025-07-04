@@ -7,6 +7,7 @@ import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
+import type { ServerContext } from '@/private/server/context';
 import { getWaitUntil, runQueries, toDashCase } from '@/private/server/utils/data';
 import {
   getRequestGeoLocation,
@@ -98,10 +99,9 @@ app.post('/api', async (c) => {
 
   const waitUntil = getWaitUntil(c);
 
-  const serverContext = {
+  const serverContext: ServerContext = {
     url: c.req.url,
     params: {},
-    lastUpdate: Date.now(),
     userAgent: getRequestUserAgent(c.req.raw),
     geoLocation: getRequestGeoLocation(c.req.raw),
     languages: getRequestLanguages(c.req.raw),

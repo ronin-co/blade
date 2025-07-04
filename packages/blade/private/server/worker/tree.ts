@@ -483,7 +483,6 @@ const renderReactTree = async (
     // made available to the client-side.
     url: addPathSegmentsToURL(url, entry),
     params: entry.params,
-    lastUpdate: Date.now(),
     userAgent: getRequestUserAgent(request),
     geoLocation: getRequestGeoLocation(request),
     languages: getRequestLanguages(request),

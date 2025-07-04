@@ -10,7 +10,7 @@ export type ServerContext<
     string,
     string | Array<string> | null
   >,
-> = Omit<UniversalContext<TParams>, 'collected'> & {
+> = Omit<UniversalContext<TParams>, 'collected' | 'lastUpdate'> & {
   cookies: Record<string, string | null>;
   collected: Collected;
   currentLeafIndex: number | null;

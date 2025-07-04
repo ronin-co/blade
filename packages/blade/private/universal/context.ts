@@ -38,7 +38,7 @@ export const getSerializableContext = (
   url: serverContext.url,
   params: serverContext.params,
   userAgent: serverContext.userAgent,
-  lastUpdate: serverContext.lastUpdate,
+  lastUpdate: Date.now(),
   geoLocation: serverContext.geoLocation,
   addressBarInSync: serverContext.addressBarInSync,
   languages: serverContext.languages,

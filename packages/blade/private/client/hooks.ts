@@ -4,7 +4,6 @@ import {
   type ReactNode,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -34,16 +33,6 @@ export const usePageTransition = () => {
   const clientContext = useContext(RootClientContext);
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
-
-  // We're using a reference to store this number, because we need to keep a single
-  // object in memory that is updated with every render, otherwise the information would
-  // be outdated in the deeply nested callback functions.
-  const lastUpdateTime = useRef<number>(clientContext.lastUpdate);
-
-  // Update the reference as soon as possible (before the browser repaints).
-  useLayoutEffect(() => {
-    lastUpdateTime.current = clientContext.lastUpdate;
-  }, [clientContext.lastUpdate]);
 
   return (
     path: string,
