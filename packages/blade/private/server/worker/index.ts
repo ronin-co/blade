@@ -176,7 +176,9 @@ let id = 0;
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.SERVER_SESSIONS) {
-  console.log(globalThis.SERVER_SESSIONS);
+  for (const [_sessionId, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
+    console.log(sessionDetails);
+  }
 } else {
   globalThis.SERVER_SESSIONS = new Map();
 }
