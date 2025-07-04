@@ -182,7 +182,7 @@ const flushUpdate = async (
   });
 
   await stream.writeSSE({
-    id: `${crypto.randomUUID}-${bundleId}`,
+    id: `${crypto.randomUUID()}-${bundleId}`,
     event: initial ? 'update-bundle' : 'update',
     data: page.text(),
   });
