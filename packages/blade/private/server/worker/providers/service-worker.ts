@@ -1,6 +1,6 @@
 import { handle } from 'hono/service-worker';
 
-import { app } from '../index';
+import app from '../index';
 
 declare const self: ServiceWorkerGlobalScope;
 

@@ -11,7 +11,15 @@ import {
 } from '@/private/shell/constants';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
-export const serve = async (environment: 'development' | 'production', port: number) => {
+export interface ServerState {
+  module?: Promise<{ default: Hono }>;
+}
+
+export const serve = async (
+  serverState: ServerState,
+  environment: 'development' | 'production',
+  port: number,
+) => {
   if (environment === 'production') {
     // Prevent the process from exiting when an exception occurs.
     process.on('uncaughtException', (error) => {
@@ -42,8 +50,8 @@ export const serve = async (environment: 'development' | 'production', port: num
   );
 
   app.all('*', async (c) => {
-    const worker = await globalThis.SHELL_STATE;
-    return worker.default.fetch(c.req.raw);
+    const worker = await serverState.module;
+    return worker!.default.fetch(c.req.raw);
   });
 
   const server = serveApp({ fetch: app.fetch, port });

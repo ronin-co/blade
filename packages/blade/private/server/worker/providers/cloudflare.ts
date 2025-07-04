@@ -1,1 +1,1 @@
-export { app as default } from '../index';
+export { default } from '../index';

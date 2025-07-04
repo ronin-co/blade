@@ -1,1 +1,1 @@
-export { app as default, channels } from '../index';
+export { default } from '../index';

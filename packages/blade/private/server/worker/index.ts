@@ -277,4 +277,4 @@ app.onError((err, c) => {
   return new Response(message, { status });
 });
 
-export { app, channels };
+export default app;
