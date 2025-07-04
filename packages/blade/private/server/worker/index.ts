@@ -206,10 +206,8 @@ app.get('/_blade/session', async (c) => {
   c.header('Cache-Control', 'no-cache');
   c.header('Connection', 'keep-alive');
 
-  // run(stream, cb, onError);
-
   const sessionDetails = {
-    url: new URL(sessionURL),
+    url: new URL(sessionURL, currentURL),
     headers: c.req.raw.headers,
     stream,
   };
