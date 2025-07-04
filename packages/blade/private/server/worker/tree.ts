@@ -2,7 +2,6 @@ import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { bundleId } from 'build-meta';
 import { type CookieSerializeOptions, serialize as serializeCookie } from 'cookie';
 import getValue from 'get-value';
-import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { verify } from 'hono/jwt';
 import React, { type ReactNode } from 'react';
@@ -19,6 +18,7 @@ import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import { SECURITY_HEADERS, VERBOSE_LOGGING } from '@/private/server/utils/constants';
+import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { runQueries } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
 import { getParentDirectories, joinPaths } from '@/private/server/utils/paths';
@@ -40,7 +40,6 @@ import type {
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
-import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 
 const pages: PageList = {
   ...pageList,
@@ -75,17 +74,16 @@ const runQueriesWithTime = async (
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
-  const { requestContext } = serverContext;
   const triggers = prepareTriggers(serverContext, triggerList);
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
 
   const results: Record<string, FormattedResults<unknown>> = await runQueries(
-    requestContext,
     queries,
     triggers,
     'write',
+    serverContext.waitUntil,
   );
 
   const end = Date.now();
@@ -431,9 +429,8 @@ const appendCookieHeader = (
 };
 
 const renderReactTree = async (
-  url: URL,
-  /** The context of the current request. */
-  c: Context,
+  /** The current request. */
+  request: Request,
   /** Whether the initial request is being handled (SSR). */
   initial: boolean,
   /** A list of options for customizing the rendering behavior. */
@@ -447,10 +444,15 @@ const renderReactTree = async (
      * page is not renderable.
      */
     forceNativeError?: boolean;
-  } = {},
+    /** A function for keeping the process alive until a promise has been resolved. */
+    waitUntil: (promise: Promise<unknown>) => void;
+  },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
 ): Promise<Response> => {
+  const { url: stringURL } = request;
+  const url = new URL(stringURL);
+
   // See https://github.com/ronin-co/blade/pull/31 for more details.
   if (!IS_SERVER_DEV) url.protocol = 'https';
 
@@ -468,10 +470,8 @@ const renderReactTree = async (
     options.updateAddressBar = false;
 
     // If an error reason was provided, expose it using query params to the error page.
-    if (options?.errorReason) url.searchParams.set('reason', options.errorReason);
+    if (options.errorReason) url.searchParams.set('reason', options.errorReason);
   }
-
-  const rawRequest = c.req.raw;
 
   const serverContext: ServerContext = {
     // Available to both server and client components, because it can be serialized and
@@ -479,14 +479,13 @@ const renderReactTree = async (
     url: addPathSegmentsToURL(url, entry),
     params: entry.params,
     lastUpdate: Date.now(),
-    userAgent: getRequestUserAgent(rawRequest),
-    geoLocation: getRequestGeoLocation(rawRequest),
-    languages: getRequestLanguages(rawRequest),
+    userAgent: getRequestUserAgent(request),
+    geoLocation: getRequestGeoLocation(request),
+    languages: getRequestLanguages(request),
     addressBarInSync: options.updateAddressBar !== false,
 
     // Only available to server components. Cannot be serialized and made available on
     // the client-side (to client components).
-    requestContext: c,
     cookies: incomingCookies,
     collected: existingCollected || {
       queries: [],
@@ -494,6 +493,7 @@ const renderReactTree = async (
       jwts: {},
     },
     currentLeafIndex: null,
+    waitUntil: options.waitUntil,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
@@ -616,10 +616,11 @@ const renderReactTree = async (
           // the error returned from the backend.
           console.log(`[BLADE] The provided ${type} was not found`);
 
-          return renderReactTree(url, c, initial, {
+          return renderReactTree(new Request(url, request), initial, {
             error: 404,
             errorReason: `${type}-not-found`,
             forceNativeError,
+            waitUntil: options.waitUntil,
           });
         }
 
@@ -645,7 +646,7 @@ const renderReactTree = async (
             // Optionally fall back to a different page if the queries have failed.
             const newPathname = options.errorFallback || url.pathname;
 
-            return renderReactTree(new URL(newPathname, url), c, initial, options, {
+            return renderReactTree(new Request(newPathname, request), initial, options, {
               queries: serverContext.collected.queries.filter(
                 ({ type }) => type === 'write',
               ),
@@ -698,7 +699,7 @@ const renderReactTree = async (
       getValue(writeQueryResults, content),
     );
 
-    return renderReactTree(new URL(newURL), c, initial, options, {
+    return renderReactTree(new Request(newURL, request), initial, options, {
       // We only need to pass the queries to the page, in order to provide the page with
       // the results of the write queries that were executed.
       queries: serverContext.collected.queries,
@@ -724,8 +725,7 @@ const renderReactTree = async (
     }
 
     return renderReactTree(
-      new URL(serverContext.collected.redirect, url),
-      c,
+      new Request(serverContext.collected.redirect, request),
       initial,
       options,
       {

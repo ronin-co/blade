@@ -6,7 +6,7 @@ import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
-import { runQueries, toDashCase } from '@/private/server/utils/data';
+import { getWaitUntil, runQueries, toDashCase } from '@/private/server/utils/data';
 import {
   getRequestGeoLocation,
   getRequestLanguages,
@@ -95,18 +95,17 @@ app.post('/api', async (c) => {
     );
   }
 
-  const rawRequest = c.req.raw;
+  const waitUntil = getWaitUntil(c);
 
   const serverContext = {
     url: c.req.url,
     params: {},
     lastUpdate: Date.now(),
-    userAgent: getRequestUserAgent(rawRequest),
-    geoLocation: getRequestGeoLocation(rawRequest),
-    languages: getRequestLanguages(rawRequest),
+    userAgent: getRequestUserAgent(c.req.raw),
+    geoLocation: getRequestGeoLocation(c.req.raw),
+    languages: getRequestLanguages(c.req.raw),
     addressBarInSync: true,
 
-    requestContext: c,
     cookies: getCookie(c),
     collected: {
       queries: [],
@@ -114,6 +113,7 @@ app.post('/api', async (c) => {
       jwts: {},
     },
     currentLeafIndex: null,
+    waitUntil,
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the
@@ -145,7 +145,9 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = (await runQueries(c, { default: queries }, triggers, 'all'))['default'];
+    results = (await runQueries({ default: queries }, triggers, 'all', waitUntil))[
+      'default'
+    ];
   } catch (err) {
     if (err instanceof TriggerError || err instanceof ClientError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
@@ -226,7 +228,9 @@ app.get('/_blade/session', async (c) => {
 });
 
 // Handle the initial render (first byte).
-app.get('*', (c) => renderReactTree(new URL(c.req.url), c, true));
+app.get('*', (c) => {
+  return renderReactTree(c.req.raw, true, { waitUntil: getWaitUntil(c) });
+});
 
 // Handle client side navigation.
 app.post('*', async (c) => {
@@ -271,7 +275,8 @@ app.post('*', async (c) => {
     }
   }
 
-  return renderReactTree(new URL(c.req.url), c, false, options, existingCollected);
+  const finalOptions = { ...options, waitUntil: getWaitUntil(c) };
+  return renderReactTree(c.req.raw, false, finalOptions, existingCollected);
 });
 
 // Handle errors that occurred during the request lifecycle.
@@ -306,7 +311,7 @@ app.onError((err, c) => {
   }
 
   try {
-    return renderReactTree(new URL(c.req.url), c, true, { error: 500 });
+    return renderReactTree(c.req.raw, true, { error: 500, waitUntil: getWaitUntil(c) });
   } catch (err) {
     console.error(err);
   }
