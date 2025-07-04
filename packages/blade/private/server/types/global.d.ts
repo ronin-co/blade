@@ -1,5 +1,5 @@
-declare module 'server-list' {
-  export const pages: import('./index').PageList;
-  export const triggers: import('./index').TriggersList;
-  export const router: import('hono').Hono | null;
+declare global {
+  var SERVER_SESSIONS: Map<string, import('hono/streaming').SSEStreamingApi>;
 }
+
+export {};

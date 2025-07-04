@@ -170,7 +170,10 @@ app.post('/api', async (c) => {
 if (projectRouter) app.route('/', projectRouter);
 
 let id = 0;
-const channels = new Map<string, SSEStreamingApi>();
+
+if (!globalThis.SERVER_SESSIONS) {
+  globalThis.SERVER_SESSIONS = new Map<string, SSEStreamingApi>();
+}
 
 // Handle the initial render (first byte).
 app.get('*', (c) => {
@@ -178,7 +181,7 @@ app.get('*', (c) => {
     const url = new URL(c.req.url);
 
     return streamSSE(c, async (stream) => {
-      channels.set(url.pathname + url.search, stream);
+      globalThis.SERVER_SESSIONS.set(url.pathname + url.search, stream);
 
       await stream.writeSSE({
         data: 'testing',
