@@ -39,6 +39,8 @@ import {
 } from '@/private/shell/utils/providers';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
+import type BuildError from '@/private/universal/types/build-error';
+import { sessionState } from '@/private/universal/state/session';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -207,6 +209,33 @@ if (isBuilding || isDeveloping) {
               // been evaluated entirely.
               server.module = import(path.join(outputDirectory, moduleName));
 
+              // Update the build status to session state
+              sessionState.set({ type: 'ok', message: null });
+
+              // Revalidate the client.
+              if (server.channel) server.channel.send('revalidate');
+            } else {
+              // Transform esbuild errors into a standardized format for client display
+              const mappedError = result.errors.map((error) => {
+                const location = {
+                  file: error.location?.file,
+                  text: error.location?.lineText,
+                  line: error.location?.line || 0,
+                  suggestion: error.location?.suggestion || '',
+                };
+
+                return {
+                  location,
+                  errorMessage: error.text,
+                } as BuildError;
+              });
+
+              // Update the build status to session state
+              sessionState.set({
+                type: 'build-error',
+                message: mappedError,
+              });
+
               // Revalidate the client.
               if (server.channel) server.channel.send('revalidate');
             }
@@ -262,7 +291,16 @@ if (isBuilding || isDeveloping) {
         const relativePath = path.relative(process.cwd(), eventPath);
 
         spinner = logSpinner(`${eventMessage}, rebuilding: ${relativePath}`);
-        mainBuild.rebuild();
+
+        mainBuild.rebuild().catch(() => {
+          // This catch pervent the server from crashing on build errors.
+
+          spinner.fail();
+          spinner.stop();
+          console.log(
+            `\n${loggingPrefixes.info} ✘ Build failed! Please check the following errors\n`,
+          );
+        });
       });
   } else {
     // Stop the build context.

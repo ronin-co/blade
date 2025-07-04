@@ -12,6 +12,7 @@ import {
   publicDirectory,
 } from '@/private/shell/constants';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import { sessionState } from '@/private/universal/state/session';
 
 export interface ServerState {
   module?: Promise<{ default: Hono }>;
@@ -62,6 +63,18 @@ export const serve = async (
 
   app.all('*', async (c) => {
     const worker = await serverState.module;
+
+    /**
+     * Injects the dev-only error state into the raw request object.
+     *
+     * In the current architecture, this is the only shared pathway I found
+     * between the shell and the evaluated worker module.
+     * Used exclusively during development to forward build error state
+     * into the SSR rendering pipeline.
+     */
+    const devState = sessionState.get();
+    (c.req.raw as any).__state = devState;
+
     return worker!.default.fetch(c.req.raw);
   });
 
