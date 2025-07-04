@@ -98,7 +98,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     if (revalidationInterval.current) return;
 
     revalidationInterval.current = setTimeout(() => {
-      // revalidate('interval');
+      revalidate('interval');
       revalidationInterval.current = null;
     }, 5000);
   }, [revalidate, universalContext.lastUpdate]);
