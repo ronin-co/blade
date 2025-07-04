@@ -1,4 +1,5 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
+import { bundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -173,13 +174,32 @@ if (projectRouter) app.route('/', projectRouter);
 
 let id = 0;
 
+const flushUpdate = async (
+  stream: SSEStreamingApi,
+  request: Request,
+  initial: boolean,
+) => {
+  const page = await renderReactTree(request, initial, {
+    waitUntil: getWaitUntil(),
+  });
+
+  await stream.writeSSE({
+    id: String(id++),
+    event: initial ? 'update-bundle' : 'update',
+    data: page.text(),
+  });
+};
+
 // If this variable is already defined when the file gets evaluated, that means the file
 // was evaluated previously already, so we're dealing with local HMR.
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.SERVER_SESSIONS) {
   for (const [_sessionId, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
-    console.log(sessionDetails);
+    const { url, headers, stream } = sessionDetails;
+    const request = new Request(url, { method: 'GET', headers });
+
+    flushUpdate(stream, request, true);
   }
 } else {
   globalThis.SERVER_SESSIONS = new Map();
@@ -187,11 +207,18 @@ if (globalThis.SERVER_SESSIONS) {
 
 app.get('/_blade/session', async (c) => {
   const currentURL = new URL(c.req.url);
+  const { searchParams } = currentURL;
 
-  const sessionID = currentURL.searchParams.get('id');
-  const sessionURL = currentURL.searchParams.get('url');
+  const sessionID = searchParams.get('id');
+  const sessionURL = searchParams.get('url');
+  const sessionBundle = searchParams.get('bundleId');
 
-  if (c.req.header('accept') !== 'text/event-stream' || !sessionID || !sessionURL) {
+  if (
+    c.req.header('accept') !== 'text/event-stream' ||
+    !sessionID ||
+    !sessionURL ||
+    !sessionBundle
+  ) {
     const body = {
       error: {
         message: 'No endpoint available for the provided query.',
@@ -210,27 +237,26 @@ app.get('/_blade/session', async (c) => {
   c.header('Cache-Control', 'no-cache');
   c.header('Connection', 'keep-alive');
 
-  const sessionDetails = {
-    url: new URL(sessionURL, currentURL),
-    headers: c.req.raw.headers,
-    stream,
-  };
+  const pageURL = new URL(sessionURL, currentURL);
+  const correctBundle = sessionBundle === bundleId;
 
-  globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
+  // If the bundles on the client and server are matching, track the session.
+  if (correctBundle) {
+    const sessionDetails = {
+      url: pageURL,
+      headers: c.req.raw.headers,
+      stream,
+    };
 
-  await stream.writeSSE({
-    data: 'testing',
-    event: 'time-update',
-    id: String(id++),
-  });
+    globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
+  }
 
+  await flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
   return c.newResponse(stream.responseReadable);
 });
 
 // Handle the initial render (first byte).
-app.get('*', (c) => {
-  return renderReactTree(c.req.raw, true, { waitUntil: getWaitUntil(c) });
-});
+app.get('*', (c) => renderReactTree(c.req.raw, true, { waitUntil: getWaitUntil(c) }));
 
 // Handle client side navigation.
 app.post('*', async (c) => {

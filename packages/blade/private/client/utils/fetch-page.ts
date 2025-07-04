@@ -42,7 +42,7 @@ export interface FetchedPage {
  *
  * @returns Either a page or `null` if the server has changed.
  */
-const fetchPage = async (
+export const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
 ): Promise<FetchedPage | null> => {
@@ -66,7 +66,6 @@ const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
-    'X-Client-Bundle-Id': bundleId,
     'X-Session-Id': window['BLADE_SESSION'],
   });
 
@@ -82,7 +81,7 @@ const fetchPage = async (
   // If the bundles used on the client are the same as the ones available on the server,
   // the server will not provide a new bundle, which means we can just proceed with
   // rendering the page using the existing React instance.
-  if (!serverBundleId) {
+  if (bundleId === serverBundleId) {
     const updateTime = response.headers.get('X-Update-Time');
     if (!updateTime) throw new Error('Missing response headers on client.');
 
@@ -92,18 +91,18 @@ const fetchPage = async (
     };
   }
 
-  // Do not render
+  // If they are not the same, do not try to render. The client chunks will be updated
+  // by the browser session endpoint.
   return null;
+};
 
-  // Otherwise, if the server did provide a new bundle, that means the client-side
-  // instance of React is outdated and needs to be replaced with a new one.
-
+export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
   // Download the new markup, CSS, and JS at the same time, but don't execute
   // any of them just yet.
-  const [markup] = await Promise.all([
-    response.text(),
-    loadResource(serverBundleId, 'style'),
-    loadResource(serverBundleId, 'script'),
+  const [newMarkup] = await Promise.all([
+    markup,
+    loadResource(bundleId, 'style'),
+    loadResource(bundleId, 'script'),
   ]);
 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
@@ -115,7 +114,7 @@ const fetchPage = async (
   window['BLADE_ROOT'] = null;
 
   const parser = new DOMParser();
-  const newDocument = parser.parseFromString(markup, 'text/html');
+  const newDocument = parser.parseFromString(newMarkup, 'text/html');
 
   // Replace the inner markup of the document element, since it is not possible to
   // replace the document element itself using DOM APIs.
@@ -143,10 +142,4 @@ const fetchPage = async (
 
   // Print debugging information.
   console.debug('Mounted new client bundles');
-
-  // Since the updated DOM will mount a new instance of React, we don't want to proceed
-  // with rendering the updated page using the old React instance.
-  return null;
 };
-
-export default fetchPage;

@@ -1,3 +1,4 @@
+import { bundleId } from 'build-meta';
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { RootClientContext } from '@/private/client/context';
@@ -68,16 +69,18 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     // client retrieves a new page, the session will be updated on the server.
     url.searchParams.set('id', window['BLADE_SESSION']);
     url.searchParams.set('url', window.location.pathname + window.location.search);
+    url.searchParams.set('bundleId', bundleId);
 
     // Open the event stream.
     const eventSource = new EventSource(url, { withCredentials: true });
 
-    const handleMessage: EventListener = (message) => {
-      // @ts-expect-error No error
-      console.log(message.data);
+    const handleMessage = (message: MessageEvent) => {
+      console.log(message.type);
     };
 
-    eventSource.addEventListener('time-update', handleMessage);
+    eventSource.addEventListener('update', handleMessage);
+    eventSource.addEventListener('update-bundle', handleMessage);
+
     return () => eventSource.close();
   }, []);
 

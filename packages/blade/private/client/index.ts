@@ -3,7 +3,7 @@ import { hydrateRoot } from 'react-dom/client';
 
 import '@/private/client/components/history';
 import '@/public/client/components';
-import fetchPage from '@/private/client/utils/fetch-page';
+import { fetchPage } from '@/private/client/utils/fetch-page';
 
 if (!window['BLADE_SESSION']) {
   window['BLADE_SESSION'] = crypto.randomUUID();

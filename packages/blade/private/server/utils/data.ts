@@ -31,12 +31,14 @@ const MOCK_EXECUTION_CONTEXT: ExecutionContext = {
  *
  * @returns A function that takes a promise and waits for it to resolve.
  */
-export const getWaitUntil = (context: Context): WaitUntil => {
+export const getWaitUntil = (context?: Context): WaitUntil => {
   if (import.meta.env.__BLADE_PROVIDER === 'vercel') return vercelWaitUntil;
 
   // Trying to access `c.executionCtx` on a Node.js runtime, such as in a Vercel
   // function, will throw an error. So we need to add a mockfallback.
   let dataFetcherWaitUntil = MOCK_EXECUTION_CONTEXT.waitUntil;
+  if (!context) return dataFetcherWaitUntil;
+
   try {
     dataFetcherWaitUntil = context.executionCtx.waitUntil?.bind(context.executionCtx);
   } catch (_err) {
