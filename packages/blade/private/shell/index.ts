@@ -287,15 +287,13 @@ if (isBuilding || isDeveloping) {
   }
 }
 
+// When serving the app in production, initialize the edge worker. Using `await` here is
+// essential, since we don't want the first request in production to get slown down by
+// the evaluation of the module.
 if (isServing) {
   const moduleName = path.join(outputDirectory, `${defaultDeploymentProvider}.js`);
-
-  // Initialize the edge worker. Using `await` here is essential, since we don't want the
-  // first request in production to get slown down by the evaluation of the module.
   server.module = await import(moduleName);
 }
 
-if (isDeveloping || isServing) {
-  // Listen on a port and serve the edge worker.
-  await serve(server, environment, port);
-}
+// Listen on a port and serve the edge worker.
+if (isDeveloping || isServing) await serve(server, environment, port);

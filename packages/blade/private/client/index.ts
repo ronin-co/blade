@@ -24,7 +24,7 @@ if (!window['BLADE_ROOT']) {
   const eventSource = new EventSource(url, { withCredentials: true });
 
   const handleMessage = async (message: MessageEvent) => {
-    const [_id, serverBundleId] = message.lastEventId.split('-');
+    const serverBundleId = message.lastEventId.split('-').pop() as string;
 
     if (message.type === 'update') {
       const stream = new Blob([message.data]).stream();

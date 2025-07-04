@@ -172,8 +172,6 @@ app.post('/api', async (c) => {
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
 
-let id = 0;
-
 const flushUpdate = async (
   stream: SSEStreamingApi,
   request: Request,
@@ -184,7 +182,7 @@ const flushUpdate = async (
   });
 
   await stream.writeSSE({
-    id: `${String(id++)}-${bundleId}`,
+    id: `${crypto.randomUUID}-${bundleId}`,
     event: initial ? 'update-bundle' : 'update',
     data: page.text(),
   });
@@ -195,7 +193,7 @@ const flushUpdate = async (
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.SERVER_SESSIONS) {
-  for (const [_sessionId, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
+  for (const [, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
     const { url, headers, stream } = sessionDetails;
     const request = new Request(url, { method: 'GET', headers });
 
