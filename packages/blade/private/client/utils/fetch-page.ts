@@ -67,6 +67,7 @@ const fetchPage = async (
   const headers = new Headers({
     Accept: 'application/json',
     'X-Client-Bundle-Id': bundleId,
+    'X-Session-Id': window['BLADE_SESSION'],
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });

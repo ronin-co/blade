@@ -748,6 +748,16 @@ const renderReactTree = async (
   // The ID of the main bundle currently being used on the client.
   const clientBundle = request.headers.get('X-Client-Bundle-Id');
 
+  // The ID of the browser session.
+  const sessionId = request.headers.get('X-Session-Id');
+  const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
+
+  // Update the server-side state to the new page.
+  if (session) {
+    session.url = url;
+    session.headers = request.headers;
+  }
+
   // The ID of the main bundle currently available on the server.
   const serverBundle = bundleId;
 
