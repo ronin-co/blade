@@ -15,9 +15,7 @@ interface HistoryContentProps {
 const HistoryContent = ({ children }: HistoryContentProps) => {
   const universalContext = useUniversalContext();
   const transitionPage = usePageTransition();
-
   const revalidate = useRevalidation<RevalidationReason>();
-  const revalidationInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { pathname, search } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
@@ -58,12 +56,8 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   // happening at once, we should only begin a new update once the last one has resulted
   // in a successful render.
   useEffect(() => {
-    if (revalidationInterval.current) return;
-
-    revalidationInterval.current = setTimeout(() => {
-      revalidate('interval');
-      revalidationInterval.current = null;
-    }, 5000);
+    const timeout = setTimeout(() => revalidate('interval'), 5000);
+    return () => clearTimeout(timeout);
   }, [revalidate, universalContext.lastUpdate]);
 
   // Ensure that the address bar is updated whenever the page changes, but only if this
