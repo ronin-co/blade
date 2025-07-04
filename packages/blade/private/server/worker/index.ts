@@ -1,6 +1,6 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { getCookie } from 'hono/cookie';
-import { type SSEStreamingApi, streamSSE } from 'hono/streaming';
+import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
@@ -178,27 +178,55 @@ let id = 0;
 if (globalThis.SERVER_SESSIONS) {
   console.log(globalThis.SERVER_SESSIONS);
 } else {
-  globalThis.SERVER_SESSIONS = new Map<string, SSEStreamingApi>();
+  globalThis.SERVER_SESSIONS = new Map();
 }
 
-// Handle the initial render (first byte).
-app.get('*', (c) => {
-  if (c.req.header('accept') === 'text/event-stream') {
-    const url = new URL(c.req.url);
+app.get('/_blade/session', async (c) => {
+  const currentURL = new URL(c.req.url);
 
-    return streamSSE(c, async (stream) => {
-      globalThis.SERVER_SESSIONS.set(url.pathname + url.search, stream);
+  const sessionID = currentURL.searchParams.get('id');
+  const sessionURL = currentURL.searchParams.get('url');
 
-      await stream.writeSSE({
-        data: 'testing',
-        event: 'time-update',
-        id: String(id++),
-      });
-    });
+  if (c.req.header('accept') !== 'text/event-stream' || !sessionID || !sessionURL) {
+    const body = {
+      error: {
+        message: 'No endpoint available for the provided query.',
+        code: 'MISSING_ENDPOINT',
+      },
+    };
+
+    return c.json(body, 400);
   }
 
-  return renderReactTree(new URL(c.req.url), c, true);
+  const { readable, writable } = new TransformStream();
+  const stream = new SSEStreamingApi(writable, readable);
+
+  c.header('Transfer-Encoding', 'chunked');
+  c.header('Content-Type', 'text/event-stream');
+  c.header('Cache-Control', 'no-cache');
+  c.header('Connection', 'keep-alive');
+
+  // run(stream, cb, onError);
+
+  const sessionDetails = {
+    url: new URL(sessionURL),
+    headers: c.req.raw.headers,
+    stream,
+  };
+
+  globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
+
+  await stream.writeSSE({
+    data: 'testing',
+    event: 'time-update',
+    id: String(id++),
+  });
+
+  return c.newResponse(stream.responseReadable);
 });
+
+// Handle the initial render (first byte).
+app.get('*', (c) => renderReactTree(new URL(c.req.url), c, true));
 
 // Handle client side navigation.
 app.post('*', async (c) => {

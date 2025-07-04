@@ -62,7 +62,15 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     // locally sit behind a proxy that terminates TLS, in which case the origin protocol
     // would be `http` if we make use of the location provided by `usePrivateLocation`,
     // since that comes from the server.
-    const eventSource = new EventSource(window.location.href, { withCredentials: true });
+    const url = new URL('/_blade/session', window.location.origin);
+
+    // Inform the server about the page that is currently being viewed. Whenever the
+    // client retrieves a new page, the session will be updated on the server.
+    url.searchParams.set('id', window['BLADE_SESSION']);
+    url.searchParams.set('url', window.location.pathname + window.location.search);
+
+    // Open the event stream.
+    const eventSource = new EventSource(url, { withCredentials: true });
 
     const handleMessage: EventListener = (message) => {
       // @ts-expect-error No error
@@ -70,7 +78,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     };
 
     eventSource.addEventListener('time-update', handleMessage);
-    return () => eventSource.removeEventListener('time-update', handleMessage);
+    return () => eventSource.close();
   }, []);
 
   // Update the records on the current page while looking at the window. The update

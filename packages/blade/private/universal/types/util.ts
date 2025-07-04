@@ -1,5 +1,28 @@
-import type { UniversalContext } from '@/private/universal/context';
+import type { SSEStreamingApi } from 'hono/streaming';
 import type { FormattedResults } from 'ronin/types';
+
+import type { UniversalContext } from '@/private/universal/context';
+
+export interface BrowserSession {
+  /**
+   * A unique identifier of a particular browser session. A browser session is synonymous
+   * to a browser tab that is open. Every new tab that gets opened, even if it is for the
+   * same page, results in a new browser session.
+   *
+   * The browser session persists, even if the page changes. If the `url` (the page) or the
+   * `headers` changes, the properties will simply be updated.
+   */
+  id: string;
+
+  /**
+   * The meta information of a particular browser session. It includes the meta information
+   * of the last request that the client made to the server, which is used internally to
+   * construct pages that are then pushed to the client.
+   */
+  url: URL;
+  headers: Headers;
+  stream: SSEStreamingApi;
+}
 
 interface QueryItemBase {
   /**

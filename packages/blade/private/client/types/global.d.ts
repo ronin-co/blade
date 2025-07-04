@@ -6,6 +6,9 @@ declare interface Window {
 
   // Contains a list of all the chunks that were loaded on the client so far.
   BLADE_CHUNKS: Record<string, Record<string, unknown>>;
+
+  // The ID of an ongoing browser session.
+  BLADE_SESSION: import('../../universal/types/util').BrowserSession['id'];
 }
 
 declare module 'client-list' {

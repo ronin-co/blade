@@ -5,6 +5,10 @@ import '@/private/client/components/history';
 import '@/public/client/components';
 import fetchPage from '@/private/client/utils/fetch-page';
 
+if (!window['BLADE_SESSION']) {
+  window['BLADE_SESSION'] = crypto.randomUUID();
+}
+
 if (!window['BLADE_ROOT']) {
   const path = location.pathname + location.search + location.hash;
 
