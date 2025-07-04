@@ -247,6 +247,11 @@ app.get('/_blade/session', async (c) => {
     };
 
     globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
+
+    // Handle connection cleanup when the client disconnects.
+    c.req.raw.signal.addEventListener('abort', () => {
+      globalThis.SERVER_SESSIONS.delete(sessionID);
+    });
   }
 
   await flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
