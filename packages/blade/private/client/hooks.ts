@@ -111,10 +111,14 @@ export const usePageTransition = () => {
     const pagePromise = pageTransitionQueue.add(
       async () => {
         const page = await fetchPage(path, options);
+        const root = window['BLADE_ROOT'];
 
         // If the client bundles have changed, don't proceed, since `fetchPage` will
         // retrieve the latest bundles fresh in that case.
-        if (!page) {
+        //
+        // If no React root is available, new bundles are currently being mounted so we
+        // should clear the queue instead of proceeding.
+        if (!page || !root) {
           // Immediately destroy the page queue, since we now know that the server has
           // changed, so we cannot continue processing any further requests from the old
           // client chunks. We have to do this inside the promise of the current function

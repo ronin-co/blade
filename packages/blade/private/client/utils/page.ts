@@ -84,6 +84,15 @@ export const fetchPage = async (
 };
 
 export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
+  const root = window['BLADE_ROOT'];
+
+  // If there is no React root, an update is still in progress.
+  if (!root) return;
+
+  // Immediately clear the React root to prevent further updates from revalidation.
+  window['BLADE_ROOT'] = null;
+  window['BLADE_SESSION'] = null;
+
   // Download the new markup, CSS, and JS at the same time, but don't execute
   // any of them just yet.
   const [newMarkup] = await Promise.all([
@@ -95,11 +104,7 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not
   // only the CSS and JS bundles can be upgraded, but also React itself.
-  const root = window['BLADE_ROOT'];
-  if (!root) throw new Error('Missing React root');
   root.unmount();
-  window['BLADE_ROOT'] = null;
-  window['BLADE_SESSION'] = null;
 
   const parser = new DOMParser();
   const newDocument = parser.parseFromString(newMarkup, 'text/html');
