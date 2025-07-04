@@ -219,8 +219,8 @@ app.get('/_blade/session', async (c) => {
   ) {
     const body = {
       error: {
-        message: 'No endpoint available for the provided query.',
-        code: 'MISSING_ENDPOINT',
+        message: 'The request for opening a session is malformed.',
+        code: 'INVALID_PAYLOAD',
       },
     };
 
