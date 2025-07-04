@@ -47,7 +47,7 @@ if (!window['BLADE_ROOT']) {
       const body = await createFromReadableStream(stream);
 
       if (window['BLADE_ROOT']) {
-        window['BLADE_ROOT']!.render(body);
+        window['BLADE_ROOT'].render(body);
       } else {
         window['BLADE_ROOT'] = hydrateRoot(document, body, {
           onRecoverableError(error, errorInfo) {
