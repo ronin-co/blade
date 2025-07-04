@@ -1,11 +1,14 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
+import { bundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
+import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
-import { runQueries, toDashCase } from '@/private/server/utils/data';
+import type { ServerContext } from '@/private/server/context';
+import { getWaitUntil, runQueries, toDashCase } from '@/private/server/utils/data';
 import {
   getRequestGeoLocation,
   getRequestLanguages,
@@ -94,18 +97,16 @@ app.post('/api', async (c) => {
     );
   }
 
-  const rawRequest = c.req.raw;
+  const waitUntil = getWaitUntil(c);
 
-  const serverContext = {
+  const serverContext: ServerContext = {
     url: c.req.url,
     params: {},
-    lastUpdate: Date.now(),
-    userAgent: getRequestUserAgent(rawRequest),
-    geoLocation: getRequestGeoLocation(rawRequest),
-    languages: getRequestLanguages(rawRequest),
+    userAgent: getRequestUserAgent(c.req.raw),
+    geoLocation: getRequestGeoLocation(c.req.raw),
+    languages: getRequestLanguages(c.req.raw),
     addressBarInSync: true,
 
-    requestContext: c,
     cookies: getCookie(c),
     collected: {
       queries: [],
@@ -113,6 +114,7 @@ app.post('/api', async (c) => {
       jwts: {},
     },
     currentLeafIndex: null,
+    waitUntil,
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the
@@ -144,7 +146,9 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = (await runQueries(c, { default: queries }, triggers, 'all'))['default'];
+    results = (await runQueries({ default: queries }, triggers, 'all', waitUntil))[
+      'default'
+    ];
   } catch (err) {
     if (err instanceof TriggerError || err instanceof ClientError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
@@ -168,8 +172,94 @@ app.post('/api', async (c) => {
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
 
+const flushUpdate = async (
+  stream: SSEStreamingApi,
+  request: Request,
+  initial: boolean,
+) => {
+  const page = await renderReactTree(request, initial, {
+    waitUntil: getWaitUntil(),
+  });
+
+  await stream.writeSSE({
+    id: `${crypto.randomUUID()}-${bundleId}`,
+    event: initial ? 'update-bundle' : 'update',
+    data: page.text(),
+  });
+};
+
+// If this variable is already defined when the file gets evaluated, that means the file
+// was evaluated previously already, so we're dealing with local HMR.
+//
+// In that case, we want to push an updated version of every page to the client.
+if (globalThis.SERVER_SESSIONS) {
+  for (const [, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
+    const { url, headers, stream } = sessionDetails;
+    const request = new Request(url, { method: 'GET', headers });
+
+    flushUpdate(stream, request, true);
+  }
+} else {
+  globalThis.SERVER_SESSIONS = new Map();
+}
+
+app.get('/_blade/session', async (c) => {
+  const currentURL = new URL(c.req.url);
+  const { searchParams } = currentURL;
+
+  const sessionID = searchParams.get('id');
+  const sessionURL = searchParams.get('url');
+  const sessionBundle = searchParams.get('bundleId');
+
+  if (
+    c.req.header('accept') !== 'text/event-stream' ||
+    !sessionID ||
+    !sessionURL ||
+    !sessionBundle
+  ) {
+    const body = {
+      error: {
+        message: 'The request for opening a session is malformed.',
+        code: 'INVALID_PAYLOAD',
+      },
+    };
+
+    return c.json(body, 400);
+  }
+
+  const { readable, writable } = new TransformStream();
+  const stream = new SSEStreamingApi(writable, readable);
+
+  c.header('Transfer-Encoding', 'chunked');
+  c.header('Content-Type', 'text/event-stream');
+  c.header('Cache-Control', 'no-cache');
+  c.header('Connection', 'keep-alive');
+
+  const pageURL = new URL(sessionURL, currentURL);
+  const correctBundle = sessionBundle === bundleId;
+
+  // If the bundles on the client and server are matching, track the session.
+  if (correctBundle) {
+    const sessionDetails = {
+      url: pageURL,
+      headers: c.req.raw.headers,
+      stream,
+    };
+
+    globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
+
+    // Handle connection cleanup when the client disconnects.
+    c.req.raw.signal.addEventListener('abort', () => {
+      globalThis.SERVER_SESSIONS.delete(sessionID);
+    });
+  }
+
+  await flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
+  return c.newResponse(stream.responseReadable);
+});
+
 // Handle the initial render (first byte).
-app.get('*', (c) => renderReactTree(new URL(c.req.url), c, true));
+app.get('*', (c) => renderReactTree(c.req.raw, true, { waitUntil: getWaitUntil(c) }));
 
 // Handle client side navigation.
 app.post('*', async (c) => {
@@ -214,7 +304,8 @@ app.post('*', async (c) => {
     }
   }
 
-  return renderReactTree(new URL(c.req.url), c, false, options, existingCollected);
+  const finalOptions = { ...options, waitUntil: getWaitUntil(c) };
+  return renderReactTree(c.req.raw, false, finalOptions, existingCollected);
 });
 
 // Handle errors that occurred during the request lifecycle.
@@ -249,7 +340,7 @@ app.onError((err, c) => {
   }
 
   try {
-    return renderReactTree(new URL(c.req.url), c, true, { error: 500 });
+    return renderReactTree(c.req.raw, true, { error: 500, waitUntil: getWaitUntil(c) });
   } catch (err) {
     console.error(err);
   }

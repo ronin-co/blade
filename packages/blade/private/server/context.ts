@@ -1,6 +1,6 @@
-import type { Context } from 'hono';
 import { createContext } from 'react';
 
+import type { WaitUntil } from '@/private/server/types';
 import type { Collected } from '@/private/server/worker/tree';
 import type { UniversalContext } from '@/private/universal/context';
 
@@ -10,11 +10,11 @@ export type ServerContext<
     string,
     string | Array<string> | null
   >,
-> = Omit<UniversalContext<TParams>, 'collected'> & {
+> = Omit<UniversalContext<TParams>, 'collected' | 'lastUpdate'> & {
   cookies: Record<string, string | null>;
-  requestContext: Context;
   collected: Collected;
   currentLeafIndex: number | null;
+  waitUntil: WaitUntil;
 };
 
 export const RootServerContext = createContext<ServerContext | null>(null);

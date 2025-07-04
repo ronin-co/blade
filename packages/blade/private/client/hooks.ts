@@ -1,9 +1,9 @@
 import Queue from 'p-queue';
 import {
   type MutableRefObject,
+  type ReactNode,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -11,11 +11,11 @@ import {
 
 import { RootClientContext } from '@/private/client/context';
 import type { RevalidationReason } from '@/private/client/types/util';
-import fetchPage, { type FetchedPage } from '@/private/client/utils/fetch-page';
+import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
+import { fetchPage } from '@/private/client/utils/page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { usePopulatePathname } from '@/public/universal/hooks';
-import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**
@@ -28,21 +28,11 @@ export interface RootTransitionOptions extends PageFetchingOptions {
 const pageTransitionQueue = new Queue({ concurrency: 1 });
 
 export const usePageTransition = () => {
-  const cache = useRef(new Map<string, FetchedPage>());
+  const cache = useRef(new Map<string, { body: ReactNode; time: number }>());
 
   const clientContext = useContext(RootClientContext);
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
-
-  // We're using a reference to store this number, because we need to keep a single
-  // object in memory that is updated with every render, otherwise the information would
-  // be outdated in the deeply nested callback functions.
-  const lastUpdateTime = useRef<number>(clientContext.lastUpdate);
-
-  // Update the reference as soon as possible (before the browser repaints).
-  useLayoutEffect(() => {
-    lastUpdateTime.current = clientContext.lastUpdate;
-  }, [clientContext.lastUpdate]);
 
   return (
     path: string,
@@ -121,10 +111,14 @@ export const usePageTransition = () => {
     const pagePromise = pageTransitionQueue.add(
       async () => {
         const page = await fetchPage(path, options);
+        const root = window['BLADE_ROOT'];
 
         // If the client bundles have changed, don't proceed, since `fetchPage` will
         // retrieve the latest bundles fresh in that case.
-        if (!page) {
+        //
+        // If no React root is available, new bundles are currently being mounted so we
+        // should clear the queue instead of proceeding.
+        if (!page || !root) {
           // Immediately destroy the page queue, since we now know that the server has
           // changed, so we cannot continue processing any further requests from the old
           // client chunks. We have to do this inside the promise of the current function
@@ -153,7 +147,7 @@ export const usePageTransition = () => {
       if (!page) return;
 
       // As soon as possible, store the page in the cache.
-      if (cacheable) cache.current.set(path, page);
+      if (cacheable) cache.current.set(path, { body: page, time: Date.now() });
 
       // By the time we're ready to render the new page, a newer page transition might
       // have already been started. If that's the case, we want to skip the current
@@ -175,7 +169,7 @@ export const usePageTransition = () => {
         if (!page) return;
 
         // Render the page.
-        window['BLADE_ROOT']!.render(page.body);
+        window['BLADE_ROOT']!.render(page);
       });
     };
   };

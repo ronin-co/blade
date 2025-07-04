@@ -53,7 +53,6 @@
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {
-    "@hono/node-ws": "1.2.0",
     "@ronin/compiler": "0.18.9",
     "@ronin/react": "0.1.4",
     "@ronin/syntax": "0.2.43",

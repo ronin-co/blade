@@ -4,7 +4,7 @@ import type { Context, ExecutionContext } from 'hono';
 import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
 import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
-import type { TriggersList } from '@/private/server/types';
+import type { TriggersList, WaitUntil } from '@/private/server/types';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
 
 /**
@@ -31,12 +31,14 @@ const MOCK_EXECUTION_CONTEXT: ExecutionContext = {
  *
  * @returns A function that takes a promise and waits for it to resolve.
  */
-const getWaitUntil = (context: Context): ((promise: Promise<unknown>) => void) => {
+export const getWaitUntil = (context?: Context): WaitUntil => {
   if (import.meta.env.__BLADE_PROVIDER === 'vercel') return vercelWaitUntil;
 
   // Trying to access `c.executionCtx` on a Node.js runtime, such as in a Vercel
   // function, will throw an error. So we need to add a mockfallback.
   let dataFetcherWaitUntil = MOCK_EXECUTION_CONTEXT.waitUntil;
+  if (!context) return dataFetcherWaitUntil;
+
   try {
     dataFetcherWaitUntil = context.executionCtx.waitUntil?.bind(context.executionCtx);
   } catch (_err) {
@@ -50,15 +52,17 @@ const getWaitUntil = (context: Context): ((promise: Promise<unknown>) => void) =
 /**
  * Generate the options passed to the `ronin` JavaScript client.
  *
- * @param c - The context of the current request.
  * @param triggers - A list of triggers that should be executed.
+ * @param requireTriggers - Determines which triggers are required to be present.
+ * @param waitUntil - A function for keeping the process alive until a promise has
+ * been resolved.
  *
  * @returns Options that can be passed to the `ronin` JavaScript client.
  */
 export const getRoninOptions = (
-  c: Context,
   triggers: TriggersList,
   requireTriggers: 'all' | 'write',
+  waitUntil: WaitUntil,
 ): QueryHandlerOptions => {
   const dataFetcher: typeof fetch = async (input, init) => {
     // Normalize the parameters of the surrounding function, as the first argument might
@@ -94,8 +98,8 @@ export const getRoninOptions = (
   return {
     triggers,
     fetch: dataFetcher,
-    waitUntil: getWaitUntil(c),
     requireTriggers,
+    waitUntil,
   };
 };
 
@@ -103,19 +107,22 @@ export const getRoninOptions = (
  * The same as `runQueries` exposed by the `ronin` JavaScript client, except that default
  * configuration options are provided.
  *
- * @param c - The context of the current request.
  * @param queries - A list of RONIN queries that should be executed.
  * @param triggers - A list of triggers that should be executed.
+ * @param requireTriggers - Determines which triggers are required to be present.
+ * @param waitUntil - A function for keeping the process alive until a promise has
+ * been resolved.
  *
  * @returns The results of the passed queries.
  */
 export const runQueries = <T extends ResultRecord>(
-  c: Context,
   queries: Record<string, Array<Query>>,
   triggers: TriggersList,
   requireTriggers: 'all' | 'write',
+  waitUntil: WaitUntil,
 ): Promise<Record<string, FormattedResults<T>>> => {
-  return runQueriesOnRonin<T>(queries, getRoninOptions(c, triggers, requireTriggers));
+  const options = getRoninOptions(triggers, requireTriggers, waitUntil);
+  return runQueriesOnRonin<T>(queries, options);
 };
 
 /**
