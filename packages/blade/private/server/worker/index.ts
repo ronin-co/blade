@@ -171,7 +171,13 @@ if (projectRouter) app.route('/', projectRouter);
 
 let id = 0;
 
-if (!globalThis.SERVER_SESSIONS) {
+// If this variable is already defined when the file gets evaluated, that means the file
+// was evaluated previously already, so we're dealing with local HMR.
+//
+// In that case, we want to push an updated version of every page to the client.
+if (globalThis.SERVER_SESSIONS) {
+  console.log(globalThis.SERVER_SESSIONS);
+} else {
   globalThis.SERVER_SESSIONS = new Map<string, SSEStreamingApi>();
 }
 

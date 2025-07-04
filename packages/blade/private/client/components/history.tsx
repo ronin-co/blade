@@ -1,4 +1,3 @@
-import { bundleId } from 'build-meta';
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { RootClientContext } from '@/private/client/context';
@@ -63,12 +62,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     // locally sit behind a proxy that terminates TLS, in which case the origin protocol
     // would be `http` if we make use of the location provided by `usePrivateLocation`,
     // since that comes from the server.
-    const url = new URL(window.location.href);
-    url.searchParams.set('bundleId', bundleId);
-
-    const eventSource = new EventSource(url, { withCredentials: true });
-
-    console.log('INIT');
+    const eventSource = new EventSource(window.location.href, { withCredentials: true });
 
     const handleMessage: EventListener = (message) => {
       // @ts-expect-error No error
@@ -77,7 +71,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
 
     eventSource.addEventListener('time-update', handleMessage);
     return () => eventSource.removeEventListener('time-update', handleMessage);
-  }, [bundleId]);
+  }, []);
 
   // Update the records on the current page while looking at the window. The update
   // should be performed every 5 seconds, but to ensure that there are never two updates
