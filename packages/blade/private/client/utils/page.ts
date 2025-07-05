@@ -87,18 +87,19 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
   const root = window['BLADE_ROOT'];
   const session = window['BLADE_SESSION'];
 
-  // If there is no React root or session, an update is still in progress.
+  // If there is no root or session, an update is still in progress.
   if (!root || !session) return;
 
-  // Immediately clear the React root to prevent further updates from revalidation.
+  // As the first step, stop receiving further push updates from the server. Otherwise
+  // more updates might come in while we perform the next steps.
+  session.source.close();
+
+  // Clear the root and session to prevent further updates from poll revalidation.
   window['BLADE_ROOT'] = null;
   window['BLADE_SESSION'] = null;
 
-  // Stop receiving further updates from the server.
-  session.source.close();
-
-  // Download the new markup, CSS, and JS at the same time, but don't execute
-  // any of them just yet.
+  // Download the new markup, CSS, and JS at the same time, but don't execute any of them
+  // just yet.
   const [newMarkup] = await Promise.all([
     markup,
     loadResource(bundleId, 'style'),
