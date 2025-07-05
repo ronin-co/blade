@@ -61,7 +61,7 @@ export const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
-    'X-Session-Id': window['BLADE_SESSION'] as string,
+    'X-Session-Id': window['BLADE_SESSION']?.id as string,
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });
@@ -85,13 +85,17 @@ export const fetchPage = async (
 
 export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
   const root = window['BLADE_ROOT'];
+  const session = window['BLADE_SESSION'];
 
-  // If there is no React root, an update is still in progress.
-  if (!root) return;
+  // If there is no React root or session, an update is still in progress.
+  if (!root || !session) return;
 
   // Immediately clear the React root to prevent further updates from revalidation.
   window['BLADE_ROOT'] = null;
   window['BLADE_SESSION'] = null;
+
+  // Stop receiving further updates from the server.
+  session.source.close();
 
   // Download the new markup, CSS, and JS at the same time, but don't execute
   // any of them just yet.

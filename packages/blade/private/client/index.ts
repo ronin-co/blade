@@ -8,15 +8,12 @@ import { mountNewBundle } from '@/private/client/utils/page';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 
 if (!window['BLADE_SESSION']) {
-  window['BLADE_SESSION'] = crypto.randomUUID();
-}
-
-if (!window['BLADE_ROOT']) {
+  const sessionId = crypto.randomUUID();
   const url = new URL('/_blade/session', window.location.origin);
 
   // Inform the server about the page that is currently being viewed. Whenever the
   // client retrieves a new page, the session will be updated on the server.
-  url.searchParams.set('id', window['BLADE_SESSION'] as string);
+  url.searchParams.set('id', sessionId);
   url.searchParams.set('url', window.location.pathname + window.location.search);
   url.searchParams.set('bundleId', bundleId);
 
@@ -50,4 +47,6 @@ if (!window['BLADE_ROOT']) {
 
   eventSource.addEventListener('update', handleMessage);
   eventSource.addEventListener('update-bundle', handleMessage);
+
+  window['BLADE_SESSION'] = { id: sessionId, source: eventSource };
 }

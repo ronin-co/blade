@@ -8,7 +8,10 @@ declare interface Window {
   BLADE_CHUNKS: Record<string, Record<string, unknown>>;
 
   // The ID of an ongoing browser session.
-  BLADE_SESSION: import('../../universal/types/util').BrowserSession['id'] | null;
+  BLADE_SESSION: {
+    id: import('../../universal/types/util').BrowserSession['id'];
+    source: EventSource;
+  } | null;
 }
 
 declare module 'client-list' {
