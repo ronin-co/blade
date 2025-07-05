@@ -1,14 +1,17 @@
-declare interface Window {
-  // It's extremely important that this remains a global instead of a variable exported
-  // from a file, as it must remain persistent across different script loads performed by
-  // the browser.
-  BLADE_ROOT: import('react-dom/client').Root | null;
+// It's extremely important that these remain globals instead of variables exported from
+// a file, as they must remain persistent across different script loads for different
+// client bundles performed by the browser.
 
-  // Contains a list of all the chunks that were loaded on the client so far.
+declare interface Window {
+  /** Contains a list of all the chunks that were loaded on the client so far. */
   BLADE_CHUNKS: Record<string, Record<string, unknown>>;
 
-  // The ID of an ongoing browser session.
-  BLADE_SESSION: import('../../universal/types/util').BrowserSession['id'] | null;
+  /** An ongoing browser session (an open browser tab). */
+  BLADE_SESSION?: {
+    id: import('../../universal/types/util').BrowserSession['id'];
+    source: EventSource;
+    root: import('react-dom/client').Root;
+  };
 }
 
 declare module 'client-list' {

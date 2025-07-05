@@ -61,7 +61,7 @@ export const fetchPage = async (
 
   const headers = new Headers({
     Accept: 'application/json',
-    'X-Session-Id': window['BLADE_SESSION'] as string,
+    'X-Session-Id': window['BLADE_SESSION']?.id as string,
   });
 
   const response = await fetchRetry(path, { method: 'POST', body, headers });
@@ -84,17 +84,23 @@ export const fetchPage = async (
 };
 
 export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
-  const root = window['BLADE_ROOT'];
+  const session = window['BLADE_SESSION'];
 
-  // If there is no React root, an update is still in progress.
-  if (!root) return;
+  // If there is no active browser session, an update is still in progress.
+  if (!session) return;
 
-  // Immediately clear the React root to prevent further updates from revalidation.
-  window['BLADE_ROOT'] = null;
-  window['BLADE_SESSION'] = null;
+  // As the first step, stop receiving further push updates from the server. Otherwise
+  // more updates might come in while we perform the next steps.
+  session.source.close();
 
-  // Download the new markup, CSS, and JS at the same time, but don't execute
-  // any of them just yet.
+  // Clear the session to prevent further updates from poll revalidation. Deleting the
+  // property resets it back to exactly the state before the session was started (the
+  // property didn't exist at that time). It's more accurate than setting it to `null`,
+  // which would be third possible state.
+  delete window['BLADE_SESSION'];
+
+  // Download the new markup, CSS, and JS at the same time, but don't execute any of them
+  // just yet.
   const [newMarkup] = await Promise.all([
     markup,
     loadResource(bundleId, 'style'),
@@ -104,7 +110,7 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not
   // only the CSS and JS bundles can be upgraded, but also React itself.
-  root.unmount();
+  session.root.unmount();
 
   const parser = new DOMParser();
   const newDocument = parser.parseFromString(newMarkup, 'text/html');

@@ -8,20 +8,17 @@ import { mountNewBundle } from '@/private/client/utils/page';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 
 if (!window['BLADE_SESSION']) {
-  window['BLADE_SESSION'] = crypto.randomUUID();
-}
-
-if (!window['BLADE_ROOT']) {
+  const id = crypto.randomUUID();
   const url = new URL('/_blade/session', window.location.origin);
 
-  // Inform the server about the page that is currently being viewed. Whenever the
-  // client retrieves a new page, the session will be updated on the server.
-  url.searchParams.set('id', window['BLADE_SESSION'] as string);
+  // Inform the server about the page that is currently being viewed. Whenever the client
+  // retrieves a new page, the session will be updated on the server.
+  url.searchParams.set('id', id);
   url.searchParams.set('url', window.location.pathname + window.location.search);
   url.searchParams.set('bundleId', bundleId);
 
   // Open the event stream.
-  const eventSource = new EventSource(url, { withCredentials: true });
+  const source = new EventSource(url, { withCredentials: true });
 
   const handleMessage = async (message: MessageEvent) => {
     const serverBundleId = message.lastEventId.split('-').pop() as string;
@@ -30,14 +27,16 @@ if (!window['BLADE_ROOT']) {
       const stream = new Blob([message.data]).stream();
       const body = await createFromReadableStream(stream);
 
-      if (window['BLADE_ROOT']) {
-        window['BLADE_ROOT'].render(body);
+      if (window['BLADE_SESSION']) {
+        window['BLADE_SESSION'].root.render(body);
       } else {
-        window['BLADE_ROOT'] = hydrateRoot(document, body, {
+        const root = hydrateRoot(document, body, {
           onRecoverableError(error, errorInfo) {
             console.error('Hydration error occurred:', error, errorInfo);
           },
         });
+
+        window['BLADE_SESSION'] = { id, source, root };
       }
 
       return;
@@ -48,6 +47,6 @@ if (!window['BLADE_ROOT']) {
     }
   };
 
-  eventSource.addEventListener('update', handleMessage);
-  eventSource.addEventListener('update-bundle', handleMessage);
+  source.addEventListener('update', handleMessage);
+  source.addEventListener('update-bundle', handleMessage);
 }
