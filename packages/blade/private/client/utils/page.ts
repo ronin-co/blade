@@ -93,8 +93,11 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
   // more updates might come in while we perform the next steps.
   session.source.close();
 
-  // Clear the session to prevent further updates from poll revalidation.
-  window['BLADE_SESSION'] = null;
+  // Clear the session to prevent further updates from poll revalidation. Deleting the
+  // property resets it back to exactly the state before the session was started (the
+  // property didn't exist at that time). It's more accurate than setting it to `null`,
+  // which would be third possible state.
+  delete window['BLADE_SESSION'];
 
   // Download the new markup, CSS, and JS at the same time, but don't execute any of them
   // just yet.

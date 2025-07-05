@@ -7,11 +7,11 @@ declare interface Window {
   BLADE_CHUNKS: Record<string, Record<string, unknown>>;
 
   /** An ongoing browser session (an open browser tab). */
-  BLADE_SESSION: {
+  BLADE_SESSION?: {
     id: import('../../universal/types/util').BrowserSession['id'];
     source: EventSource;
     root: import('react-dom/client').Root;
-  } | null;
+  };
 }
 
 declare module 'client-list' {
