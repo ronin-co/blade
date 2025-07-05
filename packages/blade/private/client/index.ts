@@ -8,17 +8,17 @@ import { mountNewBundle } from '@/private/client/utils/page';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 
 if (!window['BLADE_SESSION']) {
-  const sessionId = crypto.randomUUID();
+  const id = crypto.randomUUID();
   const url = new URL('/_blade/session', window.location.origin);
 
-  // Inform the server about the page that is currently being viewed. Whenever the
-  // client retrieves a new page, the session will be updated on the server.
-  url.searchParams.set('id', sessionId);
+  // Inform the server about the page that is currently being viewed. Whenever the client
+  // retrieves a new page, the session will be updated on the server.
+  url.searchParams.set('id', id);
   url.searchParams.set('url', window.location.pathname + window.location.search);
   url.searchParams.set('bundleId', bundleId);
 
   // Open the event stream.
-  const eventSource = new EventSource(url, { withCredentials: true });
+  const source = new EventSource(url, { withCredentials: true });
 
   const handleMessage = async (message: MessageEvent) => {
     const serverBundleId = message.lastEventId.split('-').pop() as string;
@@ -36,7 +36,7 @@ if (!window['BLADE_SESSION']) {
           },
         });
 
-        window['BLADE_SESSION'] = { id: sessionId, source: eventSource, root };
+        window['BLADE_SESSION'] = { id, source, root };
       }
 
       return;
@@ -47,6 +47,6 @@ if (!window['BLADE_SESSION']) {
     }
   };
 
-  eventSource.addEventListener('update', handleMessage);
-  eventSource.addEventListener('update-bundle', handleMessage);
+  source.addEventListener('update', handleMessage);
+  source.addEventListener('update-bundle', handleMessage);
 }
