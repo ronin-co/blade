@@ -84,18 +84,16 @@ export const fetchPage = async (
 };
 
 export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
-  const root = window['BLADE_ROOT'];
   const session = window['BLADE_SESSION'];
 
-  // If there is no root or session, an update is still in progress.
-  if (!root || !session) return;
+  // If there is no active browser session, an update is still in progress.
+  if (!session) return;
 
   // As the first step, stop receiving further push updates from the server. Otherwise
   // more updates might come in while we perform the next steps.
   session.source.close();
 
-  // Clear the root and session to prevent further updates from poll revalidation.
-  window['BLADE_ROOT'] = null;
+  // Clear the session to prevent further updates from poll revalidation.
   window['BLADE_SESSION'] = null;
 
   // Download the new markup, CSS, and JS at the same time, but don't execute any of them
@@ -109,7 +107,7 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not
   // only the CSS and JS bundles can be upgraded, but also React itself.
-  root.unmount();
+  session.root.unmount();
 
   const parser = new DOMParser();
   const newDocument = parser.parseFromString(newMarkup, 'text/html');

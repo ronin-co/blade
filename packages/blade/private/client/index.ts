@@ -27,14 +27,16 @@ if (!window['BLADE_SESSION']) {
       const stream = new Blob([message.data]).stream();
       const body = await createFromReadableStream(stream);
 
-      if (window['BLADE_ROOT']) {
-        window['BLADE_ROOT'].render(body);
+      if (window['BLADE_SESSION']) {
+        window['BLADE_SESSION'].root.render(body);
       } else {
-        window['BLADE_ROOT'] = hydrateRoot(document, body, {
+        const root = hydrateRoot(document, body, {
           onRecoverableError(error, errorInfo) {
             console.error('Hydration error occurred:', error, errorInfo);
           },
         });
+
+        window['BLADE_SESSION'] = { id: sessionId, source: eventSource, root };
       }
 
       return;
@@ -47,6 +49,4 @@ if (!window['BLADE_SESSION']) {
 
   eventSource.addEventListener('update', handleMessage);
   eventSource.addEventListener('update-bundle', handleMessage);
-
-  window['BLADE_SESSION'] = { id: sessionId, source: eventSource };
 }
