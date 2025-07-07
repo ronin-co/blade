@@ -255,7 +255,8 @@ app.get('/_blade/session', async (c) => {
     });
   }
 
-  // Don't `await` this, so that the response stream gets returned immediately.
+  // Don't `await` this, so that the response headers get flushed immediately as a result
+  // of the response getting returned below.
   flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
 
   return c.newResponse(stream.responseReadable);
