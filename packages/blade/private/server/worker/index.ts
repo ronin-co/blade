@@ -232,7 +232,7 @@ app.get('/_blade/session', async (c) => {
 
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/event-stream');
-  c.header('Cache-Control', 'no-cache');
+  c.header('Cache-Control', 'no-cache, no-transform');
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
@@ -255,7 +255,10 @@ app.get('/_blade/session', async (c) => {
     });
   }
 
-  await flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
+  // Don't `await` this, so that the response headers get flushed immediately as a result
+  // of the response getting returned below.
+  flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
+
   return c.newResponse(stream.responseReadable);
 });
 
