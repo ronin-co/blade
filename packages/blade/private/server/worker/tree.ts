@@ -436,7 +436,8 @@ const appendCookieHeader = (
  * Flushes the UI by rendering the React tree and sending it to the client.
  *
  * @param stream - The streaming API to write the rendered page to.
- * @param request - The current request object.
+ * @param url - The URL of the current request.
+ * @param headers - The headers of the current request.
  * @param initial - Whether this is the initial request (SSR) or a subsequent update.
  * @param [collected] - Optional existing collected data to prime the server context with.
  *
@@ -444,12 +445,14 @@ const appendCookieHeader = (
  */
 export const flushUI = async (
   stream: SSEStreamingApi,
-  request: Request,
+  url: URL,
+  headers: Headers,
   initial: boolean,
   collected?: Collected,
 ) => {
   const page = await renderReactTree(
-    request,
+    url,
+    headers,
     initial,
     {
       waitUntil: getWaitUntil(),
