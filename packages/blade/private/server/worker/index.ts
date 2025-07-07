@@ -115,7 +115,7 @@ app.post('/api', async (c) => {
     },
     currentLeafIndex: null,
     waitUntil,
-    flushUI: flushUI,
+    flushUI,
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the
