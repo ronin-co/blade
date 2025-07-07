@@ -174,10 +174,11 @@ if (projectRouter) app.route('/', projectRouter);
 
 const flushUpdate = async (
   stream: SSEStreamingApi,
-  request: Request,
+  url: URL,
+  headers: Headers,
   initial: boolean,
 ) => {
-  const page = await renderReactTree(request, initial, {
+  const page = await renderReactTree(url, headers, initial, {
     waitUntil: getWaitUntil(),
   });
 
@@ -195,9 +196,7 @@ const flushUpdate = async (
 if (globalThis.SERVER_SESSIONS) {
   for (const [, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
     const { url, headers, stream } = sessionDetails;
-    const request = new Request(url, { method: 'GET', headers });
-
-    flushUpdate(stream, request, true);
+    flushUpdate(stream, url, headers, true);
   }
 } else {
   globalThis.SERVER_SESSIONS = new Map();
@@ -257,13 +256,17 @@ app.get('/_blade/session', async (c) => {
 
   // Don't `await` this, so that the response headers get flushed immediately as a result
   // of the response getting returned below.
-  flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
+  flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
 
   return c.newResponse(stream.responseReadable);
 });
 
 // Handle the initial render (first byte).
-app.get('*', (c) => renderReactTree(c.req.raw, true, { waitUntil: getWaitUntil(c) }));
+app.get('*', (c) =>
+  renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
+    waitUntil: getWaitUntil(c),
+  }),
+);
 
 // Handle client side navigation.
 app.post('*', async (c) => {
