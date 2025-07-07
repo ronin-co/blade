@@ -172,11 +172,7 @@ app.post('/api', async (c) => {
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
 
-const flushUpdate = async (
-  stream: SSEStreamingApi,
-  request: Request,
-  initial: boolean,
-) => {
+const flushUI = async (stream: SSEStreamingApi, request: Request, initial: boolean) => {
   const page = await renderReactTree(request, initial, {
     waitUntil: getWaitUntil(),
   });
@@ -197,7 +193,7 @@ if (globalThis.SERVER_SESSIONS) {
     const { url, headers, stream } = sessionDetails;
     const request = new Request(url, { method: 'GET', headers });
 
-    flushUpdate(stream, request, true);
+    flushUI(stream, request, true);
   }
 } else {
   globalThis.SERVER_SESSIONS = new Map();
@@ -254,7 +250,7 @@ app.get('/_blade/session', async (c) => {
     });
   }
 
-  await flushUpdate(stream, new Request(pageURL, c.req.raw), !correctBundle);
+  await flushUI(stream, new Request(pageURL, c.req.raw), !correctBundle);
   return c.newResponse(stream.responseReadable);
 });
 
