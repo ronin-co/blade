@@ -22,7 +22,7 @@ import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import { SECURITY_HEADERS, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
-import { runQueries } from '@/private/server/utils/data';
+import { getWaitUntil, runQueries } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
 import { getParentDirectories, joinPaths } from '@/private/server/utils/paths';
 import {
@@ -43,6 +43,7 @@ import type {
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
+import type { SSEStreamingApi } from 'hono/streaming';
 
 const pages: PageList = {
   ...pageList,
@@ -431,6 +432,31 @@ const appendCookieHeader = (
   return headers;
 };
 
+/**
+ * Flushes the UI by rendering the React tree and sending it to the client.
+ *
+ * @param stream - The streaming API to write the rendered page to.
+ * @param request - The current request object.
+ * @param initial - Whether this is the initial request (SSR) or a subsequent update.
+ *
+ * @return A promise that resolves when the UI has been flushed.
+ */
+export const flushUI = async (
+  stream: SSEStreamingApi,
+  request: Request,
+  initial: boolean,
+) => {
+  const page = await renderReactTree(request, initial, {
+    waitUntil: getWaitUntil(),
+  });
+
+  await stream.writeSSE({
+    id: `${crypto.randomUUID()}-${bundleId}`,
+    event: initial ? 'update-bundle' : 'update',
+    data: page.text(),
+  });
+};
+
 const renderReactTree = async (
   /** The current request. */
   request: Request,
@@ -498,6 +524,7 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
+    flushUI,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};

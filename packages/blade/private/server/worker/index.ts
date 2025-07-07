@@ -14,7 +14,7 @@ import {
   getRequestLanguages,
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
-import renderReactTree, { type Collected } from '@/private/server/worker/tree';
+import renderReactTree, { flushUI, type Collected } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
@@ -72,18 +72,6 @@ app.all('*', async (c, next) => {
   await next();
 });
 
-const flushUI = async (stream: SSEStreamingApi, request: Request, initial: boolean) => {
-  const page = await renderReactTree(request, initial, {
-    waitUntil: getWaitUntil(),
-  });
-
-  await stream.writeSSE({
-    id: `${crypto.randomUUID()}-${bundleId}`,
-    event: initial ? 'update-bundle' : 'update',
-    data: page.text(),
-  });
-};
-
 // Expose an API endpoint that allows for accessing the provided triggers.
 app.post('/api', async (c) => {
   console.log('[BLADE] Received request to /api');
@@ -127,7 +115,7 @@ app.post('/api', async (c) => {
     },
     currentLeafIndex: null,
     waitUntil,
-    flushUI,
+    flushUI: flushUI,
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the
