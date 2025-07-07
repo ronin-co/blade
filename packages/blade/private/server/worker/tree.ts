@@ -538,7 +538,11 @@ const renderReactTree = async (
     flushUI: (collected) => {
       const sessionId = requestHeaders.get('X-Session-Id');
       const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
-      return flushUI(session!.stream, requestURL, requestHeaders, true, collected);
+
+      // TODO(@nurodev): Add proper error handling for a missing session.
+      if (!session) return Promise.reject();
+
+      return flushUI(session.stream, session.url, session.headers, true, collected);
     },
   };
 
