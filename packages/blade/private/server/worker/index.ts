@@ -72,6 +72,18 @@ app.all('*', async (c, next) => {
   await next();
 });
 
+const flushUI = async (stream: SSEStreamingApi, request: Request, initial: boolean) => {
+  const page = await renderReactTree(request, initial, {
+    waitUntil: getWaitUntil(),
+  });
+
+  await stream.writeSSE({
+    id: `${crypto.randomUUID()}-${bundleId}`,
+    event: initial ? 'update-bundle' : 'update',
+    data: page.text(),
+  });
+};
+
 // Expose an API endpoint that allows for accessing the provided triggers.
 app.post('/api', async (c) => {
   console.log('[BLADE] Received request to /api');
@@ -115,6 +127,7 @@ app.post('/api', async (c) => {
     },
     currentLeafIndex: null,
     waitUntil,
+    flushUI,
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the
@@ -171,18 +184,6 @@ app.post('/api', async (c) => {
 
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
-
-const flushUI = async (stream: SSEStreamingApi, request: Request, initial: boolean) => {
-  const page = await renderReactTree(request, initial, {
-    waitUntil: getWaitUntil(),
-  });
-
-  await stream.writeSSE({
-    id: `${crypto.randomUUID()}-${bundleId}`,
-    event: initial ? 'update-bundle' : 'update',
-    data: page.text(),
-  });
-};
 
 // If this variable is already defined when the file gets evaluated, that means the file
 // was evaluated previously already, so we're dealing with local HMR.
