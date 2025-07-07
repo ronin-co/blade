@@ -219,6 +219,7 @@ app.get('/_blade/session', async (c) => {
   c.header('Content-Type', 'text/event-stream');
   c.header('Cache-Control', 'no-cache, no-transform');
   c.header('Connection', 'keep-alive');
+  c.header('X-Accel-Buffering', 'no');
 
   const pageURL = new URL(sessionURL, currentURL);
   const correctBundle = sessionBundle === bundleId;
