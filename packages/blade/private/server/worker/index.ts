@@ -217,7 +217,7 @@ app.get('/_blade/session', async (c) => {
 
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/event-stream');
-  c.header('Cache-Control', 'no-cache');
+  c.header('Cache-Control', 'no-cache, no-transform');
   c.header('Connection', 'keep-alive');
 
   const pageURL = new URL(sessionURL, currentURL);
@@ -239,7 +239,10 @@ app.get('/_blade/session', async (c) => {
     });
   }
 
-  await flushUI(stream, new Request(pageURL, c.req.raw), !correctBundle);
+  // Don't `await` this, so that the response headers get flushed immediately as a result
+  // of the response getting returned below.
+  flushUI(stream, new Request(pageURL, c.req.raw), !correctBundle);
+
   return c.newResponse(stream.responseReadable);
 });
 
