@@ -77,6 +77,7 @@ app.post('/api', async (c) => {
   console.log('[BLADE] Received request to /api');
 
   const body = await c.req.json<{ queries?: Query[] }>();
+  const headers = c.req.raw.headers;
   const queries = body?.queries;
 
   // Ensure a valid incoming query body.
@@ -102,9 +103,9 @@ app.post('/api', async (c) => {
   const serverContext: ServerContext = {
     url: c.req.url,
     params: {},
-    userAgent: getRequestUserAgent(c.req.raw),
-    geoLocation: getRequestGeoLocation(c.req.raw),
-    languages: getRequestLanguages(c.req.raw),
+    userAgent: getRequestUserAgent(headers),
+    geoLocation: getRequestGeoLocation(headers),
+    languages: getRequestLanguages(headers),
     addressBarInSync: true,
 
     cookies: getCookie(c),
@@ -312,7 +313,13 @@ app.post('*', async (c) => {
   }
 
   const finalOptions = { ...options, waitUntil: getWaitUntil(c) };
-  return renderReactTree(c.req.raw, false, finalOptions, existingCollected);
+  return renderReactTree(
+    new URL(c.req.url),
+    c.req.raw.headers,
+    false,
+    finalOptions,
+    existingCollected,
+  );
 });
 
 // Handle errors that occurred during the request lifecycle.
@@ -347,7 +354,10 @@ app.onError((err, c) => {
   }
 
   try {
-    return renderReactTree(c.req.raw, true, { error: 500, waitUntil: getWaitUntil(c) });
+    return renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
+      error: 500,
+      waitUntil: getWaitUntil(c),
+    });
   } catch (err) {
     console.error(err);
   }
