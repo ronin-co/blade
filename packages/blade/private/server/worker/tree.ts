@@ -438,6 +438,7 @@ const appendCookieHeader = (
  * @param stream - The streaming API to write the rendered page to.
  * @param request - The current request object.
  * @param initial - Whether this is the initial request (SSR) or a subsequent update.
+ * @param [collected] - Optional existing collected data to prime the server context with.
  *
  * @return A promise that resolves when the UI has been flushed.
  */
@@ -445,10 +446,16 @@ export const flushUI = async (
   stream: SSEStreamingApi,
   request: Request,
   initial: boolean,
+  collected?: Collected,
 ) => {
-  const page = await renderReactTree(request, initial, {
-    waitUntil: getWaitUntil(),
-  });
+  const page = await renderReactTree(
+    request,
+    initial,
+    {
+      waitUntil: getWaitUntil(),
+    },
+    collected,
+  );
 
   await stream.writeSSE({
     id: `${crypto.randomUUID()}-${bundleId}`,
@@ -524,7 +531,11 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushUI,
+    flushUI: (existingCollected) => {
+      const sessionId = request.headers.get('X-Session-Id');
+      const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
+      return flushUI(session!.stream, request, true, existingCollected);
+    },
   };
 
   const collectedCookies = serverContext.collected.cookies || {};

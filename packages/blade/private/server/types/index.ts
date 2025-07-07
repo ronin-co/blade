@@ -93,7 +93,7 @@ export interface TriggerOptions extends ClientTriggerOptions {
    */
   headless: boolean;
   /**
-   * A function that can be used to flush the UI & perform a full page re-render.
+   * TODO
    */
   flushUI: ServerContext['flushUI'];
 }
