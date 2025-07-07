@@ -100,6 +100,9 @@ app.post('/api', async (c) => {
 
   const waitUntil = getWaitUntil(c);
 
+  const sessionId = c.req.header('X-Session-Id');
+  const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
+
   const serverContext: ServerContext = {
     url: c.req.url,
     params: {},
@@ -116,6 +119,15 @@ app.post('/api', async (c) => {
     },
     currentLeafIndex: null,
     waitUntil,
+    flushUI: (collected) =>
+      flushUI(
+        //
+        session!.stream,
+        new URL(c.req.url),
+        c.req.raw.headers,
+        true,
+        collected,
+      ),
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the

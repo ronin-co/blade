@@ -92,6 +92,10 @@ export interface TriggerOptions extends ClientTriggerOptions {
    * triggers, by performing permission validation.
    */
   headless: boolean;
+  /**
+   * TODO
+   */
+  flushUI: ServerContext['flushUI'];
 }
 
 export type RecursiveRequired<T> = {
