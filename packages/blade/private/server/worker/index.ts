@@ -77,6 +77,7 @@ app.post('/api', async (c) => {
   console.log('[BLADE] Received request to /api');
 
   const body = await c.req.json<{ queries?: Query[] }>();
+  const headers = c.req.raw.headers;
   const queries = body?.queries;
 
   // Ensure a valid incoming query body.
@@ -102,9 +103,9 @@ app.post('/api', async (c) => {
   const serverContext: ServerContext = {
     url: c.req.url,
     params: {},
-    userAgent: getRequestUserAgent(c.req.raw),
-    geoLocation: getRequestGeoLocation(c.req.raw),
-    languages: getRequestLanguages(c.req.raw),
+    userAgent: getRequestUserAgent(headers),
+    geoLocation: getRequestGeoLocation(headers),
+    languages: getRequestLanguages(headers),
     addressBarInSync: true,
 
     cookies: getCookie(c),
@@ -179,9 +180,7 @@ if (projectRouter) app.route('/', projectRouter);
 if (globalThis.SERVER_SESSIONS) {
   for (const [, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
     const { url, headers, stream } = sessionDetails;
-    const request = new Request(url, { method: 'GET', headers });
-
-    flushUI(stream, request, true);
+    flushUI(stream, url, headers, true);
   }
 } else {
   globalThis.SERVER_SESSIONS = new Map();
@@ -241,13 +240,17 @@ app.get('/_blade/session', async (c) => {
 
   // Don't `await` this, so that the response headers get flushed immediately as a result
   // of the response getting returned below.
-  flushUI(stream, new Request(pageURL, c.req.raw), !correctBundle);
+  flushUI(stream, pageURL, c.req.raw.headers, !correctBundle);
 
   return c.newResponse(stream.responseReadable);
 });
 
 // Handle the initial render (first byte).
-app.get('*', (c) => renderReactTree(c.req.raw, true, { waitUntil: getWaitUntil(c) }));
+app.get('*', (c) =>
+  renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
+    waitUntil: getWaitUntil(c),
+  }),
+);
 
 // Handle client side navigation.
 app.post('*', async (c) => {
@@ -293,7 +296,13 @@ app.post('*', async (c) => {
   }
 
   const finalOptions = { ...options, waitUntil: getWaitUntil(c) };
-  return renderReactTree(c.req.raw, false, finalOptions, existingCollected);
+  return renderReactTree(
+    new URL(c.req.url),
+    c.req.raw.headers,
+    false,
+    finalOptions,
+    existingCollected,
+  );
 });
 
 // Handle errors that occurred during the request lifecycle.
@@ -328,7 +337,10 @@ app.onError((err, c) => {
   }
 
   try {
-    return renderReactTree(c.req.raw, true, { error: 500, waitUntil: getWaitUntil(c) });
+    return renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
+      error: 500,
+      waitUntil: getWaitUntil(c),
+    });
   } catch (err) {
     console.error(err);
   }
