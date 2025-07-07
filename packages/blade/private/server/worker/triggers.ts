@@ -34,7 +34,6 @@ export const prepareTriggers = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-    flushUI: serverContext.flushUI,
   };
 
   const list = Object.entries(triggers || {}).map(

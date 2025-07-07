@@ -531,11 +531,6 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushUI: (existingCollected) => {
-      const sessionId = request.headers.get('X-Session-Id');
-      const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
-      return flushUI(session!.stream, request, true, existingCollected);
-    },
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
