@@ -1,19 +1,19 @@
 import UserAgentParser from 'ua-parser-js';
 
-import type { GeoLocation, UserAgent } from '@/private/universal/types/util';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
+import type { GeoLocation, UserAgent } from '@/private/universal/types/util';
 
-export const getRequestGeoLocation = (request: Request): GeoLocation => {
-  const coordinates = request.headers.get('Ronin-Client-Coordinates');
+export const getRequestGeoLocation = (headers: Headers): GeoLocation => {
+  const coordinates = headers.get('Ronin-Client-Coordinates');
   const latitude = coordinates ? Number.parseFloat(coordinates.split(',')[0]) : null;
   const longitude = coordinates ? Number.parseFloat(coordinates.split(',')[1]) : null;
 
   const start = Date.now();
 
   const geoLocation: GeoLocation = {
-    country: request.headers.get('Ronin-Client-Country') || null,
-    region: request.headers.get('Ronin-Client-Region') || null,
-    city: request.headers.get('Ronin-Client-City') || null,
+    country: headers.get('Ronin-Client-Country') || null,
+    region: headers.get('Ronin-Client-Region') || null,
+    city: headers.get('Ronin-Client-City') || null,
     latitude,
     longitude,
     timeZone: null,
@@ -37,8 +37,8 @@ export const getRequestGeoLocation = (request: Request): GeoLocation => {
   return geoLocation;
 };
 
-export const getRequestLanguages = (request: Request): string[] => {
-  const header = request.headers.get('Accept-Language');
+export const getRequestLanguages = (headers: Headers): string[] => {
+  const header = headers.get('Accept-Language');
   if (!header) return [];
 
   // Split the header by commas.
@@ -62,8 +62,8 @@ export const getRequestLanguages = (request: Request): string[] => {
 const formatOperatingSystem = (name: string): string =>
   name.replace('Mac OS', 'macOS').replace('Mac', 'macOS');
 
-export const getRequestUserAgent = (request: Request): UserAgent => {
-  const header = request.headers.get('User-Agent');
+export const getRequestUserAgent = (headers: Headers): UserAgent => {
+  const header = headers.get('User-Agent');
   let parsed = null;
 
   if (header) {

@@ -432,8 +432,10 @@ const appendCookieHeader = (
 };
 
 const renderReactTree = async (
-  /** The current request. */
-  request: Request,
+  /** The URL of the current request. */
+  requestURL: URL,
+  /** The headers of the current request. */
+  requestHeaders: Headers,
   /** Whether the initial request is being handled (SSR). */
   initial: boolean,
   /** A list of options for customizing the rendering behavior. */
@@ -453,8 +455,7 @@ const renderReactTree = async (
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
 ): Promise<Response> => {
-  const { url: stringURL } = request;
-  const url = new URL(stringURL);
+  const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
   if (!IS_SERVER_DEV) url.protocol = 'https';
@@ -466,7 +467,7 @@ const renderReactTree = async (
   });
 
   const incomingCookies = structuredClone(
-    parseCookies(request.headers.get('cookie') || ''),
+    parseCookies(requestHeaders.get('cookie') || ''),
   );
 
   if (entry.errorPage) {
@@ -483,9 +484,9 @@ const renderReactTree = async (
     // made available to the client-side.
     url: addPathSegmentsToURL(url, entry),
     params: entry.params,
-    userAgent: getRequestUserAgent(request),
-    geoLocation: getRequestGeoLocation(request),
-    languages: getRequestLanguages(request),
+    userAgent: getRequestUserAgent(requestHeaders),
+    geoLocation: getRequestGeoLocation(requestHeaders),
+    languages: getRequestLanguages(requestHeaders),
     addressBarInSync: options.updateAddressBar !== false,
 
     // Only available to server components. Cannot be serialized and made available on
@@ -620,7 +621,7 @@ const renderReactTree = async (
           // the error returned from the backend.
           console.log(`[BLADE] The provided ${type} was not found`);
 
-          return renderReactTree(new Request(url, request), initial, {
+          return renderReactTree(url, requestHeaders, initial, {
             error: 404,
             errorReason: `${type}-not-found`,
             forceNativeError,
@@ -650,13 +651,19 @@ const renderReactTree = async (
             // Optionally fall back to a different page if the queries have failed.
             const newPathname = options.errorFallback || url.pathname;
 
-            return renderReactTree(new Request(newPathname, request), initial, options, {
-              queries: serverContext.collected.queries.filter(
-                ({ type }) => type === 'write',
-              ),
-              metadata: {},
-              jwts: {},
-            });
+            return renderReactTree(
+              new URL(newPathname, url),
+              requestHeaders,
+              initial,
+              options,
+              {
+                queries: serverContext.collected.queries.filter(
+                  ({ type }) => type === 'write',
+                ),
+                metadata: {},
+                jwts: {},
+              },
+            );
           }
         } else {
           throw err;
@@ -703,14 +710,20 @@ const renderReactTree = async (
       getValue(writeQueryResults, content),
     );
 
-    return renderReactTree(new Request(newURL, request), initial, options, {
-      // We only need to pass the queries to the page, in order to provide the page with
-      // the results of the write queries that were executed.
-      queries: serverContext.collected.queries,
-      // The other properties should be empty, since nothing else was collected yet.
-      jwts: {},
-      metadata: {},
-    });
+    return renderReactTree(
+      new URL(newURL, requestURL),
+      requestHeaders,
+      initial,
+      options,
+      {
+        // We only need to pass the queries to the page, in order to provide the page with
+        // the results of the write queries that were executed.
+        queries: serverContext.collected.queries,
+        // The other properties should be empty, since nothing else was collected yet.
+        jwts: {},
+        metadata: {},
+      },
+    );
   }
 
   const headers = appendCookieHeader(
@@ -729,7 +742,8 @@ const renderReactTree = async (
     }
 
     return renderReactTree(
-      new Request(serverContext.collected.redirect, request),
+      new URL(serverContext.collected.redirect, url),
+      requestHeaders,
       initial,
       options,
       {
@@ -745,13 +759,13 @@ const renderReactTree = async (
   }
 
   // The ID of the browser session.
-  const sessionId = request.headers.get('X-Session-Id');
+  const sessionId = requestHeaders.get('X-Session-Id');
   const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
 
   // Update the server-side state to the new page.
   if (session) {
     session.url = url;
-    session.headers = request.headers;
+    session.headers = requestHeaders;
   }
 
   const body = await renderShell(initial, renderingLeaves, serverContext);
