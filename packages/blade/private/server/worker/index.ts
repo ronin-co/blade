@@ -173,6 +173,8 @@ app.post('/api', async (c) => {
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
 
+let id = 0;
+
 const flushUpdate = async (
   stream: SSEStreamingApi,
   url: URL,
@@ -188,6 +190,16 @@ const flushUpdate = async (
     event: initial ? 'update-bundle' : 'update',
     data: page.text(),
   });
+
+  while (true) {
+    const message = `It is ${new Date().toISOString()}`;
+    await stream.writeSSE({
+      data: message,
+      event: 'time-update',
+      id: String(id++),
+    });
+    await stream.sleep(1000);
+  }
 };
 
 // If this variable is already defined when the file gets evaluated, that means the file
