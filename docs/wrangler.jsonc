@@ -9,6 +9,8 @@
         "directory": ".blade/"
     },
     "observability": {
-        "logs": true
+        "logs": {
+            "enabled": true
+        }
     }
 }
