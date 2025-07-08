@@ -190,17 +190,17 @@ const flushUpdate = async (
   });
 };
 
-const keepConnectionAlive = async (stream: SSEStreamingApi) => {
-  while (true) {
-    await stream.writeSSE({
-      data: new Date().toISOString(),
-      event: 'keep-alive',
-      id: `${crypto.randomUUID()}-${bundleId}`,
-    });
+// const keepConnectionAlive = async (stream: SSEStreamingApi) => {
+//   while (true) {
+//     await stream.writeSSE({
+//       data: new Date().toISOString(),
+//       event: 'keep-alive',
+//       id: `${crypto.randomUUID()}-${bundleId}`,
+//     });
 
-    await stream.sleep(5000);
-  }
-};
+//     await new Promise((resolve) => setTimeout(resolve, 20000));
+//   }
+// };
 
 // If this variable is already defined when the file gets evaluated, that means the file
 // was evaluated previously already, so we're dealing with local HMR.
@@ -266,14 +266,21 @@ app.get('/_blade/session', async (c) => {
       globalThis.SERVER_SESSIONS.delete(sessionID);
     });
   }
-
   // Don't `await` this, so that the response headers get flushed immediately as a result
   // of the response getting returned below.
-  flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
+  stream
+    .writeSSE({
+      data: new Date().toISOString(),
+      event: 'keep-alive',
+      id: `${crypto.randomUUID()}-${bundleId}`,
+    })
+    .then(() => {
+      flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
+    });
 
   // Without this, the connection drops after a few seconds on Cloudflare.
   if (import.meta.env.__BLADE_PROVIDER === 'cloudflare') {
-    keepConnectionAlive(stream);
+    // keepConnectionAlive(stream);
   }
 
   return c.newResponse(stream.responseReadable);
