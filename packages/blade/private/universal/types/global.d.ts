@@ -19,6 +19,7 @@ interface ImportMetaEnv {
   readonly __BLADE_SERVICE_WORKER: string;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: This is needed.
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
