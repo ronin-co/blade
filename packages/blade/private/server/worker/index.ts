@@ -177,6 +177,7 @@ const flushUpdate = async (
   url: URL,
   headers: Headers,
   initial: boolean,
+  id?: string,
 ) => {
   const encoder = new TextEncoder();
   const waitUntil = getWaitUntil();
@@ -195,6 +196,16 @@ const flushUpdate = async (
 
   const encoded = encoder.encode(`${sseData.filter(Boolean).join('\n')}\n\n`);
   await writer.write(encoded);
+
+  if (id) {
+    try {
+      await writer.closed;
+    } catch (_err) {}
+
+    // Handle connection cleanup when the client disconnects.
+    globalThis.SERVER_SESSIONS.delete(id);
+    console.log('Closed', id);
+  }
 };
 
 // If this variable is already defined when the file gets evaluated, that means the file
@@ -210,7 +221,7 @@ if (globalThis.SERVER_SESSIONS) {
   globalThis.SERVER_SESSIONS = new Map();
 }
 
-app.get('/_blade/session', async (c) => {
+app.get('/_blade/session', (c) => {
   const currentURL = new URL(c.req.url);
   const { searchParams } = currentURL;
 
@@ -260,17 +271,7 @@ app.get('/_blade/session', async (c) => {
 
   // Don't `await` this, so that the response headers get flushed immediately as a result
   // of the response getting returned below.
-  flushUpdate(writer, pageURL, c.req.raw.headers, !correctBundle);
-
-  // Keep the worker alive as long as the connection is alive.
-  c.executionCtx.waitUntil(
-    writer.closed.finally(() => {
-      // Handle connection cleanup when the client disconnects.
-      globalThis.SERVER_SESSIONS.delete(sessionID);
-      console.log('Closed', sessionID);
-      writer.releaseLock();
-    }),
-  );
+  flushUpdate(writer, pageURL, c.req.raw.headers, !correctBundle, sessionID);
 
   return c.newResponse(readable);
 });
