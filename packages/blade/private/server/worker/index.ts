@@ -190,6 +190,14 @@ const flushUpdate = async (
   });
 };
 
+const keepWorkerAlive = () => {
+  // If there aren't any sessions remaining, let the worker die.
+  if (globalThis.SERVER_SESSIONS.size === 0) return;
+
+  // If there are open sessions remaining, keep the worker alive.
+  setTimeout(keepWorkerAlive, 5000);
+};
+
 // If this variable is already defined when the file gets evaluated, that means the file
 // was evaluated previously already, so we're dealing with local HMR.
 //
@@ -258,6 +266,16 @@ app.get('/_blade/session', async (c) => {
   // Don't `await` this, so that the response headers get flushed immediately as a result
   // of the response getting returned below.
   flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
+
+  // Cloudflare Workers get terminated as soon as the V8 event loop is empty, so we must
+  // ensure that the event loop remains populated as long as connections are open,
+  // otherwise the Worker gets terminated, which results in the connection getting
+  // terminated as well.
+  //
+  // Using `waitUntil` with a promise that remains pending until the connection closes
+  // doesn't work because Cloudflare detects those kinds of forever-pending promises and
+  // forcefully terminates the Worker in those cases, to avoid potential memory leaks.
+  if (import.meta.env.__BLADE_PROVIDER === 'cloudflare') keepWorkerAlive();
 
   return c.newResponse(stream.responseReadable);
 });
