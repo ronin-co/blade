@@ -198,18 +198,13 @@ const flushUpdate = async (
   await writer.write(encoded);
 
   if (id) {
-    while (true) {
-      const sseData = [
-        'event: keep-alive',
-        'data: ping',
-        `id: ${crypto.randomUUID()}-${bundleId}`,
-      ];
+    try {
+      await writer.closed;
+    } catch (_err) {}
 
-      const encoded = encoder.encode(`${sseData.filter(Boolean).join('\n')}\n\n`);
-      await writer.write(encoded);
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
+    // Handle connection cleanup when the client disconnects.
+    globalThis.SERVER_SESSIONS.delete(id);
+    console.log('Closed', id);
   }
 };
 
@@ -272,11 +267,6 @@ app.get('/_blade/session', (c) => {
     };
 
     globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
-
-    // Handle connection cleanup when the client disconnects.
-    c.req.raw.signal.addEventListener('abort', () => {
-      globalThis.SERVER_SESSIONS.delete(sessionID);
-    });
   }
 
   // Don't `await` this, so that the response headers get flushed immediately as a result
