@@ -173,8 +173,6 @@ app.post('/api', async (c) => {
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
 
-let id = 0;
-
 const flushUpdate = async (
   stream: SSEStreamingApi,
   url: URL,
@@ -190,15 +188,17 @@ const flushUpdate = async (
     event: initial ? 'update-bundle' : 'update',
     data: page.text(),
   });
+};
 
+const keepConnectionAlive = async (stream: SSEStreamingApi) => {
   while (true) {
-    const message = `It is ${new Date().toISOString()}`;
     await stream.writeSSE({
-      data: message,
-      event: 'time-update',
-      id: String(id++),
+      data: new Date().toISOString(),
+      event: 'keep-alive',
+      id: `${crypto.randomUUID()}-${bundleId}`,
     });
-    await stream.sleep(1000);
+
+    await stream.sleep(5000);
   }
 };
 
@@ -270,6 +270,11 @@ app.get('/_blade/session', async (c) => {
   // Don't `await` this, so that the response headers get flushed immediately as a result
   // of the response getting returned below.
   flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
+
+  // Without this, the connection drops after a few seconds on Cloudflare.
+  if (import.meta.env.__BLADE_PROVIDER === 'cloudflare') {
+    keepConnectionAlive(stream);
+  }
 
   return c.newResponse(stream.responseReadable);
 });
