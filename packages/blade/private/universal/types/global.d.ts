@@ -9,12 +9,18 @@ declare namespace NodeJS {
 
     // Provided automatically by BLADE.
     BLADE_ENV: 'development' | 'production';
-
-    // Provided automatically by BLADE, but only for internal use.
-    __BLADE_DEBUG_LEVEL: 'verbose' | 'error';
-    __BLADE_PROVIDER: import('./util').DeploymentProvider;
-    __BLADE_SERVICE_WORKER: string;
   }
+}
+
+// Provided automatically by BLADE, but only for internal use.
+interface ImportMetaEnv {
+  readonly __BLADE_DEBUG_LEVEL: 'verbose' | 'error';
+  readonly __BLADE_PROVIDER: import('./util').DeploymentProvider;
+  readonly __BLADE_SERVICE_WORKER: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
 
 declare module 'build-meta' {
