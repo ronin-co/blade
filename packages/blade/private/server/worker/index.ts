@@ -234,7 +234,7 @@ app.get('/_blade/session', async (c) => {
     return c.json(body, 400);
   }
 
-  const waitUntil = getWaitUntil(c);
+  // const waitUntil = getWaitUntil(c);
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
 
@@ -263,10 +263,11 @@ app.get('/_blade/session', async (c) => {
   flushUpdate(writer, pageURL, c.req.raw.headers, !correctBundle);
 
   // Keep the worker alive as long as the connection is alive.
-  waitUntil(
+  c.executionCtx.waitUntil(
     writer.closed.finally(() => {
       // Handle connection cleanup when the client disconnects.
       globalThis.SERVER_SESSIONS.delete(sessionID);
+      console.log('Closed', sessionID);
       writer.releaseLock();
     }),
   );
