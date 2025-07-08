@@ -1,7 +1,6 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { bundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
-import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
@@ -239,8 +238,6 @@ app.get('/_blade/session', async (c) => {
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
 
-  const stream = new SSEStreamingApi(writable, readable);
-
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/event-stream');
   c.header('Cache-Control', 'no-cache, no-transform');
@@ -274,7 +271,7 @@ app.get('/_blade/session', async (c) => {
     }),
   );
 
-  return c.newResponse(stream.responseReadable);
+  return c.newResponse(readable);
 });
 
 // Handle the initial render (first byte).
