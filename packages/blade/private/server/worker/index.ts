@@ -275,6 +275,9 @@ app.get('/_blade/session', async (c) => {
   // Using `waitUntil` with a promise that remains pending until the connection closes
   // doesn't work because Cloudflare detects those kinds of forever-pending promises and
   // forcefully terminates the Worker in those cases, to avoid potential memory leaks.
+  //
+  // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
+  // charge for this idle time.
   if (import.meta.env.__BLADE_PROVIDER === 'cloudflare') keepWorkerAlive();
 
   return c.newResponse(stream.responseReadable);
