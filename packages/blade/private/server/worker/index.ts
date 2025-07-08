@@ -267,14 +267,14 @@ app.get('/_blade/session', async (c) => {
   // of the response getting returned below.
   flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
 
-  // Cloudflare Workers get terminated as soon as the V8 event loop is empty, so we must
-  // ensure that the event loop remains populated as long as connections are open,
-  // otherwise the Worker gets terminated, which results in the connection getting
+  // Workers on Cloudflare get terminated as soon as the V8 event loop is empty, so we
+  // must ensure that the event loop remains populated as long as connections are open,
+  // otherwise the worker gets terminated, which results in the connection getting
   // terminated as well.
   //
   // Using `waitUntil` with a promise that remains pending until the connection closes
   // doesn't work because Cloudflare detects those kinds of forever-pending promises and
-  // forcefully terminates the Worker in those cases, to avoid potential memory leaks.
+  // forcefully terminates the worker in those cases, to avoid potential memory leaks.
   //
   // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
   // charge for this idle time.
