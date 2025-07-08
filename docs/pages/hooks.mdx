@@ -388,6 +388,8 @@ Note that, in order to avoid data waterfalls, data can only be read in server co
 
 The queries of your page and its surrounding layouts are executed as a single database transaction, in order to ensure instant page renders.
 
+## `useBatch` (Server)
+
 To run multiple queries within a single layout or page, the `useBatch` hook can be used:
 
 ```tsx
@@ -398,6 +400,8 @@ const [accounts, posts] = useBatch(() => [
     use.posts()
 ]);
 ```
+
+## `useCountOf` (Server)
 
 To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
 
