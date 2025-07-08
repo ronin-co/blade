@@ -1,3 +1,4 @@
+import type { SSEStreamingApi } from 'hono/streaming';
 import type { FormattedResults } from 'ronin/types';
 
 import type { UniversalContext } from '@/private/universal/context';
@@ -23,7 +24,7 @@ export interface BrowserSession {
    * An always-open connection between the server and the client, through which updates
    * can be pushed.
    */
-  writer: WritableStreamDefaultWriter;
+  stream: SSEStreamingApi;
 }
 
 interface QueryItemBase {

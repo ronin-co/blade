@@ -1,6 +1,7 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
 import { bundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
+import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
@@ -173,28 +174,20 @@ app.post('/api', async (c) => {
 if (projectRouter) app.route('/', projectRouter);
 
 const flushUpdate = async (
-  writer: WritableStreamDefaultWriter,
+  stream: SSEStreamingApi,
   url: URL,
   headers: Headers,
   initial: boolean,
 ) => {
-  const encoder = new TextEncoder();
-  const waitUntil = getWaitUntil();
+  const page = await renderReactTree(url, headers, initial, {
+    waitUntil: getWaitUntil(),
+  });
 
-  const page = await renderReactTree(url, headers, initial, { waitUntil });
-  const data = await page.text();
-
-  const sseData = [
-    `event: ${initial ? 'update-bundle' : 'update'}`,
-    data
-      .split('\n')
-      .map((line) => `data: ${line}`)
-      .join('\n'),
-    `id: ${crypto.randomUUID()}-${bundleId}`,
-  ];
-
-  const encoded = encoder.encode(`${sseData.filter(Boolean).join('\n')}\n\n`);
-  await writer.write(encoded);
+  await stream.writeSSE({
+    id: `${crypto.randomUUID()}-${bundleId}`,
+    event: initial ? 'update-bundle' : 'update',
+    data: page.text(),
+  });
 };
 
 // If this variable is already defined when the file gets evaluated, that means the file
@@ -203,8 +196,8 @@ const flushUpdate = async (
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.SERVER_SESSIONS) {
   for (const [, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
-    const { url, headers, writer } = sessionDetails;
-    flushUpdate(writer, url, headers, true);
+    const { url, headers, stream } = sessionDetails;
+    flushUpdate(stream, url, headers, true);
   }
 } else {
   globalThis.SERVER_SESSIONS = new Map();
@@ -234,9 +227,8 @@ app.get('/_blade/session', async (c) => {
     return c.json(body, 400);
   }
 
-  // const waitUntil = getWaitUntil(c);
   const { readable, writable } = new TransformStream();
-  const writer = writable.getWriter();
+  const stream = new SSEStreamingApi(writable, readable);
 
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/event-stream');
@@ -252,27 +244,22 @@ app.get('/_blade/session', async (c) => {
     const sessionDetails = {
       url: pageURL,
       headers: c.req.raw.headers,
-      writer,
+      stream,
     };
 
     globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
+
+    // Handle connection cleanup when the client disconnects.
+    c.req.raw.signal.addEventListener('abort', () => {
+      globalThis.SERVER_SESSIONS.delete(sessionID);
+    });
   }
 
   // Don't `await` this, so that the response headers get flushed immediately as a result
   // of the response getting returned below.
-  flushUpdate(writer, pageURL, c.req.raw.headers, !correctBundle);
+  flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
 
-  // Keep the worker alive as long as the connection is alive.
-  c.executionCtx.waitUntil(
-    writer.closed.finally(() => {
-      // Handle connection cleanup when the client disconnects.
-      globalThis.SERVER_SESSIONS.delete(sessionID);
-      console.log('Closed', sessionID);
-      writer.releaseLock();
-    }),
-  );
-
-  return c.newResponse(readable);
+  return c.newResponse(stream.responseReadable);
 });
 
 // Handle the initial render (first byte).
