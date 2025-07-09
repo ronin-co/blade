@@ -5,9 +5,4 @@ type DeferredPromise<T> = {
 
 export type DeferredPromises<T = unknown> = Record<string, DeferredPromise<T>>;
 
-export type RevalidationReason =
-  | 'window focused'
-  | 'went online'
-  | 'interval'
-  | 'page changed'
-  | 'files updated';
+export type RevalidationReason = 'window focused';

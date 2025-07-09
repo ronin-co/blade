@@ -43,23 +43,6 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     return () => window.removeEventListener('focus', focused);
   }, [revalidate]);
 
-  // Update the records on the current page when the device goes back online.
-  useEffect(() => {
-    const wentOnline = () => revalidate('went online');
-
-    window.addEventListener('online', wentOnline);
-    return () => window.removeEventListener('online', wentOnline);
-  }, [revalidate]);
-
-  // Update the records on the current page while looking at the window. The update
-  // should be performed every 5 seconds, but to ensure that there are never two updates
-  // happening at once, we should only begin a new update once the last one has resulted
-  // in a successful render.
-  useEffect(() => {
-    const timeout = setTimeout(() => revalidate('interval'), 5000);
-    return () => clearTimeout(timeout);
-  }, [revalidate, universalContext.lastUpdate]);
-
   // Ensure that the address bar is updated whenever the page changes, but only if this
   // is desired by the trigger of the page change.
   useLayoutEffect(() => {

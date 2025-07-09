@@ -56,7 +56,7 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
             rel="noreferrer">
             <Icons.Star className="size-3.5" />
 
-            <span>243</span>
+            <span>249</span>
           </a>
 
           <div className="block sm:hidden">

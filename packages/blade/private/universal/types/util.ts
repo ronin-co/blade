@@ -25,6 +25,10 @@ export interface BrowserSession {
    * can be pushed.
    */
   stream: SSEStreamingApi;
+  /** A promise that continously revalidates the session as long as it is open. */
+  interval: Promise<void>;
+  /** The ID of the bundle that is currently being used on the client. */
+  bundleId: string;
 }
 
 interface QueryItemBase {
