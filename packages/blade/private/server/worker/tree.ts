@@ -551,6 +551,7 @@ const renderReactTree = async (
     if (options.errorReason) url.searchParams.set('reason', options.errorReason);
   }
 
+  const sessionId = requestHeaders.get('X-Session-Id');
   const serverContext: ServerContext = {
     // Available to both server and client components, because it can be serialized and
     // made available to the client-side.
@@ -572,7 +573,7 @@ const renderReactTree = async (
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
     flushSession: (queries) =>
-      flushSession(requestHeaders.get('X-Session-Id'), {
+      flushSession(sessionId, {
         queries: Object.assign([], existingCollected?.queries, queries),
       }),
   };
@@ -834,8 +835,6 @@ const renderReactTree = async (
     );
   }
 
-  // The ID of the browser session.
-  const sessionId = requestHeaders.get('X-Session-Id');
   const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
 
   // Update the server-side state to the new page.

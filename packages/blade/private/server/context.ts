@@ -1,9 +1,9 @@
 import { createContext } from 'react';
+import type { Query } from 'ronin/types';
 
 import type { WaitUntil } from '@/private/server/types';
 import type { Collected } from '@/private/server/worker/tree';
 import type { UniversalContext } from '@/private/universal/context';
-import type { Query } from 'ronin/types';
 
 /** This context can only be consumed by server components. */
 export type ServerContext<
