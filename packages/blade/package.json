@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.5.5",
+  "version": "3.5.7",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -54,7 +54,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ronin/compiler": "0.18.9",
-    "@ronin/react": "0.1.4",
     "@ronin/syntax": "0.2.43",
     "@stefanprobst/rehype-extract-toc": "3.0.0",
     "@tailwindcss/node": "4.1.6",
