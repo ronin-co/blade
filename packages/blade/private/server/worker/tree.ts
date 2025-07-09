@@ -447,7 +447,7 @@ const appendCookieHeader = (
 export const flushSession = async (
   id: string | null,
   options?: {
-    collected?: Collected;
+    queries?: Array<QueryItemRead | QueryItemWrite>;
     repeat?: boolean;
   },
 ): Promise<void> => {
@@ -468,7 +468,11 @@ export const flushSession = async (
       {
         waitUntil: getWaitUntil(),
       },
-      options?.collected,
+      {
+        jwts: {},
+        metadata: {},
+        queries: options?.queries || [],
+      },
     );
 
     // Afterward, flush the update over the stream.
@@ -565,7 +569,7 @@ const renderReactTree = async (
     waitUntil: options.waitUntil,
     flushSession: (queries) =>
       flushSession(requestHeaders.get('X-Session-Id'), {
-        collected: Object.assign({}, existingCollected, { queries }),
+        queries: Object.assign([], existingCollected?.queries, queries),
       }),
   };
 
