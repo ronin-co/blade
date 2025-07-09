@@ -491,7 +491,7 @@ export const flushSession = async (
   // flushing yet another update.
   if (options?.repeat) {
     await sleep(5000);
-    await flushSession(id, options);
+    return flushSession(id, options);
   }
 };
 
