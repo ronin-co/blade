@@ -1,9 +1,8 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
-import { bundleId as serverBundleId } from 'build-meta';
+
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
-import { sleep } from 'radash';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
@@ -15,7 +14,10 @@ import {
   getRequestLanguages,
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
-import renderReactTree, { flushUI, type Collected } from '@/private/server/worker/tree';
+import renderReactTree, {
+  flushSession,
+  type Collected,
+} from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
@@ -101,9 +103,6 @@ app.post('/api', async (c) => {
 
   const waitUntil = getWaitUntil(c);
 
-  const sessionId = c.req.header('X-Session-Id');
-  const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
-
   const serverContext: ServerContext = {
     url: c.req.url,
     params: {},
@@ -120,15 +119,8 @@ app.post('/api', async (c) => {
     },
     currentLeafIndex: null,
     waitUntil,
-    flushUI: (collected) =>
-      flushUI(
-        //
-        session!.stream,
-        new URL(c.req.url),
-        c.req.raw.headers,
-        true,
-        collected,
-      ),
+    flushSession: (collected) =>
+      flushSession(c.req.header('X-Session-Id') ?? null, { collected }),
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the
@@ -185,56 +177,6 @@ app.post('/api', async (c) => {
 
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
-
-/**
- * Renders a new React tree for a particular browser session and flushes it down to the
- * client, which then updates the UI on the client.
- *
- * @param id - The ID of the session for which an update should be flushed.
- * @param repeat - Whether to flush another update for the session later on.
- *
- * @returns If a `repeat` is not set, a promise that resolves once the session has been
- * flushed once. Otherwise, if `repeat` is set, a promise that remains pending as long as
- * the session continues to exist.
- */
-const flushSession = async (id: string, repeat?: boolean) => {
-  const session = globalThis.SERVER_SESSIONS.get(id);
-
-  // If the session no longer exists, don't continue.
-  if (!session) return;
-
-  const { stream, url, headers, bundleId: clientBundleId } = session;
-  const correctBundle = clientBundleId === serverBundleId;
-
-  try {
-    // If the session does exist, render an update for it.
-    const page = await renderReactTree(url, headers, !correctBundle, {
-      waitUntil: getWaitUntil(),
-    });
-
-    // Afterward, flush the update over the stream.
-    await stream.writeSSE({
-      id: `${crypto.randomUUID()}-${serverBundleId}`,
-      event: correctBundle ? 'update' : 'update-bundle',
-      data: page.text(),
-    });
-  } catch (err) {
-    // If another update is being attempted later on anyways, we don't need to throw the
-    // error, since that would also prevent the repeated update later on.
-    if (repeat) {
-      console.error('Failed to flush session update, retrying later:', err);
-    } else {
-      throw err;
-    }
-  }
-
-  // If the update should be repeated later, wait for 5 seconds and then attempt
-  // flushing yet another update.
-  if (repeat) {
-    await sleep(5000);
-    return flushSession(id, repeat);
-  }
-};
 
 // If this variable is already defined when the file gets evaluated, that means the file
 // was evaluated previously already, so we're dealing with local HMR.
@@ -311,7 +253,7 @@ app.get('/_blade/session', async (c) => {
   //
   // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
   // charge for this idle time.
-  sessionDetails.interval = flushSession(sessionID, true);
+  sessionDetails.interval = flushSession(sessionID, { repeat: true });
 
   // Handle connection cleanup when the client disconnects.
   c.req.raw.signal.addEventListener('abort', () => {

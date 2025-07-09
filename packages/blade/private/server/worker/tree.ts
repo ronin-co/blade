@@ -1,5 +1,5 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
-import { bundleId } from 'build-meta';
+import { bundleId as serverBundleId } from 'build-meta';
 import {
   type CookieSerializeOptions,
   parse as parseCookies,
@@ -7,6 +7,7 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
+import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
@@ -43,7 +44,6 @@ import type {
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
-import type { SSEStreamingApi } from 'hono/streaming';
 
 const pages: PageList = {
   ...pageList,
@@ -433,38 +433,66 @@ const appendCookieHeader = (
 };
 
 /**
- * Flushes the UI by rendering the React tree and sending it to the client.
+ * Renders a new React tree for a particular browser session and flushes it down to the
+ * client, which then updates the UI on the client.
  *
- * @param stream - The streaming API to write the rendered page to.
- * @param url - The URL of the current request.
- * @param headers - The headers of the current request.
- * @param initial - Whether this is the initial request (SSR) or a subsequent update.
- * @param [collected] - Optional existing collected data to prime the server context with.
+ * @param id - The ID of the session for which an update should be flushed.
+ * @param [options.collected] - The collected data that should be used to render the page.
+ * @param [options.repeat] - Whether to flush another update for the session later on.
  *
- * @return A promise that resolves when the UI has been flushed.
+ * @returns If a `repeat` is not set, a promise that resolves once the session has been
+ * flushed once. Otherwise, if `repeat` is set, a promise that remains pending as long as
+ * the session continues to exist.
  */
-export const flushUI = async (
-  stream: SSEStreamingApi,
-  url: URL,
-  headers: Headers,
-  initial: boolean,
-  collected?: Collected,
-) => {
-  const page = await renderReactTree(
-    url,
-    headers,
-    initial,
-    {
-      waitUntil: getWaitUntil(),
-    },
-    collected,
-  );
+export const flushSession = async (
+  id: string | null,
+  options?: {
+    collected?: Collected;
+    repeat?: boolean;
+  },
+): Promise<void> => {
+  if (!id) return;
 
-  await stream.writeSSE({
-    id: `${crypto.randomUUID()}-${bundleId}`,
-    event: initial ? 'update-bundle' : 'update',
-    data: page.text(),
-  });
+  const session = globalThis.SERVER_SESSIONS.get(id);
+  if (!session) return;
+
+  const { stream, url, headers, bundleId: clientBundleId } = session;
+  const correctBundle = clientBundleId === serverBundleId;
+
+  try {
+    // If the session does exist, render an update for it.
+    const page = await renderReactTree(
+      url,
+      headers,
+      !correctBundle,
+      {
+        waitUntil: getWaitUntil(),
+      },
+      options?.collected,
+    );
+
+    // Afterward, flush the update over the stream.
+    await stream.writeSSE({
+      id: `${crypto.randomUUID()}-${serverBundleId}`,
+      event: correctBundle ? 'update' : 'update-bundle',
+      data: page.text(),
+    });
+  } catch (err) {
+    // If another update is being attempted later on anyways, we don't need to throw the
+    // error, since that would also prevent the repeated update later on.
+    if (options?.repeat) {
+      console.error('Failed to flush session update, retrying later:', err);
+    } else {
+      throw err;
+    }
+  }
+
+  // If the update should be repeated later, wait for 5 seconds and then attempt
+  // flushing yet another update.
+  if (options?.repeat) {
+    await sleep(5000);
+    await flushSession(id, options);
+  }
 };
 
 const renderReactTree = async (
@@ -535,15 +563,10 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushUI: (collected) => {
-      const sessionId = requestHeaders.get('X-Session-Id');
-      const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
-
-      // TODO(@nurodev): Add proper error handling for a missing session.
-      if (!session) return Promise.reject();
-
-      return flushUI(session.stream, session.url, session.headers, true, collected);
-    },
+    flushSession: (collected) =>
+      flushSession(requestHeaders.get('X-Session-Id'), {
+        collected: Object.assign({}, existingCollected, collected),
+      }),
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
@@ -822,7 +845,7 @@ const renderReactTree = async (
   } else {
     headers.set('Content-Type', 'application/json');
     // The ID of the main bundle currently available on the server.
-    headers.set('X-Server-Bundle-Id', bundleId);
+    headers.set('X-Server-Bundle-Id', serverBundleId);
   }
 
   return new Response(body, { headers });

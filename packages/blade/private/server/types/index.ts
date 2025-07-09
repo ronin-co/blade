@@ -95,7 +95,7 @@ export interface TriggerOptions extends ClientTriggerOptions {
   /**
    * TODO
    */
-  flushUI: ServerContext['flushUI'];
+  flushSession: ServerContext['flushSession'];
 }
 
 export type RecursiveRequired<T> = {
