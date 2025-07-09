@@ -229,7 +229,7 @@ const flushSession = async (id: string, repeat?: boolean) => {
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.SERVER_SESSIONS) {
-  globalThis.SERVER_SESSIONS.entries().map(([sessionId]) => flushSession(sessionId));
+  globalThis.SERVER_SESSIONS.forEach((_session, sessionId) => flushSession(sessionId));
 } else {
   globalThis.SERVER_SESSIONS = new Map();
 }
