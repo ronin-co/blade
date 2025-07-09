@@ -273,6 +273,18 @@ app.get('/_blade/session', async (c) => {
   //
   // It's critical to not `await` this function call, since the response further below
   // must be returned before the session is completely flushed (as quickly as possible).
+  //
+  // This also ensures that, in short-lived environments such as Cloudflare Workers, the
+  // worker stays alive as long as there are open sessions. Because they get terminated
+  // as soon as the V8 event loop is empty, so by ensuring that there is always something
+  // in the event loop as long as a connection is open, we keep the worker alive.
+  //
+  // Using `waitUntil` with a promise that remains pending until the connection closes
+  // wouldn't work because Cloudflare detects those kinds of forever-pending promises and
+  // forcefully terminates the worker in those cases, to avoid potential memory leaks.
+  //
+  // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
+  // charge for this idle time.
   sessionDetails.interval = flushSession(sessionID, true);
 
   // Handle connection cleanup when the client disconnects.
