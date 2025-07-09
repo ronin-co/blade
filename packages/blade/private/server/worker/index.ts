@@ -3,6 +3,7 @@ import { bundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
+import { sleep } from 'radash';
 import type { Query, QueryType } from 'ronin/types';
 import { ClientError } from 'ronin/utils';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
@@ -190,12 +191,25 @@ const flushUpdate = async (
   });
 };
 
-const keepWorkerAlive = () => {
-  // If there aren't any sessions remaining, let the worker die.
-  if (globalThis.SERVER_SESSIONS.size === 0) return;
+const flushSessions = async () => {
+  const sessions = globalThis.SERVER_SESSIONS;
 
-  // If there are open sessions remaining, keep the worker alive.
-  setTimeout(keepWorkerAlive, 5000);
+  // If there aren't any sessions remaining, let the worker die.
+  if (sessions.size === 0) return;
+
+  // If there are open sessions remaining, update them.
+  await Promise.all(
+    sessions.entries().map(([, session]) => {
+      const { stream, url, headers } = session;
+      return flushUpdate(stream, url, headers, false);
+    }),
+  );
+
+  // Wait for 5 seconds before flushing the next update.
+  await sleep(5000);
+
+  // Attempt the next update.
+  flushSessions();
 };
 
 // If this variable is already defined when the file gets evaluated, that means the file
@@ -278,7 +292,7 @@ app.get('/_blade/session', async (c) => {
   //
   // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
   // charge for this idle time.
-  if (import.meta.env.__BLADE_PROVIDER === 'cloudflare') keepWorkerAlive();
+  flushSessions();
 
   return c.newResponse(stream.responseReadable);
 });
