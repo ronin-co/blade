@@ -93,7 +93,10 @@ export interface TriggerOptions extends ClientTriggerOptions {
    */
   headless: boolean;
   /**
-   * TODO
+   * Triggers a full page re-render and streams the updated UI to the client.
+   *
+   * Optionally takes in a `Collected` object containing jwt, metadata & queries for
+   * the rendered page.
    */
   flushSession: ServerContext['flushSession'];
 }
