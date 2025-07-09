@@ -273,8 +273,12 @@ app.get('/_blade/session', async (c) => {
     url: pageURL,
     headers: c.req.raw.headers,
     stream,
-    interval: Promise.resolve(),
     bundleId: sessionBundle,
+    // We're purposefully using a `Promise` instead of `setInterval`, since the latter is
+    // prone to race conditions, because the interval continues running, even if the
+    // action hasn't yet been completed. Using our `Promise`, we ensure that the time
+    // only starts counting down once the action is completed.
+    interval: Promise.resolve(),
   };
 
   globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
