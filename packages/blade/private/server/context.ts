@@ -3,7 +3,7 @@ import { createContext } from 'react';
 import type { WaitUntil } from '@/private/server/types';
 import type { Collected } from '@/private/server/worker/tree';
 import type { UniversalContext } from '@/private/universal/context';
-import type { QueryItemRead, QueryItemWrite } from '@/private/universal/types/util';
+import type { Query } from 'ronin/types';
 
 /** This context can only be consumed by server components. */
 export type ServerContext<
@@ -16,7 +16,7 @@ export type ServerContext<
   collected: Collected;
   currentLeafIndex: number | null;
   waitUntil: WaitUntil;
-  flushSession?: (queries?: Array<QueryItemRead | QueryItemWrite>) => Promise<void>;
+  flushSession?: (queries?: Array<Query>) => Promise<void>;
 };
 
 export const RootServerContext = createContext<ServerContext | null>(null);
