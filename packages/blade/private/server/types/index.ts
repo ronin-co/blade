@@ -95,8 +95,7 @@ export interface TriggerOptions extends ClientTriggerOptions {
   /**
    * Triggers a full page re-render and streams the updated UI to the client.
    *
-   * Optionally takes in a `Collected` object containing jwt, metadata & queries for
-   * the rendered page.
+   * Optionally it takes an array of queries to used for the next page render.
    */
   flushSession: NonNullable<ServerContext['flushSession']>;
 }

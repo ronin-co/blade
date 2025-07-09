@@ -563,9 +563,9 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushSession: (collected) =>
+    flushSession: (queries) =>
       flushSession(requestHeaders.get('X-Session-Id'), {
-        collected: Object.assign({}, existingCollected, collected),
+        collected: Object.assign({}, existingCollected, { queries }),
       }),
   };
 
