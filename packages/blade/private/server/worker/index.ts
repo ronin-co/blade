@@ -278,7 +278,12 @@ app.get('/_blade/session', async (c) => {
   //
   // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
   // charge for this idle time.
-  if (import.meta.env.__BLADE_PROVIDER === 'cloudflare') keepWorkerAlive();
+  if (
+    import.meta.env.__BLADE_PROVIDER === 'cloudflare' ||
+    import.meta.env.__BLADE_PROVIDER === 'netlify'
+  ) {
+    keepWorkerAlive();
+  }
 
   return c.newResponse(stream.responseReadable);
 });
