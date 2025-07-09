@@ -150,7 +150,7 @@ if (isBuilding || isDeveloping) {
     format: 'esm',
     jsx: 'automatic',
     nodePaths: [path.join(process.cwd(), 'node_modules')],
-    minify: environment === 'production',
+    minify: false,
     // TODO: Remove this once `@ronin/engine` no longer relies on it.
     external: ['node:events'],
     plugins: [
