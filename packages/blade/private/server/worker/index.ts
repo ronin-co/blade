@@ -1,5 +1,4 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
-
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -119,8 +118,6 @@ app.post('/api', async (c) => {
     },
     currentLeafIndex: null,
     waitUntil,
-    flushSession: (collected) =>
-      flushSession(c.req.header('X-Session-Id') ?? null, { collected }),
   };
 
   // Generate a list of trigger functions based on the trigger files that exist in the

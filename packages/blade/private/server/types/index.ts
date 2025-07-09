@@ -98,7 +98,7 @@ export interface TriggerOptions extends ClientTriggerOptions {
    * Optionally takes in a `Collected` object containing jwt, metadata & queries for
    * the rendered page.
    */
-  flushSession: ServerContext['flushSession'];
+  flushSession: NonNullable<ServerContext['flushSession']>;
 }
 
 export type RecursiveRequired<T> = {
