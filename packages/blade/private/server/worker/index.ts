@@ -1,5 +1,5 @@
 import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
-import { bundleId } from 'build-meta';
+import { bundleId as serverBundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -174,42 +174,44 @@ app.post('/api', async (c) => {
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
 
-const flushUpdate = async (
-  stream: SSEStreamingApi,
-  url: URL,
-  headers: Headers,
-  initial: boolean,
-) => {
-  const page = await renderReactTree(url, headers, initial, {
+/**
+ * Renders a new React tree for a particular browser session and flushes it down to the
+ * client, which then updates the UI on the client.
+ *
+ * @param id - The ID of the session for which an update should be flushed.
+ * @param repeat - Whether to flush another update for the session later on.
+ *
+ * @returns If a `repeat` is not set, a promise that resolves once the session has been
+ * flushed once. Otherwise, if `repeat` is set, a promise that remains pending as long as
+ * the session continues to exist.
+ */
+const flushSession = async (id: string, repeat?: boolean) => {
+  const session = globalThis.SERVER_SESSIONS.get(id);
+
+  // If the session no longer exists, don't continue.
+  if (!session) return;
+
+  const { stream, url, headers, bundleId: clientBundleId } = session;
+  const correctBundle = clientBundleId === serverBundleId;
+
+  // If the session does exist, render an update for it.
+  const page = await renderReactTree(url, headers, !correctBundle, {
     waitUntil: getWaitUntil(),
   });
 
+  // Afterward, flush the update over the stream.
   await stream.writeSSE({
-    id: `${crypto.randomUUID()}-${bundleId}`,
-    event: initial ? 'update-bundle' : 'update',
+    id: `${crypto.randomUUID()}-${serverBundleId}`,
+    event: correctBundle ? 'update' : 'update-bundle',
     data: page.text(),
   });
-};
 
-const flushSessions = async () => {
-  const sessions = globalThis.SERVER_SESSIONS;
-
-  // If there aren't any sessions remaining, let the worker die.
-  if (sessions.size === 0) return;
-
-  // If there are open sessions remaining, update them.
-  await Promise.all(
-    sessions.entries().map(([, session]) => {
-      const { stream, url, headers } = session;
-      return flushUpdate(stream, url, headers, false);
-    }),
-  );
-
-  // Wait for 5 seconds before flushing the next update.
-  await sleep(5000);
-
-  // Attempt the next update.
-  flushSessions();
+  // If the update should be repeated later, wait for 5 seconds and then attempt
+  // flushing yet another update.
+  if (repeat) {
+    await sleep(5000);
+    return flushSession(id, repeat);
+  }
 };
 
 // If this variable is already defined when the file gets evaluated, that means the file
@@ -217,10 +219,7 @@ const flushSessions = async () => {
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.SERVER_SESSIONS) {
-  for (const [, sessionDetails] of globalThis.SERVER_SESSIONS.entries()) {
-    const { url, headers, stream } = sessionDetails;
-    flushUpdate(stream, url, headers, true);
-  }
+  globalThis.SERVER_SESSIONS.entries().map(([sessionId]) => flushSession(sessionId));
 } else {
   globalThis.SERVER_SESSIONS = new Map();
 }
@@ -259,40 +258,27 @@ app.get('/_blade/session', async (c) => {
   c.header('X-Accel-Buffering', 'no');
 
   const pageURL = new URL(sessionURL, currentURL);
-  const correctBundle = sessionBundle === bundleId;
 
-  // If the bundles on the client and server are matching, track the session.
-  if (correctBundle) {
-    const sessionDetails = {
-      url: pageURL,
-      headers: c.req.raw.headers,
-      stream,
-    };
+  const sessionDetails = {
+    url: pageURL,
+    headers: c.req.raw.headers,
+    stream,
+    interval: Promise.resolve(),
+    bundleId: sessionBundle,
+  };
 
-    globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
+  globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
 
-    // Handle connection cleanup when the client disconnects.
-    c.req.raw.signal.addEventListener('abort', () => {
-      globalThis.SERVER_SESSIONS.delete(sessionID);
-    });
-  }
-
-  // Don't `await` this, so that the response headers get flushed immediately as a result
-  // of the response getting returned below.
-  flushUpdate(stream, pageURL, c.req.raw.headers, !correctBundle);
-
-  // Workers on Cloudflare get terminated as soon as the V8 event loop is empty, so we
-  // must ensure that the event loop remains populated as long as connections are open,
-  // otherwise the worker gets terminated, which results in the connection getting
-  // terminated as well.
+  // Once we've created the session, flush an update for it.
   //
-  // Using `waitUntil` with a promise that remains pending until the connection closes
-  // doesn't work because Cloudflare detects those kinds of forever-pending promises and
-  // forcefully terminates the worker in those cases, to avoid potential memory leaks.
-  //
-  // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
-  // charge for this idle time.
-  flushSessions();
+  // It's critical to not `await` this function call, since the response further below
+  // must be returned before the session is completely flushed (as quickly as possible).
+  sessionDetails.interval = flushSession(sessionID, true);
+
+  // Handle connection cleanup when the client disconnects.
+  c.req.raw.signal.addEventListener('abort', () => {
+    globalThis.SERVER_SESSIONS.delete(sessionID);
+  });
 
   return c.newResponse(stream.responseReadable);
 });
