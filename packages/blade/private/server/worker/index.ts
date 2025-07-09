@@ -194,17 +194,27 @@ const flushSession = async (id: string, repeat?: boolean) => {
   const { stream, url, headers, bundleId: clientBundleId } = session;
   const correctBundle = clientBundleId === serverBundleId;
 
-  // If the session does exist, render an update for it.
-  const page = await renderReactTree(url, headers, !correctBundle, {
-    waitUntil: getWaitUntil(),
-  });
+  try {
+    // If the session does exist, render an update for it.
+    const page = await renderReactTree(url, headers, !correctBundle, {
+      waitUntil: getWaitUntil(),
+    });
 
-  // Afterward, flush the update over the stream.
-  await stream.writeSSE({
-    id: `${crypto.randomUUID()}-${serverBundleId}`,
-    event: correctBundle ? 'update' : 'update-bundle',
-    data: page.text(),
-  });
+    // Afterward, flush the update over the stream.
+    await stream.writeSSE({
+      id: `${crypto.randomUUID()}-${serverBundleId}`,
+      event: correctBundle ? 'update' : 'update-bundle',
+      data: page.text(),
+    });
+  } catch (err) {
+    // If another update is being attempted later on anyways, we don't need to throw the
+    // error, since that would also prevent the repeated update later on.
+    if (repeat) {
+      console.error('Failed to flush session update, retrying later:', err);
+    } else {
+      throw err;
+    }
+  }
 
   // If the update should be repeated later, wait for 5 seconds and then attempt
   // flushing yet another update.
