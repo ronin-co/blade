@@ -10,6 +10,7 @@ import { getSerializableContext } from '@/private/universal/context';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { Asset } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
+import { usePopulatePathname } from '@/public/universal/hooks';
 
 const metadataNames: Record<string, string> = {
   colorScheme: 'color-scheme',
@@ -47,6 +48,7 @@ const Root = ({ children, serverContext }: RootProps) => {
   const { metadata } = serverContext.collected;
 
   const currentLocation = usePrivateLocation();
+  const populatePathname = usePopulatePathname();
 
   const flatMetadata = Object.entries(
     flatten<PageMetadata, Record<string, ValueOf<PageMetadata>>>(
@@ -115,7 +117,7 @@ const Root = ({ children, serverContext }: RootProps) => {
         />
         <meta
           property="og:url"
-          content={currentLocation.href}
+          content={populatePathname(currentLocation.href)}
         />
 
         {flatMetadata.map(([name, value]) => {
