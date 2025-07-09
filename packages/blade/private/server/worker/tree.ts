@@ -447,7 +447,7 @@ const appendCookieHeader = (
 export const flushSession = async (
   id: string | null,
   options?: {
-    queries?: Array<QueryItemRead | QueryItemWrite>;
+    queries?: Array<Query>;
     repeat?: boolean;
   },
 ): Promise<void> => {
@@ -471,7 +471,11 @@ export const flushSession = async (
       {
         jwts: {},
         metadata: {},
-        queries: options?.queries || [],
+        queries: (options?.queries || []).map((query) => ({
+          hookHash: crypto.randomUUID(),
+          query: JSON.stringify(query),
+          type: 'write',
+        })),
       },
     );
 
