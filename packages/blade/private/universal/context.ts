@@ -15,7 +15,6 @@ export type UniversalContext<
   url: string;
   params: TParams extends Array<string> ? { [K in TParams[number]]: string } : TParams;
   userAgent: UserAgent;
-  lastUpdate: number;
   geoLocation: GeoLocation;
   addressBarInSync: boolean;
   languages: string[];
@@ -38,7 +37,6 @@ export const getSerializableContext = (
   url: serverContext.url,
   params: serverContext.params,
   userAgent: serverContext.userAgent,
-  lastUpdate: Date.now(),
   geoLocation: serverContext.geoLocation,
   addressBarInSync: serverContext.addressBarInSync,
   languages: serverContext.languages,
