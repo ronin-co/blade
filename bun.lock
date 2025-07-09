@@ -11,13 +11,12 @@
     },
     "packages/blade": {
       "name": "blade",
-      "version": "3.4.11",
+      "version": "3.5.6",
       "bin": {
         "blade": "./dist/private/shell/index.js",
       },
       "dependencies": {
         "@ronin/compiler": "0.18.9",
-        "@ronin/react": "0.1.4",
         "@ronin/syntax": "0.2.43",
         "@stefanprobst/rehype-extract-toc": "3.0.0",
         "@tailwindcss/node": "4.1.6",
@@ -64,7 +63,7 @@
     },
     "packages/create-blade": {
       "name": "create-blade",
-      "version": "3.4.11",
+      "version": "3.5.6",
       "bin": {
         "create-blade": "./dist/index.js",
       },
@@ -270,8 +269,6 @@
     "@ronin/compiler": ["@ronin/compiler@0.18.9", "", { "peerDependencies": { "@ronin/engine": ">=0.1.23" } }, "sha512-6h1YGdpcD/hUlrS4Mm9NvG+MlWcaPZ/+eaALSvxBXxxWb4dWcwtrtAU9/X3eZusSOa3MT6fbP3i1vDLdLWo/JA=="],
 
     "@ronin/engine": ["@ronin/engine@0.1.23", "", { "dependencies": { "zod": "3.24.1" } }, "sha512-QDeikl4YEBFHEdful9+x5e8lLrxXvjhubJEYxnFfM7SJoFC9OxoE+Dq4g6mVzRuCI+gN+Odkdy3gd2ARr7eXFg=="],
-
-    "@ronin/react": ["@ronin/react@0.1.4", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.7", "react": ">=18.3.1", "ronin": ">=6.6.13" } }, "sha512-VG+lgUBrJ2qKxzgpq9Wk3OV8r4u1L5Zv7UiLOkFm142W8XrZLnV0FyRW8QmFcMDtLPdWjqwfUYGYGZHR5EATQA=="],
 
     "@ronin/syntax": ["@ronin/syntax@0.2.43", "", { "peerDependencies": { "@ronin/compiler": ">=0.18.8" } }, "sha512-1ieYLB3SqmD2JfavuKcf/0gTwgZD4X859FDJ+8R5oO3BS1EUfGpfk1kQ0sYUgp+fM4pu0+4gjbHlNDi6Z998ag=="],
 
@@ -814,8 +811,6 @@
     "queue-microtask": ["queue-microtask@1.2.3", "", {}, "sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A=="],
 
     "radash": ["radash@12.1.0", "", {}, "sha512-b0Zcf09AhqKS83btmUeYBS8tFK7XL2e3RvLmZcm0sTdF1/UUlHSsjXdCcWNxe7yfmAlPve5ym0DmKGtTzP6kVQ=="],
-
-    "react": ["react@19.1.0", "", {}, "sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg=="],
 
     "readdirp": ["readdirp@4.1.2", "", {}, "sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg=="],
 
