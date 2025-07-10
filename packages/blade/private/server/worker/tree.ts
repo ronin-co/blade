@@ -437,7 +437,7 @@ const appendCookieHeader = (
  * client, which then updates the UI on the client.
  *
  * @param id - The ID of the session for which an update should be flushed.
- * @param [options.collected] - The collected data that should be used to render the page.
+ * @param [options.queries] - A list of write queries that should be executed.
  * @param [options.repeat] - Whether to flush another update for the session later on.
  *
  * @returns If a `repeat` is not set, a promise that resolves once the session has been
