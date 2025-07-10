@@ -1,4 +1,5 @@
 import Queue from 'p-queue';
+import { omit } from 'radash';
 import {
   type MutableRefObject,
   type ReactNode,
@@ -18,20 +19,15 @@ import { usePopulatePathname } from '@/public/universal/hooks';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**
+   * Whether to insert the page into the cache. This will also cause the page to get
+   * retrieved again after it was rendered, to make sure it is up-to-date.
+   */
+  cache?: boolean;
+  /**
    * Update the query string parameters in the address bar of the browser immediately,
    * instead of waiting for the page to be rendered on the server and returned.
    */
   immediatelyUpdateQueryParams?: boolean;
-  /**
-   * By default, the server-side session will immediately be updated to the URL of the
-   * new page, as soon as `transitionPage(path)` is called, meaning as soon as the page
-   * was retrieved from the server.
-   *
-   * If the server-side session should only be updated once `transitionPage(path)()` is
-   * called, meaning once the page was actually rendered on the client, the option can
-   * be set to `true`.
-   */
-  async?: boolean;
 }
 
 // We use this queue to ensure that all manual page transitions commit on the server
@@ -46,13 +42,10 @@ export const usePageTransition = () => {
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
 
-  return (path: string, options?: RootTransitionOptions) => {
-    const { immediatelyUpdateQueryParams, async, ...pageOptions } = options || {};
-
-    const cacheable = !(pageOptions.queries || immediatelyUpdateQueryParams);
+  return function transitionPage(path: string, options?: RootTransitionOptions) {
     const privateLocation = privateLocationRef.current;
 
-    if (cacheable) {
+    if (options?.cache) {
       const maxAge = Date.now() - 10000;
       const cacheEntry = cache.current.get(path);
 
@@ -70,7 +63,7 @@ export const usePageTransition = () => {
     // If desired, already update the query params in the address bar before the server
     // has rendered the new ones. Take a look at the `RootClientContext.Provider`
     // component for more details on this.
-    if (immediatelyUpdateQueryParams) {
+    if (options?.immediatelyUpdateQueryParams) {
       const url = new URL(path, privateLocation.origin);
 
       history.replaceState(history.state, '', url);
@@ -81,10 +74,16 @@ export const usePageTransition = () => {
       throw new Error('Device is not online to perform manual page transition');
     }
 
+    // Only retain options allowed by `PageFetchingOptions`.
+    const pageOptions = omit(options || {}, ['cache', 'immediatelyUpdateQueryParams']);
+
     const pagePromise = pageTransitionQueue.add(async () => {
       const page = await fetchPage(path, {
         ...pageOptions,
-        sessionId: async ? window['BLADE_SESSION']!.id : undefined,
+        // Don't pass a session ID yet, to ensure that the server-side session doesn't
+        // get updated yet. It should only get updated once the page was actually
+        // rendered, not when it was prefetched.
+        sessionId: options?.cache ? window['BLADE_SESSION']!.id : undefined,
       });
 
       // Check the session again after `fetchPage` has finished running, since it might
@@ -123,7 +122,7 @@ export const usePageTransition = () => {
       if (!page) return;
 
       // As soon as possible, store the page in the cache.
-      if (cacheable) cache.current.set(path, { body: page, time: Date.now() });
+      if (options?.cache) cache.current.set(path, { body: page, time: Date.now() });
 
       // By the time we're ready to render the new page, a newer page transition might
       // have already been started. If that's the case, we want to skip the current
@@ -146,6 +145,14 @@ export const usePageTransition = () => {
 
         // Render the page.
         window['BLADE_SESSION']!.root.render(page);
+
+        // Since the page was served from cache and its data might therefore be stale,
+        // we want to revalidate it immediately after rendering it. This also serves the
+        // purpose of updating the server-side session to have the correct URL.
+        //
+        // Is is essential to not pass things like `cache` as options here, since we
+        // don't want to cause an infinite loop.
+        if (options?.cache) transitionPage(path, pageOptions)();
       });
     };
   };
