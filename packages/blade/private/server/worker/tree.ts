@@ -452,6 +452,12 @@ export const flushSession = async (
   },
 ): Promise<void> => {
   const session = globalThis.SERVER_SESSIONS.get(id);
+
+  // If the session no longer exists, don't continue.
+  //
+  // In the case that `repeat` was set, this would now let the worker die, since nothing
+  // will remain in the event loop. It is crucial for ensuring that workers are not kept
+  // alive if there aren't any connections currently open.
   if (!session) return;
 
   const { stream, url, headers, bundleId: clientBundleId } = session;
@@ -536,6 +542,9 @@ const renderReactTree = async (
     forceNativeError: options.forceNativeError,
   });
 
+  // The ID of the browser session.
+  const sessionId = requestHeaders.get('X-Session-Id');
+
   const incomingCookies = structuredClone(
     parseCookies(requestHeaders.get('cookie') || ''),
   );
@@ -549,8 +558,6 @@ const renderReactTree = async (
     if (options.errorReason) url.searchParams.set('reason', options.errorReason);
   }
 
-  // The ID of the browser session.
-  const sessionId = requestHeaders.get('X-Session-Id');
   const serverContext: ServerContext = {
     // Available to both server and client components, because it can be serialized and
     // made available to the client-side.

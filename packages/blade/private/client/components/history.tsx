@@ -1,8 +1,8 @@
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { RootClientContext } from '@/private/client/context';
-import { usePageTransition, useRevalidation } from '@/private/client/hooks';
-import type { DeferredPromises, RevalidationReason } from '@/private/client/types/util';
+import { usePageTransition } from '@/private/client/hooks';
+import type { DeferredPromises } from '@/private/client/types/util';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import type { UniversalContext } from '@/private/universal/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
@@ -15,9 +15,8 @@ interface HistoryContentProps {
 const HistoryContent = ({ children }: HistoryContentProps) => {
   const universalContext = useUniversalContext();
   const transitionPage = usePageTransition();
-  const revalidate = useRevalidation<RevalidationReason>();
 
-  const { pathname, search } = usePrivateLocation();
+  const { pathname, search, hash } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
   const populatedPathname = populatePathname(pathname);
   const mounted = useRef(false);
@@ -28,7 +27,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     const pageChanged = () => {
       const newLocation = window.location;
       const pathname = newLocation.pathname + newLocation.search + newLocation.hash;
-      transitionPage(pathname, 'manual')();
+      transitionPage(pathname)();
     };
 
     window.addEventListener('popstate', pageChanged);
@@ -37,11 +36,16 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
 
   // Update the records on the current page if the window gains focus.
   useEffect(() => {
-    const focused = () => revalidate('window focused');
+    const focused = () => {
+      const path = populatedPathname + search;
+      console.debug(`Revalidating ${path} (window focused)`);
+
+      transitionPage(populatedPathname + search + hash)();
+    };
 
     window.addEventListener('focus', focused);
     return () => window.removeEventListener('focus', focused);
-  }, [revalidate]);
+  }, [populatedPathname + search + hash]);
 
   // Ensure that the address bar is updated whenever the page changes, but only if this
   // is desired by the trigger of the page change.

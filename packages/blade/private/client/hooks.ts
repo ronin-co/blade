@@ -10,7 +10,6 @@ import {
 } from 'react';
 
 import { RootClientContext } from '@/private/client/context';
-import type { RevalidationReason } from '@/private/client/types/util';
 import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
 import { fetchPage } from '@/private/client/utils/page';
 import { usePrivateLocation } from '@/private/universal/hooks';
@@ -25,6 +24,9 @@ export interface RootTransitionOptions extends PageFetchingOptions {
   immediatelyUpdateQueryParams?: boolean;
 }
 
+// We use this queue to ensure that all manual page transitions commit on the server
+// in the order they were started. Because page transitions may contain write queries
+// that must be guaranteed to commit.
 const pageTransitionQueue = new Queue({ concurrency: 1 });
 
 export const usePageTransition = () => {
@@ -34,11 +36,7 @@ export const usePageTransition = () => {
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
 
-  return (
-    path: string,
-    type: 'manual' | 'automatic',
-    options?: RootTransitionOptions,
-  ) => {
+  return (path: string, options?: RootTransitionOptions) => {
     const cacheable = !(options?.queries || options?.immediatelyUpdateQueryParams);
     const privateLocation = privateLocationRef.current;
 
@@ -67,80 +65,40 @@ export const usePageTransition = () => {
       clientContext.setClientQueryParams(url.search);
     }
 
-    // If the page transition was triggered automatically and there's a manual or
-    // automatic one in the queue (and therefore about to be run), we want to skip the
-    // new one because the purpose of automatic revalidation is to ensure that the page
-    // always shows the latest data. If a page transition of any kind will be rendered,
-    // that means the page will already show the latest data.
-    if (
-      type === 'automatic' &&
-      (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0)
-    ) {
-      return () => {
-        console.debug(
-          'Skipping automatic page transition because of other pending page transitions.',
-        );
-      };
-    }
-
     if (!window.navigator.onLine) {
-      if (type === 'automatic') {
-        return () => {
-          console.debug(
-            'Skipping automatic page transition because device is not online.',
-          );
-        };
-      }
-
       throw new Error('Device is not online to perform manual page transition');
     }
 
-    const ongoingManualAmount = pageTransitionQueue.sizeBy({ priority: 1 });
-    const ongoingAutomaticAmount = pageTransitionQueue.sizeBy({ priority: 0 });
+    const pagePromise = pageTransitionQueue.add(async () => {
+      const page = await fetchPage(path, options);
+      const session = window['BLADE_SESSION'];
 
-    // If there are currently any automatic page transitions in the queue waiting to be
-    // run, we want to stop them because a new update is being started. Regardless of
-    // whether that new update is manual or automatic, it will cause the page to show the
-    // latest data, so we don't want to waste time waiting for the ongoing transition.
-    // Only manual updates are guaranteed to always commit, because that's what the user
-    // would expect.
-    if (ongoingManualAmount === 0 && ongoingAutomaticAmount > 0) {
-      pageTransitionQueue.clear();
-    }
-
-    const pagePromise = pageTransitionQueue.add(
-      async () => {
-        const page = await fetchPage(path, options);
-        const session = window['BLADE_SESSION'];
-
-        // If the client bundles have changed, don't proceed, since `fetchPage` will
-        // retrieve the latest bundles fresh in that case.
+      // If the client bundles have changed, don't proceed, since `fetchPage` will
+      // retrieve the latest bundles fresh in that case.
+      //
+      // If no browser session is available, new bundles are currently being mounted so
+      // we should clear the queue instead of proceeding.
+      if (!page || !session) {
+        // Immediately destroy the page queue, since we now know that the server has
+        // changed, so we cannot continue processing any further requests from the old
+        // client chunks. We have to do this inside the promise of the current function
+        // and not after it resolves, since the queue would otherwise immediately start
+        // working on the other queue items.
         //
-        // If no browser session is available, new bundles are currently being mounted so
-        // we should clear the queue instead of proceeding.
-        if (!page || !session) {
-          // Immediately destroy the page queue, since we now know that the server has
-          // changed, so we cannot continue processing any further requests from the old
-          // client chunks. We have to do this inside the promise of the current function
-          // and not after it resolves, since the queue would otherwise immediately start
-          // working on the other queue items.
-          //
-          // It's critical that this happens inside the promise that is being handled by
-          // the queue and not outside the queue, otherwise the queue will already start
-          // working on the next item after the current one finishes.
-          //
-          // Note that it's absolutely fine for the queue to be destroyed completely,
-          // since the new client chunks will mount an entirely new queue.
-          pageTransitionQueue.pause();
-          pageTransitionQueue.clear();
+        // It's critical that this happens inside the promise that is being handled by
+        // the queue and not outside the queue, otherwise the queue will already start
+        // working on the next item after the current one finishes.
+        //
+        // Note that it's absolutely fine for the queue to be destroyed completely,
+        // since the new client chunks will mount an entirely new queue.
+        pageTransitionQueue.pause();
+        pageTransitionQueue.clear();
 
-          return null;
-        }
+        return null;
+      }
 
-        return page;
-      },
-      { priority: type === 'manual' ? 1 : 0 },
-    );
+      return page;
+    });
 
     const pagePromiseChain = pagePromise.then((page) => {
       // Do nothing if no page is available. Logging already happens earlier.
@@ -172,27 +130,6 @@ export const usePageTransition = () => {
         window['BLADE_SESSION']!.root.render(page);
       });
     };
-  };
-};
-
-/**
- * Allows for revalidating the current page on the edge, in order to render the most
- * recent version of all the records used on that page.
- *
- * @returns A function that can be used to trigger a revalidation for the currently
- * active page.
- */
-export const useRevalidation = <T extends RevalidationReason>() => {
-  const transitionPage = usePageTransition();
-  const privateLocationRef = usePrivateLocationRef();
-
-  return (reason: T) => {
-    const privateLocation = privateLocationRef.current;
-    const path = privateLocation.pathname + privateLocation.search + privateLocation.hash;
-
-    console.debug(`Revalidating ${path} (${reason})`);
-
-    transitionPage(path, 'automatic')();
   };
 };
 

@@ -81,7 +81,7 @@ const useRedirect = () => {
   return (pathname: string, options?: RedirectOptions) => {
     const populatedPathname = populatePathname(pathname, options?.extraParams);
 
-    transitionPage(populatedPathname, 'manual', {
+    transitionPage(populatedPathname, {
       immediatelyUpdateQueryParams: options?.immediatelyUpdateQueryParams,
     })();
   };
