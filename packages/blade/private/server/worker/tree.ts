@@ -445,14 +445,12 @@ const appendCookieHeader = (
  * the session continues to exist.
  */
 export const flushSession = async (
-  id: string | null,
+  id: string,
   options?: {
     queries?: Array<Query>;
     repeat?: boolean;
   },
 ): Promise<void> => {
-  if (!id) return;
-
   const session = globalThis.SERVER_SESSIONS.get(id);
   if (!session) return;
 
@@ -551,6 +549,7 @@ const renderReactTree = async (
     if (options.errorReason) url.searchParams.set('reason', options.errorReason);
   }
 
+  // The ID of the browser session.
   const sessionId = requestHeaders.get('X-Session-Id');
   const serverContext: ServerContext = {
     // Available to both server and client components, because it can be serialized and
@@ -572,7 +571,9 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushSession: (queries) => flushSession(sessionId, { queries }),
+    flushSession: sessionId
+      ? (queries) => flushSession(sessionId, { queries })
+      : undefined,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
