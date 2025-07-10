@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+import type { Query } from 'ronin/types';
 
 import type { WaitUntil } from '@/private/server/types';
 import type { Collected } from '@/private/server/worker/tree';
@@ -15,6 +16,7 @@ export type ServerContext<
   collected: Collected;
   currentLeafIndex: number | null;
   waitUntil: WaitUntil;
+  flushSession?: (queries?: Array<Query>) => Promise<void>;
 };
 
 export const RootServerContext = createContext<ServerContext | null>(null);

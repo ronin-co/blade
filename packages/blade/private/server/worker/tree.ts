@@ -1,5 +1,5 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
-import { bundleId } from 'build-meta';
+import { bundleId as serverBundleId } from 'build-meta';
 import {
   type CookieSerializeOptions,
   parse as parseCookies,
@@ -7,6 +7,7 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
+import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
@@ -22,7 +23,7 @@ import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import { SECURITY_HEADERS, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
-import { runQueries } from '@/private/server/utils/data';
+import { getWaitUntil, runQueries } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
 import { getParentDirectories, joinPaths } from '@/private/server/utils/paths';
 import {
@@ -431,6 +432,75 @@ const appendCookieHeader = (
   return headers;
 };
 
+/**
+ * Renders a new React tree for a particular browser session and flushes it down to the
+ * client, which then updates the UI on the client.
+ *
+ * @param id - The ID of the session for which an update should be flushed.
+ * @param [options.queries] - A list of write queries that should be executed.
+ * @param [options.repeat] - Whether to flush another update for the session later on.
+ *
+ * @returns If `repeat` is not set, a promise that resolves once the session has been
+ * flushed once. Otherwise, if `repeat` is set, a promise that remains pending as long as
+ * the session continues to exist.
+ */
+export const flushSession = async (
+  id: string,
+  options?: {
+    queries?: Array<Query>;
+    repeat?: boolean;
+  },
+): Promise<void> => {
+  const session = globalThis.SERVER_SESSIONS.get(id);
+  if (!session) return;
+
+  const { stream, url, headers, bundleId: clientBundleId } = session;
+  const correctBundle = clientBundleId === serverBundleId;
+
+  try {
+    // If the session does exist, render an update for it.
+    const page = await renderReactTree(
+      url,
+      headers,
+      !correctBundle,
+      {
+        waitUntil: getWaitUntil(),
+      },
+      {
+        jwts: {},
+        metadata: {},
+        queries: (options?.queries || []).map((query) => ({
+          hookHash: crypto.randomUUID(),
+          query: JSON.stringify(query),
+          type: 'write',
+        })),
+      },
+    );
+
+    // Afterward, flush the update over the stream.
+    await stream.writeSSE({
+      id: `${crypto.randomUUID()}-${serverBundleId}`,
+      event: correctBundle ? 'update' : 'update-bundle',
+      data: page.text(),
+    });
+  } catch (err) {
+    // If another update is being attempted later on anyways, we don't need to throw the
+    // error, since that would also prevent the repeated update later on.
+    if (options?.repeat) {
+      console.error('Failed to flush session update, retrying later:', err);
+    } else {
+      throw err;
+    }
+  }
+
+  // If the update should be repeated later, wait for 5 seconds and then attempt
+  // flushing yet another update.
+  if (options?.repeat) {
+    await sleep(5000);
+    return flushSession(id, options);
+  }
+};
+
 const renderReactTree = async (
   /** The URL of the current request. */
   requestURL: URL,
@@ -479,6 +549,8 @@ const renderReactTree = async (
     if (options.errorReason) url.searchParams.set('reason', options.errorReason);
   }
 
+  // The ID of the browser session.
+  const sessionId = requestHeaders.get('X-Session-Id');
   const serverContext: ServerContext = {
     // Available to both server and client components, because it can be serialized and
     // made available to the client-side.
@@ -499,6 +571,9 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
+    flushSession: sessionId
+      ? (queries) => flushSession(sessionId, { queries })
+      : undefined,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
@@ -758,8 +833,6 @@ const renderReactTree = async (
     );
   }
 
-  // The ID of the browser session.
-  const sessionId = requestHeaders.get('X-Session-Id');
   const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
 
   // Update the server-side state to the new page.
@@ -777,7 +850,7 @@ const renderReactTree = async (
   } else {
     headers.set('Content-Type', 'application/json');
     // The ID of the main bundle currently available on the server.
-    headers.set('X-Server-Bundle-Id', bundleId);
+    headers.set('X-Server-Bundle-Id', serverBundleId);
   }
 
   return new Response(body, { headers });
