@@ -80,10 +80,10 @@ export const usePageTransition = () => {
     const pagePromise = pageTransitionQueue.add(async () => {
       const page = await fetchPage(path, {
         ...pageOptions,
-        // Don't pass a session ID yet, to ensure that the server-side session doesn't
-        // get updated yet. It should only get updated once the page was actually
-        // rendered, not when it was prefetched.
-        sessionId: options?.cache ? window['BLADE_SESSION']!.id : undefined,
+        // If the page should be cached, don't pass the session ID yet, to ensure that
+        // the server-side session doesn't get updated yet. It should only get updated
+        // once the page was actually rendered, not when it was prefetched.
+        sessionId: options?.cache ? undefined : window['BLADE_SESSION']!.id,
       });
 
       // Check the session again after `fetchPage` has finished running, since it might
