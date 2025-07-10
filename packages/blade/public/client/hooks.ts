@@ -121,7 +121,7 @@ export const useMutation = (): {
       },
     );
 
-    transitionPage(destination, 'manual', {
+    transitionPage(destination, {
       queries: queries.map((_, index) => ({
         query: JSON.stringify(updatedQueries[index]),
         type: 'write',
@@ -224,7 +224,7 @@ export const useLinkEvents = (
     // We don't want to rely on `event.target` for retrieving the destination path, as
     // the event target might not be a link in the case that there are many nested
     // children present.
-    activeTransition.current = transitionPage(populatedPathname, 'manual');
+    activeTransition.current = transitionPage(populatedPathname);
   };
 
   return {
@@ -305,7 +305,7 @@ export const usePagination = (
     newSearchParams.delete('page');
     const params = newSearchParams.toString();
 
-    transitionPage(privateLocation.pathname + (params ? `?${params}` : ''), 'manual')();
+    transitionPage(privateLocation.pathname + (params ? `?${params}` : ''))();
   };
 
   if (!nextPage) {
@@ -338,7 +338,7 @@ export const usePagination = (
 
     loadingMore.current = true;
 
-    transitionPage(newPath, 'manual', {
+    transitionPage(newPath, {
       updateAddressBar: options?.updateAddressBar,
     })();
   };
