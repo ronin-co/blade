@@ -1,4 +1,5 @@
 import Queue from 'p-queue';
+import { omit } from 'radash';
 import {
   type MutableRefObject,
   type ReactNode,
@@ -18,6 +19,11 @@ import { usePopulatePathname } from '@/public/universal/hooks';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**
+   * Whether to insert the page into the cache. This will also cause the page to get
+   * retrieved again after it was rendered, to make sure it is up-to-date.
+   */
+  cache?: boolean;
+  /**
    * Update the query string parameters in the address bar of the browser immediately,
    * instead of waiting for the page to be rendered on the server and returned.
    */
@@ -36,11 +42,10 @@ export const usePageTransition = () => {
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
 
-  return (path: string, options?: RootTransitionOptions) => {
-    const cacheable = !(options?.queries || options?.immediatelyUpdateQueryParams);
+  return function transitionPage(path: string, options?: RootTransitionOptions) {
     const privateLocation = privateLocationRef.current;
 
-    if (cacheable) {
+    if (options?.cache) {
       const maxAge = Date.now() - 10000;
       const cacheEntry = cache.current.get(path);
 
@@ -69,16 +74,28 @@ export const usePageTransition = () => {
       throw new Error('Device is not online to perform manual page transition');
     }
 
+    // Only retain options allowed by `PageFetchingOptions`.
+    const pageOptions = omit(options || {}, ['cache', 'immediatelyUpdateQueryParams']);
+
     const pagePromise = pageTransitionQueue.add(async () => {
-      const page = await fetchPage(path, options);
-      const session = window['BLADE_SESSION'];
+      const page = await fetchPage(path, {
+        ...pageOptions,
+        // If the page should be cached, don't pass the session ID yet, to ensure that
+        // the server-side session doesn't get updated yet. It should only get updated
+        // once the page was actually rendered, not when it was prefetched.
+        sessionId: options?.cache ? undefined : window['BLADE_SESSION']!.id,
+      });
+
+      // Check the session again after `fetchPage` has finished running, since it might
+      // have changed during that time.
+      const sessionAfterFetch = window['BLADE_SESSION'];
 
       // If the client bundles have changed, don't proceed, since `fetchPage` will
       // retrieve the latest bundles fresh in that case.
       //
       // If no browser session is available, new bundles are currently being mounted so
       // we should clear the queue instead of proceeding.
-      if (!page || !session) {
+      if (!page || !sessionAfterFetch) {
         // Immediately destroy the page queue, since we now know that the server has
         // changed, so we cannot continue processing any further requests from the old
         // client chunks. We have to do this inside the promise of the current function
@@ -105,7 +122,7 @@ export const usePageTransition = () => {
       if (!page) return;
 
       // As soon as possible, store the page in the cache.
-      if (cacheable) cache.current.set(path, { body: page, time: Date.now() });
+      if (options?.cache) cache.current.set(path, { body: page, time: Date.now() });
 
       // By the time we're ready to render the new page, a newer page transition might
       // have already been started. If that's the case, we want to skip the current
@@ -128,6 +145,14 @@ export const usePageTransition = () => {
 
         // Render the page.
         window['BLADE_SESSION']!.root.render(page);
+
+        // Since the page was served from cache and its data might therefore be stale,
+        // we want to revalidate it immediately after rendering it. This also serves the
+        // purpose of updating the server-side session to have the correct URL.
+        //
+        // Is is essential to not pass things like `cache` as options here, since we
+        // don't want to cause an infinite loop.
+        if (options?.cache) transitionPage(path, pageOptions)();
       });
     };
   };

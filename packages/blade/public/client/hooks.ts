@@ -224,7 +224,7 @@ export const useLinkEvents = (
     // We don't want to rely on `event.target` for retrieving the destination path, as
     // the event target might not be a link in the case that there are many nested
     // children present.
-    activeTransition.current = transitionPage(populatedPathname);
+    activeTransition.current = transitionPage(populatedPathname, { cache: true });
   };
 
   return {
