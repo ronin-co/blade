@@ -541,6 +541,9 @@ const renderReactTree = async (
     forceNativeError: options.forceNativeError,
   });
 
+  // The ID of the browser session.
+  const sessionId = requestHeaders.get('X-Session-Id');
+
   const incomingCookies = structuredClone(
     parseCookies(requestHeaders.get('cookie') || ''),
   );
@@ -554,8 +557,6 @@ const renderReactTree = async (
     if (options.errorReason) url.searchParams.set('reason', options.errorReason);
   }
 
-  // The ID of the browser session.
-  const sessionId = requestHeaders.get('X-Session-Id');
   const serverContext: ServerContext = {
     // Available to both server and client components, because it can be serialized and
     // made available to the client-side.
