@@ -24,6 +24,9 @@ export interface RootTransitionOptions extends PageFetchingOptions {
   immediatelyUpdateQueryParams?: boolean;
 }
 
+// We use this queue to ensure that all manual page transitions commit on the server
+// in the order they were started. Because page transitions may contain write queries
+// that must be guaranteed to commit.
 const pageTransitionQueue = new Queue({ concurrency: 1 });
 
 export const usePageTransition = () => {
