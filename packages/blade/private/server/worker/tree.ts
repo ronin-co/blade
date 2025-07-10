@@ -440,7 +440,7 @@ const appendCookieHeader = (
  * @param [options.queries] - A list of write queries that should be executed.
  * @param [options.repeat] - Whether to flush another update for the session later on.
  *
- * @returns If a `repeat` is not set, a promise that resolves once the session has been
+ * @returns If `repeat` is not set, a promise that resolves once the session has been
  * flushed once. Otherwise, if `repeat` is set, a promise that remains pending as long as
  * the session continues to exist.
  */
