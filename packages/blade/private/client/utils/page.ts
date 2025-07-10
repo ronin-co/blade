@@ -59,12 +59,11 @@ export const fetchPage = async (
     body = formData;
   }
 
-  const headers = new Headers({
-    Accept: 'application/json',
-    'X-Session-Id': window['BLADE_SESSION']?.id as string,
+  const response = await fetchRetry(path, {
+    method: 'POST',
+    body,
+    headers: { Accept: 'application/json' },
   });
-
-  const response = await fetchRetry(path, { method: 'POST', body, headers });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
   // be caught and rendered further upwards in the code.

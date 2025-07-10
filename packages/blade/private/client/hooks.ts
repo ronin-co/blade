@@ -22,6 +22,16 @@ export interface RootTransitionOptions extends PageFetchingOptions {
    * instead of waiting for the page to be rendered on the server and returned.
    */
   immediatelyUpdateQueryParams?: boolean;
+  /**
+   * By default, the server-side session will immediately be updated to the URL of the
+   * new page, as soon as `transitionPage(path)` is called, meaning as soon as the page
+   * was retrieved from the server.
+   *
+   * If the server-side session should only be updated once `transitionPage(path)()` is
+   * called, meaning once the page was actually rendered on the client, the option can
+   * be set to `true`.
+   */
+  async?: boolean;
 }
 
 // We use this queue to ensure that all manual page transitions commit on the server
@@ -37,7 +47,9 @@ export const usePageTransition = () => {
   const privateLocationRef = usePrivateLocationRef();
 
   return (path: string, options?: RootTransitionOptions) => {
-    const cacheable = !(options?.queries || options?.immediatelyUpdateQueryParams);
+    const { immediatelyUpdateQueryParams, async, ...pageOptions } = options || {};
+
+    const cacheable = !(pageOptions.queries || immediatelyUpdateQueryParams);
     const privateLocation = privateLocationRef.current;
 
     if (cacheable) {
@@ -58,7 +70,7 @@ export const usePageTransition = () => {
     // If desired, already update the query params in the address bar before the server
     // has rendered the new ones. Take a look at the `RootClientContext.Provider`
     // component for more details on this.
-    if (options?.immediatelyUpdateQueryParams) {
+    if (immediatelyUpdateQueryParams) {
       const url = new URL(path, privateLocation.origin);
 
       history.replaceState(history.state, '', url);
@@ -70,15 +82,21 @@ export const usePageTransition = () => {
     }
 
     const pagePromise = pageTransitionQueue.add(async () => {
-      const page = await fetchPage(path, options);
-      const session = window['BLADE_SESSION'];
+      const page = await fetchPage(path, {
+        ...pageOptions,
+        sessionId: async ? window['BLADE_SESSION']!.id : undefined,
+      });
+
+      // Check the session again after `fetchPage` has finished running, since it might
+      // have changed during that time.
+      const sessionAfterFetch = window['BLADE_SESSION'];
 
       // If the client bundles have changed, don't proceed, since `fetchPage` will
       // retrieve the latest bundles fresh in that case.
       //
       // If no browser session is available, new bundles are currently being mounted so
       // we should clear the queue instead of proceeding.
-      if (!page || !session) {
+      if (!page || !sessionAfterFetch) {
         // Immediately destroy the page queue, since we now know that the server has
         // changed, so we cannot continue processing any further requests from the old
         // client chunks. We have to do this inside the promise of the current function

@@ -542,9 +542,6 @@ const renderReactTree = async (
     forceNativeError: options.forceNativeError,
   });
 
-  // The ID of the browser session.
-  const sessionId = requestHeaders.get('X-Session-Id');
-
   const incomingCookies = structuredClone(
     parseCookies(requestHeaders.get('cookie') || ''),
   );
@@ -578,8 +575,8 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushSession: sessionId
-      ? (queries) => flushSession(sessionId, { queries })
+    flushSession: options.sessionId
+      ? (queries) => flushSession(options.sessionId as string, { queries })
       : undefined,
   };
 
@@ -840,7 +837,9 @@ const renderReactTree = async (
     );
   }
 
-  const session = sessionId ? global.SERVER_SESSIONS.get(sessionId) : null;
+  const session = options.sessionId
+    ? global.SERVER_SESSIONS.get(options.sessionId)
+    : null;
 
   // Update the server-side state to the new page.
   if (session) {
