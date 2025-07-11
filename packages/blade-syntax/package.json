@@ -1,0 +1,50 @@
+{
+  "name": "blade-syntax",
+  "version": "3.7.0",
+  "type": "module",
+  "description": "Allows for defining RONIN queries and schemas in code.",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./schema": "./dist/schema.js",
+    "./queries": "./dist/queries.js"
+  },
+  "typesVersions": {
+    "*": {
+      "schema": [
+        "./dist/schema"
+      ],
+      "queries": [
+        "./dist/queries"
+      ]
+    }
+  },
+  "scripts": {
+    "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
+    "lint:biome": "biome check",
+    "lint:tsc": "tsc --pretty",
+    "format": "biome check --write && biome format --write",
+    "test": "bun test",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepare": "bun run build"
+  },
+  "keywords": [
+    "database",
+    "schema",
+    "primitives"
+  ],
+  "author": "ronin",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/bun": "1.2.4",
+    "expect-type": "1.2.0",
+    "tsup": "8.4.0",
+    "typescript": "5.8.2"
+  },
+  "peerDependencies": {
+    "@ronin/compiler": ">=0.18.10"
+  }
+}
