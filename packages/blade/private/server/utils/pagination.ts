@@ -1,4 +1,4 @@
-import type { GetQueryInstructions, Query } from '@ronin/compiler';
+import type { GetQueryInstructions, Query } from 'blade-compiler';
 
 import type { PaginationInstruction } from '@/private/universal/types/util';
 

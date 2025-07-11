@@ -1,0 +1,196 @@
+{
+  "account": [
+    {
+      "id": "acc_39h8fhe98hefah8j",
+      "handle": "elaine",
+      "firstName": "Elaine",
+      "lastName": "Jones",
+      "avatar": {
+        "key": "test-key",
+        "name": "example.png",
+        "src": "https://storage.ronin.co/test-key",
+        "meta": { "height": 100, "width": 100, "size": 100, "type": "image/png" },
+        "placeholder": { "base64": "" }
+      },
+      "ronin": {
+        "createdAt": "2024-12-11T10:47:58.079Z",
+        "updatedAt": "2024-12-11T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "acc_39h8fhe98hefah9j",
+      "handle": "david",
+      "firstName": "David",
+      "lastName": "Brown",
+      "avatar": {
+        "key": "test-key",
+        "name": "example.jpeg",
+        "src": "https://storage.ronin.co/test-key",
+        "meta": { "height": 100, "width": 100, "size": 100, "type": "image/jpeg" },
+        "placeholder": { "base64": "" }
+      },
+      "ronin": {
+        "createdAt": "2024-12-10T10:47:58.079Z",
+        "updatedAt": "2024-12-10T10:47:58.079Z"
+      }
+    }
+  ],
+  "product": [
+    {
+      "id": "pro_39h8fhe98hefah8j",
+      "name": "Apple",
+      "position": 1,
+      "team": "tea_39h8fhe98hefah8j",
+      "ronin": {
+        "createdAt": "2024-12-11T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "pro_39h8fhe98hefah9j",
+      "name": "Banana",
+      "position": 2,
+      "team": "tea_39h8fhe98hefah8j",
+      "ronin": {
+        "createdAt": "2024-12-10T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "pro_39h8fhe98hefah0j",
+      "name": "Cherry",
+      "position": 3,
+      "team": "tea_39h8fhe98hefah9j",
+      "ronin": {
+        "createdAt": "2024-12-09T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "pro_39h8fhe98hefah1j",
+      "name": "Peach",
+      "position": 4,
+      "team": "tea_39h8fhe98hefah9j",
+      "ronin": {
+        "createdAt": "2024-12-08T10:47:58.079Z"
+      }
+    }
+  ],
+  "member": [
+    {
+      "id": "mem_39h8fhe98hefah8j",
+      "account": "acc_39h8fhe98hefah8j",
+      "team": "tea_39h8fhe98hefah8j",
+      "activeAt": "2024-12-11T10:47:58.079Z",
+      "pending": true,
+      "ronin": {
+        "createdAt": "2024-12-11T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "mem_39h8fhe98hefah9j",
+      "account": "acc_39h8fhe98hefah9j",
+      "team": "tea_39h8fhe98hefah8j",
+      "activeAt": "2024-11-10T10:47:58.079Z",
+      "pending": false,
+      "ronin": {
+        "createdAt": "2024-11-10T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "mem_39h8fhe98hefah0j",
+      "account": "acc_39h8fhe98hefah8j",
+      "team": "tea_39h8fhe98hefah9j",
+      "activeAt": "2024-10-09T10:47:58.079Z",
+      "pending": true,
+      "ronin": {
+        "createdAt": "2024-10-09T10:47:58.079Z"
+      }
+    }
+  ],
+  "team": [
+    {
+      "id": "tea_39h8fhe98hefah8j",
+      "locations": {
+        "europe": "berlin"
+      },
+      "billing": {
+        "currency": "EUR"
+      }
+    },
+    {
+      "id": "tea_39h8fhe98hefah9j",
+      "locations": {
+        "europe": "london"
+      },
+      "billing": {
+        "currency": "GBP"
+      }
+    }
+  ],
+  "beach": [
+    {
+      "id": "bea_39h8fhe98hefah8j",
+      "name": "Bondi",
+      "division": "Wentworth",
+      "ronin": {
+        "createdAt": "2024-12-11T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "bea_39h8fhe98hefah9j",
+      "name": "Manly",
+      "division": "Warringah",
+      "ronin": {
+        "createdAt": "2024-12-10T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "bea_39h8fhe98hefah0j",
+      "name": "Coogee",
+      "division": "Kingsford",
+      "ronin": {
+        "createdAt": "2024-12-09T10:47:58.079Z"
+      }
+    },
+    {
+      "id": "bea_39h8fhe98hefah1j",
+      "name": "Cronulla",
+      "division": "Cook",
+      "ronin": {
+        "createdAt": "2024-12-08T10:47:58.079Z"
+      }
+    }
+  ],
+  "category": [
+    {
+      "id": "cat_39h8fhe98hefah8j",
+      "name": "Fruit"
+    },
+    {
+      "id": "cat_39h8fhe98hefah9j",
+      "name": "Vegetable"
+    }
+  ],
+  "beach_visitors": [
+    {
+      "id": "vis_39h8fhe98hefah8j",
+      "source": "bea_39h8fhe98hefah8j",
+      "target": "acc_39h8fhe98hefah8j"
+    },
+    {
+      "id": "vis_39h8fhe98hefah9j",
+      "source": "bea_39h8fhe98hefah8j",
+      "target": "acc_39h8fhe98hefah9j"
+    }
+  ],
+  "beach_volleyball_teams": [
+    {
+      "id": "vol_39h8fhe98hefah8j",
+      "source": "bea_39h8fhe98hefah8j",
+      "target": "tea_39h8fhe98hefah8j"
+    },
+    {
+      "id": "vol_39h8fhe98hefah9j",
+      "source": "bea_39h8fhe98hefah8j",
+      "target": "tea_39h8fhe98hefah9j"
+    }
+  ]
+}

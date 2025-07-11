@@ -1,10 +1,10 @@
-import type { Query } from '@ronin/compiler';
+import type { Query } from 'blade-compiler';
 import {
   type AddQuery,
   QUERY_SYMBOLS,
   type RemoveQuery,
   type SetQuery,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 import {
   type DeepCallable,
   type PromiseTuple,

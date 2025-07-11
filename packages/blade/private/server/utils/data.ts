@@ -1,4 +1,4 @@
-import type { Query, ResultRecord } from '@ronin/compiler';
+import type { Query, ResultRecord } from 'blade-compiler';
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
 import type { Context, ExecutionContext } from 'hono';
 import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';

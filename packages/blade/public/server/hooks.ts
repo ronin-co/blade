@@ -4,7 +4,7 @@ import {
   type ListQuery,
   QUERY_SYMBOLS,
   type Query,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 import {
   type DeepCallable,
   type PromiseTuple,
