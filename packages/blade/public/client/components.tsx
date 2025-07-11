@@ -1,4 +1,4 @@
-import type { StoredObject } from '@ronin/compiler';
+import type { StoredObject } from 'blade-compiler';
 import {
   type AnchorHTMLAttributes,
   type ReactElement,

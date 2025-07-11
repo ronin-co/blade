@@ -1,4 +1,4 @@
-import { DML_QUERY_TYPES_WRITE } from '@ronin/compiler';
+import { DML_QUERY_TYPES_WRITE } from 'blade-compiler';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
