@@ -1,4 +1,4 @@
-import type { Statement } from '@ronin/compiler';
+import type { Statement } from 'blade-compiler';
 
 const MULTILINE_SQL_COMMENTS = /\/\*[\s\S]*?\*\//g;
 const SINGLELINE_SQL_COMMENTS = /--[^\n]*\n/g;

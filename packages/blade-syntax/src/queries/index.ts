@@ -1,6 +1,6 @@
 import type { DeepCallable, ResultRecord } from '@/src/queries/types';
 import { isPlainObject, mutateStructure, setProperty } from '@/src/utils';
-import { QUERY_SYMBOLS, type Query } from '@ronin/compiler';
+import { QUERY_SYMBOLS, type Query } from 'blade-compiler';
 
 /**
  * Utility type to convert a tuple of promises into a tuple of their resolved types.

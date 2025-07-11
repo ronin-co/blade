@@ -2,7 +2,7 @@ import type {
   CombinedInstructions,
   ResultRecordBase,
   WithInstruction,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 
 export type ResultRecord = ResultRecordBase<Date>;
 
