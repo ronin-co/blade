@@ -1,11 +1,8 @@
 {
-  "name": "@ronin/compiler",
-  "version": "0.18.10",
+  "name": "blade-compiler",
+  "version": "3.7.0",
   "type": "module",
   "description": "Compiles RONIN queries to SQL statements.",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
