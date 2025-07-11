@@ -1,0 +1,97 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "include": ["./**/*.ts", "./**/*.json"],
+    "ignore": ["node_modules/", "bun.lockb", "package.json"]
+  },
+  "formatter": {
+    "enabled": true,
+
+    "attributePosition": "multiline",
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 90
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "trailingCommas": "all",
+      "arrowParentheses": "always",
+      "attributePosition": "multiline",
+      "bracketSameLine": true,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "single",
+      "quoteStyle": "single",
+      "semicolons": "always"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+
+      "a11y": { "all": true },
+      "complexity": { "all": true, "noExcessiveCognitiveComplexity": "off" },
+      "correctness": {
+        "noUnusedImports": "warn",
+        "noUnusedVariables": "warn"
+      },
+      "nursery": {
+        "all": true,
+        "useSortedClasses": "warn",
+        "noSecrets": "off",
+        "useExplicitType": "off"
+      },
+      "performance": {
+        "all": true,
+
+        "noBarrelFile": "off",
+        "noReExportAll": "off",
+        "noDelete": "off"
+      },
+      "security": { "all": true },
+      "style": {
+        "all": true,
+        "noDefaultExport": "off",
+        "useBlockStatements": "off",
+        "noNonNullAssertion": "off",
+        "useConsistentArrayType": {
+          "level": "warn",
+          "options": {
+            "syntax": "generic"
+          }
+        },
+        "useFilenamingConvention": "off",
+        "useNamingConvention": "off",
+        "useShorthandArrayType": "off",
+        "useDefaultSwitchClause": "off"
+      },
+      "suspicious": {
+        "all": true,
+        "noConsole": "off",
+        "noExplicitAny": "off"
+      }
+    }
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "vcs": {
+    "clientKind": "git",
+    "defaultBranch": "main",
+    "enabled": true
+  },
+  "overrides": [
+    {
+      "include": ["tests/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "useTopLevelRegex": "off"
+          }
+        }
+      }
+    }
+  ]
+}
