@@ -1,0 +1,40 @@
+{
+  "name": "@ronin/compiler",
+  "version": "0.18.10",
+  "type": "module",
+  "description": "Compiles RONIN queries to SQL statements.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
+    "lint:biome": "biome check --error-on-warnings",
+    "lint:tsc": "tsc --pretty",
+    "format": "biome check --write && biome format --write",
+    "test": "bun test",
+    "build": "tsup ./src/index.ts --dts --format esm",
+    "prepare": "bun run build"
+  },
+  "keywords": [
+    "query",
+    "compiler",
+    "sql"
+  ],
+  "author": "ronin",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/bun": "1.1.14",
+    "title": "4.0.1",
+    "tsup": "8.3.5",
+    "typescript": "5.7.2"
+  },
+  "peerDependencies": {
+    "@ronin/engine": ">=0.1.23"
+  }
+}

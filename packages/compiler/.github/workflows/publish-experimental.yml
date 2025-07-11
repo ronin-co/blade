@@ -1,0 +1,16 @@
+name: Publish Experimental Packages
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  publish-experimental:
+    uses: ronin-co/actions/.github/workflows/publish-experimental.yml@main
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN_READ_AND_WRITE }}
