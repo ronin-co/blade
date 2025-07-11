@@ -11,7 +11,7 @@ import {
   type SyntaxItem,
   getBatchProxy,
   getSyntaxProxy,
-} from '@ronin/syntax/queries';
+} from 'blade-syntax/queries';
 import type { verify } from 'hono/jwt';
 import { useContext } from 'react';
 import { deserializeError } from 'serialize-error';

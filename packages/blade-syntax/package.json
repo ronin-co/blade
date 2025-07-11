@@ -1,11 +1,8 @@
 {
-  "name": "@ronin/syntax",
-  "version": "0.2.44",
+  "name": "blade-syntax",
+  "version": "3.7.0",
   "type": "module",
   "description": "Allows for defining RONIN queries and schemas in code.",
-  "publishConfig": {
-    "access": "public"
-  },
   "files": [
     "dist"
   ],
