@@ -17,7 +17,7 @@ import type {
   ModelPreset,
   Model as RawModel,
   StoredObject,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 
 // This is used to ensure that any object adhering to this interface has both fields.
 export interface RoninFields {

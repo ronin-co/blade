@@ -1,4 +1,4 @@
-import { QUERY_SYMBOLS } from '@ronin/compiler';
+import { QUERY_SYMBOLS } from 'blade-compiler';
 
 /**
  * Creates a query expression object that can be processed by the compiler.

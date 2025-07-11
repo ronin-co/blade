@@ -1,5 +1,5 @@
 import { expression } from '@/src/helpers/expressions';
-import { QUERY_SYMBOLS, getQuerySymbol } from '@ronin/compiler';
+import { QUERY_SYMBOLS, getQuerySymbol } from 'blade-compiler';
 
 /**
  * Wraps a raw SQL expression as-is.

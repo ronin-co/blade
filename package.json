@@ -7,8 +7,8 @@
     "dev": "turbo dev --filter='./packages/*' --concurrency 24",
     "format": "biome format --write",
     "lint": "biome lint",
-    "prepare": "turbo build --filter='blade'",
-    "test": "turbo test",
+    "prepare": "turbo build",
+    "test": "bun test",
     "typecheck": "turbo typecheck"
   },
   "packageManager": "bun@1.2.16",

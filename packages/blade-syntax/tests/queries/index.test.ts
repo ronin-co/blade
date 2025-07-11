@@ -16,7 +16,7 @@ import {
   QUERY_SYMBOLS,
   type Query,
   type SetQuery,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 import { expectTypeOf } from 'expect-type';
 
 describe('syntax proxy', () => {
