@@ -49,15 +49,14 @@ describe('Use `ronin` middleware', () => {
         '*',
         ronin({
           fetch: fetcher,
-          hooks: {
+          triggers: {
             user: {
-              beforeGet: (query) => {
+              get: (query) => {
                 query.limitedTo = 1;
                 return query;
               },
             },
           },
-          asyncContext: new AsyncLocalStorage(),
         }),
       )
       .get('/', async (c) => {
@@ -92,15 +91,14 @@ describe('Use `ronin` middleware', () => {
         '*',
         ronin(() => ({
           fetch: fetcher,
-          hooks: {
+          triggers: {
             user: {
-              beforeGet: (query) => {
+              get: (query) => {
                 query.limitedTo = 1;
                 return query;
               },
             },
           },
-          asyncContext: new AsyncLocalStorage(),
         })),
       )
       .get('/', async (c) => {
@@ -138,11 +136,10 @@ describe('Use `ronin` middleware', () => {
           expect(context.env).toMatchObject({});
 
           return {
-            asyncContext: new AsyncLocalStorage(),
             fetch: fetcher,
-            hooks: {
+            triggers: {
               user: {
-                beforeGet: (query) => {
+                get: (query) => {
                   query.limitedTo = 1;
                   return query;
                 },
