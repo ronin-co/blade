@@ -22,8 +22,7 @@
     "format": "biome check --write && biome format --write",
     "test": "bun test",
     "build": "tsup",
-    "dev": "tsup --watch",
-    "prepare": "bun run build"
+    "dev": "tsup --watch"
   },
   "keywords": [
     "auth",
