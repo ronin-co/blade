@@ -8,7 +8,7 @@
     "format": "biome format --write",
     "lint": "biome lint",
     "prepare": "turbo build",
-    "test": "bun test",
+    "test": "turbo test",
     "typecheck": "turbo typecheck"
   },
   "packageManager": "bun@1.2.16",

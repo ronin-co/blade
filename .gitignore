@@ -9,3 +9,6 @@ coverage
 
 # Turborepo
 .turbo
+
+# RONIN
+.ronin
