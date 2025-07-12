@@ -14,7 +14,7 @@ import {
   renameFieldQuery,
 } from '@/src/utils/queries';
 import { confirm, input, select } from '@inquirer/prompts';
-import type { Model, ModelField } from '@ronin/compiler';
+import type { Model, ModelField } from 'blade-compiler';
 
 /**
  * A utility class for comparing and generating migration queries between two model definitions.

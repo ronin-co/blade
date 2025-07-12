@@ -6,8 +6,8 @@ import {
   getResponseBody,
 } from '@/src/utils/misc';
 import { spinner } from '@/src/utils/spinner';
-import { type Model, type ModelField, Transaction } from '@ronin/compiler';
 import type { Database, Row } from '@ronin/engine/resources';
+import { type Model, type ModelField, Transaction } from 'blade-compiler';
 
 /**
  * A model with fields in array format.

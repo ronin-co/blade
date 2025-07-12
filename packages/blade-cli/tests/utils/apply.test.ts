@@ -33,8 +33,8 @@ import {
 import { getRowCount, getSQLTables, getTableRows, runMigration } from '@/fixtures/utils';
 import { applyMigrationStatements } from '@/src/commands/apply';
 import type { MigrationFlags } from '@/src/utils/migration';
-import { type Model, Transaction } from '@ronin/compiler';
 import type { Database } from '@ronin/engine/resources';
+import { type Model, Transaction } from 'blade-compiler';
 import { model, number, random, string } from 'ronin/schema';
 
 describe('applyMigrationStatements', () => {

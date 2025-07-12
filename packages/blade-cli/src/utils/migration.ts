@@ -16,7 +16,7 @@ import {
   renameModelQuery,
 } from '@/src/utils/queries';
 import { confirm } from '@inquirer/prompts';
-import type { Model } from '@ronin/compiler';
+import type { Model } from 'blade-compiler';
 
 /**
  * Options for migration operations.

@@ -1,9 +1,9 @@
 import fs from 'node:fs';
-import { ROOT_MODEL, Transaction } from '@ronin/compiler';
 import { Engine } from '@ronin/engine';
 import { BunDriver } from '@ronin/engine/drivers/bun';
 import { MemoryResolver } from '@ronin/engine/resolvers/memory';
 import type { Database } from '@ronin/engine/resources';
+import { ROOT_MODEL, Transaction } from 'blade-compiler';
 
 /**
  * Initializes a new database instance.

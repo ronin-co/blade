@@ -5,11 +5,11 @@ import {
   getModels,
 } from '@/src/utils/model';
 import { Protocol } from '@/src/utils/protocol';
-import { type Model, ROOT_MODEL, type Statement, Transaction } from '@ronin/compiler';
 import { Engine } from '@ronin/engine';
 import { BunDriver } from '@ronin/engine/drivers/bun';
 import { MemoryResolver } from '@ronin/engine/resolvers/memory';
 import type { Database } from '@ronin/engine/resources';
+import { type Model, ROOT_MODEL, type Statement, Transaction } from 'blade-compiler';
 
 const engine = new Engine({
   driver: (engine): BunDriver => new BunDriver({ engine }),

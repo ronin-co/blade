@@ -1,11 +1,8 @@
 {
-  "name": "@ronin/cli",
-  "version": "0.3.20",
+  "name": "blade-cli",
+  "version": "3.7.1",
   "type": "module",
   "description": "The command-line interface for RONIN.",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
@@ -45,13 +42,13 @@
     "@types/bun": "1.2.1",
     "@types/ini": "4.1.1",
     "bun-bagel": "1.1.0",
+    "blade-syntax": "workspace:*",
+    "blade-compiler": "workspace:*",
     "ronin": "6.7.4",
     "tsup": "8.5.0",
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@ronin/compiler": ">=0.18.10",
-    "@ronin/syntax": ">=0.2.44",
     "@ronin/engine": ">=0.1.23",
     "@ronin/codegen": ">=1.7.4"
   }

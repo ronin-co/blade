@@ -8,8 +8,8 @@ import {
   type Query,
   type Statement,
   Transaction,
-} from '@ronin/compiler';
-import { getBatchProxy, getSyntaxProxy } from '@ronin/syntax/queries';
+} from 'blade-compiler';
+import { getBatchProxy, getSyntaxProxy } from 'blade-syntax/queries';
 
 /**
  * Protocol represents a set of database migration queries that can be executed in sequence.

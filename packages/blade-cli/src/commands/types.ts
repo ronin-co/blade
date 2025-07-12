@@ -4,7 +4,7 @@ import type { parseArgs } from 'node:util';
 import { generate } from '@ronin/codegen';
 import { generateZodSchema } from '@ronin/codegen/zod';
 
-import { CompilerError } from '@ronin/compiler';
+import { CompilerError } from 'blade-compiler';
 
 import type { BaseFlags } from '@/src/utils/misc';
 import { getModels } from '@/src/utils/model';

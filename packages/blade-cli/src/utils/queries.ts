@@ -1,5 +1,5 @@
 import { RONIN_SCHEMA_TEMP_SUFFIX } from '@/src/utils/misc';
-import type { Model, ModelField, ModelIndex } from '@ronin/compiler';
+import type { Model, ModelField, ModelIndex } from 'blade-compiler';
 
 export type Query = string;
 export type Queries = Array<Query>;

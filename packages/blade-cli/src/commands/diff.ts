@@ -9,7 +9,7 @@ import { Protocol } from '@/src/utils/protocol';
 import { getOrSelectSpaceId } from '@/src/utils/space';
 import { type Status, spinner } from '@/src/utils/spinner';
 import { confirm } from '@inquirer/prompts';
-import { CompilerError, type Model } from '@ronin/compiler';
+import { CompilerError, type Model } from 'blade-compiler';
 
 /**
  * Creates a new migration based on model differences.

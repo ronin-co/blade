@@ -6,7 +6,7 @@ import { CompareModels } from '@/src/utils/field';
 import { convertModelToArrayFields } from '@/src/utils/model';
 import { spinner } from '@/src/utils/spinner';
 import { input } from '@inquirer/prompts';
-import type { Model, Result } from '@ronin/compiler';
+import type { Model, Result } from 'blade-compiler';
 
 /** Represents a data item for logging */
 interface DataItem {

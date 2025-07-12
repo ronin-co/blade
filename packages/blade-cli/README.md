@@ -2,7 +2,7 @@
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/cli/validate.yml?label=tests)](https://github.com/ronin-co/cli/actions/workflows/validate.yml)
 [![code coverage](https://img.shields.io/codecov/c/github/ronin-co/cli)](https://codecov.io/github/ronin-co/cli)
-[![install size](https://packagephobia.com/badge?p=@ronin/cli)](https://packagephobia.com/result?p=@ronin/cli)
+[![install size](https://packagephobia.com/badge?p=blade-cli)](https://packagephobia.com/result?p=blade-cli)
 
 This package exposes the `ronin` command, which you can run from your terminal to interact with [RONIN](https://ronin.co).
 
@@ -28,10 +28,10 @@ Once that's done, link the package to make it available to all of your local pro
 bun link
 ```
 
-Inside the [@ronin/client](https://github.com/ronin-co/client) repo (which imports `@ronin/cli` and registers it as an executable), you can then run the following command, which is similar to `bun add @ronin/cli` or `npm install @ronin/cli`, except that it doesn't install `@ronin/cli` from npm, but instead uses your local clone of the package:
+Inside the [@ronin/client](https://github.com/ronin-co/client) repo (which imports `blade-cli` and registers it as an executable), you can then run the following command, which is similar to `bun add blade-cli` or `npm install blade-cli`, except that it doesn't install `blade-cli` from npm, but instead uses your local clone of the package:
 
 ```bash
-bun link @ronin/cli
+bun link blade-cli
 ```
 
 ### Transpilation

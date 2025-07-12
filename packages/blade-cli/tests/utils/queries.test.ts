@@ -12,7 +12,7 @@ import {
   renameModelQuery,
   setFieldQuery,
 } from '@/src/utils/queries';
-import type { Model, ModelField } from '@ronin/compiler';
+import type { Model, ModelField } from 'blade-compiler';
 
 describe('queries', () => {
   test('drop model query', () => {

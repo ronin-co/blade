@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { select } from '@inquirer/prompts';
-import { CompilerError } from '@ronin/compiler';
 import type { Database } from '@ronin/engine/resources';
+import { CompilerError } from 'blade-compiler';
 
 import types from '@/src/commands/types';
 import { initializeDatabase } from '@/src/utils/database';

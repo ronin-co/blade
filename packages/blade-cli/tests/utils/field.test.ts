@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { CompareModels } from '@/src/utils/field';
 import type { ModelWithFieldsArray } from '@/src/utils/model';
-import type { ModelField } from '@ronin/compiler';
+import type { ModelField } from 'blade-compiler';
 
 describe('fields', () => {
   describe('fields are different', () => {

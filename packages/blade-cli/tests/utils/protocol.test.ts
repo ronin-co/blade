@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, jest, spyOn, test } from 'bun:test';
 import fs, { type PathOrFileDescriptor } from 'node:fs';
 import { Protocol } from '@/src/utils/protocol';
-import type { Model, Statement } from '@ronin/compiler';
+import type { Model, Statement } from 'blade-compiler';
 
 describe('protocol', () => {
   afterEach(() => {

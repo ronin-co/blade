@@ -1,4 +1,4 @@
-import type { Model } from '@ronin/compiler';
+import type { Model } from 'blade-compiler';
 import { blob, boolean, date, json, link, model, number, string } from 'ronin/schema';
 
 export const CONSTANTS = {
