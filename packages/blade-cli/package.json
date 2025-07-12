@@ -1,0 +1,58 @@
+{
+  "name": "@ronin/cli",
+  "version": "0.3.20",
+  "type": "module",
+  "description": "The command-line interface for RONIN.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
+    "lint:biome": "biome check",
+    "lint:tsc": "tsc --pretty",
+    "format": "biome check --write && biome format --write",
+    "test": "bun test",
+    "build": "tsup ./src/index.ts --dts --format esm",
+    "prepare": "bun run build"
+  },
+  "keywords": [
+    "database",
+    "sql",
+    "command-line"
+  ],
+  "author": "ronin",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@dprint/formatter": "0.4.1",
+    "@dprint/typescript": "0.93.3",
+    "@iarna/toml": "2.2.5",
+    "@inquirer/prompts": "7.2.3",
+    "chalk-template": "1.1.0",
+    "get-port": "7.1.0",
+    "ini": "5.0.0",
+    "json5": "2.2.3",
+    "open": "10.1.0",
+    "ora": "8.1.1",
+    "resolve-from": "5.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/bun": "1.2.1",
+    "@types/ini": "4.1.1",
+    "bun-bagel": "1.1.0",
+    "ronin": "6.7.4",
+    "tsup": "8.5.0",
+    "typescript": "5.8.3"
+  },
+  "peerDependencies": {
+    "@ronin/compiler": ">=0.18.10",
+    "@ronin/syntax": ">=0.2.44",
+    "@ronin/engine": ">=0.1.23",
+    "@ronin/codegen": ">=1.7.4"
+  }
+}
