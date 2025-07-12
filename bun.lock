@@ -79,6 +79,7 @@
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
+        "@ronin/codegen": "1.7.4",
         "@types/bun": "1.2.1",
         "@types/ini": "4.1.1",
         "blade-compiler": "workspace:*",
@@ -89,7 +90,6 @@
         "typescript": "5.8.3",
       },
       "peerDependencies": {
-        "@ronin/codegen": ">=1.7.4",
         "@ronin/engine": ">=0.1.23",
       },
     },

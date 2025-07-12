@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@ronin/codegen": "1.7.4",
     "@types/bun": "1.2.1",
     "@types/ini": "4.1.1",
     "bun-bagel": "1.1.0",
@@ -48,7 +49,6 @@
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@ronin/engine": ">=0.1.23",
-    "@ronin/codegen": ">=1.7.4"
+    "@ronin/engine": ">=0.1.23"
   }
 }

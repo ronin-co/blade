@@ -27,9 +27,6 @@ describe('models', async () => {
         `
       UPDATE "ronin_schema" SET "indexes" = json_insert("indexes", '$.indexSlug', '{"slug":"indexSlug","fields":[{"slug":"author"},{"slug":"name"}],"unique":true}'), "ronin.updatedAt" = '2024-12-05T14:16:26.805Z' WHERE ("slug" = 'blog') RETURNING *
       `,
-        `
-       UPDATE "ronin_schema" SET "triggers" = json_insert("triggers", '$.triggerSlug', '{"slug":"triggerSlug","fields":[{"slug":"author"},{"slug":"name"}],"action":"onUpdate","when":"after","filter":{"author":{"__RONIN_QUERY":{"get":{"profile":{"with":{"id":{"__RONIN_EXPRESSION":"__RONIN_FIELD_PARENT_author"}}}}}}}}') WHERE ("slug" = 'blog') RETURNING *
-       `,
       ]);
 
       const models = await getModelsModule.getModels({ db });
@@ -48,9 +45,6 @@ describe('models', async () => {
         `
       UPDATE "ronin_schema" SET "indexes" = json_insert("indexes", '$.indexSlug', '{"slug":"indexSlug","fields":[{"slug":"author"},{"slug":"name"}],"unique":true}'), "ronin.updatedAt" = '2024-12-05T14:16:26.805Z' WHERE ("slug" = 'blog') RETURNING *
       `,
-        `
-       UPDATE "ronin_schema" SET "triggers" = json_insert("triggers", '$.triggerSlug', '{"slug":"triggerSlug","fields":[{"slug":"author"},{"slug":"name"}],"action":"onUpdate","when":"after","filter":{"author":{"__RONIN_QUERY":{"get":{"profile":{"with":{"id":{"__RONIN_EXPRESSION":"__RONIN_FIELD_PARENT_author"}}}}}}}}') WHERE ("slug" = 'blog') RETURNING *
-       `,
       ]);
 
       const models = await getModelsModule.getModels({ db, fieldArray: false });
