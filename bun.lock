@@ -9,24 +9,6 @@
         "turbo": "2.5.4",
       },
     },
-    "packages/better-auth": {
-      "name": "blade-better-auth",
-      "version": "3.7.1",
-      "dependencies": {
-        "better-auth": "1.2.5",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "1.9.4",
-        "@ronin/engine": "0.1.16",
-        "@types/bun": "1.2.8",
-        "blade-compiler": "workspace:*",
-        "tsup": "8.4.0",
-        "typescript": "5.8.2",
-      },
-      "peerDependencies": {
-        "ronin": ">=6.4.16",
-      },
-    },
     "packages/blade": {
       "name": "blade",
       "version": "3.7.1",
@@ -77,6 +59,24 @@
         "typescript": "5.6.2",
         "ua-parser-js": "1.0.39",
         "vitest": "3.1.2",
+      },
+    },
+    "packages/blade-better-auth": {
+      "name": "blade-better-auth",
+      "version": "3.7.1",
+      "dependencies": {
+        "better-auth": "1.2.5",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "1.9.4",
+        "@ronin/engine": "0.1.16",
+        "@types/bun": "1.2.8",
+        "blade-compiler": "workspace:*",
+        "tsup": "8.4.0",
+        "typescript": "5.8.2",
+      },
+      "peerDependencies": {
+        "ronin": ">=6.4.16",
       },
     },
     "packages/blade-cli": {
@@ -213,7 +213,7 @@
 
     "@babel/parser": ["@babel/parser@7.28.0", "", { "dependencies": { "@babel/types": "^7.28.0" }, "bin": "./bin/babel-parser.js" }, "sha512-jVZGvOxOuNSsuQuLRTh13nU0AogFlw32w/MT+LV6D3sP5WdbW61E77RnkbaO2dUvmPAYrBDJXGn5gGS6tH4j8g=="],
 
-    "@babel/types": ["@babel/types@7.28.0", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.27.1" } }, "sha512-jYnje+JyZG5YThjHiF28oT4SIZLnYOcSBb6+SDaFIyzDVSkXQmQQYclJ2R+YxcdmK0AX6x1E5OQNtuh3jHDrUg=="],
+    "@babel/types": ["@babel/types@7.28.1", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.27.1" } }, "sha512-x0LvFTekgSX+83TI28Y9wYPUfzrnl2aT5+5QLnO6v7mSJYtEEevuDRN0F0uSHRk1G1IWZC43o00Y0xDDrpBGPQ=="],
 
     "@bcoe/v8-coverage": ["@bcoe/v8-coverage@0.2.3", "", {}, "sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw=="],
 
@@ -581,7 +581,7 @@
 
     "blade": ["blade@workspace:packages/blade"],
 
-    "blade-better-auth": ["blade-better-auth@workspace:packages/better-auth"],
+    "blade-better-auth": ["blade-better-auth@workspace:packages/blade-better-auth"],
 
     "blade-cli": ["blade-cli@workspace:packages/blade-cli"],
 
