@@ -1,6 +1,6 @@
 {
   "name": "blade-syntax",
-  "version": "3.7.1",
+  "version": "3.7.2",
   "type": "module",
   "description": "Allows for defining RONIN queries and schemas in code.",
   "files": [
