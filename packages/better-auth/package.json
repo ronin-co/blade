@@ -1,0 +1,60 @@
+{
+  "name": "blade-better-auth",
+  "version": "3.7.1",
+  "type": "module",
+  "description": "A Better Auth adapter for RONIN",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronin-co/better-auth"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
+    "lint:biome": "biome check --error-on-warnings",
+    "lint:tsc": "tsc --pretty",
+    "format": "biome check --write && biome format --write",
+    "test": "bun test",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepare": "bun run build"
+  },
+  "keywords": [
+    "auth",
+    "better-auth",
+    "betterauth",
+    "ronin",
+    "ts",
+    "typescript"
+  ],
+  "author": "ronin",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "better-auth": "1.2.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@ronin/engine": "0.1.16",
+    "@types/bun": "1.2.8",
+    "blade-compiler": "workspace:*",
+    "tsup": "8.4.0",
+    "typescript": "5.8.2"
+  },
+  "peerDependencies": {
+    "ronin": ">=6.4.16"
+  },
+  "peerDependenciesMeta": {
+    "better-auth": {
+      "optional": false
+    },
+    "ronin": {
+      "optional": false
+    }
+  }
+}
