@@ -14,8 +14,7 @@
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "bun test",
-    "build": "tsup ./src/index.ts --dts --format esm",
-    "prepare": "bun run build"
+    "build": "tsup ./src/index.ts --dts --format esm"
   },
   "keywords": [
     "database",
