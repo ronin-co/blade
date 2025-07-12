@@ -38,11 +38,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@ronin/codegen": "1.7.4",
     "@types/bun": "1.2.1",
     "@types/ini": "4.1.1",
     "bun-bagel": "1.1.0",
     "blade-syntax": "workspace:*",
+    "blade-codegen": "workspace:*",
     "blade-compiler": "workspace:*",
     "ronin": "6.7.4",
     "tsup": "8.5.0",

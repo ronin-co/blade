@@ -1,9 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { parseArgs } from 'node:util';
-import { generate } from '@ronin/codegen';
-import { generateZodSchema } from '@ronin/codegen/zod';
-
+import { generate } from 'blade-codegen';
+import { generateZodSchema } from 'blade-codegen/zod';
 import { CompilerError } from 'blade-compiler';
 
 import type { BaseFlags } from '@/src/utils/misc';
