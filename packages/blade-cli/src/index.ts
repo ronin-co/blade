@@ -15,7 +15,7 @@ import { spinner } from '@/src/utils/spinner';
 
 /**
  * Runs the RONIN command-line interface (CLI) with the provided configuration options.
- * The `@ronin/cli` package intentionally doesn't do this itself, since the CLI is instead
+ * The `blade-cli` package intentionally doesn't do this itself, since the CLI is instead
  * automatically installed and exposed via the shorter `ronin` package name.
  *
  * @param config - Options for customizing the behavior of the CLI.
