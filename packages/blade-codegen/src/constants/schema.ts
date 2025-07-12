@@ -5,7 +5,7 @@ import { identifiers } from '@/src/constants/identifiers';
 import type { TypeNode } from 'typescript';
 
 import type { ModelField } from '@/src/types/model';
-import type { DML_QUERY_TYPES } from '@ronin/compiler';
+import type { DML_QUERY_TYPES } from 'blade-compiler';
 
 /**
  * A list of all model field types & their TypeScript type mapping.

@@ -1,4 +1,4 @@
-import { DDL_QUERY_TYPES, DML_QUERY_TYPES } from '@ronin/compiler';
+import { DDL_QUERY_TYPES, DML_QUERY_TYPES } from 'blade-compiler';
 import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';

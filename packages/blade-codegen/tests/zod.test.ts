@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { blob, json, model, number, string } from '@ronin/syntax/schema';
+import { blob, json, model, number, string } from 'blade-syntax/schema';
 
 import { generateZodSchema } from '@/src/zod';
 

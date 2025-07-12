@@ -4,7 +4,7 @@ import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';
 import { MODEL_TYPE_TO_SYNTAX_KIND_KEYWORD } from '@/src/constants/schema';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { ModelField } from '@ronin/compiler';
+import type { ModelField } from 'blade-compiler';
 import type { TypeNode } from 'typescript';
 
 import type { Model } from '@/src/types/model';

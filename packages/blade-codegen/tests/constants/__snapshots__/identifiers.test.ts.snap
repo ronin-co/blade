@@ -287,7 +287,7 @@ exports[`identifiers 1`] = `
       "queries": IdentifierObject {
         "emitNode": undefined,
         "end": -1,
-        "escapedText": ""@ronin/syntax/queries"",
+        "escapedText": ""blade-syntax/queries"",
         "flags": 16,
         "flowNode": undefined,
         "id": 0,

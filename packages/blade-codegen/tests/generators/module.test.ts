@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { model, string } from '@ronin/syntax/schema';
+import { model, string } from 'blade-syntax/schema';
 
 import { generateModule } from '@/src/generators/module';
 import { generateTypes } from '@/src/generators/types';

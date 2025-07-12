@@ -1,7 +1,7 @@
 import { READABLE_DML_QUERY_TYPES } from '@/src/constants/schema';
 
 import type { Model } from '@/src/types/model';
-import type { DML_QUERY_TYPES } from '@ronin/compiler';
+import type { DML_QUERY_TYPES } from 'blade-compiler';
 
 interface GenerateQueryTypeCommentResult {
   singular: string;

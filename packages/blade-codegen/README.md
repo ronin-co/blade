@@ -8,8 +8,8 @@ This package generates TypeScript code based on RONIN models.
 
 ## Usage
 ```typescript
-import { generate } from '@ronin/codegen';
-import { model, string } from 'ronin/schema';
+import { generate } from 'blade-codegen';
+import { model, string } from 'blade-client/schema';
 
 const User = model({
   slug: 'user',

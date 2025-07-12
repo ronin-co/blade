@@ -1,6 +1,6 @@
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { ModelField } from '@ronin/compiler';
+import type { ModelField } from 'blade-compiler';
 
 import type { Model } from '@/src/types/model';
 

@@ -35,7 +35,7 @@ export const importRoninStoredObjectType = createImportDeclaration({
 
 /**
  * ```ts
- * import type { DeepCallable, ResultRecord } from "@ronin/syntax/queries";
+ * import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
  * ```
  */
 export const importSyntaxUtiltypesType = createImportDeclaration({

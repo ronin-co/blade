@@ -1,8 +1,8 @@
 // Bun Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`generate a basic model 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "@ronin/compiler";
-import type { DeepCallable, ResultRecord } from "@ronin/syntax/queries";
+"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
+import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
 import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
 declare module "ronin" {
     export type Account = ResultRecord & {
@@ -80,9 +80,9 @@ declare module "ronin" {
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "@ronin/compiler";
-import type { StoredObject } from "@ronin/compiler";
-import type { DeepCallable, ResultRecord } from "@ronin/syntax/queries";
+"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
+import type { StoredObject } from "blade-compiler";
+import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
 import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
 declare module "ronin" {
     export type Account = ResultRecord & {
@@ -161,8 +161,8 @@ declare module "ronin" {
 `;
 
 exports[`generate with no models 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "@ronin/compiler";
-import type { DeepCallable, ResultRecord } from "@ronin/syntax/queries";
+"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
+import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
 import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
 declare module "ronin" {
     declare const get: {};

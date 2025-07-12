@@ -1,7 +1,7 @@
 import type {
   Model as PartialModel,
   ModelField as PartialModelField,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 
 type RecursiveRequired<T> = {
   [K in keyof T]-?: T[K] extends object ? RecursiveRequired<T[K]> : T[K];

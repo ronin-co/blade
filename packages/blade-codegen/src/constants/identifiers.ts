@@ -23,7 +23,7 @@ export const identifiers = {
     },
     model: factory.createIdentifier('Model'),
     module: {
-      root: factory.createIdentifier(JSON.stringify('@ronin/compiler')),
+      root: factory.createIdentifier(JSON.stringify('blade-compiler')),
     },
     storedObject: factory.createIdentifier('StoredObject'),
   },
@@ -45,7 +45,7 @@ export const identifiers = {
   syntax: {
     deepCallable: factory.createIdentifier('DeepCallable'),
     module: {
-      queries: factory.createIdentifier(JSON.stringify('@ronin/syntax/queries')),
+      queries: factory.createIdentifier(JSON.stringify('blade-syntax/queries')),
     },
     resultRecord: factory.createIdentifier('ResultRecord'),
   },
