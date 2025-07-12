@@ -1,7 +1,7 @@
 import type { StorableObject } from '@/src/types/storage';
 import type { QueryHandlerOptions } from '@/src/types/utils';
 import { getResponseBody } from '@/src/utils/errors';
-import type { Query, SetInstructions, StoredObject } from '@ronin/compiler';
+import type { Query, SetInstructions, StoredObject } from 'blade-compiler';
 
 /**
  * Determines whether the provided value is storable as a binary object, or not.

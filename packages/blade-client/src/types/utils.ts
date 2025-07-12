@@ -1,6 +1,6 @@
 import type { Triggers } from '@/src/utils/triggers';
 
-import type { Model, Result, ResultRecord } from '@ronin/compiler';
+import type { Model, Result, ResultRecord } from 'blade-compiler';
 
 export interface QueryHandlerOptions {
   /**

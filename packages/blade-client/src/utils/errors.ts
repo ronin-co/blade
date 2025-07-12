@@ -1,4 +1,4 @@
-import type { CompilerError } from '@ronin/compiler';
+import type { CompilerError } from 'blade-compiler';
 
 interface ClientErrorDetails {
   message: string;

@@ -9,7 +9,7 @@ import {
   type ResolvingAddTrigger,
   runQueriesWithTriggers,
 } from '@/src/utils/triggers';
-import type { CombinedInstructions, Query, QueryType } from '@ronin/compiler';
+import type { CombinedInstructions, Query, QueryType } from 'blade-compiler';
 
 let mockResolvedRequestText: any;
 

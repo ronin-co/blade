@@ -1,6 +1,6 @@
 import { runQueries, runQueriesWithStorageAndTriggers } from '@/src/queries';
 import type { QueryHandlerOptions } from '@/src/types/utils';
-import type { Query, Statement } from '@ronin/compiler';
+import type { Query, Statement } from 'blade-compiler';
 
 /**
  * Executes an array of queries and handles their results. It is used to execute

@@ -22,7 +22,7 @@ import {
   type QuerySchemaType,
   type QueryType,
   type ResultRecord,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 
 const EMPTY = Symbol('empty');
 

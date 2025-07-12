@@ -2,20 +2,20 @@
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/client/validate.yml?label=tests)](https://github.com/ronin-co/client/actions/workflows/validate.yml)
 [![code coverage](https://img.shields.io/codecov/c/github/ronin-co/client)](https://codecov.io/github/ronin-co/client)
-[![install size](https://packagephobia.com/badge?p=ronin)](https://packagephobia.com/result?p=ronin)
+[![install size](https://packagephobia.com/badge?p=blade-client)](https://packagephobia.com/result?p=blade-client)
 
 This package allows for querying data from [RONIN](https://ronin.co) with ease.
 
 ## Setup
 
-First, install the [package](https://www.npmjs.com/package/ronin) with a package manager of your choice:
+First, install the [package](https://www.npmjs.com/package/blade-client) with a package manager of your choice:
 
 ```bash
 # Bun
-bun add ronin
+bun add blade-client
 
 # npm
-npm install ronin
+npm install blade-client
 ```
 
 Next, create a new app token on the [RONIN dashboard](http://ronin.co) (under "Apps" in the sidebar), and add it as a environment variable named `RONIN_TOKEN` to your project.
@@ -23,7 +23,7 @@ Next, create a new app token on the [RONIN dashboard](http://ronin.co) (under "A
 Afterward, you can start invoking RONIN from anywhere in your code:
 
 ```typescript
-import { get } from 'ronin';
+import { get } from 'blade-client';
 
 const posts = await get.posts();
 ```
@@ -50,10 +50,10 @@ Once that's done, link the package to make it available to all of your local pro
 bun link
 ```
 
-Inside your project, you can then run the following command, which is similar to `bun add ronin` or `npm install ronin`, except that it doesn't install `ronin` from npm, but instead uses your local clone of the package:
+Inside your project, you can then run the following command, which is similar to `bun add blade-client` or `npm install blade-client`, except that it doesn't install `blade-client` from npm, but instead uses your local clone of the package:
 
 ```bash
-bun link ronin
+bun link blade-client
 ```
 
 If your project is not yet compatible with [Bun](https://bun.sh), feel free to replace all of the occurances of the word `bun` in the commands above with `npm` instead.

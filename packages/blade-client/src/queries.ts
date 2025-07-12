@@ -16,7 +16,7 @@ import type {
   Result,
   ResultRecord,
   Statement,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 
 interface RequestPayload {
   queries?: Array<Query>;

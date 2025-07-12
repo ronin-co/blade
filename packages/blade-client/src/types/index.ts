@@ -82,7 +82,7 @@ export type {
   WithInstruction,
   // Miscellaneous
   StoredObject,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 
 export type { FormattedResults } from '@/src/types/utils';
 

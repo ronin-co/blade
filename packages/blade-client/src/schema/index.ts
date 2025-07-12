@@ -1,1 +1,1 @@
-export * from '@ronin/syntax/schema';
+export * from 'blade-syntax/schema';

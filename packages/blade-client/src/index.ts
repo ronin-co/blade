@@ -18,7 +18,7 @@ import {
   type RemoveQuery,
   type SetQuery,
   type Statement,
-} from '@ronin/compiler';
+} from 'blade-compiler';
 import {
   type DeepCallable,
   type SyntaxItem,
@@ -26,8 +26,8 @@ import {
   getBatchProxySQL,
   getSyntaxProxy,
   getSyntaxProxySQL,
-} from '@ronin/syntax/queries';
-import type { Model } from '@ronin/syntax/schema';
+} from 'blade-syntax/queries';
+import type { Model } from 'blade-syntax/schema';
 
 /**
  * Creates a syntax factory for generating and executing queries.

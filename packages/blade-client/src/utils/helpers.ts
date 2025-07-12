@@ -1,6 +1,6 @@
 import type { QueryHandlerOptions } from '@/src/types/utils';
-import type { ResultRecord } from '@ronin/compiler';
-import { getProperty, setProperty } from '@ronin/syntax/queries';
+import type { ResultRecord } from 'blade-compiler';
+import { getProperty, setProperty } from 'blade-syntax/queries';
 
 /**
  * Turn the given string into "dash-case", which we use for slugs.

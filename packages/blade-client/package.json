@@ -1,6 +1,6 @@
 {
-  "name": "ronin",
-  "version": "6.8.0",
+  "name": "blade-client",
+  "version": "3.7.1",
   "type": "module",
   "description": "Access your RONIN database via TypeScript.",
   "main": "./dist/index.js",
@@ -53,8 +53,7 @@
     "format": "biome format --write",
     "test": "bun test",
     "build": "tsup",
-    "dev": "tsup --watch",
-    "prepare": "bun run build"
+    "dev": "tsup --watch"
   },
   "keywords": [
     "ronin",
@@ -72,14 +71,14 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
-    "@ronin/cli": "0.3.20",
-    "@ronin/compiler": "0.18.10",
-    "@ronin/engine": "0.1.23",
-    "@ronin/syntax": "0.2.44"
+    "@ronin/engine": "0.1.23"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.4",
+    "blade-cli": "workspace:*",
+    "blade-compiler": "workspace:*",
+    "blade-syntax": "workspace:*",
     "tsup": "8.5.0",
     "typescript": "5.8.3"
   }
