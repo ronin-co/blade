@@ -1,0 +1,8 @@
+[test]
+coverage = true
+coverageThreshold = 1.0
+coverageReporter = ["text", "lcov"]
+preload = ['./tests/preload.ts']
+
+[install]
+exact = true
