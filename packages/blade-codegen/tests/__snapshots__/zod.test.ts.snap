@@ -1,0 +1,116 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generate a basic model 1`] = `
+"import { z } from "zod";
+
+export const AccountSchema = z.object({
+	name: z.string().optional(),
+	email: z.string().email(),
+});
+"
+`;
+
+exports[`generate a basic model with blob field 1`] = `
+"import { z } from "zod";
+
+export const AccountSchema = z.object({
+	name: z.string().optional(),
+	email: z.string().email(),
+	image: z.unknown().optional(),
+});
+"
+`;
+
+exports[`generate with multiple models 1`] = `
+"import { z } from "zod";
+
+export const AccountSchema = z.object({
+	name: z.string().optional(),
+	email: z.string().email(),
+});
+export const PostSchema = z.object({
+	title: z.string(),
+	describe: z.string().optional(),
+});
+"
+`;
+
+exports[`generate with dot notation keys 1`] = `
+"import { z } from "zod";
+
+export const AccountSchema = z.object({
+	foo: z.object({
+		bar: z.string().optional(),
+	}),
+});
+"
+`;
+
+exports[`generate with a JSON field 1`] = `
+"import { z } from "zod";
+
+const JsonLiteralSchema = z.union([
+  z.boolean(),
+  z.null(),
+  z.number(),
+  z.string(),
+]);
+
+type Json = z.infer<typeof JsonLiteralSchema> | { [key: string]: Json } | Array<Json>;
+
+const JsonSchema: z.ZodType<Json> = z.lazy(() =>
+  z.union([
+    JsonLiteralSchema,
+    z.array(JsonSchema),
+    z.record(JsonSchema)
+  ])
+);
+
+export const AccountSchema = z.object({
+	name: z.string().optional(),
+	email: z.string().email(),
+	settings: JsonSchema.optional(),
+});
+"
+`;
+
+exports[`generate with a default value 1`] = `
+"import { z } from "zod";
+
+export const AccountSchema = z.object({
+	name: z.string().optional(),
+	email: z.string().email(),
+	role: z.string(),
+});
+"
+`;
+
+exports[`generate with a nested field 1`] = `
+"import { z } from "zod";
+
+export const AccountSchema = z.object({
+	name: z.string().optional(),
+	nested: z.object({
+		foo: z.string(),
+		bar: z.number().optional(),
+	}),
+});
+"
+`;
+
+exports[`generate with no models 1`] = `
+"import { z } from "zod";
+
+export {};
+"
+`;
+
+exports[`generate with \`id\` field being read-only 1`] = `
+"import { z } from "zod";
+
+export const AccountSchema = z.object({
+	id: z.string().optional().readonly(),
+	name: z.string().optional(),
+});
+"
+`;

@@ -1,0 +1,71 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`comment add with model name 1`] = `
+{
+  "plural": " Add multiple Account records ",
+  "singular": " Add a single Account record ",
+}
+`;
+
+exports[`comment add with model slug 1`] = `
+{
+  "plural": " Add multiple account records ",
+  "singular": " Add a single account record ",
+}
+`;
+
+exports[`comment count with model name 1`] = `
+{
+  "plural": " Count multiple Account records ",
+  "singular": " Count a single Account record ",
+}
+`;
+
+exports[`comment count with model slug 1`] = `
+{
+  "plural": " Count multiple account records ",
+  "singular": " Count a single account record ",
+}
+`;
+
+exports[`comment get with model name 1`] = `
+{
+  "plural": " Get multiple Account records ",
+  "singular": " Get a single Account record ",
+}
+`;
+
+exports[`comment get with model slug 1`] = `
+{
+  "plural": " Get multiple account records ",
+  "singular": " Get a single account record ",
+}
+`;
+
+exports[`comment remove with model name 1`] = `
+{
+  "plural": " Remove multiple Account records ",
+  "singular": " Remove a single Account record ",
+}
+`;
+
+exports[`comment remove with model slug 1`] = `
+{
+  "plural": " Remove multiple account records ",
+  "singular": " Remove a single account record ",
+}
+`;
+
+exports[`comment set with model name 1`] = `
+{
+  "plural": " Set multiple Account records ",
+  "singular": " Set a single Account record ",
+}
+`;
+
+exports[`comment set with model slug 1`] = `
+{
+  "plural": " Set multiple account records ",
+  "singular": " Set a single account record ",
+}
+`;
