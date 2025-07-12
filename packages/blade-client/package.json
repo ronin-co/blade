@@ -1,0 +1,85 @@
+{
+  "name": "blade-client",
+  "version": "3.7.1",
+  "type": "module",
+  "description": "Access your RONIN database via TypeScript.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "ronin": "./dist/bin/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./schema": {
+      "import": "./dist/schema/index.js",
+      "types": "./dist/schema/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ],
+      "types": [
+        "dist/types/index.d.ts"
+      ],
+      "schema": [
+        "dist/schema/index.d.ts"
+      ],
+      "utils": [
+        "dist/utils/index.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
+    "lint:biome": "biome check",
+    "lint:tsc": "tsc --pretty",
+    "format": "biome format --write",
+    "test": "bun test",
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "keywords": [
+    "ronin",
+    "client",
+    "database",
+    "orm",
+    "edge",
+    "serverless"
+  ],
+  "author": "ronin",
+  "license": "Apache-2.0",
+  "repository": "ronin-co/client",
+  "homepage": "https://ronin.co/docs/typescript-client",
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "dependencies": {
+    "@ronin/engine": "0.1.23"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/bun": "1.2.4",
+    "blade-cli": "workspace:*",
+    "blade-compiler": "workspace:*",
+    "blade-syntax": "workspace:*",
+    "tsup": "8.5.0",
+    "typescript": "5.8.3"
+  }
+}
