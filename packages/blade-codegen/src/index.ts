@@ -25,7 +25,7 @@ import type { Model } from '@/src/types/model';
  */
 export const generate = (models: Array<Model>): string => {
   // If there is any models that have a `blob()` field, we need to import the
-  // `StoredObject` type from the `@ronin/compiler` package.
+  // `StoredObject` type from the `blade-compiler` package.
   const hasStoredObjectFields = models.some((model) =>
     Object.values(model.fields).some((field) => field.type === 'blob'),
   );

@@ -109,7 +109,7 @@ exports[`identifiers 1`] = `
       "root": IdentifierObject {
         "emitNode": undefined,
         "end": -1,
-        "escapedText": ""@ronin/compiler"",
+        "escapedText": ""blade-compiler"",
         "flags": 16,
         "flowNode": undefined,
         "id": 0,

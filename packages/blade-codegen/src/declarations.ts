@@ -5,7 +5,7 @@ import { createImportDeclaration } from '@/src/generators/import';
 
 /**
  * ```ts
- * import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "@ronin/compiler";
+ * import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
  * ```
  */
 export const importRoninQueryTypesType = createImportDeclaration({
@@ -24,7 +24,7 @@ export const importRoninQueryTypesType = createImportDeclaration({
 
 /**
  * ```ts
- * import type { StoredObject } from "@ronin/compiler";
+ * import type { StoredObject } from "blade-compiler";
  * ```
  */
 export const importRoninStoredObjectType = createImportDeclaration({
