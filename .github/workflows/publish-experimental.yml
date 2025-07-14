@@ -24,4 +24,5 @@ jobs:
       - name: Build
         run: bun run build
 
-      - run: bunx pkg-pr-new publish
+      - name: Publish packages
+        run: bunx pkg-pr-new publish './packages/*'
