@@ -20,33 +20,36 @@ if (!window['BLADE_SESSION']) {
   // Open the event stream.
   const source = new EventSource(url, { withCredentials: true });
 
-  const handleMessage = async (message: MessageEvent) => {
-    const serverBundleId = message.lastEventId.split('-').pop() as string;
+  source.addEventListener('update', async (message) => {
+    const stream = new Blob([message.data]).stream();
+    const body = await createFromReadableStream(stream);
 
-    if (message.type === 'update') {
-      const stream = new Blob([message.data]).stream();
-      const body = await createFromReadableStream(stream);
-
-      if (window['BLADE_SESSION']) {
-        window['BLADE_SESSION'].root.render(body);
-      } else {
-        const root = hydrateRoot(document, body, {
-          onRecoverableError(error, errorInfo) {
-            console.error('Hydration error occurred:', error, errorInfo);
-          },
-        });
-
-        window['BLADE_SESSION'] = { id, source, root };
-      }
-
+    // If the session already exists, we can just render the new body into the existing root.
+    if (window['BLADE_SESSION']) {
+      window['BLADE_SESSION'].root.render(body);
       return;
     }
 
-    if (message.type === 'update-bundle') {
-      mountNewBundle(serverBundleId, message.data);
-    }
-  };
+    // Otherwise, we need to create a new root and hydrate it.
+    const root = hydrateRoot(document, body, {
+      onRecoverableError(error, errorInfo) {
+        console.error('Hydration error occurred:', error, errorInfo);
+      },
+    });
 
-  source.addEventListener('update', handleMessage);
-  source.addEventListener('update-bundle', handleMessage);
+    window['BLADE_SESSION'] = {
+      id,
+      source,
+      root,
+    };
+  });
+
+  source.addEventListener('update-bundle', (message) => {
+    const serverBundleId = message.lastEventId.split('-').pop() as string;
+    mountNewBundle(serverBundleId, message.data);
+  });
+
+  source.addEventListener('error', (event) => {
+    console.error('EventSource error:', event);
+  });
 }
