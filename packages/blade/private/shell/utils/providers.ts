@@ -144,6 +144,12 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
               binding: 'ASSETS',
               directory: '.blade/',
             },
+            observability: {
+              enabled: true,
+              logs: {
+                enabled: true,
+              },
+            },
           },
           null,
           4,
