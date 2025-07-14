@@ -575,9 +575,6 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushSession: options.sessionId
-      ? (queries) => flushSession(options.sessionId as string, { queries })
-      : undefined,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
