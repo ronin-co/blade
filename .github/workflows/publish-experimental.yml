@@ -1,0 +1,27 @@
+name: Publish Experimental
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.18
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun build
+
+      - run: bunx pkg-pr-new publish
