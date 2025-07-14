@@ -22,6 +22,6 @@ jobs:
         run: bun install
 
       - name: Build
-        run: bun build
+        run: bun run build
 
       - run: bunx pkg-pr-new publish
