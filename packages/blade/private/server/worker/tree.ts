@@ -7,6 +7,7 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
+import Queue from 'p-queue';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -432,6 +433,8 @@ const appendCookieHeader = (
   return headers;
 };
 
+const sseQueue = new Queue({ concurrency: 1 });
+
 /**
  * Renders a new React tree for a particular browser session and flushes it down to the
  * client, which then updates the UI on the client.
@@ -484,11 +487,13 @@ export const flushSession = async (
     );
 
     // Afterward, flush the update over the stream.
-    await stream.writeSSE({
-      id: `${crypto.randomUUID()}-${serverBundleId}`,
-      event: correctBundle ? 'update' : 'update-bundle',
-      data: page.text(),
-    });
+    await sseQueue.add(() =>
+      stream.writeSSE({
+        id: `${crypto.randomUUID()}-${serverBundleId}`,
+        event: correctBundle ? 'update' : 'update-bundle',
+        data: page.text(),
+      }),
+    );
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
     // error, since that would also prevent the repeated update later on.
