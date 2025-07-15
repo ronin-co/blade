@@ -199,13 +199,15 @@ if (isBuilding || isDeveloping) {
               await prepareStyles(environment, projects, bundleId as string);
               spinner.succeed();
 
-              // We're passing a query parameter in order to skip the import cache.
-              const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
+              if (isDeveloping) {
+                // We're passing a query parameter in order to skip the import cache.
+                const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
 
-              // Start evaluating the server module immediately. We're not using `await`
-              // to ensure that the client revalidation can begin before the module has
-              // been evaluated entirely.
-              server.module = import(path.join(outputDirectory, moduleName));
+                // Start evaluating the server module immediately. We're not using `await`
+                // to ensure that the client revalidation can begin before the module has
+                // been evaluated entirely.
+                server.module = import(path.join(outputDirectory, moduleName));
+              }
             }
           });
         },
