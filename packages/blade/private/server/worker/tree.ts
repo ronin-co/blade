@@ -487,7 +487,7 @@ export const flushSession = async (
     );
 
     // Afterward, flush the update over the stream.
-    await sseQueue.add(() =>
+    await sseQueue.add(async () =>
       stream.writeSSE({
         id: `${crypto.randomUUID()}-${serverBundleId}`,
         event: correctBundle ? 'update' : 'update-bundle',
