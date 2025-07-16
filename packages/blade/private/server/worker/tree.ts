@@ -818,16 +818,6 @@ const renderReactTree = async (
     );
   }
 
-  const session = options.sessionId
-    ? global.SERVER_SESSIONS.get(options.sessionId)
-    : null;
-
-  // Update the server-side state to the new page.
-  if (session) {
-    session.url = url;
-    session.headers = requestHeaders;
-  }
-
   const body = await renderShell(initial, renderingLeaves, serverContext);
 
   if (initial) {

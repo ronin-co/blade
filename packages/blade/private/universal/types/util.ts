@@ -94,8 +94,6 @@ export interface UserAgent {
 }
 
 export type PageFetchingOptions = {
-  /** A particular server-side session for which the page is being fetched. */
-  sessionId?: string;
   /**
    * This property is used by `useMutation` on the client and allows for processing
    * queries on the edge, after which the edge then makes the results of the queries
