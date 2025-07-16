@@ -1,6 +1,7 @@
-import { bundleId } from 'build-meta';
+import { bundleId as clientBundleId } from 'build-meta';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
+import { hydrateRoot } from 'react-dom/client';
 
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
@@ -29,19 +30,135 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
   });
 };
 
+type EventCallback = ({ data, id }: { data: string; id: string }) => void;
+
+export interface EventStream {
+  addEventListener: (type: string, callback: EventCallback) => void;
+  close: () => void;
+}
+
+/**
+ * Sends a request for rendering a page to the server, which opens a readable stream.
+ *
+ * @param url - The URL of the page to render.
+ * @param body - An optional body for the outgoing request.
+ *
+ * @returns A readable stream of events, with a new event getting submitted for every
+ * server-side page render.
+ */
+export const createStreamSource = async (
+  url: string,
+  body?: FormData,
+): Promise<EventStream> => {
+  const response = await fetchRetry(url, {
+    method: 'POST',
+    body,
+    headers: {
+      Accept: 'text/event-stream',
+      'X-Bundle-Id': clientBundleId,
+    },
+  });
+
+  // If the status code is not in the 200-299 range, we want to throw an error that will
+  // be caught and rendered further upwards in the code.
+  if (!response.ok) throw new Error(await response.text());
+  if (!response.body) throw new Error('Empty response body');
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const listeners = new Map<string, Array<EventCallback>>();
+
+  let buffer = '';
+
+  function dispatchEvent(type: string, data: string, id: string) {
+    (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
+  }
+
+  // Start reading the stream, but don't block the execution of the current scope.
+  (async () => {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      // Simple SSE parsing: split on double-newline.
+      let pos;
+
+      while ((pos = buffer.indexOf('\n\n')) !== -1) {
+        const chunk = buffer.slice(0, pos).trim();
+        buffer = buffer.slice(pos + 2);
+
+        // Parse out the metadata and contents of the event.
+        let event = 'message';
+        let data = '';
+        let id = '';
+
+        for (const line of chunk.split(/\r?\n/)) {
+          if (line.startsWith('event:')) {
+            event = line.slice(6).trim();
+          } else if (line.startsWith('data:')) {
+            data += `${line.slice(5)}\n`;
+          } else if (line.startsWith('id:')) {
+            id += line.slice(3).trim();
+          }
+        }
+
+        dispatchEvent(event, data.replace(/\n$/, ''), id);
+      }
+    }
+  })();
+
+  return {
+    addEventListener: (type: string, callback: EventCallback) => {
+      if (!listeners.has(type)) listeners.set(type, []);
+      listeners.get(type)!.push(callback);
+    },
+    close: () => reader.cancel(),
+  };
+};
+
+const SESSION: {
+  root?: import('react-dom/client').Root;
+  source?: import('../utils/page').EventStream;
+} = {};
+
+/**
+ * Receives a React node and renders it at the root of the page.
+ *
+ * @param content - The React node to render.
+ *
+ * @returns Nothing.
+ */
+export const renderRoot = (content: ReactNode): void => {
+  if (SESSION.root) {
+    SESSION.root.render(content);
+    return;
+  }
+
+  SESSION.root = hydrateRoot(document, content, {
+    onRecoverableError(error, errorInfo) {
+      console.error('Hydration error occurred:', error, errorInfo);
+    },
+  });
+};
+
 /**
  * Resolves a new page from the server-side of Blade.
  *
  * @param path - The path of the page.
+ * @param subscribe - Whether to subscribe to subsequent updates from the server.
  * @param options - Additional options for how to resolve the page.
  *
- * @returns Either a page or `null` if the server has changed.
+ * @returns A promise that resolves to a page if `subscribe` is `false`. If it is `true`,
+ * the promise will never resolve. Instead, the function will render the subsequent
+ * updates directly.
  */
 export const fetchPage = async (
   path: string,
+  subscribe: boolean,
   options?: PageFetchingOptions,
-): Promise<ReactNode | null> => {
-  let body = null;
+): Promise<ReactNode> => {
+  let body;
 
   if (options && Object.keys(options).length > 0) {
     const formData = new FormData();
@@ -59,44 +176,38 @@ export const fetchPage = async (
     body = formData;
   }
 
-  const response = await fetchRetry(path, {
-    method: 'POST',
-    body,
-    headers: { Accept: 'application/json' },
+  // Close the previous stream, since we're opening a new one.
+  if (subscribe) SESSION.source?.close();
+
+  // Open a new stream.
+  const stream = await createStreamSource(path, body);
+
+  // Immmediately start tracking the latest stream.
+  if (subscribe) SESSION.source = stream;
+
+  return new Promise((resolve) => {
+    stream.addEventListener('update', async (event) => {
+      const dataStream = new Blob([event.data]).stream();
+      const content = await createFromReadableStream(dataStream);
+
+      if (subscribe) return renderRoot(content);
+
+      stream.close();
+      resolve(content);
+    });
+
+    stream.addEventListener('update-bundle', (event) => {
+      const serverBundleId = event.id.split('-').pop() as string;
+      mountNewBundle(serverBundleId, event.data);
+    });
   });
-
-  // If the status code is not in the 200-299 range, we want to throw an error that will
-  // be caught and rendered further upwards in the code.
-  if (!response.ok) throw new Error(await response.text());
-
-  const serverBundleId = response.headers.get('X-Server-Bundle-Id');
-  if (!response.body) throw new Error('Missing response body on client.');
-
-  // If the bundles used on the client are the same as the ones available on the server,
-  // the server will not provide a new bundle, which means we can just proceed with
-  // rendering the page using the existing React instance.
-  if (bundleId === serverBundleId) return createFromReadableStream(response.body);
-
-  // If they are not the same, do not try to render. The client chunks will be updated
-  // by the browser session endpoint.
-  return null;
 };
 
-export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
-  const session = window['BLADE_SESSION'];
-
-  // If there is no active browser session, an update is still in progress.
-  if (!session) return;
-
-  // As the first step, stop receiving further push updates from the server. Otherwise
-  // more updates might come in while we perform the next steps.
-  session.source.close();
-
-  // Clear the session to prevent further updates from poll revalidation. Deleting the
-  // property resets it back to exactly the state before the session was started (the
-  // property didn't exist at that time). It's more accurate than setting it to `null`,
-  // which would be third possible state.
-  delete window['BLADE_SESSION'];
+export const mountNewBundle = async (bundleId: string, markup: string) => {
+  // Immediately close the connection, since we don't want to receive further updates
+  // from the server, now that we know that the client bundles are outdated.
+  SESSION.source?.close();
+  delete SESSION.source;
 
   // Download the new markup, CSS, and JS at the same time, but don't execute any of them
   // just yet.
@@ -109,7 +220,8 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not
   // only the CSS and JS bundles can be upgraded, but also React itself.
-  session.root.unmount();
+  SESSION.root?.unmount();
+  delete SESSION.root;
 
   const parser = new DOMParser();
   const newDocument = parser.parseFromString(newMarkup, 'text/html');

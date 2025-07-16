@@ -1,4 +1,5 @@
 import { DML_QUERY_TYPES_WRITE } from 'blade-compiler';
+import { bundleId as serverBundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -27,6 +28,20 @@ type Bindings = {
     fetch: typeof fetch;
   };
 };
+
+// This should be done as early as possible in the file.
+//
+// If this variable is already defined when the file gets evaluated, that means the file
+// was evaluated previously already, so we're dealing with local HMR.
+//
+// In that case, we want to push an updated version of every page to the client.
+if (globalThis.DEV_SESSIONS) {
+  globalThis.DEV_SESSIONS.forEach(({ stream, url, headers }) => {
+    return flushSession(stream, url, headers, false);
+  });
+} else {
+  globalThis.DEV_SESSIONS = new Map();
+}
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -175,30 +190,16 @@ app.post('/api', async (c) => {
 // If the application defines its own Hono instance, we need to mount it here.
 if (projectRouter) app.route('/', projectRouter);
 
-// If this variable is already defined when the file gets evaluated, that means the file
-// was evaluated previously already, so we're dealing with local HMR.
-//
-// In that case, we want to push an updated version of every page to the client.
-if (globalThis.SERVER_SESSIONS) {
-  globalThis.SERVER_SESSIONS.forEach((_session, sessionId) => flushSession(sessionId));
-} else {
-  globalThis.SERVER_SESSIONS = new Map();
-}
+// Handle the initial render (first byte).
+app.get('*', (c) =>
+  renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
+    waitUntil: getWaitUntil(c),
+  }),
+);
 
-app.get('/_blade/session', async (c) => {
-  const currentURL = new URL(c.req.url);
-  const { searchParams } = currentURL;
-
-  const sessionID = searchParams.get('id');
-  const sessionURL = searchParams.get('url');
-  const sessionBundle = searchParams.get('bundleId');
-
-  if (
-    c.req.header('accept') !== 'text/event-stream' ||
-    !sessionID ||
-    !sessionURL ||
-    !sessionBundle
-  ) {
+// Handle client side navigation.
+app.post('*', async (c) => {
+  if (c.req.header('accept') !== 'text/event-stream') {
     const body = {
       error: {
         message: 'The request for opening a session is malformed.',
@@ -209,66 +210,6 @@ app.get('/_blade/session', async (c) => {
     return c.json(body, 400);
   }
 
-  const { readable, writable } = new TransformStream();
-  const stream = new SSEStreamingApi(writable, readable);
-
-  c.header('Transfer-Encoding', 'chunked');
-  c.header('Content-Type', 'text/event-stream');
-  c.header('Cache-Control', 'no-cache, no-transform');
-  c.header('Connection', 'keep-alive');
-  c.header('X-Accel-Buffering', 'no');
-
-  const pageURL = new URL(sessionURL, currentURL);
-
-  const sessionDetails = {
-    url: pageURL,
-    headers: c.req.raw.headers,
-    stream,
-    bundleId: sessionBundle,
-    // We're purposefully using a `Promise` instead of `setInterval`, since the latter is
-    // prone to race conditions, because the interval continues running, even if the
-    // action hasn't yet been completed. Using our `Promise`, we ensure that the time
-    // only starts counting down once the action is completed.
-    interval: Promise.resolve(),
-  };
-
-  globalThis.SERVER_SESSIONS.set(sessionID, sessionDetails);
-
-  // Once we've created the session, flush an update for it.
-  //
-  // It's critical to not `await` this function call, since the response further below
-  // must be returned before the session is completely flushed (as quickly as possible).
-  //
-  // This also ensures that, in short-lived environments such as Cloudflare Workers, the
-  // worker stays alive as long as there are open sessions. Because they get terminated
-  // as soon as the V8 event loop is empty, so by ensuring that there is always something
-  // in the event loop as long as a connection is open, we keep the worker alive.
-  //
-  // Using `waitUntil` with a promise that remains pending until the connection closes
-  // wouldn't work because Cloudflare detects those kinds of forever-pending promises and
-  // forcefully terminates the worker in those cases, to avoid potential memory leaks.
-  //
-  // Since `setTimeout` does not count toward CPU time, Cloudflare thankfully doesn't
-  // charge for this idle time.
-  sessionDetails.interval = flushSession(sessionID, { repeat: true });
-
-  // Handle connection cleanup when the client disconnects.
-  c.req.raw.signal.addEventListener('abort', () => {
-    globalThis.SERVER_SESSIONS.delete(sessionID);
-  });
-
-  return c.newResponse(stream.responseReadable);
-});
-
-// Handle the initial render (first byte).
-app.get('*', (c) =>
-  renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
-    waitUntil: getWaitUntil(c),
-  }),
-);
-
-// Handle client side navigation.
-app.post('*', async (c) => {
   const body = await c.req.parseBody<{ options?: string; files: File }>({ all: true });
   const options: PageFetchingOptions = body.options
     ? JSON.parse(body.options)
@@ -287,18 +228,13 @@ app.post('*', async (c) => {
     }
   }
 
-  const existingCollected: Collected = {
-    queries: [],
-    metadata: {},
-    jwts: {},
-  };
+  let queries: Collected['queries'] | undefined;
 
   if (options?.queries) {
-    const list = options.queries;
-    existingCollected.queries = list;
+    queries = options.queries;
 
     // Only accept DML write queries to be provided from the client.
-    for (const { query } of list) {
+    for (const { query } of queries) {
       const queryType = Object.keys(JSON.parse(query))[0] as QueryType;
 
       if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
@@ -310,14 +246,35 @@ app.post('*', async (c) => {
     }
   }
 
-  const finalOptions = { ...options, waitUntil: getWaitUntil(c) };
-  return renderReactTree(
-    new URL(c.req.url),
-    c.req.raw.headers,
-    false,
-    finalOptions,
-    existingCollected,
-  );
+  const { readable, writable } = new TransformStream();
+  const stream = new SSEStreamingApi(writable, readable);
+
+  const url = new URL(c.req.url);
+  const headers = c.req.raw.headers;
+
+  // Check if the client-side bundle is correct. If it isn't, we will immediately send
+  // the markup for the new bundles to the client. However, we will still consider the
+  // queries of the incoming request, to make sure that writes aren't lost in the void,
+  // even if the bundles have changed.
+  const correctBundle = c.req.header('X-Bundle-Id') === serverBundleId;
+
+  c.header('Transfer-Encoding', 'chunked');
+  c.header('Content-Type', 'text/event-stream');
+  c.header('Cache-Control', 'no-cache, no-transform');
+  c.header('Connection', 'keep-alive');
+  c.header('X-Accel-Buffering', 'no');
+
+  flushSession(stream, url, headers, correctBundle, { queries, repeat: correctBundle });
+
+  const id = crypto.randomUUID();
+
+  // Track the HMR session.
+  globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
+
+  // Stop tracking the HMR session when the browser tab is closed.
+  c.req.raw.signal.addEventListener('abort', () => globalThis.DEV_SESSIONS.delete(id));
+
+  return c.newResponse(stream.responseReadable);
 });
 
 // Handle errors that occurred during the request lifecycle.
