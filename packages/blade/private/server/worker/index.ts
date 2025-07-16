@@ -240,7 +240,7 @@ app.post('*', async (c) => {
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, new URL(c.req.url), c.req.raw.headers, { queries });
+  flushSession(stream, new URL(c.req.url), c.req.raw.headers, { queries, repeat: true });
 
   return c.newResponse(stream.responseReadable);
 });

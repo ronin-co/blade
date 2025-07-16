@@ -1,10 +1,11 @@
 import { omit } from 'radash';
-import type { ReactNode } from 'react';
 
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
+import type { ReactNode } from 'react';
+import { hydrateRoot } from 'react-dom/client';
 
 /**
  * Downloads a CSS or JS bundle from the server, without evaluating it.
@@ -28,9 +29,17 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
   });
 };
 
-type Callback = ({ data }: { data: string }) => void;
+type Callback = ({ data, id }: { data: string; id: string }) => void;
 
-export const createStreamSource = async (url: string, body?: FormData) => {
+export interface EventStream {
+  addEventListener: (type: string, callback: Callback) => void;
+  close: () => void;
+}
+
+export const createStreamSource = async (
+  url: string,
+  body?: FormData,
+): Promise<EventStream> => {
   const response = await fetchRetry(url, {
     method: 'POST',
     body,
@@ -48,8 +57,8 @@ export const createStreamSource = async (url: string, body?: FormData) => {
 
   const listeners = new Map<string, Array<Callback>>();
 
-  function dispatchEvent(type: string, data: string) {
-    (listeners.get(type) || []).forEach((cb) => cb({ data }));
+  function dispatchEvent(type: string, data: string, id: string) {
+    (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
   }
 
   // start reading the stream
@@ -69,16 +78,19 @@ export const createStreamSource = async (url: string, body?: FormData) => {
         // parse `event:` and `data:` lines
         let event = 'message';
         let data = '';
+        let id = '';
 
         for (const line of chunk.split(/\r?\n/)) {
           if (line.startsWith('event:')) {
             event = line.slice(6).trim();
           } else if (line.startsWith('data:')) {
             data += `${line.slice(5)}\n`;
+          } else if (line.startsWith('id:')) {
+            id += line.slice(3).trim();
           }
         }
 
-        dispatchEvent(event, data.replace(/\n$/, ''));
+        dispatchEvent(event, data.replace(/\n$/, ''), id);
       }
     }
   })();
@@ -104,8 +116,9 @@ export const createStreamSource = async (url: string, body?: FormData) => {
  */
 export const fetchPage = async (
   path: string,
+  subscribe = true,
   options?: PageFetchingOptions,
-): Promise<ReactNode | null> => {
+): Promise<ReactNode> => {
   let body;
 
   if (options && Object.keys(options).length > 0) {
@@ -124,21 +137,40 @@ export const fetchPage = async (
     body = formData;
   }
 
+  // Close the previous connection, since we're opening a new one.
+  if (subscribe && window['BLADE_SESSION']) window['BLADE_SESSION'].source.close();
+
   const source = await createStreamSource(path, body);
 
   return new Promise((resolve) => {
-    // Resolve on the first "update" event
-    source.addEventListener('update', (event) => {
+    source.addEventListener('update', async (event) => {
       const stream = new Blob([event.data]).stream();
-      const content = createFromReadableStream(stream);
+      const contentPromise = createFromReadableStream(stream);
 
-      resolve(content);
-      source.close();
+      if (!subscribe) return resolve(await contentPromise);
+
+      if (window['BLADE_SESSION']) {
+        window['BLADE_SESSION'].source = source;
+        window['BLADE_SESSION'].root.render(await contentPromise);
+      } else {
+        const root = hydrateRoot(document, await contentPromise, {
+          onRecoverableError(error, errorInfo) {
+            console.error('Hydration error occurred:', error, errorInfo);
+          },
+        });
+
+        window['BLADE_SESSION'] = { root, source };
+      }
+    });
+
+    source.addEventListener('update-bundle', (event) => {
+      const serverBundleId = event.id.split('-').pop() as string;
+      mountNewBundle(serverBundleId, event.data);
     });
   });
 };
 
-export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
+export const mountNewBundle = async (bundleId: string, markup: string) => {
   const session = window['BLADE_SESSION'];
 
   // If there is no active browser session, an update is still in progress.

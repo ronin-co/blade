@@ -14,7 +14,7 @@ interface HistoryContentProps {
 
 const HistoryContent = ({ children }: HistoryContentProps) => {
   const universalContext = useUniversalContext();
-  const transitionPage = usePageTransition();
+  const { transitionPage } = usePageTransition();
 
   const { pathname, search, hash } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
@@ -27,7 +27,8 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     const pageChanged = () => {
       const newLocation = window.location;
       const pathname = newLocation.pathname + newLocation.search + newLocation.hash;
-      transitionPage(pathname)();
+
+      transitionPage(pathname);
     };
 
     window.addEventListener('popstate', pageChanged);
@@ -40,7 +41,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       const path = populatedPathname + search;
       console.debug(`Revalidating ${path} (window focused)`);
 
-      transitionPage(populatedPathname + search + hash)();
+      transitionPage(populatedPathname + search + hash);
     };
 
     window.addEventListener('focus', focused);

@@ -8,8 +8,8 @@ declare interface Window {
 
   /** An ongoing browser session (an open browser tab). */
   BLADE_SESSION?: {
-    id: import('../../universal/types/util').BrowserSession['id'];
     root: import('react-dom/client').Root;
+    source: import('../utils/page').EventStream;
   };
 }
 
