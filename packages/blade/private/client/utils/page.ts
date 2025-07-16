@@ -29,6 +29,72 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
   });
 };
 
+type Callback = ({ data }: { data: string }) => void;
+
+export const createStreamSource = async (url: string, body?: FormData) => {
+  const response = await fetchRetry(url, {
+    method: 'POST',
+    body,
+    headers: { Accept: 'application/json' },
+  });
+
+  // If the status code is not in the 200-299 range, we want to throw an error that will
+  // be caught and rendered further upwards in the code.
+  if (!response.ok) throw new Error(await response.text());
+  if (!response.body) throw new Error('Empty response body');
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  const listeners = new Map<string, Array<Callback>>();
+
+  function dispatchEvent(type: string, data: string) {
+    (listeners.get(type) || []).forEach((cb) => cb({ data }));
+  }
+
+  // start reading the stream
+  (async () => {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      // simple SSE parsing: split on double-newline
+      let pos;
+
+      while ((pos = buffer.indexOf('\n\n')) !== -1) {
+        const chunk = buffer.slice(0, pos).trim();
+        buffer = buffer.slice(pos + 2);
+
+        // parse `event:` and `data:` lines
+        let event = 'message';
+        let data = '';
+
+        for (const line of chunk.split(/\r?\n/)) {
+          if (line.startsWith('event:')) {
+            event = line.slice(6).trim();
+          } else if (line.startsWith('data:')) {
+            data += `${line.slice(5)}\n`;
+          }
+        }
+
+        dispatchEvent(event, data.replace(/\n$/, ''));
+      }
+    }
+  })();
+
+  return {
+    addEventListener(type: string, callback: Callback) {
+      if (!listeners.has(type)) listeners.set(type, []);
+      listeners.get(type)!.push(callback);
+    },
+    close() {
+      reader.cancel();
+    },
+  };
+};
+
 /**
  * Resolves a new page from the server-side of Blade.
  *
@@ -41,7 +107,7 @@ export const fetchPage = async (
   path: string,
   options?: PageFetchingOptions,
 ): Promise<ReactNode | null> => {
-  let body = null;
+  let body;
 
   if (options && Object.keys(options).length > 0) {
     const formData = new FormData();
@@ -59,27 +125,18 @@ export const fetchPage = async (
     body = formData;
   }
 
-  const response = await fetchRetry(path, {
-    method: 'POST',
-    body,
-    headers: { Accept: 'application/json' },
+  const source = await createStreamSource(path, body);
+
+  return new Promise((resolve) => {
+    // Resolve on the first "update" event
+    source.addEventListener('update', (event) => {
+      const stream = new Blob([event.data]).stream();
+      const content = createFromReadableStream(stream);
+
+      resolve(content);
+      source.close();
+    });
   });
-
-  // If the status code is not in the 200-299 range, we want to throw an error that will
-  // be caught and rendered further upwards in the code.
-  if (!response.ok) throw new Error(await response.text());
-
-  const serverBundleId = response.headers.get('X-Server-Bundle-Id');
-  if (!response.body) throw new Error('Missing response body on client.');
-
-  // If the bundles used on the client are the same as the ones available on the server,
-  // the server will not provide a new bundle, which means we can just proceed with
-  // rendering the page using the existing React instance.
-  if (bundleId === serverBundleId) return createFromReadableStream(response.body);
-
-  // If they are not the same, do not try to render. The client chunks will be updated
-  // by the browser session endpoint.
-  return null;
 };
 
 export const mountNewBundle = async (bundleId: string, markup: Promise<string>) => {
