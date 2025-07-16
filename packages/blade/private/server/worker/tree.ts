@@ -44,6 +44,7 @@ import type {
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
+import type { SSEStreamingApi } from 'hono/streaming';
 
 const pages: PageList = {
   ...pageList,
@@ -445,23 +446,16 @@ const appendCookieHeader = (
  * the session continues to exist.
  */
 export const flushSession = async (
-  id: string,
+  stream: SSEStreamingApi,
+  url: URL,
+  headers: Headers,
   options?: {
-    queries?: Array<Query>;
+    queries?: Collected['queries'];
     repeat?: boolean;
   },
 ): Promise<void> => {
-  const session = globalThis.SERVER_SESSIONS.get(id);
-
-  // If the session no longer exists, don't continue.
-  //
-  // In the case that `repeat` was set, this would now let the worker die, since nothing
-  // will remain in the event loop. It is crucial for ensuring that workers are not kept
-  // alive if there aren't any connections currently open.
-  if (!session) return;
-
-  const { stream, url, headers, bundleId: clientBundleId } = session;
-  const correctBundle = clientBundleId === serverBundleId;
+  const correctBundle = true;
+  const queries = options?.queries;
 
   try {
     // If the session does exist, render an update for it.
@@ -472,15 +466,13 @@ export const flushSession = async (
       {
         waitUntil: getWaitUntil(),
       },
-      {
-        jwts: {},
-        metadata: {},
-        queries: (options?.queries || []).map((query) => ({
-          hookHash: crypto.randomUUID(),
-          query: JSON.stringify(query),
-          type: 'write',
-        })),
-      },
+      queries
+        ? {
+            jwts: {},
+            metadata: {},
+            queries,
+          }
+        : undefined,
     );
 
     // Afterward, flush the update over the stream.
@@ -497,13 +489,6 @@ export const flushSession = async (
     } else {
       throw err;
     }
-  }
-
-  // If the update should be repeated later, wait for 5 seconds and then attempt
-  // flushing yet another update.
-  if (options?.repeat) {
-    await sleep(5000);
-    return flushSession(id, options);
   }
 };
 
@@ -575,9 +560,6 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushSession: options.sessionId
-      ? (queries) => flushSession(options.sessionId as string, { queries })
-      : undefined,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};

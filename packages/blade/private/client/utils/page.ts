@@ -34,7 +34,7 @@ export const createStreamSource = async (url: string, body?: FormData) => {
   const response = await fetchRetry(url, {
     method: 'POST',
     body,
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'text/event-stream' },
   });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
