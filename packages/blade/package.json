@@ -89,7 +89,6 @@
     "js-yaml": "4.1.0",
     "magic-string": "0.30.17",
     "ora": "8.1.0",
-    "p-queue": "8.0.1",
     "radash": "12.1.0",
     "serialize-error": "11.0.3",
     "tsup": "8.4.0",
