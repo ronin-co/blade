@@ -1,4 +1,3 @@
-import { bundleId } from 'build-meta';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 
@@ -144,10 +143,6 @@ export const mountNewBundle = async (bundleId: string, markup: Promise<string>) 
 
   // If there is no active browser session, an update is still in progress.
   if (!session) return;
-
-  // As the first step, stop receiving further push updates from the server. Otherwise
-  // more updates might come in while we perform the next steps.
-  session.source.close();
 
   // Clear the session to prevent further updates from poll revalidation. Deleting the
   // property resets it back to exactly the state before the session was started (the

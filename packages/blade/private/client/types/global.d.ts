@@ -9,7 +9,6 @@ declare interface Window {
   /** An ongoing browser session (an open browser tab). */
   BLADE_SESSION?: {
     id: import('../../universal/types/util').BrowserSession['id'];
-    source: EventSource;
     root: import('react-dom/client').Root;
   };
 }
