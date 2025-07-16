@@ -29,6 +29,20 @@ type Bindings = {
   };
 };
 
+// This should be done as early as possible in the file.
+//
+// If this variable is already defined when the file gets evaluated, that means the file
+// was evaluated previously already, so we're dealing with local HMR.
+//
+// In that case, we want to push an updated version of every page to the client.
+if (globalThis.DEV_SESSIONS) {
+  globalThis.DEV_SESSIONS.forEach(({ stream, url, headers }) => {
+    return flushSession(stream, url, headers, false);
+  });
+} else {
+  globalThis.DEV_SESSIONS = new Map();
+}
+
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', async (c, next) => {
@@ -235,6 +249,9 @@ app.post('*', async (c) => {
   const { readable, writable } = new TransformStream();
   const stream = new SSEStreamingApi(writable, readable);
 
+  const url = new URL(c.req.url);
+  const headers = c.req.raw.headers;
+
   // Check if the client-side bundle is correct. If it isn't, we will immediately send
   // the markup for the new bundles to the client. However, we will still consider the
   // queries of the incoming request, to make sure that writes aren't lost in the void,
@@ -247,9 +264,16 @@ app.post('*', async (c) => {
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, new URL(c.req.url), c.req.raw.headers, correctBundle, {
-    queries,
-    repeat: true,
+  flushSession(stream, url, headers, correctBundle, { queries, repeat: correctBundle });
+
+  const id = crypto.randomUUID();
+
+  // Track the session for HMR.
+  globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
+
+  // Handle connection cleanup when the client disconnects.
+  c.req.raw.signal.addEventListener('abort', () => {
+    globalThis.DEV_SESSIONS.delete(id);
   });
 
   return c.newResponse(stream.responseReadable);
