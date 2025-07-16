@@ -29,6 +29,18 @@ type Bindings = {
   };
 };
 
+// This should be done as early as possible in the file.
+//
+// If this variable is already defined when the file gets evaluated, that means the file
+// was evaluated previously already, so we're dealing with local HMR.
+//
+// In that case, we want to push an updated version of every page to the client.
+if (globalThis.HMR_SESSIONS) {
+  globalThis.HMR_SESSIONS.forEach((flush) => flush());
+} else {
+  globalThis.HMR_SESSIONS = new Map();
+}
+
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('*', async (c, next) => {
@@ -249,7 +261,19 @@ app.post('*', async (c) => {
 
   flushSession(stream, new URL(c.req.url), c.req.raw.headers, correctBundle, {
     queries,
-    repeat: true,
+    repeat: correctBundle,
+  });
+
+  const id = crypto.randomUUID();
+
+  // Track the session for HMR.
+  globalThis.HMR_SESSIONS.set(id, () => {
+    flushSession(stream, new URL(c.req.url), c.req.raw.headers, false);
+  });
+
+  // Handle connection cleanup when the client disconnects.
+  c.req.raw.signal.addEventListener('abort', () => {
+    globalThis.HMR_SESSIONS.delete(id);
   });
 
   return c.newResponse(stream.responseReadable);

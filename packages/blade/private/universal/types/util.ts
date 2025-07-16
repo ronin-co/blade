@@ -1,35 +1,6 @@
-import type { SSEStreamingApi } from 'hono/streaming';
 import type { FormattedResults } from 'ronin/types';
 
 import type { UniversalContext } from '@/private/universal/context';
-
-/**
- * A browser session is synonymous to an open browser tab. Every new tab that gets opened
- * results in a new browser session.
- *
- * The browser session contains server-side state about the page that was last visited,
- * which is defined through `url` and `headers`. In other words, the currently active
- * page of the browser session is defined like this.
- *
- * Blade uses this information to push updates from the server to the client.
- */
-export interface BrowserSession {
-  /** A unique identifier of the current browser session. */
-  id: string;
-  /** The URL of the last client-to-server request. */
-  url: URL;
-  /** The headers of the last client-to-server request. */
-  headers: Headers;
-  /**
-   * An always-open connection between the server and the client, through which updates
-   * can be pushed.
-   */
-  stream: SSEStreamingApi;
-  /** A promise that continously revalidates the session as long as it is open. */
-  interval: Promise<void>;
-  /** The ID of the bundle that is currently being used on the client. */
-  bundleId: string;
-}
 
 interface QueryItemBase {
   /**
