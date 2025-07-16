@@ -1,5 +1,5 @@
-declare global {
-  var HMR_SESSIONS: Map<string, () => void>;
-}
+import type { BrowserSession } from '@/private/universal/types/util';
 
-export {};
+declare global {
+  var SERVER_SESSIONS: Map<BrowserSession['id'], Omit<BrowserSession, 'id'>>;
+}
