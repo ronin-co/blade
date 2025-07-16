@@ -4,7 +4,5 @@ import '@/private/client/components/history';
 import '@/public/client/components';
 import { fetchPage } from '@/private/client/utils/page';
 
-if (!window['BLADE_SESSION']) {
-  const path = location.pathname + location.search + location.hash;
-  fetchPage(path, true);
-}
+const path = location.pathname + location.search + location.hash;
+fetchPage(path, true);

@@ -110,6 +110,23 @@ export const createStreamSource = async (
   };
 };
 
+const SESSION: {
+  root?: import('react-dom/client').Root;
+  source?: import('../utils/page').EventStream;
+} = {};
+
+export const renderRoot = (content: ReactNode) => {
+  if (SESSION.root) {
+    SESSION.root.render(content);
+  } else {
+    SESSION.root = hydrateRoot(document, content, {
+      onRecoverableError(error, errorInfo) {
+        console.error('Hydration error occurred:', error, errorInfo);
+      },
+    });
+  }
+};
+
 /**
  * Resolves a new page from the server-side of Blade.
  *
@@ -142,50 +159,37 @@ export const fetchPage = async (
   }
 
   // Close the previous connection, since we're opening a new one.
-  if (subscribe && window['BLADE_SESSION']) window['BLADE_SESSION'].source.close();
+  if (subscribe) SESSION.source?.close();
 
+  // Open a new session.
   const source = await createStreamSource(path, body);
+
+  // Immmediately start tracking the latest session.
+  if (subscribe) SESSION.source = source;
 
   return new Promise((resolve) => {
     source.addEventListener('update', async (event) => {
       const stream = new Blob([event.data]).stream();
-      const contentPromise = createFromReadableStream(stream);
+      const content = await createFromReadableStream(stream);
 
-      if (!subscribe) return resolve(await contentPromise);
-
-      if (window['BLADE_SESSION']) {
-        window['BLADE_SESSION'].source = source;
-        window['BLADE_SESSION'].root.render(await contentPromise);
-      } else {
-        const root = hydrateRoot(document, await contentPromise, {
-          onRecoverableError(error, errorInfo) {
-            console.error('Hydration error occurred:', error, errorInfo);
-          },
-        });
-
-        window['BLADE_SESSION'] = { root, source };
-      }
+      if (subscribe) return renderRoot(content);
+      resolve(content);
     });
 
     source.addEventListener('update-bundle', (event) => {
       const serverBundleId = event.id.split('-').pop() as string;
+
+      // Immediately close the connection, since we don't want to receive further updates
+      // from the server, now that we know that the client bundles are outdated.
+      SESSION.source?.close();
+      delete SESSION.source;
+
       mountNewBundle(serverBundleId, event.data);
     });
   });
 };
 
 export const mountNewBundle = async (bundleId: string, markup: string) => {
-  const session = window['BLADE_SESSION'];
-
-  // If there is no active browser session, an update is still in progress.
-  if (!session) return;
-
-  // Clear the session to prevent further updates from poll revalidation. Deleting the
-  // property resets it back to exactly the state before the session was started (the
-  // property didn't exist at that time). It's more accurate than setting it to `null`,
-  // which would be third possible state.
-  delete window['BLADE_SESSION'];
-
   // Download the new markup, CSS, and JS at the same time, but don't execute any of them
   // just yet.
   const [newMarkup] = await Promise.all([
@@ -197,7 +201,8 @@ export const mountNewBundle = async (bundleId: string, markup: string) => {
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not
   // only the CSS and JS bundles can be upgraded, but also React itself.
-  session.root.unmount();
+  SESSION.root?.unmount();
+  delete SESSION.root;
 
   const parser = new DOMParser();
   const newDocument = parser.parseFromString(newMarkup, 'text/html');

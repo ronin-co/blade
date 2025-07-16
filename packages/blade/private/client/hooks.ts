@@ -11,7 +11,7 @@ import {
 
 import { RootClientContext } from '@/private/client/context';
 import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
-import { fetchPage } from '@/private/client/utils/page';
+import { fetchPage, renderRoot } from '@/private/client/utils/page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { usePopulatePathname } from '@/public/universal/hooks';
@@ -59,7 +59,7 @@ export const usePageTransition = () => {
       // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
       // in production, caching a page for 10 seconds makes sense.
       if (cacheEntry && cacheEntry.time > maxAge && !IS_CLIENT_DEV) {
-        cacheEntry.body.then((page) => window['BLADE_SESSION']!.root.render(page));
+        cacheEntry.body.then((page) => renderRoot(page));
       }
     }
 
