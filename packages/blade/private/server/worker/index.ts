@@ -213,18 +213,13 @@ app.post('*', async (c) => {
     }
   }
 
-  const existingCollected: Collected = {
-    queries: [],
-    metadata: {},
-    jwts: {},
-  };
+  let queries: Collected['queries'] | undefined;
 
   if (options?.queries) {
-    const list = options.queries;
-    existingCollected.queries = list;
+    queries = options.queries;
 
     // Only accept DML write queries to be provided from the client.
-    for (const { query } of list) {
+    for (const { query } of queries) {
       const queryType = Object.keys(JSON.parse(query))[0] as QueryType;
 
       if (!(DML_QUERY_TYPES_WRITE as ReadonlyArray<QueryType>).includes(queryType)) {
@@ -245,9 +240,7 @@ app.post('*', async (c) => {
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, new URL(c.req.url), c.req.raw.headers, {
-    queries: existingCollected.queries,
-  });
+  flushSession(stream, new URL(c.req.url), c.req.raw.headers, { queries });
 
   return c.newResponse(stream.responseReadable);
 });
