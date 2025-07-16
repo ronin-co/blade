@@ -118,13 +118,14 @@ const SESSION: {
 export const renderRoot = (content: ReactNode) => {
   if (SESSION.root) {
     SESSION.root.render(content);
-  } else {
-    SESSION.root = hydrateRoot(document, content, {
-      onRecoverableError(error, errorInfo) {
-        console.error('Hydration error occurred:', error, errorInfo);
-      },
-    });
+    return;
   }
+
+  SESSION.root = hydrateRoot(document, content, {
+    onRecoverableError(error, errorInfo) {
+      console.error('Hydration error occurred:', error, errorInfo);
+    },
+  });
 };
 
 /**
