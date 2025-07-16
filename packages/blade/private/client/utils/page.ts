@@ -115,7 +115,7 @@ const SESSION: {
   source?: import('../utils/page').EventStream;
 } = {};
 
-export const renderRoot = (content: ReactNode) => {
+export const renderRoot = (content: ReactNode): void => {
   if (SESSION.root) {
     SESSION.root.render(content);
     return;
