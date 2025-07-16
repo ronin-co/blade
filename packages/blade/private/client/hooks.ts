@@ -52,8 +52,9 @@ export const usePageTransition = () => {
 
     // Otherwise, fetch the page fresh.
     //
-    // The time should be set to when we started fetching, since that's the time at which
-    // the data within the page was last updated.
+    // The time should be set to when we started receiving the first response bytes, not
+    // to when the response is finished, since the former is the time at which the data
+    // within the page was last updated.
     const promise = fetchPage(path, false);
     cache.current.set(path, { body: promise, time: Date.now() });
   };
@@ -62,8 +63,8 @@ export const usePageTransition = () => {
     const privateLocation = privateLocationRef.current;
 
     // Reading from cache should only happen in production. During development, we are
-    // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
-    // in production, caching a page for 10 seconds makes sense.
+    // performing HMR, which would be slown down by the 10 second threadshold. Whereas in
+    // production, caching a page for 10 seconds makes sense.
     if (options?.acceptCache && !IS_CLIENT_DEV) {
       getCacheEntry(path)?.body.then((page) => renderRoot(page));
     }

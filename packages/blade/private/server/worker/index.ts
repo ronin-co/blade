@@ -1,5 +1,5 @@
 import { DML_QUERY_TYPES_WRITE } from 'blade-compiler';
-import { bundleId } from 'build-meta';
+import { bundleId as serverBundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -256,7 +256,7 @@ app.post('*', async (c) => {
   // the markup for the new bundles to the client. However, we will still consider the
   // queries of the incoming request, to make sure that writes aren't lost in the void,
   // even if the bundles have changed.
-  const correctBundle = c.req.header('X-Bundle-Id') === bundleId;
+  const correctBundle = c.req.header('X-Bundle-Id') === serverBundleId;
 
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/event-stream');
@@ -268,13 +268,11 @@ app.post('*', async (c) => {
 
   const id = crypto.randomUUID();
 
-  // Track the session for HMR.
+  // Track the HMR session.
   globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
 
-  // Handle connection cleanup when the client disconnects.
-  c.req.raw.signal.addEventListener('abort', () => {
-    globalThis.DEV_SESSIONS.delete(id);
-  });
+  // Stop tracking the HMR session when the browser tab is closed.
+  c.req.raw.signal.addEventListener('abort', () => globalThis.DEV_SESSIONS.delete(id));
 
   return c.newResponse(stream.responseReadable);
 });

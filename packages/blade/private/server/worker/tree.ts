@@ -7,6 +7,7 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
+import type { SSEStreamingApi } from 'hono/streaming';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -44,7 +45,6 @@ import type {
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
-import type { SSEStreamingApi } from 'hono/streaming';
 
 const pages: PageList = {
   ...pageList,

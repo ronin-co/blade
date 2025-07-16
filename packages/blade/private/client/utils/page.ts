@@ -1,4 +1,4 @@
-import { bundleId } from 'build-meta';
+import { bundleId as clientBundleId } from 'build-meta';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
@@ -30,10 +30,10 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
   });
 };
 
-type Callback = ({ data, id }: { data: string; id: string }) => void;
+type EventCallback = ({ data, id }: { data: string; id: string }) => void;
 
 export interface EventStream {
-  addEventListener: (type: string, callback: Callback) => void;
+  addEventListener: (type: string, callback: EventCallback) => void;
   close: () => void;
 }
 
@@ -46,7 +46,7 @@ export const createStreamSource = async (
     body,
     headers: {
       Accept: 'text/event-stream',
-      'X-Bundle-Id': bundleId,
+      'X-Bundle-Id': clientBundleId,
     },
   });
 
@@ -57,29 +57,29 @@ export const createStreamSource = async (
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = '';
+  const listeners = new Map<string, Array<EventCallback>>();
 
-  const listeners = new Map<string, Array<Callback>>();
+  let buffer = '';
 
   function dispatchEvent(type: string, data: string, id: string) {
     (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
   }
 
-  // start reading the stream
+  // Start reading the stream, but don't block the execution of the current scope.
   (async () => {
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
 
-      // simple SSE parsing: split on double-newline
+      // Simple SSE parsing: split on double-newline.
       let pos;
 
       while ((pos = buffer.indexOf('\n\n')) !== -1) {
         const chunk = buffer.slice(0, pos).trim();
         buffer = buffer.slice(pos + 2);
 
-        // parse `event:` and `data:` lines
+        // Parse out the metadata and contents of the event.
         let event = 'message';
         let data = '';
         let id = '';
@@ -100,13 +100,11 @@ export const createStreamSource = async (
   })();
 
   return {
-    addEventListener(type: string, callback: Callback) {
+    addEventListener: (type: string, callback: EventCallback) => {
       if (!listeners.has(type)) listeners.set(type, []);
       listeners.get(type)!.push(callback);
     },
-    close() {
-      reader.cancel();
-    },
+    close: () => reader.cancel(),
   };
 };
 
@@ -132,13 +130,16 @@ export const renderRoot = (content: ReactNode): void => {
  * Resolves a new page from the server-side of Blade.
  *
  * @param path - The path of the page.
+ * @param subscribe - Whether to subscribe to subsequent updates from the server.
  * @param options - Additional options for how to resolve the page.
  *
- * @returns Either a page or `null` if the server has changed.
+ * @returns A promise that resolves to a page if `subscribe` is `false`. If it is `true`,
+ * the promise will never resolve. Instead, the function will render the subsequent
+ * updates directly.
  */
 export const fetchPage = async (
   path: string,
-  subscribe = true,
+  subscribe: boolean,
   options?: PageFetchingOptions,
 ): Promise<ReactNode> => {
   let body;
@@ -159,27 +160,27 @@ export const fetchPage = async (
     body = formData;
   }
 
-  // Close the previous connection, since we're opening a new one.
+  // Close the previous stream, since we're opening a new one.
   if (subscribe) SESSION.source?.close();
 
-  // Open a new session.
-  const source = await createStreamSource(path, body);
+  // Open a new stream.
+  const stream = await createStreamSource(path, body);
 
-  // Immmediately start tracking the latest session.
-  if (subscribe) SESSION.source = source;
+  // Immmediately start tracking the latest stream.
+  if (subscribe) SESSION.source = stream;
 
   return new Promise((resolve) => {
-    source.addEventListener('update', async (event) => {
-      const stream = new Blob([event.data]).stream();
-      const content = await createFromReadableStream(stream);
+    stream.addEventListener('update', async (event) => {
+      const dataStream = new Blob([event.data]).stream();
+      const content = await createFromReadableStream(dataStream);
 
       if (subscribe) return renderRoot(content);
 
-      source.close();
+      stream.close();
       resolve(content);
     });
 
-    source.addEventListener('update-bundle', (event) => {
+    stream.addEventListener('update-bundle', (event) => {
       const serverBundleId = event.id.split('-').pop() as string;
       mountNewBundle(serverBundleId, event.data);
     });
