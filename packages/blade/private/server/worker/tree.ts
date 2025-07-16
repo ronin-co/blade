@@ -7,6 +7,7 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
+import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
@@ -488,6 +489,13 @@ export const flushSession = async (
     } else {
       throw err;
     }
+  }
+
+  // If the update should be repeated later, wait for 5 seconds and then attempt
+  // flushing yet another update.
+  if (options?.repeat) {
+    await sleep(5000);
+    return flushSession(stream, url, headers, true, options);
   }
 };
 
