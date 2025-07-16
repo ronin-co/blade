@@ -1,4 +1,5 @@
 import { DML_QUERY_TYPES_WRITE } from 'blade-compiler';
+import { bundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -234,13 +235,22 @@ app.post('*', async (c) => {
   const { readable, writable } = new TransformStream();
   const stream = new SSEStreamingApi(writable, readable);
 
+  // Check if the client-side bundle is correct. If it isn't, we will immediately send
+  // the markup for the new bundles to the client. However, we will still consider the
+  // queries of the incoming request, to make sure that writes aren't lost in the void,
+  // even if the bundles have changed.
+  const correctBundle = c.req.header('X-Bundle-Id') === bundleId;
+
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/event-stream');
   c.header('Cache-Control', 'no-cache, no-transform');
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, new URL(c.req.url), c.req.raw.headers, { queries, repeat: true });
+  flushSession(stream, new URL(c.req.url), c.req.raw.headers, correctBundle, {
+    queries,
+    repeat: true,
+  });
 
   return c.newResponse(stream.responseReadable);
 });

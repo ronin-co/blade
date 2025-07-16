@@ -448,12 +448,12 @@ export const flushSession = async (
   stream: SSEStreamingApi,
   url: URL,
   headers: Headers,
+  correctBundle: boolean,
   options?: {
     queries?: Collected['queries'];
     repeat?: boolean;
   },
 ): Promise<void> => {
-  const correctBundle = true;
   const queries = options?.queries;
 
   try {

@@ -1,11 +1,12 @@
+import { bundleId } from 'build-meta';
 import { omit } from 'radash';
+import type { ReactNode } from 'react';
+import { hydrateRoot } from 'react-dom/client';
 
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { getOutputFile } from '@/private/universal/utils/paths';
-import type { ReactNode } from 'react';
-import { hydrateRoot } from 'react-dom/client';
 
 /**
  * Downloads a CSS or JS bundle from the server, without evaluating it.
@@ -43,7 +44,10 @@ export const createStreamSource = async (
   const response = await fetchRetry(url, {
     method: 'POST',
     body,
-    headers: { Accept: 'text/event-stream' },
+    headers: {
+      Accept: 'text/event-stream',
+      'X-Bundle-Id': bundleId,
+    },
   });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
