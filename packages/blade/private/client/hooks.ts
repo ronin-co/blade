@@ -37,30 +37,35 @@ export const usePageTransition = () => {
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
 
-  const primePageCache = (path: string) => {
-    const promise = fetchPage(path, false);
+  const getCacheEntry = (path: string) => {
+    const cacheEntry = cache.current.get(path);
+    const maxAge = Date.now() - 10000;
 
+    // If the page is cached on the client and it's not older than 10 seconds, we can
+    // use it, otherwise we can't.
+    return cacheEntry && cacheEntry.time > maxAge ? cacheEntry : null;
+  };
+
+  const primePageCache = (path: string) => {
+    // If the path is already in the cache and valid, don't fetch it again.
+    if (getCacheEntry(path)) return;
+
+    // Otherwise, fetch the page fresh.
+    //
     // The time should be set to when we started fetching, since that's the time at which
     // the data within the page was last updated.
+    const promise = fetchPage(path, false);
     cache.current.set(path, { body: promise, time: Date.now() });
   };
 
   const transitionPage = (path: string, options?: RootTransitionOptions) => {
     const privateLocation = privateLocationRef.current;
 
-    if (options?.acceptCache) {
-      const maxAge = Date.now() - 10000;
-      const cacheEntry = cache.current.get(path);
-
-      // If the page was already loaded on the client and it's not older than 10 seconds,
-      // we can render it immediately from cache, and subscribe later.
-      //
-      // However, this should only happen in production. During development, we are
-      // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
-      // in production, caching a page for 10 seconds makes sense.
-      if (cacheEntry && cacheEntry.time > maxAge && !IS_CLIENT_DEV) {
-        cacheEntry.body.then((page) => renderRoot(page));
-      }
+    // Reading from cache should only happen in production. During development, we are
+    // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
+    // in production, caching a page for 10 seconds makes sense.
+    if (options?.acceptCache && !IS_CLIENT_DEV) {
+      getCacheEntry(path)?.body.then((page) => renderRoot(page));
     }
 
     // If desired, already update the query params in the address bar before the server
