@@ -174,6 +174,8 @@ export const fetchPage = async (
       const content = await createFromReadableStream(stream);
 
       if (subscribe) return renderRoot(content);
+
+      source.close();
       resolve(content);
     });
 
