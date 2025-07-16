@@ -178,18 +178,17 @@ export const fetchPage = async (
 
     source.addEventListener('update-bundle', (event) => {
       const serverBundleId = event.id.split('-').pop() as string;
-
-      // Immediately close the connection, since we don't want to receive further updates
-      // from the server, now that we know that the client bundles are outdated.
-      SESSION.source?.close();
-      delete SESSION.source;
-
       mountNewBundle(serverBundleId, event.data);
     });
   });
 };
 
 export const mountNewBundle = async (bundleId: string, markup: string) => {
+  // Immediately close the connection, since we don't want to receive further updates
+  // from the server, now that we know that the client bundles are outdated.
+  SESSION.source?.close();
+  delete SESSION.source;
+
   // Download the new markup, CSS, and JS at the same time, but don't execute any of them
   // just yet.
   const [newMarkup] = await Promise.all([
