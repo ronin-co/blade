@@ -457,6 +457,20 @@ export const flushSession = async (
 ): Promise<void> => {
   const queries = options?.queries;
 
+  const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
+    const newOptions: Parameters<typeof flushSession>[4] = {
+      queries: nestedQueries
+        ? nestedQueries.map((query) => ({
+            hookHash: crypto.randomUUID(),
+            query: JSON.stringify(query),
+            type: 'write',
+          }))
+        : undefined,
+    };
+
+    return flushSession(stream, url, headers, true, newOptions);
+  };
+
   try {
     // If the session does exist, render an update for it.
     const page = await renderReactTree(
@@ -465,21 +479,7 @@ export const flushSession = async (
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
-        flushSession: options?.repeat
-          ? async (nestedQueries) => {
-              const newOptions: Parameters<typeof flushSession>[4] = {
-                queries: nestedQueries
-                  ? nestedQueries.map((query) => ({
-                      hookHash: crypto.randomUUID(),
-                      query: JSON.stringify(query),
-                      type: 'write',
-                    }))
-                  : undefined,
-              };
-
-              flushSession(stream, url, headers, true, newOptions);
-            }
-          : undefined,
+        flushSession: options?.repeat ? nestedFlushSession : undefined,
       },
       queries
         ? {
@@ -533,9 +533,9 @@ const renderReactTree = async (
      */
     forceNativeError?: boolean;
     /** A function for keeping the process alive until a promise has been resolved. */
-    waitUntil: (promise: Promise<unknown>) => void;
+    waitUntil: ServerContext['waitUntil'];
     /** A function for flushing an update for the current browser session. */
-    flushSession?: (queries?: Array<Query>) => Promise<void>;
+    flushSession?: ServerContext['flushSession'];
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,

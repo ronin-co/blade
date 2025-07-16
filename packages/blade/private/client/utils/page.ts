@@ -37,6 +37,15 @@ export interface EventStream {
   close: () => void;
 }
 
+/**
+ * Sends a request for rendering a page to the server, which opens a readable stream.
+ *
+ * @param url - The URL of the page to render.
+ * @param body - An optional body for the outgoing request.
+ *
+ * @returns A readable stream of events, with a new event getting submitted for every
+ * server-side page render.
+ */
 export const createStreamSource = async (
   url: string,
   body?: FormData,
@@ -113,6 +122,13 @@ const SESSION: {
   source?: import('../utils/page').EventStream;
 } = {};
 
+/**
+ * Receives a React node and renders it at the root of the page.
+ *
+ * @param content - The React node to render.
+ *
+ * @returns Nothing.
+ */
 export const renderRoot = (content: ReactNode): void => {
   if (SESSION.root) {
     SESSION.root.render(content);
