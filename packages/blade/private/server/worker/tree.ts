@@ -456,7 +456,7 @@ export const flushSession = async (
   },
 ): Promise<void> => {
   // If the client is no longer connected, don't try to push an update. This therefore
-  // also breaks the interval of continuous revalidation.
+  // also stops the interval of continuous revalidation.
   if (stream.closed) return;
 
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
