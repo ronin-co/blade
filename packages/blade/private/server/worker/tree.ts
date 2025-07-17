@@ -455,7 +455,9 @@ export const flushSession = async (
     repeat?: boolean;
   },
 ): Promise<void> => {
-  const queries = options?.queries;
+  // If the client is no longer connected, don't try to push an update. This therefore
+  // also breaks the interval of continuous revalidation.
+  if (stream.closed) return;
 
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[4] = {
@@ -481,11 +483,11 @@ export const flushSession = async (
         waitUntil: getWaitUntil(),
         flushSession: options?.repeat ? nestedFlushSession : undefined,
       },
-      queries
+      options?.queries
         ? {
             jwts: {},
             metadata: {},
-            queries,
+            queries: options.queries,
           }
         : undefined,
     );
