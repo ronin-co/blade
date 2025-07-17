@@ -1,4 +1,3 @@
-import type { createSyntaxFactory } from 'blade-client';
 import type {
   AddTrigger as OriginalAddTrigger,
   AfterAddTrigger as OriginalAfterAddTrigger,
@@ -70,13 +69,7 @@ export interface PageMetadata {
 }
 
 /** The original trigger options provided by the RONIN client. */
-export type ClientTriggerOptions = Omit<
-  Parameters<OriginalBeforeGetTrigger>[2],
-  'client'
-> & {
-  /** An instance of the current client, which can be used for nested queries. */
-  client: ReturnType<typeof createSyntaxFactory>;
-};
+export type ClientTriggerOptions = Parameters<OriginalBeforeGetTrigger>[2];
 
 export interface TriggerOptions extends ClientTriggerOptions {
   /**
