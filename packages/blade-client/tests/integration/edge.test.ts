@@ -79,7 +79,6 @@ describe('edge runtime', () => {
     await runQueriesWithTriggers(
       queries.map((query) => ({ query })),
       {
-        // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
         fetch: async () => {
           return Response.json({
             results: [
@@ -139,7 +138,6 @@ describe('edge runtime', () => {
     await runQueriesWithTriggers(
       queries.map((query) => ({ query })),
       {
-        // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
         fetch: async () => {
           return Response.json({
             results: [
@@ -191,7 +189,6 @@ describe('edge runtime', () => {
     await runQueriesWithTriggers(
       queries.map((query) => ({ query })),
       {
-        // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
         fetch: async () => {
           return Response.json({
             results: [

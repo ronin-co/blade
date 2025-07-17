@@ -120,6 +120,7 @@ export const handleTo = (
     }
 
     statement += compileQueryInput(symbol.value, models, statementParams, {
+      // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
       inlineDefaults: options?.inlineDefaults || false,
     }).main.statement;
     return statement;
@@ -167,6 +168,7 @@ export const handleTo = (
           },
           models,
           [],
+          // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
           { returning: false, inlineDefaults: options?.inlineDefaults || false },
         ).main;
 

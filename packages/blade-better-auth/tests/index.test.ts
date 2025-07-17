@@ -10,6 +10,7 @@ describe('adapter', () => {
 
   describe('authentication', () => {
     test('with no `RONIN_TOKEN` set', async () => {
+      // biome-ignore lint/nursery/noProcessEnv: We're intentionally overriding this environment variable.
       process.env.RONIN_TOKEN = undefined;
 
       const { auth } = await init({
@@ -28,6 +29,7 @@ describe('adapter', () => {
     });
 
     test('with an invalid `RONIN_TOKEN`', async () => {
+      // biome-ignore lint/nursery/noProcessEnv: We're intentionally overriding this environment variable.
       process.env.RONIN_TOKEN = 'abc123';
 
       const { auth } = await init({
@@ -47,6 +49,7 @@ describe('adapter', () => {
       const MOCK_JWT =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIiLCJleHAiOjAsImlhdCI6MCwiaXNzIjoiIiwic3ViIjoiIiwidGtuIjoiIn0.QwdhNGPGS1Rt3se0yBYi6XJLOPEg4cSNdBUjd8EOXaQ';
 
+      // biome-ignore lint/nursery/noProcessEnv: We're intentionally overriding this environment variable.
       process.env.RONIN_TOKEN = MOCK_JWT;
 
       const { auth } = await init({

@@ -1,4 +1,4 @@
-import type { BeforeGetTrigger } from 'blade-client/types';
+import type { BeforeGetTrigger } from 'ronin/types';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
@@ -34,6 +34,7 @@ export const prepareTriggers = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
+    flushSession: serverContext.flushSession,
   };
 
   const list = Object.entries(triggers || {}).map(
