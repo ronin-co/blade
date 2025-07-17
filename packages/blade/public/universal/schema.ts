@@ -1,1 +1,1 @@
-export * from 'ronin/schema';
+export * from 'blade-client/schema';

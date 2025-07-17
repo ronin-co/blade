@@ -506,7 +506,6 @@ describe('CLI', () => {
 
   describe('migration', () => {
     // Common migration test setup
-    // biome-ignore lint/nursery/useExplicitType: This is a mock.
     const setupMigrationTest = (options?: {
       modelDiff?: Array<ModelWithFieldsArray>;
       modelDefinitions?: Array<Model>;
