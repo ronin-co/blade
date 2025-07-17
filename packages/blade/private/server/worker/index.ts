@@ -272,7 +272,9 @@ app.post('*', async (c) => {
   globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
 
   // Stop tracking the HMR session when the browser tab is closed.
-  c.req.raw.signal.addEventListener('abort', () => globalThis.DEV_SESSIONS.delete(id));
+  stream.onAbort(() => {
+    globalThis.DEV_SESSIONS.delete(id);
+  });
 
   return c.newResponse(stream.responseReadable);
 });
