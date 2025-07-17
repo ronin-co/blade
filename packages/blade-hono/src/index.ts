@@ -34,7 +34,7 @@ interface Options extends QueryHandlerOptions {}
  * @example
  * ```ts
  * import { Hono } from 'hono';
- * import { ronin, type Bindings, type Variables } from '@ronin/hono';
+ * import { ronin, type Bindings, type Variables } from 'blade-hono';
  *
  * const app = new Hono()
  * 	.use('*', ronin())
