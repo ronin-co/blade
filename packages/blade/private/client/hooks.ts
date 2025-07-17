@@ -1,4 +1,3 @@
-import Queue from 'p-queue';
 import { omit } from 'radash';
 import {
   type MutableRefObject,
@@ -12,17 +11,18 @@ import {
 
 import { RootClientContext } from '@/private/client/context';
 import { IS_CLIENT_DEV } from '@/private/client/utils/constants';
-import { fetchPage } from '@/private/client/utils/page';
+import { fetchPage, renderRoot } from '@/private/client/utils/page';
 import { usePrivateLocation } from '@/private/universal/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { usePopulatePathname } from '@/public/universal/hooks';
 
 export interface RootTransitionOptions extends PageFetchingOptions {
   /**
-   * Whether to insert the page into the cache. This will also cause the page to get
-   * retrieved again after it was rendered, to make sure it is up-to-date.
+   * Whether to read the page from the local cache. This will also cause the page to get
+   * retrieved again after it was rendered, to make sure it is up-to-date and a
+   * subscription for updates is established.
    */
-  cache?: boolean;
+  acceptCache?: boolean;
   /**
    * Update the query string parameters in the address bar of the browser immediately,
    * instead of waiting for the page to be rendered on the server and returned.
@@ -30,34 +30,43 @@ export interface RootTransitionOptions extends PageFetchingOptions {
   immediatelyUpdateQueryParams?: boolean;
 }
 
-// We use this queue to ensure that all manual page transitions commit on the server
-// in the order they were started. Because page transitions may contain write queries
-// that must be guaranteed to commit.
-const pageTransitionQueue = new Queue({ concurrency: 1 });
-
 export const usePageTransition = () => {
-  const cache = useRef(new Map<string, { body: ReactNode; time: number }>());
+  const cache = useRef(new Map<string, { body: Promise<ReactNode>; time: number }>());
 
   const clientContext = useContext(RootClientContext);
   if (!clientContext) throw new Error('Missing client context in `usePageTransition`');
   const privateLocationRef = usePrivateLocationRef();
 
-  return function transitionPage(path: string, options?: RootTransitionOptions) {
+  const getCacheEntry = (path: string) => {
+    const cacheEntry = cache.current.get(path);
+    const maxAge = Date.now() - 10000;
+
+    // If the page is cached on the client and it's not older than 10 seconds, we can
+    // use it, otherwise we can't.
+    return cacheEntry && cacheEntry.time > maxAge ? cacheEntry : null;
+  };
+
+  const primePageCache = (path: string) => {
+    // If the path is already in the cache and valid, don't fetch it again.
+    if (getCacheEntry(path)) return;
+
+    // Otherwise, fetch the page fresh.
+    //
+    // The time should be set to when we started receiving the first response bytes, not
+    // to when the response is finished, since the former is the time at which the data
+    // within the page was last updated.
+    const promise = fetchPage(path, false);
+    cache.current.set(path, { body: promise, time: Date.now() });
+  };
+
+  const transitionPage = (path: string, options?: RootTransitionOptions) => {
     const privateLocation = privateLocationRef.current;
 
-    if (options?.cache) {
-      const maxAge = Date.now() - 10000;
-      const cacheEntry = cache.current.get(path);
-
-      // If the page was already loaded on the client and it's not older than 10 seconds,
-      // we can just render it directly without having to fetch it again.
-      //
-      // However, this should only happen in production. During development, we are
-      // performing HMR, which cannot be slown down by the 10 second threadshold. Whereas
-      // in production, caching a page for 10 seconds makes sense.
-      if (cacheEntry && cacheEntry.time > maxAge && !IS_CLIENT_DEV) {
-        return () => window['BLADE_SESSION']!.root.render(cacheEntry.body);
-      }
+    // Reading from cache should only happen in production. During development, we are
+    // performing HMR, which would be slown down by the 10 second threadshold. Whereas in
+    // production, caching a page for 10 seconds makes sense.
+    if (options?.acceptCache && !IS_CLIENT_DEV) {
+      getCacheEntry(path)?.body.then((page) => renderRoot(page));
     }
 
     // If desired, already update the query params in the address bar before the server
@@ -75,87 +84,15 @@ export const usePageTransition = () => {
     }
 
     // Only retain options allowed by `PageFetchingOptions`.
-    const pageOptions = omit(options || {}, ['cache', 'immediatelyUpdateQueryParams']);
+    const pageOptions = omit(options || {}, [
+      'acceptCache',
+      'immediatelyUpdateQueryParams',
+    ]);
 
-    const pagePromise = pageTransitionQueue.add(async () => {
-      const page = await fetchPage(path, {
-        ...pageOptions,
-        // If the page should be cached, don't pass the session ID yet, to ensure that
-        // the server-side session doesn't get updated yet. It should only get updated
-        // once the page was actually rendered, not when it was prefetched.
-        sessionId: options?.cache ? undefined : window['BLADE_SESSION']!.id,
-      });
-
-      // Check the session again after `fetchPage` has finished running, since it might
-      // have changed during that time.
-      const sessionAfterFetch = window['BLADE_SESSION'];
-
-      // If the client bundles have changed, don't proceed, since `fetchPage` will
-      // retrieve the latest bundles fresh in that case.
-      //
-      // If no browser session is available, new bundles are currently being mounted so
-      // we should clear the queue instead of proceeding.
-      if (!page || !sessionAfterFetch) {
-        // Immediately destroy the page queue, since we now know that the server has
-        // changed, so we cannot continue processing any further requests from the old
-        // client chunks. We have to do this inside the promise of the current function
-        // and not after it resolves, since the queue would otherwise immediately start
-        // working on the other queue items.
-        //
-        // It's critical that this happens inside the promise that is being handled by
-        // the queue and not outside the queue, otherwise the queue will already start
-        // working on the next item after the current one finishes.
-        //
-        // Note that it's absolutely fine for the queue to be destroyed completely,
-        // since the new client chunks will mount an entirely new queue.
-        pageTransitionQueue.pause();
-        pageTransitionQueue.clear();
-
-        return null;
-      }
-
-      return page;
-    });
-
-    const pagePromiseChain = pagePromise.then((page) => {
-      // Do nothing if no page is available. Logging already happens earlier.
-      if (!page) return;
-
-      // As soon as possible, store the page in the cache.
-      if (options?.cache) cache.current.set(path, { body: page, time: Date.now() });
-
-      // By the time we're ready to render the new page, a newer page transition might
-      // have already been started. If that's the case, we want to skip the current
-      // update to prevent the UI from temporarily regressing to an older state.
-      if (pageTransitionQueue.size > 0 || pageTransitionQueue.pending > 0) {
-        console.debug(
-          'Skipping page transition because of a newer pending page transition.',
-        );
-        return;
-      }
-
-      return page;
-    });
-
-    return () => {
-      pagePromiseChain.then((page) => {
-        // If the page is not available, then because the previous `.then()` call decided
-        // that it cannot be or should not be rendered.
-        if (!page) return;
-
-        // Render the page.
-        window['BLADE_SESSION']!.root.render(page);
-
-        // Since the page was served from cache and its data might therefore be stale,
-        // we want to revalidate it immediately after rendering it. This also serves the
-        // purpose of updating the server-side session to have the correct URL.
-        //
-        // Is is essential to not pass things like `cache` as options here, since we
-        // don't want to cause an infinite loop.
-        if (options?.cache) transitionPage(path, pageOptions)();
-      });
-    };
+    fetchPage(path, true, pageOptions);
   };
+
+  return { primePageCache, transitionPage };
 };
 
 /**

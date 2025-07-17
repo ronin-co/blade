@@ -76,14 +76,14 @@ const useRedirect = () => {
     };
   }
 
-  const transitionPage = usePageTransition();
+  const { transitionPage } = usePageTransition();
 
   return (pathname: string, options?: RedirectOptions) => {
     const populatedPathname = populatePathname(pathname, options?.extraParams);
 
     transitionPage(populatedPathname, {
       immediatelyUpdateQueryParams: options?.immediatelyUpdateQueryParams,
-    })();
+    });
   };
 };
 

@@ -58,7 +58,7 @@ export const useMutation = (): {
   const { deferredPromises, collected } = clientContext;
 
   const privateLocationRef = usePrivateLocationRef();
-  const transitionPage = usePageTransition();
+  const { transitionPage } = usePageTransition();
   const populatePathname = usePopulatePathname();
 
   // Whenever a write query is performed on the client-side, a promise is created and
@@ -130,7 +130,7 @@ export const useMutation = (): {
       })),
       errorFallback: currentPathnameWithQuery,
       files,
-    })();
+    });
 
     return new Promise((resolve, reject) => {
       const clear = () => {
@@ -200,7 +200,7 @@ export const useLinkEvents = (
   onMouseEnter: MouseEventHandler | undefined;
   onTouchStart: TouchEventHandler | undefined;
 } => {
-  const transitionPage = usePageTransition();
+  const { primePageCache, transitionPage } = usePageTransition();
   const populatePathname = usePopulatePathname();
   const activeTransition = useRef<() => void>();
 
@@ -224,7 +224,7 @@ export const useLinkEvents = (
     // We don't want to rely on `event.target` for retrieving the destination path, as
     // the event target might not be a link in the case that there are many nested
     // children present.
-    activeTransition.current = transitionPage(populatedPathname, { cache: true });
+    primePageCache(populatedPathname);
   };
 
   return {
@@ -255,8 +255,7 @@ export const useLinkEvents = (
       if (!activeTransition.current) primePage();
 
       // Render the primed page.
-      activeTransition.current!();
-      activeTransition.current = undefined;
+      transitionPage(populatedPathname, { acceptCache: true });
     },
   };
 };
@@ -278,7 +277,7 @@ export const usePagination = (
   nextPage: string | null,
   options?: Partial<Pick<PageFetchingOptions, 'updateAddressBar'>>,
 ): { paginate: () => void; resetPagination: () => void } => {
-  const transitionPage = usePageTransition();
+  const { transitionPage } = usePageTransition();
   const privateLocationRef = usePrivateLocationRef();
 
   // These two must be references and not memos in order to avoid a stale closure of the
@@ -305,7 +304,7 @@ export const usePagination = (
     newSearchParams.delete('page');
     const params = newSearchParams.toString();
 
-    transitionPage(privateLocation.pathname + (params ? `?${params}` : ''))();
+    transitionPage(privateLocation.pathname + (params ? `?${params}` : ''));
   };
 
   if (!nextPage) {
@@ -338,9 +337,7 @@ export const usePagination = (
 
     loadingMore.current = true;
 
-    transitionPage(newPath, {
-      updateAddressBar: options?.updateAddressBar,
-    })();
+    transitionPage(newPath, { updateAddressBar: options?.updateAddressBar });
   };
 
   return { paginate, resetPagination };

@@ -1,4 +1,4 @@
-import { bundleId } from 'build-meta';
+import { bundleId as serverBundleId } from 'build-meta';
 import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
@@ -28,8 +28,8 @@ const metadataNames: Record<string, string> = {
 };
 
 const ASSETS = new Array<Asset>(
-  { type: 'js', source: `/${getOutputFile(bundleId, 'js')}` },
-  { type: 'css', source: `/${getOutputFile(bundleId, 'css')}` },
+  { type: 'js', source: `/${getOutputFile(serverBundleId, 'js')}` },
+  { type: 'css', source: `/${getOutputFile(serverBundleId, 'css')}` },
 );
 
 // In production, load the service worker script.

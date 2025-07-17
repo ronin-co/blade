@@ -7,6 +7,7 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
+import type { SSEStreamingApi } from 'hono/streaming';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -445,23 +446,30 @@ const appendCookieHeader = (
  * the session continues to exist.
  */
 export const flushSession = async (
-  id: string,
+  stream: SSEStreamingApi,
+  url: URL,
+  headers: Headers,
+  correctBundle: boolean,
   options?: {
-    queries?: Array<Query>;
+    queries?: Collected['queries'];
     repeat?: boolean;
   },
 ): Promise<void> => {
-  const session = globalThis.SERVER_SESSIONS.get(id);
+  const queries = options?.queries;
 
-  // If the session no longer exists, don't continue.
-  //
-  // In the case that `repeat` was set, this would now let the worker die, since nothing
-  // will remain in the event loop. It is crucial for ensuring that workers are not kept
-  // alive if there aren't any connections currently open.
-  if (!session) return;
+  const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
+    const newOptions: Parameters<typeof flushSession>[4] = {
+      queries: nestedQueries
+        ? nestedQueries.map((query) => ({
+            hookHash: crypto.randomUUID(),
+            query: JSON.stringify(query),
+            type: 'write',
+          }))
+        : undefined,
+    };
 
-  const { stream, url, headers, bundleId: clientBundleId } = session;
-  const correctBundle = clientBundleId === serverBundleId;
+    return flushSession(stream, url, headers, true, newOptions);
+  };
 
   try {
     // If the session does exist, render an update for it.
@@ -471,16 +479,15 @@ export const flushSession = async (
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
+        flushSession: options?.repeat ? nestedFlushSession : undefined,
       },
-      {
-        jwts: {},
-        metadata: {},
-        queries: (options?.queries || []).map((query) => ({
-          hookHash: crypto.randomUUID(),
-          query: JSON.stringify(query),
-          type: 'write',
-        })),
-      },
+      queries
+        ? {
+            jwts: {},
+            metadata: {},
+            queries,
+          }
+        : undefined,
     );
 
     // Afterward, flush the update over the stream.
@@ -503,7 +510,7 @@ export const flushSession = async (
   // flushing yet another update.
   if (options?.repeat) {
     await sleep(5000);
-    return flushSession(id, options);
+    return flushSession(stream, url, headers, true, options);
   }
 };
 
@@ -526,7 +533,9 @@ const renderReactTree = async (
      */
     forceNativeError?: boolean;
     /** A function for keeping the process alive until a promise has been resolved. */
-    waitUntil: (promise: Promise<unknown>) => void;
+    waitUntil: ServerContext['waitUntil'];
+    /** A function for flushing an update for the current browser session. */
+    flushSession?: ServerContext['flushSession'];
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -832,16 +841,6 @@ const renderReactTree = async (
         queries: serverContext.collected.queries.filter(({ type }) => type === 'read'),
       },
     );
-  }
-
-  const session = options.sessionId
-    ? global.SERVER_SESSIONS.get(options.sessionId)
-    : null;
-
-  // Update the server-side state to the new page.
-  if (session) {
-    session.url = url;
-    session.headers = requestHeaders;
   }
 
   const body = await renderShell(initial, renderingLeaves, serverContext);
