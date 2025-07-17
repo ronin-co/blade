@@ -30,6 +30,7 @@ import type {
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
+import type { createSyntaxFactory } from 'ronin';
 
 export type WaitUntil = (promise: Promise<unknown>) => void;
 
@@ -69,7 +70,13 @@ export interface PageMetadata {
 }
 
 /** The original trigger options provided by the RONIN client. */
-export type ClientTriggerOptions = Parameters<OriginalBeforeGetTrigger>[2];
+export type ClientTriggerOptions = Omit<
+  Parameters<OriginalBeforeGetTrigger>[2],
+  'client'
+> & {
+  /** An instance of the current client, which can be used for nested queries. */
+  client: ReturnType<typeof createSyntaxFactory>;
+};
 
 export interface TriggerOptions extends ClientTriggerOptions {
   /**
