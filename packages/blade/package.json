@@ -57,6 +57,7 @@
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
     "@typescript-eslint/typescript-estree": "8.35.0",
+    "blade-client": "workspace:*",
     "dotenv": "16.5.0",
     "esbuild": "0.25.5",
     "gradient-string": "3.0.0"
