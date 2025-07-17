@@ -129,7 +129,7 @@ describe('models', async () => {
         method: 'POST',
       });
 
-      spyOn(logInModule, 'default').mockImplementation(async () => {
+      spyOn(logInModule, 'default').mockImplementation(() => {
         throw new Error(
           'Failed to fetch remote models: This session is no longer valid.',
         );

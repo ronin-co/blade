@@ -158,14 +158,9 @@ class Transaction {
 
     for (const { query, index, expansion } of expandedQueries) {
       const { dependencies, main, selectedFields, model, updatedQuery } =
-        compileQueryInput(
-          query,
-          modelsWithPresets,
-          options?.inlineParams ? null : [],
-
-          // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
-          { inlineDefaults: options?.inlineDefaults || false },
-        );
+        compileQueryInput(query, modelsWithPresets, options?.inlineParams ? null : [], {
+          inlineDefaults: options?.inlineDefaults || false,
+        });
 
       // Every query can only produce one main statement (which can return output), but
       // multiple dependency statements (which must be executed either before or after
