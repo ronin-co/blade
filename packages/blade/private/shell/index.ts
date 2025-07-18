@@ -1,45 +1,21 @@
 #!/usr/bin/env node
 
-import { cp, readFile, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
-import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
 import {
-  clientInputFile,
   defaultDeploymentProvider,
   loggingPrefixes,
   outputDirectory,
-  publicDirectory,
-  serverInputFolder,
 } from '@/private/shell/constants';
 import { type ServerState, serve } from '@/private/shell/listener';
-import {
-  getClientReferenceLoader,
-  getFileListLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import {
-  cleanUp,
-  composeEnvironmentVariables,
-  exists,
-  logSpinner,
-  prepareStyles,
-} from '@/private/shell/utils';
+import { cleanUp, logSpinner } from '@/private/shell/utils';
 import { build } from '@/private/shell/utils/build';
-import {
-  getProvider,
-  transformToCloudflareOutput,
-  transformToNetlifyOutput,
-  transformToVercelBuildOutput,
-} from '@/private/shell/utils/providers';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
-import { getOutputFile } from '@/private/universal/utils/paths';
+import { getProvider } from '@/private/shell/utils/providers';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -177,26 +153,6 @@ if (isBuilding || isDeveloping) {
   } else {
     // Stop the build context.
     await mainBuild.dispose();
-
-    // Copy hard-coded static assets into output directory.
-    if (await exists(publicDirectory)) {
-      await cp(publicDirectory, outputDirectory, { recursive: true });
-    }
-
-    switch (provider) {
-      case 'cloudflare': {
-        await transformToCloudflareOutput();
-        break;
-      }
-      case 'netlify': {
-        await transformToNetlifyOutput();
-        break;
-      }
-      case 'vercel': {
-        await transformToVercelBuildOutput();
-        break;
-      }
-    }
   }
 }
 

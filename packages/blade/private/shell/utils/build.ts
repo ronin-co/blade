@@ -1,4 +1,4 @@
-import { readFile, rename } from 'node:fs/promises';
+import { cp, readFile, rename } from 'node:fs/promises';
 import path from 'node:path';
 import * as esbuild from 'esbuild';
 
@@ -6,6 +6,7 @@ import {
   clientInputFile,
   defaultDeploymentProvider,
   outputDirectory,
+  publicDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
 import {
@@ -19,6 +20,11 @@ import {
   exists,
   prepareStyles,
 } from '@/private/shell/utils';
+import {
+  transformToCloudflareOutput,
+  transformToNetlifyOutput,
+  transformToVercelBuildOutput,
+} from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
@@ -123,6 +129,34 @@ export const build = async (
               ]);
 
               await prepareStyles(environment, projects, bundleId as string);
+            }
+          });
+        },
+      },
+      {
+        name: 'Provider Loader',
+        setup(build) {
+          build.onEnd(async (result) => {
+            if (result.errors.length > 0 || environment !== 'production') return;
+
+            // Copy hard-coded static assets into output directory.
+            if (await exists(publicDirectory)) {
+              await cp(publicDirectory, outputDirectory, { recursive: true });
+            }
+
+            switch (provider) {
+              case 'cloudflare': {
+                await transformToCloudflareOutput();
+                break;
+              }
+              case 'netlify': {
+                await transformToNetlifyOutput();
+                break;
+              }
+              case 'vercel': {
+                await transformToVercelBuildOutput();
+                break;
+              }
             }
           });
         },
