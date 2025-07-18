@@ -77,7 +77,7 @@ export const build = async (
     external: ['node:events'],
     plugins: [
       getFileListLoader(projects),
-      getMdxLoader('production'),
+      getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
       getMetaLoader(environment, projects),
