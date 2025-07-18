@@ -1,44 +1,20 @@
 #!/usr/bin/env node
 
-import { cp, readFile, rename } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
-import * as esbuild from 'esbuild';
 import getPort, { portNumbers } from 'get-port';
 
 import {
-  clientInputFile,
   defaultDeploymentProvider,
   loggingPrefixes,
   outputDirectory,
-  publicDirectory,
-  serverInputFolder,
 } from '@/private/shell/constants';
 import { type ServerState, serve } from '@/private/shell/listener';
-import {
-  getClientReferenceLoader,
-  getFileListLoader,
-  getMdxLoader,
-  getReactAriaLoader,
-} from '@/private/shell/loaders';
-import {
-  cleanUp,
-  composeEnvironmentVariables,
-  exists,
-  logSpinner,
-  prepareStyles,
-} from '@/private/shell/utils';
-import {
-  getProvider,
-  transformToCloudflareOutput,
-  transformToNetlifyOutput,
-  transformToVercelBuildOutput,
-} from '@/private/shell/utils/providers';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
-import { getOutputFile } from '@/private/universal/utils/paths';
+import { cleanUp, logSpinner } from '@/private/shell/utils';
+import { build } from '@/private/shell/utils/build';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -93,24 +69,7 @@ if (isDeveloping) {
   }
 }
 
-const projects = [process.cwd()];
-const tsConfig = path.join(process.cwd(), 'tsconfig.json');
-
-// If a `tsconfig.json` file exists that contains a `references` field, we should include
-// files from the referenced projects as well.
-if (await exists(tsConfig)) {
-  const tsConfigContents = JSON.parse(await readFile(tsConfig, 'utf-8'));
-  const { references } = tsConfigContents || {};
-
-  if (references && Array.isArray(references) && references.length > 0) {
-    projects.push(
-      ...references.map((reference) => path.join(process.cwd(), reference.path)),
-    );
-  }
-}
-
 const environment = isBuilding || isServing ? 'production' : 'development';
-const provider = getProvider();
 
 const server: ServerState = {};
 
@@ -121,82 +80,19 @@ if (isBuilding || isDeveloping) {
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
 
-  let bundleId: string | undefined;
-
-  const entryPoints: esbuild.BuildOptions['entryPoints'] = [
-    {
-      in: clientInputFile,
-      out: getOutputFile('init'),
-    },
-    {
-      in: path.join(serverInputFolder, `${provider}.js`),
-      out: defaultDeploymentProvider,
-    },
-  ];
-
-  if (enableServiceWorker) {
-    entryPoints.push({
-      in: path.join(serverInputFolder, 'service-worker.js'),
-      out: 'service-worker',
-    });
-  }
-
-  const mainBuild = await esbuild.context({
-    entryPoints,
-    outdir: outputDirectory,
-    sourcemap: 'external',
-    bundle: true,
-    platform: provider === 'vercel' ? 'node' : 'browser',
-    format: 'esm',
-    jsx: 'automatic',
-    nodePaths: [path.join(process.cwd(), 'node_modules')],
-    minify: environment === 'production',
-    // TODO: Remove this once `@ronin/engine` no longer relies on it.
-    external: ['node:events'],
+  const mainBuild = await build(environment, {
+    enableServiceWorker,
+    logQueries: values?.queries,
     plugins: [
-      getFileListLoader(projects),
-      getMdxLoader('production'),
-      getReactAriaLoader(),
-      getClientReferenceLoader(),
       {
-        name: 'Init Loader',
+        name: 'Spinner Loader',
         setup(build) {
           build.onStart(() => {
-            bundleId = generateUniqueId();
             spinner.start();
           });
 
-          build.onResolve({ filter: /^build-meta$/ }, (source) => ({
-            path: source.path,
-            namespace: 'dynamic-meta',
-          }));
-
-          build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => ({
-            contents: `export const bundleId = "${bundleId}";`,
-            loader: 'ts',
-            resolveDir: process.cwd(),
-          }));
-
-          build.onEnd(async (result) => {
+          build.onEnd((result) => {
             if (result.errors.length === 0) {
-              const clientBundle = path.join(
-                outputDirectory,
-                getOutputFile('init', 'js'),
-              );
-              const clientSourcemap = path.join(
-                outputDirectory,
-                getOutputFile('init', 'js.map'),
-              );
-
-              await Promise.all([
-                rename(clientBundle, clientBundle.replace('init.js', `${bundleId}.js`)),
-                rename(
-                  clientSourcemap,
-                  clientSourcemap.replace('init.js.map', `${bundleId}.js.map`),
-                ),
-              ]);
-
-              await prepareStyles(environment, projects, bundleId as string);
               spinner.succeed();
 
               if (isDeveloping) {
@@ -213,17 +109,6 @@ if (isBuilding || isDeveloping) {
         },
       },
     ],
-    banner: {
-      // Prevent a crash for missing environment variables by ensuring that
-      // `import.meta.env` is defined.
-      js: 'if(!import.meta.env){import.meta.env={}};',
-    },
-    define: composeEnvironmentVariables({
-      isLoggingQueries: values.queries || false,
-      enableServiceWorker,
-      provider,
-      environment,
-    }),
   });
 
   await mainBuild.rebuild();
@@ -266,26 +151,6 @@ if (isBuilding || isDeveloping) {
   } else {
     // Stop the build context.
     await mainBuild.dispose();
-
-    // Copy hard-coded static assets into output directory.
-    if (await exists(publicDirectory)) {
-      await cp(publicDirectory, outputDirectory, { recursive: true });
-    }
-
-    switch (provider) {
-      case 'cloudflare': {
-        await transformToCloudflareOutput();
-        break;
-      }
-      case 'netlify': {
-        await transformToNetlifyOutput();
-        break;
-      }
-      case 'vercel': {
-        await transformToVercelBuildOutput();
-        break;
-      }
-    }
   }
 }
 

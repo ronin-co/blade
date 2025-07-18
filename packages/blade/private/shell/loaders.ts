@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { cp, readFile, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
@@ -8,6 +8,7 @@ import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 import MagicString from 'magic-string';
 
+import { outputDirectory, publicDirectory } from '@/private/shell/constants';
 import {
   type ExportItem,
   type TotalFileList,
@@ -15,9 +16,17 @@ import {
   exists,
   extractDeclarationName,
   getFileList,
+  prepareStyles,
   wrapClientExport,
 } from '@/private/shell/utils';
+import {
+  transformToCloudflareOutput,
+  transformToNetlifyOutput,
+  transformToVercelBuildOutput,
+} from '@/private/shell/utils/providers';
+import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
@@ -224,6 +233,83 @@ export const getMdxLoader = (
         contents: tsx,
         loader: 'tsx',
       };
+    });
+  },
+});
+
+export const getProviderLoader = (
+  environment: 'development' | 'production',
+  provider: DeploymentProvider,
+): esbuild.Plugin => ({
+  name: 'Provider Loader',
+  setup(build) {
+    build.onEnd(async (result) => {
+      if (result.errors.length > 0 || environment !== 'production') return;
+
+      // Copy hard-coded static assets into output directory.
+      if (await exists(publicDirectory)) {
+        await cp(publicDirectory, outputDirectory, { recursive: true });
+      }
+
+      switch (provider) {
+        case 'cloudflare': {
+          await transformToCloudflareOutput();
+          break;
+        }
+        case 'netlify': {
+          await transformToNetlifyOutput();
+          break;
+        }
+        case 'vercel': {
+          await transformToVercelBuildOutput();
+          break;
+        }
+      }
+    });
+  },
+});
+
+export const getMetaLoader = (
+  environment: 'development' | 'production',
+  projects: Array<string>,
+): esbuild.Plugin => ({
+  name: 'Init Loader',
+  setup(build) {
+    let bundleId: string | undefined;
+
+    build.onStart(() => {
+      bundleId = generateUniqueId();
+    });
+
+    build.onResolve({ filter: /^build-meta$/ }, (source) => ({
+      path: source.path,
+      namespace: 'dynamic-meta',
+    }));
+
+    build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => ({
+      contents: `export const bundleId = "${bundleId}";`,
+      loader: 'ts',
+      resolveDir: process.cwd(),
+    }));
+
+    build.onEnd(async (result) => {
+      if (result.errors.length === 0) {
+        const clientBundle = path.join(outputDirectory, getOutputFile('init', 'js'));
+        const clientSourcemap = path.join(
+          outputDirectory,
+          getOutputFile('init', 'js.map'),
+        );
+
+        await Promise.all([
+          rename(clientBundle, clientBundle.replace('init.js', `${bundleId}.js`)),
+          rename(
+            clientSourcemap,
+            clientSourcemap.replace('init.js.map', `${bundleId}.js.map`),
+          ),
+        ]);
+
+        await prepareStyles(environment, projects, bundleId as string);
+      }
     });
   },
 });
