@@ -6,16 +6,13 @@ import type { Query } from 'blade-compiler';
 
 let mockRequestResolvedValue: Request | undefined;
 
-const mockFetch = mock(
-  // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
-  async (request) => {
-    mockRequestResolvedValue = request;
+const mockFetch = mock(async (request) => {
+  mockRequestResolvedValue = request;
 
-    return Response.json({
-      results: [],
-    });
-  },
-);
+  return Response.json({
+    results: [],
+  });
+});
 
 global.fetch = mockFetch;
 
@@ -100,7 +97,6 @@ describe('queries handler', () => {
   test('handle BAD_REQUEST response', async () => {
     const requestPromise = queriesHandler([], {
       token: 'takashitoken',
-      // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
       fetch: async (request) => {
         mockRequestResolvedValue = request as Request;
 

@@ -1,4 +1,4 @@
-import type { BeforeGetTrigger } from 'blade-client/types';
+import type { BeforeGetTrigger } from 'ronin/types';
 
 import type { ServerContext } from '@/private/server/context';
 import type {

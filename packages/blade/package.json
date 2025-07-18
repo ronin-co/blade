@@ -59,7 +59,8 @@
     "@typescript-eslint/typescript-estree": "8.35.0",
     "dotenv": "16.5.0",
     "esbuild": "0.25.5",
-    "gradient-string": "3.0.0"
+    "gradient-string": "3.0.0",
+    "ronin": "6.8.0"
   },
   "devDependencies": {
     "@hono/node-server": "1.14.4",

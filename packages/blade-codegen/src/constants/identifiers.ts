@@ -59,7 +59,7 @@ export const identifiers = {
 } satisfies Record<string, Record<string, Identifier | Record<string, Identifier>>>;
 
 /**
- * A list of all generic names used in the `blade-codegen` package.
+ * A list of all generic names used in the `@ronin/codegen` package.
  *
  * Similar to `identifiers` but designed specifically for use as generic names.
  */

@@ -442,7 +442,6 @@ describe('factory', () => {
 
   test('correctly format `amount`', async () => {
     const factory = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
       fetch: async (request) => {
         mockRequestResolvedValue = request as Request;
 
@@ -463,7 +462,6 @@ describe('factory', () => {
 
   test('correctly format not found result', async () => {
     const factory = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
       fetch: async (request) => {
         mockRequestResolvedValue = request as Request;
 
@@ -487,7 +485,6 @@ describe('factory', () => {
     let mockResolvedStorageRequest: Request | undefined;
 
     const factory = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
       fetch: async (request) => {
         if ((request as Request).url === 'https://storage.ronin.co/') {
           mockResolvedStorageRequest = request as Request;
@@ -552,7 +549,6 @@ describe('factory', () => {
     let mockResolvedStorageRequest: Request | undefined;
 
     const factory = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
       fetch: async (request) => {
         if ((request as Request).url === 'https://storage.ronin.co/') {
           mockResolvedStorageRequest = request as Request;
@@ -603,7 +599,6 @@ describe('factory', () => {
     let mockResolvedStorageRequest: Request | undefined;
 
     const factory = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
       fetch: async (request) => {
         if ((request as Request).url === 'https://storage.ronin.co/') {
           mockResolvedStorageRequest = request as Request;
@@ -651,7 +646,6 @@ describe('factory', () => {
 
   test('handle storage service error', async () => {
     const factory = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: `fetch` requires a promise return.
       fetch: async (request) => {
         if ((request as Request).url === 'https://storage.ronin.co/') {
           return new Response('Details here', {
@@ -674,7 +668,7 @@ describe('factory', () => {
   });
 
   test('format date fields', async () => {
-    const mockFetchNew = mock((request) => {
+    const mockFetchNew = mock(async (request) => {
       mockRequestResolvedValue = request;
 
       return Response.json({
@@ -747,7 +741,7 @@ describe('factory', () => {
   });
 
   test('format expanded results', async () => {
-    const mockFetchNew = mock((request) => {
+    const mockFetchNew = mock(async (request) => {
       mockRequestResolvedValue = request;
 
       return Response.json({
