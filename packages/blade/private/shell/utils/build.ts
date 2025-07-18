@@ -87,6 +87,7 @@ export const build = async (
       getClientReferenceLoader(),
       getMetaLoader(environment, projects),
       getProviderLoader(environment, provider),
+
       ...(options?.plugins || []),
     ],
     banner: {
