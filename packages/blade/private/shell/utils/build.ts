@@ -20,6 +20,17 @@ import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
+/**
+ * Builds a Blade application.
+ * 
+ * @param environment - The environment for which the build should run.
+ * @param [options] - Optional configuration for running the build.
+ * @param [options.enableServiceWorker] - Whether service workers should be enabled.
+ * @param [options.logQueries] - Whether queries should be logged.
+ * @param [options.plugins] - Optional additional esbuild plugins to add to the build.
+ * 
+ * @returns An esbuild context.
+ */
 export const build = async (
   environment: 'development' | 'production',
   options?: {
