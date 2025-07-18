@@ -25,5 +25,8 @@
 
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }

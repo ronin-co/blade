@@ -43,6 +43,9 @@
       ],
       "types": [
         "./dist/public/universal/types"
+      ],
+      "utils": [
+        "./dist/public/universal/utils"
       ]
     }
   },
