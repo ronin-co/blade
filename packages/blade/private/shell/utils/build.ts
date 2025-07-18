@@ -1,4 +1,4 @@
-import { readFile, rename } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as esbuild from 'esbuild';
 
@@ -16,13 +16,8 @@ import {
   getProviderLoader,
   getReactAriaLoader,
 } from '@/private/shell/loaders';
-import {
-  composeEnvironmentVariables,
-  exists,
-  prepareStyles,
-} from '@/private/shell/utils';
+import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 export const build = async (
