@@ -15,7 +15,6 @@ import {
 import { type ServerState, serve } from '@/private/shell/listener';
 import { cleanUp, logSpinner } from '@/private/shell/utils';
 import { build } from '@/private/shell/utils/build';
-import { getProvider } from '@/private/shell/utils/providers';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
