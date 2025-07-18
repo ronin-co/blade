@@ -71,7 +71,6 @@ if (isDeveloping) {
 }
 
 const environment = isBuilding || isServing ? 'production' : 'development';
-const provider = getProvider();
 
 const server: ServerState = {};
 
@@ -82,7 +81,7 @@ if (isBuilding || isDeveloping) {
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
 
-  const mainBuild = await build(environment, provider, {
+  const mainBuild = await build(environment, {
     enableServiceWorker,
     logQueries: values?.queries,
     plugins: [

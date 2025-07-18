@@ -13,6 +13,7 @@ import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
+  getProviderLoader,
   getReactAriaLoader,
 } from '@/private/shell/loaders';
 import {
@@ -21,23 +22,23 @@ import {
   prepareStyles,
 } from '@/private/shell/utils';
 import {
+  getProvider,
   transformToCloudflareOutput,
   transformToNetlifyOutput,
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
-import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 export const build = async (
   environment: 'development' | 'production',
-  provider: DeploymentProvider,
   options?: {
     enableServiceWorker?: boolean;
     logQueries?: boolean;
     plugins?: Array<esbuild.Plugin>;
   },
 ): Promise<esbuild.BuildContext> => {
+  const provider = getProvider();
   const projects = [process.cwd()];
   const tsConfig = path.join(process.cwd(), 'tsconfig.json');
 
@@ -133,34 +134,7 @@ export const build = async (
           });
         },
       },
-      {
-        name: 'Provider Loader',
-        setup(build) {
-          build.onEnd(async (result) => {
-            if (result.errors.length > 0 || environment !== 'production') return;
-
-            // Copy hard-coded static assets into output directory.
-            if (await exists(publicDirectory)) {
-              await cp(publicDirectory, outputDirectory, { recursive: true });
-            }
-
-            switch (provider) {
-              case 'cloudflare': {
-                await transformToCloudflareOutput();
-                break;
-              }
-              case 'netlify': {
-                await transformToNetlifyOutput();
-                break;
-              }
-              case 'vercel': {
-                await transformToVercelBuildOutput();
-                break;
-              }
-            }
-          });
-        },
-      },
+      getProviderLoader(environment, provider),
       ...(options?.plugins || []),
     ],
     banner: {
