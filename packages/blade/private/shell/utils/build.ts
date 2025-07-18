@@ -127,6 +127,7 @@ export const build = async (
           });
         },
       },
+      ...(options?.plugins || []),
     ],
     banner: {
       // Prevent a crash for missing environment variables by ensuring that

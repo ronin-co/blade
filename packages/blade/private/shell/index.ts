@@ -111,7 +111,7 @@ if (isBuilding || isDeveloping) {
     logQueries: values?.queries,
     plugins: [
       {
-        name: 'Init Loader',
+        name: 'Spinner Loader',
         setup(build) {
           build.onStart(() => {
             spinner.start();
