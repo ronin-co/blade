@@ -1,3 +1,5 @@
+import type { Toc } from '@stefanprobst/rehype-extract-toc';
+import type { createSyntaxFactory } from 'blade-client';
 import type { ComponentType, FunctionComponent } from 'react';
 import type {
   AddTrigger as OriginalAddTrigger,
@@ -29,7 +31,6 @@ import type {
 
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
-import type { Toc } from '@stefanprobst/rehype-extract-toc';
 
 export type WaitUntil = (promise: Promise<unknown>) => void;
 
@@ -71,7 +72,12 @@ export interface PageMetadata {
 /** The original trigger options provided by the RONIN client. */
 export type ClientTriggerOptions = Parameters<OriginalBeforeGetTrigger>[2];
 
-export interface TriggerOptions extends ClientTriggerOptions {
+export interface TriggerOptions extends Omit<ClientTriggerOptions, 'client'> {
+  /** An instance of the current client, which can be used for nested queries. */
+  client: Pick<
+    ReturnType<typeof createSyntaxFactory>,
+    'add' | 'count' | 'get' | 'remove' | 'set'
+  >;
   /**
    * A list of cookies that are stored on the client.
    */

@@ -1,29 +1,15 @@
 import {
   type AddQuery,
-  type AlterQuery,
   type CountQuery,
-  type CreateQuery,
-  type DropQuery,
   type GetQuery,
-  type ListQuery,
-  type Model,
-  type ModelField,
-  type ModelIndex,
-  type ModelPreset,
   QUERY_SYMBOLS,
   type Query,
   type RemoveQuery,
   type SetQuery,
   type Statement,
 } from 'blade-compiler';
-import {
-  type SyntaxItem,
-  getBatchProxy,
-  getBatchProxySQL,
-  getSyntaxProxy,
-  getSyntaxProxySQL,
-} from 'blade-syntax/queries';
-import type { BeforeGetTrigger, PromiseTuple, QueryHandlerOptions } from 'ronin/types';
+import { getSyntaxProxy } from 'blade-syntax/queries';
+import type { BeforeGetTrigger, QueryHandlerOptions } from 'ronin/types';
 import {
   isStorableObject,
   runQueries as runQueriesWithStorageAndTriggers,
@@ -38,34 +24,23 @@ import type {
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
 
-const queriesHandler = async (
-  queries: Array<Query> | { statements: Array<Statement> },
-  options: QueryHandlerOptions = {},
-) => {
-  if ('statements' in queries) {
-    throw new Error(
-      'TEMP: Since `runQueries` is not yet exported by the `blade-client` package we skip direct SQL queries.',
-    );
-  }
-
-  if (options.database) {
-    const queryList = { [options.database]: queries };
-    const result = await runQueriesWithStorageAndTriggers(queryList, options);
-
-    return result[options.database];
-  }
-
-  return runQueriesWithStorageAndTriggers(queries, options);
-};
-
 const queryHandler = async (
   query: Query | { statement: Statement },
   options: QueryHandlerOptions,
 ) => {
-  const input = 'statement' in query ? { statements: [query.statement] } : [query];
-  const results = await queriesHandler(input, options);
+  const queries = 'statement' in query ? { statements: [query.statement] } : [query];
 
-  return results[0];
+  if ('statements' in queries)
+    throw new Error(
+      '`statements` is not supported in Blade queries. Use `Query` objects instead.',
+    );
+
+  if (options.database)
+    throw new Error('Custom databases are not currently supported in Blade queries.');
+
+  const [results] = await runQueriesWithStorageAndTriggers(queries, options);
+
+  return results;
 };
 
 /**
@@ -85,10 +60,10 @@ export const prepareTriggers = (
   triggers: TriggersList,
   headless?: boolean,
 ): TriggersList => {
-  const callback = (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
-    console.log('serverContext.flushSession', serverContext.flushSession);
+  const callback = async (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
     const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
-    return queryHandler(query[QUERY_SYMBOLS.QUERY], queryOptions ?? {});
+    const result = await queryHandler(query[QUERY_SYMBOLS.QUERY], queryOptions ?? {});
+    return result;
   };
 
   // Ensure that storable objects are retained as-is instead of being serialized.
@@ -96,7 +71,6 @@ export const prepareTriggers = (
 
   const options: Partial<NewTriggerOptions> = {
     client: {
-      // Query types for interacting with records.
       get: getSyntaxProxy<GetQuery>({
         root: `${QUERY_SYMBOLS.QUERY}.get`,
         callback,
@@ -122,53 +96,6 @@ export const prepareTriggers = (
         callback,
         replacer,
       }),
-
-      // Query types for interacting with the database schema.
-      list: getSyntaxProxy<ListQuery>({
-        root: `${QUERY_SYMBOLS.QUERY}.list`,
-        callback,
-        replacer,
-      }),
-      create: getSyntaxProxy<CreateQuery, Model>({
-        root: `${QUERY_SYMBOLS.QUERY}.create`,
-        callback,
-        replacer,
-      }),
-      alter: getSyntaxProxy<AlterQuery, Model | ModelField | ModelIndex | ModelPreset>({
-        root: `${QUERY_SYMBOLS.QUERY}.alter`,
-        callback,
-        replacer,
-      }),
-      drop: getSyntaxProxy<DropQuery, Model>({
-        root: `${QUERY_SYMBOLS.QUERY}.drop`,
-        callback,
-        replacer,
-      }),
-
-      // Function for executing a transaction containing multiple queries.
-      batch: <T extends [Promise<any>, ...Array<Promise<any>>] | Array<Promise<any>>>(
-        operations: () => T,
-        queryOptions?: Record<string, unknown>,
-      ): Promise<PromiseTuple<T>> => {
-        const batchOperations = operations as unknown as () => Array<SyntaxItem<Query>>;
-        const queries = getBatchProxy(batchOperations).map(({ structure }) => structure);
-
-        return queriesHandler(queries, queryOptions) as Promise<PromiseTuple<T>>;
-      },
-
-      sql: getSyntaxProxySQL({
-        callback: (statement) => queryHandler({ statement }, {}),
-      }),
-
-      sqlBatch: <T extends [Promise<any>, ...Array<Promise<any>>] | Array<Promise<any>>>(
-        operations: () => T,
-        queryOptions?: Record<string, unknown>,
-      ): Promise<PromiseTuple<T>> => {
-        const batchOperations = operations as unknown as () => Array<Statement>;
-        const statements = getBatchProxySQL(batchOperations);
-
-        return queriesHandler({ statements }, queryOptions) as Promise<PromiseTuple<T>>;
-      },
     },
     cookies: serverContext.cookies,
     navigator: {
