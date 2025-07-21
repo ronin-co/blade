@@ -6,7 +6,6 @@ import {
   type Query,
   type RemoveQuery,
   type SetQuery,
-  type Statement,
 } from 'blade-compiler';
 import { getSyntaxProxy } from 'blade-syntax/queries';
 import type { BeforeGetTrigger, QueryHandlerOptions } from 'ronin/types';
@@ -23,25 +22,6 @@ import type {
   TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
-
-const queryHandler = async (
-  query: Query | { statement: Statement },
-  options: QueryHandlerOptions,
-) => {
-  const queries = 'statement' in query ? { statements: [query.statement] } : [query];
-
-  if ('statements' in queries)
-    throw new Error(
-      '`statements` is not supported in Blade queries. Use `Query` objects instead.',
-    );
-
-  if (options.database)
-    throw new Error('Custom databases are not currently supported in Blade queries.');
-
-  const [results] = await runQueriesWithStorageAndTriggers(queries, options);
-
-  return results;
-};
 
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
@@ -61,9 +41,22 @@ export const prepareTriggers = (
   headless?: boolean,
 ): TriggersList => {
   const callback = async (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
-    const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
-    const result = await queryHandler(query[QUERY_SYMBOLS.QUERY], queryOptions ?? {});
-    return result;
+    const query = (defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>)[
+      QUERY_SYMBOLS.QUERY
+    ];
+    const queries = 'statement' in query ? { statements: [query.statement] } : [query];
+
+    if ('statements' in queries)
+      throw new Error(
+        '`statements` is not supported in Blade queries. Use `Query` objects instead.',
+      );
+
+    if (queryOptions?.database)
+      throw new Error('Custom databases are not currently supported in Blade queries.');
+
+    const [results] = await runQueriesWithStorageAndTriggers(queries, queryOptions ?? {});
+
+    return results;
   };
 
   // Ensure that storable objects are retained as-is instead of being serialized.
