@@ -1,8 +1,8 @@
-import type { Query, ResultRecord } from 'blade-compiler';
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
+import type { FormattedResults, QueryHandlerOptions } from 'blade-client/types';
+import { runQueries as runQueriesOnRonin } from 'blade-client/utils';
+import type { Query, ResultRecord } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
-import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
-import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
 import type { TriggersList, WaitUntil } from '@/private/server/types';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
@@ -50,14 +50,14 @@ export const getWaitUntil = (context?: Context): WaitUntil => {
 };
 
 /**
- * Generate the options passed to the `ronin` JavaScript client.
+ * Generate the options passed to the `blade-client` JavaScript client.
  *
  * @param triggers - A list of triggers that should be executed.
  * @param requireTriggers - Determines which triggers are required to be present.
  * @param waitUntil - A function for keeping the process alive until a promise has
  * been resolved.
  *
- * @returns Options that can be passed to the `ronin` JavaScript client.
+ * @returns Options that can be passed to the `blade-client` JavaScript client.
  */
 export const getRoninOptions = (
   triggers: TriggersList,
