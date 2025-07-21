@@ -177,7 +177,7 @@ export const prepareTriggers = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-    flushSession: serverContext.flushSession,
+    flushUI: serverContext.flushUI,
   };
 
   const list = Object.entries(triggers || {}).map(

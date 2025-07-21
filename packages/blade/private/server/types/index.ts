@@ -97,7 +97,7 @@ export interface TriggerOptions extends ClientTriggerOptions {
    *
    * Optionally it takes an array of queries to use for the next page render.
    */
-  flushSession: NonNullable<ServerContext['flushSession']>;
+  flushUI: NonNullable<ServerContext['flushUI']>;
 }
 
 export type RecursiveRequired<T> = {

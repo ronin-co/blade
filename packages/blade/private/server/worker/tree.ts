@@ -459,7 +459,7 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
-  const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
+  const nestedFlushSession: ServerContext['flushUI'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[4] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
@@ -537,7 +537,7 @@ const renderReactTree = async (
     /** A function for keeping the process alive until a promise has been resolved. */
     waitUntil: ServerContext['waitUntil'];
     /** A function for flushing an update for the current browser session. */
-    flushSession?: ServerContext['flushSession'];
+    flushSession?: ServerContext['flushUI'];
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -586,7 +586,7 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushSession: options.flushSession,
+    flushUI: options.flushSession,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
