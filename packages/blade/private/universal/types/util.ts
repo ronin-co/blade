@@ -1,5 +1,5 @@
-import type { FormattedResults } from 'blade-client/types';
 import type { SSEStreamingApi } from 'hono/streaming';
+import type { FormattedResults } from 'ronin/types';
 
 import type { UniversalContext } from '@/private/universal/context';
 

@@ -29,6 +29,6 @@ export type {
   TableOfContents,
 } from '@/private/server/types';
 
-export type * from 'blade-client';
-export type * from 'blade-client/types';
+export type * from 'ronin';
+export type * from 'ronin/types';
 export type { ResultRecord } from 'blade-compiler';

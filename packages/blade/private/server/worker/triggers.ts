@@ -1,12 +1,3 @@
-import type {
-  BeforeGetTrigger,
-  PromiseTuple,
-  QueryHandlerOptions,
-} from 'blade-client/types';
-import {
-  isStorableObject,
-  runQueries as runQueriesWithStorageAndTriggers,
-} from 'blade-client/utils';
 import {
   type AddQuery,
   type AlterQuery,
@@ -32,6 +23,11 @@ import {
   getSyntaxProxy,
   getSyntaxProxySQL,
 } from 'blade-syntax/queries';
+import type { BeforeGetTrigger, PromiseTuple, QueryHandlerOptions } from 'ronin/types';
+import {
+  isStorableObject,
+  runQueries as runQueriesWithStorageAndTriggers,
+} from 'ronin/utils';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
@@ -41,16 +37,16 @@ import type {
   TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
-import { TriggerError } from '@/public/server/utils/errors';
 
 const queriesHandler = async (
   queries: Array<Query> | { statements: Array<Statement> },
   options: QueryHandlerOptions = {},
 ) => {
-  if ('statements' in queries || !Array.isArray(queries))
-    throw new TriggerError({
-      message: '`statements` are not supported in triggers.',
-    });
+  if ('statements' in queries) {
+    throw new Error(
+      'TEMP: Since `runQueries` is not yet exported by the `blade-client` package we skip direct SQL queries.',
+    );
+  }
 
   if (options.database) {
     const queryList = { [options.database]: queries };
@@ -72,15 +68,6 @@ const queryHandler = async (
   return results[0];
 };
 
-interface ExtendedQueryHandlerOptions extends QueryHandlerOptions {
-  /**
-   * Whether the query should flush the UI after execution.
-   *
-   * @default false
-   */
-  flushUI?: boolean;
-}
-
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
  *
@@ -98,14 +85,10 @@ export const prepareTriggers = (
   triggers: TriggersList,
   headless?: boolean,
 ): TriggersList => {
-  const callback = async (
-    defaultQuery: Query,
-    queryOptions?: ExtendedQueryHandlerOptions,
-  ) => {
+  const callback = (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
+    console.log('serverContext.flushSession', serverContext.flushSession);
     const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
-    const result = await queryHandler(query[QUERY_SYMBOLS.QUERY], queryOptions ?? {});
-    if (queryOptions?.flushUI === true) await serverContext.flushSession?.();
-    return result;
+    return queryHandler(query[QUERY_SYMBOLS.QUERY], queryOptions ?? {});
   };
 
   // Ensure that storable objects are retained as-is instead of being serialized.
