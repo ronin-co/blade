@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`module a basic model 1`] = `
-"declare module "ronin" {
+"declare module "blade-client" {
     export type Account = ResultRecord & {
         email: string;
         name: string;
@@ -51,12 +51,12 @@ exports[`module a basic model 1`] = `
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+        create: typeof import("blade-client").create;
+        alter: typeof import("blade-client").alter;
+        drop: typeof import("blade-client").drop;
+        batch: typeof import("blade-client").batch;
+        sql: typeof import("blade-client").sql;
+        sqlBatch: typeof import("blade-client").sqlBatch;
     };
     export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
         get: typeof get;
@@ -65,19 +65,19 @@ exports[`module a basic model 1`] = `
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+        create: typeof import("blade-client").create;
+        alter: typeof import("blade-client").alter;
+        drop: typeof import("blade-client").drop;
+        batch: typeof import("blade-client").batch;
+        sql: typeof import("blade-client").sql;
+        sqlBatch: typeof import("blade-client").sqlBatch;
     };
 }
 "
 `;
 
 exports[`module with no modules 1`] = `
-"declare module "ronin" {
+"declare module "blade-client" {
     declare const get: {};
     declare const count: {};
     declare const set: {};
@@ -98,12 +98,12 @@ exports[`module with no modules 1`] = `
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+        create: typeof import("blade-client").create;
+        alter: typeof import("blade-client").alter;
+        drop: typeof import("blade-client").drop;
+        batch: typeof import("blade-client").batch;
+        sql: typeof import("blade-client").sql;
+        sqlBatch: typeof import("blade-client").sqlBatch;
     };
     export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
         get: typeof get;
@@ -112,19 +112,19 @@ exports[`module with no modules 1`] = `
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+        create: typeof import("blade-client").create;
+        alter: typeof import("blade-client").alter;
+        drop: typeof import("blade-client").drop;
+        batch: typeof import("blade-client").batch;
+        sql: typeof import("blade-client").sql;
+        sqlBatch: typeof import("blade-client").sqlBatch;
     };
 }
 "
 `;
 
 exports[`module with multiple models 1`] = `
-"declare module "ronin" {
+"declare module "blade-client" {
     export type Account = ResultRecord & {
         email: string;
         name: string;
@@ -198,12 +198,12 @@ exports[`module with multiple models 1`] = `
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+        create: typeof import("blade-client").create;
+        alter: typeof import("blade-client").alter;
+        drop: typeof import("blade-client").drop;
+        batch: typeof import("blade-client").batch;
+        sql: typeof import("blade-client").sql;
+        sqlBatch: typeof import("blade-client").sqlBatch;
     };
     export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
         get: typeof get;
@@ -212,12 +212,12 @@ exports[`module with multiple models 1`] = `
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+        create: typeof import("blade-client").create;
+        alter: typeof import("blade-client").alter;
+        drop: typeof import("blade-client").drop;
+        batch: typeof import("blade-client").batch;
+        sql: typeof import("blade-client").sql;
+        sqlBatch: typeof import("blade-client").sqlBatch;
     };
 }
 "
