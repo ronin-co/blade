@@ -41,12 +41,12 @@ mkdir schema
 touch schema/index.ts
 ```
 
-A model is defined using the `model()` function provided by the RONIN client under the `ronin/schema` path. The `ronin/schema` path also provides all field type primitives, such as `string()`, `number()`, or `blob()`.
+A model is defined using the `model()` function provided by the RONIN client under the `blade/schema` path. The `ronin/schema` path also provides all field type primitives, such as `string()`, `number()`, or `blob()`.
 
 Here is an example of a basic schema definition:
 
 ```ts title="schema/index.ts"
-import { model, string, date } from 'ronin/schema';
+import { model, string, date } from 'blade/schema';
 
 export const Account = model({
   slug: 'account',
@@ -129,7 +129,7 @@ The following types can be used to define fields in a model:
 You can define the relationship of a field to another model like so:
 
 ```ts title="schema/index.ts"
-import { model, string, date, link } from 'ronin/schema';
+import { model, string, date, link } from 'blade/schema';
 
 export const Account = model({
   slug: 'account',

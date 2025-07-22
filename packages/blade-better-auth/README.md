@@ -44,7 +44,7 @@ To help get started, here is that "core schema" translated to a RONIN database s
 ```ts
 // schema/index.ts
 
-import { blob, boolean, date, link, model, string } from 'ronin/schema';
+import { blob, boolean, date, link, model, string } from 'blade/schema';
 
 export const User = model({
   slug: 'user',

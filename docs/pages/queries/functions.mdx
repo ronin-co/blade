@@ -4,14 +4,14 @@ title: 'Functions'
 
 # Functions
 
-RONIN provides a set of SQL functions that can be used in queries to manipulate data. These functions can be imported from `ronin/schema`.
+RONIN provides a set of SQL functions that can be used in queries to manipulate data. These functions can be imported from `blade/schema`.
 
 ### random
 
 Generates a pseudo-random integer between `-9223372036854775808` and `+9223372036854775807`.
 
 ```ts
-import { random } from 'ronin/schema';
+import { random } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
@@ -27,7 +27,7 @@ await set.user(fields => ({
 Calculates the absolute value of a number.
 
 ```ts
-import { abs } from 'ronin/schema';
+import { abs } from 'blade/schema';
 
 // Usage
 await set.transaction(fields => ({
@@ -45,7 +45,7 @@ await set.transaction(fields => ({
 Formats a timestamp according to the specified format string.
 
 ```ts
-import { strftime } from 'ronin/schema';
+import { strftime } from 'blade/schema';
 
 // Usage
 await set.log(fields => ({
@@ -63,7 +63,7 @@ await set.log(fields => ({
 Extracts a value from a JSON document at the specified path.
 
 ```ts
-import { json_extract } from 'ronin/schema';
+import { json_extract } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
@@ -79,7 +79,7 @@ await set.user(fields => ({
 Applies a JSON patch operation to a JSON document.
 
 ```ts
-import { json_patch } from 'ronin/schema';
+import { json_patch } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
@@ -95,7 +95,7 @@ await set.user(fields => ({
 Sets a value in a JSON document at the specified path. Creates the path if it doesn't exist and overwrites if it does.
 
 ```ts
-import { json_set } from 'ronin/schema';
+import { json_set } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
@@ -111,7 +111,7 @@ await set.user(fields => ({
 Replaces a value in a JSON document at the specified path. Only modifies existing paths, will not create new ones.
 
 ```ts
-import { json_replace } from 'ronin/schema';
+import { json_replace } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
@@ -127,7 +127,7 @@ await set.user(fields => ({
 Inserts a value into a JSON document at the specified path. Only creates new paths, will not modify existing ones.
 
 ```ts
-import { json_insert } from 'ronin/schema';
+import { json_insert } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
@@ -145,7 +145,7 @@ await set.user(fields => ({
 Concatenates a list of strings together.
 
 ```ts
-import { concat } from 'ronin/schema';
+import { concat } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
@@ -161,7 +161,7 @@ await set.user(fields => ({
 Replaces all occurrences of a substring within a string with a replacement value.
 
 ```ts
-import { replace } from 'ronin/schema';
+import { replace } from 'blade/schema';
 
 // Usage
 await set.user(fields => ({
