@@ -1,4 +1,4 @@
-import type { Query, QueryType, StoredObject } from 'blade-client/types';
+import type { Query, QueryType, StoredObject } from 'ronin/types';
 
 /**
  * Replaces `StoredObject` references in a list of queries with real `File` instances

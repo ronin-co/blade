@@ -1,8 +1,8 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
-import type { FormattedResults, QueryHandlerOptions } from 'blade-client/types';
-import { runQueries as runQueriesOnRonin } from 'blade-client/utils';
 import type { Query, ResultRecord } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
+import type { FormattedResults, QueryHandlerOptions } from 'ronin/types';
+import { runQueries as runQueriesOnRonin } from 'ronin/utils';
 
 import type { TriggersList, WaitUntil } from '@/private/server/types';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';

@@ -1,4 +1,3 @@
-import type { BeforeGetTrigger, QueryHandlerOptions } from 'blade-client/types';
 import {
   isStorableObject,
   runQueries as runQueriesWithStorageAndTriggers,
@@ -13,6 +12,7 @@ import {
   type SetQuery,
 } from 'blade-compiler';
 import { getSyntaxProxy } from 'blade-syntax/queries';
+import type { BeforeGetTrigger, QueryHandlerOptions } from 'ronin/types';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
