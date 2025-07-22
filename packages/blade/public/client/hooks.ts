@@ -1,7 +1,8 @@
-import type { Query } from 'blade-compiler';
+import { isStorableObject, processStorableObjects } from 'blade-client/utils';
 import {
   type AddQuery,
   QUERY_SYMBOLS,
+  type Query,
   type RemoveQuery,
   type SetQuery,
 } from 'blade-compiler';
@@ -22,7 +23,6 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import { isStorableObject, processStorableObjects } from 'ronin/utils';
 import { deserializeError } from 'serialize-error';
 
 import { RootClientContext } from '@/private/client/context';

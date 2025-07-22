@@ -1,4 +1,3 @@
-import type { ComponentType, FunctionComponent } from 'react';
 import type {
   AddTrigger as OriginalAddTrigger,
   AfterAddTrigger as OriginalAfterAddTrigger,
@@ -25,7 +24,8 @@ import type {
   ResolvingRemoveTrigger as OriginalResolvingRemoveTrigger,
   ResolvingSetTrigger as OriginalResolvingSetTrigger,
   SetTrigger as OriginalSetTrigger,
-} from 'ronin/types';
+} from 'blade-client/types';
+import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
