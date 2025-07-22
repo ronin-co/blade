@@ -213,7 +213,7 @@ exports[`identifiers 1`] = `
       "root": IdentifierObject {
         "emitNode": undefined,
         "end": -1,
-        "escapedText": ""blade-client"",
+        "escapedText": ""ronin"",
         "flags": 16,
         "flowNode": undefined,
         "id": 0,
@@ -227,7 +227,7 @@ exports[`identifiers 1`] = `
       "types": IdentifierObject {
         "emitNode": undefined,
         "end": -1,
-        "escapedText": ""blade-client/types"",
+        "escapedText": ""ronin/types"",
         "flags": 16,
         "flowNode": undefined,
         "id": 0,

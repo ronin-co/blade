@@ -3,8 +3,8 @@
 exports[`generate a basic model 1`] = `
 "import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
 import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "blade-client/types";
-declare module "blade-client" {
+import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
+declare module "ronin" {
     export type Account = ResultRecord & {
         email: string;
         name: string;
@@ -54,12 +54,12 @@ declare module "blade-client" {
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("blade-client").create;
-        alter: typeof import("blade-client").alter;
-        drop: typeof import("blade-client").drop;
-        batch: typeof import("blade-client").batch;
-        sql: typeof import("blade-client").sql;
-        sqlBatch: typeof import("blade-client").sqlBatch;
+        create: typeof import("ronin").create;
+        alter: typeof import("ronin").alter;
+        drop: typeof import("ronin").drop;
+        batch: typeof import("ronin").batch;
+        sql: typeof import("ronin").sql;
+        sqlBatch: typeof import("ronin").sqlBatch;
     };
     export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
         get: typeof get;
@@ -68,12 +68,12 @@ declare module "blade-client" {
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("blade-client").create;
-        alter: typeof import("blade-client").alter;
-        drop: typeof import("blade-client").drop;
-        batch: typeof import("blade-client").batch;
-        sql: typeof import("blade-client").sql;
-        sqlBatch: typeof import("blade-client").sqlBatch;
+        create: typeof import("ronin").create;
+        alter: typeof import("ronin").alter;
+        drop: typeof import("ronin").drop;
+        batch: typeof import("ronin").batch;
+        sql: typeof import("ronin").sql;
+        sqlBatch: typeof import("ronin").sqlBatch;
     };
 }
 "
@@ -83,8 +83,8 @@ exports[`generate a basic model with blob field 1`] = `
 "import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
 import type { StoredObject } from "blade-compiler";
 import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "blade-client/types";
-declare module "blade-client" {
+import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
+declare module "ronin" {
     export type Account = ResultRecord & {
         email: string;
         image: StoredObject;
@@ -135,12 +135,12 @@ declare module "blade-client" {
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("blade-client").create;
-        alter: typeof import("blade-client").alter;
-        drop: typeof import("blade-client").drop;
-        batch: typeof import("blade-client").batch;
-        sql: typeof import("blade-client").sql;
-        sqlBatch: typeof import("blade-client").sqlBatch;
+        create: typeof import("ronin").create;
+        alter: typeof import("ronin").alter;
+        drop: typeof import("ronin").drop;
+        batch: typeof import("ronin").batch;
+        sql: typeof import("ronin").sql;
+        sqlBatch: typeof import("ronin").sqlBatch;
     };
     export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
         get: typeof get;
@@ -149,12 +149,12 @@ declare module "blade-client" {
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("blade-client").create;
-        alter: typeof import("blade-client").alter;
-        drop: typeof import("blade-client").drop;
-        batch: typeof import("blade-client").batch;
-        sql: typeof import("blade-client").sql;
-        sqlBatch: typeof import("blade-client").sqlBatch;
+        create: typeof import("ronin").create;
+        alter: typeof import("ronin").alter;
+        drop: typeof import("ronin").drop;
+        batch: typeof import("ronin").batch;
+        sql: typeof import("ronin").sql;
+        sqlBatch: typeof import("ronin").sqlBatch;
     };
 }
 "
@@ -163,8 +163,8 @@ declare module "blade-client" {
 exports[`generate with no models 1`] = `
 "import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
 import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "blade-client/types";
-declare module "blade-client" {
+import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
+declare module "ronin" {
     declare const get: {};
     declare const count: {};
     declare const set: {};
@@ -185,12 +185,12 @@ declare module "blade-client" {
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("blade-client").create;
-        alter: typeof import("blade-client").alter;
-        drop: typeof import("blade-client").drop;
-        batch: typeof import("blade-client").batch;
-        sql: typeof import("blade-client").sql;
-        sqlBatch: typeof import("blade-client").sqlBatch;
+        create: typeof import("ronin").create;
+        alter: typeof import("ronin").alter;
+        drop: typeof import("ronin").drop;
+        batch: typeof import("ronin").batch;
+        sql: typeof import("ronin").sql;
+        sqlBatch: typeof import("ronin").sqlBatch;
     };
     export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
         get: typeof get;
@@ -199,12 +199,12 @@ declare module "blade-client" {
         add: typeof add;
         remove: typeof remove;
         list: typeof list;
-        create: typeof import("blade-client").create;
-        alter: typeof import("blade-client").alter;
-        drop: typeof import("blade-client").drop;
-        batch: typeof import("blade-client").batch;
-        sql: typeof import("blade-client").sql;
-        sqlBatch: typeof import("blade-client").sqlBatch;
+        create: typeof import("ronin").create;
+        alter: typeof import("ronin").alter;
+        drop: typeof import("ronin").drop;
+        batch: typeof import("ronin").batch;
+        sql: typeof import("ronin").sql;
+        sqlBatch: typeof import("ronin").sqlBatch;
     };
 }
 "
