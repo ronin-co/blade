@@ -89,7 +89,7 @@ const primitive = <T extends ModelField['type']>(type: T) => {
  *
  * @example
  * ```ts
- * import { model, string } from 'ronin/schema';
+ * import { model, string } from 'blade/schema';
  *
  * const User = model({
  *  slug: 'user',
@@ -113,7 +113,7 @@ export const string = primitive('string');
  *
  * @example
  * ```ts
- * import { model, number } from 'ronin/schema';
+ * import { model, number } from 'blade/schema';
  *
  * const User = model({
  *  slug: 'user',
@@ -137,7 +137,7 @@ export const number = primitive('number');
  *
  * @example
  * ```ts
- * import { model, link } from 'ronin/schema';
+ * import { model, link } from 'blade/schema';
  *
  * const User = model({
  *  slug: 'user',
@@ -161,7 +161,7 @@ export const link = primitive('link');
  *
  * @example
  * ```ts
- * import { model, json } from 'ronin/schema';
+ * import { model, json } from 'blade/schema';
  *
  * const User = model({
  *  slug: 'user',
@@ -184,7 +184,7 @@ export const json = primitive('json');
  *
  * @example
  * ```ts
- * import { model, date } from 'ronin/schema';
+ * import { model, date } from 'blade/schema';
  *
  * const User = model({
  *  slug: 'user',
@@ -208,7 +208,7 @@ export const date = primitive('date');
  *
  * @example
  * ```ts
- * import { model, boolean } from 'ronin/schema';
+ * import { model, boolean } from 'blade/schema';
  *
  * const User = model({
  *  slug: 'user',
@@ -232,7 +232,7 @@ export const boolean = primitive('boolean');
  *
  * @example
  * ```ts
- * import { model, blob } from 'ronin/schema';
+ * import { model, blob } from 'blade/schema';
  *
  * const User = model({
  *  slug: 'user',

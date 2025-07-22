@@ -59,7 +59,7 @@ describe('helper', () => {
     const models = await getModelDefinitionsFileContent();
     expect(models).toBeDefined();
     expect(models).toBe(
-      formatCode(`import { boolean, model, number, string } from "ronin/schema";
+      formatCode(`import { boolean, model, number, string } from "blade/schema";
 
                 export const User = model({
                 slug: "user",
@@ -94,7 +94,7 @@ describe('helper', () => {
     const models = await getModelDefinitionsFileContent();
     expect(models).toBeDefined();
     expect(models).toBe(
-      formatCode(`import { model, string } from "ronin/schema";
+      formatCode(`import { model, string } from "blade/schema";
 
 export const User = model({
   slug: "user",
@@ -129,7 +129,7 @@ export const Post = model({
     const models = await getModelDefinitionsFileContent();
     expect(models).toBeDefined();
     expect(models).toBe(
-      formatCode(`import { model, string } from "ronin/schema";
+      formatCode(`import { model, string } from "blade/schema";
 
 export const User = model({
   slug: "user",
@@ -288,7 +288,7 @@ describe('command', () => {
     // Create a model file.
     await fs.writeFile(
       MODEL_IN_CODE_PATH,
-      `import { model } from "ronin/schema";
+      `import { model } from "blade/schema";
 
 export const User = model({
   slug: "user",
@@ -318,7 +318,7 @@ export const User = model({
     // Verify file content.
     const content = await fs.readFile(MODEL_IN_CODE_PATH, 'utf-8');
     expect(content).toBe(
-      'import { model } from "ronin/schema";\n\nexport const User = model({\n  slug: "user",\n});\n',
+      'import { model } from "blade/schema";\n\nexport const User = model({\n  slug: "user",\n});\n',
     );
   });
 });
