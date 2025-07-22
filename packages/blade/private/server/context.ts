@@ -1,5 +1,5 @@
+import type { Query } from 'blade-compiler';
 import { createContext } from 'react';
-import type { Query } from 'ronin/types';
 
 import type { WaitUntil } from '@/private/server/types';
 import type { Collected } from '@/private/server/worker/tree';
