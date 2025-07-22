@@ -1,1 +1,1 @@
-export * from 'blade-client/schema';
+export * from 'blade-syntax/schema';
