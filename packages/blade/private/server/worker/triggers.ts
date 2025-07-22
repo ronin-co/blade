@@ -1,8 +1,4 @@
 import {
-  isStorableObject,
-  runQueries as runQueriesWithStorageAndTriggers,
-} from 'blade-client/utils';
-import {
   type AddQuery,
   type CountQuery,
   type GetQuery,
@@ -13,6 +9,10 @@ import {
 } from 'blade-compiler';
 import { getSyntaxProxy } from 'blade-syntax/queries';
 import type { BeforeGetTrigger, QueryHandlerOptions } from 'ronin/types';
+import {
+  isStorableObject,
+  runQueries as runQueriesWithStorageAndTriggers,
+} from 'ronin/utils';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
