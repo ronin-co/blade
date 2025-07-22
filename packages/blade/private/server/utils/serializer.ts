@@ -10,7 +10,7 @@ import React from 'react';
 
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 
-const ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+const ReactSharedInternals = React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
 
 function error(format) {
   for (
@@ -21,27 +21,7 @@ function error(format) {
     args[_key2 - 1] = arguments[_key2];
   }
 
-  printWarning('error', format, args);
-}
-
-function printWarning(level, defaultFormat, defaultArgs) {
-  let format = defaultFormat;
-  let args = defaultArgs;
-
-  const ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
-  const stack = ReactDebugCurrentFrame.getStackAddendum();
-
-  if (stack !== '') {
-    format += '%s';
-    args = args.concat([stack]);
-  }
-
-  const argsWithFormat = args.map((item) => String(item)); // Careful: RN currently depends on this prefix
-
-  argsWithFormat.unshift(`Warning: ${format}`); // We intentionally don't use spread (or .apply) directly because it
-  // breaks IE9: https://github.com/facebook/react/issues/13610
-
-  Function.prototype.apply.call(console[level], console, argsWithFormat);
+  console.error('error', format, args);
 }
 
 function scheduleWork(callback) {
@@ -781,8 +761,6 @@ const PENDING = 0;
 const COMPLETED = 1;
 const ABORTED = 3;
 const ERRORED = 4;
-const ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
-const ReactCurrentCache = ReactSharedInternals.ReactCurrentCache;
 
 function defaultErrorHandler(error) {
   console['error'](error); // Don't transform to our wrapper
@@ -793,13 +771,13 @@ const CLOSING = 1;
 const CLOSED = 2;
 function createRequest(model, onError, identifierPrefix) {
   if (
-    ReactCurrentCache.current !== null &&
-    ReactCurrentCache.current !== DefaultCacheDispatcher
+    ReactSharedInternals.A !== null &&
+    ReactSharedInternals.A !== DefaultCacheDispatcher
   ) {
     throw new Error('Currently React only supports one RSC renderer at a time.');
   }
 
-  ReactCurrentCache.current = DefaultCacheDispatcher;
+  ReactSharedInternals.A = DefaultCacheDispatcher;
   const abortSet = new Set();
   const pingedTasks = [];
   const request = {
@@ -1527,15 +1505,15 @@ function retryTask(request, task) {
 }
 
 function mountReactDispatcher() {
-  ReactCurrentDispatcher.current = HooksDispatcher;
+  ReactSharedInternals.H = HooksDispatcher;
 }
 
 function performWork(request) {
-  const prevDispatcher = ReactCurrentDispatcher.current;
-  const prevCacheDispatcher = ReactCurrentCache.current;
+  const prevDispatcher = ReactSharedInternals.H;
+  const prevCacheDispatcher = ReactSharedInternals.A;
 
   mountReactDispatcher();
-  ReactCurrentCache.current = DefaultCacheDispatcher;
+  ReactSharedInternals.A = DefaultCacheDispatcher;
 
   prepareToUseHooksForRequest(request);
 
@@ -1555,8 +1533,8 @@ function performWork(request) {
     logRecoverableError(request, error);
     fatalError(request, error);
   } finally {
-    ReactCurrentDispatcher.current = prevDispatcher;
-    ReactCurrentCache.current = prevCacheDispatcher;
+    ReactSharedInternals.H = prevDispatcher;
+    ReactSharedInternals.A = prevCacheDispatcher;
 
     resetHooksForRequest();
   }
