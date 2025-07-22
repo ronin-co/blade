@@ -14,7 +14,7 @@ export default defineConfig({
   ],
   format: 'esm',
   clean: true,
-  dts: true,
+  dts: { resolve: true },
   external: ['server-list', 'client-list', 'build-meta', 'react', 'react-dom'],
   publicDir: './private/client/assets',
   treeshake: true,
