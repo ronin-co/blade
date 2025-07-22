@@ -23,6 +23,15 @@ import type {
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
 
+interface ExtendedQueryHandlerOptions extends QueryHandlerOptions {
+  /**
+   * Whether the query should flush the UI after execution.
+   *
+   * @default false
+   */
+  flushUI?: boolean;
+}
+
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
  *
@@ -40,7 +49,10 @@ export const prepareTriggers = (
   triggers: TriggersList,
   headless?: boolean,
 ): TriggersList => {
-  const callback = async (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
+  const callback = async (
+    defaultQuery: Query,
+    queryOptions?: ExtendedQueryHandlerOptions,
+  ) => {
     const query = (defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>)[
       QUERY_SYMBOLS.QUERY
     ];
@@ -55,6 +67,8 @@ export const prepareTriggers = (
       throw new Error('Custom databases are not currently supported in Blade queries.');
 
     const [results] = await runQueriesWithStorageAndTriggers(queries, queryOptions ?? {});
+
+    if (queryOptions?.flushUI === true) await serverContext.flushUI?.();
 
     return results;
   };
