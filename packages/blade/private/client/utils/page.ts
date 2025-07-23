@@ -51,6 +51,8 @@ export const createStreamSource = async (
   url: string,
   body?: FormData,
 ): Promise<EventStream> => {
+  const abortController = new AbortController();
+
   const response = await fetchRetry(url, {
     method: 'POST',
     body,
@@ -58,6 +60,7 @@ export const createStreamSource = async (
       Accept: 'text/event-stream',
       'X-Bundle-Id': clientBundleId,
     },
+    signal: abortController.signal,
   });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
@@ -92,7 +95,10 @@ export const createStreamSource = async (
       if (!listeners.has(type)) listeners.set(type, []);
       listeners.get(type)!.push(callback);
     },
-    close: () => reader.cancel(),
+    close: () => {
+      abortController.abort();
+      reader.cancel();
+    },
   };
 };
 
@@ -161,7 +167,7 @@ export const fetchPage = async (
   // Open a new stream.
   const stream = await createStreamSource(path, body);
 
-  // Immmediately start tracking the latest stream.
+  // Immediately start tracking the latest stream.
   if (subscribe) SESSION.source = stream;
 
   return new Promise((resolve) => {
