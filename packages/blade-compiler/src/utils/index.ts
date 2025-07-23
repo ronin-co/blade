@@ -79,6 +79,7 @@ export const compileQueryInput = (
     statementParams,
     defaultQuery,
     {
+      // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
       inlineDefaults: options?.inlineDefaults || false,
     },
   );
@@ -173,6 +174,7 @@ export const compileQueryInput = (
       orderedBy: instructions?.orderedBy,
       limitedTo: instructions?.limitedTo,
     },
+    // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
     { inlineDefaults: options?.inlineDefaults || false },
   );
 

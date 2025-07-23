@@ -163,6 +163,7 @@ class Transaction {
           modelsWithPresets,
           options?.inlineParams ? null : [],
 
+          // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
           { inlineDefaults: options?.inlineDefaults || false },
         );
 

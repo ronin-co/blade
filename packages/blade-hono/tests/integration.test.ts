@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { createFactory } from 'hono/factory';
 import { testClient } from 'hono/testing';
 

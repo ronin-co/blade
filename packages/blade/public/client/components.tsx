@@ -320,6 +320,7 @@ const Image = forwardRef<HTMLDivElement, ImageProps>(
     return (
       <div
         ref={ref}
+        // biome-ignore lint/suspicious/noReactSpecificProps: This is a React library so React specific props are allowed.
         className={className}
         style={{
           position: 'relative',
