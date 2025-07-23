@@ -167,7 +167,7 @@ export const fetchPage = async (
   // Open a new stream.
   const stream = await createStreamSource(path, body);
 
-  // Immediately start tracking the latest stream and abort controller.
+  // Immediately start tracking the latest stream.
   if (subscribe) SESSION.source = stream;
 
   return new Promise((resolve) => {
