@@ -22,9 +22,20 @@ export const fetchRetry = async (
   request: Parameters<typeof fetch>[0],
   requestInit?: Parameters<typeof fetch>[1],
 ): Promise<Response> => {
+  const controller = requestInit?.signal ? undefined : new AbortController();
+
   return retry(async (bail) => {
     try {
-      const response = await fetch(request, requestInit);
+      const response = await fetch(
+        request,
+        Object.assign(
+          {},
+          {
+            signal: controller?.signal || requestInit?.signal,
+          } satisfies Parameters<typeof fetch>[1],
+          requestInit,
+        ),
+      );
 
       if ((response.status >= 500 && response.status < 600) || response.status === 429) {
         const retryAfter = response.headers.has('retry-after')
