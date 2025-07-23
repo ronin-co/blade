@@ -166,11 +166,8 @@ export const fetchPage = async (
     SESSION.source?.close();
   }
 
-  // Create a new abort controller for the new stream.
-  const abortController = subscribe ? new AbortController() : undefined;
-
   // Open a new stream.
-  const stream = await createStreamSource(path, body, abortController);
+  const stream = await createStreamSource(path, body);
 
   // Immediately start tracking the latest stream and abort controller.
   if (subscribe) {
