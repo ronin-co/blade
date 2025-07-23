@@ -162,17 +162,13 @@ export const fetchPage = async (
   }
 
   // Close the previous stream, since we're opening a new one.
-  if (subscribe) {
-    SESSION.source?.close();
-  }
+  if (subscribe) SESSION.source?.close();
 
   // Open a new stream.
   const stream = await createStreamSource(path, body);
 
   // Immediately start tracking the latest stream and abort controller.
-  if (subscribe) {
-    SESSION.source = stream;
-  }
+  if (subscribe) SESSION.source = stream;
 
   return new Promise((resolve) => {
     stream.addEventListener('update', async (event) => {
