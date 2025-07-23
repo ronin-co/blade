@@ -43,7 +43,6 @@ export interface EventStream {
  *
  * @param url - The URL of the page to render.
  * @param body - An optional body for the outgoing request.
- * @param abortController - Optional abort controller to cancel the stream.
  *
  * @returns A readable stream of events, with a new event getting submitted for every
  * server-side page render.
@@ -51,8 +50,9 @@ export interface EventStream {
 export const createStreamSource = async (
   url: string,
   body?: FormData,
-  abortController?: AbortController,
 ): Promise<EventStream> => {
+  const abortController = new AbortController();
+
   const response = await fetchRetry(url, {
     method: 'POST',
     body,
@@ -60,7 +60,7 @@ export const createStreamSource = async (
       Accept: 'text/event-stream',
       'X-Bundle-Id': clientBundleId,
     },
-    signal: abortController?.signal,
+    signal: abortController.signal,
   });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
@@ -96,7 +96,7 @@ export const createStreamSource = async (
       listeners.get(type)!.push(callback);
     },
     close: () => {
-      abortController?.abort();
+      abortController.abort();
       reader.cancel();
     },
   };
@@ -105,7 +105,6 @@ export const createStreamSource = async (
 const SESSION: {
   root?: import('react-dom/client').Root;
   source?: import('../utils/page').EventStream;
-  abortController?: AbortController;
 } = {};
 
 /**
@@ -165,7 +164,6 @@ export const fetchPage = async (
   // Close the previous stream, since we're opening a new one.
   if (subscribe) {
     SESSION.source?.close();
-    SESSION.abortController?.abort();
   }
 
   // Create a new abort controller for the new stream.
@@ -177,7 +175,6 @@ export const fetchPage = async (
   // Immediately start tracking the latest stream and abort controller.
   if (subscribe) {
     SESSION.source = stream;
-    SESSION.abortController = abortController;
   }
 
   return new Promise((resolve) => {
@@ -202,9 +199,7 @@ export const mountNewBundle = async (bundleId: string, markup: string) => {
   // Immediately close the connection, since we don't want to receive further updates
   // from the server, now that we know that the client bundles are outdated.
   SESSION.source?.close();
-  SESSION.abortController?.abort();
   delete SESSION.source;
-  delete SESSION.abortController;
 
   // Download the new markup, CSS, and JS at the same time, but don't execute any of them
   // just yet.
