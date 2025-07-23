@@ -83,6 +83,7 @@
     "chalk": "5.3.0",
     "chokidar": "4.0.3",
     "cookie": "0.7.0",
+    "eventsource-parser": "3.0.3",
     "flat": "6.0.1",
     "get-port": "7.1.0",
     "get-value": "3.0.1",

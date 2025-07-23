@@ -1,4 +1,5 @@
 import { bundleId as clientBundleId } from 'build-meta';
+import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
@@ -64,47 +65,25 @@ export const createStreamSource = async (
   if (!response.ok) throw new Error(await response.text());
   if (!response.body) throw new Error('Empty response body');
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
+  const eventStream = response.body
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(new EventSourceParserStream());
+
+  const reader = eventStream.getReader();
   const listeners = new Map<string, Array<EventCallback>>();
 
-  let buffer = '';
-
-  function dispatchEvent(type: string, data: string, id: string) {
-    (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
-  }
+  const dispatchStreamEvent = (type: string, data: string, id: string) => {
+    return (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
+  };
 
   // Start reading the stream, but don't block the execution of the current scope.
   (async () => {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
+    let done = false;
 
-      // Simple SSE parsing: split on double-newline.
-      let pos;
-
-      while ((pos = buffer.indexOf('\n\n')) !== -1) {
-        const chunk = buffer.slice(0, pos).trim();
-        buffer = buffer.slice(pos + 2);
-
-        // Parse out the metadata and contents of the event.
-        let event = 'message';
-        let data = '';
-        let id = '';
-
-        for (const line of chunk.split(/\r?\n/)) {
-          if (line.startsWith('event:')) {
-            event = line.slice(6).trim();
-          } else if (line.startsWith('data:')) {
-            data += `${line.slice(5)}\n`;
-          } else if (line.startsWith('id:')) {
-            id += line.slice(3).trim();
-          }
-        }
-
-        dispatchEvent(event, data.replace(/\n$/, ''), id);
-      }
+    while (!done) {
+      let value;
+      ({ value, done } = await reader.read());
+      dispatchStreamEvent(value?.event!, value?.data!, value?.id!);
     }
   })();
 
