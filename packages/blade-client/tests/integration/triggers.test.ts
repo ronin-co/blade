@@ -205,6 +205,7 @@ describe('triggers', () => {
     let finalAfterResult: unknown;
 
     const { create } = createSyntaxFactory({
+      // biome-ignore lint/suspicious/useAwait: Fetch requires an `async` function.
       fetch: async () => {
         return Response.json({
           results: [
@@ -349,6 +350,7 @@ describe('triggers', () => {
     let finalAfterResult: unknown;
 
     const { drop } = createSyntaxFactory({
+      // biome-ignore lint/suspicious/useAwait: Fetch requires an `async` function.
       fetch: async () => {
         return Response.json({
           results: [
@@ -401,6 +403,7 @@ describe('triggers', () => {
     let finalAfterResult: unknown;
 
     const { remove } = createSyntaxFactory({
+      // biome-ignore lint/suspicious/useAwait: Fetch requires an `async` function.
       fetch: async () => {
         return Response.json({
           results: [
@@ -471,6 +474,7 @@ describe('triggers', () => {
     ];
 
     const { set } = createSyntaxFactory({
+      // biome-ignore lint/suspicious/useAwait: Fetch requires an `async` function.
       fetch: async () => {
         return Response.json({
           results: [{ records: previousAccounts }, { records: nextAccounts }],
