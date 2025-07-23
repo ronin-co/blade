@@ -92,9 +92,7 @@ export const createStreamSource = async (
       if (!listeners.has(type)) listeners.set(type, []);
       listeners.get(type)!.push(callback);
     },
-    close: () => {
-      // reader.cancel()
-    },
+    close: () => reader.cancel(),
   };
 };
 
