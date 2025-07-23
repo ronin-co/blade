@@ -69,20 +69,21 @@ export const createStreamSource = async (
     .pipeThrough(new TextDecoderStream())
     .pipeThrough(new EventSourceParserStream());
 
+  const reader = eventStream.getReader();
   const listeners = new Map<string, Array<EventCallback>>();
 
   const dispatchStreamEvent = (type: string, data: string, id: string) => {
     return (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
   };
 
-  console.log('CHEFS NEAT');
-
   // Start reading the stream, but don't block the execution of the current scope.
   (async () => {
-    for await (const value of eventStream) {
-      if (value.type === 'event') {
-        dispatchStreamEvent(value.event, value.data, value.id);
-      }
+    let done = false;
+
+    while (!done) {
+      let value;
+      ({ value, done } = await reader.read());
+      dispatchStreamEvent(value?.event!, value?.data!, value?.id!);
     }
   })();
 
