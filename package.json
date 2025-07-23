@@ -7,7 +7,7 @@
     "dev": "turbo dev --filter='./packages/*' --concurrency 24",
     "format": "biome format --write",
     "lint": "biome lint",
-    "prepare": "turbo build --filter='./packages/*'",
+    "prepare": "turbo build",
     "test": "turbo test",
     "typecheck": "turbo typecheck"
   },
