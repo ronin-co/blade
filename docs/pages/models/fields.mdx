@@ -218,9 +218,9 @@ Although this information is entirely **read-only** (and therefore cannot be
 overwritten), you may use it to filter or order records when querying:
 
 ```ts
-await get.blogPosts.orderedBy.ascending(['ronin.createdAt']);
+use.blogPosts.orderedBy.ascending(['ronin.createdAt']);
 
-await get.blogPosts.with.ronin.createdAt.lessThan(new Date());
+use.blogPosts.with.ronin.createdAt.lessThan(new Date());
 ```
 
 Note that, even though they might look like record references, the `ronin.createdBy`
