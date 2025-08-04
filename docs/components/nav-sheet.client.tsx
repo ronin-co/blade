@@ -14,14 +14,16 @@ export const NavSheet = ({
 
   // Close the sheet when the page changes.
   useEffect(() => {
-    setOpen(false);
+    if (open && location.pathname) {
+      setOpen(false);
+    }
   }, [location.pathname]);
 
   return (
     <Sheet
       open={open}
       onOpenChange={setOpen}>
-      <SheetTrigger asChild={true}>
+      <SheetTrigger asChild>
         <button
           type="button"
           className="flex cursor-pointer flex-row items-center gap-1.5 rounded-md border border-transparent p-2 font-medium font-mono text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:p-1">
@@ -40,7 +42,7 @@ export const NavSheet = ({
                 'py-3': scrolled,
               },
             )}>
-            <SheetClose asChild={true}>
+            <SheetClose asChild>
               <a
                 className={cn(
                   'group font-medium font-mono text-base text-muted-foreground/60 tracking-tight transition-all duration-200 hover:text-muted-foreground hover:duration-0',
@@ -55,7 +57,7 @@ export const NavSheet = ({
               </a>
             </SheetClose>
 
-            <SheetClose asChild={true}>
+            <SheetClose asChild>
               <button
                 type="button"
                 className="flex cursor-pointer flex-row items-center gap-1.5 rounded-md border border-transparent p-2 font-medium font-mono text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:p-1">
