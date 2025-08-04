@@ -1,6 +1,6 @@
 import { Icons } from '@/components/icons';
 import type { NavGroup } from '@/components/nav';
-import { NavSheet } from '@/components/nav-sheet';
+import { NavSheet } from '@/components/nav-sheet.client';
 import { Snippet } from '@/components/snippet.client';
 import { cn } from '@/lib/utils';
 import { type FunctionComponent, useEffect, useState } from 'react';
@@ -56,7 +56,7 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
             rel="noreferrer">
             <Icons.Star className="size-3.5" />
 
-            <span>256</span>
+            <span>261</span>
           </a>
 
           <div className="block sm:hidden">
