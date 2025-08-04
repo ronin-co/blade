@@ -14,7 +14,7 @@ export const NavSheet = ({
 
   // Close the sheet when the page changes.
   useEffect(() => {
-    if (open && location.pathname) {
+    if (open) {
       setOpen(false);
     }
   }, [location.pathname]);
