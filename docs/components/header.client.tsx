@@ -1,6 +1,6 @@
 import { Icons } from '@/components/icons';
 import type { NavGroup } from '@/components/nav';
-import { NavSheet } from '@/components/nav-sheet';
+import { NavSheet } from '@/components/nav-sheet.client';
 import { Snippet } from '@/components/snippet.client';
 import { cn } from '@/lib/utils';
 import { type FunctionComponent, useEffect, useState } from 'react';

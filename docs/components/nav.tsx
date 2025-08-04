@@ -1,9 +1,7 @@
 import { Link } from 'blade/client/components';
 import { useLocation } from 'blade/hooks';
 
-import { SheetClose } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import * as React from 'react';
 
 export type NavItem = {
   id: string;
@@ -18,15 +16,9 @@ export type NavGroup = {
 
 export const Nav = ({
   nav,
-  withSheetClose,
 }: {
   nav: Array<NavGroup>;
-  withSheetClose?: boolean;
 }) => {
-  const [SheetCloseWrapper, sheetCloseWrapperProps] = withSheetClose
-    ? [SheetClose, { asChild: true }]
-    : [React.Fragment, {}];
-
   const location = useLocation();
 
   return (
@@ -39,20 +31,17 @@ export const Nav = ({
 
           <div className="flex w-full flex-col gap-0.5">
             {group.items.map((item) => (
-              <SheetCloseWrapper
-                {...sheetCloseWrapperProps}
-                key={item.id}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    '-ml-2.5 block cursor-pointer rounded-md px-2.5 py-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:bg-accent hover:text-primary hover:duration-0',
-                    {
-                      'bg-accent text-primary': item.href === location.pathname,
-                    },
-                  )}>
-                  <span>{item.name}</span>
-                </Link>
-              </SheetCloseWrapper>
+              <Link
+                key={item.id}
+                href={item.href}
+                className={cn(
+                  '-ml-2.5 block cursor-pointer rounded-md px-2.5 py-1.5 text-muted-foreground text-sm transition-colors duration-200 hover:bg-accent hover:text-primary hover:duration-0',
+                  {
+                    'bg-accent text-primary': item.href === location.pathname,
+                  },
+                )}>
+                <span>{item.name}</span>
+              </Link>
             ))}
           </div>
         </div>
