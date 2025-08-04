@@ -50,12 +50,12 @@ export const NavSheet = ({
             </button>
           </SheetClose>
         </div>
-
-        <SheetClose asChild={true}>
-          <div className="px-8">
-            <Nav nav={nav} />
-          </div>
-        </SheetClose>
+        <div className="px-8">
+          <Nav
+            nav={nav}
+            withSheetClose
+          />
+        </div>
       </div>
     </SheetContent>
   </Sheet>
