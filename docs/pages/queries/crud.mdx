@@ -58,15 +58,15 @@ Additionally, the `ronin.createdAt` and `ronin.updatedAt` [metadata](/docs/platf
 To obtain all records of a given RONIN model, the `get` query type can be used:
 
 ```ts
-await get.accounts();
+use.accounts();
 ```
 
 To obtain only specific records, you may optionally pass a list of fields that should be matched:
 
 ```ts
-await get.account.with.id('acc_vais0g9rrk995tz0');
+use.account.with.id('acc_vais0g9rrk995tz0');
 
-await get.accounts.with({
+use.accounts.with({
   handle: 'elaine',
   emailAddress: 'elaine@site.co',
 });
@@ -77,7 +77,7 @@ await get.accounts.with({
 In most cases, the syntax above will suffice for retrieving the records you’re interested in. If it doesn’t suffice, you may optionally choose to provide more complex field assertions using the sub instructions of the `with` query instruction:
 
 ```ts
-await get.accounts.with({
+use.accounts.with({
   email: {
     startingWith: 'team-',
     endingWith: '@site.com',

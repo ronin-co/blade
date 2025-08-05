@@ -267,7 +267,7 @@ to execute the query, and can be used to run additional queries within the trigg
 ```ts
 add: (query, multiple, options) => {
   const { get } = options.client;
-  const anotherRecord = await get.team.with.id(query.with.team);
+  const anotherRecord = use.team.with.id(query.with.team);
   
   // Modify the query
   return query;
