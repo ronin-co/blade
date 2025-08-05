@@ -86,74 +86,63 @@ export type RecursiveRequired<T> = {
 
 export type ValueOf<T> = T[keyof T];
 
-export type BeforeCountTrigger = BeforeTriggerHandler<'count', TriggerOptions>;
-export type BeforeAddTrigger = BeforeTriggerHandler<'add', TriggerOptions>;
-export type BeforeRemoveTrigger = BeforeTriggerHandler<'remove', TriggerOptions>;
-export type BeforeGetTrigger = BeforeTriggerHandler<'get', TriggerOptions>;
-export type BeforeSetTrigger = BeforeTriggerHandler<'set', TriggerOptions>;
+type BladeTrigger<T extends (...args: Array<any>) => any> = (
+  ...args: Parameters<
+    // Combine the last parameter of the original trigger function with `TriggerOptions`.
+    T extends (...args: [...infer Rest, infer Last]) => infer R
+      ? (...args: [...Rest, Last & TriggerOptions]) => R
+      : never
+  >
+) => ReturnType<T>;
 
-export type CountTrigger = DuringTriggerHandler<'count', TriggerOptions>;
-export type AddTrigger = DuringTriggerHandler<'add', TriggerOptions>;
-export type RemoveTrigger = DuringTriggerHandler<'remove', TriggerOptions>;
-export type GetTrigger = DuringTriggerHandler<'get', TriggerOptions>;
-export type SetTrigger = DuringTriggerHandler<'set', TriggerOptions>;
+export type BeforeCountTrigger = BladeTrigger<BeforeTriggerHandler<'count'>>;
+export type BeforeAddTrigger = BladeTrigger<BeforeTriggerHandler<'add'>>;
+export type BeforeRemoveTrigger = BladeTrigger<BeforeTriggerHandler<'remove'>>;
+export type BeforeGetTrigger = BladeTrigger<BeforeTriggerHandler<'get'>>;
+export type BeforeSetTrigger = BladeTrigger<BeforeTriggerHandler<'set'>>;
 
-export type AfterCountTrigger = AfterTriggerHandler<'count', TriggerOptions>;
-export type AfterAddTrigger = AfterTriggerHandler<'add', TriggerOptions>;
-export type AfterRemoveTrigger = AfterTriggerHandler<'remove', TriggerOptions>;
-export type AfterGetTrigger = AfterTriggerHandler<'get', TriggerOptions>;
-export type AfterSetTrigger = AfterTriggerHandler<'set', TriggerOptions>;
+export type CountTrigger = BladeTrigger<DuringTriggerHandler<'count'>>;
+export type AddTrigger = BladeTrigger<DuringTriggerHandler<'add'>>;
+export type RemoveTrigger = BladeTrigger<DuringTriggerHandler<'remove'>>;
+export type GetTrigger = BladeTrigger<DuringTriggerHandler<'get'>>;
+export type SetTrigger = BladeTrigger<DuringTriggerHandler<'set'>>;
 
-export type ResolvingCountTrigger<TSchema = unknown> = ResolvingTriggerHandler<
-  'count',
-  TriggerOptions,
-  TSchema
+export type AfterCountTrigger = BladeTrigger<AfterTriggerHandler<'count'>>;
+export type AfterAddTrigger = BladeTrigger<AfterTriggerHandler<'add'>>;
+export type AfterRemoveTrigger = BladeTrigger<AfterTriggerHandler<'remove'>>;
+export type AfterGetTrigger = BladeTrigger<AfterTriggerHandler<'get'>>;
+export type AfterSetTrigger = BladeTrigger<AfterTriggerHandler<'set'>>;
+
+export type ResolvingCountTrigger<TSchema = unknown> = BladeTrigger<
+  ResolvingTriggerHandler<'count', TSchema>
 >;
-export type ResolvingAddTrigger<TSchema = unknown> = ResolvingTriggerHandler<
-  'add',
-  TriggerOptions,
-  TSchema
+export type ResolvingAddTrigger<TSchema = unknown> = BladeTrigger<
+  ResolvingTriggerHandler<'add', TSchema>
 >;
-export type ResolvingRemoveTrigger<TSchema = unknown> = ResolvingTriggerHandler<
-  'remove',
-  TriggerOptions,
-  TSchema
+export type ResolvingRemoveTrigger<TSchema = unknown> = BladeTrigger<
+  ResolvingTriggerHandler<'remove', TSchema>
 >;
-export type ResolvingGetTrigger<TSchema = unknown> = ResolvingTriggerHandler<
-  'get',
-  TriggerOptions,
-  TSchema
+export type ResolvingGetTrigger<TSchema = unknown> = BladeTrigger<
+  ResolvingTriggerHandler<'get', TSchema>
 >;
-export type ResolvingSetTrigger<TSchema = unknown> = ResolvingTriggerHandler<
-  'set',
-  TriggerOptions,
-  TSchema
+export type ResolvingSetTrigger<TSchema = unknown> = BladeTrigger<
+  ResolvingTriggerHandler<'set', TSchema>
 >;
 
-export type FollowingCountTrigger<TSchema = unknown> = FollowingTriggerHandler<
-  'count',
-  TriggerOptions,
-  TSchema
+export type FollowingCountTrigger<TSchema = unknown> = BladeTrigger<
+  FollowingTriggerHandler<'count', TSchema>
 >;
-export type FollowingAddTrigger<TSchema = unknown> = FollowingTriggerHandler<
-  'add',
-  TriggerOptions,
-  TSchema
+export type FollowingAddTrigger<TSchema = unknown> = BladeTrigger<
+  FollowingTriggerHandler<'add', TSchema>
 >;
-export type FollowingRemoveTrigger<TSchema = unknown> = FollowingTriggerHandler<
-  'remove',
-  TriggerOptions,
-  TSchema
+export type FollowingRemoveTrigger<TSchema = unknown> = BladeTrigger<
+  FollowingTriggerHandler<'remove', TSchema>
 >;
-export type FollowingGetTrigger<TSchema = unknown> = FollowingTriggerHandler<
-  'get',
-  TriggerOptions,
-  TSchema
+export type FollowingGetTrigger<TSchema = unknown> = BladeTrigger<
+  FollowingTriggerHandler<'get', TSchema>
 >;
-export type FollowingSetTrigger<TSchema = unknown> = FollowingTriggerHandler<
-  'set',
-  TriggerOptions,
-  TSchema
+export type FollowingSetTrigger<TSchema = unknown> = BladeTrigger<
+  FollowingTriggerHandler<'set', TSchema>
 >;
 
 export type Triggers<TSchema = unknown> = Record<
