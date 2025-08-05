@@ -1,30 +1,3 @@
-import type {
-  AddTrigger as OriginalAddTrigger,
-  AfterAddTrigger as OriginalAfterAddTrigger,
-  AfterCountTrigger as OriginalAfterCountTrigger,
-  AfterGetTrigger as OriginalAfterGetTrigger,
-  AfterRemoveTrigger as OriginalAfterRemoveTrigger,
-  AfterSetTrigger as OriginalAfterSetTrigger,
-  BeforeAddTrigger as OriginalBeforeAddTrigger,
-  BeforeCountTrigger as OriginalBeforeCountTrigger,
-  BeforeGetTrigger as OriginalBeforeGetTrigger,
-  BeforeRemoveTrigger as OriginalBeforeRemoveTrigger,
-  BeforeSetTrigger as OriginalBeforeSetTrigger,
-  CountTrigger as OriginalCountTrigger,
-  FollowingAddTrigger as OriginalFollowingAddTrigger,
-  FollowingCountTrigger as OriginalFollowingCountTrigger,
-  FollowingGetTrigger as OriginalFollowingGetTrigger,
-  FollowingRemoveTrigger as OriginalFollowingRemoveTrigger,
-  FollowingSetTrigger as OriginalFollowingSetTrigger,
-  GetTrigger as OriginalGetTrigger,
-  RemoveTrigger as OriginalRemoveTrigger,
-  ResolvingAddTrigger as OriginalResolvingAddTrigger,
-  ResolvingCountTrigger as OriginalResolvingCountTrigger,
-  ResolvingGetTrigger as OriginalResolvingGetTrigger,
-  ResolvingRemoveTrigger as OriginalResolvingRemoveTrigger,
-  ResolvingSetTrigger as OriginalResolvingSetTrigger,
-  SetTrigger as OriginalSetTrigger,
-} from 'blade-client/types';
 import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
@@ -69,7 +42,9 @@ export interface PageMetadata {
 }
 
 /** The original trigger options provided by the RONIN client. */
-export type ClientTriggerOptions = Parameters<OriginalBeforeGetTrigger>[2];
+export type ClientTriggerOptions = Parameters<
+  import('blade-client/types').BeforeGetTrigger
+>[2];
 
 export interface TriggerOptions extends ClientTriggerOptions {
   /**
@@ -115,54 +90,68 @@ type BladeTrigger<T extends (...args: Array<any>) => any> = (
   >
 ) => ReturnType<T>;
 
-export type BeforeCountTrigger = BladeTrigger<OriginalBeforeCountTrigger>;
-export type BeforeAddTrigger = BladeTrigger<OriginalBeforeAddTrigger>;
-export type BeforeRemoveTrigger = BladeTrigger<OriginalBeforeRemoveTrigger>;
-export type BeforeGetTrigger = BladeTrigger<OriginalBeforeGetTrigger>;
-export type BeforeSetTrigger = BladeTrigger<OriginalBeforeSetTrigger>;
+export type BeforeCountTrigger = BladeTrigger<
+  import('blade-client/types').BeforeCountTrigger
+>;
+export type BeforeAddTrigger = BladeTrigger<
+  import('blade-client/types').BeforeAddTrigger
+>;
+export type BeforeRemoveTrigger = BladeTrigger<
+  import('blade-client/types').BeforeRemoveTrigger
+>;
+export type BeforeGetTrigger = BladeTrigger<
+  import('blade-client/types').BeforeGetTrigger
+>;
+export type BeforeSetTrigger = BladeTrigger<
+  import('blade-client/types').BeforeSetTrigger
+>;
 
-export type CountTrigger = BladeTrigger<OriginalCountTrigger>;
-export type AddTrigger = BladeTrigger<OriginalAddTrigger>;
-export type RemoveTrigger = BladeTrigger<OriginalRemoveTrigger>;
-export type GetTrigger = BladeTrigger<OriginalGetTrigger>;
-export type SetTrigger = BladeTrigger<OriginalSetTrigger>;
+export type CountTrigger = BladeTrigger<import('blade-client/types').CountTrigger>;
+export type AddTrigger = BladeTrigger<import('blade-client/types').AddTrigger>;
+export type RemoveTrigger = BladeTrigger<import('blade-client/types').RemoveTrigger>;
+export type GetTrigger = BladeTrigger<import('blade-client/types').GetTrigger>;
+export type SetTrigger = BladeTrigger<import('blade-client/types').SetTrigger>;
 
-export type AfterCountTrigger = BladeTrigger<OriginalAfterCountTrigger>;
-export type AfterAddTrigger = BladeTrigger<OriginalAfterAddTrigger>;
-export type AfterRemoveTrigger = BladeTrigger<OriginalAfterRemoveTrigger>;
-export type AfterGetTrigger = BladeTrigger<OriginalAfterGetTrigger>;
-export type AfterSetTrigger = BladeTrigger<OriginalAfterSetTrigger>;
+export type AfterCountTrigger = BladeTrigger<
+  import('blade-client/types').AfterCountTrigger
+>;
+export type AfterAddTrigger = BladeTrigger<import('blade-client/types').AfterAddTrigger>;
+export type AfterRemoveTrigger = BladeTrigger<
+  import('blade-client/types').AfterRemoveTrigger
+>;
+export type AfterGetTrigger = BladeTrigger<import('blade-client/types').AfterGetTrigger>;
+export type AfterSetTrigger = BladeTrigger<import('blade-client/types').AfterSetTrigger>;
 
 export type ResolvingCountTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalResolvingCountTrigger<TSchema>
+  import('blade-client/types').ResolvingCountTrigger<TSchema>
 >;
 export type ResolvingAddTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalResolvingAddTrigger<TSchema>
+  import('blade-client/types').ResolvingAddTrigger<TSchema>
 >;
 export type ResolvingRemoveTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalResolvingRemoveTrigger<TSchema>
+  import('blade-client/types').ResolvingRemoveTrigger<TSchema>
 >;
 export type ResolvingGetTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalResolvingGetTrigger<TSchema>
+  import('blade-client/types').ResolvingGetTrigger<TSchema>
 >;
 export type ResolvingSetTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalResolvingSetTrigger<TSchema>
+  import('blade-client/types').ResolvingSetTrigger<TSchema>
 >;
 
 export type FollowingCountTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalFollowingCountTrigger<TSchema>
+  import('blade-client/types').FollowingCountTrigger<TSchema>
 >;
 export type FollowingAddTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalFollowingAddTrigger<TSchema>
+  import('blade-client/types').FollowingAddTrigger<TSchema>
 >;
 export type FollowingRemoveTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalFollowingRemoveTrigger<TSchema>
+  import('blade-client/types').FollowingRemoveTrigger<TSchema>
 >;
 export type FollowingGetTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalFollowingGetTrigger<TSchema>
+  import('blade-client/types').FollowingGetTrigger<TSchema>
 >;
 export type FollowingSetTrigger<TSchema = unknown> = BladeTrigger<
-  OriginalFollowingSetTrigger<TSchema>
+  import('blade-client/types').FollowingSetTrigger<TSchema>
 >;
 
 export type Triggers<TSchema = unknown> = Record<
