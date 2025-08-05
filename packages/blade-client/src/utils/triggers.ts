@@ -61,43 +61,54 @@ export type FilteredTriggerQuery<
 
 export type BeforeTriggerHandler<
   TType extends QueryType,
+  TOptions extends object = object,
   TQuery extends FilteredTriggerQuery<TType> = FilteredTriggerQuery<TType>,
 > = (
   query: TQuery,
   multipleRecords: boolean,
-  options: TriggerOptions,
+  options: TriggerOptions & TOptions,
 ) => Array<Query> | Promise<Array<Query>>;
 
 export type DuringTriggerHandler<
   TType extends QueryType,
+  TOptions extends object = object,
   TQuery extends FilteredTriggerQuery<TType> = FilteredTriggerQuery<TType>,
 > = (
   query: TQuery,
   multipleRecords: boolean,
-  options: TriggerOptions,
+  options: TriggerOptions & TOptions,
 ) => TQuery | Promise<TQuery> | Query | Promise<Query>;
 
 export type AfterTriggerHandler<
   TType extends QueryType,
+  TOptions extends object = object,
   TQuery extends FilteredTriggerQuery<TType> = FilteredTriggerQuery<TType>,
 > = (
   query: TQuery,
   multipleRecords: boolean,
-  options: TriggerOptions,
+  options: TriggerOptions & TOptions,
 ) => Array<Query> | Promise<Array<Query>>;
 
-export type ResolvingTriggerHandler<TType extends QueryType, TSchema = unknown> = (
+export type ResolvingTriggerHandler<
+  TType extends QueryType,
+  TOptions extends object = object,
+  TSchema = unknown,
+> = (
   query: FilteredTriggerQuery<TType>,
   multipleRecords: boolean,
-  options: TriggerOptions,
+  options: TriggerOptions & TOptions,
 ) => TSchema | Promise<TSchema>;
 
-export type FollowingTriggerHandler<TType extends QueryType, TSchema = unknown> = (
+export type FollowingTriggerHandler<
+  TType extends QueryType,
+  TOptions extends object = object,
+  TSchema = unknown,
+> = (
   query: FilteredTriggerQuery<TType>,
   multipleRecords: boolean,
   beforeResult: TSchema,
   afterResult: TSchema,
-  options: TriggerOptions,
+  options: TriggerOptions & TOptions,
 ) => void | Promise<void>;
 
 // The order of these types is important, as they determine the order in which
@@ -114,107 +125,128 @@ type TriggerKeys = (
   | { [K in QueryType]: `following${Capitalize<K>}` }
 )[QueryType];
 
-type Trigger<
-  TStage extends TriggerType,
-  TType extends QueryType,
-  TSchema extends TStage extends 'before' | 'during' | 'after' ? never : unknown = never,
-> = TStage extends 'before'
-  ? BeforeTriggerHandler<TType>
-  : TStage extends 'during'
-    ? DuringTriggerHandler<TType>
-    : TStage extends 'after'
-      ? AfterTriggerHandler<TType>
-      : TStage extends 'resolving'
-        ? ResolvingTriggerHandler<TType, TSchema>
-        : TStage extends 'following'
-          ? FollowingTriggerHandler<TType, TSchema>
-          : never;
-
 type TriggerList<TSchema = unknown> = {
   [K in TriggerKeys]?: K extends 'before' | `before${string}`
     ? BeforeTriggerHandler<QueryType>
     : K extends 'after' | `after${string}`
       ? AfterTriggerHandler<QueryType>
       : K extends 'resolving' | `resolving${string}`
-        ? ResolvingTriggerHandler<QueryType, TSchema>
+        ? ResolvingTriggerHandler<QueryType, object, TSchema>
         : K extends 'following' | `following${string}`
-          ? FollowingTriggerHandler<QueryType, TSchema>
+          ? FollowingTriggerHandler<QueryType, object, TSchema>
           : DuringTriggerHandler<QueryType>;
 };
 
 export type Triggers<TSchema = unknown> = Record<string, TriggerList<TSchema>>;
 
-type BeforeTrigger<TType extends QueryType> = Trigger<'before', TType>;
-type DuringTrigger<TType extends QueryType> = Trigger<'during', TType>;
-type AfterTrigger<TType extends QueryType> = Trigger<'after', TType>;
+export type BeforeGetTrigger = BeforeTriggerHandler<'get'>;
+export type BeforeSetTrigger = BeforeTriggerHandler<'set'>;
+export type BeforeAddTrigger = BeforeTriggerHandler<'add'>;
+export type BeforeRemoveTrigger = BeforeTriggerHandler<'remove'>;
+export type BeforeCountTrigger = BeforeTriggerHandler<'count'>;
+export type BeforeCreateTrigger = BeforeTriggerHandler<'create'>;
+export type BeforeAlterTrigger = BeforeTriggerHandler<'alter'>;
+export type BeforeDropTrigger = BeforeTriggerHandler<'drop'>;
 
-type ResolvingTrigger<TType extends QueryType, TSchema = unknown> = Trigger<
-  'resolving',
-  TType,
+export type GetTrigger = DuringTriggerHandler<'get'>;
+export type SetTrigger = DuringTriggerHandler<'set'>;
+export type AddTrigger = DuringTriggerHandler<'add'>;
+export type RemoveTrigger = DuringTriggerHandler<'remove'>;
+export type CountTrigger = DuringTriggerHandler<'count'>;
+export type CreateTrigger = DuringTriggerHandler<'create'>;
+export type AlterTrigger = DuringTriggerHandler<'alter'>;
+export type DropTrigger = DuringTriggerHandler<'drop'>;
+
+export type AfterGetTrigger = AfterTriggerHandler<'get'>;
+export type AfterSetTrigger = AfterTriggerHandler<'set'>;
+export type AfterAddTrigger = AfterTriggerHandler<'add'>;
+export type AfterRemoveTrigger = AfterTriggerHandler<'remove'>;
+export type AfterCountTrigger = AfterTriggerHandler<'count'>;
+export type AfterCreateTrigger = AfterTriggerHandler<'create'>;
+export type AfterAlterTrigger = AfterTriggerHandler<'alter'>;
+export type AfterDropTrigger = AfterTriggerHandler<'drop'>;
+
+export type ResolvingGetTrigger<TSchema = unknown> = ResolvingTriggerHandler<
+  'get',
+  object,
   TSchema
 >;
-type FollowingTrigger<TType extends QueryType, TSchema = unknown> = Trigger<
-  'following',
-  TType,
+export type ResolvingSetTrigger<TSchema = unknown> = ResolvingTriggerHandler<
+  'set',
+  object,
   TSchema
 >;
-
-export type BeforeGetTrigger = BeforeTrigger<'get'>;
-export type BeforeSetTrigger = BeforeTrigger<'set'>;
-export type BeforeAddTrigger = BeforeTrigger<'add'>;
-export type BeforeRemoveTrigger = BeforeTrigger<'remove'>;
-export type BeforeCountTrigger = BeforeTrigger<'count'>;
-export type BeforeCreateTrigger = BeforeTrigger<'create'>;
-export type BeforeAlterTrigger = BeforeTrigger<'alter'>;
-export type BeforeDropTrigger = BeforeTrigger<'drop'>;
-
-export type GetTrigger = DuringTrigger<'get'>;
-export type SetTrigger = DuringTrigger<'set'>;
-export type AddTrigger = DuringTrigger<'add'>;
-export type RemoveTrigger = DuringTrigger<'remove'>;
-export type CountTrigger = DuringTrigger<'count'>;
-export type CreateTrigger = DuringTrigger<'create'>;
-export type AlterTrigger = DuringTrigger<'alter'>;
-export type DropTrigger = DuringTrigger<'drop'>;
-
-export type AfterGetTrigger = AfterTrigger<'get'>;
-export type AfterSetTrigger = AfterTrigger<'set'>;
-export type AfterAddTrigger = AfterTrigger<'add'>;
-export type AfterRemoveTrigger = AfterTrigger<'remove'>;
-export type AfterCountTrigger = AfterTrigger<'count'>;
-export type AfterCreateTrigger = AfterTrigger<'create'>;
-export type AfterAlterTrigger = AfterTrigger<'alter'>;
-export type AfterDropTrigger = AfterTrigger<'drop'>;
-
-export type ResolvingGetTrigger<TSchema = unknown> = ResolvingTrigger<'get', TSchema>;
-export type ResolvingSetTrigger<TSchema = unknown> = ResolvingTrigger<'set', TSchema>;
-export type ResolvingAddTrigger<TSchema = unknown> = ResolvingTrigger<'add', TSchema>;
-export type ResolvingRemoveTrigger<TSchema = unknown> = ResolvingTrigger<
+export type ResolvingAddTrigger<TSchema = unknown> = ResolvingTriggerHandler<
+  'add',
+  object,
+  TSchema
+>;
+export type ResolvingRemoveTrigger<TSchema = unknown> = ResolvingTriggerHandler<
   'remove',
+  object,
   TSchema
 >;
-export type ResolvingCountTrigger<TSchema = unknown> = ResolvingTrigger<'count', TSchema>;
-export type ResolvingCreateTrigger<TSchema = unknown> = ResolvingTrigger<
+export type ResolvingCountTrigger<TSchema = unknown> = ResolvingTriggerHandler<
+  'count',
+  object,
+  TSchema
+>;
+export type ResolvingCreateTrigger<TSchema = unknown> = ResolvingTriggerHandler<
   'create',
+  object,
   TSchema
 >;
-export type ResolvingAlterTrigger<TSchema = unknown> = ResolvingTrigger<'alter', TSchema>;
-export type ResolvingDropTrigger<TSchema = unknown> = ResolvingTrigger<'drop', TSchema>;
+export type ResolvingAlterTrigger<TSchema = unknown> = ResolvingTriggerHandler<
+  'alter',
+  object,
+  TSchema
+>;
+export type ResolvingDropTrigger<TSchema = unknown> = ResolvingTriggerHandler<
+  'drop',
+  object,
+  TSchema
+>;
 
-export type FollowingGetTrigger<TSchema = unknown> = FollowingTrigger<'get', TSchema>;
-export type FollowingSetTrigger<TSchema = unknown> = FollowingTrigger<'set', TSchema>;
-export type FollowingAddTrigger<TSchema = unknown> = FollowingTrigger<'add', TSchema>;
-export type FollowingRemoveTrigger<TSchema = unknown> = FollowingTrigger<
+export type FollowingGetTrigger<TSchema = unknown> = FollowingTriggerHandler<
+  'get',
+  object,
+  TSchema
+>;
+export type FollowingSetTrigger<TSchema = unknown> = FollowingTriggerHandler<
+  'set',
+  object,
+  TSchema
+>;
+export type FollowingAddTrigger<TSchema = unknown> = FollowingTriggerHandler<
+  'add',
+  object,
+  TSchema
+>;
+export type FollowingRemoveTrigger<TSchema = unknown> = FollowingTriggerHandler<
   'remove',
+  object,
   TSchema
 >;
-export type FollowingCountTrigger<TSchema = unknown> = FollowingTrigger<'count', TSchema>;
-export type FollowingCreateTrigger<TSchema = unknown> = FollowingTrigger<
+export type FollowingCountTrigger<TSchema = unknown> = FollowingTriggerHandler<
+  'count',
+  object,
+  TSchema
+>;
+export type FollowingCreateTrigger<TSchema = unknown> = FollowingTriggerHandler<
   'create',
+  object,
   TSchema
 >;
-export type FollowingAlterTrigger<TSchema = unknown> = FollowingTrigger<'alter', TSchema>;
-export type FollowingDropTrigger<TSchema = unknown> = FollowingTrigger<'drop', TSchema>;
+export type FollowingAlterTrigger<TSchema = unknown> = FollowingTriggerHandler<
+  'alter',
+  object,
+  TSchema
+>;
+export type FollowingDropTrigger<TSchema = unknown> = FollowingTriggerHandler<
+  'drop',
+  object,
+  TSchema
+>;
 
 const getModel = (
   instruction: QuerySchemaType,
@@ -375,14 +407,14 @@ const invokeTriggers = async (
     // special function arguments that contain the value of the affected records
     // before and after the query was executed.
     const triggerResult = await (triggerType === 'following'
-      ? (trigger as FollowingTrigger<QueryType, unknown>)(
+      ? (trigger as FollowingTriggerHandler<QueryType, object, unknown>)(
           queryInstruction,
           multipleRecords,
           normalizeResults(definition.resultBefore),
           normalizeResults(definition.resultAfter),
           triggerOptions,
         )
-      : (trigger as DuringTrigger<QueryType> | ResolvingTrigger<QueryType>)(
+      : (trigger as DuringTriggerHandler<QueryType> | ResolvingTriggerHandler<QueryType>)(
           queryInstruction,
           multipleRecords,
           triggerOptions,
