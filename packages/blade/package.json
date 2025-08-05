@@ -9,7 +9,7 @@
     "type": "git"
   },
   "bin": {
-    "blade": "./dist/private/shell/index.js"
+    "blade": "./dist/private/shell/index.mjs"
   },
   "files": [
     "dist"
@@ -23,9 +23,9 @@
   "exports": {
     "./client/": "./dist/public/client/",
     "./server/": "./dist/public/server/",
-    "./hooks": "./dist/public/universal/hooks.js",
-    "./schema": "./dist/public/universal/schema.js",
-    "./types": "./dist/public/universal/types.js"
+    "./hooks": "./dist/public/universal/hooks.mjs",
+    "./schema": "./dist/public/universal/schema.mjs",
+    "./types": "./dist/public/universal/types.mjs"
   },
   "typesVersions": {
     "*": {
