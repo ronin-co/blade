@@ -55,5 +55,9 @@ export default defineBuildConfig({
         global: 'globalThis',
       },
     },
+    output: {
+      format: 'es',
+      entryFileNames: '[name].js', // Force .js extension
+    },
   },
 });
