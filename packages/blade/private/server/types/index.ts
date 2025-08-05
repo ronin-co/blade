@@ -106,89 +106,64 @@ export type RecursiveRequired<T> = {
 
 export type ValueOf<T> = T[keyof T];
 
-type AddOptionsArgument<T> = T extends (...args: [...infer Rest, infer Last]) => infer R
-  ? (...args: [...Rest, Last & TriggerOptions]) => R
-  : never;
+type BladeTrigger<T extends (...args: Array<any>) => any> = (
+  ...args: Parameters<
+    // Combine the last parameter of the original trigger function with `TriggerOptions`.
+    T extends (...args: [...infer Rest, infer Last]) => infer R
+      ? (...args: [...Rest, Last & TriggerOptions]) => R
+      : never
+  >
+) => ReturnType<T>;
 
-export type BeforeCountTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeCountTrigger>>
-) => ReturnType<OriginalBeforeCountTrigger>;
-export type BeforeAddTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeAddTrigger>>
-) => ReturnType<OriginalBeforeAddTrigger>;
-export type BeforeRemoveTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeRemoveTrigger>>
-) => ReturnType<OriginalBeforeRemoveTrigger>;
-export type BeforeGetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeGetTrigger>>
-) => ReturnType<OriginalBeforeGetTrigger>;
-export type BeforeSetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeSetTrigger>>
-) => ReturnType<OriginalBeforeSetTrigger>;
+export type BeforeCountTrigger = BladeTrigger<OriginalBeforeCountTrigger>;
+export type BeforeAddTrigger = BladeTrigger<OriginalBeforeAddTrigger>;
+export type BeforeRemoveTrigger = BladeTrigger<OriginalBeforeRemoveTrigger>;
+export type BeforeGetTrigger = BladeTrigger<OriginalBeforeGetTrigger>;
+export type BeforeSetTrigger = BladeTrigger<OriginalBeforeSetTrigger>;
 
-export type CountTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalCountTrigger>>
-) => ReturnType<OriginalCountTrigger>;
-export type AddTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAddTrigger>>
-) => ReturnType<OriginalAddTrigger>;
-export type RemoveTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalRemoveTrigger>>
-) => ReturnType<OriginalRemoveTrigger>;
-export type GetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalGetTrigger>>
-) => ReturnType<OriginalGetTrigger>;
-export type SetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalSetTrigger>>
-) => ReturnType<OriginalSetTrigger>;
+export type CountTrigger = BladeTrigger<OriginalCountTrigger>;
+export type AddTrigger = BladeTrigger<OriginalAddTrigger>;
+export type RemoveTrigger = BladeTrigger<OriginalRemoveTrigger>;
+export type GetTrigger = BladeTrigger<OriginalGetTrigger>;
+export type SetTrigger = BladeTrigger<OriginalSetTrigger>;
 
-export type AfterCountTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterCountTrigger>>
-) => ReturnType<OriginalAfterCountTrigger>;
-export type AfterAddTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterAddTrigger>>
-) => ReturnType<OriginalAfterAddTrigger>;
-export type AfterRemoveTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterRemoveTrigger>>
-) => ReturnType<OriginalAfterRemoveTrigger>;
-export type AfterGetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterGetTrigger>>
-) => ReturnType<OriginalAfterGetTrigger>;
-export type AfterSetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterSetTrigger>>
-) => ReturnType<OriginalAfterSetTrigger>;
+export type AfterCountTrigger = BladeTrigger<OriginalAfterCountTrigger>;
+export type AfterAddTrigger = BladeTrigger<OriginalAfterAddTrigger>;
+export type AfterRemoveTrigger = BladeTrigger<OriginalAfterRemoveTrigger>;
+export type AfterGetTrigger = BladeTrigger<OriginalAfterGetTrigger>;
+export type AfterSetTrigger = BladeTrigger<OriginalAfterSetTrigger>;
 
-export type ResolvingCountTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingCountTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingCountTrigger<TSchema>>;
-export type ResolvingAddTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingAddTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingAddTrigger<TSchema>>;
-export type ResolvingRemoveTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingRemoveTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingRemoveTrigger<TSchema>>;
-export type ResolvingGetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingGetTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingGetTrigger<TSchema>>;
-export type ResolvingSetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingSetTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingSetTrigger<TSchema>>;
+export type ResolvingCountTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalResolvingCountTrigger<TSchema>
+>;
+export type ResolvingAddTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalResolvingAddTrigger<TSchema>
+>;
+export type ResolvingRemoveTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalResolvingRemoveTrigger<TSchema>
+>;
+export type ResolvingGetTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalResolvingGetTrigger<TSchema>
+>;
+export type ResolvingSetTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalResolvingSetTrigger<TSchema>
+>;
 
-export type FollowingCountTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingCountTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingCountTrigger<TSchema>>;
-export type FollowingAddTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingAddTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingAddTrigger<TSchema>>;
-export type FollowingRemoveTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingRemoveTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingRemoveTrigger<TSchema>>;
-export type FollowingGetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingGetTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingGetTrigger<TSchema>>;
-export type FollowingSetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingSetTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingSetTrigger<TSchema>>;
+export type FollowingCountTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalFollowingCountTrigger<TSchema>
+>;
+export type FollowingAddTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalFollowingAddTrigger<TSchema>
+>;
+export type FollowingRemoveTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalFollowingRemoveTrigger<TSchema>
+>;
+export type FollowingGetTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalFollowingGetTrigger<TSchema>
+>;
+export type FollowingSetTrigger<TSchema = unknown> = BladeTrigger<
+  OriginalFollowingSetTrigger<TSchema>
+>;
 
 export type Triggers<TSchema = unknown> = Record<
   string,
