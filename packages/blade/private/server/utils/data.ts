@@ -1,5 +1,5 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
-import type { FormattedResults, QueryHandlerOptions } from 'blade-client/types';
+import type { FormattedResults, QueryHandlerOptions } from 'blade-client';
 import { runQueries as runQueriesOnRonin } from 'blade-client/utils';
 import type { Query, ResultRecord } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';

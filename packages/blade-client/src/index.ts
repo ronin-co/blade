@@ -210,3 +210,5 @@ export const sql = factory.sql;
 export const sqlBatch = factory.sqlBatch;
 
 export default createSyntaxFactory;
+
+export * from '@/src/types';

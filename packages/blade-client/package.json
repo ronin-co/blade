@@ -17,10 +17,6 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./types": {
-      "import": "./dist/types/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
     "./utils": {
       "import": "./dist/utils/index.js",
       "types": "./dist/utils/index.d.ts"
@@ -30,9 +26,6 @@
     "*": {
       "*": [
         "dist/index.d.ts"
-      ],
-      "types": [
-        "dist/types/index.d.ts"
       ],
       "utils": [
         "dist/utils/index.d.ts"

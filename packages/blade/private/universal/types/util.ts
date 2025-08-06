@@ -1,4 +1,4 @@
-import type { FormattedResults } from 'blade-client/types';
+import type { FormattedResults } from 'blade-client';
 import type { SSEStreamingApi } from 'hono/streaming';
 
 import type { UniversalContext } from '@/private/universal/context';

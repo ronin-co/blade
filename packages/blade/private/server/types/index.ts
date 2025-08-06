@@ -24,7 +24,7 @@ import type {
   ResolvingRemoveTrigger as OriginalResolvingRemoveTrigger,
   ResolvingSetTrigger as OriginalResolvingSetTrigger,
   SetTrigger as OriginalSetTrigger,
-} from 'blade-client/types';
+} from 'blade-client';
 import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';

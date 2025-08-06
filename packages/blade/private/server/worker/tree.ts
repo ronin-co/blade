@@ -1,5 +1,5 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
-import type { FormattedResults } from 'blade-client/types';
+import type { FormattedResults } from 'blade-client';
 import { ClientError } from 'blade-client/utils';
 import type { Query } from 'blade-compiler';
 import { bundleId as serverBundleId } from 'build-meta';

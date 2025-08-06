@@ -30,5 +30,4 @@ export type {
 } from '@/private/server/types';
 
 export type * from 'blade-client';
-export type * from 'blade-client/types';
 export type { ResultRecord } from 'blade-compiler';
