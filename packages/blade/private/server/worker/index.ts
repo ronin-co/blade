@@ -1,6 +1,7 @@
 import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
 import { bundleId as serverBundleId } from 'build-meta';
+import { compress } from 'hono/compress';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -8,6 +9,7 @@ import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
 import { getWaitUntil, runQueries, toDashCase } from '@/private/server/utils/data';
+import { polyfillCompressionStream } from '@/private/server/utils/polyfills';
 import {
   getRequestGeoLocation,
   getRequestLanguages,
@@ -43,6 +45,23 @@ if (globalThis.DEV_SESSIONS) {
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+// If the application runs inside a generic container instead of a specific cloud
+// provider, add support for compressing responses depending on the incoming request
+// headers, since there might not be a proxy in front that handles compression.
+//
+// If there is a proxy in front that handles compression, we assume that it wouldn't pass
+// the `Accept-Encoding` header through to the origin.
+if (
+  import.meta.env.BLADE_ENV === 'production' &&
+  import.meta.env.__BLADE_PROVIDER === 'edge-worker'
+) {
+  // Enable necessary polyfills on unsupported runtimes.
+  polyfillCompressionStream();
+
+  // Enable the compression middleware.
+  app.use(compress());
+}
 
 app.use('*', async (c, next) => {
   const requestURL = new URL(c.req.url);
