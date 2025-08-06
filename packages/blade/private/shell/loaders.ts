@@ -155,6 +155,7 @@ export const getFileListLoader = (
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
+    const componentDirectories = ['components'];
 
     const directories = [
       ['pages', path.join(process.cwd(), 'pages')],
@@ -170,7 +171,6 @@ export const getFileListLoader = (
     // If no virtual files were provided, crawl the directories on the file system.
     else {
       const extraProjects = projects.slice(1);
-      const componentDirectories = ['components'];
 
       for (let index = 0; index < extraProjects.length; index++) {
         const project = extraProjects[index];

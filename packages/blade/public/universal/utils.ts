@@ -24,6 +24,7 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';
 
   const mainBuild = await buildContext(environment, {
+    filePaths: config.sourceFiles.map((sourceFile) => sourceFile.path),
     plugins: [
       {
         name: 'Memory Loader',
