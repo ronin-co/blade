@@ -25,7 +25,12 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';
 
   const mainBuild = await buildContext(environment, {
-    filePaths: config.sourceFiles.map((sourceFile) => sourceFile.path),
+    // Normalize file paths, so that all of them are absolute.
+    filePaths: config.sourceFiles.map(({ path }) => {
+      if (path.startsWith('./')) return path.slice(1);
+      if (path.startsWith('/')) return path;
+      return `/${path}`;
+    }),
     plugins: [
       {
         name: 'Memory Loader',
