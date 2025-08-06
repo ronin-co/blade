@@ -66,7 +66,7 @@ if (import.meta.env.__BLADE_PROVIDER === 'edge-worker') {
       constructor(format: keyof typeof transformMap) {
         const handle = transformMap[format]();
         this.readable = Readable.toWeb(handle) as unknown as ReadableStream;
-        this.writable = Writable.toWeb(handle);
+        this.writable = Writable.toWeb(handle) as unknown as WritableStream;
       }
     };
   }
