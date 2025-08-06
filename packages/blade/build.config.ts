@@ -46,7 +46,6 @@ export default defineBuildConfig({
   failOnWarn: false,
   parallel: true,
   rollup: {
-    emitCJS: false,
     esbuild: {
       define: {
         // Deno does not support `global` and certain dependencies that Blade uses are
