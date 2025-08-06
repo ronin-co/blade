@@ -8,7 +8,11 @@ import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 import MagicString from 'magic-string';
 
-import { outputDirectory, publicDirectory } from '@/private/shell/constants';
+import {
+  outputDirectory,
+  publicDirectory,
+  routerInputFile,
+} from '@/private/shell/constants';
 import {
   type ExportItem,
   type TotalFileList,
@@ -143,7 +147,10 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
+export const getFileListLoader = (
+  projects: Array<string>,
+  filePaths?: Array<string>,
+): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
@@ -185,7 +192,7 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
     });
 
     build.onLoad({ filter: /^server-list$/, namespace: 'server-imports' }, async () => ({
-      contents: await getFileList(files, ['pages', 'triggers'], true),
+      contents: getFileList(files, ['pages', 'triggers'], await exists(routerInputFile)),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
@@ -195,7 +202,7 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
     });
 
     build.onLoad({ filter: /^client-list$/, namespace: 'client-imports' }, async () => ({
-      contents: await getFileList(files, componentDirectories),
+      contents: getFileList(files, componentDirectories),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));

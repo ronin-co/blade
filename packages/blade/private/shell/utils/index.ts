@@ -38,7 +38,7 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
   }));
 };
 
-const getImportList = async (directoryName: string, files: FileList) => {
+const getImportList = (directoryName: string, files: FileList): string => {
   const importList = [];
   const exportList: { [key: string]: string } = {};
 
@@ -66,14 +66,12 @@ const getImportList = async (directoryName: string, files: FileList) => {
   return code;
 };
 
-export const getFileList = async (
+export const getFileList = (
   files: TotalFileList,
   directories: Array<string>,
-  router?: boolean,
-): Promise<string> => {
-  const importPromises = directories.map((name) => getImportList(name, files.get(name)!));
-  const imports = await Promise.all(importPromises);
-  const routerExists = router ? await exists(routerInputFile) : false;
+  routerExists?: boolean,
+): string => {
+  const imports = directories.map((name) => getImportList(name, files.get(name)!));
 
   if (routerExists) {
     // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).
