@@ -48,9 +48,13 @@ const app = new Hono<{ Bindings: Bindings }>();
 // If the application runs inside a generic container instead of a specific cloud
 // provider, add support for compressing responses depending on the incoming request
 // headers, since there might not be a proxy in front that handles compression.
-if (import.meta.env.__BLADE_PROVIDER === 'edge-worker') {
+if (
+  import.meta.env.BLADE_ENV === 'production' &&
+  import.meta.env.__BLADE_PROVIDER === 'edge-worker'
+) {
   // Bun doesn't support `CompressionStream` yet, so we need to polyfill it.
   if (typeof Bun !== 'undefined') {
+    // We use dynamic imports to prevent `esbuild` from detecting and inlining them.
     const prefix = 'node:';
     const { Readable, Writable } = await import(`${prefix}stream`);
     const zlib = await import(`${prefix}zlib`);
