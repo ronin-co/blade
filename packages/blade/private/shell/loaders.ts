@@ -8,11 +8,16 @@ import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
 import MagicString from 'magic-string';
 
-import { outputDirectory, publicDirectory } from '@/private/shell/constants';
+import {
+  outputDirectory,
+  publicDirectory,
+  routerInputFile,
+} from '@/private/shell/constants';
 import {
   type ExportItem,
   type TotalFileList,
   crawlDirectory,
+  crawlVirtualDirectory,
   exists,
   extractDeclarationName,
   getFileList,
@@ -143,10 +148,14 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
+export const getFileListLoader = (
+  projects: Array<string>,
+  filePaths?: Array<string>,
+): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
+    const componentDirectories = ['components'];
 
     const directories = [
       ['pages', path.join(process.cwd(), 'pages')],
@@ -154,38 +163,45 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
       ['components', path.join(process.cwd(), 'components')],
     ];
 
-    const extraProjects = projects.slice(1);
-    const componentDirectories = ['components'];
-
-    for (let index = 0; index < extraProjects.length; index++) {
-      const project = extraProjects[index];
-      const exportName = `components${index}`;
-
-      directories.push([exportName, path.join(project, 'components')]);
-      componentDirectories.push(exportName);
+    if (filePaths) {
+      for (const [directoryName] of directories) {
+        files.set(directoryName, crawlVirtualDirectory(filePaths, directoryName));
+      }
     }
+    // If no virtual files were provided, crawl the directories on the file system.
+    else {
+      const extraProjects = projects.slice(1);
 
-    build.onStart(async () => {
-      await Promise.all(
-        directories.map(async ([directoryName, directoryPath]) => {
-          const results = (await exists(directoryPath))
-            ? await crawlDirectory(directoryPath)
-            : [];
-          const finalResults = directoryName.startsWith('components')
-            ? results.filter((item) => item.relativePath.includes('.client'))
-            : results;
+      for (let index = 0; index < extraProjects.length; index++) {
+        const project = extraProjects[index];
+        const exportName = `components${index}`;
 
-          files.set(directoryName, finalResults);
-        }),
-      );
-    });
+        directories.push([exportName, path.join(project, 'components')]);
+        componentDirectories.push(exportName);
+      }
+
+      build.onStart(async () => {
+        await Promise.all(
+          directories.map(async ([directoryName, directoryPath]) => {
+            const results = (await exists(directoryPath))
+              ? await crawlDirectory(directoryPath)
+              : [];
+            const finalResults = directoryName.startsWith('components')
+              ? results.filter((item) => item.relativePath.includes('.client'))
+              : results;
+
+            files.set(directoryName, finalResults);
+          }),
+        );
+      });
+    }
 
     build.onResolve({ filter: /^server-list$/ }, (source) => {
       return { path: source.path, namespace: 'server-imports' };
     });
 
     build.onLoad({ filter: /^server-list$/, namespace: 'server-imports' }, async () => ({
-      contents: await getFileList(files, ['pages', 'triggers'], true),
+      contents: getFileList(files, ['pages', 'triggers'], await exists(routerInputFile)),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
@@ -195,7 +211,7 @@ export const getFileListLoader = (projects: Array<string>): esbuild.Plugin => ({
     });
 
     build.onLoad({ filter: /^client-list$/, namespace: 'client-imports' }, async () => ({
-      contents: await getFileList(files, componentDirectories),
+      contents: getFileList(files, componentDirectories),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));
@@ -272,6 +288,7 @@ export const getProviderLoader = (
 export const getMetaLoader = (
   environment: 'development' | 'production',
   projects: Array<string>,
+  virtual: boolean,
 ): esbuild.Plugin => ({
   name: 'Init Loader',
   setup(build) {
@@ -293,7 +310,7 @@ export const getMetaLoader = (
     }));
 
     build.onEnd(async (result) => {
-      if (result.errors.length === 0) {
+      if (result.errors.length === 0 && !virtual) {
         const clientBundle = path.join(outputDirectory, getOutputFile('init', 'js'));
         const clientSourcemap = path.join(
           outputDirectory,

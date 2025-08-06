@@ -38,7 +38,44 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
   }));
 };
 
-const getImportList = async (directoryName: string, files: FileList) => {
+/**
+ * Crawls a directory that only exists virtually (in memory) and not on the file system.
+ *
+ * @param filePaths - The entire list of virtual files.
+ * @param directoryName — The directory within the list of files that should be crawled.
+ *
+ * @returns A list of nested files and directories.
+ */
+export const crawlVirtualDirectory = (
+  filePaths: string[],
+  directoryName: string,
+): FileList => {
+  const entries: FileList = [];
+  const seenDirs = new Set<string>();
+
+  for (const filePath of filePaths) {
+    // Only include items under the specified directory.
+    if (!filePath.startsWith(`${directoryName}/`)) continue;
+    const parts = filePath.split('/');
+
+    // Emit intermediate directories.
+    for (let i = 1; i < parts.length - 1; i++) {
+      const dirPath = parts.slice(0, i + 1).join('/');
+
+      if (!seenDirs.has(dirPath)) {
+        seenDirs.add(dirPath);
+        entries.push({ type: 'DIRECTORY', relativePath: dirPath, absolutePath: dirPath });
+      }
+    }
+
+    // Emit the file itself.
+    entries.push({ type: 'FILE', relativePath: filePath, absolutePath: filePath });
+  }
+
+  return entries;
+};
+
+const getImportList = (directoryName: string, files: FileList): string => {
   const importList = [];
   const exportList: { [key: string]: string } = {};
 
@@ -66,14 +103,12 @@ const getImportList = async (directoryName: string, files: FileList) => {
   return code;
 };
 
-export const getFileList = async (
+export const getFileList = (
   files: TotalFileList,
   directories: Array<string>,
-  router?: boolean,
-): Promise<string> => {
-  const importPromises = directories.map((name) => getImportList(name, files.get(name)!));
-  const imports = await Promise.all(importPromises);
-  const routerExists = router ? await exists(routerInputFile) : false;
+  routerExists?: boolean,
+): string => {
+  const imports = directories.map((name) => getImportList(name, files.get(name)!));
 
   if (routerExists) {
     // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).

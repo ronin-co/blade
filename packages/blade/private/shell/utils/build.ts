@@ -5,6 +5,7 @@ import * as esbuild from 'esbuild';
 import {
   clientInputFile,
   defaultDeploymentProvider,
+  nodePath,
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
@@ -28,6 +29,8 @@ import { getOutputFile } from '@/private/universal/utils/paths';
  * @param [options.enableServiceWorker] - Whether service workers should be enabled.
  * @param [options.logQueries] - Whether executed queries should be logged at runtime.
  * @param [options.plugins] - Optional additional esbuild plugins to add to the build.
+ * @param [options.filePaths] - A list of all source file paths in the project. If the
+ * list is not provided, the project directory will be crawled automatically.
  *
  * @returns An esbuild context.
  */
@@ -37,15 +40,18 @@ export const build = async (
     enableServiceWorker?: boolean;
     logQueries?: boolean;
     plugins?: Array<esbuild.Plugin>;
+    filePaths?: Array<string>;
   },
 ): Promise<esbuild.BuildContext> => {
   const provider = getProvider();
+  const virtual = Boolean(options?.filePaths);
+
   const projects = [process.cwd()];
   const tsConfig = path.join(process.cwd(), 'tsconfig.json');
 
   // If a `tsconfig.json` file exists that contains a `references` field, we should include
   // files from the referenced projects as well.
-  if (await exists(tsConfig)) {
+  if (!virtual && (await exists(tsConfig))) {
     const tsConfigContents = JSON.parse(await readFile(tsConfig, 'utf-8'));
     const { references } = tsConfigContents || {};
 
@@ -79,19 +85,25 @@ export const build = async (
     outdir: outputDirectory,
     sourcemap: 'external',
     bundle: true,
+
+    // Return the files in memory if a list of source file paths was provided.
+    write: !virtual,
+
     platform: provider === 'vercel' ? 'node' : 'browser',
     format: 'esm',
     jsx: 'automatic',
-    nodePaths: [path.join(process.cwd(), 'node_modules')],
+    nodePaths: [nodePath],
     minify: environment === 'production',
+
     // TODO: Remove this once `@ronin/engine` no longer relies on it.
     external: ['node:events'],
+
     plugins: [
-      getFileListLoader(projects),
+      getFileListLoader(projects, options?.filePaths),
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
-      getMetaLoader(environment, projects),
+      getMetaLoader(environment, projects, virtual),
       getProviderLoader(environment, provider),
 
       ...(options?.plugins || []),
