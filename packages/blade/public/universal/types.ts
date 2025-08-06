@@ -31,4 +31,4 @@ export type {
 
 export type * from 'blade-client';
 export type * from 'blade-client/types';
-export type { ResultRecord, Query } from 'blade-compiler';
+export type { ResultRecord } from 'blade-compiler';
