@@ -38,6 +38,14 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
   }));
 };
 
+/**
+ * Crawls a directory that only exists virtually (in memory) and not on the file system.
+ *
+ * @param filePaths - The entire list of virtual files.
+ * @param directoryName — The directory within the list of files that should be crawled.
+ *
+ * @returns A list of nested files and directories.
+ */
 export const crawlVirtualDirectory = (
   filePaths: string[],
   directoryName: string,

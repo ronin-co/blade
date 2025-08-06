@@ -86,7 +86,7 @@ export const build = async (
     sourcemap: 'external',
     bundle: true,
 
-    // Return the files in memory a list of source file paths was provided.
+    // Return the files in memory if a list of source file paths was provided.
     write: !virtual,
 
     platform: provider === 'vercel' ? 'node' : 'browser',

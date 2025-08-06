@@ -24,6 +24,13 @@ interface BuildOutput {
   outputFiles: Array<OutputFile>;
 }
 
+/**
+ * Allows for performing an in-memory build.
+ *
+ * @param config - The configuration options for customizing the build behavior.
+ *
+ * @returns The generated build output in the form of virtual files.
+ */
 export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';
 
