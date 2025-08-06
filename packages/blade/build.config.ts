@@ -54,6 +54,7 @@ export default defineBuildConfig({
         // using `global`, so we're aliasing it ourselves.
         global: 'globalThis',
       },
+      jsx: 'automatic',
     },
     output: {
       format: 'es',
