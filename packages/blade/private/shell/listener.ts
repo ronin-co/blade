@@ -3,12 +3,14 @@ import { serve as serveApp } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import chalk from 'chalk';
 import { Hono } from 'hono';
+import { compress } from 'hono/compress';
 
 import {
   loggingPrefixes,
   outputDirectory,
   publicDirectory,
 } from '@/private/shell/constants';
+import { polyfillCompressionStream } from '@/private/shell/utils/polyfills';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export interface ServerState {
@@ -33,6 +35,20 @@ export const serve = async (
   }
 
   const app = new Hono();
+
+  // If `blade serve` is used to serve the application, add support for compressing
+  // responses depending on the incoming request headers, since there might not be a
+  // proxy in front that handles compression.
+  //
+  // If there is a proxy in front that handles compression, we assume that it wouldn't pass
+  // the `Accept-Encoding` header through to the origin.
+  if (environment === 'production') {
+    // Enable necessary polyfills on unsupported runtimes.
+    polyfillCompressionStream();
+
+    // Enable the compression middleware.
+    app.use(compress());
+  }
 
   const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
   app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
