@@ -38,6 +38,35 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
   }));
 };
 
+export const crawlVirtualDirectory = (
+  filePaths: string[],
+  directoryName: string,
+): FileList => {
+  const entries: FileList = [];
+  const seenDirs = new Set<string>();
+
+  for (const filePath of filePaths) {
+    // Only include items under the specified directory.
+    if (!filePath.startsWith(`${directoryName}/`)) continue;
+    const parts = filePath.split('/');
+
+    // Emit intermediate directories.
+    for (let i = 1; i < parts.length - 1; i++) {
+      const dirPath = parts.slice(0, i + 1).join('/');
+
+      if (!seenDirs.has(dirPath)) {
+        seenDirs.add(dirPath);
+        entries.push({ type: 'DIRECTORY', relativePath: dirPath, absolutePath: dirPath });
+      }
+    }
+
+    // Emit the file itself.
+    entries.push({ type: 'FILE', relativePath: filePath, absolutePath: filePath });
+  }
+
+  return entries;
+};
+
 const getImportList = (directoryName: string, files: FileList): string => {
   const importList = [];
   const exportList: { [key: string]: string } = {};

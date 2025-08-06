@@ -17,6 +17,7 @@ import {
   type ExportItem,
   type TotalFileList,
   crawlDirectory,
+  crawlVirtualDirectory,
   exists,
   extractDeclarationName,
   getFileList,
@@ -161,31 +162,39 @@ export const getFileListLoader = (
       ['components', path.join(process.cwd(), 'components')],
     ];
 
-    const extraProjects = projects.slice(1);
-    const componentDirectories = ['components'];
-
-    for (let index = 0; index < extraProjects.length; index++) {
-      const project = extraProjects[index];
-      const exportName = `components${index}`;
-
-      directories.push([exportName, path.join(project, 'components')]);
-      componentDirectories.push(exportName);
+    if (filePaths) {
+      for (const [directoryName] of directories) {
+        files.set(directoryName, crawlVirtualDirectory(filePaths, directoryName));
+      }
     }
+    // If no virtual files were provided, crawl the directories on the file system.
+    else {
+      const extraProjects = projects.slice(1);
+      const componentDirectories = ['components'];
 
-    build.onStart(async () => {
-      await Promise.all(
-        directories.map(async ([directoryName, directoryPath]) => {
-          const results = (await exists(directoryPath))
-            ? await crawlDirectory(directoryPath)
-            : [];
-          const finalResults = directoryName.startsWith('components')
-            ? results.filter((item) => item.relativePath.includes('.client'))
-            : results;
+      for (let index = 0; index < extraProjects.length; index++) {
+        const project = extraProjects[index];
+        const exportName = `components${index}`;
 
-          files.set(directoryName, finalResults);
-        }),
-      );
-    });
+        directories.push([exportName, path.join(project, 'components')]);
+        componentDirectories.push(exportName);
+      }
+
+      build.onStart(async () => {
+        await Promise.all(
+          directories.map(async ([directoryName, directoryPath]) => {
+            const results = (await exists(directoryPath))
+              ? await crawlDirectory(directoryPath)
+              : [];
+            const finalResults = directoryName.startsWith('components')
+              ? results.filter((item) => item.relativePath.includes('.client'))
+              : results;
+
+            files.set(directoryName, finalResults);
+          }),
+        );
+      });
+    }
 
     build.onResolve({ filter: /^server-list$/ }, (source) => {
       return { path: source.path, namespace: 'server-imports' };
