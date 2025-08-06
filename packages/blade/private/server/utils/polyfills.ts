@@ -2,8 +2,8 @@
  * Polyfills the global `CompressionStream` class for runtimes that don't support it.
  */
 export const polyfillCompressionStream = async () => {
-    // Only Bun does not offer support.
-    if (typeof Bun === 'undefined') return;
+  // Only Bun does not offer support.
+  if (typeof Bun === 'undefined') return;
 
   // We use dynamic imports to prevent `esbuild` from detecting and inlining them.
   const prefix = 'node:';
