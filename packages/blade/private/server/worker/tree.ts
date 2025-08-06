@@ -482,7 +482,7 @@ export const flushSession = async (
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
-        flushSession: options?.repeat ? nestedFlushSession : undefined,
+        flushUI: options?.repeat ? nestedFlushSession : undefined,
       },
       options?.queries
         ? {
@@ -537,8 +537,8 @@ const renderReactTree = async (
     forceNativeError?: boolean;
     /** A function for keeping the process alive until a promise has been resolved. */
     waitUntil: ServerContext['waitUntil'];
-    /** A function for flushing an update for the current browser session. */
-    flushSession?: ServerContext['flushUI'];
+    /** A function for flushing an update for the current UI. */
+    flushUI?: ServerContext['flushUI'];
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -587,7 +587,7 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushUI: options.flushSession,
+    flushUI: options.flushUI,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
