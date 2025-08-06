@@ -48,6 +48,9 @@ const app = new Hono<{ Bindings: Bindings }>();
 // If the application runs inside a generic container instead of a specific cloud
 // provider, add support for compressing responses depending on the incoming request
 // headers, since there might not be a proxy in front that handles compression.
+//
+// If there is a proxy in front that handles compression, we assume that it wouldn't pass
+// the `Accept-Encoding` header through to the origin.
 if (
   import.meta.env.BLADE_ENV === 'production' &&
   import.meta.env.__BLADE_PROVIDER === 'edge-worker'
