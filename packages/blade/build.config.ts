@@ -21,24 +21,41 @@ export default defineBuildConfig({
   },
   entries: [
     // These files are publicly accessible.
-    './public/client/components.tsx',
-    './public/client/hooks.ts',
-
-    './public/server/hooks.ts',
-    './public/server/utils/errors.ts',
-
-    './public/universal/hooks.ts',
-    './public/universal/schema.ts',
-    './public/universal/types.ts',
+    {
+      input: './public/client/',
+      outDir: './dist/public/client/',
+      ext: 'js',
+    },
+    {
+      input: './public/server/',
+      outDir: './dist/public/server/',
+      ext: 'js',
+    },
+    {
+      input: './public/server/utils/',
+      outDir: './dist/public/server/utils/',
+      ext: 'js',
+    },
+    {
+      input: './public/universal/',
+      outDir: './dist/public/universal/',
+      ext: 'js',
+    },
 
     // These files are used internally by Blade.
-    './private/shell/index.ts',
-    './private/client/index.ts',
-    './private/server/worker/providers/cloudflare.ts',
-    './private/server/worker/providers/edge-worker.ts',
-    './private/server/worker/providers/netlify.ts',
-    './private/server/worker/providers/service-worker.ts',
-    './private/server/worker/providers/vercel.ts',
+    {
+      input: './private/shell/index.ts',
+      outDir: './dist/private/shell/',
+    },
+    {
+      input: './private/client/index.ts',
+      outDir: './dist/private/client/',
+    },
+    {
+      input: './private/server/worker/providers/',
+      outDir: './dist/private/server/worker/providers/',
+      ext: 'js',
+    },
   ],
   declaration: true,
   externals: ['server-list', 'client-list', 'build-meta', 'react', 'react-dom'],
