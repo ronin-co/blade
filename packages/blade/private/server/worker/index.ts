@@ -52,7 +52,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 // headers, since there might not be a proxy in front that handles compression.
 if (import.meta.env.__BLADE_PROVIDER === 'edge-worker') {
   // Bun doesn't support `CompressionStream` yet, so we need to polyfill it.
-  if (typeof Bun === 'undefined') {
+  if (typeof Bun !== 'undefined') {
     const transformMap = {
       deflate: zlib.createDeflate,
       'deflate-raw': zlib.createDeflateRaw,
