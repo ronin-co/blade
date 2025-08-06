@@ -1,19 +1,17 @@
+import { Readable, Writable } from 'node:stream';
+import { createDeflate, createDeflateRaw, createGzip } from 'node:zlib';
+
 /**
  * Polyfills the global `CompressionStream` class for runtimes that don't support it.
  */
-export const polyfillCompressionStream = async () => {
+export const polyfillCompressionStream = () => {
   // Only Bun does not offer support.
   if (typeof Bun === 'undefined') return;
 
-  // We use dynamic imports to prevent `esbuild` from detecting and inlining them.
-  const prefix = 'node:';
-  const { Readable, Writable } = await import(`${prefix}stream`);
-  const zlib = await import(`${prefix}zlib`);
-
   const transformMap = {
-    deflate: zlib.createDeflate,
-    'deflate-raw': zlib.createDeflateRaw,
-    gzip: zlib.createGzip,
+    deflate: createDeflate,
+    'deflate-raw': createDeflateRaw,
+    gzip: createGzip,
   };
 
   globalThis.CompressionStream ??= class CompressionStream {
