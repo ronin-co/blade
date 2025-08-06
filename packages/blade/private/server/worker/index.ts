@@ -1,6 +1,9 @@
+import { Readable, Writable } from 'node:stream';
+import zlib from 'node:zlib';
 import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
 import { bundleId as serverBundleId } from 'build-meta';
+import { compress } from 'hono/compress';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -43,6 +46,33 @@ if (globalThis.DEV_SESSIONS) {
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+// If the application runs inside a generic container instead of a specific cloud
+// provider, add support for compressing responses depending on the incoming request
+// headers, since there might not be a proxy in front that handles compression.
+if (import.meta.env.__BLADE_PROVIDER === 'edge-worker') {
+  // Bun doesn't support `CompressionStream` yet, so we need to polyfill it.
+  if (typeof Bun === 'undefined') {
+    const transformMap = {
+      deflate: zlib.createDeflate,
+      'deflate-raw': zlib.createDeflateRaw,
+      gzip: zlib.createGzip,
+    };
+
+    globalThis.CompressionStream ??= class CompressionStream {
+      readable: ReadableStream;
+      writable: WritableStream;
+
+      constructor(format: keyof typeof transformMap) {
+        const handle = transformMap[format]();
+        this.readable = Readable.toWeb(handle);
+        this.writable = Writable.toWeb(handle);
+      }
+    };
+  }
+
+  app.use(compress());
+}
 
 app.use('*', async (c, next) => {
   const requestURL = new URL(c.req.url);
