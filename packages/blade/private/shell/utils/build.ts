@@ -103,7 +103,7 @@ export const build = async (
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
-      getMetaLoader(environment, projects),
+      getMetaLoader(environment, projects, virtual),
       getProviderLoader(environment, provider),
 
       ...(options?.plugins || []),

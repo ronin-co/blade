@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { BuildOptions, BuildResult, Loader } from 'esbuild';
+import type { Loader, Message, OutputFile } from 'esbuild';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { build as buildContext } from '@/private/shell/utils/build';
@@ -18,8 +18,11 @@ interface BuildConfig {
   environment?: 'development' | 'production';
 }
 
-interface BuildOutput
-  extends Pick<BuildResult<BuildOptions>, 'errors' | 'warnings' | 'outputFiles'> {}
+interface BuildOutput {
+  errors: Array<Message>;
+  warnings: Array<Message>;
+  outputFiles: Array<OutputFile>;
+}
 
 export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';

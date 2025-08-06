@@ -288,6 +288,7 @@ export const getProviderLoader = (
 export const getMetaLoader = (
   environment: 'development' | 'production',
   projects: Array<string>,
+  virtual: boolean,
 ): esbuild.Plugin => ({
   name: 'Init Loader',
   setup(build) {
@@ -309,7 +310,7 @@ export const getMetaLoader = (
     }));
 
     build.onEnd(async (result) => {
-      if (result.errors.length === 0) {
+      if (result.errors.length === 0 && !virtual) {
         const clientBundle = path.join(outputDirectory, getOutputFile('init', 'js'));
         const clientSourcemap = path.join(
           outputDirectory,
