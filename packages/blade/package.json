@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.7.10",
+  "version": "3.8.2",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -17,8 +17,8 @@
   "scripts": {
     "typecheck": "tsc --pretty",
     "test": "vitest",
-    "build": "tsup",
-    "dev": "tsup --watch"
+    "build": "unbuild",
+    "dev": "unbuild --watch"
   },
   "exports": {
     "./client/": "./dist/public/client/",
@@ -93,9 +93,9 @@
     "ora": "8.1.0",
     "radash": "12.1.0",
     "serialize-error": "11.0.3",
-    "tsup": "8.4.0",
     "typescript": "5.6.2",
     "ua-parser-js": "1.0.39",
+    "unbuild": "3.6.0",
     "vitest": "3.1.2"
   }
 }
