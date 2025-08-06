@@ -1,5 +1,3 @@
-import { Readable, Writable } from 'node:stream';
-import zlib from 'node:zlib';
 import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
 import { bundleId as serverBundleId } from 'build-meta';
@@ -53,6 +51,10 @@ const app = new Hono<{ Bindings: Bindings }>();
 if (import.meta.env.__BLADE_PROVIDER === 'edge-worker') {
   // Bun doesn't support `CompressionStream` yet, so we need to polyfill it.
   if (typeof Bun !== 'undefined') {
+    const prefix = 'node:';
+    const { Readable, Writable } = await import(`${prefix}stream`);
+    const zlib = await import(`${prefix}zlib`);
+
     const transformMap = {
       deflate: zlib.createDeflate,
       'deflate-raw': zlib.createDeflateRaw,
