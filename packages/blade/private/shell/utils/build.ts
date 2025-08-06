@@ -5,6 +5,7 @@ import * as esbuild from 'esbuild';
 import {
   clientInputFile,
   defaultDeploymentProvider,
+  nodePath,
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
@@ -91,7 +92,7 @@ export const build = async (
     platform: provider === 'vercel' ? 'node' : 'browser',
     format: 'esm',
     jsx: 'automatic',
-    nodePaths: [path.join(process.cwd(), 'node_modules')],
+    nodePaths: [nodePath],
     minify: environment === 'production',
 
     // TODO: Remove this once `@ronin/engine` no longer relies on it.

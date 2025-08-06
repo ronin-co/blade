@@ -1,6 +1,7 @@
 import path from 'node:path';
 import type { BuildOptions, BuildResult, Loader } from 'esbuild';
 
+import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { build as buildContext } from '@/private/shell/utils/build';
 
 interface SourceFile {
@@ -32,13 +33,22 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
           const rawLoaders = ['js', 'jsx', 'ts', 'tsx', 'json'];
 
           build.onResolve({ filter: /.*/ }, (args) => {
-            // Entry points should be loaded from disk.
-            if (args.kind === 'entry-point') return;
-
-            // Turn "./message.txt" into an absolute key "/src/message.txt"
+            // Turn relative paths into absolute ones.
             const resolved = args.path.startsWith('.')
               ? path.join(args.resolveDir, args.path)
               : args.path;
+
+            if (
+              // Load files in `node_modules` from disk.
+              resolved.startsWith(nodePath) ||
+              // Load framework source files from disk (framework might be linked).
+              resolved.startsWith(sourceDirPath) ||
+              // Load dependency imports from disk (like "react").
+              !resolved.startsWith('/')
+            ) {
+              return;
+            }
+
             return { path: resolved, namespace: 'memory' };
           });
 
