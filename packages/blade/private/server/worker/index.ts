@@ -56,7 +56,7 @@ if (
   import.meta.env.BLADE_ENV === 'production' &&
   import.meta.env.__BLADE_PROVIDER === 'edge-worker'
 ) {
-  // Enable necessary polyfilly on unsupported runtimes.
+  // Enable necessary polyfills on unsupported runtimes.
   polyfillCompressionStream();
 
   // Enable the compression middleware.
