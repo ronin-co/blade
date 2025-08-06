@@ -68,7 +68,15 @@ export const prepareTriggers = (
 
     const [results] = await runQueriesWithStorageAndTriggers(queries, queryOptions ?? {});
 
-    if (queryOptions?.flushUI === true) await serverContext.flushUI?.();
+    if (queryOptions?.flushUI === true) {
+      if (serverContext.flushUI) {
+        await serverContext
+          .flushUI()
+          .catch((err) => console.error('[BLADE] flushUI failed:', err));
+      } else {
+        console.warn('[BLADE] `flushUI` is not available in the current server context.');
+      }
+    }
 
     return results;
   };
