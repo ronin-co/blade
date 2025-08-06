@@ -40,8 +40,8 @@ export const serve = async (
   // responses depending on the incoming request headers, since there might not be a
   // proxy in front that handles compression.
   //
-  // If there is a proxy in front that handles compression, we assume that it wouldn't pass
-  // the `Accept-Encoding` header through to the origin.
+  // If there is a proxy in front that handles compression, we assume that it wouldn't
+  // pass the `Accept-Encoding` header through to the origin.
   if (environment === 'production') {
     // Enable necessary polyfills on unsupported runtimes.
     polyfillCompressionStream();
