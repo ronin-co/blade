@@ -25,7 +25,8 @@
     "./server/": "./dist/public/server/",
     "./hooks": "./dist/public/universal/hooks.js",
     "./schema": "./dist/public/universal/schema.js",
-    "./types": "./dist/public/universal/types.js"
+    "./types": "./dist/public/universal/types.js",
+    "./utils": "./dist/public/universal/utils.js"
   },
   "typesVersions": {
     "*": {
@@ -43,6 +44,9 @@
       ],
       "types": [
         "./dist/public/universal/types"
+      ],
+      "utils": [
+        "./dist/public/universal/utils"
       ]
     }
   },
