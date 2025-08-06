@@ -40,7 +40,6 @@ export default defineBuildConfig({
     './private/server/worker/providers/service-worker.ts',
     './private/server/worker/providers/vercel.ts',
   ],
-  clean: true,
   declaration: true,
   externals: ['server-list', 'client-list', 'build-meta', 'react', 'react-dom'],
   failOnWarn: false,
