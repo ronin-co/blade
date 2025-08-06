@@ -51,7 +51,7 @@ export default defineBuildConfig({
         // using `global`, so we're aliasing it ourselves.
         global: 'globalThis',
       },
-      // Add the `React` global for JSX support
+      // Add the `React` global for JSX support.
       jsx: 'automatic',
     },
     output: {
