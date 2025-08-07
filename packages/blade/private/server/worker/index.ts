@@ -263,10 +263,7 @@ app.post('*', async (c) => {
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, url, headers, correctBundle, {
-    queries,
-    repeat: correctBundle,
-  });
+  flushSession(stream, url, headers, correctBundle, { queries, repeat: correctBundle });
 
   const id = crypto.randomUUID();
 
