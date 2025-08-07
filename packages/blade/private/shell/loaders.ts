@@ -22,6 +22,7 @@ import {
 import {
   type ExportItem,
   type TotalFileList,
+  type VirtualFileItem,
   crawlDirectory,
   crawlVirtualDirectory,
   exists,
@@ -155,7 +156,9 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (filePaths?: Array<string>): esbuild.Plugin => ({
+export const getFileListLoader = (
+  virtualFiles?: Array<VirtualFileItem>,
+): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
@@ -167,9 +170,9 @@ export const getFileListLoader = (filePaths?: Array<string>): esbuild.Plugin => 
       ['components', path.join(process.cwd(), 'components')],
     ];
 
-    if (filePaths) {
+    if (virtualFiles) {
       for (const [directoryName] of directories) {
-        files.set(directoryName, crawlVirtualDirectory(filePaths, directoryName));
+        files.set(directoryName, crawlVirtualDirectory(virtualFiles, directoryName));
       }
     }
     // If no virtual files were provided, crawl the directories on the file system.

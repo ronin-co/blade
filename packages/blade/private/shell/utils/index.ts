@@ -21,6 +21,16 @@ type FileList = Array<FileItem>;
 
 export type TotalFileList = Map<string, FileList>;
 
+export interface VirtualFileItem {
+  /**
+   * The path of the file, relative to the project root. For example, when providing a
+   * page, its path might be `pages/index.tsx`.
+   */
+  path: string;
+  /** The content of the file, as a string. */
+  content: string;
+}
+
 export const crawlDirectory = async (directoryPath: string): Promise<FileList> => {
   const files = await readdir(directoryPath, { recursive: true });
 
@@ -34,19 +44,19 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
 /**
  * Crawls a directory that only exists virtually (in memory) and not on the file system.
  *
- * @param filePaths - The entire list of virtual files.
+ * @param virtualFiles - The entire list of virtual files.
  * @param directoryName — The directory within the list of files that should be crawled.
  *
  * @returns A list of nested files and directories.
  */
 export const crawlVirtualDirectory = (
-  filePaths: string[],
+  virtualFiles: Array<VirtualFileItem>,
   directoryName: string,
 ): FileList => {
   const entries: FileList = [];
   const seenDirs = new Set<string>();
 
-  for (const filePath of filePaths) {
+  for (const { path: filePath } of virtualFiles) {
     // Only include items under the specified directory.
     if (!filePath.startsWith(`${directoryName}/`)) continue;
     const parts = filePath.split('/');
