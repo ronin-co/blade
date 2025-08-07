@@ -21,6 +21,16 @@ import { composeEnvironmentVariables } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
+export interface VirtualFileItem {
+  /**
+   * The path of the file, relative to the project root. For example, when providing a
+   * page, its path might be `/pages/index.tsx`.
+   */
+  path: string;
+  /** The content of the file, as a string. */
+  content: string;
+}
+
 /**
  * Prepares an `esbuild` context for building a Blade application.
  *
@@ -40,11 +50,10 @@ export const composeBuildContext = (
     enableServiceWorker?: boolean;
     logQueries?: boolean;
     plugins?: Array<esbuild.Plugin>;
-    filePaths?: Array<string>;
+    virtualFiles?: Array<VirtualFileItem>;
   },
 ): Promise<esbuild.BuildContext> => {
   const provider = getProvider();
-  const virtual = Boolean(options?.filePaths);
 
   const entryPoints: esbuild.BuildOptions['entryPoints'] = [
     {
@@ -71,7 +80,7 @@ export const composeBuildContext = (
     bundle: true,
 
     // Return the files in memory if a list of source file paths was provided.
-    write: !virtual,
+    write: !options?.virtualFiles,
 
     platform: provider === 'vercel' ? 'node' : 'browser',
     format: 'esm',
@@ -83,12 +92,12 @@ export const composeBuildContext = (
     external: ['node:events'],
 
     plugins: [
-      getFileListLoader(options?.filePaths),
+      getFileListLoader(options?.virtualFiles),
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
-      getTailwindLoader(environment),
-      getMetaLoader(virtual),
+      getTailwindLoader(environment, options?.virtualFiles),
+      getMetaLoader(Boolean(options?.virtualFiles)),
       getProviderLoader(environment, provider),
 
       ...(options?.plugins || []),

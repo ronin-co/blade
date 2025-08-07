@@ -29,6 +29,7 @@ import {
   getFileList,
   wrapClientExport,
 } from '@/private/shell/utils';
+import type { VirtualFileItem } from '@/private/shell/utils/build';
 import {
   transformToCloudflareOutput,
   transformToNetlifyOutput,
@@ -155,7 +156,9 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (filePaths?: Array<string>): esbuild.Plugin => ({
+export const getFileListLoader = (
+  virtualFiles?: Array<VirtualFileItem>,
+): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
@@ -167,9 +170,9 @@ export const getFileListLoader = (filePaths?: Array<string>): esbuild.Plugin => 
       ['components', path.join(process.cwd(), 'components')],
     ];
 
-    if (filePaths) {
+    if (virtualFiles) {
       for (const [directoryName] of directories) {
-        files.set(directoryName, crawlVirtualDirectory(filePaths, directoryName));
+        files.set(directoryName, crawlVirtualDirectory(virtualFiles, directoryName));
       }
     }
     // If no virtual files were provided, crawl the directories on the file system.
@@ -321,6 +324,7 @@ export const getMetaLoader = (virtual: boolean): esbuild.Plugin => ({
 
 export const getTailwindLoader = (
   environment: 'development' | 'production',
+  virtualFiles?: Array<VirtualFileItem>,
 ): esbuild.Plugin => ({
   name: 'Tailwind CSS Loader',
   setup(build) {
@@ -328,6 +332,7 @@ export const getTailwindLoader = (
     let candidates: Array<string> = [];
 
     const scanner = new TailwindScanner({});
+    const encoder = new TextEncoder();
 
     build.onStart(async () => {
       const input = (await exists(styleInputFile))
@@ -343,7 +348,11 @@ export const getTailwindLoader = (
     });
 
     build.onResolve({ filter: /\.(?:tsx|jsx)$/ }, async (args) => {
-      const content = await readFile(args.path, 'utf8');
+      const virtualFile = virtualFiles?.find((item) => item.path === args.path);
+      const content = virtualFile
+        ? virtualFile.content
+        : await readFile(args.path, 'utf8');
+
       const extension = path.extname(args.path).slice(1);
       const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
 
@@ -364,7 +373,23 @@ export const getTailwindLoader = (
         });
 
         const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
-        await writeFile(tailwindOutput, optimizedStyles.code);
+
+        // If output files are available here, that means the build is virtual, meaning
+        // it is being performed in memory instead of on the file system.
+        if (result.outputFiles) {
+          const byteArray = encoder.encode(optimizedStyles.code);
+
+          result.outputFiles.push({
+            path: tailwindOutput,
+            contents: byteArray,
+            get text() {
+              return optimizedStyles.code;
+            },
+            hash: 'noop',
+          });
+        } else {
+          await writeFile(tailwindOutput, optimizedStyles.code);
+        }
       }
     });
   },
