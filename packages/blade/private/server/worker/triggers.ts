@@ -63,9 +63,6 @@ export const prepareTriggers = (
         '`statements` is not supported in Blade queries. Use `Query` objects instead.',
       );
 
-    if (queryOptions?.database)
-      throw new Error('Custom databases are not currently supported in Blade queries.');
-
     const [results] = await runQueriesWithStorageAndTriggers(queries, queryOptions ?? {});
 
     if (queryOptions?.flushSession === true) {
