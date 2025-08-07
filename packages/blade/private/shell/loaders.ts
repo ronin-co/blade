@@ -364,3 +364,36 @@ export const getTailwindLoader = (
     });
   },
 });
+
+// TODO: Move this into a config file or plugin.
+//
+// This ensures that no unnecessary localizations are included in the client bundle,
+// which would otherwise increase the bundle size.
+//
+// https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
+export const getReactAriaLoader = (): esbuild.Plugin => ({
+  name: 'React Aria Loader',
+  setup(build) {
+    build.onLoad(
+      {
+        filter:
+          /(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/(.*)\/[a-zA-Z]{2}-[a-zA-Z]{2}\.(js|mjs)$/,
+      },
+      async (source) => {
+        const { name } = path.parse(source.path);
+
+        if (name === 'en-US') {
+          return {
+            contents: await readFile(source.path),
+            loader: 'js',
+          };
+        }
+
+        return {
+          contents: 'const removedLocale = undefined;\nexport default removedLocale;',
+          loader: 'js',
+        };
+      },
+    );
+  },
+});
