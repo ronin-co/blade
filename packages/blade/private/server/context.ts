@@ -16,7 +16,7 @@ export type ServerContext<
   collected: Collected;
   currentLeafIndex: number | null;
   waitUntil: WaitUntil;
-  flushUI?: (queries?: Array<Query>) => Promise<void>;
+  flushSession?: (queries?: Array<Query>) => Promise<void>;
 };
 
 export const RootServerContext = createContext<ServerContext | null>(null);

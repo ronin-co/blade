@@ -25,11 +25,11 @@ import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
 
 interface ExtendedQueryHandlerOptions extends QueryHandlerOptions {
   /**
-   * Whether the query should flush the UI after execution.
+   * Whether the query should flush the current browser session.
    *
    * @default false
    */
-  flushUI?: boolean;
+  flushSession?: boolean;
 }
 
 /**
@@ -68,10 +68,10 @@ export const prepareTriggers = (
 
     const [results] = await runQueriesWithStorageAndTriggers(queries, queryOptions ?? {});
 
-    if (queryOptions?.flushUI === true) {
-      if (serverContext.flushUI) {
+    if (queryOptions?.flushSession === true) {
+      if (serverContext.flushSession) {
         await serverContext
-          .flushUI()
+          .flushSession()
           .catch((err) => console.error('[BLADE] flushUI failed:', err));
       } else {
         console.warn('[BLADE] `flushUI` is not available in the current server context.');
@@ -119,7 +119,7 @@ export const prepareTriggers = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-    flushUI: serverContext.flushUI,
+    flushSession: serverContext.flushSession,
   };
 
   const list = Object.entries(triggers || {}).map(
