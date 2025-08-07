@@ -22,7 +22,6 @@ import {
 import {
   type ExportItem,
   type TotalFileList,
-  type VirtualFile,
   crawlDirectory,
   crawlVirtualDirectory,
   exists,
@@ -156,10 +155,11 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (virtualFiles?: Array<VirtualFile>): esbuild.Plugin => ({
+export const getFileListLoader = (filePaths?: Array<string>): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
+    const componentDirectories = ['components'];
 
     const directories = [
       ['pages', path.join(process.cwd(), 'pages')],
@@ -167,23 +167,28 @@ export const getFileListLoader = (virtualFiles?: Array<VirtualFile>): esbuild.Pl
       ['components', path.join(process.cwd(), 'components')],
     ];
 
-    build.onStart(async () => {
-      await Promise.all(
-        directories.map(async ([directoryName, directoryPath]) => {
-          const results = virtualFiles
-            ? crawlVirtualDirectory(virtualFiles, directoryName)
-            : (await exists(directoryPath))
+    if (filePaths) {
+      for (const [directoryName] of directories) {
+        files.set(directoryName, crawlVirtualDirectory(filePaths, directoryName));
+      }
+    }
+    // If no virtual files were provided, crawl the directories on the file system.
+    else {
+      build.onStart(async () => {
+        await Promise.all(
+          directories.map(async ([directoryName, directoryPath]) => {
+            const results = (await exists(directoryPath))
               ? await crawlDirectory(directoryPath)
               : [];
+            const finalResults = directoryName.startsWith('components')
+              ? results.filter((item) => item.relativePath.includes('.client'))
+              : results;
 
-          const finalResults = directoryName.startsWith('components')
-            ? results.filter((item) => item.relativePath.includes('.client'))
-            : results;
-
-          files.set(directoryName, finalResults);
-        }),
-      );
-    });
+            files.set(directoryName, finalResults);
+          }),
+        );
+      });
+    }
 
     build.onResolve({ filter: /^server-list$/ }, (source) => {
       return { path: source.path, namespace: 'server-imports' };
@@ -200,7 +205,7 @@ export const getFileListLoader = (virtualFiles?: Array<VirtualFile>): esbuild.Pl
     });
 
     build.onLoad({ filter: /^client-list$/, namespace: 'client-imports' }, async () => ({
-      contents: getFileList(files, ['components']),
+      contents: getFileList(files, componentDirectories),
       loader: 'tsx',
       resolveDir: process.cwd(),
     }));

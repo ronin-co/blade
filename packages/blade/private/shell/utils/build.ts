@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as esbuild from 'esbuild';
 
@@ -17,7 +18,7 @@ import {
   getReactAriaLoader,
   getTailwindLoader,
 } from '@/private/shell/loaders';
-import { type VirtualFile, composeEnvironmentVariables } from '@/private/shell/utils';
+import { composeEnvironmentVariables } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
@@ -40,10 +41,11 @@ export const composeBuildContext = (
     enableServiceWorker?: boolean;
     logQueries?: boolean;
     plugins?: Array<esbuild.Plugin>;
-    virtualFiles?: Array<VirtualFile>;
+    filePaths?: Array<string>;
   },
 ): Promise<esbuild.BuildContext> => {
   const provider = getProvider();
+  const virtual = Boolean(options?.filePaths);
 
   const entryPoints: esbuild.BuildOptions['entryPoints'] = [
     {
@@ -70,7 +72,7 @@ export const composeBuildContext = (
     bundle: true,
 
     // Return the files in memory if a list of source file paths was provided.
-    write: !options?.virtualFiles,
+    write: !virtual,
 
     platform: provider === 'vercel' ? 'node' : 'browser',
     format: 'esm',
@@ -82,12 +84,12 @@ export const composeBuildContext = (
     external: ['node:events'],
 
     plugins: [
-      getFileListLoader(options?.virtualFiles),
+      getFileListLoader(options?.filePaths),
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
       getTailwindLoader(environment),
-      getMetaLoader(Boolean(options?.virtualFiles)),
+      getMetaLoader(virtual),
       getProviderLoader(environment, provider),
 
       ...(options?.plugins || []),

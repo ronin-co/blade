@@ -2,11 +2,19 @@ import path from 'node:path';
 import type { Loader, Message, OutputFile } from 'esbuild';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
-import type { VirtualFile } from '@/private/shell/utils';
 import { composeBuildContext } from '@/private/shell/utils/build';
 
+interface SourceFile {
+  /**
+   * The path of the file, relative to the project root. For example, when providing a
+   * page, its path might be `pages/index.tsx`.
+   */
+  path: string;
+  /** The content of the file, as a string. */
+  content: string;
+}
 interface BuildConfig {
-  sourceFiles: Array<VirtualFile>;
+  sourceFiles: Array<SourceFile>;
   environment?: 'development' | 'production';
 }
 
@@ -28,14 +36,10 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
 
   const mainBuild = await composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
-    virtualFiles: config.sourceFiles.map(({ path, content }) => {
-      const newPath = path.startsWith('./')
-        ? path.slice(1)
-        : path.startsWith('/')
-          ? path
-          : `/${path}`;
-
-      return { path: newPath, content };
+    filePaths: config.sourceFiles.map(({ path }) => {
+      if (path.startsWith('./')) return path.slice(1);
+      if (path.startsWith('/')) return path;
+      return `/${path}`;
     }),
     plugins: [
       {
