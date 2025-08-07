@@ -332,6 +332,7 @@ export const getTailwindLoader = (
     let candidates: Array<string> = [];
 
     const scanner = new TailwindScanner({});
+    const encoder = new TextEncoder();
 
     build.onStart(async () => {
       const input = (await exists(styleInputFile))
@@ -372,7 +373,23 @@ export const getTailwindLoader = (
         });
 
         const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
-        await writeFile(tailwindOutput, optimizedStyles.code);
+
+        // If output files are available here, that means the build is virtual, meaning
+        // it is being performed in memory instead of on the file system.
+        if (result.outputFiles) {
+          const byteArray = encoder.encode(optimizedStyles.code);
+
+          result.outputFiles.push({
+            path: tailwindOutput,
+            contents: byteArray,
+            get text() {
+              return optimizedStyles.code;
+            },
+            hash: 'noop',
+          });
+        } else {
+          await writeFile(tailwindOutput, optimizedStyles.code);
+        }
       }
     });
   },
