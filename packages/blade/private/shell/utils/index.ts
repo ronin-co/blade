@@ -1,10 +1,5 @@
-import { constants, access, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { constants, access, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
-import {
-  compile as compileTailwind,
-  optimize as optimizeTailwind,
-} from '@tailwindcss/node';
-import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import ora from 'ora';
 
@@ -12,11 +7,10 @@ import {
   loggingPrefixes,
   outputDirectory,
   routerInputFile,
-  styleInputFile,
 } from '@/private/shell/constants';
 import type { FileError } from '@/private/shell/types';
+import type { VirtualFileItem } from '@/private/shell/utils/build';
 import type { DeploymentProvider } from '@/private/universal/types/util';
-import { getOutputFile } from '@/private/universal/utils/paths';
 
 interface FileItem {
   type: 'FILE' | 'DIRECTORY';
@@ -41,28 +35,29 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
 /**
  * Crawls a directory that only exists virtually (in memory) and not on the file system.
  *
- * @param filePaths - The entire list of virtual files.
+ * @param virtualFiles - The entire list of virtual files.
  * @param directoryName — The directory within the list of files that should be crawled.
  *
  * @returns A list of nested files and directories.
  */
 export const crawlVirtualDirectory = (
-  filePaths: string[],
+  virtualFiles: Array<VirtualFileItem>,
   directoryName: string,
 ): FileList => {
   const entries: FileList = [];
   const seenDirs = new Set<string>();
+  const rootDir = `/${directoryName}`;
 
-  for (const filePath of filePaths) {
+  for (const { path: filePath } of virtualFiles) {
     // Only include items under the specified directory.
-    if (!filePath.startsWith(`${directoryName}/`)) continue;
+    if (!filePath.startsWith(`/${directoryName}`)) continue;
     const parts = filePath.split('/');
 
     // Emit intermediate directories.
     for (let i = 1; i < parts.length - 1; i++) {
       const dirPath = parts.slice(0, i + 1).join('/');
 
-      if (!seenDirs.has(dirPath)) {
+      if (!seenDirs.has(dirPath) && dirPath !== rootDir) {
         seenDirs.add(dirPath);
         entries.push({ type: 'DIRECTORY', relativePath: dirPath, absolutePath: dirPath });
       }
@@ -273,47 +268,3 @@ export const exists = (path: string) =>
   access(path, constants.F_OK)
     .then(() => true)
     .catch(() => false);
-
-/**
- * Compiles the Tailwind CSS stylesheet for the application.
- *
- * @param environment - The environment in which the application is running.
- * @param projects - The list of Blade projects to scan for Tailwind CSS classes.
- * @param bundleId - The unique identifier for the current bundle.
- *
- * @returns A promise that resolves when the styles have been prepared.
- */
-export const prepareStyles = async (
-  environment: 'development' | 'production',
-  projects: Array<string>,
-  bundleId: string,
-) => {
-  // Consider the directories containing the source code of the application.
-  const content = ['pages', 'components', 'contexts'].flatMap((directory) => {
-    return projects.map((project) => path.join(project, directory));
-  });
-
-  const input = (await exists(styleInputFile))
-    ? await readFile(styleInputFile, 'utf8')
-    : `@import 'tailwindcss';`;
-
-  const compiler = await compileTailwind(input, {
-    onDependency(_path) {},
-    base: process.cwd(),
-  });
-
-  const scanner = new TailwindScanner({
-    sources: content.map((base) => ({ base, pattern: '**/*', negated: false })),
-  });
-
-  const candidates = scanner.scan();
-  const compiledStyles = compiler.build(candidates);
-
-  const optimizedStyles = optimizeTailwind(compiledStyles, {
-    file: 'input.css',
-    minify: environment === 'production',
-  });
-
-  const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
-  await writeFile(tailwindOutput, optimizedStyles.code);
-};

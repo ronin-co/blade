@@ -2,19 +2,10 @@ import path from 'node:path';
 import type { Loader, Message, OutputFile } from 'esbuild';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
-import { build as buildContext } from '@/private/shell/utils/build';
+import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
-interface SourceFile {
-  /**
-   * The path of the file, relative to the project root. For example, when providing a
-   * page, its path might be `pages/index.tsx`.
-   */
-  path: string;
-  /** The content of the file, as a string. */
-  content: string;
-}
 interface BuildConfig {
-  sourceFiles: Array<SourceFile>;
+  sourceFiles: Array<VirtualFileItem>;
   environment?: 'development' | 'production';
 }
 
@@ -34,13 +25,18 @@ interface BuildOutput {
 export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';
 
-  const mainBuild = await buildContext(environment, {
+  const virtualFiles = config.sourceFiles.map(({ path, content }) => {
+    const newPath = path.startsWith('./')
+      ? path.slice(1)
+      : path.startsWith('/')
+        ? path
+        : `/${path}`;
+    return { path: newPath, content };
+  });
+
+  const mainBuild = await composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
-    filePaths: config.sourceFiles.map(({ path }) => {
-      if (path.startsWith('./')) return path.slice(1);
-      if (path.startsWith('/')) return path;
-      return `/${path}`;
-    }),
+    virtualFiles,
     plugins: [
       {
         name: 'Memory Loader',
@@ -68,7 +64,7 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
           });
 
           build.onLoad({ filter: /.*/, namespace: 'memory' }, (args) => {
-            const sourceFile = config.sourceFiles.find((sourceFile) => {
+            const sourceFile = virtualFiles.find((sourceFile) => {
               return sourceFile.path === args.path;
             });
 
@@ -80,7 +76,7 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
             const extension = path.extname(args.path).slice(1);
             const loader = (rawLoaders.includes(extension) ? extension : 'js') as Loader;
 
-            return { contents, loader };
+            return { contents, loader, resolveDir: process.cwd() };
           });
         },
       },

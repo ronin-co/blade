@@ -1,4 +1,3 @@
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as esbuild from 'esbuild';
 
@@ -16,13 +15,24 @@ import {
   getMetaLoader,
   getProviderLoader,
   getReactAriaLoader,
+  getTailwindLoader,
 } from '@/private/shell/loaders';
-import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
+import { composeEnvironmentVariables } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
+export interface VirtualFileItem {
+  /**
+   * The path of the file, relative to the project root. For example, when providing a
+   * page, its path might be `/pages/index.tsx`.
+   */
+  path: string;
+  /** The content of the file, as a string. */
+  content: string;
+}
+
 /**
- * Builds a Blade application.
+ * Prepares an `esbuild` context for building a Blade application.
  *
  * @param environment - The environment for which the build should run.
  * @param [options] - Optional configuration for running the build.
@@ -34,33 +44,16 @@ import { getOutputFile } from '@/private/universal/utils/paths';
  *
  * @returns An esbuild context.
  */
-export const build = async (
+export const composeBuildContext = (
   environment: 'development' | 'production',
   options?: {
     enableServiceWorker?: boolean;
     logQueries?: boolean;
     plugins?: Array<esbuild.Plugin>;
-    filePaths?: Array<string>;
+    virtualFiles?: Array<VirtualFileItem>;
   },
 ): Promise<esbuild.BuildContext> => {
   const provider = getProvider();
-  const virtual = Boolean(options?.filePaths);
-
-  const projects = [process.cwd()];
-  const tsConfig = path.join(process.cwd(), 'tsconfig.json');
-
-  // If a `tsconfig.json` file exists that contains a `references` field, we should include
-  // files from the referenced projects as well.
-  if (!virtual && (await exists(tsConfig))) {
-    const tsConfigContents = JSON.parse(await readFile(tsConfig, 'utf-8'));
-    const { references } = tsConfigContents || {};
-
-    if (references && Array.isArray(references) && references.length > 0) {
-      projects.push(
-        ...references.map((reference) => path.join(process.cwd(), reference.path)),
-      );
-    }
-  }
 
   const entryPoints: esbuild.BuildOptions['entryPoints'] = [
     {
@@ -87,7 +80,7 @@ export const build = async (
     bundle: true,
 
     // Return the files in memory if a list of source file paths was provided.
-    write: !virtual,
+    write: !options?.virtualFiles,
 
     platform: provider === 'vercel' ? 'node' : 'browser',
     format: 'esm',
@@ -99,11 +92,12 @@ export const build = async (
     external: ['node:events'],
 
     plugins: [
-      getFileListLoader(projects, options?.filePaths),
+      getFileListLoader(options?.virtualFiles),
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
-      getMetaLoader(environment, projects, virtual),
+      getTailwindLoader(environment, options?.virtualFiles),
+      getMetaLoader(Boolean(options?.virtualFiles)),
       getProviderLoader(environment, provider),
 
       ...(options?.plugins || []),
