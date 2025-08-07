@@ -16,6 +16,7 @@ import {
   getMetaLoader,
   getProviderLoader,
   getReactAriaLoader,
+  getTailwindLoader,
 } from '@/private/shell/loaders';
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
@@ -103,6 +104,7 @@ export const build = async (
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
+      getTailwindLoader(environment),
       getMetaLoader(environment, projects, virtual),
       getProviderLoader(environment, provider),
 

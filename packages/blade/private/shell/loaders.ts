@@ -3,6 +3,11 @@ import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
 import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
+import {
+  compile as compileTailwind,
+  optimize as optimizeTailwind,
+} from '@tailwindcss/node';
+import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import { type TSESTree, parse } from '@typescript-eslint/typescript-estree';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
@@ -12,6 +17,7 @@ import {
   outputDirectory,
   publicDirectory,
   routerInputFile,
+  styleInputFile,
 } from '@/private/shell/constants';
 import {
   type ExportItem,
@@ -21,7 +27,6 @@ import {
   exists,
   extractDeclarationName,
   getFileList,
-  prepareStyles,
   wrapClientExport,
 } from '@/private/shell/utils';
 import {
@@ -324,8 +329,55 @@ export const getMetaLoader = (
             clientSourcemap.replace('init.js.map', `${bundleId}.js.map`),
           ),
         ]);
+      }
+    });
+  },
+});
 
-        await prepareStyles(environment, projects, bundleId as string);
+export const getTailwindLoader = (
+  environment: 'development' | 'production',
+): esbuild.Plugin => ({
+  name: 'Init Loader',
+  setup(build) {
+    let compiler: Awaited<ReturnType<typeof compileTailwind>>;
+    let candidates: Array<string> = [];
+
+    const scanner = new TailwindScanner({});
+
+    build.onStart(async () => {
+      const input = (await exists(styleInputFile))
+        ? await readFile(styleInputFile, 'utf8')
+        : `@import 'tailwindcss';`;
+
+      compiler = await compileTailwind(input, {
+        onDependency(_path) {},
+        base: process.cwd(),
+      });
+
+      candidates = [];
+    });
+
+    build.onLoad({ filter: /\.(?:tsx|jsx)$/ }, async (args) => {
+      const content = await readFile(args.path, 'utf8');
+      const extension = path.extname(args.path).slice(1);
+      const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
+
+      candidates.push(...newCandidates.map((item) => item.candidate));
+
+      // Let `esbuild` decide how to process the file.
+      return null;
+    });
+
+    build.onEnd((result) => {
+      if (result.errors.length === 0) {
+        const compiledStyles = compiler.build(candidates);
+
+        const optimizedStyles = optimizeTailwind(compiledStyles, {
+          file: 'input.css',
+          minify: environment === 'production',
+        });
+
+        console.log(optimizedStyles);
       }
     });
   },
