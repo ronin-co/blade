@@ -1,4 +1,4 @@
-import { cp, readFile, rename } from 'node:fs/promises';
+import { cp, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
@@ -37,6 +37,8 @@ import {
 import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
+
+const ID_FIELD = '__BLADE_BUNDLE_ID';
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
@@ -290,17 +292,11 @@ export const getProviderLoader = (
   },
 });
 
-export const getMetaLoader = (
-  environment: 'development' | 'production',
-  projects: Array<string>,
-  virtual: boolean,
-): esbuild.Plugin => ({
+export const getMetaLoader = (virtual: boolean): esbuild.Plugin => ({
   name: 'Init Loader',
   setup(build) {
-    let bundleId: string | undefined;
-
     build.onStart(() => {
-      bundleId = generateUniqueId();
+      build.initialOptions.define![ID_FIELD] = generateUniqueId();
     });
 
     build.onResolve({ filter: /^build-meta$/ }, (source) => ({
@@ -309,13 +305,15 @@ export const getMetaLoader = (
     }));
 
     build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => ({
-      contents: `export const bundleId = "${bundleId}";`,
+      contents: `export const bundleId = "${build.initialOptions.define![ID_FIELD]}";`,
       loader: 'ts',
       resolveDir: process.cwd(),
     }));
 
     build.onEnd(async (result) => {
       if (result.errors.length === 0 && !virtual) {
+        const bundleId = build.initialOptions.define![ID_FIELD];
+
         const clientBundle = path.join(outputDirectory, getOutputFile('init', 'js'));
         const clientSourcemap = path.join(
           outputDirectory,
@@ -368,8 +366,9 @@ export const getTailwindLoader = (
       return null;
     });
 
-    build.onEnd((result) => {
+    build.onEnd(async (result) => {
       if (result.errors.length === 0) {
+        const bundleId = build.initialOptions.define![ID_FIELD];
         const compiledStyles = compiler.build(candidates);
 
         const optimizedStyles = optimizeTailwind(compiledStyles, {
@@ -377,7 +376,8 @@ export const getTailwindLoader = (
           minify: environment === 'production',
         });
 
-        console.log(optimizedStyles);
+        const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
+        await writeFile(tailwindOutput, optimizedStyles.code);
       }
     });
   },

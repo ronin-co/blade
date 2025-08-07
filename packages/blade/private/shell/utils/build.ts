@@ -105,7 +105,7 @@ export const build = async (
       getReactAriaLoader(),
       getClientReferenceLoader(),
       getTailwindLoader(environment),
-      getMetaLoader(environment, projects, virtual),
+      getMetaLoader(virtual),
       getProviderLoader(environment, provider),
 
       ...(options?.plugins || []),
