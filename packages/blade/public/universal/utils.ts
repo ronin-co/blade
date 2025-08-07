@@ -34,7 +34,7 @@ interface BuildOutput {
 export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';
 
-  const mainBuild = composeBuildContext(environment, {
+  const mainBuild = await composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
     filePaths: config.sourceFiles.map(({ path }) => {
       if (path.startsWith('./')) return path.slice(1);

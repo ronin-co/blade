@@ -80,7 +80,7 @@ if (isBuilding || isDeveloping) {
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
 
-  const mainBuild = composeBuildContext(environment, {
+  const mainBuild = await composeBuildContext(environment, {
     enableServiceWorker,
     logQueries: values?.queries,
     plugins: [

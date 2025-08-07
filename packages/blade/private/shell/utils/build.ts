@@ -43,7 +43,7 @@ export const composeBuildContext = (
     plugins?: Array<esbuild.Plugin>;
     filePaths?: Array<string>;
   },
-): esbuild.BuildContext => {
+): Promise<esbuild.BuildContext> => {
   const provider = getProvider();
   const virtual = Boolean(options?.filePaths);
 
