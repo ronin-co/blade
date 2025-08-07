@@ -24,7 +24,7 @@ import { getOutputFile } from '@/private/universal/utils/paths';
 export interface VirtualFileItem {
   /**
    * The path of the file, relative to the project root. For example, when providing a
-   * page, its path might be `pages/index.tsx`.
+   * page, its path might be `/pages/index.tsx`.
    */
   path: string;
   /** The content of the file, as a string. */
