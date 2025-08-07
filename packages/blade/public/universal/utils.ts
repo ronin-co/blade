@@ -2,8 +2,7 @@ import path from 'node:path';
 import type { Loader, Message, OutputFile } from 'esbuild';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
-import type { VirtualFileItem } from '@/private/shell/utils';
-import { composeBuildContext } from '@/private/shell/utils/build';
+import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
 interface BuildConfig {
   sourceFiles: Array<VirtualFileItem>;
@@ -26,16 +25,18 @@ interface BuildOutput {
 export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';
 
+  const virtualFiles = config.sourceFiles.map(({ path, content }) => {
+    const newPath = path.startsWith('./')
+      ? path.slice(1)
+      : path.startsWith('/')
+        ? path
+        : `/${path}`;
+    return { path: newPath, content };
+  });
+
   const mainBuild = await composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
-    virtualFiles: config.sourceFiles.map(({ path, content }) => {
-      const newPath = path.startsWith('./')
-        ? path.slice(1)
-        : path.startsWith('/')
-          ? path
-          : `/${path}`;
-      return { path: newPath, content };
-    }),
+    virtualFiles,
     plugins: [
       {
         name: 'Memory Loader',
@@ -63,7 +64,7 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
           });
 
           build.onLoad({ filter: /.*/, namespace: 'memory' }, (args) => {
-            const sourceFile = config.sourceFiles.find((sourceFile) => {
+            const sourceFile = virtualFiles.find((sourceFile) => {
               return sourceFile.path === args.path;
             });
 
@@ -75,7 +76,7 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
             const extension = path.extname(args.path).slice(1);
             const loader = (rawLoaders.includes(extension) ? extension : 'js') as Loader;
 
-            return { contents, loader };
+            return { contents, loader, resolveDir: process.cwd() };
           });
         },
       },

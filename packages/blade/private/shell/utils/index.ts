@@ -9,6 +9,7 @@ import {
   routerInputFile,
 } from '@/private/shell/constants';
 import type { FileError } from '@/private/shell/types';
+import type { VirtualFileItem } from '@/private/shell/utils/build';
 import type { DeploymentProvider } from '@/private/universal/types/util';
 
 interface FileItem {
@@ -20,16 +21,6 @@ interface FileItem {
 type FileList = Array<FileItem>;
 
 export type TotalFileList = Map<string, FileList>;
-
-export interface VirtualFileItem {
-  /**
-   * The path of the file, relative to the project root. For example, when providing a
-   * page, its path might be `pages/index.tsx`.
-   */
-  path: string;
-  /** The content of the file, as a string. */
-  content: string;
-}
 
 export const crawlDirectory = async (directoryPath: string): Promise<FileList> => {
   const files = await readdir(directoryPath, { recursive: true });
@@ -55,17 +46,18 @@ export const crawlVirtualDirectory = (
 ): FileList => {
   const entries: FileList = [];
   const seenDirs = new Set<string>();
+  const rootDir = `/${directoryName}`;
 
   for (const { path: filePath } of virtualFiles) {
     // Only include items under the specified directory.
-    if (!filePath.startsWith(`${directoryName}/`)) continue;
+    if (!filePath.startsWith(`/${directoryName}`)) continue;
     const parts = filePath.split('/');
 
     // Emit intermediate directories.
     for (let i = 1; i < parts.length - 1; i++) {
       const dirPath = parts.slice(0, i + 1).join('/');
 
-      if (!seenDirs.has(dirPath)) {
+      if (!seenDirs.has(dirPath) && dirPath !== rootDir) {
         seenDirs.add(dirPath);
         entries.push({ type: 'DIRECTORY', relativePath: dirPath, absolutePath: dirPath });
       }

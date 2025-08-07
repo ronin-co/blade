@@ -22,7 +22,6 @@ import {
 import {
   type ExportItem,
   type TotalFileList,
-  type VirtualFileItem,
   crawlDirectory,
   crawlVirtualDirectory,
   exists,
@@ -30,6 +29,7 @@ import {
   getFileList,
   wrapClientExport,
 } from '@/private/shell/utils';
+import type { VirtualFileItem } from '@/private/shell/utils/build';
 import {
   transformToCloudflareOutput,
   transformToNetlifyOutput,
