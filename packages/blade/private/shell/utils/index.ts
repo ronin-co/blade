@@ -1,4 +1,4 @@
-import { constants, access, readdir, rm } from 'node:fs/promises';
+import { constants, access, readFile, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import ora from 'ora';
@@ -34,19 +34,19 @@ export const crawlDirectory = async (directoryPath: string): Promise<FileList> =
 /**
  * Crawls a directory that only exists virtually (in memory) and not on the file system.
  *
- * @param filePaths - The entire list of virtual files.
+ * @param virtualFiles - The entire list of virtual files.
  * @param directoryName — The directory within the list of files that should be crawled.
  *
  * @returns A list of nested files and directories.
  */
 export const crawlVirtualDirectory = (
-  filePaths: string[],
+  virtualFiles: Array<VirtualFile>,
   directoryName: string,
 ): FileList => {
   const entries: FileList = [];
   const seenDirs = new Set<string>();
 
-  for (const filePath of filePaths) {
+  for (const { path: filePath } of virtualFiles) {
     // Only include items under the specified directory.
     if (!filePath.startsWith(`${directoryName}/`)) continue;
     const parts = filePath.split('/');
@@ -266,3 +266,20 @@ export const exists = (path: string) =>
   access(path, constants.F_OK)
     .then(() => true)
     .catch(() => false);
+
+export interface VirtualFile {
+  /**
+   * The path of the file, relative to the project root. For example, when providing a
+   * page, its path might be `pages/index.tsx`.
+   */
+  path: string;
+  /** The content of the file, as a string. */
+  content: string;
+}
+
+export const readVirtualFile = (path: string, virtualFiles?: Array<VirtualFile>) => {
+  if (!virtualFiles) return readFile(path, 'utf8');
+  const file = virtualFiles.find((item) => item.path === path);
+  if (!file) throw new Error(`File "${path}" not found.`);
+  return file.content;
+};
