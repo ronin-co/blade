@@ -1,8 +1,13 @@
-import { cp, readFile, rename } from 'node:fs/promises';
+import { cp, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
 import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
+import {
+  compile as compileTailwind,
+  optimize as optimizeTailwind,
+} from '@tailwindcss/node';
+import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import { type TSESTree, parse } from '@typescript-eslint/typescript-estree';
 import type * as esbuild from 'esbuild';
 import YAML from 'js-yaml';
@@ -12,6 +17,7 @@ import {
   outputDirectory,
   publicDirectory,
   routerInputFile,
+  styleInputFile,
 } from '@/private/shell/constants';
 import {
   type ExportItem,
@@ -21,7 +27,6 @@ import {
   exists,
   extractDeclarationName,
   getFileList,
-  prepareStyles,
   wrapClientExport,
 } from '@/private/shell/utils';
 import {
@@ -32,6 +37,8 @@ import {
 import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
+
+const ID_FIELD = '__BLADE_BUNDLE_ID';
 
 export const getClientReferenceLoader = (): esbuild.Plugin => ({
   name: 'Client Reference Loader',
@@ -148,10 +155,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (
-  projects: Array<string>,
-  filePaths?: Array<string>,
-): esbuild.Plugin => ({
+export const getFileListLoader = (filePaths?: Array<string>): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
@@ -170,16 +174,6 @@ export const getFileListLoader = (
     }
     // If no virtual files were provided, crawl the directories on the file system.
     else {
-      const extraProjects = projects.slice(1);
-
-      for (let index = 0; index < extraProjects.length; index++) {
-        const project = extraProjects[index];
-        const exportName = `components${index}`;
-
-        directories.push([exportName, path.join(project, 'components')]);
-        componentDirectories.push(exportName);
-      }
-
       build.onStart(async () => {
         await Promise.all(
           directories.map(async ([directoryName, directoryPath]) => {
@@ -285,17 +279,11 @@ export const getProviderLoader = (
   },
 });
 
-export const getMetaLoader = (
-  environment: 'development' | 'production',
-  projects: Array<string>,
-  virtual: boolean,
-): esbuild.Plugin => ({
+export const getMetaLoader = (virtual: boolean): esbuild.Plugin => ({
   name: 'Init Loader',
   setup(build) {
-    let bundleId: string | undefined;
-
     build.onStart(() => {
-      bundleId = generateUniqueId();
+      build.initialOptions.define![ID_FIELD] = generateUniqueId();
     });
 
     build.onResolve({ filter: /^build-meta$/ }, (source) => ({
@@ -304,13 +292,15 @@ export const getMetaLoader = (
     }));
 
     build.onLoad({ filter: /^build-meta$/, namespace: 'dynamic-meta' }, () => ({
-      contents: `export const bundleId = "${bundleId}";`,
+      contents: `export const bundleId = "${build.initialOptions.define![ID_FIELD]}";`,
       loader: 'ts',
       resolveDir: process.cwd(),
     }));
 
     build.onEnd(async (result) => {
       if (result.errors.length === 0 && !virtual) {
+        const bundleId = build.initialOptions.define![ID_FIELD];
+
         const clientBundle = path.join(outputDirectory, getOutputFile('init', 'js'));
         const clientSourcemap = path.join(
           outputDirectory,
@@ -324,8 +314,57 @@ export const getMetaLoader = (
             clientSourcemap.replace('init.js.map', `${bundleId}.js.map`),
           ),
         ]);
+      }
+    });
+  },
+});
 
-        await prepareStyles(environment, projects, bundleId as string);
+export const getTailwindLoader = (
+  environment: 'development' | 'production',
+): esbuild.Plugin => ({
+  name: 'Tailwind CSS Loader',
+  setup(build) {
+    let compiler: Awaited<ReturnType<typeof compileTailwind>>;
+    let candidates: Array<string> = [];
+
+    const scanner = new TailwindScanner({});
+
+    build.onStart(async () => {
+      const input = (await exists(styleInputFile))
+        ? await readFile(styleInputFile, 'utf8')
+        : `@import 'tailwindcss';`;
+
+      compiler = await compileTailwind(input, {
+        onDependency(_path) {},
+        base: process.cwd(),
+      });
+
+      candidates = [];
+    });
+
+    build.onResolve({ filter: /\.(?:tsx|jsx)$/ }, async (args) => {
+      const content = await readFile(args.path, 'utf8');
+      const extension = path.extname(args.path).slice(1);
+      const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
+
+      candidates.push(...newCandidates.map((item) => item.candidate));
+
+      // Let `esbuild` decide how to process the file.
+      return null;
+    });
+
+    build.onEnd(async (result) => {
+      if (result.errors.length === 0) {
+        const bundleId = build.initialOptions.define![ID_FIELD];
+        const compiledStyles = compiler.build(candidates);
+
+        const optimizedStyles = optimizeTailwind(compiledStyles, {
+          file: 'input.css',
+          minify: environment === 'production',
+        });
+
+        const tailwindOutput = path.join(outputDirectory, getOutputFile(bundleId, 'css'));
+        await writeFile(tailwindOutput, optimizedStyles.code);
       }
     });
   },
