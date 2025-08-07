@@ -342,7 +342,7 @@ export const getTailwindLoader = (
       candidates = [];
     });
 
-    build.onLoad({ filter: /\.(?:tsx|jsx)$/ }, async (args) => {
+    build.onResolve({ filter: /\.(?:tsx|jsx)$/ }, async (args) => {
       const content = await readFile(args.path, 'utf8');
       const extension = path.extname(args.path).slice(1);
       const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
