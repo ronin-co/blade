@@ -35,9 +35,9 @@ type Bindings = {
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.DEV_SESSIONS) {
-  globalThis.DEV_SESSIONS.forEach(({ stream, url, headers }) => {
-    return flushSession(stream, url, headers, false);
-  });
+  for (const [sessionId, { headers, url, stream }] of globalThis.DEV_SESSIONS.entries()) {
+    flushSession(stream, url, headers, false, sessionId);
+  }
 } else {
   globalThis.DEV_SESSIONS = new Map();
 }
@@ -263,16 +263,19 @@ app.post('*', async (c) => {
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, url, headers, correctBundle, { queries, repeat: correctBundle });
+  const sessionId = crypto.randomUUID();
 
-  const id = crypto.randomUUID();
+  flushSession(stream, url, headers, correctBundle, sessionId, {
+    queries,
+    repeat: correctBundle,
+  });
 
   // Track the HMR session.
-  globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
+  globalThis.DEV_SESSIONS.set(sessionId, { stream, url, headers });
 
   // Stop tracking the HMR session when the browser tab is closed.
   stream.onAbort(() => {
-    globalThis.DEV_SESSIONS.delete(id);
+    globalThis.DEV_SESSIONS.delete(sessionId);
   });
 
   return c.newResponse(stream.responseReadable);

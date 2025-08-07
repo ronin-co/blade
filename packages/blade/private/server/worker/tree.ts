@@ -11,7 +11,6 @@ import {
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
 import type { SSEStreamingApi } from 'hono/streaming';
-import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
@@ -52,6 +51,8 @@ const pages: PageList = {
   [joinPaths(DEFAULT_PAGE_PATH, '404.tsx')]: DefaultPage404,
   [joinPaths(DEFAULT_PAGE_PATH, '500.tsx')]: DefaultPage500,
 };
+
+const activeFlushTimeouts = new Map<string, NodeJS.Timeout>();
 
 const getRenderingLeaves = (location: keyof PageList): Map<string, TreeItem> => {
   const leaves = new Map<string, TreeItem>();
@@ -451,6 +452,7 @@ export const flushSession = async (
   url: URL,
   headers: Headers,
   correctBundle: boolean,
+  sessionId: string,
   options?: {
     queries?: Collected['queries'];
     repeat?: boolean;
@@ -460,8 +462,16 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
+  // Cancel any existing timeout for this URL to prevent the UI being flushed with UI
+  // from an old or previous page.
+  const existingTimeout = activeFlushTimeouts.get(sessionId);
+  if (existingTimeout) {
+    clearTimeout(existingTimeout);
+    activeFlushTimeouts.delete(sessionId);
+  }
+
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
-    const newOptions: Parameters<typeof flushSession>[4] = {
+    const newOptions: Parameters<typeof flushSession>[5] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
             hookHash: crypto.randomUUID(),
@@ -471,7 +481,7 @@ export const flushSession = async (
         : undefined,
     };
 
-    return flushSession(stream, url, headers, true, newOptions);
+    return flushSession(stream, url, headers, true, sessionId, newOptions);
   };
 
   try {
@@ -512,8 +522,17 @@ export const flushSession = async (
   // If the update should be repeated later, wait for 5 seconds and then attempt
   // flushing yet another update.
   if (options?.repeat) {
-    await sleep(5000);
-    return flushSession(stream, url, headers, true, options);
+    activeFlushTimeouts.set(
+      sessionId,
+      setTimeout(async () => {
+        activeFlushTimeouts.delete(sessionId);
+
+        // Only proceed if the stream is still active
+        if (stream.aborted || stream.closed) return;
+
+        await flushSession(stream, url, headers, true, sessionId, options);
+      }, 5000),
+    );
   }
 };
 
