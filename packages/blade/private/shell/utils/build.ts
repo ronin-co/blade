@@ -14,7 +14,6 @@ import {
   getMdxLoader,
   getMetaLoader,
   getProviderLoader,
-  getReactAriaLoader,
   getTailwindLoader,
 } from '@/private/shell/loaders';
 import { type VirtualFile, composeEnvironmentVariables } from '@/private/shell/utils';
@@ -84,7 +83,6 @@ export const composeBuildContext = (
     plugins: [
       getFileListLoader(options?.virtualFiles),
       getMdxLoader(environment),
-      getReactAriaLoader(),
       getClientReferenceLoader(),
       getTailwindLoader(environment),
       getMetaLoader(Boolean(options?.virtualFiles)),
