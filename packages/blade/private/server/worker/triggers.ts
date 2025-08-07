@@ -1,4 +1,18 @@
-import type { BeforeGetTrigger } from 'blade-client/types';
+import type { BeforeGetTrigger, QueryHandlerOptions } from 'blade-client/types';
+import {
+  type AddQuery,
+  type CountQuery,
+  type GetQuery,
+  QUERY_SYMBOLS,
+  type Query,
+  type RemoveQuery,
+  type SetQuery,
+} from 'blade-compiler';
+import { getSyntaxProxy } from 'blade-syntax/queries';
+import {
+  isStorableObject,
+  runQueries as runQueriesWithStorageAndTriggers,
+} from 'ronin/utils';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
@@ -8,6 +22,15 @@ import type {
   TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
+
+interface ExtendedQueryHandlerOptions extends QueryHandlerOptions {
+  /**
+   * Whether the query should flush the current browser session.
+   *
+   * @default false
+   */
+  flushSession?: boolean;
+}
 
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
@@ -26,7 +49,68 @@ export const prepareTriggers = (
   triggers: TriggersList,
   headless?: boolean,
 ): TriggersList => {
+  const callback = async (
+    defaultQuery: Query,
+    queryOptions?: ExtendedQueryHandlerOptions,
+  ) => {
+    const query = (defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>)[
+      QUERY_SYMBOLS.QUERY
+    ];
+    const queries = 'statement' in query ? { statements: [query.statement] } : [query];
+
+    if ('statements' in queries)
+      throw new Error(
+        '`statements` is not supported in Blade queries. Use `Query` objects instead.',
+      );
+
+    const [results] = await runQueriesWithStorageAndTriggers(queries, queryOptions ?? {});
+
+    if (queryOptions?.flushSession === true) {
+      if (serverContext.flushSession) {
+        await serverContext
+          .flushSession()
+          .catch((err) => console.error('[BLADE] `flushSession` failed:', err));
+      } else {
+        console.warn(
+          '[BLADE] `flushSession` is not available in the current server context.',
+        );
+      }
+    }
+
+    return results;
+  };
+
+  // Ensure that storable objects are retained as-is instead of being serialized.
+  const replacer = (value: unknown) => (isStorableObject(value) ? value : undefined);
+
   const options: Partial<NewTriggerOptions> = {
+    client: {
+      get: getSyntaxProxy<GetQuery>({
+        root: `${QUERY_SYMBOLS.QUERY}.get`,
+        callback,
+        replacer,
+      }),
+      set: getSyntaxProxy<SetQuery>({
+        root: `${QUERY_SYMBOLS.QUERY}.set`,
+        callback,
+        replacer,
+      }),
+      add: getSyntaxProxy<AddQuery>({
+        root: `${QUERY_SYMBOLS.QUERY}.add`,
+        callback,
+        replacer,
+      }),
+      remove: getSyntaxProxy<RemoveQuery>({
+        root: `${QUERY_SYMBOLS.QUERY}.remove`,
+        callback,
+        replacer,
+      }),
+      count: getSyntaxProxy<CountQuery, number>({
+        root: `${QUERY_SYMBOLS.QUERY}.count`,
+        callback,
+        replacer,
+      }),
+    },
     cookies: serverContext.cookies,
     navigator: {
       userAgent: serverContext.userAgent,
