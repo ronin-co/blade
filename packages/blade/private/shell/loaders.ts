@@ -324,6 +324,7 @@ export const getMetaLoader = (virtual: boolean): esbuild.Plugin => ({
 
 export const getTailwindLoader = (
   environment: 'development' | 'production',
+  virtualFiles?: Array<VirtualFileItem>,
 ): esbuild.Plugin => ({
   name: 'Tailwind CSS Loader',
   setup(build) {
@@ -346,7 +347,11 @@ export const getTailwindLoader = (
     });
 
     build.onResolve({ filter: /\.(?:tsx|jsx)$/ }, async (args) => {
-      const content = await readFile(args.path, 'utf8');
+      const virtualFile = virtualFiles?.find((item) => item.path === args.path);
+      const content = virtualFile
+        ? virtualFile.content
+        : await readFile(args.path, 'utf8');
+
       const extension = path.extname(args.path).slice(1);
       const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
 

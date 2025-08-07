@@ -86,7 +86,7 @@ export const composeBuildContext = (
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
-      getTailwindLoader(environment),
+      getTailwindLoader(environment, options?.virtualFiles),
       getMetaLoader(Boolean(options?.virtualFiles)),
       getProviderLoader(environment, provider),
 
