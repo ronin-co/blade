@@ -14,7 +14,7 @@ import {
 } from '@/private/shell/constants';
 import { type ServerState, serve } from '@/private/shell/listener';
 import { cleanUp, logSpinner } from '@/private/shell/utils';
-import { build } from '@/private/shell/utils/build';
+import { composeBuildContext } from '@/private/shell/utils/build';
 
 // We want people to add BLADE to `package.json`, which, for example, ensures that
 // everyone in a team is using the same version when working on apps.
@@ -80,7 +80,7 @@ if (isBuilding || isDeveloping) {
     `Building${environment === 'production' ? ' for production' : ''}`,
   );
 
-  const mainBuild = await build(environment, {
+  const mainBuild = composeBuildContext(environment, {
     enableServiceWorker,
     logQueries: values?.queries,
     plugins: [

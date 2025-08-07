@@ -18,12 +18,12 @@ import {
   getReactAriaLoader,
   getTailwindLoader,
 } from '@/private/shell/loaders';
-import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
+import { composeEnvironmentVariables } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 /**
- * Builds a Blade application.
+ * Prepares an `esbuild` context for building a Blade application.
  *
  * @param environment - The environment for which the build should run.
  * @param [options] - Optional configuration for running the build.
@@ -35,7 +35,7 @@ import { getOutputFile } from '@/private/universal/utils/paths';
  *
  * @returns An esbuild context.
  */
-export const build = async (
+export const composeBuildContext = (
   environment: 'development' | 'production',
   options?: {
     enableServiceWorker?: boolean;
@@ -43,25 +43,9 @@ export const build = async (
     plugins?: Array<esbuild.Plugin>;
     filePaths?: Array<string>;
   },
-): Promise<esbuild.BuildContext> => {
+): esbuild.BuildContext => {
   const provider = getProvider();
   const virtual = Boolean(options?.filePaths);
-
-  const projects = [process.cwd()];
-  const tsConfig = path.join(process.cwd(), 'tsconfig.json');
-
-  // If a `tsconfig.json` file exists that contains a `references` field, we should include
-  // files from the referenced projects as well.
-  if (!virtual && (await exists(tsConfig))) {
-    const tsConfigContents = JSON.parse(await readFile(tsConfig, 'utf-8'));
-    const { references } = tsConfigContents || {};
-
-    if (references && Array.isArray(references) && references.length > 0) {
-      projects.push(
-        ...references.map((reference) => path.join(process.cwd(), reference.path)),
-      );
-    }
-  }
 
   const entryPoints: esbuild.BuildOptions['entryPoints'] = [
     {
@@ -100,7 +84,7 @@ export const build = async (
     external: ['node:events'],
 
     plugins: [
-      getFileListLoader(projects, options?.filePaths),
+      getFileListLoader(options?.filePaths),
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),

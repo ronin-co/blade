@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { Loader, Message, OutputFile } from 'esbuild';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
-import { build as buildContext } from '@/private/shell/utils/build';
+import { composeBuildContext } from '@/private/shell/utils/build';
 
 interface SourceFile {
   /**
@@ -34,7 +34,7 @@ interface BuildOutput {
 export const build = async (config: BuildConfig): Promise<BuildOutput> => {
   const environment = config?.environment || 'development';
 
-  const mainBuild = await buildContext(environment, {
+  const mainBuild = composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
     filePaths: config.sourceFiles.map(({ path }) => {
       if (path.startsWith('./')) return path.slice(1);

@@ -155,10 +155,7 @@ export const getClientReferenceLoader = (): esbuild.Plugin => ({
   },
 });
 
-export const getFileListLoader = (
-  projects: Array<string>,
-  filePaths?: Array<string>,
-): esbuild.Plugin => ({
+export const getFileListLoader = (filePaths?: Array<string>): esbuild.Plugin => ({
   name: 'File List Loader',
   setup(build) {
     const files: TotalFileList = new Map();
@@ -177,16 +174,6 @@ export const getFileListLoader = (
     }
     // If no virtual files were provided, crawl the directories on the file system.
     else {
-      const extraProjects = projects.slice(1);
-
-      for (let index = 0; index < extraProjects.length; index++) {
-        const project = extraProjects[index];
-        const exportName = `components${index}`;
-
-        directories.push([exportName, path.join(project, 'components')]);
-        componentDirectories.push(exportName);
-      }
-
       build.onStart(async () => {
         await Promise.all(
           directories.map(async ([directoryName, directoryPath]) => {
