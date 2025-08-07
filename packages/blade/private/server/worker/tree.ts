@@ -444,7 +444,6 @@ const appendCookieHeader = (
  * @param headers - The headers of the current request.
  * @param correctBundle - Whether the bundle that is being flushed is the correct one for
  * the current request.
- * @param sessionId - The ID of the current browser session.
  * @param [options] - Options for flushing the session.
  * @param [options.queries] - A list of queries to run before flushing the session.
  * @param [options.repeat] - Whether the session should be flushed repeatedly every 5 seconds.
@@ -458,7 +457,6 @@ export const flushSession = async (
   url: URL,
   headers: Headers,
   correctBundle: boolean,
-  sessionId: string,
   options?: {
     queries?: Collected['queries'];
     repeat?: boolean;
@@ -468,16 +466,21 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
+  // We need some kind of key to identify the current session, so that we can cancel
+  // any existing timeout for this session and prevent the UI from being flushed with
+  // updates from an old or previous page.
+  const sessionKey = url.href;
+
   // Cancel any existing timeout for this URL to prevent the UI being flushed with UI
   // from an old or previous page.
-  const existingTimeout = activeFlushTimeouts.get(sessionId);
+  const existingTimeout = activeFlushTimeouts.get(sessionKey);
   if (existingTimeout) {
     clearTimeout(existingTimeout);
-    activeFlushTimeouts.delete(sessionId);
+    activeFlushTimeouts.delete(sessionKey);
   }
 
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
-    const newOptions: Parameters<typeof flushSession>[5] = {
+    const newOptions: Parameters<typeof flushSession>[4] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
             hookHash: crypto.randomUUID(),
@@ -487,7 +490,7 @@ export const flushSession = async (
         : undefined,
     };
 
-    return flushSession(stream, url, headers, true, sessionId, newOptions);
+    return flushSession(stream, url, headers, true, newOptions);
   };
 
   try {
@@ -529,14 +532,14 @@ export const flushSession = async (
   // flushing yet another update.
   if (options?.repeat) {
     activeFlushTimeouts.set(
-      sessionId,
+      sessionKey,
       setTimeout(async () => {
-        activeFlushTimeouts.delete(sessionId);
+        activeFlushTimeouts.delete(sessionKey);
 
         // Only proceed if the stream is still active
         if (stream.aborted || stream.closed) return;
 
-        await flushSession(stream, url, headers, true, sessionId, options);
+        await flushSession(stream, url, headers, true, options);
       }, 5000),
     );
   }
