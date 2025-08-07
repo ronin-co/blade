@@ -322,7 +322,7 @@ export const getMetaLoader = (virtual: boolean): esbuild.Plugin => ({
 export const getTailwindLoader = (
   environment: 'development' | 'production',
 ): esbuild.Plugin => ({
-  name: 'Init Loader',
+  name: 'Tailwind CSS Loader',
   setup(build) {
     let compiler: Awaited<ReturnType<typeof compileTailwind>>;
     let candidates: Array<string> = [];
