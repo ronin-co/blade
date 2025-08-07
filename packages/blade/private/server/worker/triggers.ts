@@ -69,7 +69,7 @@ export const prepareTriggers = (
       if (serverContext.flushSession) {
         await serverContext
           .flushSession()
-          .catch((err) => console.error('[BLADE] flushSession failed:', err));
+          .catch((err) => console.error('[BLADE] `flushSession` failed:', err));
       } else {
         console.warn(
           '[BLADE] `flushSession` is not available in the current server context.',
