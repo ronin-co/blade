@@ -40,7 +40,7 @@ export const Nav = ({
                     'bg-accent text-primary': item.href === location.pathname,
                   },
                 )}>
-                <span>{item.name}</span>
+                <a>{item.name}</a>
               </Link>
             ))}
           </div>
