@@ -52,8 +52,6 @@ const pages: PageList = {
   [joinPaths(DEFAULT_PAGE_PATH, '500.tsx')]: DefaultPage500,
 };
 
-const activeFlushTimeouts = new Map<string, NodeJS.Timeout>();
-
 const getRenderingLeaves = (location: keyof PageList): Map<string, TreeItem> => {
   const leaves = new Map<string, TreeItem>();
   const parentDirectories = getParentDirectories(location);
@@ -466,19 +464,6 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
-  // We need some kind of key to identify the current session, so that we can cancel
-  // any existing timeout for this session and prevent the UI from being flushed with
-  // updates from an old or previous page.
-  const sessionKey = url.href;
-
-  // Cancel any existing timeout for this URL to prevent the UI being flushed with UI
-  // from an old or previous page.
-  const existingTimeout = activeFlushTimeouts.get(sessionKey);
-  if (existingTimeout) {
-    clearTimeout(existingTimeout);
-    activeFlushTimeouts.delete(sessionKey);
-  }
-
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[4] = {
       queries: nestedQueries
@@ -531,17 +516,14 @@ export const flushSession = async (
   // If the update should be repeated later, wait for 5 seconds and then attempt
   // flushing yet another update.
   if (options?.repeat) {
-    activeFlushTimeouts.set(
-      sessionKey,
-      setTimeout(async () => {
-        activeFlushTimeouts.delete(sessionKey);
+    const timeoutId = setTimeout(() => {
+      flushSession(stream, url, headers, true, options);
+    }, 5000);
 
-        // Only proceed if the stream is still active
-        if (stream.aborted || stream.closed) return;
-
-        await flushSession(stream, url, headers, true, options);
-      }, 5000),
-    );
+    // Set up an abort handler to clear the timeout if the stream is aborted
+    stream.onAbort((): void => {
+      clearTimeout(timeoutId);
+    });
   }
 };
 
