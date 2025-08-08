@@ -11,6 +11,7 @@ import {
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
 import type { SSEStreamingApi } from 'hono/streaming';
+import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
@@ -516,14 +517,8 @@ export const flushSession = async (
   // If the update should be repeated later, wait for 5 seconds and then attempt
   // flushing yet another update.
   if (options?.repeat) {
-    const timeoutId = setTimeout(() => {
-      flushSession(stream, url, headers, true, options);
-    }, 5000);
-
-    // Set up an abort handler to clear the timeout if the stream is aborted
-    stream.onAbort((): void => {
-      clearTimeout(timeoutId);
-    });
+    await sleep(5000);
+    return flushSession(stream, url, headers, true, options);
   }
 };
 
