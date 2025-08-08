@@ -48,23 +48,32 @@ export const crawlVirtualDirectory = (
   const seenDirs = new Set<string>();
   const rootDir = `/${directoryName}`;
 
-  for (const { path: filePath } of virtualFiles) {
+  for (const { path: absoluteFilePath } of virtualFiles) {
     // Only include items under the specified directory.
-    if (!filePath.startsWith(`/${directoryName}`)) continue;
-    const parts = filePath.split('/');
+    if (!absoluteFilePath.startsWith(`/${directoryName}`)) continue;
+    const parts = absoluteFilePath.split('/');
 
     // Emit intermediate directories.
     for (let i = 1; i < parts.length - 1; i++) {
-      const dirPath = parts.slice(0, i + 1).join('/');
+      const absoluteDirPath = parts.slice(0, i + 1).join('/');
 
-      if (!seenDirs.has(dirPath) && dirPath !== rootDir) {
-        seenDirs.add(dirPath);
-        entries.push({ type: 'DIRECTORY', relativePath: dirPath, absolutePath: dirPath });
+      if (!seenDirs.has(absoluteDirPath) && absoluteDirPath !== rootDir) {
+        seenDirs.add(absoluteDirPath);
+
+        entries.push({
+          type: 'DIRECTORY',
+          absolutePath: absoluteDirPath,
+          relativePath: path.relative(rootDir, absoluteDirPath),
+        });
       }
     }
 
     // Emit the file itself.
-    entries.push({ type: 'FILE', relativePath: filePath, absolutePath: filePath });
+    entries.push({
+      type: 'FILE',
+      absolutePath: absoluteFilePath,
+      relativePath: path.relative(rootDir, absoluteFilePath),
+    });
   }
 
   return entries;
