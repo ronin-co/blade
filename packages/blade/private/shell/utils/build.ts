@@ -88,7 +88,7 @@ export const composeBuildContext = async (
       modules: [nodePath],
       tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
 
-      // When linking the framework package, rolldown doesn't recognize these dependencies
+      // When linking the framework package, Rolldown doesn't recognize these dependencies
       // correctly, so we have to alias them explicitly.
       alias: {
         react: path.join(nodePath, 'react'),
