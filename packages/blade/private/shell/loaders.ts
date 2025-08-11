@@ -151,58 +151,57 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
 
 export const getFileListLoader = (
   virtualFiles?: Array<VirtualFileItem>,
-): RolldownPlugin => ({
-  name: 'File List Loader',
-  async buildStart() {
-    const files: TotalFileList = new Map();
+): RolldownPlugin => {
+  let files: TotalFileList = new Map();
 
-    const directories = [
-      ['pages', path.join(process.cwd(), 'pages')],
-      ['triggers', path.join(process.cwd(), 'triggers')],
-      ['components', path.join(process.cwd(), 'components')],
-    ];
-    if (virtualFiles) {
-      for (const [directoryName] of directories) {
-        files.set(directoryName, crawlVirtualDirectory(virtualFiles, directoryName));
+  const directories = [
+    ['pages', path.join(process.cwd(), 'pages')],
+    ['triggers', path.join(process.cwd(), 'triggers')],
+    ['components', path.join(process.cwd(), 'components')],
+  ];
+
+  return {
+    name: 'File List Loader',
+    async buildStart() {
+      files = new Map();
+
+      if (virtualFiles) {
+        for (const [directoryName] of directories) {
+          files.set(directoryName, crawlVirtualDirectory(virtualFiles, directoryName));
+        }
+      } else {
+        await Promise.all(
+          directories.map(async ([directoryName, directoryPath]) => {
+            const results = (await exists(directoryPath))
+              ? await crawlDirectory(directoryPath)
+              : [];
+            const finalResults = directoryName.startsWith('components')
+              ? results.filter((item) => item.relativePath.includes('.client'))
+              : results;
+            files.set(directoryName, finalResults);
+          }),
+        );
       }
-    } else {
-      await Promise.all(
-        directories.map(async ([directoryName, directoryPath]) => {
-          const results = (await exists(directoryPath))
-            ? await crawlDirectory(directoryPath)
-            : [];
-          const finalResults = directoryName.startsWith('components')
-            ? results.filter((item) => item.relativePath.includes('.client'))
-            : results;
-          files.set(directoryName, finalResults);
-        }),
-      );
-    }
-    (this as unknown as { _blade_files: TotalFileList })._blade_files = files;
-  },
-  resolveId(source) {
-    if (source === 'server-list') return '\u0000server-list.tsx';
-    if (source === 'client-list') return '\u0000client-list.tsx';
-    return null;
-  },
-  async load(id) {
-    if (id === '\u0000server-list.tsx') {
-      const files = (this as unknown as { _blade_files: TotalFileList })._blade_files;
-      const contents = getFileList(
-        files,
-        ['pages', 'triggers'],
-        await exists(routerInputFile),
-      );
-      return contents;
-    }
-    if (id === '\u0000client-list.tsx') {
-      const files = (this as unknown as { _blade_files: TotalFileList })._blade_files;
-      const contents = getFileList(files, ['components']);
-      return contents;
-    }
-    return null;
-  },
-});
+    },
+    resolveId(source) {
+      if (source === 'server-list') return '\u0000server-list.tsx';
+      if (source === 'client-list') return '\u0000client-list.tsx';
+
+      return null;
+    },
+    async load(id) {
+      if (id === '\u0000server-list.tsx') {
+        return getFileList(files, ['pages', 'triggers'], await exists(routerInputFile));
+      }
+
+      if (id === '\u0000client-list.tsx') {
+        return getFileList(files, ['components']);
+      }
+
+      return null;
+    },
+  };
+};
 
 export const getMdxLoader = (
   environment: 'development' | 'production',
@@ -298,59 +297,58 @@ export const getMetaLoader = (virtual: boolean): RolldownPlugin => ({
 export const getTailwindLoader = (
   environment: 'development' | 'production',
   virtualFiles?: Array<VirtualFileItem>,
-): RolldownPlugin => ({
-  name: 'Tailwind CSS Loader',
-  async buildStart() {
-    (this as unknown as any)._blade_tailwind = {
-      compiler: await compileTailwind(
-        (await exists(styleInputFile))
-          ? await readFile(styleInputFile, 'utf8')
-          : `@import 'tailwindcss';`,
-        {
-          onDependency(_path) {},
-          base: process.cwd(),
-        },
-      ),
-      candidates: [] as Array<string>,
-      scanner: new TailwindScanner({}),
-    };
-  },
-  async transform(code, id) {
-    if (!/\.(tsx|jsx)$/.test(id)) return null;
-    const ctx = (this as unknown as any)._blade_tailwind as {
-      compiler: Awaited<ReturnType<typeof compileTailwind>>;
-      candidates: string[];
-      scanner: TailwindScanner;
-    };
-    const content = (() => {
-      const vf = virtualFiles?.find((item) => item.path === id);
-      return vf ? vf.content : code;
-    })();
-    const extension = path.extname(id).slice(1);
-    const newCandidates = ctx.scanner.getCandidatesWithPositions({ content, extension });
-    ctx.candidates.push(...newCandidates.map((item) => item.candidate));
-    return null;
-  },
-  generateBundle(this: any) {
-    const ctx = (this as unknown as any)._blade_tailwind as {
-      compiler: Awaited<ReturnType<typeof compileTailwind>>;
-      candidates: string[];
-    };
-    const compiledStyles = ctx.compiler.build(ctx.candidates);
-    const optimizedStyles = optimizeTailwind(compiledStyles, {
-      file: 'input.css',
-      minify: environment === 'production',
-    });
-    const cssFileName = getOutputFile(CURRENT_BUNDLE_ID || 'init', 'css');
-    if (typeof this.emitFile === 'function') {
+): RolldownPlugin => {
+  let compiler: Awaited<ReturnType<typeof compileTailwind>>;
+  let candidates: Array<string> = [];
+
+  const scanner = new TailwindScanner({});
+
+  return {
+    name: 'Tailwind CSS Loader',
+    async buildStart() {
+      const input = (await exists(styleInputFile))
+        ? await readFile(styleInputFile, 'utf8')
+        : `@import 'tailwindcss';`;
+
+      compiler = await compileTailwind(input, {
+        onDependency(_path) {},
+        base: process.cwd(),
+      });
+
+      candidates = [];
+    },
+    async transform(code, id) {
+      if (!/\.(tsx|jsx)$/.test(id)) return null;
+
+      const content = (() => {
+        const vf = virtualFiles?.find((item) => item.path === id);
+        return vf ? vf.content : code;
+      })();
+
+      const extension = path.extname(id).slice(1);
+      const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
+
+      candidates.push(...newCandidates.map((item) => item.candidate));
+
+      return null;
+    },
+    generateBundle() {
+      const compiledStyles = compiler.build(candidates);
+      const optimizedStyles = optimizeTailwind(compiledStyles, {
+        file: 'input.css',
+        minify: environment === 'production',
+      });
+
+      const cssFileName = getOutputFile(CURRENT_BUNDLE_ID || 'init', 'css');
+
       this.emitFile({
         type: 'asset',
         fileName: cssFileName,
         source: optimizedStyles.code,
       });
-    }
-  },
-});
+    },
+  };
+};
 
 // TODO: Move this into a config file or plugin.
 //
