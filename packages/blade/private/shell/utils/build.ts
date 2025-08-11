@@ -60,6 +60,7 @@ export const composeBuildContext = async (
   },
 ): Promise<{
   rebuild: () => Promise<RolldownOutput>;
+  dispose: () => Promise<void>;
 }> => {
   const provider = getProvider();
 
@@ -147,5 +148,6 @@ export const composeBuildContext = async (
         ? bundle.generate(outputOptions)
         : bundle.write(outputOptions);
     },
+    dispose: () => bundle.close(),
   };
 };
