@@ -100,8 +100,6 @@ export const composeBuildContext = async (
     }),
   });
 
-  const writeToDisk = !options?.virtualFiles;
-
   return {
     async rebuild(): Promise<RolldownOutput> {
       const entryFileNames: ChunkFileNamesFunction = (chunk) => {
@@ -128,7 +126,9 @@ export const composeBuildContext = async (
         banner,
       };
 
-      return writeToDisk ? bundle.write(outputOptions) : bundle.generate(outputOptions);
+      return options?.virtualFiles
+        ? bundle.generate(outputOptions)
+        : bundle.write(outputOptions);
     },
   };
 };
