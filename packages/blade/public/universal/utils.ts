@@ -1,26 +1,10 @@
 import path from 'node:path';
 
-// Keep for path normalization behavior in Memory Loader
-// removed unused import of sourceDirPath to satisfy linter
-import type { VirtualFileItem } from '@/private/shell/utils/build';
-import { composeBuildContext } from '@/private/shell/utils/build';
+import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
 interface BuildConfig {
   sourceFiles: Array<VirtualFileItem>;
   environment?: 'development' | 'production';
-}
-
-interface OutputFileLike {
-  path: string;
-  contents: Uint8Array;
-  readonly text: string;
-  hash?: string;
-}
-
-interface BuildOutput {
-  errors: Array<unknown>;
-  warnings: Array<unknown>;
-  outputFiles: Array<OutputFileLike>;
 }
 
 /**
@@ -30,7 +14,9 @@ interface BuildOutput {
  *
  * @returns The generated build output in the form of virtual files.
  */
-export const build = async (config: BuildConfig): Promise<BuildOutput> => {
+export const build = async (
+  config: BuildConfig,
+): Promise<ReturnType<typeof composeBuildContext>> => {
   const environment = config?.environment || 'development';
 
   const virtualFiles = config.sourceFiles.map(({ path, content }) => {
@@ -42,7 +28,7 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
     return { path: newPath, content };
   });
 
-  const mainBuild = await composeBuildContext(environment, {
+  return composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
     virtualFiles,
     plugins: [
@@ -65,7 +51,4 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
       },
     ],
   });
-
-  const { errors, warnings, outputFiles } = await mainBuild.rebuild();
-  return { errors, warnings, outputFiles: outputFiles ?? [] };
 };

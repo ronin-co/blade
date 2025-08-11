@@ -37,7 +37,7 @@ export interface VirtualFileItem {
 }
 
 /**
- * Prepares a Rolldown-powered build context for building a Blade application.
+ * Prepares a Rolldown build context for building a Blade application.
  *
  * @param environment - The environment for which the build should run.
  * @param [options] - Optional configuration for running the build.
