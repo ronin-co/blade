@@ -1,5 +1,11 @@
 import path from 'node:path';
-import * as esbuild from 'esbuild';
+import {
+  type ChunkFileNamesFunction,
+  type OutputOptions,
+  type RolldownOutput,
+  type Plugin as RolldownPlugin,
+  rolldown,
+} from 'rolldown';
 
 import {
   clientInputFile,
@@ -17,7 +23,7 @@ import {
   getReactAriaLoader,
   getTailwindLoader,
 } from '@/private/shell/loaders';
-import { composeEnvironmentVariables } from '@/private/shell/utils';
+import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
@@ -32,7 +38,7 @@ export interface VirtualFileItem {
 }
 
 /**
- * Prepares an `esbuild` context for building a Blade application.
+ * Prepares a Rolldown build context for building a Blade application.
  *
  * @param environment - The environment for which the build should run.
  * @param [options] - Optional configuration for running the build.
@@ -44,49 +50,51 @@ export interface VirtualFileItem {
  *
  * @returns An esbuild context.
  */
-export const composeBuildContext = (
+export const composeBuildContext = async (
   environment: 'development' | 'production',
   options?: {
     enableServiceWorker?: boolean;
     logQueries?: boolean;
-    plugins?: Array<esbuild.Plugin>;
+    plugins?: Array<RolldownPlugin>;
     virtualFiles?: Array<VirtualFileItem>;
   },
-): Promise<esbuild.BuildContext> => {
+): Promise<{
+  rebuild: () => Promise<RolldownOutput>;
+  dispose: () => Promise<void>;
+}> => {
   const provider = getProvider();
 
-  const entryPoints: esbuild.BuildOptions['entryPoints'] = [
-    {
-      in: clientInputFile,
-      out: getOutputFile('init'),
-    },
-    {
-      in: path.join(serverInputFolder, `${provider}.js`),
-      out: defaultDeploymentProvider,
-    },
-  ];
+  // Build inputs
+  const serverEntry = path.join(serverInputFolder, `${provider}.js`);
+  const swEntry = path.join(serverInputFolder, 'service-worker.js');
 
-  if (options?.enableServiceWorker) {
-    entryPoints.push({
-      in: path.join(serverInputFolder, 'service-worker.js'),
-      out: 'service-worker',
-    });
-  }
+  const tsconfigFilename = path.join(process.cwd(), 'tsconfig.json');
 
-  return esbuild.context({
-    entryPoints,
-    outdir: outputDirectory,
-    sourcemap: 'external',
-    bundle: true,
+  const input: Record<string, string> = {
+    client: clientInputFile,
+    provider: serverEntry,
+  };
 
-    // Return the files in memory if a list of source file paths was provided.
-    write: !options?.virtualFiles,
+  if (options?.enableServiceWorker) input['service_worker'] = swEntry;
 
+  // Banner to ensure import.meta.env exists
+  const banner = 'if(!import.meta.env){import.meta.env={}};';
+
+  const bundle = await rolldown({
+    input,
     platform: provider === 'vercel' ? 'node' : 'browser',
-    format: 'esm',
-    jsx: 'automatic',
-    nodePaths: [nodePath],
-    minify: environment === 'production',
+
+    resolve: {
+      modules: [nodePath],
+      tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
+
+      // When linking the framework package, Rolldown doesn't recognize these dependencies
+      // correctly, so we have to alias them explicitly.
+      alias: {
+        react: path.join(nodePath, 'react'),
+        'react-dom': path.join(nodePath, 'react-dom'),
+      },
+    },
 
     // TODO: Remove this once `@ronin/engine` no longer relies on it.
     external: ['node:events'],
@@ -99,14 +107,9 @@ export const composeBuildContext = (
       getTailwindLoader(environment, options?.virtualFiles),
       getMetaLoader(Boolean(options?.virtualFiles)),
       getProviderLoader(environment, provider),
-
       ...(options?.plugins || []),
     ],
-    banner: {
-      // Prevent a crash for missing environment variables by ensuring that
-      // `import.meta.env` is defined.
-      js: 'if(!import.meta.env){import.meta.env={}};',
-    },
+
     define: composeEnvironmentVariables({
       isLoggingQueries: options?.logQueries || false,
       enableServiceWorker: options?.enableServiceWorker || false,
@@ -114,4 +117,38 @@ export const composeBuildContext = (
       environment,
     }),
   });
+
+  return {
+    async rebuild(): Promise<RolldownOutput> {
+      const entryFileNames: ChunkFileNamesFunction = (chunk) => {
+        // Client entry gets our fixed init name to be renamed later by meta loader.
+        if (chunk.facadeModuleId === clientInputFile) {
+          return getOutputFile('init', 'js');
+        }
+        // Provider entry should be the default deployment provider filename.
+        if (chunk.facadeModuleId === serverEntry) {
+          return `${defaultDeploymentProvider}.js`;
+        }
+        // Service worker.
+        if (options?.enableServiceWorker && chunk.facadeModuleId === swEntry) {
+          return 'service-worker.js';
+        }
+        return '[name].js';
+      };
+
+      const outputOptions: OutputOptions = {
+        dir: outputDirectory,
+        sourcemap: true,
+        entryFileNames,
+        chunkFileNames: getOutputFile('chunk.[hash]', 'js'),
+        banner,
+        minify: environment === 'production',
+      };
+
+      return options?.virtualFiles
+        ? bundle.generate(outputOptions)
+        : bundle.write(outputOptions);
+    },
+    dispose: () => bundle.close(),
+  };
 };
