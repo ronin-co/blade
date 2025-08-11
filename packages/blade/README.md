@@ -13,7 +13,7 @@ A [React](https://react.dev) framework for building instant web apps.
 - **Client & Server Components** (code is not shipped to the client by default, unless you opt in)
 - **Web Standard Compliant** (outputs a req/res worker + static files that run anywhere — also runs in containers)
 - **No Data Waterfalls** (queries are collected across layouts and pages to ensure a single DB transaction)
-- **Instant Prod Builds** (powered by [Rolldown](https://rolldown.rs)'s Rust compiler)
+- **Instant Prod Builds** (powered by Rust, using [Rolldown](https://rolldown.rs))
 - **Zero Config** (only `pages/index.tsx` and `package.json` are [needed](https://github.com/ronin-co/blade/tree/main/packages/create-blade/templates/basic) to get Blade to run)
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
 - **Zero Config Deployments** (Vercel [ready], containers [ready], Cloudflare [ready], and more)
