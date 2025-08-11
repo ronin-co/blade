@@ -140,7 +140,7 @@ export const composeBuildContext = async (
         dir: outputDirectory,
         sourcemap: true,
         entryFileNames,
-        chunkFileNames: getOutputFile('[name]-[hash]', 'js'),
+        chunkFileNames: getOutputFile('chunk.[hash]', 'js'),
         banner,
         minify: environment === 'production',
       };
