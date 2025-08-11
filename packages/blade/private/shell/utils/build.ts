@@ -1,10 +1,10 @@
 import path from 'node:path';
 import {
-  type OutputAsset,
-  type OutputChunk,
+  type ChunkFileNamesFunction,
+  type OutputOptions,
+  type RolldownOutput,
   type Plugin as RolldownPlugin,
-  type RollupBuild,
-  rollup,
+  rolldown,
 } from 'rolldown';
 
 import {
@@ -58,17 +58,7 @@ export const composeBuildContext = async (
     virtualFiles?: Array<VirtualFileItem>;
   },
 ): Promise<{
-  rebuild: () => Promise<{
-    errors: Array<unknown>;
-    warnings: Array<unknown>;
-    outputFiles?: Array<{
-      path: string;
-      contents: Uint8Array;
-      readonly text: string;
-      hash?: string;
-    }>;
-  }>;
-  dispose: () => Promise<void>;
+  rebuild: () => Promise<RolldownOutput>;
 }> => {
   const provider = getProvider();
 
@@ -83,59 +73,38 @@ export const composeBuildContext = async (
 
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
 
-  // Define replacement plugin (simple string replacement for import.meta.env and NODE_ENV)
-  const defineMap = composeEnvironmentVariables({
-    isLoggingQueries: options?.logQueries || false,
-    enableServiceWorker: options?.enableServiceWorker || false,
-    provider,
-    environment,
-  });
-
-  const definePlugin: RolldownPlugin = {
-    name: 'blade-define-replacements',
-    transform(code: string) {
-      let transformed = code;
-      for (const [key, value] of Object.entries(defineMap)) {
-        // naive replace is acceptable for explicit keys like import.meta.env.X and process.env.NODE_ENV
-        transformed = transformed.split(key).join(value);
-      }
-      return { code: transformed, map: null };
-    },
-  };
-
   // Banner to ensure import.meta.env exists
   const banner = 'if(!import.meta.env){import.meta.env={}};';
 
-  const plugins: Array<RolldownPlugin> = [
-    getFileListLoader(options?.virtualFiles),
-    getMdxLoader(environment),
-    getReactAriaLoader(),
-    getClientReferenceLoader(),
-    getTailwindLoader(environment, options?.virtualFiles),
-    getMetaLoader(Boolean(options?.virtualFiles)),
-    getProviderLoader(environment, provider),
-    definePlugin,
-    ...(options?.plugins || []),
-  ];
+  const bundle = await rolldown({
+    input,
+    // TODO: Remove this once `@ronin/engine` no longer relies on it.
+    external: ['node:events'],
 
-  // Keep cache between rebuilds for faster dev builds
-  let previousBundle: RollupBuild | null = null;
+    plugins: [
+      getFileListLoader(options?.virtualFiles),
+      getMdxLoader(environment),
+      getReactAriaLoader(),
+      getClientReferenceLoader(),
+      getTailwindLoader(environment, options?.virtualFiles),
+      getMetaLoader(Boolean(options?.virtualFiles)),
+      getProviderLoader(environment, provider),
+      ...(options?.plugins || []),
+    ],
+
+    define: composeEnvironmentVariables({
+      isLoggingQueries: options?.logQueries || false,
+      enableServiceWorker: options?.enableServiceWorker || false,
+      provider,
+      environment,
+    }),
+  });
 
   const writeToDisk = !options?.virtualFiles;
 
   return {
-    async rebuild() {
-      const bundle = await rollup({
-        input,
-        plugins,
-        // external dependencies
-        external: ['node:events'],
-        cache: previousBundle ?? undefined,
-      });
-
-      previousBundle = bundle;
-
-      const entryFileNames = (chunk: OutputChunk) => {
+    async rebuild(): Promise<RolldownOutput> {
+      const entryFileNames: ChunkFileNamesFunction = (chunk) => {
         // client entry gets our fixed init name to be renamed later by meta loader
         if (chunk.facadeModuleId === clientInputFile) {
           return getOutputFile('init', 'js');
@@ -151,7 +120,7 @@ export const composeBuildContext = async (
         return '[name].js';
       };
 
-      const outputOptions = {
+      const outputOptions: OutputOptions = {
         dir: outputDirectory,
         format: 'es' as const,
         sourcemap: true,
@@ -159,56 +128,7 @@ export const composeBuildContext = async (
         banner,
       };
 
-      if (writeToDisk) {
-        await bundle.write(outputOptions);
-        return { errors: [], warnings: [] };
-      }
-
-      const generated = await bundle.generate(outputOptions);
-
-      // Adapt to esbuild-like output files API
-      const outputFiles = (generated.output as Array<OutputChunk | OutputAsset>).flatMap(
-        (item) => {
-          if (item.type === 'chunk') {
-            const text = item.code;
-            const contents = new TextEncoder().encode(text);
-            return [
-              {
-                path: path.join(outputDirectory, (item as OutputChunk).fileName),
-                contents,
-                get text() {
-                  return text;
-                },
-                hash: 'noop',
-              },
-            ];
-          }
-          {
-            const source = (item as OutputAsset).source as string | Uint8Array;
-            const text =
-              typeof source === 'string' ? source : new TextDecoder().decode(source);
-            const contents =
-              typeof source === 'string' ? new TextEncoder().encode(source) : source;
-            return [
-              {
-                path: path.join(outputDirectory, (item as OutputAsset).fileName),
-                contents,
-                get text() {
-                  return text;
-                },
-                hash: 'noop',
-              },
-            ];
-          }
-        },
-      );
-
-      return { errors: [], warnings: [], outputFiles };
-    },
-    async dispose() {
-      // Rolldown/Rollup bundles are closed per build; nothing persistent to dispose here
-      previousBundle = null;
-      await Promise.resolve();
+      return writeToDisk ? bundle.write(outputOptions) : bundle.generate(outputOptions);
     },
   };
 };

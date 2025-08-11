@@ -91,6 +91,7 @@ if (isBuilding || isDeveloping) {
         },
         writeBundle() {
           spinner.succeed();
+
           if (isDeveloping) {
             const moduleName = `${defaultDeploymentProvider}.js?t=${Date.now()}`;
             server.module = import(path.join(outputDirectory, moduleName));
