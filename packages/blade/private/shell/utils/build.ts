@@ -65,14 +65,14 @@ export const composeBuildContext = async (
   const provider = getProvider();
 
   // Build inputs
-  const serveEntry = path.join(serverInputFolder, `${provider}.js`);
+  const serverEntry = path.join(serverInputFolder, `${provider}.js`);
   const swEntry = path.join(serverInputFolder, 'service-worker.js');
 
   const tsconfigFilename = path.join(process.cwd(), 'tsconfig.json');
 
   const input: Record<string, string> = {
     client: clientInputFile,
-    provider: serveEntry,
+    provider: serverEntry,
   };
 
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
@@ -121,15 +121,15 @@ export const composeBuildContext = async (
   return {
     async rebuild(): Promise<RolldownOutput> {
       const entryFileNames: ChunkFileNamesFunction = (chunk) => {
-        // client entry gets our fixed init name to be renamed later by meta loader
+        // Client entry gets our fixed init name to be renamed later by meta loader.
         if (chunk.facadeModuleId === clientInputFile) {
           return getOutputFile('init', 'js');
         }
-        // provider entry should be the default deployment provider filename
-        if (chunk.facadeModuleId === serveEntry) {
+        // Provider entry should be the default deployment provider filename.
+        if (chunk.facadeModuleId === serverEntry) {
           return `${defaultDeploymentProvider}.js`;
         }
-        // service worker
+        // Service worker.
         if (options?.enableServiceWorker && chunk.facadeModuleId === swEntry) {
           return 'service-worker.js';
         }
