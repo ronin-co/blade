@@ -35,12 +35,12 @@ export const build = async (
       {
         name: 'Memory Loader',
         resolveId(id, importer) {
-          // Turn relative to absolute for virtual files
+          // Turn relative to absolute for virtual files.
           if (id.startsWith('.')) {
             const abs = path.join(path.dirname(importer || process.cwd()), id);
             if (virtualFiles.some((f) => f.path === abs)) return abs;
           }
-          // keep node_modules and framework files resolved by default resolver
+          // Keep node_modules and framework files resolved by default resolver.
           return null;
         },
         load(id) {
