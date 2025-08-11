@@ -1,10 +1,15 @@
 import path from 'node:path';
-import * as esbuild from 'esbuild';
+import {
+  type OutputAsset,
+  type OutputChunk,
+  type Plugin as RolldownPlugin,
+  type RollupBuild,
+  rollup,
+} from 'rolldown';
 
 import {
   clientInputFile,
   defaultDeploymentProvider,
-  nodePath,
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
@@ -32,7 +37,7 @@ export interface VirtualFileItem {
 }
 
 /**
- * Prepares an `esbuild` context for building a Blade application.
+ * Prepares a Rolldown-powered build context for building a Blade application.
  *
  * @param environment - The environment for which the build should run.
  * @param [options] - Optional configuration for running the build.
@@ -44,74 +49,166 @@ export interface VirtualFileItem {
  *
  * @returns An esbuild context.
  */
-export const composeBuildContext = (
+export const composeBuildContext = async (
   environment: 'development' | 'production',
   options?: {
     enableServiceWorker?: boolean;
     logQueries?: boolean;
-    plugins?: Array<esbuild.Plugin>;
+    plugins?: Array<RolldownPlugin>;
     virtualFiles?: Array<VirtualFileItem>;
   },
-): Promise<esbuild.BuildContext> => {
+): Promise<{
+  rebuild: () => Promise<{
+    errors: Array<unknown>;
+    warnings: Array<unknown>;
+    outputFiles?: Array<{
+      path: string;
+      contents: Uint8Array;
+      readonly text: string;
+      hash?: string;
+    }>;
+  }>;
+  dispose: () => Promise<void>;
+}> => {
   const provider = getProvider();
 
-  const entryPoints: esbuild.BuildOptions['entryPoints'] = [
-    {
-      in: clientInputFile,
-      out: getOutputFile('init'),
+  // Build inputs
+  const serveEntry = path.join(serverInputFolder, `${provider}.js`);
+  const swEntry = path.join(serverInputFolder, 'service-worker.js');
+
+  const input: Record<string, string> = {
+    client: clientInputFile,
+    provider: serveEntry,
+  };
+
+  if (options?.enableServiceWorker) input['service_worker'] = swEntry;
+
+  // Define replacement plugin (simple string replacement for import.meta.env and NODE_ENV)
+  const defineMap = composeEnvironmentVariables({
+    isLoggingQueries: options?.logQueries || false,
+    enableServiceWorker: options?.enableServiceWorker || false,
+    provider,
+    environment,
+  });
+
+  const definePlugin: RolldownPlugin = {
+    name: 'blade-define-replacements',
+    transform(code: string) {
+      let transformed = code;
+      for (const [key, value] of Object.entries(defineMap)) {
+        // naive replace is acceptable for explicit keys like import.meta.env.X and process.env.NODE_ENV
+        transformed = transformed.split(key).join(value);
+      }
+      return { code: transformed, map: null };
     },
-    {
-      in: path.join(serverInputFolder, `${provider}.js`),
-      out: defaultDeploymentProvider,
-    },
+  };
+
+  // Banner to ensure import.meta.env exists
+  const banner = 'if(!import.meta.env){import.meta.env={}};';
+
+  const plugins: Array<RolldownPlugin> = [
+    getFileListLoader(options?.virtualFiles),
+    getMdxLoader(environment),
+    getReactAriaLoader(),
+    getClientReferenceLoader(),
+    getTailwindLoader(environment, options?.virtualFiles),
+    getMetaLoader(Boolean(options?.virtualFiles)),
+    getProviderLoader(environment, provider),
+    definePlugin,
+    ...(options?.plugins || []),
   ];
 
-  if (options?.enableServiceWorker) {
-    entryPoints.push({
-      in: path.join(serverInputFolder, 'service-worker.js'),
-      out: 'service-worker',
-    });
-  }
+  // Keep cache between rebuilds for faster dev builds
+  let previousBundle: RollupBuild | null = null;
 
-  return esbuild.context({
-    entryPoints,
-    outdir: outputDirectory,
-    sourcemap: 'external',
-    bundle: true,
+  const writeToDisk = !options?.virtualFiles;
 
-    // Return the files in memory if a list of source file paths was provided.
-    write: !options?.virtualFiles,
+  return {
+    async rebuild() {
+      const bundle = await rollup({
+        input,
+        plugins,
+        // external dependencies
+        external: ['node:events'],
+        cache: previousBundle ?? undefined,
+      });
 
-    platform: provider === 'vercel' ? 'node' : 'browser',
-    format: 'esm',
-    jsx: 'automatic',
-    nodePaths: [nodePath],
-    minify: environment === 'production',
+      previousBundle = bundle;
 
-    // TODO: Remove this once `@ronin/engine` no longer relies on it.
-    external: ['node:events'],
+      const entryFileNames = (chunk: OutputChunk) => {
+        // client entry gets our fixed init name to be renamed later by meta loader
+        if (chunk.facadeModuleId === clientInputFile) {
+          return getOutputFile('init', 'js');
+        }
+        // provider entry should be the default deployment provider filename
+        if (chunk.facadeModuleId === serveEntry) {
+          return `${defaultDeploymentProvider}.js`;
+        }
+        // service worker
+        if (options?.enableServiceWorker && chunk.facadeModuleId === swEntry) {
+          return 'service-worker.js';
+        }
+        return '[name].js';
+      };
 
-    plugins: [
-      getFileListLoader(options?.virtualFiles),
-      getMdxLoader(environment),
-      getReactAriaLoader(),
-      getClientReferenceLoader(),
-      getTailwindLoader(environment, options?.virtualFiles),
-      getMetaLoader(Boolean(options?.virtualFiles)),
-      getProviderLoader(environment, provider),
+      const outputOptions = {
+        dir: outputDirectory,
+        format: 'es' as const,
+        sourcemap: true,
+        entryFileNames,
+        banner,
+      };
 
-      ...(options?.plugins || []),
-    ],
-    banner: {
-      // Prevent a crash for missing environment variables by ensuring that
-      // `import.meta.env` is defined.
-      js: 'if(!import.meta.env){import.meta.env={}};',
+      if (writeToDisk) {
+        await bundle.write(outputOptions);
+        return { errors: [], warnings: [] };
+      }
+
+      const generated = await bundle.generate(outputOptions);
+
+      // Adapt to esbuild-like output files API
+      const outputFiles = (generated.output as Array<OutputChunk | OutputAsset>).flatMap(
+        (item) => {
+          if (item.type === 'chunk') {
+            const text = item.code;
+            const contents = new TextEncoder().encode(text);
+            return [
+              {
+                path: path.join(outputDirectory, (item as OutputChunk).fileName),
+                contents,
+                get text() {
+                  return text;
+                },
+                hash: 'noop',
+              },
+            ];
+          }
+          {
+            const source = (item as OutputAsset).source as string | Uint8Array;
+            const text =
+              typeof source === 'string' ? source : new TextDecoder().decode(source);
+            const contents =
+              typeof source === 'string' ? new TextEncoder().encode(source) : source;
+            return [
+              {
+                path: path.join(outputDirectory, (item as OutputAsset).fileName),
+                contents,
+                get text() {
+                  return text;
+                },
+                hash: 'noop',
+              },
+            ];
+          }
+        },
+      );
+
+      return { errors: [], warnings: [], outputFiles };
     },
-    define: composeEnvironmentVariables({
-      isLoggingQueries: options?.logQueries || false,
-      enableServiceWorker: options?.enableServiceWorker || false,
-      provider,
-      environment,
-    }),
-  });
+    async dispose() {
+      // Rolldown/Rollup bundles are closed per build; nothing persistent to dispose here
+      previousBundle = null;
+      await Promise.resolve();
+    },
+  };
 };

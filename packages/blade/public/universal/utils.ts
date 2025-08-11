@@ -1,18 +1,26 @@
 import path from 'node:path';
-import type { Loader, Message, OutputFile } from 'esbuild';
 
-import { nodePath, sourceDirPath } from '@/private/shell/constants';
-import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
+// Keep for path normalization behavior in Memory Loader
+// removed unused import of sourceDirPath to satisfy linter
+import type { VirtualFileItem } from '@/private/shell/utils/build';
+import { composeBuildContext } from '@/private/shell/utils/build';
 
 interface BuildConfig {
   sourceFiles: Array<VirtualFileItem>;
   environment?: 'development' | 'production';
 }
 
+interface OutputFileLike {
+  path: string;
+  contents: Uint8Array;
+  readonly text: string;
+  hash?: string;
+}
+
 interface BuildOutput {
-  errors: Array<Message>;
-  warnings: Array<Message>;
-  outputFiles: Array<OutputFile>;
+  errors: Array<unknown>;
+  warnings: Array<unknown>;
+  outputFiles: Array<OutputFileLike>;
 }
 
 /**
@@ -40,49 +48,24 @@ export const build = async (config: BuildConfig): Promise<BuildOutput> => {
     plugins: [
       {
         name: 'Memory Loader',
-        setup(build) {
-          const rawLoaders = ['js', 'jsx', 'ts', 'tsx', 'json'];
-
-          build.onResolve({ filter: /.*/ }, (args) => {
-            // Turn relative paths into absolute ones.
-            const resolved = args.path.startsWith('.')
-              ? path.join(args.resolveDir, args.path)
-              : args.path;
-
-            if (
-              // Load files in `node_modules` from disk.
-              resolved.startsWith(nodePath) ||
-              // Load framework source files from disk (framework might be linked).
-              resolved.startsWith(sourceDirPath) ||
-              // Load dependency imports from disk (like "react").
-              !resolved.startsWith('/')
-            ) {
-              return;
-            }
-
-            return { path: resolved, namespace: 'memory' };
-          });
-
-          build.onLoad({ filter: /.*/, namespace: 'memory' }, (args) => {
-            const sourceFile = virtualFiles.find((sourceFile) => {
-              return sourceFile.path === args.path;
-            });
-
-            if (!sourceFile) {
-              throw new Error(`No source file found for import "${args.path}".`);
-            }
-
-            const contents = sourceFile.content;
-            const extension = path.extname(args.path).slice(1);
-            const loader = (rawLoaders.includes(extension) ? extension : 'js') as Loader;
-
-            return { contents, loader, resolveDir: process.cwd() };
-          });
+        resolveId(id, importer) {
+          // Turn relative to absolute for virtual files
+          if (id.startsWith('.')) {
+            const abs = path.join(path.dirname(importer || process.cwd()), id);
+            if (virtualFiles.some((f) => f.path === abs)) return abs;
+          }
+          // keep node_modules and framework files resolved by default resolver
+          return null;
+        },
+        load(id) {
+          const sourceFile = virtualFiles.find((sourceFile) => sourceFile.path === id);
+          if (!sourceFile) return null;
+          return sourceFile.content;
         },
       },
     ],
   });
 
   const { errors, warnings, outputFiles } = await mainBuild.rebuild();
-  return { errors, warnings, outputFiles };
+  return { errors, warnings, outputFiles: outputFiles ?? [] };
 };
