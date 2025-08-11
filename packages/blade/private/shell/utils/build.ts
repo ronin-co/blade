@@ -10,6 +10,7 @@ import {
 import {
   clientInputFile,
   defaultDeploymentProvider,
+  nodePath,
   outputDirectory,
   serverInputFolder,
 } from '@/private/shell/constants';
@@ -22,7 +23,7 @@ import {
   getReactAriaLoader,
   getTailwindLoader,
 } from '@/private/shell/loaders';
-import { composeEnvironmentVariables } from '@/private/shell/utils';
+import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
@@ -66,6 +67,8 @@ export const composeBuildContext = async (
   const serveEntry = path.join(serverInputFolder, `${provider}.js`);
   const swEntry = path.join(serverInputFolder, 'service-worker.js');
 
+  const tsconfigFilename = path.join(process.cwd(), 'tsconfig.json');
+
   const input: Record<string, string> = {
     client: clientInputFile,
     provider: serveEntry,
@@ -78,6 +81,18 @@ export const composeBuildContext = async (
 
   const bundle = await rolldown({
     input,
+    resolve: {
+      modules: [nodePath],
+      tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
+
+      // When linking the framework package, rolldown doesn't recognize these dependencies
+      // correctly, so we have to alias them explicitly.
+      alias: {
+        react: path.join(nodePath, 'react'),
+        'react-dom': path.join(nodePath, 'react-dom'),
+      },
+    },
+
     // TODO: Remove this once `@ronin/engine` no longer relies on it.
     external: ['node:events'],
 
