@@ -81,6 +81,8 @@ export const composeBuildContext = async (
 
   const bundle = await rolldown({
     input,
+    platform: provider === 'vercel' ? 'node' : 'browser',
+
     resolve: {
       modules: [nodePath],
       tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
@@ -135,10 +137,10 @@ export const composeBuildContext = async (
 
       const outputOptions: OutputOptions = {
         dir: outputDirectory,
-        format: 'es' as const,
         sourcemap: true,
         entryFileNames,
         banner,
+        minify: environment === 'production',
       };
 
       return options?.virtualFiles
