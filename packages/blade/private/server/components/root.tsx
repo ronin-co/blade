@@ -1,4 +1,3 @@
-import { bundleId as serverBundleId } from 'build-meta';
 import { flatten } from 'flat';
 import type { ReactNode } from 'react';
 
@@ -26,6 +25,8 @@ const metadataNames: Record<string, string> = {
   'openGraph.description': 'og:description',
   'openGraph.siteName': 'og:site_name',
 };
+
+const serverBundleId = import.meta.env.__BLADE_BUNDLE_ID;
 
 const ASSETS = new Array<Asset>(
   { type: 'js', source: `/${getOutputFile(serverBundleId, 'js')}` },

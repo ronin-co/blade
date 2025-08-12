@@ -1,6 +1,5 @@
 import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
-import { bundleId as serverBundleId } from 'build-meta';
 import { getCookie } from 'hono/cookie';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
@@ -255,7 +254,7 @@ app.post('*', async (c) => {
   // the markup for the new bundles to the client. However, we will still consider the
   // queries of the incoming request, to make sure that writes aren't lost in the void,
   // even if the bundles have changed.
-  const correctBundle = c.req.header('X-Bundle-Id') === serverBundleId;
+  const correctBundle = c.req.header('X-Bundle-Id') === import.meta.env.__BLADE_BUNDLE_ID;
 
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/event-stream');

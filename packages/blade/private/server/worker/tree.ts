@@ -2,7 +2,6 @@ import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import type { FormattedResults } from 'blade-client/types';
 import { ClientError } from 'blade-client/utils';
 import type { Query } from 'blade-compiler';
-import { bundleId as serverBundleId } from 'build-meta';
 import {
   type CookieSerializeOptions,
   parse as parseCookies,
@@ -495,7 +494,7 @@ export const flushSession = async (
 
     // Afterward, flush the update over the stream.
     await stream.writeSSE({
-      id: `${crypto.randomUUID()}-${serverBundleId}`,
+      id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,
       event: correctBundle ? 'update' : 'update-bundle',
       data: page.text(),
     });
@@ -856,7 +855,7 @@ const renderReactTree = async (
   } else {
     headers.set('Content-Type', 'application/json');
     // The ID of the main bundle currently available on the server.
-    headers.set('X-Server-Bundle-Id', serverBundleId);
+    headers.set('X-Server-Bundle-Id', import.meta.env.__BLADE_BUNDLE_ID);
   }
 
   return new Response(body, { headers });

@@ -1,6 +1,5 @@
 import path from 'node:path';
 import {
-  type ChunkFileNamesFunction,
   type OutputOptions,
   type RolldownOutput,
   type Plugin as RolldownPlugin,
@@ -9,7 +8,6 @@ import {
 
 import {
   clientInputFile,
-  defaultDeploymentProvider,
   nodePath,
   outputDirectory,
   serverInputFolder,
@@ -18,13 +16,13 @@ import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
-  getMetaLoader,
   getProviderLoader,
   getReactAriaLoader,
   getTailwindLoader,
 } from '@/private/shell/loaders';
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 export interface VirtualFileItem {
@@ -72,13 +70,10 @@ export const composeBuildContext = async (
 
   const input: Record<string, string> = {
     client: clientInputFile,
-    provider: serverEntry,
+    'edge-worker': serverEntry,
   };
 
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
-
-  // Banner to ensure import.meta.env exists
-  const banner = 'if(!import.meta.env){import.meta.env={}};';
 
   const bundle = await rolldown({
     input,
@@ -96,16 +91,12 @@ export const composeBuildContext = async (
       },
     },
 
-    // TODO: Remove this once `@ronin/engine` no longer relies on it.
-    external: ['node:events'],
-
     plugins: [
       getFileListLoader(options?.virtualFiles),
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
-      getTailwindLoader(environment, options?.virtualFiles),
-      getMetaLoader(Boolean(options?.virtualFiles)),
+      getTailwindLoader(environment),
       getProviderLoader(environment, provider),
       ...(options?.plugins || []),
     ],
@@ -119,30 +110,20 @@ export const composeBuildContext = async (
   });
 
   return {
-    async rebuild(): Promise<RolldownOutput> {
-      const entryFileNames: ChunkFileNamesFunction = (chunk) => {
-        // Client entry gets our fixed init name to be renamed later by meta loader.
-        if (chunk.facadeModuleId === clientInputFile) {
-          return getOutputFile('init', 'js');
-        }
-        // Provider entry should be the default deployment provider filename.
-        if (chunk.facadeModuleId === serverEntry) {
-          return `${defaultDeploymentProvider}.js`;
-        }
-        // Service worker.
-        if (options?.enableServiceWorker && chunk.facadeModuleId === swEntry) {
-          return 'service-worker.js';
-        }
-        return '[name].js';
-      };
+    rebuild(): Promise<RolldownOutput> {
+      const bundleId = generateUniqueId();
 
       const outputOptions: OutputOptions = {
         dir: outputDirectory,
         sourcemap: true,
-        entryFileNames,
-        chunkFileNames: getOutputFile('chunk.[hash]', 'js'),
-        banner,
+        banner: `if(!import.meta.env){import.meta.env={}};import.meta.env.__BLADE_BUNDLE_ID='${bundleId}';`,
         minify: environment === 'production',
+        entryFileNames: (chunk) => {
+          if (chunk.name === 'client') return getOutputFile(bundleId, 'js');
+          return '[name].js';
+        },
+        assetFileNames: getOutputFile(bundleId, 'css'),
+        chunkFileNames: getOutputFile('chunk.[hash]', 'js'),
       };
 
       return options?.virtualFiles

@@ -1,6 +1,5 @@
 import { constants, access, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import ora from 'ora';
 
 import {
@@ -161,15 +160,13 @@ export const wrapClientExport = (
   `;
 };
 
-export const extractDeclarationName = (
-  node: TSESTree.Node | null | undefined,
-): string | null => {
+export const extractDeclarationName = (node: any | null | undefined): string | null => {
   if (!node) return null;
   switch (node.type) {
     case 'Identifier':
       return node.name;
     case 'Literal':
-      return String((node as TSESTree.Literal).value);
+      return String(node.value);
     default:
       if ('id' in node && node.id?.type === 'Identifier') return node.id.name;
       return null;
