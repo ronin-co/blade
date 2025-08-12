@@ -26,7 +26,7 @@ The first and currently largest known implementation of Blade is the [RONIN](htt
 
 Blade purposefully does not (and likely won't ever) comply with the official specification for React Server Components, because it provides different solutions to the problems that RSC aims to solve.
 
-- **No Server Functions** (instead of executing arbitrary code, the only way to invoke the server in Blade is through a [mutation](#usemutation-client))
+- **No Server Functions** (instead of executing arbitrary code, the only way to invoke the server in Blade is through a [mutation](https://blade.im/hooks#usemutation-client))
 - **No Async Components** (I/O leads to slow code, so reads in Blade are always synchronous, but async behind the scenes)
 - **No Suspense** (Blade does not support reads on the client — server components can only read and client components can only write)
 
