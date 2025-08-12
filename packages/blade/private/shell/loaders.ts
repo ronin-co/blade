@@ -341,7 +341,7 @@ export const getTailwindLoader = (
 
       this.emitFile({
         type: 'asset',
-        fileName: getOutputFile('init', 'css'),
+        fileName: getOutputFile('[hash]', 'css'),
         source,
       });
     },
