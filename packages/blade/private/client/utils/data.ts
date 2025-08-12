@@ -12,9 +12,9 @@ type ResponseError = Error & { body: string; statusCode: number };
 type AbortError = Error & { type: string };
 
 /**
- * Detects if the current browser has issues with stream handling that require XHR fallback
+ * Detects if the current browser has issues with stream handling that require a XHR fallback.
  *
- * @returns True if the browser needs XHR fallback for stream issues
+ * @returns True if the browser needs a XHR fallback for stream issues.
  */
 function needsXHRFallback(): boolean {
   if (typeof navigator === 'undefined') return false;
@@ -42,7 +42,7 @@ function extractXHRUrl(request: string | URL | Request): string {
 }
 
 /**
- * XMLHttpRequest-based implementation to replace fetch for better Safari compatibility
+ * XMLHttpRequest-based implementation to replace `fetch` for better Safari compatibility.
  *
  * @param request - A URL or `Request` object.
  * @param requestInit - An optional `RequestInit` object.
@@ -123,9 +123,8 @@ export const fetchRetry = async (
 ): Promise<Response> => {
   return retry(async (bail) => {
     try {
-      // Note: Safari has an issue where streams are closed but the connection remains open
-      // so UI flushing / revalidation will end up flickering between the current and previous
-      // page.
+      // Safari has an issue where streams are closed but the connection remains open, so
+      // UI flushing / revalidation will end up flickering between the current and previous page.
       let response: Response;
       if (needsXHRFallback()) {
         const xhrResponse = await makeXHRRequest(request, requestInit);
