@@ -8,7 +8,6 @@ import {
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
-import { type TSESTree, parse } from '@typescript-eslint/typescript-estree';
 import YAML from 'js-yaml';
 import MagicString from 'magic-string';
 import type { Plugin as RolldownPlugin } from 'rolldown';
@@ -42,9 +41,10 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
   name: 'Client Reference Loader',
   transform: {
     filter: {
-      id: /\.client\.(js|jsx|ts|tsx)$/,
+      id: /\.client\.(ts|tsx|js|jsx)$/,
     },
     handler(code, id) {
+      const extension = path.extname(id).slice(1) as 'ts' | 'tsx' | 'js' | 'jsx';
       const rawContents = code;
       const relativeSourcePath = path.relative(process.cwd(), id.replace(/^\0+/, ''));
       const chunkId = generateUniqueId();
@@ -57,7 +57,13 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
         rawContents,
       ].join('\n');
 
-      const ast = parse(contents, { range: true, loc: true, jsx: true });
+      const ast = this.parse(contents, {
+        lang: extension,
+        sourceType: 'module',
+        astType: 'js',
+        range: true,
+      });
+
       const ms = new MagicString(contents);
       const exportList: Array<ExportItem> = [];
 
@@ -90,16 +96,15 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
             }
 
             // Remove only the `export ` prefix so the declaration remains.
-            ms.remove(node.range[0], decl.range[0]);
+            ms.remove(node.range![0], decl.range![0]);
           } else {
             // Pure `export { foo, bar }` — drop the whole statement.
             for (const spec of node.specifiers) {
-              const localName = extractDeclarationName(spec.local as TSESTree.Node) || '';
-              const exportedName =
-                extractDeclarationName(spec.exported as TSESTree.Node) || '';
+              const localName = extractDeclarationName(spec.local) || '';
+              const exportedName = extractDeclarationName(spec.exported) || '';
               exportList.push({ localName, externalName: exportedName });
             }
-            ms.remove(node.range[0], node.range[1]);
+            ms.remove(node.range![0], node.range![1]);
           }
         }
 
@@ -111,7 +116,7 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
           if (decl.type === 'Identifier') {
             const name = decl.name;
             exportList.push({ localName: name, externalName: 'default' });
-            ms.remove(node.range[0], node.range[1]);
+            ms.remove(node.range![0], node.range![1]);
             continue;
           }
 
@@ -119,8 +124,8 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
           const localName = extractDeclarationName(decl) || '__default_export';
           if (localName === '__default_export') {
             ms.overwrite(
-              node.range[0],
-              node.range[0] + 'export default'.length,
+              node.range![0],
+              node.range![0] + 'export default'.length,
               `const ${localName} =`,
             );
 
@@ -128,7 +133,7 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
           }
 
           // Named default declaration (function/class).
-          ms.remove(node.range[0], node.range[0] + 'export default'.length);
+          ms.remove(node.range![0], node.range![0] + 'export default'.length);
 
           exportList.push({ localName, externalName: 'default' });
         }
