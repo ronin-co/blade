@@ -326,7 +326,6 @@ export const getTailwindLoader = (
         id: /\.(tsx|jsx)$/,
       },
       async handler(content, filePath) {
-        console.log(filePath);
         const extension = path.extname(filePath).slice(1); // "tsx" | "jsx"
         const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
 
@@ -334,18 +333,16 @@ export const getTailwindLoader = (
       },
     },
     generateBundle() {
-      const compiledStyles = compiler.build(candidates);
-      const optimizedStyles = optimizeTailwind(compiledStyles, {
-        file: 'input.css',
-        minify: environment === 'production',
-      });
+      let source = compiler.build(candidates);
 
-      const cssFileName = getOutputFile(CURRENT_BUNDLE_ID || 'init', 'css');
+      if (environment === 'production') {
+        source = optimizeTailwind(source, { minify: true }).code;
+      }
 
       this.emitFile({
         type: 'asset',
-        fileName: cssFileName,
-        source: optimizedStyles.code,
+        fileName: getOutputFile('init', 'css'),
+        source,
       });
     },
   };
