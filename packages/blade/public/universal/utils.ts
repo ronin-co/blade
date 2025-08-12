@@ -1,5 +1,4 @@
-import path from 'node:path';
-
+import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
 const makePathAbsolute = (input: string) => {
@@ -7,6 +6,14 @@ const makePathAbsolute = (input: string) => {
   if (input.startsWith('/')) return input;
   return `/${input}`;
 };
+
+// Tiny helpers for safe, cross-platform matching.
+const reEscape = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const toPosix = (input: string) => input.replace(/\\/g, '/');
+
+const ignoreStart = new RegExp(
+  `^(?:${[nodePath, sourceDirPath].map((p) => reEscape(toPosix(p))).join('|')})`,
+);
 
 interface BuildConfig {
   sourceFiles: Array<VirtualFileItem>;
@@ -35,19 +42,24 @@ export const build = async (
     plugins: [
       {
         name: 'Memory Loader',
-        resolveId(id, importer) {
-          // Turn relative to absolute for virtual files.
-          if (id.startsWith('.')) {
-            const abs = path.join(path.dirname(importer || process.cwd()), id);
-            if (virtualFiles.some((f) => f.path === abs)) return abs;
-          }
-          // Keep node_modules and framework files resolved by default resolver.
-          return null;
+        resolveId: {
+          filter: {
+            id: { include: [/^\//], exclude: [ignoreStart] },
+          },
+          handler(id) {
+            return `virtual:${id}`;
+          },
         },
-        load(id) {
-          const sourceFile = virtualFiles.find((sourceFile) => sourceFile.path === id);
-          if (!sourceFile) return null;
-          return sourceFile.content;
+        load: {
+          filter: {
+            id: /^virtual:/,
+          },
+          handler(id) {
+            const absolutePath = id.replace('virtual:', '');
+            const sourceFile = virtualFiles.find(({ path }) => path === absolutePath);
+            if (!sourceFile) return;
+            return sourceFile.content;
+          },
         },
       },
     ],
