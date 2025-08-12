@@ -17,13 +17,10 @@ interface ImportMetaEnv {
   readonly __BLADE_DEBUG_LEVEL: 'verbose' | 'error';
   readonly __BLADE_PROVIDER: import('./util').DeploymentProvider;
   readonly __BLADE_SERVICE_WORKER: string;
+  readonly __BLADE_BUNDLE_ID: string;
 }
 
 // biome-ignore lint/correctness/noUnusedVariables: This is needed.
 interface ImportMeta {
   readonly env: ImportMetaEnv;
-}
-
-declare module 'build-meta' {
-  export const bundleId: string;
 }

@@ -261,33 +261,6 @@ export const getProviderLoader = (
   },
 });
 
-export const getMetaLoader = (): RolldownPlugin => {
-  let bundleId: string;
-
-  return {
-    name: 'Init Loader',
-    outputOptions(opts) {
-      bundleId = generateUniqueId();
-
-      opts.entryFileNames = (chunk) => {
-        if (chunk.name === 'client') return getOutputFile(bundleId, 'js');
-        return '[name].js';
-      };
-
-      opts.assetFileNames = getOutputFile(bundleId, 'css');
-      opts.chunkFileNames = getOutputFile('chunk.[hash]', 'js');
-
-      return opts;
-    },
-    resolveId(source) {
-      if (source === 'build-meta') return '\u0000build-meta.ts';
-    },
-    load(id) {
-      if (id === '\u0000build-meta.ts') return `export const bundleId = "${bundleId}";`;
-    },
-  };
-};
-
 export const getTailwindLoader = (
   environment: 'development' | 'production',
 ): RolldownPlugin => {

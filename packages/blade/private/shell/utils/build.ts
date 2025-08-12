@@ -16,13 +16,14 @@ import {
   getClientReferenceLoader,
   getFileListLoader,
   getMdxLoader,
-  getMetaLoader,
   getProviderLoader,
   getReactAriaLoader,
   getTailwindLoader,
 } from '@/private/shell/loaders';
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
+import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { getOutputFile } from '@/private/universal/utils/paths';
 
 export interface VirtualFileItem {
   /**
@@ -74,9 +75,6 @@ export const composeBuildContext = async (
 
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
 
-  // Banner to ensure import.meta.env exists
-  const banner = 'if(!import.meta.env){import.meta.env={}};';
-
   const bundle = await rolldown({
     input,
     platform: provider === 'vercel' ? 'node' : 'browser',
@@ -99,7 +97,6 @@ export const composeBuildContext = async (
       getReactAriaLoader(),
       getClientReferenceLoader(),
       getTailwindLoader(environment),
-      getMetaLoader(),
       getProviderLoader(environment, provider),
       ...(options?.plugins || []),
     ],
@@ -114,11 +111,19 @@ export const composeBuildContext = async (
 
   return {
     rebuild(): Promise<RolldownOutput> {
+      const bundleId = generateUniqueId();
+
       const outputOptions: OutputOptions = {
         dir: outputDirectory,
         sourcemap: true,
-        banner,
+        banner: `if(!import.meta.env){import.meta.env={}};import.meta.env.__BLADE_BUNDLE_ID='${bundleId}';`,
         minify: environment === 'production',
+        entryFileNames: (chunk) => {
+          if (chunk.name === 'client') return getOutputFile(bundleId, 'js');
+          return '[name].js';
+        },
+        assetFileNames: getOutputFile(bundleId, 'css'),
+        chunkFileNames: getOutputFile('chunk.[hash]', 'js'),
       };
 
       return options?.virtualFiles
