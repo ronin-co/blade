@@ -91,9 +91,7 @@ export const createStreamSource = async (
   };
 };
 
-const SESSION: {
-  root?: import('react-dom/client').Root;
-} = {};
+let BLADE_ROOT: import('react-dom/client').Root | null = null;
 
 /**
  * Receives a React node and renders it at the root of the page.
@@ -103,12 +101,12 @@ const SESSION: {
  * @returns Nothing.
  */
 export const renderRoot = (content: ReactNode): void => {
-  if (SESSION.root) {
-    SESSION.root.render(content);
+  if (BLADE_ROOT) {
+    BLADE_ROOT.render(content);
     return;
   }
 
-  SESSION.root = hydrateRoot(document, content, {
+  BLADE_ROOT = hydrateRoot(document, content, {
     onRecoverableError(error, errorInfo) {
       console.error('Hydration error occurred:', error, errorInfo);
     },
@@ -179,8 +177,8 @@ export const mountNewBundle = async (bundleId: string, markup: string) => {
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
   // the updated CSS and JS bundles and mounts a new React root. This ensures that not
   // only the CSS and JS bundles can be upgraded, but also React itself.
-  SESSION.root?.unmount();
-  delete SESSION.root;
+  BLADE_ROOT?.unmount();
+  BLADE_ROOT = null;
 
   const parser = new DOMParser();
   const newDocument = parser.parseFromString(newMarkup, 'text/html');
