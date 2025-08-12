@@ -9,6 +9,7 @@ const retryOptions = {
 };
 
 type ResponseError = Error & { body: string; statusCode: number };
+type AbortError = Error & { type: string };
 
 /**
  * Detects if the current browser has issues with stream handling that require XHR fallback
@@ -78,7 +79,6 @@ function makeXHRRequest(
         for (const line of lines) {
           const parts = line.split(': ');
           if (parts.length === 2) {
-            // headers[parts[0]] = parts[1];
             headers.append(parts[0], parts[1]);
           }
         }
@@ -97,15 +97,15 @@ function makeXHRRequest(
     };
 
     xhr.onabort = (): void => {
-      const error = new Error('Request aborted');
-      (error as any).type = 'aborted';
+      const error = new Error('Request aborted') as AbortError;
+      error.type = 'aborted';
       reject(error);
     };
 
     // Handle abort signal
     if (requestInit?.signal) requestInit.signal.addEventListener('abort', xhr.abort);
 
-    xhr.send(requestInit?.body as any);
+    xhr.send(requestInit?.body as XMLHttpRequestBodyInit);
   });
 }
 
