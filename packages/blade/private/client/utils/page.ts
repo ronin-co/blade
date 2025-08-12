@@ -1,4 +1,3 @@
-import { bundleId as clientBundleId } from 'build-meta';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
@@ -58,7 +57,7 @@ export const createStreamSource = async (
     body,
     headers: {
       Accept: 'text/event-stream',
-      'X-Bundle-Id': clientBundleId,
+      'X-Bundle-Id': import.meta.env.__BLADE_BUNDLE_ID,
     },
     signal: abortController.signal,
   });

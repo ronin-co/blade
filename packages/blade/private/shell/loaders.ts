@@ -8,7 +8,6 @@ import {
   optimize as optimizeTailwind,
 } from '@tailwindcss/node';
 import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
-import { type TSESTree, parse } from '@typescript-eslint/typescript-estree';
 import YAML from 'js-yaml';
 import MagicString from 'magic-string';
 import type { Plugin as RolldownPlugin } from 'rolldown';
@@ -37,115 +36,124 @@ import {
 } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
-import { getOutputFile } from '@/private/universal/utils/paths';
-
-let CURRENT_BUNDLE_ID = '';
 
 export const getClientReferenceLoader = (): RolldownPlugin => ({
   name: 'Client Reference Loader',
-  transform(code, id) {
-    if (!/\.client\.(js|jsx|ts|tsx)$/.test(id)) return null;
-    const rawContents = code;
-    const relativeSourcePath = path.relative(process.cwd(), id.replace(/^\0+/, ''));
-    const chunkId = generateUniqueId();
+  transform: {
+    filter: {
+      id: /\.client\.(ts|tsx|js|jsx)$/,
+    },
+    handler(code, id) {
+      const extension = path.extname(id).slice(1) as 'ts' | 'tsx' | 'js' | 'jsx';
+      const rawContents = code;
+      const relativeSourcePath = path.relative(process.cwd(), id.replace(/^\0+/, ''));
+      const chunkId = generateUniqueId();
 
-    const contents = [
-      "const CLIENT_REFERENCE = Symbol.for('react.client.reference');",
-      "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');",
-      "const isNetlify = typeof Netlify !== 'undefined';",
-      '', // Empty line
-      rawContents,
-    ].join('\n');
+      const contents = [
+        "const CLIENT_REFERENCE = Symbol.for('react.client.reference');",
+        "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');",
+        "const isNetlify = typeof Netlify !== 'undefined';",
+        '', // Empty line
+        rawContents,
+      ].join('\n');
 
-    const ast = parse(contents, { range: true, loc: true, jsx: true });
-    const ms = new MagicString(contents);
-    const exportList: Array<ExportItem> = [];
+      const ast = this.parse(contents, {
+        lang: extension,
+        sourceType: 'module',
+        astType: 'js',
+        range: true,
+      });
 
-    for (const node of ast.body) {
-      // Skip remote re-exports (`export * from ...`) and types (`export type`).
-      if (
-        node.type === 'ExportAllDeclaration' ||
-        (node.type === 'ExportNamedDeclaration' &&
-          (node.source || node.exportKind === 'type'))
-      ) {
-        continue;
-      }
+      const ms = new MagicString(contents);
+      const exportList: Array<ExportItem> = [];
 
-      // Handle named exports.
-      if (node.type === 'ExportNamedDeclaration') {
-        const decl = node.declaration;
+      for (const node of ast.body) {
+        // Skip remote re-exports (`export * from ...`) and types (`export type`).
+        if (
+          node.type === 'ExportAllDeclaration' ||
+          (node.type === 'ExportNamedDeclaration' &&
+            (node.source || node.exportKind === 'type'))
+        ) {
+          continue;
+        }
 
-        if (decl) {
-          // Record function/class/var exports.
-          const name = extractDeclarationName(decl);
+        // Handle named exports.
+        if (node.type === 'ExportNamedDeclaration') {
+          const decl = node.declaration;
 
-          if (name && decl.type !== 'VariableDeclaration') {
-            exportList.push({ localName: name, externalName: name });
-          } else if (decl.type === 'VariableDeclaration') {
-            for (const d of decl.declarations) {
-              if (d.id.type === 'Identifier') {
-                exportList.push({ localName: d.id.name, externalName: d.id.name });
+          if (decl) {
+            // Record function/class/var exports.
+            const name = extractDeclarationName(decl);
+
+            if (name && decl.type !== 'VariableDeclaration') {
+              exportList.push({ localName: name, externalName: name });
+            } else if (decl.type === 'VariableDeclaration') {
+              for (const d of decl.declarations) {
+                if (d.id.type === 'Identifier') {
+                  exportList.push({ localName: d.id.name, externalName: d.id.name });
+                }
               }
             }
+
+            // Remove only the `export ` prefix so the declaration remains.
+            ms.remove(node.range![0], decl.range![0]);
+          } else {
+            // Pure `export { foo, bar }` — drop the whole statement.
+            for (const spec of node.specifiers) {
+              const localName = extractDeclarationName(spec.local) || '';
+              const exportedName = extractDeclarationName(spec.exported) || '';
+              exportList.push({ localName, externalName: exportedName });
+            }
+            ms.remove(node.range![0], node.range![1]);
+          }
+        }
+
+        // Handle default exports.
+        else if (node.type === 'ExportDefaultDeclaration') {
+          const decl = node.declaration;
+
+          // Pure identifier re-export: Remove whole statement.
+          if (decl.type === 'Identifier') {
+            const name = decl.name;
+            exportList.push({ localName: name, externalName: 'default' });
+            ms.remove(node.range![0], node.range![1]);
+            continue;
           }
 
-          // Remove only the `export ` prefix so the declaration remains.
-          ms.remove(node.range[0], decl.range[0]);
+          // Anonymous default (e.g. `export default () => {}`).
+          const localName = extractDeclarationName(decl) || '__default_export';
+          if (localName === '__default_export') {
+            ms.overwrite(
+              node.range![0],
+              node.range![0] + 'export default'.length,
+              `const ${localName} =`,
+            );
+
+            continue;
+          }
+
+          // Named default declaration (function/class).
+          ms.remove(node.range![0], node.range![0] + 'export default'.length);
+
+          exportList.push({ localName, externalName: 'default' });
+        }
+      }
+
+      // Append property assignments and re-exports.
+      for (const exp of exportList) {
+        ms.append(
+          `\n${wrapClientExport(exp, { id: chunkId, path: relativeSourcePath })}`,
+        );
+
+        if (exp.localName === exp.externalName) {
+          ms.append(`\nexport { ${exp.localName} };`);
         } else {
-          // Pure `export { foo, bar }` — drop the whole statement.
-          for (const spec of node.specifiers) {
-            const localName = extractDeclarationName(spec.local as TSESTree.Node) || '';
-            const exportedName =
-              extractDeclarationName(spec.exported as TSESTree.Node) || '';
-            exportList.push({ localName, externalName: exportedName });
-          }
-          ms.remove(node.range[0], node.range[1]);
+          ms.append(`\nexport { ${exp.localName} as ${exp.externalName} };`);
         }
       }
 
-      // Handle default exports.
-      else if (node.type === 'ExportDefaultDeclaration') {
-        const decl = node.declaration;
-
-        // Pure identifier re-export: Remove whole statement.
-        if (decl.type === 'Identifier') {
-          const name = decl.name;
-          exportList.push({ localName: name, externalName: 'default' });
-          ms.remove(node.range[0], node.range[1]);
-          continue;
-        }
-
-        // Anonymous default (e.g. `export default () => {}`).
-        const localName = extractDeclarationName(decl) || '__default_export';
-        if (localName === '__default_export') {
-          ms.overwrite(
-            node.range[0],
-            node.range[0] + 'export default'.length,
-            `const ${localName} =`,
-          );
-
-          continue;
-        }
-
-        // Named default declaration (function/class).
-        ms.remove(node.range[0], node.range[0] + 'export default'.length);
-
-        exportList.push({ localName, externalName: 'default' });
-      }
-    }
-
-    // Append property assignments and re-exports.
-    for (const exp of exportList) {
-      ms.append(`\n${wrapClientExport(exp, { id: chunkId, path: relativeSourcePath })}`);
-
-      if (exp.localName === exp.externalName) {
-        ms.append(`\nexport { ${exp.localName} };`);
-      } else {
-        ms.append(`\nexport { ${exp.localName} as ${exp.externalName} };`);
-      }
-    }
-
-    return { code: ms.toString(), map: null };
+      return { code: ms.toString(), map: null };
+    },
   },
 });
 
@@ -207,29 +215,31 @@ export const getMdxLoader = (
   environment: 'development' | 'production',
 ): RolldownPlugin => ({
   name: 'MDX Loader',
-  async transform(code, id) {
-    if (!id.endsWith('.mdx')) return null;
-    const contents = code;
+  transform: {
+    filter: {
+      id: /\.mdx$/,
+    },
+    async handler(contents) {
+      const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
 
-    const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
+      const yaml = contents.match(yamlPattern);
+      let mdxContents = contents;
 
-    const yaml = contents.match(yamlPattern);
-    let mdxContents = contents;
+      if (yaml) {
+        const yamlData = YAML.load(yaml[1]);
+        const hook = `import { useMetadata } from 'blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
 
-    if (yaml) {
-      const yamlData = YAML.load(yaml[1]);
-      const hook = `import { useMetadata } from 'blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
+        mdxContents = contents.replace(yaml[0], hook);
+      }
 
-      mdxContents = contents.replace(yaml[0], hook);
-    }
+      const mdx = await compile(mdxContents, {
+        development: environment === 'development',
+        rehypePlugins: [withToc, withTocExport],
+      });
 
-    const mdx = await compile(mdxContents, {
-      development: environment === 'development',
-      rehypePlugins: [withToc, withTocExport],
-    });
-
-    const tsx = String(mdx.value);
-    return { code: tsx, map: null };
+      const tsx = String(mdx.value);
+      return { code: tsx, map: null };
+    },
   },
 });
 
@@ -263,40 +273,8 @@ export const getProviderLoader = (
   },
 });
 
-export const getMetaLoader = (virtual: boolean): RolldownPlugin => ({
-  name: 'Init Loader',
-  buildStart() {
-    CURRENT_BUNDLE_ID = generateUniqueId();
-  },
-  resolveId(source) {
-    if (source === 'build-meta') return '\u0000build-meta.ts';
-    return null;
-  },
-  load(id) {
-    if (id === '\u0000build-meta.ts') {
-      return `export const bundleId = "${CURRENT_BUNDLE_ID}";`;
-    }
-    return null;
-  },
-  generateBundle(_options, bundle) {
-    if (virtual) return;
-    const initName = getOutputFile('init', 'js');
-    const desired = getOutputFile(CURRENT_BUNDLE_ID, 'js');
-    for (const [fileName, chunk] of Object.entries(bundle)) {
-      if (fileName === initName && chunk.type === 'chunk') {
-        chunk.fileName = desired;
-      }
-      if (fileName === `${initName}.map` && chunk.type === 'asset') {
-        // update sourcemap file name
-        chunk.fileName = `${desired}.map`;
-      }
-    }
-  },
-});
-
 export const getTailwindLoader = (
   environment: 'development' | 'production',
-  virtualFiles?: Array<VirtualFileItem>,
 ): RolldownPlugin => {
   let compiler: Awaited<ReturnType<typeof compileTailwind>>;
   let candidates: Array<string> = [];
@@ -306,9 +284,15 @@ export const getTailwindLoader = (
   return {
     name: 'Tailwind CSS Loader',
     async buildStart() {
-      const input = (await exists(styleInputFile))
-        ? await readFile(styleInputFile, 'utf8')
-        : `@import 'tailwindcss';`;
+      let input = `@import 'tailwindcss';`;
+
+      // Always reading the file and handling the error if the file doesn't exist is
+      // faster than first checking if the file exists.
+      try {
+        input = await readFile(styleInputFile, 'utf8');
+      } catch (err) {
+        if ((err as { code: string }).code !== 'ENOENT') throw err;
+      }
 
       compiler = await compileTailwind(input, {
         onDependency(_path) {},
@@ -317,35 +301,25 @@ export const getTailwindLoader = (
 
       candidates = [];
     },
-    async transform(code, id) {
-      if (!/\.(tsx|jsx)$/.test(id)) return null;
+    transform: {
+      filter: {
+        id: /\.(tsx|jsx)$/,
+      },
+      async handler(content, filePath) {
+        const extension = path.extname(filePath).slice(1); // "tsx" | "jsx"
+        const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
 
-      const content = (() => {
-        const vf = virtualFiles?.find((item) => item.path === id);
-        return vf ? vf.content : code;
-      })();
-
-      const extension = path.extname(id).slice(1);
-      const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
-
-      candidates.push(...newCandidates.map((item) => item.candidate));
-
-      return null;
+        candidates.push(...newCandidates.map((item) => item.candidate));
+      },
     },
     generateBundle() {
-      const compiledStyles = compiler.build(candidates);
-      const optimizedStyles = optimizeTailwind(compiledStyles, {
-        file: 'input.css',
-        minify: environment === 'production',
-      });
+      let source = compiler.build(candidates);
 
-      const cssFileName = getOutputFile(CURRENT_BUNDLE_ID || 'init', 'css');
+      if (environment === 'production') {
+        source = optimizeTailwind(source, { minify: true }).code;
+      }
 
-      this.emitFile({
-        type: 'asset',
-        fileName: cssFileName,
-        source: optimizedStyles.code,
-      });
+      this.emitFile({ type: 'asset', source });
     },
   };
 };
@@ -358,14 +332,14 @@ export const getTailwindLoader = (
 // https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
 export const getReactAriaLoader = (): RolldownPlugin => ({
   name: 'React Aria Loader',
-  async load(id) {
-    const localeRe =
-      /(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/(.*)\/[a-zA-Z]{2}-[a-zA-Z]{2}\.(js|mjs)$/;
-    if (!localeRe.test(id)) return null;
-    const { name } = path.parse(id);
-    if (name === 'en-US') {
-      return await readFile(id, 'utf8');
-    }
-    return 'const removedLocale = undefined;\nexport default removedLocale;';
+  load: {
+    filter: {
+      id: /(?:^|\/)(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/[^/]+\/[A-Za-z]{2}-[A-Za-z]{2}\.m?js$/,
+    },
+    handler(id) {
+      const { name } = path.parse(id);
+      if (name === 'en-US') return readFile(id, 'utf8');
+      return 'const removedLocale = undefined;\nexport default removedLocale;';
+    },
   },
 });
