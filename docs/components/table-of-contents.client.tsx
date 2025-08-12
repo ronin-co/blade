@@ -16,15 +16,23 @@ export const TableOfContentsSidebarItem = ({
 
   const onClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    document.location.hash = slug;
 
     const element = document.getElementById(slug);
 
-    if (element)
+    if (element) {
       element.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       });
+
+      // Update the URL hash after the scroll animation completes.
+      const handleScrollEnd = () => {
+        document.location.hash = slug;
+        document.removeEventListener('scrollend', handleScrollEnd);
+      };
+
+      document.addEventListener('scrollend', handleScrollEnd);
+    }
   };
 
   return (
