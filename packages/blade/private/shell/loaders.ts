@@ -304,9 +304,15 @@ export const getTailwindLoader = (
   return {
     name: 'Tailwind CSS Loader',
     async buildStart() {
-      const input = (await exists(styleInputFile))
-        ? await readFile(styleInputFile, 'utf8')
-        : `@import 'tailwindcss';`;
+      let input = `@import 'tailwindcss';`;
+
+      // Always reading the file and handling the error if the file doesn't exist is
+      // faster than first checking if the file exists.
+      try {
+        input = await readFile(styleInputFile, 'utf8');
+      } catch (err) {
+        if ((err as { code: string }).code !== 'ENOENT') throw err;
+      }
 
       compiler = await compileTailwind(input, {
         onDependency(_path) {},
@@ -315,13 +321,17 @@ export const getTailwindLoader = (
 
       candidates = [];
     },
-    async transform(content, id) {
-      if (!/\.(tsx|jsx)$/.test(id)) return;
+    transform: {
+      filter: {
+        id: /\.(tsx|jsx)$/,
+      },
+      async handler(content, filePath) {
+        console.log(filePath);
+        const extension = path.extname(filePath).slice(1); // "tsx" | "jsx"
+        const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
 
-      const extension = path.extname(id).slice(1);
-      const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
-
-      candidates.push(...newCandidates.map((item) => item.candidate));
+        candidates.push(...newCandidates.map((item) => item.candidate));
+      },
     },
     generateBundle() {
       const compiledStyles = compiler.build(candidates);
