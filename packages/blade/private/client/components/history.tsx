@@ -16,7 +16,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
   const universalContext = useUniversalContext();
   const { transitionPage } = usePageTransition();
 
-  const { pathname, search, hash } = usePrivateLocation();
+  const { pathname, search } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
   const populatedPathname = populatePathname(pathname);
   const mounted = useRef(false);
@@ -34,19 +34,6 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     window.addEventListener('popstate', pageChanged);
     return () => window.removeEventListener('popstate', pageChanged);
   }, [transitionPage]);
-
-  // Update the records on the current page if the window gains focus.
-  useEffect(() => {
-    const focused = () => {
-      const path = populatedPathname + search;
-      console.debug(`Revalidating ${path} (window focused)`);
-
-      transitionPage(populatedPathname + search + hash);
-    };
-
-    window.addEventListener('focus', focused);
-    return () => window.removeEventListener('focus', focused);
-  }, [populatedPathname + search + hash]);
 
   // Ensure that the address bar is updated whenever the page changes, but only if this
   // is desired by the trigger of the page change.
