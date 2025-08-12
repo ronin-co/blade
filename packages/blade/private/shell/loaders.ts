@@ -327,14 +327,14 @@ export const getTailwindLoader = (
 // https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
 export const getReactAriaLoader = (): RolldownPlugin => ({
   name: 'React Aria Loader',
-  async load(id) {
-    const localeRe =
-      /(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/(.*)\/[a-zA-Z]{2}-[a-zA-Z]{2}\.(js|mjs)$/;
-    if (!localeRe.test(id)) return null;
-    const { name } = path.parse(id);
-    if (name === 'en-US') {
-      return await readFile(id, 'utf8');
-    }
-    return 'const removedLocale = undefined;\nexport default removedLocale;';
+  load: {
+    filter: {
+      id: /(?:^|\/)(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/[^/]+\/[A-Za-z]{2}-[A-Za-z]{2}\.m?js$/,
+    },
+    handler(id) {
+      const { name } = path.parse(id);
+      if (name === 'en-US') return readFile(id, 'utf8');
+      return 'const removedLocale = undefined;\nexport default removedLocale;';
+    },
   },
 });
