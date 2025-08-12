@@ -80,11 +80,9 @@ export const createStreamSource = async (
 
   // Start reading the stream, but don't block the execution of the current scope.
   (async () => {
-    let done = false;
-
-    while (!done) {
-      let value;
-      ({ value, done } = await reader.read());
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
       dispatchStreamEvent(value?.event!, value?.data!, value?.id!);
     }
   })();
