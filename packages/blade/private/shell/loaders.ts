@@ -317,20 +317,13 @@ export const getTailwindLoader = (
 
       candidates = [];
     },
-    async transform(code, id) {
-      if (!/\.(tsx|jsx)$/.test(id)) return null;
-
-      const content = (() => {
-        const vf = virtualFiles?.find((item) => item.path === id);
-        return vf ? vf.content : code;
-      })();
+    async transform(content, id) {
+      if (!/\.(tsx|jsx)$/.test(id)) return;
 
       const extension = path.extname(id).slice(1);
       const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
 
       candidates.push(...newCandidates.map((item) => item.candidate));
-
-      return null;
     },
     generateBundle() {
       const compiledStyles = compiler.build(candidates);
