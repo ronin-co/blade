@@ -437,14 +437,9 @@ const appendCookieHeader = (
  * Renders a new React tree for a particular browser session and flushes it down to the
  * client, which then updates the UI on the client.
  *
- * @param stream - The stream to flush the rendered React tree to.
- * @param url - The URL of the current request.
- * @param headers - The headers of the current request.
- * @param correctBundle - Whether the bundle that is being flushed is the correct one for
- * the current request.
- * @param [options] - Options for flushing the session.
- * @param [options.queries] - A list of queries to run before flushing the session.
- * @param [options.repeat] - Whether the session should be flushed repeatedly every 5 seconds.
+ * @param id - The ID of the session for which an update should be flushed.
+ * @param [options.queries] - A list of write queries that should be executed.
+ * @param [options.repeat] - Whether to flush another update for the session later on.
  *
  * @returns If `repeat` is not set, a promise that resolves once the session has been
  * flushed once. Otherwise, if `repeat` is set, a promise that remains pending as long as
