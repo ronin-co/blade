@@ -208,7 +208,7 @@ app.post('*', async (c) => {
     return c.json(body, 400);
   }
 
-  const body = await c.req.parseBody<{ options?: string; files: File }>({ all: true });
+  const body = await c.req.parseBody<{ options?: string; files?: File }>({ all: true });
   const options: PageFetchingOptions = body.options
     ? JSON.parse(body.options)
     : undefined;

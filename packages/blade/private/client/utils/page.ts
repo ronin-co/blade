@@ -32,26 +32,23 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
 
 type EventCallback = ({ data, id }: { data: string; id: string }) => void;
 
-export interface EventStream {
+interface EventStream {
   addEventListener: (type: string, callback: EventCallback) => void;
-  close: () => void;
 }
 
 /**
  * Sends a request for rendering a page to the server, which opens a readable stream.
  *
  * @param url - The URL of the page to render.
- * @param body - An optional body for the outgoing request.
+ * @param body - The body of the outgoing request.
  *
  * @returns A readable stream of events, with a new event getting submitted for every
  * server-side page render.
  */
 export const createStreamSource = async (
   url: string,
-  body?: FormData,
+  body: FormData,
 ): Promise<EventStream> => {
-  const abortController = new AbortController();
-
   const response = await fetchRetry(url, {
     method: 'POST',
     body,
@@ -59,7 +56,6 @@ export const createStreamSource = async (
       Accept: 'text/event-stream',
       'X-Bundle-Id': import.meta.env.__BLADE_BUNDLE_ID,
     },
-    signal: abortController.signal,
   });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
@@ -92,16 +88,11 @@ export const createStreamSource = async (
       if (!listeners.has(type)) listeners.set(type, []);
       listeners.get(type)!.push(callback);
     },
-    close: () => {
-      abortController.abort();
-      reader.cancel();
-    },
   };
 };
 
 const SESSION: {
   root?: import('react-dom/client').Root;
-  source?: import('../utils/page').EventStream;
 } = {};
 
 /**
@@ -140,32 +131,24 @@ export const fetchPage = async (
   subscribe: boolean,
   options?: PageFetchingOptions,
 ): Promise<ReactNode> => {
-  let body;
+  const body = new FormData();
 
   if (options && Object.keys(options).length > 0) {
-    const formData = new FormData();
-
-    formData.append('options', JSON.stringify(omit(options, ['files'])));
+    body.append('options', JSON.stringify(omit(options, ['files'])));
 
     // Since binary data cannot be serialized into JSON, we need to send it separately
     // as form data fields.
     if (options.files) {
       for (const [identifier, value] of options.files.entries()) {
-        formData.append('files', value, identifier);
+        body.append('files', value, identifier);
       }
     }
-
-    body = formData;
   }
 
-  // Close the previous stream, since we're opening a new one.
-  if (subscribe) SESSION.source?.close();
+  if (subscribe) body.append('subscribe', '1');
 
   // Open a new stream.
   const stream = await createStreamSource(path, body);
-
-  // Immediately start tracking the latest stream.
-  if (subscribe) SESSION.source = stream;
 
   return new Promise((resolve) => {
     stream.addEventListener('update', async (event) => {
@@ -174,7 +157,6 @@ export const fetchPage = async (
 
       if (subscribe) return renderRoot(content);
 
-      stream.close();
       resolve(content);
     });
 
@@ -186,11 +168,6 @@ export const fetchPage = async (
 };
 
 export const mountNewBundle = async (bundleId: string, markup: string) => {
-  // Immediately close the connection, since we don't want to receive further updates
-  // from the server, now that we know that the client bundles are outdated.
-  SESSION.source?.close();
-  delete SESSION.source;
-
   // Download the new markup, CSS, and JS at the same time, but don't execute any of them
   // just yet.
   const [newMarkup] = await Promise.all([
