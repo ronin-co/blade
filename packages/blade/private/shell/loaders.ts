@@ -39,8 +39,6 @@ import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils/crypto';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
-let CURRENT_BUNDLE_ID = '';
-
 export const getClientReferenceLoader = (): RolldownPlugin => ({
   name: 'Client Reference Loader',
   transform(code, id) {
@@ -263,35 +261,33 @@ export const getProviderLoader = (
   },
 });
 
-export const getMetaLoader = (): RolldownPlugin => ({
-  name: 'Init Loader',
-  buildStart() {
-    CURRENT_BUNDLE_ID = generateUniqueId();
-  },
-  resolveId(source) {
-    if (source === 'build-meta') return '\u0000build-meta.ts';
-    return null;
-  },
-  load(id) {
-    if (id === '\u0000build-meta.ts') {
-      return `export const bundleId = "${CURRENT_BUNDLE_ID}";`;
-    }
-    return null;
-  },
-  generateBundle(_options, bundle) {
-    const initName = getOutputFile('init', 'js');
-    const desired = getOutputFile(CURRENT_BUNDLE_ID, 'js');
-    for (const [fileName, chunk] of Object.entries(bundle)) {
-      if (fileName === initName && chunk.type === 'chunk') {
-        chunk.fileName = desired;
-      }
-      if (fileName === `${initName}.map` && chunk.type === 'asset') {
-        // update sourcemap file name
-        chunk.fileName = `${desired}.map`;
-      }
-    }
-  },
-});
+export const getMetaLoader = (): RolldownPlugin => {
+  let bundleId: string;
+
+  return {
+    name: 'Init Loader',
+    outputOptions(opts) {
+      bundleId = generateUniqueId();
+
+      opts.entryFileNames = (chunk) => {
+        if (chunk.name === 'client') return getOutputFile(bundleId, 'js');
+        return '[name].js';
+      };
+
+      //opts.entryFileNames = `[dir]/[name].${bundleId}.[ext]`;
+      opts.assetFileNames = getOutputFile(bundleId, 'css');
+      opts.chunkFileNames = getOutputFile('chunk.[hash]', 'js');
+
+      return opts;
+    },
+    resolveId(source) {
+      if (source === 'build-meta') return '\u0000build-meta.ts';
+    },
+    load(id) {
+      if (id === '\u0000build-meta.ts') return `export const bundleId = "${bundleId}";`;
+    },
+  };
+};
 
 export const getTailwindLoader = (
   environment: 'development' | 'production',
@@ -339,11 +335,7 @@ export const getTailwindLoader = (
         source = optimizeTailwind(source, { minify: true }).code;
       }
 
-      this.emitFile({
-        type: 'asset',
-        fileName: getOutputFile('[hash]', 'css'),
-        source,
-      });
+      this.emitFile({ type: 'asset', source });
     },
   };
 };

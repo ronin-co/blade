@@ -1,6 +1,5 @@
 import path from 'node:path';
 import {
-  type ChunkFileNamesFunction,
   type OutputOptions,
   type RolldownOutput,
   type Plugin as RolldownPlugin,
@@ -9,7 +8,6 @@ import {
 
 import {
   clientInputFile,
-  defaultDeploymentProvider,
   nodePath,
   outputDirectory,
   serverInputFolder,
@@ -25,7 +23,6 @@ import {
 } from '@/private/shell/loaders';
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
-import { getOutputFile } from '@/private/universal/utils/paths';
 
 export interface VirtualFileItem {
   /**
@@ -72,7 +69,7 @@ export const composeBuildContext = async (
 
   const input: Record<string, string> = {
     client: clientInputFile,
-    provider: serverEntry,
+    'edge-worker': serverEntry,
   };
 
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
@@ -116,28 +113,10 @@ export const composeBuildContext = async (
   });
 
   return {
-    async rebuild(): Promise<RolldownOutput> {
-      const entryFileNames: ChunkFileNamesFunction = (chunk) => {
-        // Client entry gets our fixed init name to be renamed later by meta loader.
-        if (chunk.facadeModuleId === clientInputFile) {
-          return getOutputFile('init', 'js');
-        }
-        // Provider entry should be the default deployment provider filename.
-        if (chunk.facadeModuleId === serverEntry) {
-          return `${defaultDeploymentProvider}.js`;
-        }
-        // Service worker.
-        if (options?.enableServiceWorker && chunk.facadeModuleId === swEntry) {
-          return 'service-worker.js';
-        }
-        return '[name].js';
-      };
-
+    rebuild(): Promise<RolldownOutput> {
       const outputOptions: OutputOptions = {
         dir: outputDirectory,
         sourcemap: true,
-        entryFileNames,
-        chunkFileNames: getOutputFile('chunk.[hash]', 'js'),
         banner,
         minify: environment === 'production',
       };
