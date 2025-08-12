@@ -274,7 +274,6 @@ export const getMetaLoader = (): RolldownPlugin => {
         return '[name].js';
       };
 
-      //opts.entryFileNames = `[dir]/[name].${bundleId}.[ext]`;
       opts.assetFileNames = getOutputFile(bundleId, 'css');
       opts.chunkFileNames = getOutputFile('chunk.[hash]', 'js');
 
