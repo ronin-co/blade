@@ -120,7 +120,7 @@ const DocsLayout = ({
 
   useMetadata({
     htmlClassName: cn(
-      'scroll-smooth antialiased',
+      'antialiased',
       theme && ['dark', 'light'].includes(theme) ? theme : undefined,
     ),
     title,
