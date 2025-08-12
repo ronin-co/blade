@@ -263,7 +263,7 @@ export const getProviderLoader = (
   },
 });
 
-export const getMetaLoader = (virtual: boolean): RolldownPlugin => ({
+export const getMetaLoader = (): RolldownPlugin => ({
   name: 'Init Loader',
   buildStart() {
     CURRENT_BUNDLE_ID = generateUniqueId();
@@ -279,7 +279,6 @@ export const getMetaLoader = (virtual: boolean): RolldownPlugin => ({
     return null;
   },
   generateBundle(_options, bundle) {
-    if (virtual) return;
     const initName = getOutputFile('init', 'js');
     const desired = getOutputFile(CURRENT_BUNDLE_ID, 'js');
     for (const [fileName, chunk] of Object.entries(bundle)) {
@@ -296,7 +295,6 @@ export const getMetaLoader = (virtual: boolean): RolldownPlugin => ({
 
 export const getTailwindLoader = (
   environment: 'development' | 'production',
-  virtualFiles?: Array<VirtualFileItem>,
 ): RolldownPlugin => {
   let compiler: Awaited<ReturnType<typeof compileTailwind>>;
   let candidates: Array<string> = [];
