@@ -205,29 +205,31 @@ export const getMdxLoader = (
   environment: 'development' | 'production',
 ): RolldownPlugin => ({
   name: 'MDX Loader',
-  async transform(code, id) {
-    if (!id.endsWith('.mdx')) return null;
-    const contents = code;
+  transform: {
+    filter: {
+      id: /\.mdx$/,
+    },
+    async handler(contents) {
+      const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
 
-    const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
+      const yaml = contents.match(yamlPattern);
+      let mdxContents = contents;
 
-    const yaml = contents.match(yamlPattern);
-    let mdxContents = contents;
+      if (yaml) {
+        const yamlData = YAML.load(yaml[1]);
+        const hook = `import { useMetadata } from 'blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
 
-    if (yaml) {
-      const yamlData = YAML.load(yaml[1]);
-      const hook = `import { useMetadata } from 'blade/server/hooks';\n\n{useMetadata(${JSON.stringify(yamlData)})}\n\n`;
+        mdxContents = contents.replace(yaml[0], hook);
+      }
 
-      mdxContents = contents.replace(yaml[0], hook);
-    }
+      const mdx = await compile(mdxContents, {
+        development: environment === 'development',
+        rehypePlugins: [withToc, withTocExport],
+      });
 
-    const mdx = await compile(mdxContents, {
-      development: environment === 'development',
-      rehypePlugins: [withToc, withTocExport],
-    });
-
-    const tsx = String(mdx.value);
-    return { code: tsx, map: null };
+      const tsx = String(mdx.value);
+      return { code: tsx, map: null };
+    },
   },
 });
 
