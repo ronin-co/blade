@@ -2,6 +2,12 @@ import path from 'node:path';
 
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
+const makePathAbsolute = (input: string) => {
+  if (input.startsWith('./')) return input.slice(1);
+  if (input.startsWith('/')) return input;
+  return `/${input}`;
+};
+
 interface BuildConfig {
   sourceFiles: Array<VirtualFileItem>;
   environment?: 'development' | 'production';
@@ -20,12 +26,7 @@ export const build = async (
   const environment = config?.environment || 'development';
 
   const virtualFiles = config.sourceFiles.map(({ path, content }) => {
-    const newPath = path.startsWith('./')
-      ? path.slice(1)
-      : path.startsWith('/')
-        ? path
-        : `/${path}`;
-    return { path: newPath, content };
+    return { path: makePathAbsolute(path), content };
   });
 
   return composeBuildContext(environment, {
