@@ -96,9 +96,6 @@ export const composeBuildContext = async (
       },
     },
 
-    // TODO: Remove this once `@ronin/engine` no longer relies on it.
-    external: ['node:events'],
-
     plugins: [
       getFileListLoader(options?.virtualFiles),
       getMdxLoader(environment),
