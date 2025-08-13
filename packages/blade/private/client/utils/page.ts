@@ -37,7 +37,7 @@ interface EventStream {
   subscribed: boolean;
 }
 
-let LATEST_SUBSCRIPTION: ReadableStreamDefaultReader;
+let SUBSCRIPTIONS = new Array<ReadableStreamDefaultReader>();
 
 /**
  * Sends a request for rendering a page to the server, which opens a readable stream.
@@ -73,7 +73,17 @@ export const createStreamSource = async (
   if (!response.body) throw new Error('Empty response body');
 
   const reader = response.body.getReader();
-  if (subscribe) LATEST_SUBSCRIPTION = reader;
+
+  // Close any old subscriptions to ensure that only one subscription exists at a time.
+  if (subscribe) {
+    SUBSCRIPTIONS.forEach((subscription) => {
+      subscription.cancel();
+      subscription.releaseLock();
+    });
+
+    SUBSCRIPTIONS = [];
+    SUBSCRIPTIONS.push(reader);
+  }
 
   const listeners = new Map<string, Array<EventCallback>>();
   const decoder = new TextDecoder();
@@ -95,8 +105,13 @@ export const createStreamSource = async (
         // If the stream ended, stop reading from it immediately.
         if (done) break;
 
-        // If the reader is no longer the latest one, close it and stop reading.
-        if (subscribe && reader !== LATEST_SUBSCRIPTION) {
+        // Whenever an update comes in for a reader that is no longer the latest one,
+        // close it and stop reading.
+        //
+        // This is an additional safety mechanism for preventing race conditions. In the
+        // majority of cases, old subscriptions will already be closed as soon as new
+        // subscriptions are opened further above.
+        if (subscribe && reader !== SUBSCRIPTIONS.at(-1)) {
           reader.cancel();
           break;
         }
