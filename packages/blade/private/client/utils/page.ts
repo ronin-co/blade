@@ -97,7 +97,6 @@ export const createStreamSource = async (
 
         // If the reader is no longer the latest one, close it and stop reading.
         if (subscribe && reader !== LATEST_SUBSCRIPTION) {
-          console.log('CLOSING OLD READER');
           reader.cancel();
           break;
         }
