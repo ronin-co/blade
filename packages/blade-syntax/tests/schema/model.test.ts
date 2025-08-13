@@ -698,7 +698,7 @@ describe('models', () => {
                     account: {
                       with: {
                         id: {
-                          [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD}account`,
+                          [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD_PARENT}account`,
                         },
                       },
                     },

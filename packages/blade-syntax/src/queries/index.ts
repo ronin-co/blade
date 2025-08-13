@@ -85,9 +85,7 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
           value = propertyValue;
         } else {
           value = mutateStructure(value, (value) => {
-            // Check if we're in a sub-query context by looking at the path.
-            const isSubQuery = path.some((segment) => ['including'].includes(segment));
-            return serializeValue(value, config?.replacer, isSubQuery);
+            return serializeValue(value, config?.replacer);
           });
         }
 
@@ -99,6 +97,9 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
         const pathParts = config?.root ? [config.root, ...path] : path;
         const pathJoined = pathParts.length > 0 ? pathParts.join('.') : '.';
 
+        // Convert field symbols within nested queries inside the provided value only,
+        // then mount it. This avoids traversing the entire structure.
+        convertFieldSymbolsInSubQueries(value);
         setProperty(structure, pathJoined, value);
 
         // If the function call is happening inside a batch, return a new proxy, to
@@ -205,7 +206,6 @@ export const getBatchProxy = (
 const serializeValue = (
   defaultValue: unknown,
   replacer?: NonNullable<Parameters<typeof getSyntaxProxy>[0]>['replacer'],
-  isSubQuery = false,
 ) => {
   let value = defaultValue;
 
@@ -232,12 +232,9 @@ const serializeValue = (
       {
         get(_target, property) {
           const name = property.toString();
-          const fieldSymbol = isSubQuery
-            ? QUERY_SYMBOLS.FIELD_PARENT
-            : QUERY_SYMBOLS.FIELD;
 
           return {
-            [QUERY_SYMBOLS.EXPRESSION]: `${fieldSymbol}${name}`,
+            [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD}${name}`,
           };
         },
       },
@@ -263,6 +260,60 @@ const serializeValue = (
   // Otherwise, default to serializing the value as JSON.
   return JSON.parse(JSON.stringify(value));
 };
+
+/**
+ * Recursively traverse a query structure and, for any nested sub-queries (depth > 1),
+ * replace occurrences of FIELD symbols in expression strings with FIELD_PARENT symbols.
+ */
+function convertFieldSymbolsInSubQueries(root: unknown) {
+  const rootHasQuery = isPlainObject(root)
+    ? Object.prototype.hasOwnProperty.call(
+        root as Record<string, unknown>,
+        QUERY_SYMBOLS.QUERY,
+      )
+    : false;
+  const replaceInExpression = (expr: string) =>
+    expr.split(QUERY_SYMBOLS.FIELD).join(QUERY_SYMBOLS.FIELD_PARENT);
+
+  const rewriteSubtree = (node: unknown) => {
+    if (Array.isArray(node)) {
+      for (const item of node) rewriteSubtree(item);
+      return;
+    }
+    if (!isPlainObject(node)) return;
+    const obj = node as Record<string, unknown>;
+    if (Object.prototype.hasOwnProperty.call(obj, QUERY_SYMBOLS.EXPRESSION)) {
+      const expr = obj[QUERY_SYMBOLS.EXPRESSION];
+      if (typeof expr === 'string')
+        obj[QUERY_SYMBOLS.EXPRESSION] = replaceInExpression(expr);
+    }
+    for (const key of Object.keys(obj)) rewriteSubtree(obj[key]);
+  };
+
+  const walk = (node: unknown, seenQuery: boolean) => {
+    if (Array.isArray(node)) {
+      for (const item of node) walk(item, seenQuery);
+      return;
+    }
+    if (!isPlainObject(node)) return;
+    const obj = node as Record<string, unknown>;
+    const hasQuery = Object.prototype.hasOwnProperty.call(obj, QUERY_SYMBOLS.QUERY);
+    if (hasQuery) {
+      if (seenQuery || !rootHasQuery) {
+        // Nested query encountered: rewrite this subtree and stop descending further here.
+        rewriteSubtree(obj);
+        return;
+      }
+      // First (top-level) query: mark as seen and continue.
+      const nowSeenQuery = true;
+      for (const key of Object.keys(obj)) walk(obj[key], nowSeenQuery);
+      return;
+    }
+    for (const key of Object.keys(obj)) walk(obj[key], seenQuery);
+  };
+
+  walk(root, false);
+}
 
 export { getProperty, setProperty } from '@/src/utils';
 export type { ResultRecord, DeepCallable } from '@/src/queries/types';
