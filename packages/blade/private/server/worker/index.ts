@@ -267,7 +267,6 @@ app.post('*', async (c) => {
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/plain');
   c.header('Cache-Control', 'no-cache, no-transform');
-  c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
   flushSession(stream, url, headers, correctBundle, { queries, repeat: subscribe });
