@@ -523,7 +523,7 @@ export const flushSession = async (
   // flushing yet another update.
   if (options?.repeat) {
     await sleep(5000);
-    return flushSession(stream, url, headers, true, options);
+    return flushSession(stream, url, headers, true, { repeat: options.repeat });
   }
 
   // If no repetition is desired, signal the end of the stream to the client. But only if
