@@ -456,7 +456,7 @@ export const flushSession = async (
   headers: Headers,
   correctBundle: boolean,
   options?: {
-    queries?: Collected['queries'];
+    queries?: Array<QueryItemWrite>;
     repeat?: boolean;
   },
 ): Promise<void> => {
@@ -489,9 +489,16 @@ export const flushSession = async (
       },
       options?.queries
         ? {
-            jwts: {},
+            // Do not pass `options.queries` directly here, since it will get modified
+            // in place and we don't want to resume the results of queries.
+            queries: options.queries.map(({ query, database, hookHash }) => ({
+              type: 'write',
+              query,
+              database,
+              hookHash,
+            })),
             metadata: {},
-            queries: options.queries,
+            jwts: {},
           }
         : undefined,
     );
