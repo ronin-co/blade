@@ -12,12 +12,9 @@ import {
   getRequestLanguages,
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
-import renderReactTree, {
-  flushSession,
-  type Collected,
-} from '@/private/server/worker/tree';
+import renderReactTree, { flushSession } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
-import type { PageFetchingOptions } from '@/private/universal/types/util';
+import type { PageFetchingOptions, QueryItemWrite } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX, CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
 
@@ -241,7 +238,7 @@ app.post('*', async (c) => {
     }
   }
 
-  let queries: Collected['queries'] | undefined;
+  let queries: Array<QueryItemWrite> | undefined;
 
   if (options?.queries) {
     queries = options.queries;
