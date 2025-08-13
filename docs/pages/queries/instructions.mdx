@@ -282,6 +282,8 @@ use.account({
 });
 ```
 
+The query shown above will return the first Account record whose `handle` field matches `"elaine"` and all team records that are related to that account.
+
 ### Architecture Example
 
 For example, if your application uses a password-based login, you might use a model named “Account”, which contains a field of type String (with "Display As" set to "Secret") called “Password”, which holds a hashed version of the Account's password.
