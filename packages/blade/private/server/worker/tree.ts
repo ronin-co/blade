@@ -520,8 +520,10 @@ export const flushSession = async (
     return flushSession(stream, url, headers, true, options);
   }
 
-  // If no repetition is desired, signal the end of the stream to the client.
-  stream.close();
+  // If no repetition is desired, signal the end of the stream to the client. But only if
+  // no queries were provided. Because, if queries were provided, we're dealing with a
+  // flush that was caused by triggers, which should not close the stream.
+  if (!options?.queries) stream.close();
 };
 
 const renderReactTree = async (
