@@ -79,12 +79,20 @@ export const createStreamSource = async (
 
   // Start reading the stream, but don't block the execution of the current scope.
   (async () => {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
 
-      const decoded = decoder.decode(value);
-      parser.feed(decoded);
+        const decoded = decoder.decode(value);
+        parser.feed(decoded);
+      }
+    } catch (err) {
+      // When the page is refreshed, Safari cancels all old streams, which is causing
+      // their reader to throw this error. We must therefore explicitly ignore the error.
+      if (!(err instanceof TypeError && /load failed/i.test(err.message))) {
+        throw err;
+      }
     }
   })();
 
