@@ -319,12 +319,12 @@ const Account = Model({
 Sub query example:
 
 ```ts
-use.account((field) => {
+use.account((fields) => ({
   with: { handle: 'elaine' },
   including: {
-    teams: get.teams.with.member.id(field.id)
+    teams: get.teams.with.member.id(fields.id)
   }
-});
+}));
 ```
 
 The query shown above will return the first Account record whose `handle` field matches `"elaine"` and all team records that are related to that account.
