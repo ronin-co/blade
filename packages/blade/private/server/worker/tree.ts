@@ -519,6 +519,9 @@ export const flushSession = async (
     await sleep(5000);
     return flushSession(stream, url, headers, true, options);
   }
+
+  // If no repetition is desired, signal the end of the stream to the client.
+  stream.close();
 };
 
 const renderReactTree = async (
