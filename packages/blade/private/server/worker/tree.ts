@@ -479,7 +479,6 @@ export const flushSession = async (
   };
 
   try {
-    // If the session does exist, render an update for it.
     const page = await renderReactTree(
       url,
       headers,
