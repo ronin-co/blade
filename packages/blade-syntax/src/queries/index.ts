@@ -84,7 +84,7 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
         if (typeof value === 'undefined') {
           value = propertyValue;
         } else {
-          const shouldUseParentSymbols = Boolean(globalThis.IN_RONIN_SUBQUERY);
+          const shouldUseParentSymbols = Boolean(globalThis.IN_RONIN_QUERY);
           value = mutateStructure(value, (inner) => {
             const serialized = serializeValue(inner, config?.replacer);
             if (shouldUseParentSymbols && typeof serialized === 'string') {
@@ -246,10 +246,10 @@ const serializeValue = (
     );
 
     try {
-      const ORIGINAL_IN_RONIN_SUBQUERY = globalThis.IN_RONIN_SUBQUERY;
-      globalThis.IN_RONIN_SUBQUERY = true;
+      const ORIGINAL_IN_RONIN_QUERY = globalThis.IN_RONIN_QUERY;
+      globalThis.IN_RONIN_QUERY = true;
       value = value(fieldProxy);
-      globalThis.IN_RONIN_SUBQUERY = ORIGINAL_IN_RONIN_SUBQUERY;
+      globalThis.IN_RONIN_QUERY = ORIGINAL_IN_RONIN_QUERY;
     } finally {
       // Always restore the original value of `IN_RONIN_BATCH`, even if `value()` throws.
       // This is essential, otherwise `IN_RONIN_BATCH` might stay outdated.
