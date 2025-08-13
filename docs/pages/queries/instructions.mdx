@@ -282,8 +282,6 @@ use.account({
 });
 ```
 
-The query shown above will return the first Account record whose `handle` field matches `"elaine"` while preventing the `password` field from getting included in the final result.
-
 ### Architecture Example
 
 For example, if your application uses a password-based login, you might use a model named “Account”, which contains a field of type String (with "Display As" set to "Secret") called “Password”, which holds a hashed version of the Account's password.
@@ -293,3 +291,38 @@ This field should never be exposed to your application (neither client- nor serv
 In such a case, you may therefore want to add the `password` field to `selecting`.
 
 Similarly, the value of a particular field on a record might be so large that you don’t want to receive it on a particular client in order to avoid hitting memory constraints. This is another case in which using `selecting` will help you.
+
+## Sub Queries
+
+You can use sub queries to retrieve records from a related model.
+
+Model definition:
+
+```ts
+const Team = Model({
+  slug: 'Team',
+  fields: {
+    member: link({target: 'account'}),
+  },
+});
+
+const Account = Model({
+  slug: 'Account',
+  fields: {
+    handle: string(),
+  },
+});
+``` 
+
+Sub query example:
+
+```ts
+use.account((field) => {
+  with: { handle: 'elaine' },
+  including: {
+    teams: get.teams.with.member.id(field.id)
+  }
+});
+```
+
+The query shown above will return the first Account record whose `handle` field matches `"elaine"` and all team records that are related to that account.
