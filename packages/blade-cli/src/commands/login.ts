@@ -28,7 +28,7 @@ const logIn = async (appToken?: string, exit = true): Promise<string | undefined
   const port = await getPort();
   const server = http.createServer().listen(port);
 
-  const baseURL = new URL('https://ronin.co/actions/auth/cli');
+  const baseURL = new URL('https://studio.ronin.co/actions/auth/cli');
 
   const currentHost = `http://localhost:${port}`;
   const initURL = new URL(baseURL);
