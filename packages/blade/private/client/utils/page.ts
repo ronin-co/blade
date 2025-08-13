@@ -63,9 +63,8 @@ export const createStreamSource = async (
   if (!response.ok) throw new Error(await response.text());
   if (!response.body) throw new Error('Empty response body');
 
-  const eventStream = response.body;
+  const reader = response.body.getReader();
 
-  const reader = eventStream.getReader();
   const listeners = new Map<string, Array<EventCallback>>();
   const decoder = new TextDecoder();
 
