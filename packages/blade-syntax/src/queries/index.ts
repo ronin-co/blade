@@ -84,23 +84,17 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
         if (typeof value === 'undefined') {
           value = propertyValue;
         } else {
-          value = mutateStructure(value, (value) =>
-            serializeValue(value, config?.replacer),
-          );
-
-          // If this function is being evaluated inside another query (nested query),
-          // convert field symbols in expressions to parent field symbols.
-          if (globalThis.IN_RONIN_SUBQUERY) {
-            value = mutateStructure(value, (maybeExpression) => {
-              if (typeof maybeExpression === 'string') {
-                return maybeExpression.replaceAll(
-                  QUERY_SYMBOLS.FIELD,
-                  QUERY_SYMBOLS.FIELD_PARENT,
-                );
-              }
-              return maybeExpression;
-            });
-          }
+          const shouldUseParentSymbols = Boolean(globalThis.IN_RONIN_SUBQUERY);
+          value = mutateStructure(value, (inner) => {
+            const serialized = serializeValue(inner, config?.replacer);
+            if (shouldUseParentSymbols && typeof serialized === 'string') {
+              return serialized.replaceAll(
+                QUERY_SYMBOLS.FIELD,
+                QUERY_SYMBOLS.FIELD_PARENT,
+              );
+            }
+            return serialized;
+          });
         }
 
         // If the function call is happening after an existing function call in the
