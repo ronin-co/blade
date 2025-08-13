@@ -34,13 +34,17 @@ type EventCallback = ({ data, id }: { data: string; id: string }) => void;
 
 interface EventStream {
   addEventListener: (type: string, callback: EventCallback) => void;
+  subscribed: boolean;
 }
+
+let LATEST_SUBSCRIPTION: ReadableStreamDefaultReader;
 
 /**
  * Sends a request for rendering a page to the server, which opens a readable stream.
  *
  * @param url - The URL of the page to render.
  * @param body - The body of the outgoing request.
+ * @param subscribe - Whether the stream should remain open for future server pushes.
  *
  * @returns A readable stream of events, with a new event getting submitted for every
  * server-side page render.
@@ -48,14 +52,19 @@ interface EventStream {
 export const createStreamSource = async (
   url: string,
   body: FormData,
+  subscribe: boolean,
 ): Promise<EventStream> => {
+  const headers = new Headers({
+    Accept: 'text/plain',
+    'X-Bundle-Id': import.meta.env.__BLADE_BUNDLE_ID,
+  });
+
+  if (subscribe) headers.set('X-Subscribe', '1');
+
   const response = await fetchRetry(url, {
     method: 'POST',
     body,
-    headers: {
-      Accept: 'text/plain',
-      'X-Bundle-Id': import.meta.env.__BLADE_BUNDLE_ID,
-    },
+    headers,
   });
 
   // If the status code is not in the 200-299 range, we want to throw an error that will
@@ -64,6 +73,7 @@ export const createStreamSource = async (
   if (!response.body) throw new Error('Empty response body');
 
   const reader = response.body.getReader();
+  if (subscribe) LATEST_SUBSCRIPTION = reader;
 
   const listeners = new Map<string, Array<EventCallback>>();
   const decoder = new TextDecoder();
@@ -81,7 +91,16 @@ export const createStreamSource = async (
     try {
       while (true) {
         const { value, done } = await reader.read();
+
+        // If the stream ended, stop reading from it immediately.
         if (done) break;
+
+        // If the reader is no longer the latest one, close it and stop reading.
+        if (subscribe && reader !== LATEST_SUBSCRIPTION) {
+          console.log('CLOSING OLD READER');
+          reader.cancel();
+          break;
+        }
 
         const decoded = decoder.decode(value);
         parser.feed(decoded);
@@ -102,6 +121,7 @@ export const createStreamSource = async (
       if (!listeners.has(type)) listeners.set(type, []);
       listeners.get(type)!.push(callback);
     },
+    subscribed: subscribe,
   };
 };
 
@@ -157,17 +177,15 @@ export const fetchPage = async (
     }
   }
 
-  if (subscribe) body.append('subscribe', '1');
-
   // Open a new stream.
-  const stream = await createStreamSource(path, body);
+  const stream = await createStreamSource(path, body, subscribe);
 
   return new Promise((resolve) => {
     stream.addEventListener('update', async (event) => {
       const dataStream = new Blob([event.data]).stream();
       const content = await createFromReadableStream(dataStream);
 
-      if (subscribe) return renderRoot(content);
+      if (stream.subscribed) return renderRoot(content);
 
       resolve(content);
     });

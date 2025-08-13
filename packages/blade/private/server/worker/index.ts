@@ -230,7 +230,7 @@ app.post('*', async (c) => {
       ? body.files
       : [body.files]
     : undefined;
-  const subscribe = Boolean(body.subscribe) && correctBundle;
+  const subscribe = c.req.header('X-Subscribe') === '1' && correctBundle;
 
   if (files) {
     options.files = new Map();
@@ -263,6 +263,10 @@ app.post('*', async (c) => {
 
   const url = new URL(c.req.url);
   const headers = c.req.raw.headers;
+
+  // Remove meta headers from the incoming headers.
+  headers.delete('X-Bundle-Id');
+  headers.delete('X-Subscribe');
 
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/plain');
