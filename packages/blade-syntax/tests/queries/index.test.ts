@@ -22,7 +22,6 @@ import { expectTypeOf } from 'expect-type';
 describe('syntax proxy', () => {
   test('using sub query', () => {
     let addQuery: Query | undefined;
-    8;
 
     const getQueryHandler = { callback: () => undefined };
     const getQueryHandlerSpy = spyOn(getQueryHandler, 'callback');
