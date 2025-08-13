@@ -203,7 +203,7 @@ type ClientTransition = {
 
 // Handle client side navigation.
 app.post('*', async (c) => {
-  if (c.req.header('accept') !== 'text/event-stream') {
+  if (c.req.header('accept') !== 'text/plain') {
     const body = {
       error: {
         message: 'The request for opening a session is malformed.',
@@ -265,7 +265,7 @@ app.post('*', async (c) => {
   const headers = c.req.raw.headers;
 
   c.header('Transfer-Encoding', 'chunked');
-  c.header('Content-Type', 'text/event-stream');
+  c.header('Content-Type', 'text/plain');
   c.header('Cache-Control', 'no-cache, no-transform');
   c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');

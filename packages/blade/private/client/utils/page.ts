@@ -53,7 +53,7 @@ export const createStreamSource = async (
     method: 'POST',
     body,
     headers: {
-      Accept: 'text/event-stream',
+      Accept: 'text/plain',
       'X-Bundle-Id': import.meta.env.__BLADE_BUNDLE_ID,
     },
   });
