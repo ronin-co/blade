@@ -18,7 +18,7 @@ import renderReactTree, {
 } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import { CLIENT_ASSET_PREFIX, CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
 
 type Bindings = {
@@ -218,7 +218,8 @@ app.post('*', async (c) => {
   // the markup for the new bundles to the client. However, we will still consider the
   // queries of the incoming request, to make sure that writes aren't lost in the void,
   // even if the bundles have changed.
-  const correctBundle = c.req.header('X-Bundle-Id') === import.meta.env.__BLADE_BUNDLE_ID;
+  const serverBundleId = import.meta.env.__BLADE_BUNDLE_ID;
+  const correctBundle = c.req.header(CUSTOM_HEADERS.bundleId) === serverBundleId;
 
   const body = await c.req.parseBody<ClientTransition>({ all: true });
 
@@ -230,7 +231,7 @@ app.post('*', async (c) => {
       ? body.files
       : [body.files]
     : undefined;
-  const subscribe = c.req.header('X-Subscribe') === '1' && correctBundle;
+  const subscribe = c.req.header(CUSTOM_HEADERS.subscribe) === '1' && correctBundle;
 
   if (files) {
     options.files = new Map();
@@ -265,8 +266,7 @@ app.post('*', async (c) => {
   const headers = c.req.raw.headers;
 
   // Remove meta headers from the incoming headers.
-  headers.delete('X-Bundle-Id');
-  headers.delete('X-Subscribe');
+  Object.values(CUSTOM_HEADERS).forEach((header) => headers.delete(header));
 
   c.header('Transfer-Encoding', 'chunked');
   c.header('Content-Type', 'text/plain');

@@ -6,6 +6,7 @@ import { hydrateRoot } from 'react-dom/client';
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
+import { CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 /**
@@ -56,10 +57,10 @@ export const createStreamSource = async (
 ): Promise<EventStream> => {
   const headers = new Headers({
     Accept: 'text/plain',
-    'X-Bundle-Id': import.meta.env.__BLADE_BUNDLE_ID,
+    [CUSTOM_HEADERS.bundleId]: import.meta.env.__BLADE_BUNDLE_ID,
   });
 
-  if (subscribe) headers.set('X-Subscribe', '1');
+  if (subscribe) headers.set(CUSTOM_HEADERS.subscribe, '1');
 
   const response = await fetchRetry(url, {
     method: 'POST',
