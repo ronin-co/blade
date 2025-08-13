@@ -22,6 +22,7 @@ import { expectTypeOf } from 'expect-type';
 describe('syntax proxy', () => {
   test('using sub query', () => {
     let addQuery: Query | undefined;
+    8;
 
     const getQueryHandler = { callback: () => undefined };
     const getQueryHandlerSpy = spyOn(getQueryHandler, 'callback');
@@ -89,7 +90,7 @@ describe('syntax proxy', () => {
                     account: {
                       with: {
                         id: {
-                          [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD}account`,
+                          [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD_PARENT}account`,
                         },
                       },
                     },
@@ -102,7 +103,7 @@ describe('syntax proxy', () => {
                     team: {
                       with: {
                         id: {
-                          [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD}team`,
+                          [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD_PARENT}team`,
                         },
                       },
                     },

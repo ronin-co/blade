@@ -85,7 +85,9 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
           value = propertyValue;
         } else {
           value = mutateStructure(value, (value) => {
-            return serializeValue(value, config?.replacer);
+            // Check if we're in a sub-query context by looking at the path.
+            const isSubQuery = path.some((segment) => ['including'].includes(segment));
+            return serializeValue(value, config?.replacer, isSubQuery);
           });
         }
 
@@ -203,6 +205,7 @@ export const getBatchProxy = (
 const serializeValue = (
   defaultValue: unknown,
   replacer?: NonNullable<Parameters<typeof getSyntaxProxy>[0]>['replacer'],
+  isSubQuery = false,
 ) => {
   let value = defaultValue;
 
@@ -229,9 +232,12 @@ const serializeValue = (
       {
         get(_target, property) {
           const name = property.toString();
+          const fieldSymbol = isSubQuery
+            ? QUERY_SYMBOLS.FIELD_PARENT
+            : QUERY_SYMBOLS.FIELD;
 
           return {
-            [QUERY_SYMBOLS.EXPRESSION]: `${QUERY_SYMBOLS.FIELD}${name}`,
+            [QUERY_SYMBOLS.EXPRESSION]: `${fieldSymbol}${name}`,
           };
         },
       },
