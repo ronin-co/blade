@@ -1,4 +1,4 @@
-import { EventSourceParserStream } from 'eventsource-parser/stream';
+import { createParser } from 'eventsource-parser';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
@@ -63,12 +63,15 @@ export const createStreamSource = async (
   if (!response.ok) throw new Error(await response.text());
   if (!response.body) throw new Error('Empty response body');
 
-  const eventStream = response.body
-    .pipeThrough(new TextDecoderStream())
-    .pipeThrough(new EventSourceParserStream());
+  const eventStream = response.body;
 
   const reader = eventStream.getReader();
   const listeners = new Map<string, Array<EventCallback>>();
+  const decoder = new TextDecoder();
+
+  const parser = createParser({
+    onEvent: (event) => dispatchStreamEvent(event.event!, event.data, event.id!),
+  });
 
   const dispatchStreamEvent = (type: string, data: string, id: string) => {
     return (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
@@ -78,8 +81,10 @@ export const createStreamSource = async (
   (async () => {
     while (true) {
       const { value, done } = await reader.read();
+      const decoded = decoder.decode(value);
+      parser.feed(decoded);
+
       if (done) break;
-      dispatchStreamEvent(value?.event!, value?.data!, value?.id!);
     }
   })();
 
