@@ -84,9 +84,23 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
         if (typeof value === 'undefined') {
           value = propertyValue;
         } else {
-          value = mutateStructure(value, (value) => {
-            return serializeValue(value, config?.replacer);
-          });
+          value = mutateStructure(value, (value) =>
+            serializeValue(value, config?.replacer),
+          );
+
+          // If this function is being evaluated inside another query (nested query),
+          // convert field symbols in expressions to parent field symbols.
+          if ((globalThis as any).IN_RONIN_SUBQUERY) {
+            value = mutateStructure(value as any, (maybeExpression) => {
+              if (typeof maybeExpression === 'string') {
+                return maybeExpression.replaceAll(
+                  QUERY_SYMBOLS.FIELD,
+                  QUERY_SYMBOLS.FIELD_PARENT,
+                );
+              }
+              return maybeExpression;
+            });
+          }
         }
 
         // If the function call is happening after an existing function call in the
@@ -97,9 +111,6 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
         const pathParts = config?.root ? [config.root, ...path] : path;
         const pathJoined = pathParts.length > 0 ? pathParts.join('.') : '.';
 
-        // Convert field symbols within nested queries inside the provided value only,
-        // then mount it. This avoids traversing the entire structure.
-        convertFieldSymbolsInSubQueries(value);
         setProperty(structure, pathJoined, value);
 
         // If the function call is happening inside a batch, return a new proxy, to
@@ -241,7 +252,10 @@ const serializeValue = (
     );
 
     try {
+      const ORIGINAL_IN_RONIN_SUBQUERY = (globalThis as any).IN_RONIN_SUBQUERY;
+      (globalThis as any).IN_RONIN_SUBQUERY = true;
       value = value(fieldProxy);
+      (globalThis as any).IN_RONIN_SUBQUERY = ORIGINAL_IN_RONIN_SUBQUERY;
     } finally {
       // Always restore the original value of `IN_RONIN_BATCH`, even if `value()` throws.
       // This is essential, otherwise `IN_RONIN_BATCH` might stay outdated.
@@ -260,60 +274,6 @@ const serializeValue = (
   // Otherwise, default to serializing the value as JSON.
   return JSON.parse(JSON.stringify(value));
 };
-
-/**
- * Recursively traverse a query structure and, for any nested sub-queries (depth > 1),
- * replace occurrences of FIELD symbols in expression strings with FIELD_PARENT symbols.
- */
-function convertFieldSymbolsInSubQueries(root: unknown) {
-  const rootHasQuery = isPlainObject(root)
-    ? Object.prototype.hasOwnProperty.call(
-        root as Record<string, unknown>,
-        QUERY_SYMBOLS.QUERY,
-      )
-    : false;
-  const replaceInExpression = (expr: string) =>
-    expr.split(QUERY_SYMBOLS.FIELD).join(QUERY_SYMBOLS.FIELD_PARENT);
-
-  const rewriteSubtree = (node: unknown) => {
-    if (Array.isArray(node)) {
-      for (const item of node) rewriteSubtree(item);
-      return;
-    }
-    if (!isPlainObject(node)) return;
-    const obj = node as Record<string, unknown>;
-    if (Object.prototype.hasOwnProperty.call(obj, QUERY_SYMBOLS.EXPRESSION)) {
-      const expr = obj[QUERY_SYMBOLS.EXPRESSION];
-      if (typeof expr === 'string')
-        obj[QUERY_SYMBOLS.EXPRESSION] = replaceInExpression(expr);
-    }
-    for (const key of Object.keys(obj)) rewriteSubtree(obj[key]);
-  };
-
-  const walk = (node: unknown, seenQuery: boolean) => {
-    if (Array.isArray(node)) {
-      for (const item of node) walk(item, seenQuery);
-      return;
-    }
-    if (!isPlainObject(node)) return;
-    const obj = node as Record<string, unknown>;
-    const hasQuery = Object.prototype.hasOwnProperty.call(obj, QUERY_SYMBOLS.QUERY);
-    if (hasQuery) {
-      if (seenQuery || !rootHasQuery) {
-        // Nested query encountered: rewrite this subtree and stop descending further here.
-        rewriteSubtree(obj);
-        return;
-      }
-      // First (top-level) query: mark as seen and continue.
-      const nowSeenQuery = true;
-      for (const key of Object.keys(obj)) walk(obj[key], nowSeenQuery);
-      return;
-    }
-    for (const key of Object.keys(obj)) walk(obj[key], seenQuery);
-  };
-
-  walk(root, false);
-}
 
 export { getProperty, setProperty } from '@/src/utils';
 export type { ResultRecord, DeepCallable } from '@/src/queries/types';
