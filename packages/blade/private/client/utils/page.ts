@@ -93,6 +93,8 @@ export const createStreamSource = async (
       if (!(err instanceof TypeError && /load failed/i.test(err.message))) {
         throw err;
       }
+    } finally {
+      reader.releaseLock();
     }
   })();
 
