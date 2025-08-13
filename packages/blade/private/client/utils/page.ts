@@ -81,10 +81,10 @@ export const createStreamSource = async (
   (async () => {
     while (true) {
       const { value, done } = await reader.read();
+      if (done) break;
+
       const decoded = decoder.decode(value);
       parser.feed(decoded);
-
-      if (done) break;
     }
   })();
 
