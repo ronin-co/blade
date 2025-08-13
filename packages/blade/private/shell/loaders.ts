@@ -168,6 +168,8 @@ export const getFileListLoader = (
     ['components', path.join(process.cwd(), 'components')],
   ];
 
+  const filter = { id: /^(?:server-list|client-list)$/ };
+
   return {
     name: 'File List Loader',
     async buildStart() {
@@ -191,22 +193,21 @@ export const getFileListLoader = (
         );
       }
     },
-    resolveId(source) {
-      if (source === 'server-list') return '\u0000server-list.tsx';
-      if (source === 'client-list') return '\u0000client-list.tsx';
-
-      return null;
+    resolveId: {
+      filter,
+      handler(source) {
+        return source;
+      },
     },
-    async load(id) {
-      if (id === '\u0000server-list.tsx') {
-        return getFileList(files, ['pages', 'triggers'], await exists(routerInputFile));
-      }
+    load: {
+      filter,
+      async handler(id) {
+        if (id === 'server-list') {
+          return getFileList(files, ['pages', 'triggers'], await exists(routerInputFile));
+        }
 
-      if (id === '\u0000client-list.tsx') {
         return getFileList(files, ['components']);
-      }
-
-      return null;
+      },
     },
   };
 };
