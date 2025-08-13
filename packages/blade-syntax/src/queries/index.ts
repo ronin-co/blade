@@ -90,8 +90,8 @@ export const getSyntaxProxy = <Structure, ReturnValue = ResultRecord>(config?: {
 
           // If this function is being evaluated inside another query (nested query),
           // convert field symbols in expressions to parent field symbols.
-          if ((globalThis as any).IN_RONIN_SUBQUERY) {
-            value = mutateStructure(value as any, (maybeExpression) => {
+          if (globalThis.IN_RONIN_SUBQUERY) {
+            value = mutateStructure(value, (maybeExpression) => {
               if (typeof maybeExpression === 'string') {
                 return maybeExpression.replaceAll(
                   QUERY_SYMBOLS.FIELD,
@@ -252,10 +252,10 @@ const serializeValue = (
     );
 
     try {
-      const ORIGINAL_IN_RONIN_SUBQUERY = (globalThis as any).IN_RONIN_SUBQUERY;
-      (globalThis as any).IN_RONIN_SUBQUERY = true;
+      const ORIGINAL_IN_RONIN_SUBQUERY = globalThis.IN_RONIN_SUBQUERY;
+      globalThis.IN_RONIN_SUBQUERY = true;
       value = value(fieldProxy);
-      (globalThis as any).IN_RONIN_SUBQUERY = ORIGINAL_IN_RONIN_SUBQUERY;
+      globalThis.IN_RONIN_SUBQUERY = ORIGINAL_IN_RONIN_SUBQUERY;
     } finally {
       // Always restore the original value of `IN_RONIN_BATCH`, even if `value()` throws.
       // This is essential, otherwise `IN_RONIN_BATCH` might stay outdated.
