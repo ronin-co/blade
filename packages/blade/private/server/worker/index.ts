@@ -18,7 +18,7 @@ import renderReactTree, {
 } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import { CLIENT_ASSET_PREFIX, CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 import { TriggerError } from '@/public/server/utils/errors';
 
 type Bindings = {
@@ -195,9 +195,15 @@ app.get('*', (c) =>
   }),
 );
 
+type ClientTransition = {
+  options?: string;
+  files?: File;
+  subscribe?: string;
+};
+
 // Handle client side navigation.
 app.post('*', async (c) => {
-  if (c.req.header('accept') !== 'text/event-stream') {
+  if (c.req.header('accept') !== 'text/plain') {
     const body = {
       error: {
         message: 'The request for opening a session is malformed.',
@@ -208,7 +214,15 @@ app.post('*', async (c) => {
     return c.json(body, 400);
   }
 
-  const body = await c.req.parseBody<{ options?: string; files: File }>({ all: true });
+  // Check if the client-side bundle is correct. If it isn't, we will immediately send
+  // the markup for the new bundles to the client. However, we will still consider the
+  // queries of the incoming request, to make sure that writes aren't lost in the void,
+  // even if the bundles have changed.
+  const serverBundleId = import.meta.env.__BLADE_BUNDLE_ID;
+  const correctBundle = c.req.header(CUSTOM_HEADERS.bundleId) === serverBundleId;
+
+  const body = await c.req.parseBody<ClientTransition>({ all: true });
+
   const options: PageFetchingOptions = body.options
     ? JSON.parse(body.options)
     : undefined;
@@ -217,6 +231,7 @@ app.post('*', async (c) => {
       ? body.files
       : [body.files]
     : undefined;
+  const subscribe = c.req.header(CUSTOM_HEADERS.subscribe) === '1' && correctBundle;
 
   if (files) {
     options.files = new Map();
@@ -250,29 +265,27 @@ app.post('*', async (c) => {
   const url = new URL(c.req.url);
   const headers = c.req.raw.headers;
 
-  // Check if the client-side bundle is correct. If it isn't, we will immediately send
-  // the markup for the new bundles to the client. However, we will still consider the
-  // queries of the incoming request, to make sure that writes aren't lost in the void,
-  // even if the bundles have changed.
-  const correctBundle = c.req.header('X-Bundle-Id') === import.meta.env.__BLADE_BUNDLE_ID;
+  // Remove meta headers from the incoming headers.
+  Object.values(CUSTOM_HEADERS).forEach((header) => headers.delete(header));
 
   c.header('Transfer-Encoding', 'chunked');
-  c.header('Content-Type', 'text/event-stream');
+  c.header('Content-Type', 'text/plain');
   c.header('Cache-Control', 'no-cache, no-transform');
-  c.header('Connection', 'keep-alive');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, url, headers, correctBundle, { queries, repeat: correctBundle });
+  flushSession(stream, url, headers, correctBundle, { queries, repeat: subscribe });
 
   const id = crypto.randomUUID();
 
-  // Track the HMR session.
-  globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
+  if (subscribe) {
+    // Track the HMR session.
+    globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
 
-  // Stop tracking the HMR session when the browser tab is closed.
-  stream.onAbort(() => {
-    globalThis.DEV_SESSIONS.delete(id);
-  });
+    // Stop tracking the HMR session when the browser tab is closed.
+    stream.onAbort(() => {
+      globalThis.DEV_SESSIONS.delete(id);
+    });
+  }
 
   return c.newResponse(stream.responseReadable);
 });

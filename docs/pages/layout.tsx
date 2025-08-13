@@ -4,7 +4,7 @@ import type { TableOfContents } from 'blade/types';
 
 import type { CodeProps } from '@/components/code.client';
 import { Code, InlineCode } from '@/components/code.client';
-import { Footer } from '@/components/footer.client';
+import { Footer } from '@/components/footer';
 import { Header } from '@/components/header.client';
 import { Heading } from '@/components/heading.client';
 import { Nav, type NavGroup } from '@/components/nav';
