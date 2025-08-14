@@ -1,6 +1,5 @@
 import { cp, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { OutputOptions } from 'rolldown';
 
 import {
   defaultCacheControl,
@@ -36,14 +35,8 @@ export const getProvider = (): DeploymentProvider => {
  *
  * @see https://vercel.com/docs/build-output-api
  */
-export const transformToVercelBuildOutput = async (
-  outputOptions: OutputOptions,
-): Promise<void> => {
+export const transformToVercelBuildOutput = async (): Promise<void> => {
   const spinner = logSpinner('Transforming output for Vercel').start();
-
-  const chunkName = outputOptions.chunkFileNames as string;
-  const chunkPath = path.join(outputDirectory, chunkName);
-  const chunkPathMap = path.join(outputDirectory, chunkName.replace('.js', '.js.map'));
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
@@ -75,9 +68,6 @@ export const transformToVercelBuildOutput = async (
         return staticFile && !source.endsWith('.map');
       },
     }),
-
-    cp(chunkPath, path.join(functionDir, chunkName.replace('.js', '.mjs'))),
-    cp(chunkPathMap, path.join(functionDir, chunkName.replace('.js', '.mjs.map'))),
 
     // Copy chunk files that are shared between client and server into worker.
     cp(path.join(outputDirectory, 'client'), path.join(functionDir, 'client'), {
