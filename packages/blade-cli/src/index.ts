@@ -122,3 +122,10 @@ export const run = async (config: { version: string }): Promise<void> => {
 };
 
 export default run;
+
+export const commands = {
+  apply,
+  diff,
+  init: initializeProject,
+  login: logIn,
+};
