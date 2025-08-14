@@ -179,6 +179,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   // provide a list of all static assets to not be routed to the edge function.
   const staticAssets = new Array<string>();
   const files = await readdir(outputDirectory, { recursive: true });
+
   for (const file of files) {
     if (file.startsWith('_worker') || file.endsWith('.map')) continue;
     staticAssets.push(`/${file}`);
