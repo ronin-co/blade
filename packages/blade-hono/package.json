@@ -1,6 +1,6 @@
 {
   "name": "blade-hono",
-  "version": "3.10.6",
+  "version": "3.10.7",
   "type": "module",
   "description": "Access your RONIN database via Hono.",
   "main": "./dist/index.js",
