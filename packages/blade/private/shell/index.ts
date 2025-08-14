@@ -16,15 +16,6 @@ import { type ServerState, serve } from '@/private/shell/listener';
 import { cleanUp, logSpinner } from '@/private/shell/utils';
 import { composeBuildContext } from '@/private/shell/utils/build';
 
-// We want people to add BLADE to `package.json`, which, for example, ensures that
-// everyone in a team is using the same version when working on apps.
-if (!process.env['npm_lifecycle_event']) {
-  console.error(
-    `${loggingPrefixes.error} The package must be installed locally, not globally.`,
-  );
-  process.exit(0);
-}
-
 // Load the `.env` file.
 dotenv.config();
 
