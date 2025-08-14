@@ -36,7 +36,7 @@ export const getProvider = (): DeploymentProvider => {
  * @see https://vercel.com/docs/build-output-api
  */
 export const transformToVercelBuildOutput = async (): Promise<void> => {
-  const spinner = logSpinner('Transforming to output for Vercel (production)').start();
+  const spinner = logSpinner('Transforming output for Vercel').start();
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
@@ -102,14 +102,12 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
  * Transform to match the Cloudflare output structure.
  */
 export const transformToCloudflareOutput = async (): Promise<void> => {
-  const spinner = logSpinner(
-    'Transforming to output for Cloudflare (production)',
-  ).start();
+  const spinner = logSpinner('Transforming output for Cloudflare').start();
 
   const promises = new Array<Promise<unknown>>(
     writeFile(
       path.join(outputDirectory, '.assetsignore'),
-      ['edge-worker.js', 'edge-worker.js.map', '_routes.json'].join('\n'),
+      ['edge-worker.js', '_routes.json', '*.map'].join('\n'),
     ),
     writeFile(
       path.join(outputDirectory, '_headers'),
@@ -167,7 +165,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
  * Transform to match the Netlify output structure.
  */
 export const transformToNetlifyOutput = async (): Promise<void> => {
-  const spinner = logSpinner('Transforming to output for Netlify (production)').start();
+  const spinner = logSpinner('Transforming output for Netlify').start();
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
@@ -181,6 +179,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   // provide a list of all static assets to not be routed to the edge function.
   const staticAssets = new Array<string>();
   const files = await readdir(outputDirectory, { recursive: true });
+
   for (const file of files) {
     if (file.startsWith('_worker') || file.endsWith('.map')) continue;
     staticAssets.push(`/${file}`);
