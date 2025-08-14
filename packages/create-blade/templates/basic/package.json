@@ -10,7 +10,7 @@
   },
   "author": "ronin",
   "dependencies": {
-    "blade": "https://pkg.pr.new/ronin-co/blade@392",
+    "blade": "3.10.8",
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510"
   },
