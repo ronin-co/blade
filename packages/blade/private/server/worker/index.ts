@@ -260,6 +260,9 @@ app.post('*', async (c) => {
   const stream = new SSEStreamingApi(writable, readable);
 
   const url = new URL(c.req.url);
+
+  // Clone the headers since we will modify them, and runtimes like `workerd` don't allow
+  // modifying the headers of the incoming request.
   const headers = new Headers(c.req.raw.headers);
 
   // Remove meta headers from the incoming headers.
