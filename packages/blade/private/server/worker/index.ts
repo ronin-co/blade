@@ -260,7 +260,7 @@ app.post('*', async (c) => {
   const stream = new SSEStreamingApi(writable, readable);
 
   const url = new URL(c.req.url);
-  const headers = c.req.raw.headers;
+  const headers = new Headers(c.req.raw.headers);
 
   // Remove meta headers from the incoming headers.
   Object.values(CUSTOM_HEADERS).forEach((header) => headers.delete(header));
