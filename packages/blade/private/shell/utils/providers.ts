@@ -80,13 +80,15 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
     cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
-      path.join(functionDir, 'worker.mjs'),
+      path.join(functionDir, 'worker.js'),
     ),
 
     cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
-      path.join(functionDir, 'worker.mjs.map'),
+      path.join(functionDir, 'worker.js.map'),
     ),
+
+    writeFile(path.join(functionDir, 'package.json'), JSON.stringify({ type: 'module' })),
 
     writeFile(
       path.join(vercelOutputDir, 'config.json'),
@@ -114,7 +116,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     writeFile(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
-        handler: 'worker.mjs',
+        handler: 'worker.js',
         launcherType: 'Nodejs',
         runtime: 'nodejs22.x',
       } satisfies VercelNodejsServerlessFunctionConfig),
@@ -214,12 +216,12 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   await Promise.all([
     cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
-      path.join(edgeFunctionDir, 'worker.mjs'),
+      path.join(edgeFunctionDir, 'worker.js'),
     ),
 
     cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
-      path.join(edgeFunctionDir, 'worker.mjs.map'),
+      path.join(edgeFunctionDir, 'worker.js.map'),
     ),
 
     // Copy chunk files that are shared between client and server into worker.
@@ -232,8 +234,13 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
     }),
 
     writeFile(
-      path.join(edgeFunctionDir, 'index.mjs'),
-      `export { default } from './worker.mjs';
+      path.join(edgeFunctionDir, 'package.json'),
+      JSON.stringify({ type: 'module' }),
+    ),
+
+    writeFile(
+      path.join(edgeFunctionDir, 'index.js'),
+      `export { default } from './worker.js';
 export const config = {
       path: "/*",
       excludedPath: ${JSON.stringify(staticAssets)},
