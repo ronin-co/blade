@@ -69,6 +69,15 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
       },
     }),
 
+    // Copy chunk files that are shared between client and server into worker.
+    cp(path.join(outputDirectory, 'client'), path.join(functionDir, 'client'), {
+      recursive: true,
+      filter: (source) => {
+        if (source === path.join(outputDirectory, 'client')) return true;
+        return source.includes('/client/chunk.');
+      },
+    }),
+
     cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
       path.join(functionDir, 'worker.mjs'),
