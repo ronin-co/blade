@@ -249,7 +249,7 @@ export const getProviderLoader = (
   provider: DeploymentProvider,
 ): RolldownPlugin => ({
   name: 'Provider Loader',
-  async writeBundle() {
+  async writeBundle(outputOptions) {
     if (environment !== 'production') return;
 
     // Copy hard-coded static assets into output directory.
@@ -263,11 +263,11 @@ export const getProviderLoader = (
         break;
       }
       case 'netlify': {
-        await transformToNetlifyOutput();
+        await transformToNetlifyOutput(outputOptions);
         break;
       }
       case 'vercel': {
-        await transformToVercelBuildOutput();
+        await transformToVercelBuildOutput(outputOptions);
         break;
       }
     }
