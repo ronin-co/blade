@@ -13,6 +13,10 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./utils": {
+      "import": "./dist/utils.js",
+      "types": "./dist/utils.d.ts"
+    },
     "./commands/login": {
       "import": "./dist/commands/login.js",
       "types": "./dist/commands/login.d.ts"
@@ -22,6 +26,9 @@
     "*": {
       "*": [
         "dist/index.d.ts"
+      ],
+      "utils": [
+        "dist/utils.d.ts"
       ],
       "commands/login": [
         "dist/commands/login.d.ts"

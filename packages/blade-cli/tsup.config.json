@@ -3,6 +3,7 @@
   "dts": true,
   "entry": {
     "index": "./src/index.ts",
+    "utils": "./src/utils.ts",
     "commands/login": "./src/commands/login.ts"
   },
   "format": "esm"
