@@ -29,7 +29,7 @@ const loadResource = async (bundleId: string, type: PreloadableAsset) => {
   const extension = extensions[type];
 
   return new Promise((resolve, reject) => {
-    const link = document.createElement('link');
+    const link = document.createElement('link') as HTMLLinkElement;
 
     link.rel = 'preload';
     link.as = extension === 'css' ? 'style' : 'script';
