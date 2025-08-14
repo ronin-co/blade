@@ -28,9 +28,12 @@ const metadataNames: Record<string, string> = {
 
 const serverBundleId = import.meta.env.__BLADE_BUNDLE_ID;
 
+// Ensure that stylesheets are loaded first in favor of performance. The HMR logic on the
+// client depends on this order as well.
 const ASSETS = new Array<Asset>(
-  { type: 'js', source: `/${getOutputFile(serverBundleId, 'js')}` },
-  { type: 'css', source: `/${getOutputFile(serverBundleId, 'css')}` },
+  { type: 'main-css', source: `/${getOutputFile(serverBundleId, 'css')}` },
+  { type: 'main-js', source: `/${getOutputFile(serverBundleId, 'js')}` },
+  { type: 'shared', source: `/${getOutputFile(serverBundleId, 'js', true)}` },
 );
 
 // In production, load the service worker script.
@@ -66,42 +69,39 @@ const Root = ({ children, serverContext }: RootProps) => {
       className={metadata.htmlClassName}
       suppressHydrationWarning={true}>
       <head>
-        {ASSETS
-          // Ensure that stylesheets are loaded first in favor of performance. The HMR
-          // logic on the client depends on this order as well.
-          .sort((a, b) => Number(b.type === 'css') - Number(a.type === 'css'))
-          .map(({ type, source }) => {
-            switch (type) {
-              case 'css':
-                return (
-                  <link
-                    rel="stylesheet"
-                    href={source}
-                    key={source}
-                    className="blade-style"
-                  />
-                );
-              case 'js':
-                return (
-                  <script
-                    src={source}
-                    key={source}
-                    type="module"
-                    className="blade-script"
-                    // Don't block the parsing of the remaining HTML, CSS, etc.
-                    async
-                  />
-                );
-              case 'worker':
-                return (
-                  <link
-                    rel="prefetch"
-                    href={source}
-                    as="script"
-                  />
-                );
-            }
-          })}
+        {ASSETS.map(({ type, source }) => {
+          switch (type) {
+            case 'main-css':
+              return (
+                <link
+                  rel="stylesheet"
+                  href={source}
+                  key={source}
+                  className="blade-style"
+                />
+              );
+            case 'main-js':
+              return (
+                <script
+                  src={source}
+                  key={source}
+                  type="module"
+                  className="blade-script"
+                  // Don't block the parsing of the remaining HTML, CSS, etc.
+                  async
+                />
+              );
+            case 'shared':
+            case 'worker':
+              return (
+                <link
+                  rel="prefetch"
+                  href={source}
+                  as="script"
+                />
+              );
+          }
+        })}
 
         <meta
           name="viewport"
