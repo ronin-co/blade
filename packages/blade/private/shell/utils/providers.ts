@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import {
@@ -42,13 +42,14 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
   const functionDir = path.resolve(vercelOutputDir, 'functions', 'worker.func');
 
-  const vercelOutputDirExists = await exists(vercelOutputDir);
-  if (vercelOutputDirExists) await rm(vercelOutputDir, { recursive: true });
+  // Delete the directory. Checking whether it exists first is slower.
+  try {
+    await rm(vercelOutputDir, { recursive: true });
+  } catch (err) {
+    if (!((err as { code: string }).code === 'ENOENT')) throw err;
+  }
 
-  await Promise.all([
-    mkdir(staticFilesDir, { recursive: true }),
-    mkdir(functionDir, { recursive: true }),
-  ]);
+  await mkdir(functionDir, { recursive: true });
 
   const staticDirectories = ['client', 'public'];
 
@@ -201,14 +202,16 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   }
 
   await Promise.all([
-    rename(
+    cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
       path.join(edgeFunctionDir, 'worker.mjs'),
     ),
-    rename(
+
+    cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
       path.join(edgeFunctionDir, 'worker.mjs.map'),
     ),
+
     writeFile(
       path.join(edgeFunctionDir, 'index.mjs'),
       `export { default } from './worker.mjs';
@@ -217,6 +220,7 @@ export const config = {
       excludedPath: ${JSON.stringify(staticAssets)},
 };`,
     ),
+
     writeFile(
       path.join(netlifyOutputDir, 'config.json'),
       JSON.stringify({
