@@ -123,10 +123,7 @@ export const composeBuildContext = async (
           return '[name].js';
         },
         assetFileNames: getOutputFile(bundleId, 'css'),
-        chunkFileNames: () => {
-          const chunkId = generateUniqueId();
-          return getOutputFile(chunkId, 'js', true);
-        },
+        chunkFileNames: getOutputFile(bundleId, 'js', true),
       };
 
       return options?.virtualFiles
