@@ -117,7 +117,7 @@ export const composeBuildContext = async (
         dir: outputDirectory,
         sourcemap: true,
         banner: `if(!import.meta.env){import.meta.env={}};import.meta.env.__BLADE_BUNDLE_ID='${bundleId}';`,
-        minify: false,
+        minify: environment === 'production',
         entryFileNames: (chunk) => {
           if (chunk.name === 'client') return getOutputFile(bundleId, 'js');
           return '[name].js';
