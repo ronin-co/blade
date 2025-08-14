@@ -95,6 +95,7 @@ const Root = ({ children, serverContext }: RootProps) => {
             case 'worker':
               return (
                 <link
+                  key={type}
                   rel="prefetch"
                   href={source}
                   as="script"
