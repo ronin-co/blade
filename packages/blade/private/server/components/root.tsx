@@ -92,10 +92,20 @@ const Root = ({ children, serverContext }: RootProps) => {
                 />
               );
             case 'shared':
+              return (
+                <link
+                  key="shared"
+                  // High priority fetching.
+                  rel="preload"
+                  href={source}
+                  as="script"
+                />
+              );
             case 'worker':
               return (
                 <link
-                  key={type}
+                  key="worker"
+                  // Low priority fetching.
                   rel="prefetch"
                   href={source}
                   as="script"
