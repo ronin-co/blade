@@ -51,7 +51,16 @@ export const serve = async (
   }
 
   const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
+
+  // Serve files located in the `public` directory.
   app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
+
+  // Source maps should only be accessible during development.
+  if (environment !== 'development') {
+    app.use(`/${CLIENT_ASSET_PREFIX}/:path{.+\\.map}`, async (c) => c.notFound());
+  }
+
+  // Serve files located in the `.blade/client` output directory.
   app.use(
     `/${CLIENT_ASSET_PREFIX}/*`,
     serveStatic({

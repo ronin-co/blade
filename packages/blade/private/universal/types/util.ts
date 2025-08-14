@@ -44,7 +44,7 @@ export interface QueryItemWrite extends QueryItemBase {
 }
 
 export type Asset = {
-  type: 'css' | 'js' | 'worker';
+  type: 'main-js' | 'main-css' | 'shared' | 'worker';
   source: string;
 };
 
