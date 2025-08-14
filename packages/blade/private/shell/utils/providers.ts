@@ -107,7 +107,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
   const promises = new Array<Promise<unknown>>(
     writeFile(
       path.join(outputDirectory, '.assetsignore'),
-      ['edge-worker.js', 'edge-worker.js.map', '_routes.json', '*.map'].join('\n'),
+      ['edge-worker.js', '_routes.json', '*.map'].join('\n'),
     ),
     writeFile(
       path.join(outputDirectory, '_headers'),
