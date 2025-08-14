@@ -36,7 +36,7 @@ export const getProvider = (): DeploymentProvider => {
  * @see https://vercel.com/docs/build-output-api
  */
 export const transformToVercelBuildOutput = async (): Promise<void> => {
-  const spinner = logSpinner('Transforming to output for Vercel (production)').start();
+  const spinner = logSpinner('Transforming output for Vercel').start();
 
   const vercelOutputDir = path.resolve(process.cwd(), '.vercel', 'output');
   const staticFilesDir = path.resolve(vercelOutputDir, 'static');
@@ -102,9 +102,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
  * Transform to match the Cloudflare output structure.
  */
 export const transformToCloudflareOutput = async (): Promise<void> => {
-  const spinner = logSpinner(
-    'Transforming to output for Cloudflare (production)',
-  ).start();
+  const spinner = logSpinner('Transforming output for Cloudflare').start();
 
   const promises = new Array<Promise<unknown>>(
     writeFile(
@@ -167,7 +165,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
  * Transform to match the Netlify output structure.
  */
 export const transformToNetlifyOutput = async (): Promise<void> => {
-  const spinner = logSpinner('Transforming to output for Netlify (production)').start();
+  const spinner = logSpinner('Transforming output for Netlify').start();
 
   const netlifyOutputDir = path.resolve(process.cwd(), '.netlify', 'v1');
   const edgeFunctionDir = path.resolve(netlifyOutputDir, 'edge-functions');
