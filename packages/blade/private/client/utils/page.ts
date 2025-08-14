@@ -5,19 +5,27 @@ import { hydrateRoot } from 'react-dom/client';
 
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
-import type { PageFetchingOptions } from '@/private/universal/types/util';
+import type { Asset, PageFetchingOptions } from '@/private/universal/types/util';
 import { CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
+type PreloadableAsset = Exclude<Asset['type'], 'worker'>;
+
 /**
- * Downloads a CSS or JS bundle from the server, without evaluating it.
+ * Downloads an asset from the server, without evaluating it.
  *
- * @param bundleId - The ID of the bundle to download.
- * @param type - The type of the bundle to download. Can be either 'style' or 'script'.
+ * @param bundleId - The ID of the bundle.
+ * @param type - The type of the asset to download.
  *
- * @returns A promise that resolves once the bundle is downloaded.
+ * @returns A promise that resolves once the asset is downloaded.
  */
-const loadResource = async (bundleId: string, type: 'style' | 'script') => {
+const loadResource = async (bundleId: string, type: PreloadableAsset) => {
+  const extensions: Record<PreloadableAsset, string> = {
+    'main-css': 'css',
+    'main-js': 'js',
+    shared: 'js',
+  };
+
   return new Promise((resolve, reject) => {
     const link = document.createElement('link');
 
@@ -25,7 +33,7 @@ const loadResource = async (bundleId: string, type: 'style' | 'script') => {
     link.as = type;
     link.onload = resolve;
     link.onerror = reject;
-    link.href = `/${getOutputFile(bundleId, type === 'style' ? 'css' : 'js')}`;
+    link.href = `/${getOutputFile(bundleId, extensions[type], type === 'shared')}`;
 
     document.head.appendChild(link);
   });
@@ -212,13 +220,12 @@ export const fetchPage = async (
   });
 };
 
-export const mountNewBundle = async (bundleId: string, markup: string) => {
-  // Download the new markup, CSS, and JS at the same time, but don't execute any of them
-  // just yet.
-  const [newMarkup] = await Promise.all([
-    markup,
-    loadResource(bundleId, 'style'),
-    loadResource(bundleId, 'script'),
+export const mountNewBundle = async (bundleId: string, newMarkup: string) => {
+  // Download the new assets at the same time, but don't execute any of them just yet.
+  await Promise.all([
+    loadResource(bundleId, 'main-css'),
+    loadResource(bundleId, 'main-js'),
+    loadResource(bundleId, 'shared'),
   ]);
 
   // Unmount React and replace the DOM with the static HTML markup, which then also loads
