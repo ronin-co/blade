@@ -7,11 +7,7 @@ import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
 import getPort, { portNumbers } from 'get-port';
 
-import {
-  defaultDeploymentProvider,
-  loggingPrefixes,
-  outputDirectory,
-} from '@/private/shell/constants';
+import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
 import { type ServerState, serve } from '@/private/shell/listener';
 import { cleanUp, logSpinner } from '@/private/shell/utils';
 import { composeBuildContext } from '@/private/shell/utils/build';
