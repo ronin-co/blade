@@ -1,4 +1,4 @@
-import { mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import {
@@ -50,16 +50,30 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     mkdir(functionDir, { recursive: true }),
   ]);
 
-  await rename(outputDirectory, staticFilesDir);
+  const staticDirectories = ['client', 'public'];
+
+  await cp(outputDirectory, staticFilesDir, {
+    recursive: true,
+    filter: (source) => {
+      if (source === outputDirectory) return true;
+
+      const relativeSource = path.relative(outputDirectory, source);
+      const staticFile = staticDirectories.some((item) => {
+        return relativeSource === item || relativeSource.startsWith(`${item}/`);
+      });
+
+      return staticFile && !source.endsWith('.map');
+    },
+  });
 
   await Promise.all([
-    rename(
-      path.join(staticFilesDir, `${defaultDeploymentProvider}.js`),
+    cp(
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
       path.join(functionDir, 'worker.mjs'),
     ),
 
-    rename(
-      path.join(staticFilesDir, `${defaultDeploymentProvider}.js.map`),
+    cp(
+      path.join(outputDirectory, `${defaultDeploymentProvider}.js.map`),
       path.join(functionDir, 'worker.mjs.map'),
     ),
 
@@ -85,6 +99,7 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
         ],
       } satisfies VercelConfig),
     ),
+
     writeFile(
       path.join(functionDir, '.vc-config.json'),
       JSON.stringify({
