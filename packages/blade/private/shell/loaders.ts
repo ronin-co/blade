@@ -60,7 +60,7 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
       const ast = this.parse(contents, {
         lang: extension,
         sourceType: 'module',
-        astType: 'js',
+        astType: 'ts',
         range: true,
       });
 
