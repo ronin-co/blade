@@ -20,7 +20,7 @@ type PreloadableAsset = Exclude<Asset['type'], 'worker'>;
  * @returns A promise that resolves once the asset is downloaded.
  */
 const loadResource = async (bundleId: string, type: PreloadableAsset) => {
-  const extensions: Record<PreloadableAsset, string> = {
+  const extensions: Record<PreloadableAsset, 'js' | 'css'> = {
     'main-css': 'css',
     'main-js': 'js',
     shared: 'js',
