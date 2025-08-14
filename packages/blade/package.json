@@ -80,6 +80,7 @@
     "@vercel/functions": "2.0.2",
     "@vitest/coverage-v8": "2.1.8",
     "async-retry": "1.3.3",
+    "blade-cli": "workspace:*",
     "blade-client": "workspace:*",
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
