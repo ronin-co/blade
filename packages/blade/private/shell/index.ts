@@ -3,27 +3,15 @@
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import login from 'blade-cli/commands/login';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
 import getPort, { portNumbers } from 'get-port';
 
-import {
-  defaultDeploymentProvider,
-  loggingPrefixes,
-  outputDirectory,
-} from '@/private/shell/constants';
+import { defaultDeploymentProvider, outputDirectory } from '@/private/shell/constants';
 import { type ServerState, serve } from '@/private/shell/listener';
 import { cleanUp, logSpinner } from '@/private/shell/utils';
 import { composeBuildContext } from '@/private/shell/utils/build';
-
-// We want people to add BLADE to `package.json`, which, for example, ensures that
-// everyone in a team is using the same version when working on apps.
-if (!process.env['npm_lifecycle_event']) {
-  console.error(
-    `${loggingPrefixes.error} The package must be installed locally, not globally.`,
-  );
-  process.exit(0);
-}
 
 // Load the `.env` file.
 dotenv.config();
@@ -53,8 +41,21 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
 });
 
-const isBuilding = positionals.includes('build');
-const isServing = positionals.includes('serve');
+// This ensures that people can accidentally type uppercase letters and still get the
+// command they are looking for.
+const normalizedPositionals = positionals.map((positional) => positional.toLowerCase());
+
+// If this environment variable is provided, the CLI will authenticate as an app for a
+// particular space instead of authenticating as an account. This is especially useful
+// in CI, which must be independent of individual people.
+const appToken = process.env['RONIN_TOKEN'];
+
+// `blade login` command
+const isLoggingIn = normalizedPositionals.includes('login');
+if (isLoggingIn) await login(appToken, true);
+
+const isBuilding = normalizedPositionals.includes('build');
+const isServing = normalizedPositionals.includes('serve');
 const isDeveloping = !isBuilding && !isServing;
 const enableServiceWorker = values.sw;
 

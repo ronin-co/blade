@@ -1,0 +1,9 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
+  "dts": true,
+  "entry": {
+    "index": "./src/index.ts",
+    "commands/login": "./src/commands/login.ts"
+  },
+  "format": "esm"
+}

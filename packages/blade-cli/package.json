@@ -8,13 +8,33 @@
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./commands/login": {
+      "import": "./dist/commands/login.js",
+      "types": "./dist/commands/login.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ],
+      "commands/login": [
+        "dist/commands/login.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "lint": "bun run --bun lint:tsc && bun run --bun lint:biome",
     "lint:biome": "biome check",
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "bun test",
-    "build": "tsup ./src/index.ts --dts --format esm"
+    "build": "tsup"
   },
   "keywords": [
     "database",
