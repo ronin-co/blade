@@ -222,6 +222,15 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
       path.join(edgeFunctionDir, 'worker.mjs.map'),
     ),
 
+    // Copy chunk files that are shared between client and server into worker.
+    cp(path.join(outputDirectory, 'client'), path.join(edgeFunctionDir, 'client'), {
+      recursive: true,
+      filter: (source) => {
+        if (source === path.join(outputDirectory, 'client')) return true;
+        return source.includes('/client/chunk.');
+      },
+    }),
+
     writeFile(
       path.join(edgeFunctionDir, 'index.mjs'),
       `export { default } from './worker.mjs';
