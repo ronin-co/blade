@@ -26,14 +26,16 @@ const loadResource = async (bundleId: string, type: PreloadableAsset) => {
     shared: 'js',
   };
 
+  const extension = extensions[type];
+
   return new Promise((resolve, reject) => {
     const link = document.createElement('link');
 
     link.rel = 'preload';
-    link.as = type;
+    link.as = extension === 'css' ? 'style' : 'script';
     link.onload = resolve;
     link.onerror = reject;
-    link.href = `/${getOutputFile(bundleId, extensions[type], type === 'shared')}`;
+    link.href = `/${getOutputFile(bundleId, extension, type === 'shared')}`;
 
     document.head.appendChild(link);
   });
