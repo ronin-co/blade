@@ -53,21 +53,22 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   const staticDirectories = ['client', 'public'];
 
-  await cp(outputDirectory, staticFilesDir, {
-    recursive: true,
-    filter: (source) => {
-      if (source === outputDirectory) return true;
-
-      const relativeSource = path.relative(outputDirectory, source);
-      const staticFile = staticDirectories.some((item) => {
-        return relativeSource === item || relativeSource.startsWith(`${item}/`);
-      });
-
-      return staticFile && !source.endsWith('.map');
-    },
-  });
-
   await Promise.all([
+    cp(outputDirectory, staticFilesDir, {
+      recursive: true,
+      filter: (source) => {
+        if (source === outputDirectory) return true;
+
+        // Only copy static files and exclude source maps.
+        const relativeSource = path.relative(outputDirectory, source);
+        const staticFile = staticDirectories.some((item) => {
+          return relativeSource === item || relativeSource.startsWith(`${item}/`);
+        });
+
+        return staticFile && !source.endsWith('.map');
+      },
+    }),
+
     cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
       path.join(functionDir, 'worker.mjs'),
