@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import apply from '@/src/commands/apply';
-import { initializeDatabase } from '@/src/utils/database';
 import { Migration, type MigrationFlags } from '@/src/utils/migration';
 import { MIGRATIONS_PATH, getModelDefinitions, logTableDiff } from '@/src/utils/misc';
 import { getModels } from '@/src/utils/model';
@@ -34,8 +33,6 @@ export default async (
     positionals[positionals.indexOf('diff') + 1] &&
     path.join(process.cwd(), positionals[positionals.indexOf('diff') + 1]);
 
-  const db = await initializeDatabase();
-
   try {
     const space = await getOrSelectSpaceId(sessionToken, spinner);
     status = 'comparing';
@@ -45,10 +42,8 @@ export default async (
       flags['force-create']
         ? []
         : getModels({
-            db,
             token: appToken ?? sessionToken,
             space,
-            isLocal: flags.local,
           }),
       flags['force-drop'] ? [] : getModelDefinitions(modelsInCodePath),
     ]);

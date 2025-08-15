@@ -1,11 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { select } from '@inquirer/prompts';
-import type { Database } from '@ronin/engine/resources';
 import { CompilerError } from 'blade-compiler';
 
 import types from '@/src/commands/types';
-import { initializeDatabase } from '@/src/utils/database';
 import type { MigrationFlags } from '@/src/utils/migration';
 import { MIGRATIONS_PATH } from '@/src/utils/misc';
 import {
@@ -28,16 +26,12 @@ export default async (
 ): Promise<void> => {
   const spinner = ora.info('Applying migration');
 
-  const db = await initializeDatabase();
-
   try {
     const space = await getOrSelectSpaceId(sessionToken, spinner);
 
     const existingModels = (await getModels({
-      db,
       token: appToken ?? sessionToken,
       space,
-      isLocal: flags.local,
       fieldArray: true,
     })) as Array<ModelWithFieldsArray>;
 
@@ -81,13 +75,7 @@ export default async (
       })),
     );
 
-    await applyMigrationStatements(
-      appToken ?? sessionToken,
-      flags,
-      db,
-      statements,
-      space,
-    );
+    await applyMigrationStatements(appToken ?? sessionToken, statements, space);
 
     spinner.succeed('Successfully applied migration');
 
@@ -110,20 +98,9 @@ export default async (
  */
 export const applyMigrationStatements = async (
   appTokenOrSessionToken: string | undefined,
-  flags: MigrationFlags,
-  db: Database,
   statements: Array<{ statement: string }>,
   slug: string,
 ): Promise<void> => {
-  if (flags.local) {
-    ora.info('Applying migration to local database');
-
-    await db.query(statements.map(({ statement }) => statement));
-    fs.writeFileSync('.ronin/db.sqlite', await db.getContents());
-
-    return;
-  }
-
   ora.info('Applying migration to production database');
 
   const response = await fetch(`https://data.ronin.co/?data-selector=${slug}`, {

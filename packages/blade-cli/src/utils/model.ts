@@ -6,7 +6,7 @@ import {
   getResponseBody,
 } from '@/src/utils/misc';
 import { spinner } from '@/src/utils/spinner';
-import type { Database, Row } from '@ronin/engine/resources';
+import type { Row } from '@ronin/engine/resources';
 import { type Model, type ModelField, Transaction } from 'blade-compiler';
 
 /**
@@ -17,65 +17,57 @@ export type ModelWithFieldsArray = Omit<Model, 'fields'> & { fields: Array<Model
 /**
  * Fetches and formats schema models from either production API or local database.
  *
- * @param db - The database instance to query from.
  * @param token - Optional authentication token for production API requests.
  * @param space - Optional space ID for production API requests.
- * @param isLocal - Optional flag to determine if production API should be used.
  *
  * @returns Promise resolving to an array of formatted Model objects.
  *
  * @throws Error if production API request fails.
  */
 export const getModels = async (options?: {
-  db?: Database;
   token?: string;
   space?: string;
-  isLocal?: boolean;
   fieldArray?: boolean;
 }): Promise<Array<ModelWithFieldsArray | Model>> => {
   const transaction = new Transaction([{ list: { models: null } }]);
-  const { db, token, space, isLocal = true, fieldArray = true } = options || {};
+  const { token, space, fieldArray = true } = options || {};
 
   let rawResults: Array<Array<Row>>;
 
-  if (isLocal && db) {
-    rawResults = (await db.query(transaction.statements)).map((r) => r.rows);
-  } else {
-    try {
-      const nativeQueries = transaction.statements.map((statement) => ({
-        query: statement.statement,
-        values: statement.params,
-      }));
+  try {
+    const nativeQueries = transaction.statements.map((statement) => ({
+      query: statement.statement,
+      values: statement.params,
+    }));
 
-      const response = await fetch(`https://data.ronin.co/?data-selector=${space}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ nativeQueries }),
-      });
+    const response = await fetch(`https://data.ronin.co/?data-selector=${space}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ nativeQueries }),
+    });
 
-      const responseResults = await getResponseBody<QueryResponse<Model>>(response);
+    const responseResults = await getResponseBody<QueryResponse<Model>>(response);
 
-      rawResults = responseResults.results.map((result) => {
-        return 'records' in result ? result.records : [];
-      });
-    } catch (error) {
-      // If the session is no longer valid, log in again and try to fetch the models again.
-      if (
-        error instanceof InvalidResponseError &&
-        error.code &&
-        error.code === 'AUTH_INVALID_SESSION'
-      ) {
-        spinner.stop();
-        const sessionToken = await logIn(undefined, false);
-        spinner.start();
-        return getModels({ db, token: sessionToken, space, isLocal });
-      }
-
-      throw new Error(`Failed to fetch remote models: ${(error as Error).message}`);
+    rawResults = responseResults.results.map((result) => {
+      return 'records' in result ? result.records : [];
+    });
+  } catch (error) {
+    // If the session is no longer valid, log in again and try to fetch the models again.
+    if (
+      error instanceof InvalidResponseError &&
+      error.code &&
+      error.code === 'AUTH_INVALID_SESSION'
+    ) {
+      spinner.stop();
+      const sessionToken = await logIn(undefined, false);
+      spinner.start();
+      return getModels({ token: sessionToken, space });
     }
+
+    throw new Error(`Failed to fetch remote models: ${(error as Error).message}`);
   }
 
   const results = transaction.formatResults<Model>(rawResults, false);
