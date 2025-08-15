@@ -3,7 +3,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import login from 'blade-cli/commands/login';
+import cmdLogin from 'blade-cli/commands/login';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
 import getPort, { portNumbers } from 'get-port';
@@ -52,7 +52,7 @@ const appToken = process.env['RONIN_TOKEN'];
 
 // `blade login` command
 const isLoggingIn = normalizedPositionals.includes('login');
-if (isLoggingIn) await login(appToken, true);
+if (isLoggingIn) await cmdLogin(appToken, true);
 
 const isBuilding = normalizedPositionals.includes('build');
 const isServing = normalizedPositionals.includes('serve');
