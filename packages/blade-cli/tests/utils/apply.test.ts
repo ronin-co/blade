@@ -1,5 +1,4 @@
 import { describe, expect, mock, spyOn, test } from 'bun:test';
-import fs from 'node:fs';
 import {
   Account,
   Account3,
@@ -32,22 +31,15 @@ import {
 } from '@/fixtures/index';
 import { getRowCount, getSQLTables, getTableRows, runMigration } from '@/fixtures/utils';
 import { applyMigrationStatements } from '@/src/commands/apply';
-import type { MigrationFlags } from '@/src/utils/migration';
-import type { Database } from '@ronin/engine/resources';
 import { type Model, Transaction } from 'blade-compiler';
 import { model, number, random, string } from 'ronin/schema';
 
 describe('applyMigrationStatements', () => {
   test('should apply migration to production database', async () => {
-    const mockDb = {
-      query: mock(() => Promise.resolve()),
-      getContents: mock(() => Promise.resolve(Buffer.from('mock-db-contents'))),
-    };
     const mockStatements = [
       { statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' },
       { statement: 'INSERT INTO test VALUES (1)' },
     ];
-    const mockFlags = { local: false, help: false, version: false, debug: false };
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
 
@@ -61,13 +53,7 @@ describe('applyMigrationStatements', () => {
 
     const stdoutSpy = spyOn(process.stderr, 'write');
 
-    await applyMigrationStatements(
-      mockToken,
-      mockFlags,
-      mockDb as unknown as Database,
-      mockStatements,
-      mockSlug,
-    );
+    await applyMigrationStatements(mockToken, mockStatements, mockSlug);
 
     expect(global.fetch).toHaveBeenCalledWith(
       `https://data.ronin.co/?data-selector=${mockSlug}`,
@@ -98,17 +84,7 @@ describe('applyMigrationStatements', () => {
   });
 
   test('should throw error when production API returns error', async () => {
-    const mockDb = {
-      query: mock(() => Promise.resolve()),
-      getContents: mock(() => Promise.resolve(Buffer.from('mock-db-contents'))),
-    };
     const mockStatements = [{ statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' }];
-    const mockFlags: MigrationFlags = {
-      local: false,
-      help: false,
-      version: false,
-      debug: false,
-    };
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
     const errorMessage = 'Database error occurred';
@@ -121,40 +97,23 @@ describe('applyMigrationStatements', () => {
       } as Response),
     );
 
-    expect(
-      applyMigrationStatements(
-        mockToken,
-        mockFlags,
-        mockDb as unknown as Database,
-        mockStatements,
-        mockSlug,
-      ),
-    ).rejects.toThrow(errorMessage);
+    expect(applyMigrationStatements(mockToken, mockStatements, mockSlug)).rejects.toThrow(
+      errorMessage,
+    );
     global.fetch = originalFetch;
   });
 
   test('should handle network failures when applying to production', async () => {
-    const mockDb = {
-      query: mock(() => Promise.resolve()),
-      getContents: mock(() => Promise.resolve(Buffer.from('mock-db-contents'))),
-    };
     const mockStatements = [{ statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' }];
-    const mockFlags = { local: false, help: false, version: false, debug: false };
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
 
     const originalFetch = fetch;
     global.fetch = mock(() => Promise.reject(new Error('Network error')));
 
-    expect(
-      applyMigrationStatements(
-        mockToken,
-        mockFlags,
-        mockDb as unknown as Database,
-        mockStatements,
-        mockSlug,
-      ),
-    ).rejects.toThrow('Network error');
+    expect(applyMigrationStatements(mockToken, mockStatements, mockSlug)).rejects.toThrow(
+      'Network error',
+    );
 
     global.fetch = originalFetch;
   });
