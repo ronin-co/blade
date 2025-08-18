@@ -3,6 +3,8 @@
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+import cmdApply from 'blade-cli/commands/apply';
+import cmdDiff from 'blade-cli/commands/diff';
 import cmdLogin from 'blade-cli/commands/login';
 import { getSession } from 'blade-cli/utils';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
@@ -59,6 +61,29 @@ const session = await getSession();
 // `blade login` command
 const isLoggingIn = normalizedPositionals.includes('login');
 if (isLoggingIn) await cmdLogin(appToken, true);
+
+// `blade diff` command
+const isDiffing = normalizedPositionals.includes('diff');
+if (isDiffing)
+  await cmdDiff(
+    appToken,
+    session?.token,
+    {
+      debug: values.debug,
+      help: false,
+      version: false,
+    },
+    positionals,
+  );
+
+// `blade apply` command
+const isApplying = normalizedPositionals.includes('apply');
+if (isApplying)
+  await cmdApply(appToken, session?.token, {
+    debug: values.debug,
+    help: false,
+    version: false,
+  });
 
 const isBuilding = normalizedPositionals.includes('build');
 const isServing = normalizedPositionals.includes('serve');
