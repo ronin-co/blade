@@ -3,7 +3,7 @@ import path from 'node:path';
 import { select } from '@inquirer/prompts';
 import { CompilerError } from 'blade-compiler';
 
-import types from '@/src/commands/types';
+// import types from '@/src/commands/types';
 import type { MigrationFlags } from '@/src/utils/migration';
 import { MIGRATIONS_PATH } from '@/src/utils/misc';
 import {
@@ -79,8 +79,9 @@ export default async (
 
     spinner.succeed('Successfully applied migration');
 
-    // If desired, generate new TypeScript types.
-    if (!flags['skip-types']) await types(appToken, sessionToken);
+    // TODO(@nurodev): Re-enable once
+    // // If desired, generate new TypeScript types.
+    // if (!flags['skip-types']) await types(appToken, sessionToken);
 
     process.exit(0);
   } catch (err) {
