@@ -913,7 +913,7 @@ describe('CLI', () => {
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).message).toContain(
-            'Migrations directory not found. Run `ronin diff` to create your first migration.',
+            'Migrations directory not found. Run `blade diff` to create your first migration.',
           );
         }
       });
@@ -1075,7 +1075,7 @@ describe('CLI', () => {
             (call) =>
               typeof call[0] === 'string' &&
               call[0].includes(
-                'No migrations found. Run `ronin diff` to create your first migration.',
+                'No migrations found. Run `blade diff` to create your first migration.',
               ),
           ),
         ).toBe(true);
