@@ -17,6 +17,10 @@
       "import": "./dist/utils.js",
       "types": "./dist/utils.d.ts"
     },
+    "./commands/apply": {
+      "import": "./dist/commands/apply.js",
+      "types": "./dist/commands/apply.d.ts"
+    },
     "./commands/diff": {
       "import": "./dist/commands/diff.js",
       "types": "./dist/commands/diff.d.ts"
@@ -33,6 +37,9 @@
       ],
       "utils": [
         "dist/utils.d.ts"
+      ],
+      "commands/apply": [
+        "dist/commands/apply.d.ts"
       ],
       "commands/diff": [
         "dist/commands/diff.d.ts"
