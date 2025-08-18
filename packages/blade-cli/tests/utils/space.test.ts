@@ -59,7 +59,7 @@ describe('space utils', () => {
 
       const result = await getSpaces('test-token');
       expect(result).toEqual(mockSpaces);
-      expect(fetchSpy).toHaveBeenCalledWith('https://ronin.co/api', {
+      expect(fetchSpy).toHaveBeenCalledWith('https://studio.ronin.co/api', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ describe('space utils', () => {
     });
 
     test('should login when api returns 400 - fails', async () => {
-      mock('https://ronin.co/api', {
+      mock('https://studio.ronin.co/api', {
         response: {
           status: 400,
           data: 'This session is no longer valid.',
@@ -226,7 +226,7 @@ describe('space utils', () => {
     });
 
     test('should login when api returns 400 - succeeds', async () => {
-      mock('https://ronin.co/api', {
+      mock('https://studio.ronin.co/api', {
         response: {
           status: 400,
           data: 'This session is no longer valid.',
