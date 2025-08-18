@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync } from 'node:fs';
-import { cp } from 'node:fs/promises';
+import { cp, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -101,6 +101,18 @@ async function main(): Promise<void> {
       errorOnExist: true,
       recursive: true,
     });
+
+    // Note: npm ignores all `.gitignore` files by default. But even when explicitly told
+    // to include them, it still ignores them. So we need to create this file manually.
+    await writeFile(
+      path.join(directory.target, '.gitignore'),
+      `# Build output
+.blade
+
+# Dependencies
+node_modules`,
+    );
+
     logSpinner('Successfully created example app').succeed();
   } catch (error) {
     logSpinner('Failed to create example app').fail();
