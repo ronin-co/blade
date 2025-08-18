@@ -79,7 +79,7 @@ export default async (
 
     spinner.succeed('Successfully applied migration');
 
-    // TODO(@nurodev): Re-enable once
+    // TODO(@nurodev): Re-enable once the `types` command dynamic import is fixed.
     // // If desired, generate new TypeScript types.
     // if (!flags['skip-types']) await types(appToken, sessionToken);
 
