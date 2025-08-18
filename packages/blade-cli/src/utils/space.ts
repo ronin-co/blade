@@ -22,7 +22,7 @@ export const getSpaces = async (
   sessionToken: string,
 ): Promise<Array<{ id: string; handle: string; name: string }>> => {
   try {
-    const response = await fetch('https://ronin.co/api', {
+    const response = await fetch('https://studio.ronin.co/api', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
