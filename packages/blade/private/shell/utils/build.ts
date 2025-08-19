@@ -80,8 +80,11 @@ export const composeBuildContext = async (
     platform: provider === 'vercel' ? 'node' : 'browser',
 
     resolve: {
-      modules: [nodePath],
       tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
+
+      // If the provided files are virtual, Rolldown can't reliable resolve the modules,
+      // so we provide the resolving logic ourselves as a plugin from the outside.
+      modules: options?.virtualFiles ? undefined : [nodePath],
 
       // When linking the framework package, Rolldown doesn't recognize these dependencies
       // correctly, so we have to alias them explicitly.
