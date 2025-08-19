@@ -659,6 +659,26 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
+      test.skip('diff with local flag', async () => {
+        process.argv = ['bun', 'ronin', 'diff', '--local'];
+        setupMigrationTest();
+
+        await run({ version: '1.0.0' });
+
+        expect(
+          stderrSpy.mock.calls.some(
+            (call) => typeof call[0] === 'string' && call[0].includes('Comparing models'),
+          ),
+        ).toBe(true);
+        expect(
+          stderrSpy.mock.calls.some(
+            (call) =>
+              typeof call[0] === 'string' &&
+              call[0].includes('Successfully generated migration protocol file'),
+          ),
+        ).toBe(true);
+      });
+
       test('diff with multiple flags', async () => {
         process.argv = ['bun', 'ronin', 'diff', '--local', '--apply'];
         setupMigrationTest();
@@ -912,6 +932,115 @@ describe('CLI', () => {
           // @ts-expect-error This is a mock.
           stderrSpy.mock.calls.some((call) => call[0].includes('Network error')),
         ).toBe(true);
+      });
+
+      test.skip('apply with local flag', async () => {
+        process.argv = ['bun', 'ronin', 'apply', '--local'];
+
+        spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('test-space');
+        spyOn(modelModule, 'getModels').mockResolvedValue([
+          {
+            slug: 'user',
+            fields: convertObjectToArray({
+              fields: {
+                name: { type: 'string' },
+              },
+            }),
+          },
+        ]);
+
+        spyOn(fs, 'existsSync').mockImplementation(
+          (path) =>
+            path.toString().includes('migration-fixture.ts') ||
+            path.toString().includes('.ronin/migrations'),
+        );
+        spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
+        spyOn(path, 'resolve').mockReturnValue(
+          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+        );
+
+        await run({ version: '1.0.0' });
+
+        expect(
+          stderrSpy.mock.calls.some(
+            (call) =>
+              typeof call[0] === 'string' &&
+              call[0].includes('Applying migration to local database'),
+          ),
+        ).toBe(true);
+        expect(
+          stderrSpy.mock.calls.some(
+            (call) =>
+              typeof call[0] === 'string' &&
+              call[0].includes('Successfully applied migration'),
+          ),
+        ).toBe(true);
+        expect(
+          stderrSpy.mock.calls.some(
+            (call) => typeof call[0] === 'string' && call[0].includes('Generating types'),
+          ),
+        ).toBe(true);
+
+        expect(
+          stderrSpy.mock.calls.some(
+            (call) =>
+              typeof call[0] === 'string' &&
+              call[0].includes('Successfully generated types'),
+          ),
+        ).toBe(true);
+      });
+
+      test.skip('skip generating types', async () => {
+        process.argv = ['bun', 'ronin', 'apply', '--local', '--skip-types'];
+
+        spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('test-space');
+        spyOn(modelModule, 'getModels').mockResolvedValue([
+          {
+            slug: 'user',
+            fields: convertObjectToArray({
+              fields: {
+                name: { type: 'string' },
+              },
+            }),
+          },
+        ]);
+
+        spyOn(fs, 'existsSync').mockImplementation(
+          (path) =>
+            path.toString().includes('migration-fixture.ts') ||
+            path.toString().includes('.ronin/migrations'),
+        );
+        spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
+        spyOn(path, 'resolve').mockReturnValue(
+          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+        );
+
+        await run({ version: '1.0.0' });
+
+        expect(
+          stderrSpy.mock.calls.some(
+            ([call]) =>
+              typeof call === 'string' &&
+              call.includes('Applying migration to local database'),
+          ),
+        ).toBe(true);
+        expect(
+          stderrSpy.mock.calls.some(
+            ([call]) =>
+              typeof call === 'string' && call.includes('Successfully applied migration'),
+          ),
+        ).toBe(true);
+        expect(
+          stderrSpy.mock.calls.some(
+            ([call]) => typeof call === 'string' && call.includes('Generating types'),
+          ),
+        ).toBe(false);
+        expect(
+          stderrSpy.mock.calls.some(
+            ([call]) =>
+              typeof call === 'string' && call.includes('Failed to generate types'),
+          ),
+        ).toBe(false);
       });
 
       test('try to apply with non-existent migration file', async () => {

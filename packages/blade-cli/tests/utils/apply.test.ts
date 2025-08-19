@@ -1,4 +1,5 @@
 import { describe, expect, mock, spyOn, test } from 'bun:test';
+import fs from 'node:fs';
 import {
   Account,
   Account3,
@@ -35,6 +36,44 @@ import { type Model, Transaction } from 'blade-compiler';
 import { model, number, random, string } from 'ronin/schema';
 
 describe('applyMigrationStatements', () => {
+  test.skip('should apply migration to local database', async () => {
+    const mockDb = {
+      query: mock(() => Promise.resolve()),
+      getContents: mock(() => Promise.resolve(Buffer.from('mock-db-contents'))),
+    };
+    const mockStatements = [
+      { statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' },
+      { statement: 'INSERT INTO test VALUES (1)' },
+    ];
+    const mockSlug = 'test-space';
+
+    const writeFileSpy = spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+
+    const stdoutSpy = spyOn(process.stderr, 'write');
+
+    await applyMigrationStatements('mock-token', mockStatements, mockSlug);
+
+    expect(mockDb.query).toHaveBeenCalledWith(
+      mockStatements.map(({ statement }) => statement),
+    );
+    expect(mockDb.getContents).toHaveBeenCalled();
+    expect(writeFileSpy).toHaveBeenCalledWith(
+      '.ronin/db.sqlite',
+      await mockDb.getContents(),
+    );
+
+    expect(
+      stdoutSpy.mock.calls.some(
+        (call) =>
+          typeof call[0] === 'string' &&
+          call[0].includes('Applying migration to local database'),
+      ),
+    ).toBe(true);
+
+    writeFileSpy.mockRestore();
+    stdoutSpy.mockRestore();
+  });
+
   test('should apply migration to production database', async () => {
     const mockStatements = [
       { statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' },
