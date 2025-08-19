@@ -82,7 +82,7 @@ export const composeBuildContext = async (
     resolve: {
       tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
 
-      // If the provided files are virtual, Rolldown can't reliable resolve the modules,
+      // If the provided files are virtual, Rolldown can't reliably resolve the modules,
       // so we provide the resolving logic ourselves as a plugin from the outside.
       modules: options?.virtualFiles ? undefined : [nodePath],
 
