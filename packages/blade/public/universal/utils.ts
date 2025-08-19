@@ -68,7 +68,7 @@ export const build = async (
         name: 'Memory Dependency Loader',
         resolveId: {
           filter: {
-            id: { include: [/^[\w@][\w./-]*$/] },
+            id: [/^[\w@][\w./-]*$/],
           },
           handler(id) {
             return resolveFrom(nodePath, id);
