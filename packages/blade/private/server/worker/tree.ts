@@ -94,11 +94,11 @@ const runQueriesWithTime = async (
   const end = Date.now();
 
   const databases = databaseAmount > 1 ? ` targeting ${databaseAmount} databases` : '';
-  console.log(
-    `[BLADE] Page ${path} took ${end - start}ms for ${queryAmount} queries${databases}`,
-  );
 
   if (VERBOSE_LOGGING) {
+    console.log(
+      `[BLADE] Page ${path} took ${end - start}ms for ${queryAmount} queries${databases}`,
+    );
     console.log('-'.repeat(20));
     console.log(`"queries": ${JSON.stringify(queries)}`);
     console.log('-'.repeat(20));
