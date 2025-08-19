@@ -1,3 +1,5 @@
+import resolveFrom from 'resolve-from';
+
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
@@ -41,7 +43,7 @@ export const build = async (
     virtualFiles,
     plugins: [
       {
-        name: 'Memory Loader',
+        name: 'Memory File Loader',
         resolveId: {
           filter: {
             id: { include: [/^\//], exclude: [ignoreStart] },
@@ -59,6 +61,17 @@ export const build = async (
             const sourceFile = virtualFiles.find(({ path }) => path === absolutePath);
             if (!sourceFile) return;
             return sourceFile.content;
+          },
+        },
+      },
+      {
+        name: 'Memory Dependency Loader',
+        resolveId: {
+          filter: {
+            id: [/^[\w@][\w./-]*$/],
+          },
+          handler(id) {
+            return resolveFrom(nodePath, id);
           },
         },
       },
