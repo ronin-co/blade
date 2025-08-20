@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createFromBuffer } from '@dprint/formatter';
-import { getPath } from '@dprint/typescript';
 
 // Top-level regex constants for better performance
 const CREATE_TABLE_REGEX = /CREATE TABLE "(.*?)" \((.*?)\)/s;
@@ -90,7 +90,11 @@ export const detectFormatConfig = (): {
 
 export const formatCode = (code: string): string => {
   const config = detectFormatConfig();
-  const buffer = fs.readFileSync(getPath());
+  const wasmPath = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    'plugin.wasm',
+  );
+  const buffer = fs.readFileSync(wasmPath);
   const formatter = createFromBuffer(buffer);
 
   const formated = formatter.formatText({
