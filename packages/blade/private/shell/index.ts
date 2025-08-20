@@ -6,6 +6,7 @@ import { parseArgs } from 'node:util';
 import cmdApply from 'blade-cli/commands/apply';
 import cmdDiff from 'blade-cli/commands/diff';
 import cmdLogin from 'blade-cli/commands/login';
+import cmdTypes from 'blade-cli/commands/types';
 import { getSession } from 'blade-cli/utils';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
@@ -80,6 +81,15 @@ if (isDiffing)
 const isApplying = normalizedPositionals.includes('apply');
 if (isApplying)
   await cmdApply(appToken, session?.token, {
+    debug: values.debug,
+    help: false,
+    version: false,
+  });
+
+// `blade types` command.
+const isGeneratingTypes = normalizedPositionals.includes('types');
+if (isGeneratingTypes)
+  await cmdTypes(appToken, session?.token, {
     debug: values.debug,
     help: false,
     version: false,
