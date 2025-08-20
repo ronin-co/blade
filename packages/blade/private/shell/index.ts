@@ -76,7 +76,7 @@ if (isDiffing)
     positionals,
   );
 
-// `blade apply` command
+// `blade apply` command.
 const isApplying = normalizedPositionals.includes('apply');
 if (isApplying)
   await cmdApply(appToken, session?.token, {
