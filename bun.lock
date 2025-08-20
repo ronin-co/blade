@@ -11,7 +11,7 @@
     },
     "packages/blade": {
       "name": "blade",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "bin": {
         "blade": "./dist/private/shell/index.js",
       },
@@ -25,6 +25,7 @@
         "ronin": "6.8.0",
       },
       "devDependencies": {
+        "@dprint/typescript": "0.95.10",
         "@hono/node-server": "1.14.4",
         "@mdx-js/mdx": "3.0.1",
         "@types/async-retry": "1.4.8",
@@ -64,7 +65,7 @@
     },
     "packages/blade-better-auth": {
       "name": "blade-better-auth",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "dependencies": {
         "better-auth": "1.2.5",
       },
@@ -82,7 +83,7 @@
     },
     "packages/blade-cli": {
       "name": "blade-cli",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "dependencies": {
         "@dprint/formatter": "0.4.1",
         "@dprint/typescript": "0.93.3",
@@ -114,7 +115,7 @@
     },
     "packages/blade-client": {
       "name": "blade-client",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "bin": {
         "ronin": "./dist/bin/index.js",
       },
@@ -133,7 +134,7 @@
     },
     "packages/blade-codegen": {
       "name": "blade-codegen",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "dependencies": {
         "typescript": "5.7.3",
       },
@@ -147,7 +148,7 @@
     },
     "packages/blade-compiler": {
       "name": "blade-compiler",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
@@ -161,7 +162,7 @@
     },
     "packages/blade-hono": {
       "name": "blade-hono",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.18",
@@ -177,7 +178,7 @@
     },
     "packages/blade-syntax": {
       "name": "blade-syntax",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
@@ -189,7 +190,7 @@
     },
     "packages/create-blade": {
       "name": "create-blade",
-      "version": "3.10.6",
+      "version": "3.10.12",
       "bin": {
         "create-blade": "./dist/index.js",
       },
@@ -250,7 +251,7 @@
 
     "@dprint/formatter": ["@dprint/formatter@0.4.1", "", {}, "sha512-IB/GXdlMOvi0UhQQ9mcY15Fxcrc2JPadmo6tqefCNV0bptFq7YBpggzpqYXldBXDa04CbKJ+rDwO2eNRPE2+/g=="],
 
-    "@dprint/typescript": ["@dprint/typescript@0.93.3", "", {}, "sha512-P/AAHYDyUG+5hih8knuk3s9n2wrCD1LSh0YsLlJMx6+v0Wsjf0PpcVRn+xDvHCtwPUctB5WBkZT2U8mu6Cm7RQ=="],
+    "@dprint/typescript": ["@dprint/typescript@0.95.10", "", {}, "sha512-ksBdEcYyFf9j8AadfQmmtyDyWdgaGfOPFnzf+qOoqJrX0HD8E009wHzMkdfn1FZv2JOGv0lvP1AoAnB3YUeVXQ=="],
 
     "@emnapi/core": ["@emnapi/core@1.4.5", "", { "dependencies": { "@emnapi/wasi-threads": "1.0.4", "tslib": "^2.4.0" } }, "sha512-XsLw1dEOpkSX/WucdqUhPWP7hDxSvZiY+fsUC14h+FtQ2Ifni4znbBt8punRX+Uj2JG/uDb8nEHVKvrVlvdZ5Q=="],
 
@@ -1472,6 +1473,8 @@
 
     "@rollup/pluginutils/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
+    "@ronin/cli/@dprint/typescript": ["@dprint/typescript@0.93.3", "", {}, "sha512-P/AAHYDyUG+5hih8knuk3s9n2wrCD1LSh0YsLlJMx6+v0Wsjf0PpcVRn+xDvHCtwPUctB5WBkZT2U8mu6Cm7RQ=="],
+
     "@ronin/cli/@ronin/engine": ["@ronin/engine@0.1.23", "", { "dependencies": { "zod": "3.24.1" } }, "sha512-QDeikl4YEBFHEdful9+x5e8lLrxXvjhubJEYxnFfM7SJoFC9OxoE+Dq4g6mVzRuCI+gN+Odkdy3gd2ARr7eXFg=="],
 
     "@ronin/cli/ora": ["ora@8.1.1", "", { "dependencies": { "chalk": "^5.3.0", "cli-cursor": "^5.0.0", "cli-spinners": "^2.9.2", "is-interactive": "^2.0.0", "is-unicode-supported": "^2.0.0", "log-symbols": "^6.0.0", "stdin-discarder": "^0.2.2", "string-width": "^7.2.0", "strip-ansi": "^7.1.0" } }, "sha512-YWielGi1XzG1UTvOaCFaNgEnuhZVMSHYkW/FQ7UX8O26PtlpdM84c0f7wLPlkvx2RfiQmnzd61d/MGxmpQeJPw=="],
@@ -1505,6 +1508,8 @@
     "ansi-escapes/type-fest": ["type-fest@0.21.3", "", {}, "sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w=="],
 
     "blade-better-auth/typescript": ["typescript@5.8.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ=="],
+
+    "blade-cli/@dprint/typescript": ["@dprint/typescript@0.93.3", "", {}, "sha512-P/AAHYDyUG+5hih8knuk3s9n2wrCD1LSh0YsLlJMx6+v0Wsjf0PpcVRn+xDvHCtwPUctB5WBkZT2U8mu6Cm7RQ=="],
 
     "blade-cli/@ronin/engine": ["@ronin/engine@0.1.23", "", { "dependencies": { "zod": "3.24.1" } }, "sha512-QDeikl4YEBFHEdful9+x5e8lLrxXvjhubJEYxnFfM7SJoFC9OxoE+Dq4g6mVzRuCI+gN+Odkdy3gd2ARr7eXFg=="],
 
