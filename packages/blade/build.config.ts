@@ -1,4 +1,7 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { resolve } from 'node:path';
+import { getPath as getWasmPath } from '@dprint/typescript';
 import { defineBuildConfig } from 'unbuild';
 
 export default defineBuildConfig({
@@ -18,6 +21,25 @@ export default defineBuildConfig({
     os: 'node:os',
     path: 'node:path',
     stream: 'node:stream',
+  },
+  hooks: {
+    'build:done': async (): Promise<void> => {
+      try {
+        await fs.copyFile(
+          getWasmPath(),
+          path.resolve(__dirname, 'dist', 'private', 'shell', 'plugin.wasm'),
+        );
+        console.log('✓ Copied `@dprint/typescript` WASM module to dist/private/shell/');
+      } catch (err) {
+        if (err instanceof Error)
+          return console.warn(
+            '⚠ Failed to copy `@dprint/typescript` WASM module:',
+            err.message,
+          );
+
+        throw err;
+      }
+    },
   },
   entries: [
     // These files are publicly accessible.

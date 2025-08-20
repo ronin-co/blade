@@ -3,7 +3,10 @@
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import login from 'blade-cli/commands/login';
+import cmdApply from 'blade-cli/commands/apply';
+import cmdDiff from 'blade-cli/commands/diff';
+import cmdLogin from 'blade-cli/commands/login';
+import { getSession } from 'blade-cli/utils';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
 import getPort, { portNumbers } from 'get-port';
@@ -50,9 +53,37 @@ const normalizedPositionals = positionals.map((positional) => positional.toLower
 // in CI, which must be independent of individual people.
 const appToken = process.env['RONIN_TOKEN'];
 
+// If there is no active session, automatically start one and then continue with the
+// execution of the requested sub command, if there is one. If the `login` sub command
+// is invoked, we don't need to auto-login, since the command itself will handle it.
+const session = await getSession();
+
 // `blade login` command
 const isLoggingIn = normalizedPositionals.includes('login');
-if (isLoggingIn) await login(appToken, true);
+if (isLoggingIn) await cmdLogin(appToken, true);
+
+// `blade diff` command.
+const isDiffing = normalizedPositionals.includes('diff');
+if (isDiffing)
+  await cmdDiff(
+    appToken,
+    session?.token,
+    {
+      debug: values.debug,
+      help: false,
+      version: false,
+    },
+    positionals,
+  );
+
+// `blade apply` command.
+const isApplying = normalizedPositionals.includes('apply');
+if (isApplying)
+  await cmdApply(appToken, session?.token, {
+    debug: values.debug,
+    help: false,
+    version: false,
+  });
 
 const isBuilding = normalizedPositionals.includes('build');
 const isServing = normalizedPositionals.includes('serve');

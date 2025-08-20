@@ -22,7 +22,7 @@ export const getSpaces = async (
   sessionToken: string,
 ): Promise<Array<{ id: string; handle: string; name: string }>> => {
   try {
-    const response = await fetch('https://ronin.co/api', {
+    const response = await fetch('https://studio.ronin.co/api', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export const getOrSelectSpaceId = async (
       throw new Error(
         "You don't have access to any space or your CLI session is invalid.\n\n" +
           'Please login again (by running `npx ronin login`) or ' +
-          'create a new space on the dashboard (`https://ronin.co/new`) and try again.',
+          'create a new space on the dashboard (`https://studio.ronin.co/new`) and try again.',
       );
     }
 

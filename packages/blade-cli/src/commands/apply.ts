@@ -1,11 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { select } from '@inquirer/prompts';
-import type { Database } from '@ronin/engine/resources';
 import { CompilerError } from 'blade-compiler';
 
-import types from '@/src/commands/types';
-import { initializeDatabase } from '@/src/utils/database';
 import type { MigrationFlags } from '@/src/utils/migration';
 import { MIGRATIONS_PATH } from '@/src/utils/misc';
 import {
@@ -28,23 +25,19 @@ export default async (
 ): Promise<void> => {
   const spinner = ora.info('Applying migration');
 
-  const db = await initializeDatabase();
-
   try {
     const space = await getOrSelectSpaceId(sessionToken, spinner);
 
     const existingModels = (await getModels({
-      db,
       token: appToken ?? sessionToken,
       space,
-      isLocal: flags.local,
       fieldArray: true,
     })) as Array<ModelWithFieldsArray>;
 
     // Verify that the migrations directory exists before proceeding.
     if (!fs.existsSync(MIGRATIONS_PATH)) {
       throw new Error(
-        'Migrations directory not found. Run `ronin diff` to create your first migration.',
+        'Migrations directory not found. Run `blade diff` to create your first migration.',
       );
     }
 
@@ -54,7 +47,7 @@ export default async (
     let migrationPrompt: string | undefined;
     if (migrations.length === 0) {
       throw new Error(
-        'No migrations found. Run `ronin diff` to create your first migration.',
+        'No migrations found. Run `blade diff` to create your first migration.',
       );
     }
 
@@ -81,18 +74,15 @@ export default async (
       })),
     );
 
-    await applyMigrationStatements(
-      appToken ?? sessionToken,
-      flags,
-      db,
-      statements,
-      space,
-    );
+    await applyMigrationStatements(appToken ?? sessionToken, statements, space);
 
     spinner.succeed('Successfully applied migration');
 
     // If desired, generate new TypeScript types.
-    if (!flags['skip-types']) await types(appToken, sessionToken);
+    if (!flags['skip-types']) {
+      // TODO(@nurodev): Re-enable once the `types` command dynamic import is fixed.
+      // await types(appToken, sessionToken);
+    }
 
     process.exit(0);
   } catch (err) {
@@ -110,20 +100,9 @@ export default async (
  */
 export const applyMigrationStatements = async (
   appTokenOrSessionToken: string | undefined,
-  flags: MigrationFlags,
-  db: Database,
   statements: Array<{ statement: string }>,
   slug: string,
 ): Promise<void> => {
-  if (flags.local) {
-    ora.info('Applying migration to local database');
-
-    await db.query(statements.map(({ statement }) => statement));
-    fs.writeFileSync('.ronin/db.sqlite', await db.getContents());
-
-    return;
-  }
-
   ora.info('Applying migration to production database');
 
   const response = await fetch(`https://data.ronin.co/?data-selector=${slug}`, {
