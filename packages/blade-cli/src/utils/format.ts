@@ -15,8 +15,13 @@ const KEYWORD_REGEX =
 const TABLE_NAME_REGEX = /"([^"]+)"/g;
 const STRING_LITERAL_REGEX = /'([^']+)'/g;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const DPRINT_WASM_NODE_MODULE_PATH = path.join(
+  '..',
+  '..',
+  'node_modules',
+  '@dprint',
+  'typescript',
+);
 
 /**
  * Detects code formatting configuration from common config files.
@@ -92,8 +97,16 @@ export const detectFormatConfig = (): {
 };
 
 export const formatCode = (code: string): string => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   const config = detectFormatConfig();
-  const wasmPath = path.resolve(__dirname, 'plugin.wasm');
+  const wasmPath = path.resolve(
+    process.env.NODE_ENV === 'test'
+      ? path.join(__dirname, DPRINT_WASM_NODE_MODULE_PATH)
+      : __dirname,
+    'plugin.wasm',
+  );
   const buffer = fs.readFileSync(wasmPath);
   const formatter = createFromBuffer(buffer);
 
