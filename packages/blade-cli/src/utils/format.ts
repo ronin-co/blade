@@ -15,6 +15,9 @@ const KEYWORD_REGEX =
 const TABLE_NAME_REGEX = /"([^"]+)"/g;
 const STRING_LITERAL_REGEX = /'([^']+)'/g;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /**
  * Detects code formatting configuration from common config files.
  *
@@ -90,10 +93,7 @@ export const detectFormatConfig = (): {
 
 export const formatCode = (code: string): string => {
   const config = detectFormatConfig();
-  const wasmPath = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    'plugin.wasm',
-  );
+  const wasmPath = path.resolve(__dirname, 'plugin.wasm');
   const buffer = fs.readFileSync(wasmPath);
   const formatter = createFromBuffer(buffer);
 
