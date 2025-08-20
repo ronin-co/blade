@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createFromBuffer } from '@dprint/formatter';
 import { getPath } from '@dprint/typescript';
 
@@ -90,7 +91,10 @@ export const detectFormatConfig = (): {
 
 export const formatCode = (code: string): string => {
   const config = detectFormatConfig();
+
+  globalThis.__dirname = path.dirname(fileURLToPath(import.meta.url));
   const buffer = fs.readFileSync(getPath());
+
   const formatter = createFromBuffer(buffer);
 
   const formated = formatter.formatText({
