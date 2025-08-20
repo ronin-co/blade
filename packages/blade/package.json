@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.10.12",
+  "version": "3.10.14",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -21,8 +21,9 @@
     "dev": "unbuild --watch"
   },
   "exports": {
-    "./client/": "./dist/public/client/",
-    "./server/": "./dist/public/server/",
+    "./client/*": "./dist/public/client/*.js",
+    "./server/*": "./dist/public/server/*.js",
+    "./server/utils/*": "./dist/public/server/utils/*.js",
     "./hooks": "./dist/public/universal/hooks.js",
     "./schema": "./dist/public/universal/schema.js",
     "./types": "./dist/public/universal/types.js",
@@ -97,6 +98,7 @@
     "magic-string": "0.30.17",
     "ora": "8.1.0",
     "radash": "12.1.0",
+    "resolve-from": "5.0.0",
     "serialize-error": "11.0.3",
     "typescript": "5.6.2",
     "ua-parser-js": "1.0.39",
