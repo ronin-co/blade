@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createFromBuffer } from '@dprint/formatter';
+import { getPath } from '@dprint/typescript';
 
 // Top-level regex constants for better performance
 const CREATE_TABLE_REGEX = /CREATE TABLE "(.*?)" \((.*?)\)/s;
@@ -14,14 +15,6 @@ const KEYWORD_REGEX =
   /\b(CREATE|TABLE|ALTER|ADD|COLUMN|INSERT|INTO|SELECT|TEXT|BOOLEAN|DATETIME|DEFAULT|UPDATE|SET|RETURNING|DROP|ON DELETE|ON UPDATE|PRIMARY KEY|REFERENCES)\b/g;
 const TABLE_NAME_REGEX = /"([^"]+)"/g;
 const STRING_LITERAL_REGEX = /'([^']+)'/g;
-
-const DPRINT_WASM_NODE_MODULE_PATH = path.join(
-  '..',
-  '..',
-  'node_modules',
-  '@dprint',
-  'typescript',
-);
 
 /**
  * Detects code formatting configuration from common config files.
@@ -97,17 +90,11 @@ export const detectFormatConfig = (): {
 };
 
 export const formatCode = (code: string): string => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
   const config = detectFormatConfig();
-  const wasmPath = path.resolve(
-    process.env.NODE_ENV === 'test'
-      ? path.join(__dirname, DPRINT_WASM_NODE_MODULE_PATH)
-      : __dirname,
-    'plugin.wasm',
-  );
-  const buffer = fs.readFileSync(wasmPath);
+
+  globalThis.__dirname = path.dirname(fileURLToPath(import.meta.url));
+  const buffer = fs.readFileSync(getPath());
+
   const formatter = createFromBuffer(buffer);
 
   const formated = formatter.formatText({
