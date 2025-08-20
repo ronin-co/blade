@@ -62,7 +62,7 @@ const session = await getSession();
 const isLoggingIn = normalizedPositionals.includes('login');
 if (isLoggingIn) await cmdLogin(appToken, true);
 
-// `blade diff` command
+// `blade diff` command.
 const isDiffing = normalizedPositionals.includes('diff');
 if (isDiffing)
   await cmdDiff(
