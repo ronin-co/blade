@@ -22,7 +22,7 @@ import { RootServerContext, type ServerContext } from '@/private/server/context'
 import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
-import { SECURITY_HEADERS, VERBOSE_LOGGING } from '@/private/server/utils/constants';
+import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { getWaitUntil, runQueries } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
@@ -410,17 +410,15 @@ const renderShell = async (
 };
 
 /**
- * Composes a `Set-Cookie` header and appends it to a list of existing headers.
+ * Composes a list of `Set-Cookie` headers.
  *
- * @param headers - The existing headers to append the `Set-Cookie` header to.
  * @param cookies - The list of cookies to set.
  *
- * @returns The new list of headers, including `Set-Cookie`.
+ * @returns The list of headers.
  */
-const appendCookieHeader = (
-  headers: Headers,
-  cookies: Collected['cookies'] = {},
-): Headers => {
+const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
+  const headers = new Headers();
+
   for (const key in cookies) {
     const settings = cookies[key];
     const { value, ...config } = settings;
@@ -830,10 +828,7 @@ const renderReactTree = async (
     );
   }
 
-  const headers = appendCookieHeader(
-    new Headers(SECURITY_HEADERS),
-    serverContext.collected.cookies || {},
-  );
+  const headers = getCookieHeaders(serverContext.collected.cookies || {});
 
   if (serverContext.collected.redirect) {
     if (initial) {

@@ -1,6 +1,7 @@
 import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
 import { getCookie } from 'hono/cookie';
+import { secureHeaders } from 'hono/secure-headers';
 import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
@@ -39,6 +40,9 @@ if (globalThis.DEV_SESSIONS) {
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+// Add basic security headers. In the future, they will be configurable.
+app.use('*', secureHeaders({ xFrameOptions: false }));
 
 app.use('*', async (c, next) => {
   const requestURL = new URL(c.req.url);
