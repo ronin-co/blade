@@ -27,6 +27,7 @@ const loadResource = async (bundleId: string, type: PreloadableAsset) => {
   };
 
   const extension = extensions[type];
+  const assetPrefix = import.meta.env.__BLADE_ASSET_PREFIX;
 
   return new Promise((resolve, reject) => {
     const link = document.createElement('link') as HTMLLinkElement;
@@ -35,7 +36,7 @@ const loadResource = async (bundleId: string, type: PreloadableAsset) => {
     link.as = extension === 'css' ? 'style' : 'script';
     link.onload = resolve;
     link.onerror = reject;
-    link.href = `/${getOutputFile(bundleId, extension, type === 'shared')}`;
+    link.href = `${assetPrefix}/${getOutputFile(bundleId, extension, type === 'shared')}`;
 
     document.head.appendChild(link);
   });
