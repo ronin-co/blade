@@ -20,6 +20,7 @@ const ignoreStart = new RegExp(
 interface BuildConfig {
   sourceFiles: Array<VirtualFileItem>;
   environment?: 'development' | 'production';
+  assetPrefix?: string;
 }
 
 /**
@@ -76,5 +77,6 @@ export const build = async (
         },
       },
     ],
+    assetPrefix: config.assetPrefix,
   });
 };
