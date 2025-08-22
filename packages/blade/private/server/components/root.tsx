@@ -41,6 +41,12 @@ if (import.meta.env['__BLADE_SERVICE_WORKER'] === 'true') {
   ASSETS.push({ type: 'worker', source: '/service-worker.js' });
 }
 
+if (import.meta.env['__BLADE_ASSET_PREFIX']) {
+  for (const asset of ASSETS) {
+    asset.source = `${import.meta.env['__BLADE_ASSET_PREFIX']}${asset.source}`;
+  }
+}
+
 const SERVICE_WORKER = ASSETS.find((asset) => asset.type === 'worker');
 
 interface RootProps {
