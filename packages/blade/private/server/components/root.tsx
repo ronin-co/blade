@@ -27,18 +27,22 @@ const metadataNames: Record<string, string> = {
 };
 
 const serverBundleId = import.meta.env.__BLADE_BUNDLE_ID;
+const assetPrefix = import.meta.env.__BLADE_ASSET_PREFIX;
 
 // Ensure that stylesheets are loaded first in favor of performance. The HMR logic on the
 // client depends on this order as well.
 const ASSETS = new Array<Asset>(
-  { type: 'main-css', source: `/${getOutputFile(serverBundleId, 'css')}` },
-  { type: 'main-js', source: `/${getOutputFile(serverBundleId, 'js')}` },
-  { type: 'shared', source: `/${getOutputFile(serverBundleId, 'js', true)}` },
+  { type: 'main-css', source: `${assetPrefix}/${getOutputFile(serverBundleId, 'css')}` },
+  { type: 'main-js', source: `${assetPrefix}/${getOutputFile(serverBundleId, 'js')}` },
+  {
+    type: 'shared',
+    source: `${assetPrefix}/${getOutputFile(serverBundleId, 'js', true)}`,
+  },
 );
 
 // In production, load the service worker script.
-if (import.meta.env['__BLADE_SERVICE_WORKER'] === 'true') {
-  ASSETS.push({ type: 'worker', source: '/service-worker.js' });
+if (import.meta.env.__BLADE_SERVICE_WORKER === 'true') {
+  ASSETS.push({ type: 'worker', source: `${assetPrefix}/service-worker.js` });
 }
 
 const SERVICE_WORKER = ASSETS.find((asset) => asset.type === 'worker');

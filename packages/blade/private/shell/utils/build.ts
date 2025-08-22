@@ -42,6 +42,7 @@ export interface VirtualFileItem {
  * @param [options] - Optional configuration for running the build.
  * @param [options.enableServiceWorker] - Whether service workers should be enabled.
  * @param [options.logQueries] - Whether executed queries should be logged at runtime.
+ * @param [options.assetPrefix] - A custom URL prefix for static assets.
  * @param [options.plugins] - Optional additional esbuild plugins to add to the build.
  * @param [options.filePaths] - A list of all source file paths in the project. If the
  * list is not provided, the project directory will be crawled automatically.
@@ -53,6 +54,8 @@ export const composeBuildContext = async (
   options?: {
     enableServiceWorker?: boolean;
     logQueries?: boolean;
+    assetPrefix?: string;
+
     plugins?: Array<RolldownPlugin>;
     virtualFiles?: Array<VirtualFileItem>;
   },
@@ -107,6 +110,7 @@ export const composeBuildContext = async (
     define: composeEnvironmentVariables({
       isLoggingQueries: options?.logQueries || false,
       enableServiceWorker: options?.enableServiceWorker || false,
+      assetPrefix: options?.assetPrefix || null,
       provider,
       environment,
     }),

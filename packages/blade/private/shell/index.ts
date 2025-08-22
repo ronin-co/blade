@@ -39,6 +39,10 @@ const { values, positionals } = parseArgs({
       default: false,
       description: 'Enable service worker support',
     },
+    'asset-prefix': {
+      type: 'string',
+      description: 'Used to prefix all static asset URLs',
+    },
   },
   strict: true,
   allowPositionals: true,
@@ -115,6 +119,7 @@ if (isBuilding || isDeveloping) {
   const mainBuild = await composeBuildContext(environment, {
     enableServiceWorker,
     logQueries: values?.queries,
+    assetPrefix: values?.['asset-prefix'],
     plugins: [
       {
         name: 'Spinner Loader',
