@@ -83,7 +83,12 @@ export const build = async (
             id: { include: [/^\//], exclude: [ignoreStart] },
           },
           handler(id) {
-            return `virtual:${id}`;
+            const rx = new RegExp(`^${reEscape(id)}(?:\\.(?:ts|tsx|js|jsx))?$`);
+            const sourceFile = virtualFiles.find(({ path }) => rx.test(path));
+
+            if (!sourceFile) return;
+
+            return `virtual:${sourceFile.path}`;
           },
         },
         load: {
@@ -92,9 +97,7 @@ export const build = async (
           },
           handler(id) {
             const absolutePath = id.replace('virtual:', '');
-
-            const rx = new RegExp(`^${reEscape(absolutePath)}(?:\\.(?:ts|tsx|js|jsx))?$`);
-            const sourceFile = virtualFiles.find(({ path }) => rx.test(path));
+            const sourceFile = virtualFiles.find(({ path }) => path === absolutePath);
 
             if (!sourceFile) return;
 
