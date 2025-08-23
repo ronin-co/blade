@@ -46,7 +46,7 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
     handler(code, id) {
       const extension = path.extname(id).slice(1) as 'ts' | 'tsx' | 'js' | 'jsx';
       const rawContents = code;
-      const relativeSourcePath = path.relative(process.cwd(), id.replace(/^\0+/, ''));
+      const relativeSourcePath = path.relative(process.cwd(), id).replace('virtual:/', '');
       const chunkId = generateUniqueId();
 
       const contents = [
