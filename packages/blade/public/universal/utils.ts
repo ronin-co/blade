@@ -18,15 +18,14 @@ export const tsConfigToAliases = (config: string): AliasEntry[] => {
   const paths = content?.compilerOptions?.paths || {};
 
   return Object.entries(paths).flatMap(([key, targets]) => {
-    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const hasStar = key.includes('*');
-    const find = hasStar ? new RegExp('^' + esc(key).replace('\\*', '(.*)') + '$') : key;
+    const find = hasStar ? new RegExp(`^${reEscape(key).replace('\\*', '(.*)')}$`) : key;
 
     return targets.map((target) => {
       // Make path absolute and strip trailing /*.
       const base = makePathAbsolute(target).replace(/\/\*$/, '');
+      const replacement = `/${hasStar ? base.replace('*', '$1') : base}`;
 
-      const replacement = '/' + (hasStar ? base.replace('*', '$1') : base);
       return { find, replacement };
     });
   });
