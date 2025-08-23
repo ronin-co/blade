@@ -22,13 +22,10 @@ export const tsConfigToAliases = (config: string): AliasEntry[] => {
     const hasStar = key.includes('*');
     const find = hasStar ? new RegExp('^' + esc(key).replace('\\*', '(.*)') + '$') : key;
 
-    return targets.map((t) => {
-      // normalize: strip trailing /*, drop leading ./, use '/', ensure single leading '/'
-      let base = t
-        .replace(/\/\*$/, '')
-        .replace(/^[.][/\\]/, '')
-        .replace(/\\/g, '/')
-        .replace(/^\/+/, '');
+    return targets.map((target) => {
+      // Make path absolute and strip trailing /*.
+      const base = makePathAbsolute(target).replace(/\/\*$/, '');
+
       const replacement = '/' + (hasStar ? base.replace('*', '$1') : base);
       return { find, replacement };
     });
