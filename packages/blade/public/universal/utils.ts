@@ -13,7 +13,7 @@ const makePathAbsolute = (input: string) => {
 type TypeScriptConfig = { compilerOptions?: { paths?: Record<string, string[]> } };
 
 /**
- * Convert a list of aliases for the `aliasPlugin` from a `tsconfig.json` file.
+ * Composes a list of aliases for the `aliasPlugin` from a `tsconfig.json` file.
  *
  * @param config - The content of a `tsconfig.json` file.
  *
