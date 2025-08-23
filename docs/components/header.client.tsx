@@ -78,8 +78,10 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
             <span>
               {isLoading ? (
                 <span className="inline w-5 h-4 mt-1 bg-muted-foreground/20 animate-pulse rounded" />
+              ) : starCount !== null ? (
+                starCount.toLocaleString()
               ) : (
-                starCount !== null ? starCount.toLocaleString() : '0'
+                '0'
               )}
             </span>
           </a>
