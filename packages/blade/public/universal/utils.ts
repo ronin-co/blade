@@ -11,7 +11,6 @@ const makePathAbsolute = (input: string) => {
 };
 
 type TypeScriptConfig = { compilerOptions?: { paths?: Record<string, string[]> } };
-type AliasEntry = { find: string | RegExp; replacement: string };
 
 /**
  * Convert a list of aliases for the `aliasPlugin` from a `tsconfig.json` file.
@@ -20,11 +19,11 @@ type AliasEntry = { find: string | RegExp; replacement: string };
  *
  * @returns A list of aliases.
  */
-export const tsConfigToAliases = (config: string): AliasEntry[] => {
+export const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
   const content = JSON.parse(config) as TypeScriptConfig;
   const paths = content?.compilerOptions?.paths || {};
 
-  return Object.entries(paths).flatMap(([key, targets]) => {
+  const entries = Object.entries(paths).flatMap(([key, targets]) => {
     const hasStar = key.includes('*');
     const find = hasStar ? new RegExp(`^${reEscape(key).replace('\\*', '(.*)')}$`) : key;
 
@@ -36,6 +35,8 @@ export const tsConfigToAliases = (config: string): AliasEntry[] => {
       return { find, replacement };
     });
   });
+
+  return { entries };
 };
 
 // Tiny helpers for safe, cross-platform matching.
@@ -69,13 +70,12 @@ export const build = async (
   });
 
   const tsconfig = virtualFiles.find((file) => file.path === '/tsconfig.json');
-  const aliases = tsconfig ? { entries: tsConfigToAliases(tsconfig.content) } : null;
 
   return composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
     virtualFiles,
     plugins: [
-      ...(aliases ? [aliasPlugin(aliases)] : []),
+      ...(tsconfig ? [aliasPlugin(composeAliases(tsconfig.content))] : []),
       {
         name: 'Memory File Loader',
         resolveId: {
