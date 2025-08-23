@@ -1,3 +1,4 @@
+import path from 'node:path';
 import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
@@ -28,9 +29,8 @@ export const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0
     const find = hasStar ? new RegExp(`^${reEscape(key).replace('\\*', '(.*)')}$`) : key;
 
     return targets.map((target) => {
-      // Make path absolute and strip trailing /*.
-      const base = makePathAbsolute(target).replace(/\/\*$/, '');
-      const replacement = `/${hasStar ? base.replace('*', '$1') : base}`;
+      const base = makePathAbsolute(target);
+      const replacement = hasStar ? base.replace('*', '$1') : base;
 
       return { find, replacement };
     });
@@ -92,9 +92,16 @@ export const build = async (
           },
           handler(id) {
             const absolutePath = id.replace('virtual:', '');
-            const sourceFile = virtualFiles.find(({ path }) => path === absolutePath);
+
+            const rx = new RegExp(`^${reEscape(absolutePath)}(?:\\.(?:ts|tsx|js|jsx))?$`);
+            const sourceFile = virtualFiles.find(({ path }) => rx.test(path));
+
             if (!sourceFile) return;
-            return sourceFile.content;
+
+            return {
+              code: sourceFile.content,
+              moduleType: path.extname(sourceFile.path).slice(1),
+            };
           },
         },
       },
