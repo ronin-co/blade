@@ -3,10 +3,13 @@ import type { NavGroup } from '@/components/nav';
 import { NavSheet } from '@/components/nav-sheet.client';
 import { Snippet } from '@/components/snippet.client';
 import { cn } from '@/lib/utils';
+import { fetchGitHubStats } from '@/lib/github-stats';
 import { type FunctionComponent, useEffect, useState } from 'react';
 
 export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => {
   const [scrolled, setScrolled] = useState(false);
+  const [starCount, setStarCount] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 0);
@@ -19,6 +22,22 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
 
     // Unregister the scroll event listener on unmount.
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await fetchGitHubStats();
+        setStarCount(stats.stars);
+      } catch (error) {
+        console.error('Failed to fetch GitHub stats:', error);
+        setStarCount(261);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
   }, []);
 
   return (
@@ -56,7 +75,13 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
             rel="noreferrer">
             <Icons.Star className="size-3.5" />
 
-            <span>261</span>
+            <span>
+              {isLoading ? (
+                <span className="inline w-5 h-4 mt-1 bg-muted-foreground/20 animate-pulse rounded" />
+              ) : (
+                starCount !== null ? starCount.toLocaleString() : '0'
+              )}
+            </span>
           </a>
 
           <div className="block sm:hidden">
