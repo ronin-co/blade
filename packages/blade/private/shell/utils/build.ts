@@ -70,6 +70,7 @@ export const composeBuildContext = async (
   const swEntry = path.join(serverInputFolder, 'service-worker.js');
 
   const tsconfigFilename = path.join(process.cwd(), 'tsconfig.json');
+  const tsconfigExists = options?.virtualFiles ? false : await exists(tsconfigFilename);
 
   const input: Record<string, string> = {
     client: clientInputFile,
@@ -83,7 +84,9 @@ export const composeBuildContext = async (
     platform: provider === 'vercel' ? 'node' : 'browser',
 
     resolve: {
-      tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
+      // If the provided files are virtual, we resolve the TS config paths using a
+      // separate plugin on the outside.
+      tsconfigFilename: tsconfigExists ? tsconfigFilename : undefined,
 
       // If the provided files are virtual, Rolldown can't reliably resolve the modules,
       // so we provide the resolving logic ourselves as a plugin from the outside.

@@ -1,4 +1,5 @@
 import resolveFrom from 'resolve-from';
+import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
@@ -7,6 +8,31 @@ const makePathAbsolute = (input: string) => {
   if (input.startsWith('./')) return input.slice(1);
   if (input.startsWith('/')) return input;
   return `/${input}`;
+};
+
+type TypeScriptConfig = { compilerOptions?: { paths?: Record<string, string[]> } };
+type AliasEntry = { find: string | RegExp; replacement: string };
+
+export const tsConfigToAliases = (config: string): AliasEntry[] => {
+  const content = JSON.parse(config) as TypeScriptConfig;
+  const paths = content?.compilerOptions?.paths || {};
+
+  return Object.entries(paths).flatMap(([key, targets]) => {
+    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const hasStar = key.includes('*');
+    const find = hasStar ? new RegExp('^' + esc(key).replace('\\*', '(.*)') + '$') : key;
+
+    return targets.map((t) => {
+      // normalize: strip trailing /*, drop leading ./, use '/', ensure single leading '/'
+      let base = t
+        .replace(/\/\*$/, '')
+        .replace(/^[.][/\\]/, '')
+        .replace(/\\/g, '/')
+        .replace(/^\/+/, '');
+      const replacement = '/' + (hasStar ? base.replace('*', '$1') : base);
+      return { find, replacement };
+    });
+  });
 };
 
 // Tiny helpers for safe, cross-platform matching.
@@ -39,10 +65,14 @@ export const build = async (
     return { path: makePathAbsolute(path), content };
   });
 
+  const tsconfig = virtualFiles.find((file) => file.path === '/tsconfig.json');
+  const aliases = tsconfig ? { entries: tsConfigToAliases(tsconfig.content) } : null;
+
   return composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
     virtualFiles,
     plugins: [
+      ...(aliases ? [aliasPlugin(aliases)] : []),
       {
         name: 'Memory File Loader',
         resolveId: {
