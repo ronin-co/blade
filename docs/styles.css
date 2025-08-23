@@ -155,6 +155,8 @@ html {
 	body {
 		@apply bg-background text-foreground;
 	}
+	
+
 	:root {
 		--sidebar-background: 0 0% 98%;
 		--sidebar-foreground: 240 5.3% 26.1%;
