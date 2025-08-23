@@ -17,99 +17,99 @@ const searchItems: SearchItem[] = [
     title: 'Introduction',
     href: '/',
     description: 'Get started with Blade - React framework for instant web apps',
-    category: 'Get Started'
+    category: 'Get Started',
   },
   {
     id: 'hooks',
     title: 'Hooks',
     href: '/hooks',
     description: 'Learn about Blade hooks - useLocation, useRedirect, useParams',
-    category: 'Get Started'
+    category: 'Get Started',
   },
   {
     id: 'components',
     title: 'Components',
     href: '/components',
     description: 'Building with components - client and server components',
-    category: 'Get Started'
+    category: 'Get Started',
   },
   {
     id: 'pages',
     title: 'Pages',
     href: '/pages',
     description: 'Creating pages in Blade - file-based routing',
-    category: 'Get Started'
+    category: 'Get Started',
   },
   {
     id: 'api-routes',
     title: 'API Routes',
     href: '/api-routes',
     description: 'Working with API routes - REST endpoints and triggers',
-    category: 'Get Started'
+    category: 'Get Started',
   },
   {
     id: 'deploying',
     title: 'Deploying',
     href: '/deploying',
     description: 'Deploy your Blade app - production deployment guide',
-    category: 'Get Started'
+    category: 'Get Started',
   },
   {
     id: 'client',
     title: 'Client',
     href: '/client',
     description: 'Client-side functionality - interactive components',
-    category: 'Get Started'
+    category: 'Get Started',
   },
   {
     id: 'queries-overview',
     title: 'Queries Overview',
     href: '/queries',
     description: 'Learn about Blade queries - data fetching and mutations',
-    category: 'Queries'
+    category: 'Queries',
   },
   {
     id: 'queries-crud',
     title: 'CRUD Operations',
     href: '/queries/crud',
     description: 'Create, read, update, delete - database operations',
-    category: 'Queries'
+    category: 'Queries',
   },
   {
     id: 'queries-instructions',
     title: 'Instructions',
     href: '/queries/instructions',
     description: 'Query instructions and syntax - advanced querying',
-    category: 'Queries'
+    category: 'Queries',
   },
   {
     id: 'queries-functions',
     title: 'Functions',
     href: '/queries/functions',
     description: 'Query functions and utilities - built-in functions',
-    category: 'Queries'
+    category: 'Queries',
   },
   {
     id: 'models-overview',
     title: 'Models Overview',
     href: '/models',
     description: 'Understanding Blade models - data models and schemas',
-    category: 'Models'
+    category: 'Models',
   },
   {
     id: 'models-fields',
     title: 'Fields',
     href: '/models/fields',
     description: 'Model field types and options - field definitions',
-    category: 'Models'
+    category: 'Models',
   },
   {
     id: 'models-triggers',
     title: 'Triggers',
     href: '/models/triggers',
     description: 'Model triggers and events - before, during, after hooks',
-    category: 'Models'
-  }
+    category: 'Models',
+  },
 ];
 
 export const Search: FunctionComponent = () => {
@@ -122,10 +122,11 @@ export const Search: FunctionComponent = () => {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // Filter search items based on search term
-  const filteredItems = searchItems.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = searchItems.filter(
+    (item) =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Reset selected index when search term changes
@@ -139,7 +140,7 @@ export const Search: FunctionComponent = () => {
         e.preventDefault();
         setOpen((open) => !open);
       }
-      
+
       if (e.key === 'Escape' && open) {
         e.preventDefault();
         setOpen(false);
@@ -170,15 +171,11 @@ export const Search: FunctionComponent = () => {
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex(prev => 
-            prev < filteredItems.length - 1 ? prev + 1 : 0
-          );
+          setSelectedIndex((prev) => (prev < filteredItems.length - 1 ? prev + 1 : 0));
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setSelectedIndex(prev => 
-            prev > 0 ? prev - 1 : filteredItems.length - 1
-          );
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : filteredItems.length - 1));
           break;
         case 'Enter':
           e.preventDefault();
@@ -235,7 +232,7 @@ export const Search: FunctionComponent = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto p-4">
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" />
           <div className="relative mx-auto max-w-2xl mt-20">
-            <div 
+            <div
               ref={dialogRef}
               className="relative overflow-hidden rounded-lg border bg-background shadow-2xl">
               <div className="flex items-center border-b px-3">
@@ -262,7 +259,8 @@ export const Search: FunctionComponent = () => {
                       className={cn(
                         'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none w-full text-left transition-colors duration-150 hover:bg-accent/50',
                         index === selectedIndex && 'bg-accent text-accent-foreground',
-                        location.pathname === item.href && 'bg-accent text-accent-foreground'
+                        location.pathname === item.href &&
+                          'bg-accent text-accent-foreground',
                       )}>
                       <div className="flex flex-col w-full gap-1">
                         <div className="flex items-center gap-2">
