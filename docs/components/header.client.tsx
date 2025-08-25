@@ -1,6 +1,7 @@
 import { Icons } from '@/components/icons';
 import type { NavGroup } from '@/components/nav';
 import { NavSheet } from '@/components/nav-sheet.client';
+import { Search } from '@/components/search';
 import { Snippet } from '@/components/snippet.client';
 import { cn } from '@/lib/utils';
 import { type FunctionComponent, useEffect, useState } from 'react';
@@ -48,6 +49,8 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
 
         <div className="flex flex-row items-center gap-2">
           <Snippet />
+
+          <Search />
 
           <a
             className="flex flex-row items-center gap-1.5 rounded-md border border-transparent px-3 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:py-1 sm:pr-2 sm:pl-1.5"
