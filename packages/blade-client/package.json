@@ -60,9 +60,6 @@
   "engines": {
     "node": ">=18.17.0"
   },
-  "dependencies": {
-    "@ronin/engine": "0.1.23"
-  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.4",
