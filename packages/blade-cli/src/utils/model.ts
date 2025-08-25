@@ -53,7 +53,7 @@ export const getModels = async (options?: {
 
   const transaction = new Transaction(queries);
 
-  let rawResults: Array<{ [x: string]: any }>;
+  let rawResults: Array<Array<{ [x: string]: any }>>;
 
   try {
     const nativeQueries = transaction.statements.map((statement) => ({

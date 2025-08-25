@@ -1,3 +1,7 @@
+import { type Database, Hive } from 'hive';
+import { BunDriver } from 'hive/bun-driver';
+import { MemoryStorage } from 'hive/memory-storage';
+
 import { Migration, type MigrationOptions } from '@/src/utils/migration';
 import {
   type ModelWithFieldsArray,
@@ -5,15 +9,14 @@ import {
   getModels,
 } from '@/src/utils/model';
 import { Protocol } from '@/src/utils/protocol';
-import { Engine } from '@ronin/engine';
-import { BunDriver } from '@ronin/engine/drivers/bun';
-import { MemoryResolver } from '@ronin/engine/resolvers/memory';
-import type { Database } from '@ronin/engine/resources';
 import { type Model, ROOT_MODEL, type Statement, Transaction } from 'blade-compiler';
 
-const engine = new Engine({
-  driver: (engine): BunDriver => new BunDriver({ engine }),
-  resolvers: [(engine) => new MemoryResolver({ engine })],
+const hive = new Hive({
+  storage: ({ events }) =>
+    new MemoryStorage({
+      events,
+      driver: new BunDriver(),
+    }),
 });
 
 /**
@@ -31,7 +34,7 @@ export const queryEphemeralDatabase = async (
   insertStatements: Array<Statement> = [],
 ): Promise<Database> => {
   const databaseId = Math.random().toString(36).substring(7);
-  const database = await engine.createDatabase({ id: databaseId });
+  const database = await hive.create({ type: 'database', id: databaseId });
 
   await prefillDatabase(database, models, insertStatements);
 
@@ -41,7 +44,7 @@ export const queryEphemeralDatabase = async (
 /**
  * Prefills the database with the provided models.
  *
- * @param databaseName - The name of the database to prefill.
+ * @param db - The database to prefill.
  * @param models - The models that should be inserted into the database.
  * @param insertStatements - The statements that should be executed to insert records into
  * the database.
@@ -57,11 +60,28 @@ export const prefillDatabase = async (
     models.map((model) => JSON.parse(JSON.stringify({ create: { model } }))),
   );
 
+  const hiveModelStatements = [
+    ...rootModelTransaction.statements,
+    ...modelTransaction.statements,
+  ].map(({ statement, params }) => {
+    return {
+      sql: statement,
+      params: params as Array<string>,
+    };
+  });
+
   // Create the root model and all other models.
-  await db.query([...rootModelTransaction.statements, ...modelTransaction.statements]);
+  await db.query(hiveModelStatements);
+
+  const hiveInsertStatements = insertStatements.map(({ statement, params }) => {
+    return {
+      sql: statement,
+      params: params as Array<string>,
+    };
+  });
 
   // Insert records into the database.
-  await db.query(insertStatements);
+  await db.query(hiveInsertStatements);
 };
 
 /**
@@ -106,7 +126,14 @@ export const runMigration = async (
     models.map((model) => convertModelToObjectFields(model)),
   );
 
-  await db.query(statements);
+  const hiveStatements = statements.map(({ statement, params }) => {
+    return {
+      sql: statement,
+      params: params as Array<string>,
+    };
+  });
+
+  await db.query(hiveStatements);
 
   return {
     db,
@@ -150,6 +177,7 @@ export const getSQLTables = async (
  *
  * @param db - The database instance to query.
  * @param model - The model to get the rows for.
+ * @param options - A list of configuration options.
  *
  * @returns A list of rows from the table.
  */
@@ -166,6 +194,13 @@ export const getTableRows = async (
     },
   );
 
-  const result = await db.query(transaction.statements);
+  const hiveStatements = transaction.statements.map(({ statement, params }) => {
+    return {
+      sql: statement,
+      params: params as Array<string>,
+    };
+  });
+
+  const result = await db.query(hiveStatements);
   return result[0].rows;
 };

@@ -107,6 +107,7 @@
         "blade-compiler": "workspace:*",
         "blade-syntax": "workspace:*",
         "bun-bagel": "1.1.0",
+        "hive": "1.0.8",
         "ronin": "6.7.4",
         "tsup": "8.5.0",
         "typescript": "5.8.3",
@@ -149,9 +150,6 @@
         "title": "4.0.1",
         "tsup": "8.3.5",
         "typescript": "5.7.2",
-      },
-      "peerDependencies": {
-        "@ronin/engine": ">=0.1.23",
       },
     },
     "packages/blade-hono": {
@@ -1522,8 +1520,6 @@
     "blade-codegen/@types/bun": ["@types/bun@1.2.4", "", { "dependencies": { "bun-types": "1.2.4" } }, "sha512-QtuV5OMR8/rdKJs213iwXDpfVvnskPXY/S0ZiFbsTjQZycuqPbMW8Gf/XhLfwE5njW8sxI2WjISURXPlHypMFA=="],
 
     "blade-codegen/typescript": ["typescript@5.7.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw=="],
-
-    "blade-compiler/@ronin/engine": ["@ronin/engine@0.1.23", "", { "dependencies": { "zod": "3.24.1" } }, "sha512-QDeikl4YEBFHEdful9+x5e8lLrxXvjhubJEYxnFfM7SJoFC9OxoE+Dq4g6mVzRuCI+gN+Odkdy3gd2ARr7eXFg=="],
 
     "blade-compiler/@types/bun": ["@types/bun@1.1.14", "", { "dependencies": { "bun-types": "1.1.37" } }, "sha512-opVYiFGtO2af0dnWBdZWlioLBoxSdDO5qokaazLhq8XQtGZbY4pY3/JxY8Zdf/hEwGubbp7ErZXoN1+h2yesxA=="],
 
