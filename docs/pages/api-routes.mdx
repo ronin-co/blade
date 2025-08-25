@@ -55,7 +55,7 @@ export default app;
 If needed, you can also run queries via the `c.var.client` context variable, which contains an instance of the Blade client that allows for running Blade queries:
 
 ```typescript
-app.post('/some-path', (c) => {
+app.post('/some-path', async (c) => {
   const { get, set, ... } = c.var.client;
   const records = await get.accounts.with.email.containing('@site');
 
