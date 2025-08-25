@@ -39,9 +39,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@ronin/engine": "0.1.16",
     "@types/bun": "1.2.8",
     "blade-compiler": "workspace:*",
+    "hive": "1.0.8",
     "tsup": "8.4.0",
     "typescript": "5.8.2"
   },
