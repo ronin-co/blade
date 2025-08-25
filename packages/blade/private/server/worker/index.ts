@@ -1,6 +1,7 @@
 import { createSyntaxFactory } from 'blade-client';
 import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
+import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { secureHeaders } from 'hono/secure-headers';
 import { SSEStreamingApi } from 'hono/streaming';
@@ -98,12 +99,34 @@ app.all('*', async (c, next) => {
   await next();
 });
 
+const simulateServerContext = (c: Context): ServerContext => {
+  const headers = c.req.raw.headers;
+  const waitUntil = getWaitUntil(c);
+
+  return {
+    url: c.req.url,
+    params: {},
+    userAgent: getRequestUserAgent(headers),
+    geoLocation: getRequestGeoLocation(headers),
+    languages: getRequestLanguages(headers),
+    addressBarInSync: true,
+
+    cookies: getCookie(c),
+    collected: {
+      queries: [],
+      metadata: {},
+      jwts: {},
+    },
+    currentLeafIndex: null,
+    waitUntil,
+  };
+};
+
 // Expose an API endpoint that allows for accessing the provided triggers.
 app.post('/api', async (c) => {
   console.log('[BLADE] Received request to /api');
 
   const body = await c.req.json<{ queries?: Query[] }>();
-  const headers = c.req.raw.headers;
   const queries = body?.queries;
 
   // Ensure a valid incoming query body.
@@ -124,25 +147,7 @@ app.post('/api', async (c) => {
     );
   }
 
-  const waitUntil = getWaitUntil(c);
-
-  const serverContext: ServerContext = {
-    url: c.req.url,
-    params: {},
-    userAgent: getRequestUserAgent(headers),
-    geoLocation: getRequestGeoLocation(headers),
-    languages: getRequestLanguages(headers),
-    addressBarInSync: true,
-
-    cookies: getCookie(c),
-    collected: {
-      queries: [],
-      metadata: {},
-      jwts: {},
-    },
-    currentLeafIndex: null,
-    waitUntil,
-  };
+  const serverContext = simulateServerContext(c);
 
   // Generate a list of trigger functions based on the trigger files that exist in the
   // source code of the application.
@@ -173,9 +178,9 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = (await runQueries({ default: queries }, triggers, 'all', waitUntil))[
-      'default'
-    ];
+    results = (
+      await runQueries({ default: queries }, triggers, 'all', serverContext.waitUntil)
+    )['default'];
   } catch (err) {
     if (err instanceof TriggerError || err instanceof ClientError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
@@ -197,29 +202,10 @@ app.post('/api', async (c) => {
 });
 
 app.use('*', async (c, next) => {
-  const headers = c.req.raw.headers;
-  const waitUntil = getWaitUntil(c);
-
-  const serverContext: ServerContext = {
-    url: c.req.url,
-    params: {},
-    userAgent: getRequestUserAgent(headers),
-    geoLocation: getRequestGeoLocation(headers),
-    languages: getRequestLanguages(headers),
-    addressBarInSync: true,
-
-    cookies: getCookie(c),
-    collected: {
-      queries: [],
-      metadata: {},
-      jwts: {},
-    },
-    currentLeafIndex: null,
-    waitUntil,
-  };
+  const serverContext = simulateServerContext(c);
 
   const triggers = prepareTriggers(serverContext, triggerList);
-  const options = getRoninOptions(triggers, 'none', waitUntil);
+  const options = getRoninOptions(triggers, 'none', serverContext.waitUntil);
   const client = createSyntaxFactory(options);
 
   c.set('client', client);
