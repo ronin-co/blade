@@ -89,8 +89,5 @@
     "ronin": "6.7.4",
     "tsup": "8.5.0",
     "typescript": "5.8.3"
-  },
-  "peerDependencies": {
-    "@ronin/engine": ">=0.1.23"
   }
 }
