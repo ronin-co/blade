@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { select } from '@inquirer/prompts';
+import { runQueries } from 'blade-client/utils';
 import { CompilerError } from 'blade-compiler';
 
 import type { MigrationFlags } from '@/src/utils/migration';
@@ -13,7 +14,6 @@ import {
 import { Protocol } from '@/src/utils/protocol';
 import { getOrSelectSpaceId } from '@/src/utils/space';
 import { spinner as ora } from '@/src/utils/spinner';
-import { runQueries } from 'blade-client/utils';
 
 /**
  * Applies a migration file to the database.
