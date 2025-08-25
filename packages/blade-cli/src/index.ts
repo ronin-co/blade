@@ -3,7 +3,6 @@ import { parseArgs } from 'node:util';
 import path from 'node:path';
 import apply from '@/src/commands/apply';
 import diff from '@/src/commands/diff';
-import initializeProject from '@/src/commands/init';
 import logIn from '@/src/commands/login';
 import pull from '@/src/commands/pull';
 import generateTypes, { TYPES_FLAGS } from '@/src/commands/types';
@@ -85,13 +84,6 @@ export const run = async (config: { version: string }): Promise<void> => {
     await logIn(appToken);
     return;
   }
-
-  // `init` sub command
-  if (normalizedPositionals.includes('init'))
-    return initializeProject(positionals, {
-      appToken: appToken,
-      sessionToken: session?.token,
-    });
 
   // `diff` sub command
   if (normalizedPositionals.includes('diff')) {
