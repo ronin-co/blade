@@ -11,7 +11,7 @@
     },
     "packages/blade": {
       "name": "blade",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "bin": {
         "blade": "./dist/private/shell/index.js",
       },
@@ -66,7 +66,7 @@
     },
     "packages/blade-better-auth": {
       "name": "blade-better-auth",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "dependencies": {
         "better-auth": "1.2.5",
       },
@@ -84,7 +84,7 @@
     },
     "packages/blade-cli": {
       "name": "blade-cli",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "dependencies": {
         "@dprint/formatter": "0.4.1",
         "@dprint/typescript": "0.93.3",
@@ -116,7 +116,7 @@
     },
     "packages/blade-client": {
       "name": "blade-client",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "bin": {
         "ronin": "./dist/bin/index.js",
       },
@@ -129,13 +129,14 @@
         "blade-cli": "workspace:*",
         "blade-compiler": "workspace:*",
         "blade-syntax": "workspace:*",
+        "hive": "1.0.8",
         "tsup": "8.5.0",
         "typescript": "5.8.3",
       },
     },
     "packages/blade-codegen": {
       "name": "blade-codegen",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "dependencies": {
         "typescript": "5.7.3",
       },
@@ -149,7 +150,7 @@
     },
     "packages/blade-compiler": {
       "name": "blade-compiler",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
@@ -163,7 +164,7 @@
     },
     "packages/blade-hono": {
       "name": "blade-hono",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.18",
@@ -179,7 +180,7 @@
     },
     "packages/blade-syntax": {
       "name": "blade-syntax",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
@@ -191,7 +192,7 @@
     },
     "packages/create-blade": {
       "name": "create-blade",
-      "version": "3.11.1",
+      "version": "3.12.1",
       "bin": {
         "create-blade": "./dist/index.js",
       },
@@ -869,6 +870,8 @@
     "hast-util-whitespace": ["hast-util-whitespace@3.0.0", "", { "dependencies": { "@types/hast": "^3.0.0" } }, "sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw=="],
 
     "headers-polyfill": ["headers-polyfill@4.0.3", "", {}, "sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ=="],
+
+    "hive": ["hive@1.0.8", "", { "dependencies": { "hono": "4.8.4", "zod": "3.25.75" }, "peerDependencies": { "typescript": "^5" } }, "sha512-wHyHDadWUzN5awl29oIEELgxKRzwOSJBYYG4fiyDeI2rdLkv3e3LymzuZszyT5MaF6L2ghDIAF3FXiz0+MzfNw=="],
 
     "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
 
@@ -1573,6 +1576,10 @@
     "execa/onetime": ["onetime@6.0.0", "", { "dependencies": { "mimic-fn": "^4.0.0" } }, "sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ=="],
 
     "gradient-string/chalk": ["chalk@5.4.1", "", {}, "sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w=="],
+
+    "hive/hono": ["hono@4.8.4", "", {}, "sha512-KOIBp1+iUs0HrKztM4EHiB2UtzZDTBihDtOF5K6+WaJjCPeaW4Q92R8j63jOhvJI5+tZSMuKD9REVEXXY9illg=="],
+
+    "hive/zod": ["zod@3.25.75", "", {}, "sha512-OhpzAmVzabPOL6C3A3gpAifqr9MqihV/Msx3gor2b2kviCgcb+HM9SEOpMWwwNp9MRunWnhtAKUoo0AHhjyPPg=="],
 
     "log-symbols/chalk": ["chalk@5.4.1", "", {}, "sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w=="],
 

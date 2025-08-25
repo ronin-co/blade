@@ -25,6 +25,7 @@ import type {
   ResolvingSetTrigger as OriginalResolvingSetTrigger,
   SetTrigger as OriginalSetTrigger,
 } from 'blade-client/types';
+import type { Model } from 'blade-compiler';
 import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
@@ -201,3 +202,4 @@ export type Triggers<TSchema = unknown> = Record<
 
 export type TriggersList<TSchema = unknown> = Record<string, Triggers<TSchema>>;
 export type PageList = Record<string, TreeItem | 'DIRECTORY'>;
+export type ModelList = { 'index.ts'?: Record<string, Model> };
