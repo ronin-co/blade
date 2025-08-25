@@ -99,6 +99,14 @@ app.all('*', async (c, next) => {
   await next();
 });
 
+/**
+ * Composes a server context object for headless requests that were not sent by a
+ * client-side instance of Blade.
+ *
+ * @param c - The Hono context.
+ *
+ * @returns A full server context object.
+ */
 const simulateServerContext = (c: Context): ServerContext => {
   const headers = c.req.raw.headers;
   const waitUntil = getWaitUntil(c);
