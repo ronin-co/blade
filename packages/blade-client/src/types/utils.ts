@@ -48,6 +48,9 @@ export interface QueryHandlerOptions {
    * recommended to use the client provided in the `options.client` argument for triggers.
    */
   implicit?: boolean;
+
+  /** A list of models used for compiling Blade queries to SQL. */
+  models?: Array<Model>;
 }
 
 /**
