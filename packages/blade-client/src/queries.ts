@@ -94,7 +94,12 @@ export const runQueries = async <T extends ResultRecord>(
       return result;
     });
 
+    // The `transaction.formatResults` logic of the query compiler (which is invoked
+    // above), purposefully only formats results in a network-serializable manner. The
+    // formatting logic below applies formatting that is specific to the JavaScript
+    // environment, such as using `Date` instances for timestamps.
     const finalResults = formatResults<T>(usableResults as Array<Result<T>>);
+
     return finalResults.map((result) => ({ result }));
   }
 
