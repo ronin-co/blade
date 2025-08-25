@@ -1,5 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { confirm } from '@inquirer/prompts';
+import { CompilerError, type Model } from 'blade-compiler';
+
 import apply from '@/src/commands/apply';
 import { Migration, type MigrationFlags } from '@/src/utils/migration';
 import { MIGRATIONS_PATH, getModelDefinitions, logTableDiff } from '@/src/utils/misc';
@@ -7,8 +10,6 @@ import { getModels } from '@/src/utils/model';
 import { Protocol } from '@/src/utils/protocol';
 import { getOrSelectSpaceId } from '@/src/utils/space';
 import { type Status, spinner } from '@/src/utils/spinner';
-import { confirm } from '@inquirer/prompts';
-import { CompilerError, type Model } from 'blade-compiler';
 
 /**
  * Creates a new migration based on model differences.
@@ -18,6 +19,7 @@ export default async (
   sessionToken: string | undefined,
   flags: MigrationFlags,
   positionals: Array<string>,
+  enableHive: boolean,
 ): Promise<void> => {
   if (flags['force-create'] && flags.apply) {
     throw new Error('Cannot run `--apply` and `--force-create` at the same time');
@@ -34,7 +36,9 @@ export default async (
     path.join(process.cwd(), positionals[positionals.indexOf('diff') + 1]);
 
   try {
-    const space = await getOrSelectSpaceId(sessionToken, spinner);
+    const space = enableHive
+      ? undefined
+      : await getOrSelectSpaceId(sessionToken, spinner);
     status = 'comparing';
     spinner.text = 'Comparing models';
 
@@ -44,6 +48,7 @@ export default async (
         : getModels({
             token: appToken ?? sessionToken,
             space,
+            enableHive,
           }),
       flags['force-drop'] ? [] : getModelDefinitions(modelsInCodePath),
     ]);
@@ -123,7 +128,7 @@ export default async (
 
     // If desired, immediately apply the migration
     if (flags.apply) {
-      await apply(appToken, sessionToken, flags);
+      await apply(appToken, sessionToken, flags, enableHive);
     }
 
     process.exit(0);

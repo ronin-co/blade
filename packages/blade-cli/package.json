@@ -82,14 +82,12 @@
     "@types/bun": "1.2.1",
     "@types/ini": "4.1.1",
     "bun-bagel": "1.1.0",
-    "blade-syntax": "workspace:*",
+    "blade-client": "workspace:*",
     "blade-codegen": "workspace:*",
     "blade-compiler": "workspace:*",
+    "blade-syntax": "workspace:*",
     "ronin": "6.7.4",
     "tsup": "8.5.0",
     "typescript": "5.8.3"
-  },
-  "peerDependencies": {
-    "@ronin/engine": ">=0.1.23"
   }
 }
