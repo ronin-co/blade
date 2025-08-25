@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { select } from '@inquirer/prompts';
-import { runQueries } from 'blade-client/utils';
+import { runQueries } from 'blade-client';
 import { CompilerError } from 'blade-compiler';
 
 import type { MigrationFlags } from '@/src/utils/migration';

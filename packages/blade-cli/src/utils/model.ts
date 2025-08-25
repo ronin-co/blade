@@ -1,4 +1,4 @@
-import { runQueries } from 'blade-client/utils';
+import { runQueries } from 'blade-client';
 import { type Model, type ModelField, type Query, Transaction } from 'blade-compiler';
 
 import logIn from '@/src/commands/login';
