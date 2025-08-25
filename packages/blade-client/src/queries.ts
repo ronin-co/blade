@@ -95,7 +95,6 @@ export const runQueries = async <T extends ResultRecord>(
     });
 
     const finalResults = formatResults<T>(usableResults as Array<Result<T>>);
-
     return finalResults.map((result) => ({ result }));
   }
 
