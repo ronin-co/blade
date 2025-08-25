@@ -102,6 +102,7 @@
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.1",
         "@types/ini": "4.1.1",
+        "blade-client": "workspace:*",
         "blade-codegen": "workspace:*",
         "blade-compiler": "workspace:*",
         "blade-syntax": "workspace:*",
@@ -117,16 +118,12 @@
     "packages/blade-client": {
       "name": "blade-client",
       "version": "3.12.1",
-      "bin": {
-        "ronin": "./dist/bin/index.js",
-      },
       "dependencies": {
         "@ronin/engine": "0.1.23",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
-        "blade-cli": "workspace:*",
         "blade-compiler": "workspace:*",
         "blade-syntax": "workspace:*",
         "hive": "1.0.8",

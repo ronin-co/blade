@@ -1,3 +1,6 @@
+import { runQueries } from 'blade-client/utils';
+import { type Model, type ModelField, type Query, Transaction } from 'blade-compiler';
+
 import logIn from '@/src/commands/login';
 import { IGNORED_FIELDS } from '@/src/utils/migration';
 import {
@@ -7,7 +10,6 @@ import {
 } from '@/src/utils/misc';
 import { spinner } from '@/src/utils/spinner';
 import type { Row } from '@ronin/engine/resources';
-import { type Model, type ModelField, Transaction } from 'blade-compiler';
 
 /**
  * A model with fields in array format.
@@ -19,6 +21,8 @@ export type ModelWithFieldsArray = Omit<Model, 'fields'> & { fields: Array<Model
  *
  * @param token - Optional authentication token for production API requests.
  * @param space - Optional space ID for production API requests.
+ * @param fieldArray — Whether to provide an array of fields.
+ * @param enableHive — Whether to enable the new database engine.
  *
  * @returns Promise resolving to an array of formatted Model objects.
  *
@@ -28,9 +32,27 @@ export const getModels = async (options?: {
   token?: string;
   space?: string;
   fieldArray?: boolean;
+  enableHive?: boolean;
 }): Promise<Array<ModelWithFieldsArray | Model>> => {
-  const transaction = new Transaction([{ list: { models: null } }]);
+  const queries: Array<Query> = [{ list: { models: null } }];
   const { token, space, fieldArray = true } = options || {};
+
+  if (options?.enableHive) {
+    const models = (await runQueries(queries, { token })) as unknown as Array<Model>;
+
+    if (fieldArray) {
+      return models.map((model) => ({
+        ...model,
+        fields: convertObjectToArray(model.fields || {})?.filter(
+          (field) => !IGNORED_FIELDS.includes(field.slug),
+        ),
+      }));
+    }
+
+    return models;
+  }
+
+  const transaction = new Transaction(queries);
 
   let rawResults: Array<Array<Row>>;
 

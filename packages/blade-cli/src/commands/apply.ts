@@ -13,6 +13,7 @@ import {
 import { Protocol } from '@/src/utils/protocol';
 import { getOrSelectSpaceId } from '@/src/utils/space';
 import { spinner as ora } from '@/src/utils/spinner';
+import { runQueries } from 'blade-client/utils';
 
 /**
  * Applies a migration file to the database.
@@ -21,17 +22,21 @@ export default async (
   appToken: string | undefined,
   sessionToken: string | undefined,
   flags: MigrationFlags,
+  enableHive: boolean,
   migrationFilePath?: string,
 ): Promise<void> => {
   const spinner = ora.info('Applying migration');
 
   try {
-    const space = await getOrSelectSpaceId(sessionToken, spinner);
+    const space = enableHive
+      ? undefined
+      : await getOrSelectSpaceId(sessionToken, spinner);
 
     const existingModels = (await getModels({
       token: appToken ?? sessionToken,
       space,
       fieldArray: true,
+      enableHive,
     })) as Array<ModelWithFieldsArray>;
 
     // Verify that the migrations directory exists before proceeding.
@@ -67,14 +72,23 @@ export default async (
     }
 
     const protocol = await new Protocol().load(migrationPrompt);
-    const statements = protocol.getSQLStatements(
-      existingModels.map((model) => ({
-        ...model,
-        fields: convertArrayFieldToObject(model.fields),
-      })),
-    );
 
-    await applyMigrationStatements(appToken ?? sessionToken, statements, space);
+    if (enableHive) {
+      await runQueries(protocol.queries, { token: appToken });
+    } else {
+      const statements = protocol.getSQLStatements(
+        existingModels.map((model) => ({
+          ...model,
+          fields: convertArrayFieldToObject(model.fields),
+        })),
+      );
+
+      await applyMigrationStatements(
+        appToken ?? sessionToken,
+        statements,
+        space as string,
+      );
+    }
 
     spinner.succeed('Successfully applied migration');
 

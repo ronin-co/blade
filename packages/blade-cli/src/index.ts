@@ -95,7 +95,7 @@ export const run = async (config: { version: string }): Promise<void> => {
 
   // `diff` sub command
   if (normalizedPositionals.includes('diff')) {
-    return diff(appToken, session?.token, flags, positionals);
+    return diff(appToken, session?.token, flags, positionals, false);
   }
 
   // `apply` sub command
@@ -104,7 +104,7 @@ export const run = async (config: { version: string }): Promise<void> => {
       ? path.join(process.cwd(), positionals[positionals.indexOf('apply') + 1])
       : undefined;
 
-    return apply(appToken, session?.token, flags, migrationFilePath);
+    return apply(appToken, session?.token, flags, false, migrationFilePath);
   }
 
   // `types` sub command.

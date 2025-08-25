@@ -18,6 +18,7 @@ export default async (
   sessionToken: string | undefined,
   flags: MigrationFlags,
   positionals: Array<string>,
+  enableHive: boolean,
 ): Promise<void> => {
   if (flags['force-create'] && flags.apply) {
     throw new Error('Cannot run `--apply` and `--force-create` at the same time');
@@ -123,7 +124,7 @@ export default async (
 
     // If desired, immediately apply the migration
     if (flags.apply) {
-      await apply(appToken, sessionToken, flags);
+      await apply(appToken, sessionToken, flags, enableHive);
     }
 
     process.exit(0);

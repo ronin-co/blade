@@ -6,9 +6,6 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "ronin": "./dist/bin/index.js"
-  },
   "files": [
     "dist"
   ],
@@ -69,7 +66,6 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.4",
-    "blade-cli": "workspace:*",
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
     "hive": "1.0.8",
