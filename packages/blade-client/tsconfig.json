@@ -13,7 +13,7 @@
     "jsx": "react-jsx",
     "allowJs": true,
 
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "pretty": true,

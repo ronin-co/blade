@@ -72,6 +72,7 @@
     "blade-cli": "workspace:*",
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
+    "hive": "1.0.8",
     "tsup": "8.5.0",
     "typescript": "5.8.3"
   }

@@ -1,3 +1,14 @@
+import {
+  type Query,
+  type RegularResult,
+  type Result,
+  type ResultRecord,
+  type Statement,
+  Transaction,
+} from 'blade-compiler';
+import { Hive, Selector } from 'hive';
+import { RemoteStorage } from 'hive/remote-storage';
+
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import type {
   ExpandedFormattedResult,
@@ -10,13 +21,6 @@ import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { getResponseBody } from '@/src/utils/errors';
 import { formatDateFields, validateToken } from '@/src/utils/helpers';
 import { runQueriesWithTriggers } from '@/src/utils/triggers';
-import type {
-  Query,
-  RegularResult,
-  Result,
-  ResultRecord,
-  Statement,
-} from 'blade-compiler';
 
 interface RequestPayload {
   queries?: Array<Query>;
@@ -51,6 +55,57 @@ export const runQueries = async <T extends ResultRecord>(
   // initialized with triggers that run all the queries using a different data source,
   // we don't want to require a token.
   validateToken(options);
+
+  if (options.models) {
+    const rawQueries = queries
+      .filter((item) => 'query' in item)
+      .map((item) => item.query);
+
+    const transaction = new Transaction(rawQueries, { models: options.models });
+    const rawStatements = transaction.statements.map((item) => {
+      return { sql: item.statement, params: item.params as Array<string> };
+    });
+
+    const hive = new Hive({
+      storage: ({ logger, events }) =>
+        new RemoteStorage({
+          logger,
+          events,
+          remote: 'https://db.ronin.co',
+          token: options.token,
+        }),
+    });
+
+    const db = new Selector({ type: 'database', id: 'default' });
+    const results = await hive.storage.query(db, {
+      statements: rawStatements,
+      transaction: 'DEFERRED',
+    });
+
+    const rawResults = results.map((result) => result.rows);
+
+    const usableResults = transaction.formatResults(rawResults).map((result) => {
+      if ('record' in result) {
+        const { modelFields, ...rest } = result;
+        return { ...rest, schema: modelFields };
+      }
+
+      if ('records' in result) {
+        const { modelFields, ...rest } = result;
+        return { ...rest, schema: modelFields };
+      }
+
+      return result;
+    });
+
+    // The `transaction.formatResults` logic of the query compiler (which is invoked
+    // above), purposefully only formats results in a network-serializable manner. The
+    // formatting logic below applies formatting that is specific to the JavaScript
+    // environment, such as using `Date` instances for timestamps.
+    const finalResults = formatResults<T>(usableResults as Array<Result<T>>);
+
+    return finalResults.map((result) => ({ result }));
+  }
 
   let hasWriteQuery: boolean | null = null;
   let hasSingleQuery = true;
