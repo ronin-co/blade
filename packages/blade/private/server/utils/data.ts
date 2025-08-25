@@ -102,7 +102,7 @@ export const getRoninOptions = (
 
   return {
     triggers,
-    fetch: dataFetcher,
+    fetch: ENABLE_HIVE ? undefined : dataFetcher,
     requireTriggers,
     waitUntil,
     models: ENABLE_HIVE ? models : undefined,
