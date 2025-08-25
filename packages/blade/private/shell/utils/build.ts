@@ -100,6 +100,9 @@ export const composeBuildContext = async (
       },
     },
 
+    // TODO: Remove this once the Hive client no longer depends on it.
+    external: ['events'],
+
     plugins: [
       getFileListLoader(options?.virtualFiles),
       getMdxLoader(environment),
