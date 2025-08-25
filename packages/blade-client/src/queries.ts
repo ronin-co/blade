@@ -6,7 +6,7 @@ import {
   type Statement,
   Transaction,
 } from 'blade-compiler';
-import { Hive } from 'hive';
+import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
@@ -76,8 +76,12 @@ export const runQueries = async <T extends ResultRecord>(
         }),
     });
 
-    const database = await hive.get({ type: 'database', id: 'default' });
-    const results = await database.query(rawStatements);
+    const db = new Selector({ type: 'database', id: 'default' });
+    const results = await hive.storage.query(db, {
+      statements: rawStatements,
+      transaction: 'DEFERRED',
+    });
+
     const rawResults = results.map((result) => result.rows);
 
     const usableResults = transaction.formatResults(rawResults).map((result) => {
