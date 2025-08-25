@@ -46,12 +46,21 @@ In the rare case that you need to mount an API with a specific request signature
 ```typescript
 import { Hono } from "hono";
 
-const app = new Hono()
-  .post('/some-path', (c) => c.text('Testing'));
+const app = new Hono();
+app.post('/some-path', (c) => c.text('Testing'));
 
 export default app;
 ```
 
-If needed, you can also run queries via the `c.var.client` context variable, which contains an instance of the Blade client that allows for running Blade queries.
+If needed, you can also run queries via the `c.var.client` context variable, which contains an instance of the Blade client that allows for running Blade queries:
+
+```typescript
+app.post('/some-path', (c) => {
+  const { get, set, ... } = c.var.client;
+  const records = await get.accounts.with.email.containing('@site');
+
+  return c.json(records);
+});
+```
 
 However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app (like your pages) in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same domain.
