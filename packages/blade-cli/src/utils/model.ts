@@ -9,7 +9,6 @@ import {
   getResponseBody,
 } from '@/src/utils/misc';
 import { spinner } from '@/src/utils/spinner';
-import type { Row } from '@ronin/engine/resources';
 
 /**
  * A model with fields in array format.
@@ -54,7 +53,7 @@ export const getModels = async (options?: {
 
   const transaction = new Transaction(queries);
 
-  let rawResults: Array<Array<Row>>;
+  let rawResults: Array<{ [x: string]: any }>;
 
   try {
     const nativeQueries = transaction.statements.map((statement) => ({

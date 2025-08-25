@@ -1,5 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { confirm } from '@inquirer/prompts';
+import { CompilerError, type Model } from 'blade-compiler';
+
 import apply from '@/src/commands/apply';
 import { Migration, type MigrationFlags } from '@/src/utils/migration';
 import { MIGRATIONS_PATH, getModelDefinitions, logTableDiff } from '@/src/utils/misc';
@@ -7,8 +10,6 @@ import { getModels } from '@/src/utils/model';
 import { Protocol } from '@/src/utils/protocol';
 import { getOrSelectSpaceId } from '@/src/utils/space';
 import { type Status, spinner } from '@/src/utils/spinner';
-import { confirm } from '@inquirer/prompts';
-import { CompilerError, type Model } from 'blade-compiler';
 
 /**
  * Creates a new migration based on model differences.
@@ -35,7 +36,9 @@ export default async (
     path.join(process.cwd(), positionals[positionals.indexOf('diff') + 1]);
 
   try {
-    const space = await getOrSelectSpaceId(sessionToken, spinner);
+    const space = enableHive
+      ? undefined
+      : await getOrSelectSpaceId(sessionToken, spinner);
     status = 'comparing';
     spinner.text = 'Comparing models';
 
@@ -45,6 +48,7 @@ export default async (
         : getModels({
             token: appToken ?? sessionToken,
             space,
+            enableHive,
           }),
       flags['force-drop'] ? [] : getModelDefinitions(modelsInCodePath),
     ]);
