@@ -1,3 +1,4 @@
+import { createSyntaxFactory } from 'blade-client';
 import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
 import { getCookie } from 'hono/cookie';
@@ -7,7 +8,12 @@ import { Hono } from 'hono/tiny';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
-import { getWaitUntil, runQueries, toDashCase } from '@/private/server/utils/data';
+import {
+  getRoninOptions,
+  getWaitUntil,
+  runQueries,
+  toDashCase,
+} from '@/private/server/utils/data';
 import {
   getRequestGeoLocation,
   getRequestLanguages,
@@ -25,6 +31,10 @@ type Bindings = {
   };
 };
 
+type Variables = {
+  client: ReturnType<typeof createSyntaxFactory>;
+};
+
 // This should be done as early as possible in the file.
 //
 // If this variable is already defined when the file gets evaluated, that means the file
@@ -39,7 +49,7 @@ if (globalThis.DEV_SESSIONS) {
   globalThis.DEV_SESSIONS = new Map();
 }
 
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // Add basic security headers. In the future, they will be configurable.
 app.use('*', secureHeaders({ xFrameOptions: false }));
@@ -184,6 +194,37 @@ app.post('/api', async (c) => {
 
   // Return the results of the provided queries.
   return c.json({ results });
+});
+
+app.use('*', async (c, next) => {
+  const headers = c.req.raw.headers;
+  const waitUntil = getWaitUntil(c);
+
+  const serverContext: ServerContext = {
+    url: c.req.url,
+    params: {},
+    userAgent: getRequestUserAgent(headers),
+    geoLocation: getRequestGeoLocation(headers),
+    languages: getRequestLanguages(headers),
+    addressBarInSync: true,
+
+    cookies: getCookie(c),
+    collected: {
+      queries: [],
+      metadata: {},
+      jwts: {},
+    },
+    currentLeafIndex: null,
+    waitUntil,
+  };
+
+  const triggers = prepareTriggers(serverContext, triggerList);
+  const options = getRoninOptions(triggers, 'none', waitUntil);
+  const client = createSyntaxFactory(options);
+
+  c.set('client', client);
+
+  await next();
 });
 
 // If the application defines its own Hono instance, we need to mount it here.

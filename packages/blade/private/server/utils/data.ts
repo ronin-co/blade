@@ -66,7 +66,7 @@ const enableHive = import.meta.env.BLADE_DATA_WORKER === 'db.ronin.co';
  */
 export const getRoninOptions = (
   triggers: TriggersList,
-  requireTriggers: 'all' | 'write',
+  requireTriggers: 'all' | 'write' | 'none',
   waitUntil: WaitUntil,
 ): QueryHandlerOptions => {
   const dataFetcher: typeof fetch = async (input, init) => {
@@ -103,7 +103,7 @@ export const getRoninOptions = (
   return {
     triggers,
     fetch: enableHive ? undefined : dataFetcher,
-    requireTriggers,
+    requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
     waitUntil,
     models: enableHive ? models : undefined,
   };
