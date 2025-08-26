@@ -1,6 +1,6 @@
 {
   "name": "blade-cli",
-  "version": "3.12.2",
+  "version": "3.13.0",
   "type": "module",
   "description": "The command-line interface for RONIN.",
   "main": "./dist/index.js",
@@ -28,6 +28,10 @@
     "./commands/login": {
       "import": "./dist/commands/login.js",
       "types": "./dist/commands/login.d.ts"
+    },
+    "./commands/types": {
+      "import": "./dist/commands/types.js",
+      "types": "./dist/commands/types.d.ts"
     }
   },
   "typesVersions": {
@@ -46,6 +50,9 @@
       ],
       "commands/login": [
         "dist/commands/login.d.ts"
+      ],
+      "commands/types": [
+        "dist/commands/types.d.ts"
       ]
     }
   },

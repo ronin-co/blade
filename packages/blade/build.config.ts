@@ -64,7 +64,7 @@ export default defineBuildConfig({
     './private/server/worker/providers/vercel.ts',
   ],
   declaration: true,
-  externals: ['server-list', 'client-list', 'react', 'react-dom'],
+  externals: ['server-list', 'client-list', 'react', 'react-dom', 'typescript'],
   failOnWarn: false,
   parallel: true,
   rollup: {

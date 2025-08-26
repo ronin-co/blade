@@ -6,7 +6,9 @@
     "utils": "./src/utils.ts",
     "commands/apply": "./src/commands/apply.ts",
     "commands/diff": "./src/commands/diff.ts",
-    "commands/login": "./src/commands/login.ts"
+    "commands/login": "./src/commands/login.ts",
+    "commands/types": "./src/commands/types.ts"
   },
+  "external": ["typescript"],
   "format": "esm"
 }

@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, jest, spyOn, test } from 'bun:
 
 import * as typesModule from '@/src/utils/types';
 
+import type { Stats } from 'node:fs';
+
 describe('types utils', () => {
   beforeEach(() => {
     // Reset all mocks before each test.
@@ -46,7 +48,7 @@ describe('types utils', () => {
     });
 
     test('should extend a populated `include` array', async () => {
-      spyOn(fs, 'exists').mockReturnValue(Promise.resolve(true));
+      spyOn(fs, 'stat').mockReturnValue(Promise.resolve({} as Stats));
       spyOn(fs, 'readFile').mockReturnValue(
         Promise.resolve(
           JSON.stringify({

@@ -37,7 +37,10 @@ export const injectTSConfigInclude = async (
   };
 
   // Attempt to load the existing `tsconfig.json` file.
-  const fileExists = await fs.exists(path);
+  const fileExists = await fs
+    .stat(path)
+    .then(() => true)
+    .catch(() => false);
   if (fileExists) {
     const fileContents = await fs.readFile(path, 'utf-8');
     const json = json5.parse(fileContents);
