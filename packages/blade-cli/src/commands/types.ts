@@ -35,7 +35,10 @@ export default async (
     const space = await getOrSelectSpaceId(sessionToken, spinner);
 
     const configDir = path.join(process.cwd(), '.ronin');
-    const configDirExists = await fs.exists(configDir);
+    const configDirExists = await fs
+      .stat(configDir)
+      .then(() => true)
+      .catch(() => false);
     if (!configDirExists) await fs.mkdir(configDir);
 
     const models = (await getModels({

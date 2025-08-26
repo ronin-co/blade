@@ -97,12 +97,14 @@ if (isApplying)
 
 // `blade types` command.
 const isGeneratingTypes = normalizedPositionals.includes('types');
-if (isGeneratingTypes)
+if (isGeneratingTypes) {
   await cmdTypes(appToken, session?.token, {
     debug: values.debug,
     help: false,
     version: false,
   });
+  process.exit(0);
+}
 
 const isBuilding = normalizedPositionals.includes('build');
 const isServing = normalizedPositionals.includes('serve');
