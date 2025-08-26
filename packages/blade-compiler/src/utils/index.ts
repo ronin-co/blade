@@ -228,6 +228,10 @@ export const compileQueryInput = (
     if (tableSubQuery) {
       statement += `(${tableSubQuery}) as ${model.tableAlias} `;
       isJoiningMultipleRows = true;
+
+      // Remove the instructions that are now being handled by the sub query.
+      delete instructions?.['with'];
+      delete instructions?.['orderedBy'];
     } else {
       statement += `"${model.table}" `;
     }

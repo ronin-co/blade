@@ -158,7 +158,8 @@ export const handleIncluding = (
             },
           },
         },
-        models,
+        // We don't want to consider a table alias here.
+        [{ ...model, tableAlias: undefined }],
         statementParams,
         { inlineDefaults: options.inlineDefaults, explicitColumns: false },
       );
