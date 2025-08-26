@@ -230,8 +230,8 @@ export const compileQueryInput = (
       isJoiningMultipleRows = true;
 
       // Remove the instructions that are now being handled by the sub query.
-      delete instructions?.['with'];
-      delete instructions?.['orderedBy'];
+      if (instructions?.['with']) delete instructions['with'];
+      if (instructions?.['orderedBy']) delete instructions['orderedBy'];
     } else {
       statement += `"${model.table}" `;
     }
