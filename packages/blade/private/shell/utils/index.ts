@@ -175,11 +175,14 @@ export const extractDeclarationName = (node: any | null | undefined): string | n
 
 export const composeEnvironmentVariables = (options: {
   environment: 'development' | 'production';
+  provider: DeploymentProvider;
+
   isLoggingQueries: boolean;
   enableServiceWorker: boolean;
-  provider: DeploymentProvider;
+  assetPrefix: string | null;
 }): Record<string, string> => {
-  const { provider, environment, isLoggingQueries, enableServiceWorker } = options;
+  const { provider, environment, isLoggingQueries, enableServiceWorker, assetPrefix } =
+    options;
 
   const filteredVariables = Object.entries(process.env).filter(([key]) => {
     return key.startsWith('BLADE_');
@@ -197,6 +200,7 @@ export const composeEnvironmentVariables = (options: {
 
   defined['__BLADE_PROVIDER'] = provider;
   defined['__BLADE_SERVICE_WORKER'] = enableServiceWorker.toString();
+  defined['__BLADE_ASSET_PREFIX'] = assetPrefix || '';
 
   if (provider === 'cloudflare') {
     defined['BLADE_PUBLIC_GIT_BRANCH'] = process.env['CF_PAGES_BRANCH'] ?? '';

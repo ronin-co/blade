@@ -42,6 +42,7 @@ export interface VirtualFileItem {
  * @param [options] - Optional configuration for running the build.
  * @param [options.enableServiceWorker] - Whether service workers should be enabled.
  * @param [options.logQueries] - Whether executed queries should be logged at runtime.
+ * @param [options.assetPrefix] - A custom URL prefix for static assets.
  * @param [options.plugins] - Optional additional esbuild plugins to add to the build.
  * @param [options.filePaths] - A list of all source file paths in the project. If the
  * list is not provided, the project directory will be crawled automatically.
@@ -53,6 +54,8 @@ export const composeBuildContext = async (
   options?: {
     enableServiceWorker?: boolean;
     logQueries?: boolean;
+    assetPrefix?: string;
+
     plugins?: Array<RolldownPlugin>;
     virtualFiles?: Array<VirtualFileItem>;
   },
@@ -67,6 +70,7 @@ export const composeBuildContext = async (
   const swEntry = path.join(serverInputFolder, 'service-worker.js');
 
   const tsconfigFilename = path.join(process.cwd(), 'tsconfig.json');
+  const tsconfigExists = options?.virtualFiles ? false : await exists(tsconfigFilename);
 
   const input: Record<string, string> = {
     client: clientInputFile,
@@ -80,7 +84,9 @@ export const composeBuildContext = async (
     platform: provider === 'vercel' ? 'node' : 'browser',
 
     resolve: {
-      tsconfigFilename: (await exists(tsconfigFilename)) ? tsconfigFilename : undefined,
+      // If the provided files are virtual, we resolve the TS config paths using a
+      // separate plugin on the outside.
+      tsconfigFilename: tsconfigExists ? tsconfigFilename : undefined,
 
       // If the provided files are virtual, Rolldown can't reliably resolve the modules,
       // so we provide the resolving logic ourselves as a plugin from the outside.
@@ -93,6 +99,9 @@ export const composeBuildContext = async (
         'react-dom': path.join(nodePath, 'react-dom'),
       },
     },
+
+    // TODO: Remove this once the Hive client no longer depends on it.
+    external: ['events'],
 
     plugins: [
       getFileListLoader(options?.virtualFiles),
@@ -107,6 +116,7 @@ export const composeBuildContext = async (
     define: composeEnvironmentVariables({
       isLoggingQueries: options?.logQueries || false,
       enableServiceWorker: options?.enableServiceWorker || false,
+      assetPrefix: options?.assetPrefix || null,
       provider,
       environment,
     }),

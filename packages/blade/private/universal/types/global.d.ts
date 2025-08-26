@@ -17,6 +17,7 @@ interface ImportMetaEnv {
   readonly __BLADE_DEBUG_LEVEL: 'verbose' | 'error';
   readonly __BLADE_PROVIDER: import('./util').DeploymentProvider;
   readonly __BLADE_SERVICE_WORKER: string;
+  readonly __BLADE_ASSET_PREFIX: string;
   readonly __BLADE_BUNDLE_ID: string;
 }
 

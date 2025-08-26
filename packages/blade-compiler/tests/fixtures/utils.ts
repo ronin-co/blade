@@ -1,10 +1,17 @@
+import { type Database, Hive } from 'hive';
+import { BunDriver } from 'hive/bun-driver';
+import { MemoryStorage } from 'hive/memory-storage';
+import type { Row } from 'hive/sdk/query';
+
 import fixtureData from '@/fixtures/data.json';
-import { type Model, type Query, ROOT_MODEL, Transaction } from '@/src/index';
+import {
+  type Model,
+  type Query,
+  ROOT_MODEL,
+  type Statement,
+  Transaction,
+} from '@/src/index';
 import { convertToSnakeCase, getProperty, setProperty } from '@/src/utils/helpers';
-import { Engine } from '@ronin/engine';
-import { BunDriver } from '@ronin/engine/drivers/bun';
-import { MemoryResolver } from '@ronin/engine/resolvers/memory';
-import type { Database, Row, Statement } from '@ronin/engine/resources';
 
 /** A regex for asserting RONIN record IDs. */
 export const RECORD_ID_REGEX = /[a-z]{3}_[a-z0-9]{16}/;
@@ -18,7 +25,7 @@ export const PAGINATION_CURSOR_REGEX = /^(?:[a-zA-Z0-9_]+,)*[a-zA-Z0-9_]*\d{13}$
 /**
  * Pre-fills the database with the provided models and their respective data.
  *
- * @param databaseName - The name of the database that should be pre-filled.
+ * @param database - The database that should be pre-filled.
  * @param models - The models that should be inserted.
  *
  * @returns A promise that resolves when the database has been pre-filled.
@@ -68,12 +75,22 @@ const prefillDatabase = async (
     ...dataTransaction.statements,
   ];
 
-  await database.query(statements);
+  const hiveStatements = statements.map(({ statement, params }) => {
+    return {
+      sql: statement,
+      params: params as Array<string>,
+    };
+  });
+
+  await database.query(hiveStatements);
 };
 
-const ENGINE = new Engine({
-  driver: (engine): BunDriver => new BunDriver({ engine }),
-  resolvers: [(engine) => new MemoryResolver({ engine })],
+const hive = new Hive({
+  storage: ({ events }) =>
+    new MemoryStorage({
+      events,
+      driver: new BunDriver(),
+    }),
 });
 
 /**
@@ -89,14 +106,21 @@ export const queryEphemeralDatabase = async (
   statements: Array<Statement>,
 ): Promise<Array<Array<Row>>> => {
   const databaseId = Math.random().toString(36).substring(7);
-  const database = await ENGINE.createDatabase({ id: databaseId });
+  const database = await hive.create({ type: 'database', id: databaseId });
 
   await prefillDatabase(database, models);
 
-  const results = await database.query(statements);
+  const hiveStatements = statements.map(({ statement, params }) => {
+    return {
+      sql: statement,
+      params: params as Array<string>,
+    };
+  });
+
+  const results = await database.query(hiveStatements);
   const formattedResults = results.map((result) => result.rows);
 
-  await ENGINE.deleteDatabase({ id: databaseId });
+  await hive.delete({ type: 'database', id: databaseId });
 
   return formattedResults;
 };

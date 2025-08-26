@@ -40,6 +40,10 @@ const { values, positionals } = parseArgs({
       default: false,
       description: 'Enable service worker support',
     },
+    'asset-prefix': {
+      type: 'string',
+      description: 'Used to prefix all static asset URLs',
+    },
   },
   strict: true,
   allowPositionals: true,
@@ -53,6 +57,9 @@ const normalizedPositionals = positionals.map((positional) => positional.toLower
 // particular space instead of authenticating as an account. This is especially useful
 // in CI, which must be independent of individual people.
 const appToken = process.env['RONIN_TOKEN'];
+
+// This determines whether the new database engine should be used.
+const enableHive = process.env['BLADE_DATA_WORKER'] === 'db.ronin.co';
 
 // If there is no active session, automatically start one and then continue with the
 // execution of the requested sub command, if there is one. If the `login` sub command
@@ -75,6 +82,7 @@ if (isDiffing)
       version: false,
     },
     positionals,
+    enableHive,
   );
 
 // `blade apply` command.
@@ -84,6 +92,7 @@ if (isApplying)
     debug: values.debug,
     help: false,
     version: false,
+    enableHive,
   });
 
 // `blade types` command.
@@ -125,6 +134,7 @@ if (isBuilding || isDeveloping) {
   const mainBuild = await composeBuildContext(environment, {
     enableServiceWorker,
     logQueries: values?.queries,
+    assetPrefix: values?.['asset-prefix'],
     plugins: [
       {
         name: 'Spinner Loader',

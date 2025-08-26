@@ -1,21 +1,22 @@
-import { Engine } from '@ronin/engine';
-import { BunDriver } from '@ronin/engine/drivers/bun';
-import { MemoryResolver } from '@ronin/engine/resolvers/memory';
 import { betterAuth } from 'better-auth';
+import type { BetterAuthOptions } from 'better-auth';
 import { bearer } from 'better-auth/plugins';
-import { createSyntaxFactory } from 'ronin';
 import { ROOT_MODEL, Transaction } from 'blade-compiler';
+import type { Model, Query, ResultRecord } from 'blade-compiler';
+import { type Database, Hive } from 'hive';
+import { BunDriver } from 'hive/bun-driver';
+import { MemoryStorage } from 'hive/memory-storage';
+import { createSyntaxFactory } from 'ronin';
 
 import { Account, Session, User, Verification } from '@/fixtures/schema';
 import { ronin } from '@/index';
 
-import type { Database } from '@ronin/engine/resources';
-import type { BetterAuthOptions } from 'better-auth';
-import type { Model, Query, ResultRecord } from 'blade-compiler';
-
-const engine = new Engine({
-  driver: (engine): BunDriver => new BunDriver({ engine }),
-  resolvers: [(engine) => new MemoryResolver({ engine })],
+const hive = new Hive({
+  storage: ({ events }) =>
+    new MemoryStorage({
+      events,
+      driver: new BunDriver(),
+    }),
 });
 
 export const DEFAULT_MODELS = [
@@ -36,8 +37,10 @@ type SyntaxFactory = ReturnType<typeof createSyntaxFactory>;
 
 export const cleanup = async (): Promise<void> => {
   // Delete all databases in the engine.
-  const databases = await engine.listDatabases();
-  await Promise.all(databases.map(({ id }) => engine.deleteDatabase({ id })));
+  const databases = (await hive.list()).filter(
+    (item) => item.type === 'database',
+  ) as Array<Database>;
+  await Promise.all(databases.map(({ id }) => hive.delete({ type: 'database', id })));
 };
 
 /**
@@ -65,13 +68,21 @@ export const init = async (options?: {
   // Create an ephemeral database instance.
   // @ts-expect-error For some reason `crypto.randomUUID` is not getting picked up
   const databaseId = crypto.randomUUID();
-  const database = await engine.createDatabase({ id: databaseId });
+  const database = await hive.create({ type: 'database', id: databaseId });
 
   // Create the root model & all other models.
   const queries = new Array<Query>({ create: { model: ROOT_MODEL } });
   for (const model of models) queries.push({ create: { model } });
   const transaction = new Transaction(queries);
-  await database.query(transaction.statements);
+
+  const hiveStatements = transaction.statements.map(({ statement, params }) => {
+    return {
+      sql: statement,
+      params: params as Array<string>,
+    };
+  });
+
+  await database.query(hiveStatements);
 
   // Create a new RONIN client instance to communicate with the in-memory database.
   const client = createSyntaxFactory({
@@ -79,7 +90,15 @@ export const init = async (options?: {
     fetch: async (request: Request): Promise<Response> => {
       const { queries } = (await request.json()) as { queries: Array<object> };
       const transaction = new Transaction(queries, { models });
-      const results = await database.query<Array<ResultRecord>>(transaction.statements);
+
+      const hiveStatements = transaction.statements.map(({ statement, params }) => {
+        return {
+          sql: statement,
+          params: params as Array<string>,
+        };
+      });
+
+      const results = await database.query<Array<ResultRecord>>(hiveStatements);
       const formattedResults = transaction.formatResults(results.map(({ rows }) => rows));
       return Response.json({
         results: formattedResults,

@@ -1,6 +1,6 @@
 {
   "name": "blade-cli",
-  "version": "3.11.2",
+  "version": "3.12.2",
   "type": "module",
   "description": "The command-line interface for RONIN.",
   "main": "./dist/index.js",
@@ -88,15 +88,14 @@
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.1",
     "@types/ini": "4.1.1",
-    "bun-bagel": "1.1.0",
-    "blade-syntax": "workspace:*",
+    "blade-client": "workspace:*",
     "blade-codegen": "workspace:*",
     "blade-compiler": "workspace:*",
+    "blade-syntax": "workspace:*",
+    "bun-bagel": "1.1.0",
+    "hive": "1.0.8",
     "ronin": "6.7.4",
     "tsup": "8.5.0",
     "typescript": "5.8.3"
-  },
-  "peerDependencies": {
-    "@ronin/engine": ">=0.1.23"
   }
 }

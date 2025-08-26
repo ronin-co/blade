@@ -46,7 +46,9 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
     handler(code, id) {
       const extension = path.extname(id).slice(1) as 'ts' | 'tsx' | 'js' | 'jsx';
       const rawContents = code;
-      const relativeSourcePath = path.relative(process.cwd(), id.replace(/^\0+/, ''));
+      const relativeSourcePath = path
+        .relative(process.cwd(), id)
+        .replace('virtual:/', '');
       const chunkId = generateUniqueId();
 
       const contents = [
@@ -166,6 +168,7 @@ export const getFileListLoader = (
     ['pages', path.join(process.cwd(), 'pages')],
     ['triggers', path.join(process.cwd(), 'triggers')],
     ['components', path.join(process.cwd(), 'components')],
+    ['schema', path.join(process.cwd(), 'schema')],
   ];
 
   const filter = { id: /^(?:server-list|client-list)$/ };
@@ -203,7 +206,11 @@ export const getFileListLoader = (
       filter,
       async handler(id) {
         if (id === 'server-list') {
-          return getFileList(files, ['pages', 'triggers'], await exists(routerInputFile));
+          return getFileList(
+            files,
+            ['pages', 'triggers', 'schema'],
+            await exists(routerInputFile),
+          );
         }
 
         return getFileList(files, ['components']);

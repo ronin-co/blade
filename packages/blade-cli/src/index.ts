@@ -3,7 +3,6 @@ import { parseArgs } from 'node:util';
 import path from 'node:path';
 import apply from '@/src/commands/apply';
 import diff from '@/src/commands/diff';
-import initializeProject from '@/src/commands/init';
 import logIn from '@/src/commands/login';
 import pull from '@/src/commands/pull';
 import generateTypes, { TYPES_FLAGS } from '@/src/commands/types';
@@ -86,16 +85,9 @@ export const run = async (config: { version: string }): Promise<void> => {
     return;
   }
 
-  // `init` sub command
-  if (normalizedPositionals.includes('init'))
-    return initializeProject(positionals, {
-      appToken: appToken,
-      sessionToken: session?.token,
-    });
-
   // `diff` sub command
   if (normalizedPositionals.includes('diff')) {
-    return diff(appToken, session?.token, flags, positionals);
+    return diff(appToken, session?.token, flags, positionals, false);
   }
 
   // `apply` sub command
@@ -104,7 +96,7 @@ export const run = async (config: { version: string }): Promise<void> => {
       ? path.join(process.cwd(), positionals[positionals.indexOf('apply') + 1])
       : undefined;
 
-    return apply(appToken, session?.token, flags, migrationFilePath);
+    return apply(appToken, session?.token, flags, false, migrationFilePath);
   }
 
   // `types` sub command.
