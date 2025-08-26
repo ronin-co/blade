@@ -9,5 +9,6 @@
     "commands/login": "./src/commands/login.ts",
     "commands/types": "./src/commands/types.ts"
   },
+  "external": ["typescript"],
   "format": "esm"
 }
