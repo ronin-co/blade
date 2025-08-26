@@ -28,11 +28,14 @@ export default async (
   appToken: string | undefined,
   sessionToken: string | undefined,
   flags?: TypesFlags,
+  enableHive?: boolean,
 ): Promise<void> => {
   const spinner = ora.info(flags?.zod ? 'Generating Zod schemas' : 'Generating types');
 
   try {
-    const space = await getOrSelectSpaceId(sessionToken, spinner);
+    const space = enableHive
+      ? undefined
+      : await getOrSelectSpaceId(sessionToken, spinner);
 
     const configDir = path.join(process.cwd(), '.ronin');
     const configDirExists = await fs
@@ -45,6 +48,7 @@ export default async (
       token: appToken ?? sessionToken,
       space: space,
       fieldArray: false,
+      enableHive,
     })) as Parameters<typeof generateZodSchema>[0];
 
     if (flags?.zod) {

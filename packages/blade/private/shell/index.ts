@@ -102,11 +102,16 @@ if (isApplying)
 // `blade types` command.
 const isGeneratingTypes = normalizedPositionals.includes('types');
 if (isGeneratingTypes) {
-  await cmdTypes(appToken, session?.token, {
-    debug: values.debug,
-    help: false,
-    version: false,
-  });
+  await cmdTypes(
+    appToken,
+    session?.token,
+    {
+      debug: values.debug,
+      help: false,
+      version: false,
+    },
+    enableHive,
+  );
   process.exit(0);
 }
 
