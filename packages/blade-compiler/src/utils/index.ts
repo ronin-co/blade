@@ -54,6 +54,11 @@ export const compileQueryInput = (
      */
     parentModel?: Model;
     /**
+     * Whether to name columns explicitly in order to avoid columns arising when joining
+     * multiple tables. Defaults to `true`.
+     */
+    explicitColumns?: boolean;
+    /**
      * Whether to compute default field values as part of the generated statement.
      */
     inlineDefaults: boolean;
@@ -174,8 +179,10 @@ export const compileQueryInput = (
       orderedBy: instructions?.orderedBy,
       limitedTo: instructions?.limitedTo,
     },
-    // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
-    { inlineDefaults: options?.inlineDefaults || false },
+    {
+      inlineDefaults: options?.inlineDefaults ?? false,
+      explicitColumns: options?.explicitColumns ?? true,
+    },
   );
 
   let statement = '';
@@ -207,7 +214,11 @@ export const compileQueryInput = (
       model,
       statementParams,
       single,
-      instructions?.including,
+      {
+        with: instructions?.with,
+        orderedBy: instructions?.orderedBy,
+        including: instructions?.including,
+      },
     );
 
     // If multiple rows are being joined from a different table, even though the root

@@ -49,7 +49,12 @@ export const handleSelecting = (
      * Whether to compute default field values as part of the generated statement.
      */
     inlineDefaults: boolean;
-  } = { inlineDefaults: false },
+    /**
+     * Whether to name columns explicitly in order to avoid columns arising when joining
+     * multiple tables.
+     */
+    explicitColumns: boolean;
+  } = { inlineDefaults: false, explicitColumns: true },
 ): { columns: string; isJoining: boolean; selectedFields: Array<InternalModelField> } => {
   let isJoining = false;
 
@@ -217,24 +222,31 @@ export const handleSelecting = (
     }
   }
 
-  const columns = selectedFields.map((selectedField) => {
-    if (selectedField.mountedValue) {
-      return `${selectedField.mountedValue} as "${selectedField.slug}"`;
-    }
+  let columnList = '*';
 
-    const { fieldSelector } = getFieldFromModel(model, selectedField.slug, {
-      instructionName: 'selecting',
+  if (options.explicitColumns) {
+    const columns = selectedFields.map((selectedField) => {
+      if (selectedField.mountedValue) {
+        return `${selectedField.mountedValue} as "${selectedField.slug}"`;
+      }
+
+      const { fieldSelector } = getFieldFromModel(model, selectedField.slug, {
+        instructionName: 'selecting',
+      });
+
+      if (options.mountingPath) {
+        return `${fieldSelector} as "${options.mountingPath}.${selectedField.slug}"`;
+      }
+
+      return fieldSelector;
     });
 
-    if (options.mountingPath) {
-      return `${fieldSelector} as "${options.mountingPath}.${selectedField.slug}"`;
-    }
+    columnList = [...columns, ...joinedColumns].join(', ');
+  }
 
-    return fieldSelector;
-  });
-
-  columns.push(...joinedColumns);
-  selectedFields.push(...joinedSelectedFields);
-
-  return { columns: columns.join(', '), isJoining, selectedFields };
+  return {
+    columns: columnList,
+    isJoining,
+    selectedFields: [...selectedFields, ...joinedSelectedFields],
+  };
 };
