@@ -220,7 +220,7 @@ export const Search: FunctionComponent = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="relative flex flex-row w-44 items-center gap-1.5 rounded-md border border-black/5 px-3 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:py-1.5 sm:pr-2 sm:pl-1.5">
+        className="relative flex flex-row w-10 sm:w-32 md:w-44 items-center justify-center sm:justify-start gap-1 sm:gap-1.5 rounded-md border border-black/5 px-1 sm:px-2 md:px-3 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:py-1.5 sm:pr-2 sm:pl-1.5">
         <Icons.Search className="size-3.5" />
         <span className="hidden sm:inline">Search</span>
         <kbd className="pointer-events-none absolute right-1.5 top-1.2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
@@ -252,15 +252,12 @@ export const Search: FunctionComponent = () => {
                     No results found.
                   </div>
                 ) : (
-                  filteredItems.map((item, index) => (
+                  filteredItems.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleItemClick(item.href)}
                       className={cn(
                         'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none w-full text-left transition-colors duration-150 hover:bg-accent/50',
-                        index === selectedIndex && 'bg-accent text-accent-foreground',
-                        location.pathname === item.href &&
-                          'bg-accent text-accent-foreground',
                       )}>
                       <div className="flex flex-col w-full gap-1">
                         <div className="flex items-center gap-2">

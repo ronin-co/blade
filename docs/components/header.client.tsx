@@ -31,7 +31,7 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
           'py-3': scrolled,
         },
       )}>
-      <div className="hidden w-48 shrink-0 md:block" />
+      <div className="hidden w-40 shrink-0 md:block" />
 
       <div className="flex w-full max-w-3xl flex-row items-center justify-between 2xl:max-w-4xl">
         <a
@@ -47,7 +47,7 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
           <span>.im</span>
         </a>
 
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-row items-center gap-1 sm:gap-2">
           <Snippet />
 
           <Search />
