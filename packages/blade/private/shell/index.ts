@@ -87,12 +87,16 @@ if (isDiffing)
 // `blade apply` command.
 const isApplying = normalizedPositionals.includes('apply');
 if (isApplying)
-  await cmdApply(appToken, session?.token, {
-    debug: values.debug,
-    help: false,
-    version: false,
+  await cmdApply(
+    appToken,
+    session?.token,
+    {
+      debug: values.debug,
+      help: false,
+      version: false,
+    },
     enableHive,
-  });
+  );
 
 const isBuilding = normalizedPositionals.includes('build');
 const isServing = normalizedPositionals.includes('serve');
