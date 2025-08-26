@@ -57,6 +57,9 @@ const normalizedPositionals = positionals.map((positional) => positional.toLower
 // in CI, which must be independent of individual people.
 const appToken = process.env['RONIN_TOKEN'];
 
+// This determines whether the new database engine should be used.
+const enableHive = process.env['BLADE_DATA_WORKER'] === 'db.ronin.co';
+
 // If there is no active session, automatically start one and then continue with the
 // execution of the requested sub command, if there is one. If the `login` sub command
 // is invoked, we don't need to auto-login, since the command itself will handle it.
@@ -78,6 +81,7 @@ if (isDiffing)
       version: false,
     },
     positionals,
+    enableHive,
   );
 
 // `blade apply` command.
@@ -87,6 +91,7 @@ if (isApplying)
     debug: values.debug,
     help: false,
     version: false,
+    enableHive,
   });
 
 const isBuilding = normalizedPositionals.includes('build');

@@ -1,3 +1,4 @@
+import { runQueriesWithStorageAndTriggers } from '@/src/queries';
 import { isStorableObject } from '@/src/storage';
 import type { PromiseTuple, QueryHandlerOptions } from '@/src/types/utils';
 import { queriesHandler, queryHandler } from '@/src/utils/handlers';
@@ -208,5 +209,7 @@ export const batch = factory.batch as <
 
 export const sql = factory.sql;
 export const sqlBatch = factory.sqlBatch;
+
+export const runQueries = runQueriesWithStorageAndTriggers;
 
 export default createSyntaxFactory;

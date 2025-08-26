@@ -1,6 +1,6 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
+import { runQueries as runQueriesOnRonin } from 'blade-client';
 import type { FormattedResults, QueryHandlerOptions } from 'blade-client/types';
-import { runQueries as runQueriesOnRonin } from 'blade-client/utils';
 import type { Model, Query, ResultRecord } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
 import { schema } from 'server-list';
@@ -52,7 +52,7 @@ export const getWaitUntil = (context?: Context): WaitUntil => {
   return dataFetcherWaitUntil;
 };
 
-const ENABLE_HIVE = import.meta.env.BLADE_DATA_WORKER === 'db.ronin.co';
+const enableHive = import.meta.env.BLADE_DATA_WORKER === 'db.ronin.co';
 
 /**
  * Generate the options passed to the `ronin` JavaScript client.
@@ -66,7 +66,7 @@ const ENABLE_HIVE = import.meta.env.BLADE_DATA_WORKER === 'db.ronin.co';
  */
 export const getRoninOptions = (
   triggers: TriggersList,
-  requireTriggers: 'all' | 'write',
+  requireTriggers: 'all' | 'write' | 'none',
   waitUntil: WaitUntil,
 ): QueryHandlerOptions => {
   const dataFetcher: typeof fetch = async (input, init) => {
@@ -102,10 +102,10 @@ export const getRoninOptions = (
 
   return {
     triggers,
-    fetch: ENABLE_HIVE ? undefined : dataFetcher,
-    requireTriggers,
+    fetch: enableHive ? undefined : dataFetcher,
+    requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
     waitUntil,
-    models: ENABLE_HIVE ? models : undefined,
+    models: enableHive ? models : undefined,
   };
 };
 
