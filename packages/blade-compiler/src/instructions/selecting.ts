@@ -50,7 +50,7 @@ export const handleSelecting = (
      */
     inlineDefaults: boolean;
     /**
-     * Whether to name columns explicitly in order to avoid columns arising when joining
+     * Whether to name columns explicitly in order to avoid conflicts arising when joining
      * multiple tables.
      */
     explicitColumns: boolean;
