@@ -154,7 +154,7 @@ export const handleIncluding = (
           get: {
             [model.slug]: {
               ...(instructions.with ? { with: instructions.with } : {}),
-              ...(instructions.orderedBy ? { with: instructions.orderedBy } : {}),
+              ...(instructions.orderedBy ? { orderedBy: instructions.orderedBy } : {}),
             },
           },
         },
