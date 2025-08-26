@@ -86,8 +86,6 @@ export const runQueries = async <T extends ResultRecord>(
 
     const rawResults = results.map((result) => result.rows);
 
-    console.log(rawResults);
-
     const usableResults = transaction.formatResults(rawResults).map((result) => {
       if ('record' in result) {
         const { modelFields, ...rest } = result;
