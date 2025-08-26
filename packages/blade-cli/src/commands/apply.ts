@@ -74,7 +74,7 @@ export default async (
     const protocol = await new Protocol().load(migrationPrompt);
 
     if (enableHive) {
-      await runQueries(protocol.queries, { token: appToken });
+      await runQueries(protocol.queries, { token: appToken, models: [] });
     } else {
       const statements = protocol.getSQLStatements(
         existingModels.map((model) => ({

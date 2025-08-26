@@ -71,18 +71,22 @@ export const runQueries = async <T extends ResultRecord>(
         new RemoteStorage({
           logger,
           events,
-          remote: 'https://db.ronin.co',
+          remote: 'https://db.ronin.co/api',
           token: options.token,
         }),
     });
 
-    const db = new Selector({ type: 'database', id: 'default' });
+    const parent = new Selector({ type: 'namespace', id: 'ronin' });
+    const db = new Selector({ type: 'database', id: 'main', parent });
+
     const results = await hive.storage.query(db, {
       statements: rawStatements,
       transaction: 'DEFERRED',
     });
 
     const rawResults = results.map((result) => result.rows);
+
+    console.log(rawResults);
 
     const usableResults = transaction.formatResults(rawResults).map((result) => {
       if ('record' in result) {

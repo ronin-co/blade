@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { confirm } from '@inquirer/prompts';
-import { CompilerError, type Model } from 'blade-compiler';
+import { runQueries } from 'blade-client';
+import { CompilerError, type Model, type Query, ROOT_MODEL } from 'blade-compiler';
 
 import apply from '@/src/commands/apply';
 import { Migration, type MigrationFlags } from '@/src/utils/migration';
@@ -14,7 +15,7 @@ import { type Status, spinner } from '@/src/utils/spinner';
 /**
  * Creates a new migration based on model differences.
  */
-export default async (
+const diff = async (
   appToken: string | undefined,
   sessionToken: string | undefined,
   flags: MigrationFlags,
@@ -133,6 +134,23 @@ export default async (
 
     process.exit(0);
   } catch (err) {
+    if (err instanceof Error && err.message.includes('no such table: ronin_schema')) {
+      spinner.start('Initializing database');
+
+      try {
+        const queries: Array<Query> = [{ create: { model: ROOT_MODEL } }];
+        await runQueries(queries, { token: appToken, models: [] });
+      } catch (err) {
+        spinner.fail('Failed to initialize database');
+        console.error(err);
+      }
+
+      spinner.succeed();
+
+      // Start the diffing again, now that the database is initialized.
+      return diff(appToken, sessionToken, flags, positionals, enableHive);
+    }
+
     const message =
       err instanceof CompilerError
         ? err.message
@@ -157,3 +175,5 @@ const logModelDiffs = (
     }
   }
 };
+
+export default diff;
