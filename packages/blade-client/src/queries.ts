@@ -37,6 +37,8 @@ export type ResultsPerDatabase<T> = Array<{
   database?: string;
 }>;
 
+const clients: Record<string, Hive> = {};
+
 /**
  * Run a set of given queries.
  *
@@ -66,16 +68,21 @@ export const runQueries = async <T extends ResultRecord>(
       return { sql: item.statement, params: item.params as Array<string> };
     });
 
-    const hive = new Hive({
-      storage: ({ logger, events }) =>
-        new RemoteStorage({
-          logger,
-          events,
-          remote: 'https://db.ronin.co/api',
-          token: options.token,
-        }),
-    });
+    const token = options.token as string;
 
+    if (!clients[token]) {
+      clients[token] = new Hive({
+        storage: ({ logger, events }) =>
+          new RemoteStorage({
+            logger,
+            events,
+            remote: 'https://db.ronin.co/api',
+            token: options.token,
+          }),
+      });
+    }
+
+    const hive = clients[token];
     const parent = new Selector({ type: 'namespace', id: 'ronin' });
     const db = new Selector({ type: 'database', id: 'main', parent });
 
