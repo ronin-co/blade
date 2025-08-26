@@ -10,7 +10,7 @@
         "@radix-ui/react-slot": "1.2.3",
         "@radix-ui/react-tooltip": "1.2.7",
         "@tabler/icons-react": "3.34.0",
-        "blade": "3.10.10",
+        "blade": "3.13.0",
         "class-variance-authority": "0.7.1",
         "clsx": "2.1.1",
         "lucide-react": "0.513.0",
@@ -288,7 +288,7 @@
 
     "aria-hidden": ["aria-hidden@1.2.6", "", { "dependencies": { "tslib": "^2.0.0" } }, "sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA=="],
 
-    "blade": ["blade@3.10.10", "", { "dependencies": { "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "rolldown": "1.0.0-beta.32", "ronin": "6.8.0" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-t5NRSptBG3z5ytIowU3tUbDMESmsvlr6kl1g06TGoV4YCm17kM6OA1w3ZYXUMU3pQaASPCe3f8SqdM3OzreBjQ=="],
+    "blade": ["blade@3.13.0", "", { "dependencies": { "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "rolldown": "1.0.0-beta.32", "ronin": "6.8.0" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-QSd0JG4V526SBlnG7JgX0Faw0q4yDPDywoVnhmBrP4WFYVqIxgsgWAqAq2zf3gRsMl1EryhVkxHSloEJcXbyDg=="],
 
     "bundle-name": ["bundle-name@4.1.0", "", { "dependencies": { "run-applescript": "^7.0.0" } }, "sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q=="],
 
