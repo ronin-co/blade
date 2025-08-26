@@ -43,18 +43,18 @@ export const handleSelecting = (
     limitedTo: Instructions['limitedTo'];
   },
   options: {
-    /** The path on which the selected fields should be mounted in the final record. */
-    mountingPath?: InternalModelField['mountingPath'];
     /**
      * Whether to compute default field values as part of the generated statement.
      */
     inlineDefaults: boolean;
     /**
-     * Whether to name columns explicitly in order to avoid conflicts arising when joining
-     * multiple tables.
+     * Whether to name columns explicitly in order to avoid conflicts arising when
+     * joining multiple tables.
      */
     explicitColumns: boolean;
-  } = { inlineDefaults: false, explicitColumns: true },
+    /** The path on which the selected fields should be mounted in the final record. */
+    mountingPath?: InternalModelField['mountingPath'];
+  },
 ): { columns: string; isJoining: boolean; selectedFields: Array<InternalModelField> } => {
   let isJoining = false;
 

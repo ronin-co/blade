@@ -54,14 +54,14 @@ export const compileQueryInput = (
      */
     parentModel?: Model;
     /**
-     * Whether to name columns explicitly in order to avoid conflicts arising when joining
-     * multiple tables. Defaults to `true`.
+     * Whether to name columns explicitly in order to avoid conflicts arising when
+     * joining multiple tables. Defaults to `true`.
      */
     explicitColumns?: boolean;
     /**
      * Whether to compute default field values as part of the generated statement.
      */
-    inlineDefaults: boolean;
+    inlineDefaults?: boolean;
   },
 ): {
   dependencies: Array<InternalDependencyStatement>;
