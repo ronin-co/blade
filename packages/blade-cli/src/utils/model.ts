@@ -37,7 +37,10 @@ export const getModels = async (options?: {
   const { token, space, fieldArray = true } = options || {};
 
   if (options?.enableHive) {
-    const models = (await runQueries(queries, { token })) as unknown as Array<Model>;
+    const [models] = (await runQueries(queries, {
+      token,
+      models: [],
+    })) as unknown as [Array<Model>];
 
     if (fieldArray) {
       return models.map((model) => ({
