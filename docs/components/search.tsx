@@ -1,7 +1,6 @@
 import { Icons } from '@/components/icons';
-import { cn } from '@/lib/utils';
 import { useLocation, useRedirect } from 'blade/hooks';
-import { type FunctionComponent, useEffect, useState, useRef } from 'react';
+import { type FunctionComponent, useEffect, useRef, useState } from 'react';
 
 interface SearchItem {
   id: string;
@@ -117,7 +116,7 @@ export const Search: FunctionComponent = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const redirect = useRedirect();
-  const location = useLocation();
+  const _location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -220,10 +219,10 @@ export const Search: FunctionComponent = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="relative flex flex-row w-10 sm:w-32 md:w-44 items-center justify-center sm:justify-start gap-1 sm:gap-1.5 rounded-md border border-black/5 px-1 sm:px-2 md:px-3 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:py-1.5 sm:pr-2 sm:pl-1.5">
+        className="relative flex w-10 flex-row items-center justify-center gap-1 rounded-md border border-black/5 px-1 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:w-32 sm:justify-start sm:gap-1.5 sm:px-2 sm:py-1.5 sm:pr-2 sm:pl-1.5 md:w-44 md:px-3">
         <Icons.Search className="size-3.5" />
         <span className="hidden sm:inline">Search</span>
-        <kbd className="pointer-events-none absolute right-1.5 top-1.2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+        <kbd className="pointer-events-none absolute top-1.2 right-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium font-mono text-[10px] opacity-100 sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
       </button>
@@ -231,7 +230,7 @@ export const Search: FunctionComponent = () => {
       {open && (
         <div className="fixed inset-0 z-50 overflow-y-auto p-4">
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" />
-          <div className="relative mx-auto max-w-2xl mt-20">
+          <div className="relative mx-auto mt-20 max-w-2xl">
             <div
               ref={dialogRef}
               className="relative overflow-hidden rounded-lg border bg-background shadow-2xl">
@@ -248,7 +247,7 @@ export const Search: FunctionComponent = () => {
               </div>
               <div className="max-h-[300px] overflow-y-auto p-1">
                 {filteredItems.length === 0 ? (
-                  <div className="py-6 text-center text-sm text-muted-foreground">
+                  <div className="py-6 text-center text-muted-foreground text-sm">
                     No results found.
                   </div>
                 ) : (
@@ -256,18 +255,16 @@ export const Search: FunctionComponent = () => {
                     <button
                       key={item.id}
                       onClick={() => handleItemClick(item.href)}
-                      className={cn(
-                        'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none w-full text-left transition-colors duration-150 hover:bg-accent/50',
-                      )}>
-                      <div className="flex flex-col w-full gap-1">
+                      className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-left text-sm outline-none transition-colors duration-150 hover:bg-accent/50">
+                      <div className="flex w-full flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{item.title}</span>
-                          <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                          <span className="rounded bg-muted px-1.5 py-0.5 text-muted-foreground text-xs">
                             {item.category}
                           </span>
                         </div>
                         {item.description && (
-                          <span className="text-xs text-muted-foreground leading-relaxed">
+                          <span className="text-muted-foreground text-xs leading-relaxed">
                             {item.description}
                           </span>
                         )}
