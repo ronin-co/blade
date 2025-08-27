@@ -353,9 +353,9 @@ Usually, in React, the [use](https://react.dev/reference/react/use) hook is used
 
 In Blade, however, since Blade purposefully does not support Suspense and also does not support asynchronous components, the hook is used to load data instead.
 
-Specifically, the hook reflects the full capabilities of the [RONIN query syntax](https://ronin.co/docs/queries) (which is as powerful as SQL) and thereby allows for easily querying records on your database.
+Specifically, the hook reflects the full capabilities of the [RONIN query syntax](/docs/queries) (which is as powerful as SQL) and thereby allows for easily querying records on your database.
 
-By default, if you provide a `RONIN_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using [triggers](https://ronin.co/docs/models/triggers) instead.
+By default, if you provide a `RONIN_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using [triggers](/models/triggers) instead.
 
 ```tsx
 import { use } from 'blade/server/hooks';
@@ -368,7 +368,7 @@ const Page = () => {
 };
 ```
 
-The queries you provide can be as complex as you would like them to be (see the [query syntax docs](https://ronin.co/docs/queries) for more details on what you can do):
+The queries you provide can be as complex as you would like them to be (see the [query syntax docs](/queries) for more details on what you can do):
 
 ```tsx
 import { use } from 'blade/server/hooks';

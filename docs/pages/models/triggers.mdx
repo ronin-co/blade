@@ -54,7 +54,7 @@ await add.account.with.name('Engineering');
 ## When to use Triggers
 
 In general, you should refrain from using triggers for anything that can be accomplished
-using [model definitions](/docs/models), to ensure the best performance and
+using [model definitions](/models), to ensure the best performance and
 maintainability of your queries.
 
 For example, if you need to provide any form of static defaults for your queries (meaning
@@ -125,7 +125,7 @@ beforeAdd: (query, multiple, options) => {
 
 These triggers are executed instead of the original query, within the same transaction.
 They can be used to validate the original query, or transform it by modifying its
-[query instructions](/docs/queries/instructions).
+[query instructions](/queries/instructions).
 
 They must return exactly one query.
 
@@ -228,7 +228,7 @@ types that read data, such as `get` or `count`.
 
 The following arguments are available for all triggers:
 
-- `query`: An object containing the [instructions](/docs/queries/instructions)
+- `query`: An object containing the [instructions](/queries/instructions)
   of the query that is being executed. The argument neither contains the
   [type](/docs/queries/types) of the query, nor the
   [target](/docs/queries/targets) of the query. It only contains the
