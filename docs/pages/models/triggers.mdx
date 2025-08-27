@@ -217,7 +217,7 @@ it allows for diffing the field values of a record.
 #### Methods
 
 Unlike the other types of triggers, triggers of type `following` can only be defined for
-[query types](/docs/queries/types) that write data. They cannot be defined for query
+[query types](/queries/crud) that write data. They cannot be defined for query
 types that read data, such as `get` or `count`.
 
 - `followingAdd`: Executed after an `add` query.
@@ -230,7 +230,7 @@ The following arguments are available for all triggers:
 
 - `query`: An object containing the [instructions](/queries/instructions)
   of the query that is being executed. The argument neither contains the
-  [type](/docs/queries/types) of the query, nor the
+  [type](/queries/crud) of the query, nor the
   [target](/docs/queries/targets) of the query. It only contains the
   instructions of the query. The type and target are already evident from the
   name of the trigger and the model for which it was defined.

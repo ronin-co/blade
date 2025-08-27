@@ -273,7 +273,7 @@ Please note that resolving more fields affects the performance of your query, so
 
 In order to ensure the maximum security of your data, you might want to prevent specific fields from ever leaving RONIN’s storage. You can achieve this by using the `selecting` instruction.
 
-By default, every record will always contain all of its stored fields when retrieved via the `get` [query type](/docs/queries/query-types). To exclude a particular field, it has to be added to `selecting` explicitly.
+By default, every record will always contain all of its stored fields when retrieved via the `get` [query type](/queries/crud). To exclude a particular field, it has to be added to `selecting` explicitly.
 
 ```ts
 use.account({
