@@ -1,6 +1,7 @@
 import { Icons } from '@/components/icons';
 import type { NavGroup } from '@/components/nav';
 import { NavSheet } from '@/components/nav-sheet.client';
+import { Search } from '@/components/search';
 import { Snippet } from '@/components/snippet.client';
 import { cn } from '@/lib/utils';
 import { type FunctionComponent, useEffect, useState } from 'react';
@@ -30,7 +31,7 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
           'py-3': scrolled,
         },
       )}>
-      <div className="hidden w-48 shrink-0 md:block" />
+      <div className="hidden w-40 shrink-0 md:block" />
 
       <div className="flex w-full max-w-3xl flex-row items-center justify-between 2xl:max-w-4xl">
         <a
@@ -46,8 +47,10 @@ export const Header: FunctionComponent<{ nav: Array<NavGroup> }> = ({ nav }) => 
           <span>.im</span>
         </a>
 
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-row items-center gap-1 sm:gap-2">
           <Snippet />
+
+          <Search />
 
           <a
             className="flex flex-row items-center gap-1.5 rounded-md border border-transparent px-3 py-2 font-medium text-muted-foreground text-xs transition duration-200 hover:border-border hover:bg-accent hover:text-primary hover:duration-0 sm:py-1 sm:pr-2 sm:pl-1.5"
