@@ -63,4 +63,4 @@ app.post('/some-path', async (c) => {
 });
 ```
 
-However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app (like your pages) in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](https://ronin.co/docs/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same domain.
+However, note that paths mounted in this Hono app cannot interface with the rest of your Blade app (like your pages) in any way. They are only meant to be used in edge cases where you cannot rely on Blade's [trigger](/models/triggers) feature. In other words, your Hono app and your Blade app are two different apps running on the same domain.

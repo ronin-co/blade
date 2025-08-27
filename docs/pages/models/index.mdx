@@ -31,7 +31,7 @@ npm install -g ronin
 Afterward, log into your RONIN account:
 
 ```bash title="Terminal"
-ronin login
+blade login
 ```
 
 Next, create the file (in your project's root directory) that will contain the model definitions for your project:
@@ -64,7 +64,7 @@ In the example above, we defined a model named `Account` with three fields: `nam
 Once you've defined your models locally, you can compare them to the current state of your database like this:
 
 ```bash title="Terminal"
-ronin diff
+blade diff
 ```
 
 Running the command above will produce a so-called "migration protocol" in the `schema` directory. This protocol contains all the steps required to update your database to match your local schema definition.
@@ -72,7 +72,7 @@ Running the command above will produce a so-called "migration protocol" in the `
 To apply the changes to your database, run the following command:
 
 ```bash title="Terminal"
-ronin apply
+blade apply
 ```
 
 Afterward, you can start sending queries to your database that make use of the newly added (or updated) models in your database schema.
@@ -80,7 +80,7 @@ Afterward, you can start sending queries to your database that make use of the n
 In the future, if you'd like to immediately apply your local changes to your database without first reviewing them, run thhis command:
 
 ```bash title="Terminal"
-ronin diff --apply
+blade diff --apply
 ```
 
 Like this, the generated migration protocol will be applied immediately.
