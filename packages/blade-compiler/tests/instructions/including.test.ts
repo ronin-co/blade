@@ -348,6 +348,82 @@ test('get single record including unrelated records without filter', async () =>
   });
 });
 
+test('get single record (with filter) including unrelated records without filter', async () => {
+  const queries: Array<Query> = [
+    {
+      get: {
+        product: {
+          with: {
+            name: 'Cherry',
+          },
+          including: {
+            beaches: {
+              [QUERY_SYMBOLS.QUERY]: {
+                get: {
+                  beaches: null,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  ];
+
+  const models: Array<Model> = [
+    {
+      slug: 'beach',
+      fields: {
+        name: {
+          type: 'string',
+        },
+      },
+    },
+    {
+      slug: 'product',
+      fields: {
+        name: {
+          type: 'string',
+        },
+      },
+    },
+  ];
+
+  const transaction = new Transaction(queries, { models });
+
+  expect(transaction.statements).toEqual([
+    {
+      statement: `SELECT "sub_products"."id", "sub_products"."ronin.createdAt", "sub_products"."ronin.createdBy", "sub_products"."ronin.updatedAt", "sub_products"."ronin.updatedBy", "sub_products"."name", "including_beaches[0]"."id" as "beaches[0].id", "including_beaches[0]"."ronin.createdAt" as "beaches[0].ronin.createdAt", "including_beaches[0]"."ronin.createdBy" as "beaches[0].ronin.createdBy", "including_beaches[0]"."ronin.updatedAt" as "beaches[0].ronin.updatedAt", "including_beaches[0]"."ronin.updatedBy" as "beaches[0].ronin.updatedBy", "including_beaches[0]"."name" as "beaches[0].name" FROM (SELECT * FROM "products" WHERE "name" = ?1 LIMIT 1) as sub_products CROSS JOIN "beaches" as "including_beaches[0]"`,
+      params: ['Cherry'],
+      returning: true,
+    },
+  ]);
+
+  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
+  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+
+  expect(result.record).toEqual({
+    id: expect.stringMatching(RECORD_ID_REGEX),
+    name: expect.any(String),
+    ronin: {
+      createdAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
+      createdBy: null,
+      updatedAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
+      updatedBy: null,
+    },
+    beaches: new Array(4).fill({
+      id: expect.stringMatching(RECORD_ID_REGEX),
+      name: expect.any(String),
+      ronin: {
+        createdAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
+        createdBy: null,
+        updatedAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
+        updatedBy: null,
+      },
+    }),
+  });
+});
+
 test('get single record including unrelated records with filter', async () => {
   const queries: Array<Query> = [
     {
@@ -408,28 +484,16 @@ test('get single record including unrelated records with filter', async () => {
       updatedAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
       updatedBy: null,
     },
-    members: [
-      {
-        account: expect.stringMatching(RECORD_ID_REGEX),
-        id: expect.stringMatching(RECORD_ID_REGEX),
-        ronin: {
-          createdAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
-          createdBy: null,
-          updatedAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
-          updatedBy: null,
-        },
+    members: new Array(2).fill({
+      account: expect.stringMatching(RECORD_ID_REGEX),
+      id: expect.stringMatching(RECORD_ID_REGEX),
+      ronin: {
+        createdAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
+        createdBy: null,
+        updatedAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
+        updatedBy: null,
       },
-      {
-        account: expect.stringMatching(RECORD_ID_REGEX),
-        id: expect.stringMatching(RECORD_ID_REGEX),
-        ronin: {
-          createdAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
-          createdBy: null,
-          updatedAt: expect.stringMatching(RECORD_TIMESTAMP_REGEX),
-          updatedBy: null,
-        },
-      },
-    ],
+    }),
   });
 });
 

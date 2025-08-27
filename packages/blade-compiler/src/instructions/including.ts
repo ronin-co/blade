@@ -1,7 +1,7 @@
 import type { WithFilters } from '@/src/instructions/with';
 import { getModelBySlug } from '@/src/model';
 import type { InternalModelField, Model } from '@/src/types/model';
-import type { Instructions } from '@/src/types/query';
+import type { GetInstructions } from '@/src/types/query';
 import { composeMountingPath, getQuerySymbol, splitQuery } from '@/src/utils/helpers';
 import { compileQueryInput } from '@/src/utils/index';
 import { composeConditions } from '@/src/utils/statement';
@@ -25,7 +25,11 @@ export const handleIncluding = (
   model: Model,
   statementParams: Array<unknown> | null,
   single: boolean,
-  instruction: Instructions['including'],
+  instructions: {
+    with?: GetInstructions['with'];
+    orderedBy?: GetInstructions['orderedBy'];
+    including?: GetInstructions['including'];
+  },
   options: {
     /** The path on which the selected fields should be mounted in the final record. */
     mountingPath?: InternalModelField['mountingPath'];
@@ -43,10 +47,10 @@ export const handleIncluding = (
   let statement = '';
   let tableSubQuery: string | undefined;
 
-  for (const ephemeralFieldSlug in instruction) {
-    if (!Object.hasOwn(instruction, ephemeralFieldSlug)) continue;
+  for (const ephemeralFieldSlug in instructions.including) {
+    if (!Object.hasOwn(instructions.including, ephemeralFieldSlug)) continue;
 
-    const symbol = getQuerySymbol(instruction[ephemeralFieldSlug]);
+    const symbol = getQuerySymbol(instructions.including[ephemeralFieldSlug]);
 
     // The `including` instruction might contain values that are not queries, which are
     // taken care of by the `handleSelecting` function. Specifically, those values are
@@ -145,7 +149,22 @@ export const handleIncluding = (
     // used as a replacement for the root table, since we want to guarantee that the root
     // statement only returns one row, and multiple rows are being joined to it.
     if (single && !subSingle) {
-      tableSubQuery = `SELECT * FROM "${model.table}" LIMIT 1`;
+      const subSelect = compileQueryInput(
+        {
+          get: {
+            [model.slug]: {
+              ...(instructions.with ? { with: instructions.with } : {}),
+              ...(instructions.orderedBy ? { orderedBy: instructions.orderedBy } : {}),
+            },
+          },
+        },
+        // We don't want to consider a table alias here.
+        [{ ...model, tableAlias: undefined }],
+        statementParams,
+        { inlineDefaults: options.inlineDefaults, explicitColumns: false },
+      );
+
+      tableSubQuery = subSelect.main.statement;
     }
 
     if (modifiableQueryInstructions?.including) {
@@ -154,7 +173,9 @@ export const handleIncluding = (
         { ...relatedModel, tableAlias },
         statementParams,
         subSingle,
-        modifiableQueryInstructions.including,
+        {
+          including: modifiableQueryInstructions.including,
+        },
         { mountingPath: subMountingPath, inlineDefaults: options.inlineDefaults },
       );
 
