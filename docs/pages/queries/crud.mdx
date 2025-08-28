@@ -39,7 +39,7 @@ for (const postDetails of posts) {
 }
 ```
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type `add`:
 
@@ -85,7 +85,7 @@ use.accounts.with({
 });
 ```
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type get:
 
@@ -125,7 +125,7 @@ await set.accounts({
 
 Every time you update a record, the updated record (with the modifications applied) is returned.
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type set:
 
@@ -160,7 +160,7 @@ Similarily, multiple records of the same RONIN model may be removed like so:
 await remove.accounts.with.email.endingWith('kojima-productions.com');
 ```
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type `remove`:
 
@@ -184,7 +184,7 @@ await count.accounts();
 
 Note that, as shown above, the `count` query type can only be used with the **Plural Slug** of a model, not the Slug. For example, `count.account()` does not work, whereas `count.accounts()` does.
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type `count`:
 
