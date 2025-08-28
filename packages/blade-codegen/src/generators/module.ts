@@ -6,6 +6,7 @@ import { generateQueryTypeComment } from '@/src/generators/comment';
 import { convertToPascalCase } from '@/src/utils/slug';
 
 import type {
+  ExportDeclaration,
   InterfaceDeclaration,
   ModuleDeclaration,
   ParameterDeclaration,
@@ -13,6 +14,7 @@ import type {
   Statement,
   TypeAliasDeclaration,
   TypeElement,
+  VariableStatement,
 } from 'typescript';
 
 import type { Model } from '@/src/types/model';
@@ -447,3 +449,145 @@ export const generateModule = (
     factory.createModuleBlock(moduleBodyStatements),
   );
 };
+
+/**
+ * Generate an export declaration to export all model type definitions. This is primarily
+ * used to re-export types under the `blade/types` export.
+ *
+ * @example
+ * ```ts
+ * export type { User, Users };
+ * ```
+ *
+ * @param models - An array of RONIN models to generate type definitions for.
+ *
+ * @returns An export declaration for the generated type definitions.
+ */
+export const generateExportTypeModuleStatements = (
+  models: Array<Model>,
+): ExportDeclaration =>
+  factory.createExportDeclaration(
+    undefined,
+    true,
+    factory.createNamedExports(
+      models.flatMap((model) => {
+        const singularSlug = convertToPascalCase(model.slug);
+        const pluralSlug = convertToPascalCase(model.pluralSlug);
+
+        return [
+          factory.createExportSpecifier(false, undefined, singularSlug),
+          factory.createExportSpecifier(false, undefined, pluralSlug),
+        ];
+      }),
+    ),
+  );
+
+/**
+ * Generate a `declare const` statement for a provided query type using a list
+ * of provided models.
+ *
+ * @example
+ * ```ts
+ * declare const use: {
+ *    user: DeepCallable<GetQuery[keyof GetQuery], User | null>;
+ *    users: DeepCallable<GetQuery[keyof GetQuery], Array<User>>;
+ * };
+ * ```
+ *
+ * @param models - An array of RONIN models to generate query declarations for.
+ * @param queryType - The type of query to generate (e.g. 'use').
+ *
+ * @returns A variable statement for the generated query declarations.
+ */
+export const generateQueryDeclarationStatement = (
+  models: Array<Model>,
+  queryType: (typeof DML_QUERY_TYPES)[number] | 'use',
+): VariableStatement =>
+  factory.createVariableStatement(
+    [factory.createModifier(SyntaxKind.DeclareKeyword)],
+    factory.createVariableDeclarationList(
+      [
+        factory.createVariableDeclaration(
+          queryType,
+          undefined,
+          factory.createTypeLiteralNode(
+            models.flatMap((model) => {
+              const comment = generateQueryTypeComment(model, queryType);
+
+              const singularModelIdentifier = factory.createTypeReferenceNode(
+                convertToPascalCase(model.slug),
+              );
+              const pluralSchemaIdentifier = factory.createTypeReferenceNode(
+                convertToPascalCase(model.pluralSlug),
+              );
+
+              /**
+               * ```ts
+               * GetQuery[keyof GetQuery]
+               * ```
+               */
+              const queryTypeValue = factory.createIndexedAccessTypeNode(
+                factory.createTypeReferenceNode(
+                  identifiers.compiler.dmlQueryType.get,
+                  undefined,
+                ),
+                factory.createTypeOperatorNode(
+                  SyntaxKind.KeyOfKeyword,
+                  factory.createTypeReferenceNode(identifiers.compiler.dmlQueryType.get),
+                ),
+              );
+
+              /**
+               * ```ts
+               * account: DeepCallable<GetQuery[keyof GetQuery], Account | null>;
+               * ```
+               */
+              const singularPropertySig = factory.createPropertySignature(
+                undefined,
+                model.slug,
+                undefined,
+                factory.createTypeReferenceNode(identifiers.syntax.deepCallable, [
+                  queryTypeValue,
+                  factory.createUnionTypeNode([
+                    singularModelIdentifier,
+                    factory.createLiteralTypeNode(factory.createNull()),
+                  ]),
+                ]),
+              );
+
+              /**
+               * ```ts
+               * accounts: DeepCallable<GetQuery[keyof GetQuery], Array<Account>>;
+               * ```
+               */
+              const pluralPropertySig = factory.createPropertySignature(
+                undefined,
+                model.pluralSlug,
+                undefined,
+                factory.createTypeReferenceNode(identifiers.syntax.deepCallable, [
+                  queryTypeValue,
+                  pluralSchemaIdentifier,
+                ]),
+              );
+
+              return [
+                addSyntheticLeadingComment(
+                  singularPropertySig,
+                  SyntaxKind.MultiLineCommentTrivia,
+                  comment.singular,
+                  true,
+                ),
+                addSyntheticLeadingComment(
+                  pluralPropertySig,
+                  SyntaxKind.MultiLineCommentTrivia,
+                  comment.plural,
+                  true,
+                ),
+              ];
+            }),
+          ),
+        ),
+      ],
+      NodeFlags.Const,
+    ),
+  );

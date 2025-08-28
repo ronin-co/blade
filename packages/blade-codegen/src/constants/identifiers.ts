@@ -10,6 +10,15 @@ import type { Identifier } from 'typescript';
  * Here we simply store a list of all identifiers used in the code generation package.
  */
 export const identifiers = {
+  blade: {
+    module: {
+      root: factory.createIdentifier(JSON.stringify('blade')),
+      server: {
+        hooks: factory.createIdentifier(JSON.stringify('blade/server/hooks')),
+      },
+      types: factory.createIdentifier(JSON.stringify('blade/types')),
+    },
+  },
   compiler: {
     ddlQueryType: {
       list: factory.createIdentifier('ListQuery'),
@@ -56,7 +65,10 @@ export const identifiers = {
     jsonPrimitive: factory.createIdentifier('JsonPrimitive'),
     resolveSchema: factory.createIdentifier('ResolveSchema'),
   },
-} satisfies Record<string, Record<string, Identifier | Record<string, Identifier>>>;
+} satisfies Record<
+  string,
+  Record<string, Identifier | Record<string, Identifier | Record<string, Identifier>>>
+>;
 
 /**
  * A list of all generic names used in the `@ronin/codegen` package.

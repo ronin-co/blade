@@ -32,4 +32,5 @@ export const READABLE_DML_QUERY_TYPES = {
   get: 'Get',
   remove: 'Remove',
   set: 'Set',
-} satisfies Record<(typeof DML_QUERY_TYPES)[number], string>;
+  use: 'Get',
+} satisfies Record<(typeof DML_QUERY_TYPES)[number] | 'use', string>;

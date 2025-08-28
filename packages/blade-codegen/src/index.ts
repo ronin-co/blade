@@ -1,3 +1,6 @@
+import { SyntaxKind, factory } from 'typescript';
+
+import { identifiers } from '@/src/constants/identifiers';
 import {
   importQueryHandlerOptionsType,
   importRoninQueryTypesType,
@@ -8,7 +11,10 @@ import {
   jsonPrimitiveType,
   resolveSchemaType,
 } from '@/src/declarations';
-import { generateModule } from '@/src/generators/module';
+import {
+  generateExportTypeModuleStatements,
+  generateQueryDeclarationStatement,
+} from '@/src/generators/module';
 import { generateTypes } from '@/src/generators/types';
 import { printNodes } from '@/src/utils/print';
 
@@ -51,12 +57,60 @@ export const generate = (models: Array<Model>): string => {
   );
   if (hasJsonFields) nodes.push(jsonArrayType, jsonObjectType, jsonPrimitiveType);
 
-  // Generate and add the type declarations for each model.
+  /**
+   * Generate and add the type declarations for each model.
+   *
+   * @example
+   * ```ts
+   * type User = ResultRecord & {
+   *    email: string;
+   *    name: string;
+   * };
+   *
+   * type Users = Array<User> & {
+   *    moreBefore?: string;
+   *    moreAfter?: string;
+   * };
+   * ```
+   */
   const typeDeclarations = generateTypes(models);
+  nodes.push(...typeDeclarations);
 
-  // Generate and add the `ronin` module augmentation..
-  const moduleAugmentation = generateModule(models, typeDeclarations);
-  nodes.push(moduleAugmentation);
+  /**
+   * Generate and add the `blade/types` module augmentations.
+   *
+   * @example
+   * ```ts
+   * declare module "blade/types" {
+   *   export type { ... };
+   * }
+   * ```
+   */
+  nodes.push(
+    factory.createModuleDeclaration(
+      [factory.createModifier(SyntaxKind.DeclareKeyword)],
+      identifiers.blade.module.types,
+      factory.createModuleBlock([generateExportTypeModuleStatements(models)]),
+    ),
+  );
+
+  /**
+   * Generate and add the `blade/server/hooks` module augmentations.
+   *
+   * @example
+   * ```ts
+   * declare module "blade/server/hooks" {
+   *   declare const use: { ... };
+   * }
+   * ```
+   */
+  nodes.push(
+    factory.createModuleDeclaration(
+      [factory.createModifier(SyntaxKind.DeclareKeyword)],
+      identifiers.blade.module.server.hooks,
+      factory.createModuleBlock([generateQueryDeclarationStatement(models, 'use')]),
+    ),
+  );
 
   return printNodes(nodes);
 };

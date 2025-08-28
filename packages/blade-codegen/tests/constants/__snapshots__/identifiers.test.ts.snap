@@ -1,7 +1,55 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`identifiers 1`] = `
 {
+  "blade": {
+    "module": {
+      "root": IdentifierObject {
+        "emitNode": undefined,
+        "end": -1,
+        "escapedText": ""blade"",
+        "flags": 16,
+        "flowNode": undefined,
+        "id": 0,
+        "jsDoc": undefined,
+        "kind": 80,
+        "parent": undefined,
+        "pos": -1,
+        "symbol": undefined,
+        "transformFlags": 0,
+      },
+      "server": {
+        "hooks": IdentifierObject {
+          "emitNode": undefined,
+          "end": -1,
+          "escapedText": ""blade/server/hooks"",
+          "flags": 16,
+          "flowNode": undefined,
+          "id": 0,
+          "jsDoc": undefined,
+          "kind": 80,
+          "parent": undefined,
+          "pos": -1,
+          "symbol": undefined,
+          "transformFlags": 0,
+        },
+      },
+      "types": IdentifierObject {
+        "emitNode": undefined,
+        "end": -1,
+        "escapedText": ""blade/types"",
+        "flags": 16,
+        "flowNode": undefined,
+        "id": 0,
+        "jsDoc": undefined,
+        "kind": 80,
+        "parent": undefined,
+        "pos": -1,
+        "symbol": undefined,
+        "transformFlags": 0,
+      },
+    },
+  },
   "compiler": {
     "ddlQueryType": {
       "list": IdentifierObject {
