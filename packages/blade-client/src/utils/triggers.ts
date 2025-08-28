@@ -32,7 +32,7 @@ interface TriggerOptions {
   /** An instance of the current client, which can be used for nested queries. */
   client: ReturnType<typeof createSyntaxFactory>;
   /** Can be used for sharing values between the triggers of a model. */
-  context: Map<string, unknown>;
+  context: Map<string, any>;
 
   /** The model for which the query is being executed. */
   model?: string;
@@ -489,7 +489,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   }
 
   // Lets people share arbitrary values between the triggers of a model.
-  const context = new Map<string, unknown>();
+  const context = new Map<string, any>();
 
   let queryList: Array<
     QueriesPerDatabase[number] & {
