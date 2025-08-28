@@ -54,7 +54,7 @@ export const TableOfContentsSidebarItem = ({
         <span>{item.value}</span>
       </Link>
 
-      {item.children && (
+      {item.children && item.depth < 3 && (
         <div className="flex flex-col gap-0.5">
           {item.children.map((child) => (
             <TableOfContentsSidebarItem

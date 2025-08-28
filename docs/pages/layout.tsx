@@ -46,12 +46,7 @@ const NAV: Array<NavGroup> = [
         id: 'deploying',
         name: 'Deploying',
         href: '/deploying',
-      },
-      {
-        id: 'client',
-        name: 'Client',
-        href: '/client',
-      },
+      }
     ],
   },
   {

@@ -14,27 +14,15 @@ import {
 
 # Models
 
-The schema of your RONIN database consistents of multiple models. Each model uses fields to define the shape of a particular kind of record in your database.
+The schema of your database consistents of multiple models. Each model uses fields to define the shape of a particular kind of record in your database.
 
 For example, your database schema might contain a model called "Account" representing a user, and a model called "Team", representing a group of users.
 
-When using RONIN, your database schema is defined in code, which provides maximum flexibility and benefits such as **revisions**, **reviews** and **reverts** via Git. This page provides an overview of how to define your database schema in code.
+When using Blade, your database schema is defined in code, which provides maximum flexibility and benefits such as **revisions**, **reviews** and **reverts** via Git. This page provides an overview of how to define your database schema in code.
 
 ## Getting Started
 
-If you haven't yet defined your database schema in code in your project, start by installing the [RONIN client](https://www.npmjs.com/package/ronin) on your device, which comes with a CLI that lets you manage your database schema:
-
-```bash title="Terminal"
-npm install -g ronin
-```
-
-Afterward, log into your RONIN account:
-
-```bash title="Terminal"
-blade login
-```
-
-Next, create the file (in your project's root directory) that will contain the model definitions for your project:
+Start by creating the file (in your project's root directory) that will contain the model definitions for your project:
 
 ```bash title="Terminal"
 mkdir schema
