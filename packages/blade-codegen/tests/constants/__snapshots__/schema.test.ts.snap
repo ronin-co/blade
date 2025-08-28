@@ -1,4 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`schema MODEL_TYPE_TO_SYNTAX_KIND_KEYWORD 1`] = `
 {
