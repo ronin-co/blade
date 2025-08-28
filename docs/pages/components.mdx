@@ -57,9 +57,9 @@ In the future, links will also be prefetched when the page that contains them is
 
 Building a fast web application that instantly provides joy to its users whenever it is accessed (rather than introducing delays) typically requires paying attention to a number of different components.
 
-RONIN aims to automatically provide you with the optimizations you need to guarantee the fastest experience possible, additionally letting you fine-tune those improvements where necessary.
+Blade aims to automatically provide you with the optimizations you need to guarantee the fastest experience possible, additionally letting you fine-tune those improvements where necessary.
 
-One of those optimizations is that images are **displayed instantaneously**, which RONIN ensures via a number of different features available for images (`image` [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) data) stored in the **Blob** field type.
+One of those optimizations is that images are **displayed instantaneously**, which Blade ensures via a number of different features available for images (`image` [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) data) stored in the **Blob** field type.
 
 ### Image Metadata
 
@@ -130,7 +130,7 @@ If you aren’t using Next.js, you may render the placeholder like so:
 
 ### Image Performance
 
-To ensure that the final image finishes loading as quickly as possible, it is recommended to have its size automatically optimized by RONIN, or your deployment provider.
+To ensure that the final image finishes loading as quickly as possible, it is recommended to have its size automatically optimized by Blade, or your deployment provider.
 
 Other additional options can be used as well, in order to guarantee the most ideal experience possible:
 
@@ -187,4 +187,4 @@ const imageLoader = ({ src, width, quality }: { src: string; width: number; qual
 />;
 ```
 
-As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from RONIN when the record is retrieved. This field (as mentioned in the “Image Placeholder” section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.
+As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from Blade when the record is retrieved. This field (as mentioned in the “Image Placeholder” section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.

@@ -4,9 +4,9 @@ title: Query Instructions
 
 # Query Instructions
 
-The third part of every RONIN query is its instructions (“query instructions”).
+The third part of every Blade query is its instructions (“query instructions”).
 
-RONIN queries generally do not require instructions to be provided, as the purpose of instructions to clarify which records should be affected by given query, and to format how the records should be returned from RONIN, meaning in which format.
+Blade queries generally do not require instructions to be provided, as the purpose of instructions to clarify which records should be affected by given query, and to format how the records should be returned from Blade, meaning in which format.
 
 A query without instructions may look like this, for example:
 
@@ -20,7 +20,7 @@ Whereas a query with instructions would look like this:
 use.accounts.with.email.endingWith('site.co');
 ```
 
-Just like with the other levels of a RONIN query, you may choose to nest query instructions in any way you like, meaning that you may use object-notation versus dot-notation on any level of your choice, in order to ensure the simplest query possible.
+Just like with the other levels of a Blade query, you may choose to nest query instructions in any way you like, meaning that you may use object-notation versus dot-notation on any level of your choice, in order to ensure the simplest query possible.
 
 Below, you will find a list of all the different query instructions that are available, of which several are limited to specific query types.
 
@@ -128,7 +128,7 @@ const accounts = use.accounts();
 accounts.moreAfter;
 ```
 
-Whenever you would like to load more records, you can then pass the value of `moreAfter` back to RONIN, and you will be provided with the next 20 records:
+Whenever you would like to load more records, you can then pass the value of `moreAfter` back to Blade, and you will be provided with the next 20 records:
 
 ```ts
 const moreAccounts = use.accounts.after(accounts.moreAfter);
@@ -150,13 +150,13 @@ const moreAccounts = use.accounts.before(accounts.moreBefore);
 moreAccounts.moreBefore;
 ```
 
-For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in RONIN, which aren’t displayed. You could then use `before` to reveal more of the “previous records” in the list.
+For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in Blade, which aren’t displayed. You could then use `before` to reveal more of the “previous records” in the list.
 
 ### Custom Page Length
 
 As mentioned above, by default, 20 records are provided per page and more records can be obtained by paginating them, meaning by loading more pages.
 
-However, in special cases in which you would like to retrieve more than 20 records from RONIN without having to load multiple pages, you may decide to use the `limitedTo` instruction to provide a custom page length:
+However, in special cases in which you would like to retrieve more than 20 records from Blade without having to load multiple pages, you may decide to use the `limitedTo` instruction to provide a custom page length:
 
 ```ts
 use.accounts.limitedTo(50);
@@ -199,7 +199,7 @@ use.customers.with.country('germany');
 
 In order to define a custom order for the returned records, you may optionally provide the `orderedBy` instruction for any query of type `get`.
 
-RONIN offers the default fields `ronin.createdAt` and `ronin.updatedAt` for easily ordering records using their creation and update date:
+Blade offers the default fields `ronin.createdAt` and `ronin.updatedAt` for easily ordering records using their creation and update date:
 
 ```ts
 // The 20 most recently updated records of the model will be returned.
@@ -220,7 +220,7 @@ use.blogPosts.orderedBy({
 
 ## Resolving Related Records (`using`)
 
-While designing an advanced data structure for your application, you will find yourself often wanting to make use of “relations”, which, in RONIN, are only a matter of adding a field of type “Record” to a model, and referencing a different model from it.
+While designing an advanced data structure for your application, you will find yourself often wanting to make use of “relations”, which, in Blade, are only a matter of adding a field of type “Record” to a model, and referencing a different model from it.
 
 The `using` query instruction can then be used to resolve the field when needed.
 
@@ -271,7 +271,7 @@ Please note that resolving more fields affects the performance of your query, so
 
 ## Selecting Fields (`selecting`)
 
-In order to ensure the maximum security of your data, you might want to prevent specific fields from ever leaving RONIN’s storage. You can achieve this by using the `selecting` instruction.
+In order to ensure the maximum security of your data, you might want to prevent specific fields from ever leaving your database. You can achieve this by using the `selecting` instruction.
 
 By default, every record will always contain all of its stored fields when retrieved via the `get` [query type](/queries/crud). To exclude a particular field, it has to be added to `selecting` explicitly.
 
