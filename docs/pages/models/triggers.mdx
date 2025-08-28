@@ -13,6 +13,10 @@ Database triggers are TypeScript functions that are executed for incoming Blade 
 and can be used to validate those queries, run additional queries within the same
 transaction, run asynchronous code, or load data from a different data source.
 
+They are modeled after [SQLite triggers](https://sqlite.org/lang_createtrigger.html)
+and mostly behave in the same way, except for adding additional functionality
+through the function arguments that are provided to triggers.
+
 ## Defining Triggers
 
 To get started with locally developing database triggers, create a `triggers` directory
@@ -245,8 +249,45 @@ The following arguments are available for all triggers:
 - `options.client`: Contains methods for running [Nested Queries](#Nested%20Queries).
 - `options.waitUntil`: A function to which a promise can be passed. Blade will keep the
   worker alive until the promise has either been resolved or rejected.
+- `options.waitUntil`: A `Map` that can be used for sharing arbitrary values between triggers.
 
 Additional options are available for [Sink](#Trigger%20Sink) triggers.
+
+## Trigger Context
+
+In order to share arbitrary values between the trigger of a model, you can store them
+in the `context` map, which is provided to every trigger:
+
+```typescript
+export const add = (query, multiple, options) => {
+  context.set('test', query.with.ephemeralField);
+  delete query.with.ephemeralField;
+
+  return query;
+};
+
+export const afterAdd = (query, multiple, options) => {
+  const value = options.context.get('test');
+
+  return [
+    add.record.with.content(value)
+  ];
+};
+```
+
+In the example above, a write query containing a field named `ephemeralField` field
+is executed on the client. This field does not exist in the model, so it cannot be
+stored, but it was provided to the query regardless, which makes it a so-called
+"ephemeral field".
+
+The term describes fields that are provided as part of a query,
+but not actually stored in the database, because they are stripped in a trigger.
+This allows for providing triggers with values that should not be stored in the database.
+
+Ephemeral fields must be stripped in triggers of type [during](#during), to ensure
+that they will not be stored in the database. After stripping such a field, you could
+then either use it inside that same trigger, or use trigger context to make the
+value of the stripped field available to any triggers after the current trigger.
 
 ## Nested Queries
 
