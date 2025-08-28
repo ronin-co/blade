@@ -77,9 +77,9 @@ if (isDiffing)
     appToken,
     session?.token,
     {
-      debug: values.debug,
       help: false,
       version: false,
+      ...values,
     },
     positionals,
     enableHive,
@@ -92,9 +92,9 @@ if (isApplying)
     appToken,
     session?.token,
     {
-      debug: values.debug,
       help: false,
       version: false,
+      ...values,
     },
     enableHive,
   );
@@ -106,9 +106,9 @@ if (isGeneratingTypes) {
     appToken,
     session?.token,
     {
-      debug: values.debug,
       help: false,
       version: false,
+      ...values,
     },
     enableHive,
   );
