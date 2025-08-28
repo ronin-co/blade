@@ -278,7 +278,7 @@ const collectPromises = (
 
           // If the query was already collected, don't add it again.
           if (
-            serverContext.collected.queries.some((item) => {
+            freshlyAdded.queries.some((item) => {
               return item.query === query && item.database === database;
             })
           ) {
@@ -296,7 +296,7 @@ const collectPromises = (
         const { token, secret, algo } = details.__blade_jwt;
 
         // If the query was already collected, don't add it again.
-        if (serverContext.collected.jwts[token]) continue;
+        if (freshlyAdded.jwts[token]) continue;
 
         // If the JWT was not collected yet, add it to the collection.
         freshlyAdded.jwts[token] = {
