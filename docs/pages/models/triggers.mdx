@@ -255,12 +255,12 @@ Additional options are available for [Sink](#Trigger%20Sink) triggers.
 
 ## Trigger Context
 
-In order to share arbitrary values between the trigger of a model, you can store them
+In order to share arbitrary values between the triggers of a model, you can store them
 in the `context` map, which is provided to every trigger:
 
 ```typescript
 export const add = (query, multiple, options) => {
-  context.set('test', query.with.ephemeralField);
+  options.context.set('test', query.with.ephemeralField);
   delete query.with.ephemeralField;
 
   return query;
@@ -287,7 +287,7 @@ This allows for providing triggers with values that should not be stored in the 
 Ephemeral fields must be stripped in triggers of type [during](#during), to ensure
 that they will not be stored in the database. After stripping such a field, you could
 then either use it inside that same trigger, or use trigger context to make the
-value of the stripped field available to any triggers after the current trigger.
+value of the stripped field available to any triggers after the current one.
 
 ## Nested Queries
 
