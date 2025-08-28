@@ -31,6 +31,8 @@ interface TriggerOptions {
   implicit: boolean;
   /** An instance of the current client, which can be used for nested queries. */
   client: ReturnType<typeof createSyntaxFactory>;
+  /** Can be used for sharing values between the triggers of a model. */
+  context: Map<string, any>;
 
   /** The model for which the query is being executed. */
   model?: string;
@@ -309,7 +311,7 @@ const invokeTriggers = async (
   /** The result of a query provided by the trigger. */
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
-  const { database, client, waitUntil, implicit } = options;
+  const { database, client, waitUntil, implicit, context } = options;
   const { query } = definition;
 
   const queryType = Object.keys(query)[0] as QueryType;
@@ -368,6 +370,7 @@ const invokeTriggers = async (
       implicit,
       client,
       waitUntil,
+      context,
       ...(triggerFile === 'sink' ? { model: queryModel, database } : {}),
     };
 
@@ -485,6 +488,9 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
     throw new Error(message);
   }
 
+  // Lets people share arbitrary values between the triggers of a model.
+  const context = new Map<string, any>();
+
   let queryList: Array<
     QueriesPerDatabase[number] & {
       result: FormattedResults<T>[number] | symbol;
@@ -510,7 +516,13 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
         triggers,
         'before',
         { query },
-        { database, client, waitUntil, implicit: Boolean(implicitRoot || implicit) },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
       );
 
       const queriesToInsert = triggerResults.queries!.map((query) => ({
@@ -531,7 +543,13 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
         triggers,
         'during',
         { query },
-        { database, client, waitUntil, implicit: Boolean(implicitRoot || implicit) },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
       );
 
       if (triggerResults.queries && triggerResults.queries.length > 0) {
@@ -562,7 +580,13 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
         triggers,
         'after',
         { query },
-        { database, client, waitUntil, implicit: Boolean(implicitRoot || implicit) },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
       );
 
       const queriesToInsert = triggerResults.queries!.map((query) => ({
@@ -629,7 +653,13 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
         triggers,
         'resolving',
         { query },
-        { database, client, waitUntil, implicit: Boolean(implicitRoot || implicit) },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
       );
       queryList[index].result = triggerResults.result as FormattedResults<T>[number];
     }),
@@ -681,7 +711,13 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
       triggers,
       'following',
       { query, resultBefore, resultAfter },
-      { database, client, waitUntil, implicit: Boolean(implicitRoot || implicit) },
+      {
+        database,
+        client,
+        waitUntil,
+        implicit: Boolean(implicitRoot || implicit),
+        context,
+      },
     );
 
     // The result of the trigger should not be made available, otherwise
