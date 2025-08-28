@@ -516,7 +516,13 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
         triggers,
         'before',
         { query },
-        { database, client, waitUntil, implicit: Boolean(implicitRoot || implicit) },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
       );
 
       const queriesToInsert = triggerResults.queries!.map((query) => ({
