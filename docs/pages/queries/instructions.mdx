@@ -115,7 +115,7 @@ To retrieve more than 20 records, making use of “pagination” is advised, whi
 
 Which of these implementations (or any other) you may choose is up to you.
 
-### Retrieving the Next Page of Records
+### Next Page
 
 When running a Query such as `get.accounts` while more than 20 records are available for the respective model, a `moreAfter` property will be provided to you (the property only exists if more than 20 records are available; otherwise it is not defined).
 
@@ -139,7 +139,7 @@ moreAccounts.moreAfter;
 
 You can repeat the above as often as you want to until there are no more records available (in which case `moreAfter` will not be defined anymore). Every time you run the query, a new `moreAfter` cursor will be provided to you.
 
-### Retrieving the Previous Page of Records
+### Previous Page
 
 If you would like to implement bi-directional pagination, you may use the `before` instruction and its `moreBefore` counterpart, which behave exactly the same as `after` and `moreAfter`, except that they let you paginate “upwards” instead of “downwards”:
 
@@ -152,7 +152,7 @@ moreAccounts.moreBefore;
 
 For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in RONIN, which aren’t displayed. You could then use `before` to reveal more of the “previous records” in the list.
 
-### Customizing the Length of Pages
+### Custom Page Length
 
 As mentioned above, by default, 20 records are provided per page and more records can be obtained by paginating them, meaning by loading more pages.
 
