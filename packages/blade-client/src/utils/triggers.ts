@@ -451,30 +451,36 @@ interface QueryWithResult<T> extends QueryFromTrigger {
   result: FormattedResults<T>[number] | typeof EMPTY;
 }
 
+interface TriggerExecutionOptions
+  extends Pick<QueryHandlerOptions, 'waitUntil' | 'implicit' | 'requireTriggers'> {
+  client: ReturnType<typeof createSyntaxFactory>;
+  context: Map<string, any>;
+  triggerError: ClientError;
+}
+
 /**
  * Executes any synchronous triggers that might have been provided for a list of queries,
  * meaning the kind of triggers that can return queries.
  *
  * @param queries - A list of queries to execute triggers for.
- * @param client - An instance of the client that allows triggers to run queries inline.
- * @param context - A map used for sharing values between the triggers of a model.
+ * @param triggers - A list of triggers to filter for relevant ones.
  * @param options - A list of options to change how the triggers are executed.
  *
  * @returns The list of queries after they were transformed by triggers.
  */
 export const applySyncTriggers = async (
   queries: Array<QueryPerDatabase>,
-  client: ReturnType<typeof createSyntaxFactory>,
-  context: Map<string, any>,
-  options: QueryHandlerOptions = {},
+  triggers: Triggers,
+  options: TriggerExecutionOptions,
 ): Promise<Array<QueryFromTrigger>> => {
-  const { triggers, waitUntil, requireTriggers, implicit: implicitRoot } = options;
-
-  const triggerErrorType = requireTriggers !== 'all' ? ` ${requireTriggers}` : '';
-  const triggerError = new ClientError({
-    message: `Please define "during" triggers for the provided${triggerErrorType} queries.`,
-    code: 'TRIGGER_REQUIRED',
-  });
+  const {
+    waitUntil,
+    requireTriggers,
+    implicit: implicitRoot,
+    triggerError,
+    client,
+    context,
+  } = options;
 
   const queryList: Array<QueryFromTrigger> = [...queries];
 
@@ -617,19 +623,17 @@ export const applySyncTriggers = async (
  * meaning the kind of triggers that can handle query results.
  *
  * @param queries - A list of queries to execute triggers for.
- * @param client - An instance of the client that allows triggers to run queries inline.
- * @param context - A map used for sharing values between the triggers of a model.
+ * @param triggers - A list of triggers to filter for relevant ones.
  * @param options - A list of options to change how the triggers are executed.
  *
  * @returns The results provided by the triggers.
  */
 export const applyAsyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger>,
-  client: ReturnType<typeof createSyntaxFactory>,
-  context: Map<string, any>,
-  options: QueryHandlerOptions = {},
+  triggers: Triggers,
+  options: TriggerExecutionOptions,
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  const { triggers, waitUntil, implicit: implicitRoot } = options;
+  const { waitUntil, implicit: implicitRoot, client, context } = options;
 
   const queryList: Array<QueryWithResult<T>> = queries.map((item) => ({
     ...item,
@@ -792,8 +796,10 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  const queryList = await applySyncTriggers(queries, client, context, options);
-  const queryResults = await applyAsyncTriggers<T>(queryList, client, context, options);
+  const execOptions = { ...options, context, client, triggerError, requireTriggers };
+
+  const queryList = await applySyncTriggers(queries, triggers, execOptions);
+  const queryResults = await applyAsyncTriggers<T>(queryList, triggers, execOptions);
 
   return queryResults;
 };
