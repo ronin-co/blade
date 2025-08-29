@@ -9,6 +9,7 @@ import {
   jsonArrayType,
   jsonObjectType,
   jsonPrimitiveType,
+  reducedFunctionType,
   resolveSchemaType,
 } from '@/src/declarations';
 import {
@@ -43,6 +44,7 @@ export const generate = (models: Array<Model>): string => {
     ...(hasStoredObjectFields ? [importRoninStoredObjectType] : []),
     importSyntaxUtiltypesType,
     importQueryHandlerOptionsType,
+    reducedFunctionType,
   );
 
   // If there is any models that have a `link()` field, we need to add the

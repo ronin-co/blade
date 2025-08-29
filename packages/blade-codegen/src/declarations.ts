@@ -1,4 +1,4 @@
-import { SyntaxKind, factory } from 'typescript';
+import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';
 import { createImportDeclaration } from '@/src/generators/import';
@@ -210,4 +210,61 @@ export const jsonArrayType = factory.createTypeAliasDeclaration(
       factory.createTypeReferenceNode(identifiers.utils.jsonArray),
     ]),
   ]),
+);
+
+/**
+ * ```ts
+ * interface ReducedFunction {
+ *  // @ deprecated
+ *  apply: never;
+ *  // @ deprecated
+ *  arguments: never;
+ *  // @ deprecated
+ *  bind: never;
+ *  // @ deprecated
+ *  call: never;
+ *  // @ deprecated
+ *  caller: never;
+ *  // @ deprecated
+ *  length: never;
+ *  // @ deprecated
+ *  name: any;
+ *  // @ deprecated
+ *  prototype: never;
+ *  // @ deprecated
+ *  toString: never;
+ *  // @ deprecated
+ *  unify: never;
+ * }
+ * ```
+ */
+export const reducedFunctionType = factory.createInterfaceDeclaration(
+  [],
+  'ReducedFunction',
+  undefined,
+  undefined,
+  [
+    'apply',
+    'arguments',
+    'bind',
+    'call',
+    'caller',
+    'length',
+    'name',
+    'prototype',
+    'toString',
+    'unify',
+  ].map((property) =>
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        property,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '@deprecated',
+      true,
+    ),
+  ),
 );
