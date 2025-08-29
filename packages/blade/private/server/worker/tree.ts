@@ -525,6 +525,8 @@ const renderReactTree = async (
   initial: boolean,
   /** A list of options for customizing the rendering behavior. */
   options: Omit<PageFetchingOptions, 'queries'> & {
+    /** A function for keeping the process alive until a promise has been resolved. */
+    waitUntil: ServerContext['waitUntil'];
     /** Whether an error page should be rendered, and for which error code. */
     error?: 404 | 500;
     /** The reason why the error page is being rendered. */
@@ -534,9 +536,7 @@ const renderReactTree = async (
      * page is not renderable.
      */
     forceNativeError?: boolean;
-    /** A function for keeping the process alive until a promise has been resolved. */
-    waitUntil: ServerContext['waitUntil'];
-    /** Whether triggers should be allowed to flush UI updates for the current request. */
+    /** Allows for flushing asynchronous UI updates after the first response. */
     stream?: SSEStreamingApi;
   },
   /** Existing properties that the server context should be primed with. */
