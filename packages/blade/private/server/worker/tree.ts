@@ -462,6 +462,9 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
+  // The server-side might decide to change the URL of a session during its lifetime.
+  let sessionURL = new URL(url);
+
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[4] = {
       queries: nestedQueries
@@ -473,11 +476,11 @@ export const flushSession = async (
         : undefined,
     };
 
-    return flushSession(stream, url, headers, true, newOptions);
+    return flushSession(stream, sessionURL, headers, true, newOptions);
   };
 
   try {
-    const page = await renderReactTree(
+    const response = await renderReactTree(
       url,
       headers,
       !correctBundle,
@@ -501,11 +504,16 @@ export const flushSession = async (
         : undefined,
     );
 
+    // If the URL of the page changed while it was rendered (for example because of a
+    // redirect), we have to update the session URL accordingly.
+    const newURL = response.headers.get('Content-Location');
+    if (newURL) sessionURL = new URL(newURL, sessionURL);
+
     // Afterward, flush the update over the stream.
     await stream.writeSSE({
       id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,
       event: correctBundle ? 'update' : 'update-bundle',
-      data: page.text(),
+      data: response.text(),
     });
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
@@ -865,6 +873,7 @@ const renderReactTree = async (
     headers.set('Document-Policy', 'js-profiling');
   } else {
     headers.set('Content-Type', 'application/json');
+    headers.set('Content-Location', url.pathname + url.search);
   }
 
   return new Response(body, { headers });
