@@ -295,12 +295,11 @@ export interface TriggerContext {
 const invokeTriggers = async (
   triggers: NonNullable<QueryHandlerOptions['triggers']>,
   triggerType: TriggerType,
-  definition: {
-    query: Query;
+  definition: QueryFromTrigger & {
     resultBefore?: unknown;
     resultAfter?: unknown;
   },
-  options: Omit<TriggerOptions, 'model' | 'client'>,
+  options: Omit<TriggerOptions, 'model' | 'client' | 'database' | 'implicit'>,
   clientOptions: QueryHandlerOptions = {},
 ): Promise<{
   /** A list of queries provided by the trigger. */
@@ -308,9 +307,11 @@ const invokeTriggers = async (
   /** The result of a query provided by the trigger. */
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
-  const { database, implicit, context } = options;
-  const { waitUntil } = clientOptions;
-  const { query } = definition;
+  const { context } = options;
+  const { waitUntil, implicit: implicitRoot } = clientOptions;
+  const { query, database, implicit: implicitQuery } = definition;
+
+  const implicit = Boolean(implicitRoot || implicitQuery);
 
   const queryType = Object.keys(query)[0] as QueryType;
 
@@ -466,8 +467,7 @@ interface QueryWithResult<T> extends QueryFromTrigger {
   result: FormattedResults<T>[number] | typeof EMPTY;
 }
 
-interface TriggerExecutionOptions
-  extends Pick<QueryHandlerOptions, 'implicit' | 'requireTriggers'> {
+interface TriggerExecutionOptions extends Pick<QueryHandlerOptions, 'requireTriggers'> {
   context: Map<string, any>;
   triggerError: ClientError;
 }
@@ -488,20 +488,18 @@ export const applySyncTriggers = async (
   options: TriggerExecutionOptions,
   clientOptions: QueryHandlerOptions,
 ): Promise<Array<QueryFromTrigger>> => {
-  const { requireTriggers, implicit: implicitRoot, triggerError, context } = options;
+  const { requireTriggers, triggerError, context } = options;
 
   const queryList: Array<QueryFromTrigger> = [...queries];
 
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
-    queryList.map(async ({ query, database, implicit }, index) => {
+    queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
         triggers,
         'before',
-        { query },
+        queryItem,
         {
-          database,
-          implicit: Boolean(implicitRoot || implicit),
           context,
         },
         clientOptions,
@@ -518,14 +516,12 @@ export const applySyncTriggers = async (
 
   // Invoke `add`, `get`, `set`, `remove`, and `count`.
   await Promise.all(
-    queryList.map(async ({ query, database, implicit }, index) => {
+    queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
         triggers,
         'during',
-        { query },
+        queryItem,
         {
-          database,
-          implicit: Boolean(implicitRoot || implicit),
           context,
         },
         clientOptions,
@@ -539,7 +535,7 @@ export const applySyncTriggers = async (
       // If "during" triggers are required for the query type of the current query,
       // we want to throw an error to prevent the query from being executed.
       if (requireTriggers) {
-        const queryType = Object.keys(query)[0] as QueryType;
+        const queryType = Object.keys(queryItem.query)[0] as QueryType;
         const requiredTypes: ReadonlyArray<QueryType> =
           requireTriggers === 'read'
             ? QUERY_TYPES_READ
@@ -554,14 +550,12 @@ export const applySyncTriggers = async (
 
   // Invoke `afterAdd`, `afterGet`, `afterSet`, `afterRemove`, and `afterCount`.
   await Promise.all(
-    queryList.map(async ({ query, database, implicit }, index) => {
+    queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
         triggers,
         'after',
-        { query },
+        queryItem,
         {
-          database,
-          implicit: Boolean(implicitRoot || implicit),
           context,
         },
         clientOptions,
@@ -647,14 +641,12 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   // Invoke `resolvingGet`, `resolvingSet`, `resolvingAdd`, `resolvingRemove`,
   // and `resolvingCount`.
   await Promise.all(
-    queryList.map(async ({ query, database, implicit }, index) => {
+    queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
         triggers,
         'resolving',
-        { query },
+        queryItem,
         {
-          database,
-          implicit: Boolean(implicitRoot || implicit),
           context,
         },
         clientOptions,
@@ -685,8 +677,8 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   // Asynchronously invoke `followingAdd`, `followingSet`, `followingRemove`,
   // `followingCreate`, `followingAlter`, and `followingDrop`.
   for (let index = 0; index < queryList.length; index++) {
-    const { query, result, database, implicit } = queryList[index];
-    const queryType = Object.keys(query)[0] as QueryType;
+    const queryItem = queryList[index];
+    const queryType = Object.keys(queryItem.query)[0] as QueryType;
 
     // "following" triggers should only fire for writes — not reads.
     if (!(WRITE_QUERY_TYPES as ReadonlyArray<string>).includes(queryType)) continue;
@@ -694,14 +686,14 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     const diffMatch = queryList.find((item) => item.diffForIndex === index);
 
     let resultBefore = diffMatch ? diffMatch.result : EMPTY;
-    let resultAfter = result;
+    let resultAfter = queryItem.result;
 
     // For queries of type "remove" and "drop", we want to set `resultBefore` to the
     // result of the query (which contains the record), because the record will no longer
     // exist after the query has been executed, so it wouldn't make sense to expose the
     // record as `resultAfter` in the triggers.
     if (queryType === 'remove' || queryType === 'drop') {
-      resultBefore = result;
+      resultBefore = queryItem.result;
       resultAfter = EMPTY;
     }
 
@@ -709,10 +701,8 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     const promise = invokeTriggers(
       triggers,
       'following',
-      { query, resultBefore, resultAfter },
+      { ...queryItem, resultBefore, resultAfter },
       {
-        database,
-        implicit: Boolean(implicitRoot || implicit),
         context,
       },
       clientOptions,
