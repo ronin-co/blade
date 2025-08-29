@@ -297,7 +297,7 @@ const invokeTriggers = async (
     resultBefore?: unknown;
     resultAfter?: unknown;
   },
-  options: Omit<TriggerOptions, 'model' | 'client' | 'database' | 'implicit'>,
+  context: Map<string, any>,
   clientOptions: QueryHandlerOptions = {},
 ): Promise<{
   /** A list of queries provided by the trigger. */
@@ -305,7 +305,6 @@ const invokeTriggers = async (
   /** The result of a query provided by the trigger. */
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
-  const { context } = options;
   const { waitUntil, implicit: implicitRoot, triggers } = clientOptions;
   const { query, database, implicit: implicitQuery } = definition;
 
@@ -496,9 +495,7 @@ export const applySyncTriggers = async (
       const triggerResults = await invokeTriggers(
         'before',
         queryItem,
-        {
-          context,
-        },
+        context,
         clientOptions,
       );
 
@@ -517,9 +514,7 @@ export const applySyncTriggers = async (
       const triggerResults = await invokeTriggers(
         'during',
         queryItem,
-        {
-          context,
-        },
+        context,
         clientOptions,
       );
 
@@ -550,9 +545,7 @@ export const applySyncTriggers = async (
       const triggerResults = await invokeTriggers(
         'after',
         queryItem,
-        {
-          context,
-        },
+        context,
         clientOptions,
       );
 
@@ -639,9 +632,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
       const triggerResults = await invokeTriggers(
         'resolving',
         queryItem,
-        {
-          context,
-        },
+        context,
         clientOptions,
       );
 
@@ -694,9 +685,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     const promise = invokeTriggers(
       'following',
       { ...queryItem, resultBefore, resultAfter },
-      {
-        context,
-      },
+      context,
       clientOptions,
     );
 
