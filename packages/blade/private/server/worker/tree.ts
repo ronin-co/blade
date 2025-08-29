@@ -462,20 +462,6 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
-  const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
-    const newOptions: Parameters<typeof flushSession>[4] = {
-      queries: nestedQueries
-        ? nestedQueries.map((query) => ({
-            hookHash: crypto.randomUUID(),
-            query: JSON.stringify(query),
-            type: 'write',
-          }))
-        : undefined,
-    };
-
-    return flushSession(stream, url, headers, true, newOptions);
-  };
-
   try {
     const page = await renderReactTree(
       url,
@@ -483,7 +469,7 @@ export const flushSession = async (
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
-        flushSession: options?.repeat ? nestedFlushSession : undefined,
+        stream: options?.repeat ? stream : undefined,
       },
       options?.queries
         ? {
@@ -550,8 +536,8 @@ const renderReactTree = async (
     forceNativeError?: boolean;
     /** A function for keeping the process alive until a promise has been resolved. */
     waitUntil: ServerContext['waitUntil'];
-    /** A function for flushing an update for the current browser session. */
-    flushSession?: ServerContext['flushSession'];
+    /** Whether triggers should be allowed to flush UI updates for the current request. */
+    stream?: SSEStreamingApi;
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -580,6 +566,25 @@ const renderReactTree = async (
     if (options.errorReason) url.searchParams.set('reason', options.errorReason);
   }
 
+  const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
+    if (!options.stream) {
+      console.log('Flushing the UI is not allowed under the current condition.');
+      return;
+    }
+
+    const newOptions: Parameters<typeof flushSession>[4] = {
+      queries: nestedQueries
+        ? nestedQueries.map((query) => ({
+            hookHash: crypto.randomUUID(),
+            query: JSON.stringify(query),
+            type: 'write',
+          }))
+        : undefined,
+    };
+
+    return flushSession(options.stream, url, headers, true, newOptions);
+  };
+
   const serverContext: ServerContext = {
     // Available to both server and client components, because it can be serialized and
     // made available to the client-side.
@@ -600,7 +605,7 @@ const renderReactTree = async (
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
-    flushSession: options.flushSession,
+    flushSession: nestedFlushSession,
   };
 
   const collectedCookies = serverContext.collected.cookies || {};
