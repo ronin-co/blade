@@ -340,7 +340,7 @@ const invokeTriggers = async (
   // Prevent infinite recursions by ensuring that triggers can't invoke themselves.
   //
   // Specifically, if a trigger returns a query that would invoke said trigger or runs a
-  // query that invokes said trigger, this code breaks the recursion.
+  // query that would invoke said trigger, this condition prevents that.
   if (
     parentTrigger?.model === currentTrigger.model &&
     parentTrigger?.type === currentTrigger.type
@@ -617,7 +617,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   await Promise.all(
     queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers('resolving', queryItem, options);
-
       queryList[index].result = triggerResults.result as FormattedResults<T>[number];
     }),
   );
@@ -665,11 +664,8 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     }
 
     // Run the actual trigger functions.
-    const promise = invokeTriggers(
-      'following',
-      { ...queryItem, resultBefore, resultAfter },
-      options,
-    );
+    const queryDetails = { ...queryItem, resultBefore, resultAfter };
+    const promise = invokeTriggers('following', queryDetails, options);
 
     // The result of the trigger should not be made available, otherwise
     // developers might start relying on it. Only errors should be propagated.
