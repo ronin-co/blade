@@ -664,16 +664,14 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  const queryList = (await primeQueriesWithTriggers(
-    queries,
-    client,
-    context,
-    options,
-  )) as Array<
+  const queryList: Array<
     QueriesFromTriggers[number] & {
       result: FormattedResults<T>[number] | symbol;
     }
-  >;
+  > = (await primeQueriesWithTriggers(queries, client, context, options)).map((item) => ({
+    ...item,
+    result: EMPTY,
+  }));
 
   // Invoke `resolvingGet`, `resolvingSet`, `resolvingAdd`, `resolvingRemove`,
   // and `resolvingCount`.
