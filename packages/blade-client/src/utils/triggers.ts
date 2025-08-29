@@ -456,16 +456,17 @@ interface QueryWithResult<T> extends QueryFromTrigger {
 }
 
 /**
- * Executes queries and also invokes any potential triggers (such as `followingAdd`)
- * that might have been provided as part of `options.triggers`.
+ * Executes any synchronous triggers that might have been provided for a list of queries,
+ * meaning the kind of triggers that can return queries.
  *
- * @param queries - A list of queries to execute.
- * @param options - A list of options to change how the queries are executed. To
- * run triggers, the `options.triggers` property must contain a map of triggers.
+ * @param queries - A list of queries to execute triggers for.
+ * @param client - An instance of the client that allows triggers to run queries inline.
+ * @param context - A map used for sharing values between the triggers of a model.
+ * @param options - A list of options to change how the triggers are executed.
  *
- * @returns The results of the queries that were passed.
+ * @returns The list of queries after they were transformed by triggers.
  */
-export const primeQueriesWithTriggers = async (
+export const applySynchronousTriggers = async (
   queries: Array<QueryPerDatabase>,
   client: ReturnType<typeof createSyntaxFactory>,
   context: Map<string, any>,
@@ -667,7 +668,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   const context = new Map<string, any>();
 
   const queryList: Array<QueryWithResult<T>> = (
-    await primeQueriesWithTriggers(queries, client, context, options)
+    await applySynchronousTriggers(queries, client, context, options)
   ).map((item) => ({
     ...item,
     result: EMPTY,
