@@ -1,4 +1,4 @@
-import type { Triggers } from '@/src/utils/triggers';
+import type { TriggerOptions, Triggers } from '@/src/utils/triggers';
 
 import type { Model, Result, ResultRecord } from 'blade-compiler';
 
@@ -41,13 +41,13 @@ export interface QueryHandlerOptions {
   database?: string;
 
   /**
-   * Sets the `implicit` option received by triggers, allowing for indicating whether the
-   * client is being invoked from within triggers.
+   * Allows for indicating whether the client is being invoked from inside of a trigger,
+   * which lets the client ensure that the trigger is not invoked recursively.
    *
-   * In order to automatically resume the configuration of the client, it is highly
-   * recommended to use the client provided in the `options.client` argument for triggers.
+   * It is highly recommended to rely on `options.client` for running queries in triggers
+   * instead of initializing a custom client, as that resumes the configuration.
    */
-  implicit?: boolean;
+  parentTrigger?: TriggerOptions['parentTrigger'];
 
   /** A list of models used for compiling Blade queries to SQL. */
   models?: Array<Model>;
