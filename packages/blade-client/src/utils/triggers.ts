@@ -396,13 +396,19 @@ const invokeTriggers = async (
           triggerOptions,
         ));
 
-    const prepareQueries = (queries: Array<Query>) =>
-      queries.map((query) => ({ query, database, implicit: true }));
+    const prepareQueries = async (queries: Array<Query>, applyTriggers?: boolean) => {
+      const list = queries.map((query) => {
+        const newQuery: QueryFromTrigger = { query, database, implicit: true };
+        return applyTriggers ? applySyncTriggers([newQuery], options) : newQuery;
+      });
+
+      return (await Promise.all(list)).flat();
+    };
 
     // If the trigger returned multiple queries that should be run before the original query,
     // we want to return those queries.
     if (triggerType === 'before') {
-      return { queries: prepareQueries(triggerResult as Array<Query>) };
+      return { queries: await prepareQueries(triggerResult as Array<Query>, true) };
     }
 
     // If the trigger returned a query, we want to replace the original query with
@@ -425,13 +431,13 @@ const invokeTriggers = async (
         };
       }
 
-      return { queries: prepareQueries([newQuery]) };
+      return { queries: await prepareQueries([newQuery]) };
     }
 
     // If the trigger returned multiple queries that should be run after the original
     // query, we want to return those queries.
     if (triggerType === 'after') {
-      return { queries: prepareQueries(triggerResult as Array<Query>) };
+      return { queries: await prepareQueries(triggerResult as Array<Query>, true) };
     }
 
     // If the trigger returned a record (or multiple), we want to set the query's
@@ -489,13 +495,7 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers('before', queryItem, options);
-
-      const providedQueries = triggerResults.queries!.map((query) => {
-        return applySyncTriggers([query], options);
-      });
-
-      const queriesToInsert = (await Promise.all(providedQueries)).flat();
-      queryList.splice(index, 0, ...queriesToInsert);
+      queryList.splice(index, 0, ...(triggerResults?.queries || []));
     }),
   );
 
@@ -531,13 +531,7 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers('after', queryItem, options);
-
-      const providedQueries = triggerResults.queries!.map((query) => {
-        return applySyncTriggers([query], options);
-      });
-
-      const queriesToInsert = (await Promise.all(providedQueries)).flat();
-      queryList.splice(index + 1, 0, ...queriesToInsert);
+      queryList.splice(index + 1, 0, ...(triggerResults?.queries || []));
     }),
   );
 
