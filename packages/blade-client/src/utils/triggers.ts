@@ -467,7 +467,7 @@ interface QueryWithResult<T> extends QueryFromTrigger {
   result: FormattedResults<T>[number] | typeof EMPTY;
 }
 
-interface TriggerExecutionOptions extends Pick<QueryHandlerOptions, 'requireTriggers'> {
+interface TriggerExecutionOptions {
   context: Map<string, any>;
   triggerError: ClientError;
 }
@@ -488,7 +488,8 @@ export const applySyncTriggers = async (
   options: TriggerExecutionOptions,
   clientOptions: QueryHandlerOptions,
 ): Promise<Array<QueryFromTrigger>> => {
-  const { requireTriggers, triggerError, context } = options;
+  const { triggerError, context } = options;
+  const { requireTriggers } = clientOptions;
 
   const queryList: Array<QueryFromTrigger> = [...queries];
 
@@ -631,7 +632,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   options: TriggerExecutionOptions,
   clientOptions: QueryHandlerOptions = {},
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  const { implicit: implicitRoot, context } = options;
+  const { context } = options;
 
   const queryList: Array<QueryWithResult<T>> = queries.map((item) => ({
     ...item,
@@ -663,7 +664,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   // If queries are remaining that don't have any results that were provided by above by
   // triggers, we need to run those queries against the database.
   if (queriesWithoutResults.length > 0) {
-    const resultsFromDatabase = await runQueries<T>(queriesWithoutResults, options);
+    const resultsFromDatabase = await runQueries<T>(queriesWithoutResults, clientOptions);
 
     // Assign the results from the database to the list of queries.
     for (let index = 0; index < resultsFromDatabase.length; index++) {
@@ -779,7 +780,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  const execOptions = { ...options, context, triggerError, requireTriggers };
+  const execOptions = { context, triggerError };
 
   const queryList = await applySyncTriggers(queries, triggers, execOptions, options);
   const queryResults = await applyAsyncTriggers<T>(
