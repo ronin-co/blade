@@ -1,9 +1,5 @@
 import { createSyntaxFactory } from '@/src/index';
-import {
-  type QueryPerDatabase,
-  type ResultsPerDatabase,
-  runQueries,
-} from '@/src/queries';
+import { type QueryPerDatabase, type ResultPerDatabase, runQueries } from '@/src/queries';
 import type {
   FormattedResults,
   QueryHandlerOptions,
@@ -632,7 +628,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   client: ReturnType<typeof createSyntaxFactory>,
   context: Map<string, any>,
   options: QueryHandlerOptions = {},
-): Promise<ResultsPerDatabase<T>> => {
+): Promise<Array<ResultPerDatabase<T>>> => {
   const { triggers, waitUntil, implicit: implicitRoot } = options;
 
   const queryList: Array<QueryWithResult<T>> = queries.map((item) => ({
@@ -758,7 +754,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
 export const runQueriesWithTriggers = async <T extends ResultRecord>(
   queries: Array<QueryPerDatabase>,
   options: QueryHandlerOptions = {},
-): Promise<ResultsPerDatabase<T>> => {
+): Promise<Array<ResultPerDatabase<T>>> => {
   const { triggers, waitUntil, requireTriggers } = options;
 
   const triggerErrorType = requireTriggers !== 'all' ? ` ${requireTriggers}` : '';

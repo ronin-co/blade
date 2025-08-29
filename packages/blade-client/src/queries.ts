@@ -39,10 +39,10 @@ interface StatementPerDatabase {
   database?: string;
 }
 
-export type ResultsPerDatabase<T> = Array<{
+export interface ResultPerDatabase<T> {
   result: FormattedResults<T>[number];
   database?: string;
-}>;
+}
 
 const clients: Record<string, Hive> = {};
 
@@ -58,7 +58,7 @@ const clients: Record<string, Hive> = {};
 export const runQueries = async <T extends ResultRecord>(
   queries: Array<QueryPerDatabase> | Array<StatementPerDatabase>,
   options: QueryHandlerOptions = {},
-): Promise<ResultsPerDatabase<T>> => {
+): Promise<Array<ResultPerDatabase<T>>> => {
   // Ensure that a token is present. We must only perform this check if there is a
   // guarantee that actual queries must be executed. For example, if the client is
   // initialized with triggers that run all the queries using a different data source,
@@ -189,7 +189,7 @@ export const runQueries = async <T extends ResultRecord>(
   const responseResults = await getResponseBody<QueryResponse<T>>(response);
 
   const startFormatting = performance.now();
-  const formattedResults: ResultsPerDatabase<T> = [];
+  const formattedResults: Array<ResultPerDatabase<T>> = [];
 
   if ('results' in responseResults) {
     const usableResults = responseResults.results as Array<Result<T>>;
