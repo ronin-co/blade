@@ -308,7 +308,7 @@ const invokeTriggers = async (
   /** The result of a query provided by the trigger. */
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
-  const { database, waitUntil, implicit, context } = options;
+  const { database, implicit, context } = options;
   const { query } = definition;
 
   const queryType = Object.keys(query)[0] as QueryType;
@@ -376,7 +376,7 @@ const invokeTriggers = async (
     const triggerOptions = {
       implicit,
       client,
-      waitUntil,
+      waitUntil: clientOptions.waitUntil,
       context,
       ...(triggerFile === 'sink' ? { model: queryModel, database } : {}),
     };
@@ -506,7 +506,6 @@ export const applySyncTriggers = async (
         { query },
         {
           database,
-          waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
@@ -531,7 +530,6 @@ export const applySyncTriggers = async (
         { query },
         {
           database,
-          waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
@@ -568,7 +566,6 @@ export const applySyncTriggers = async (
         { query },
         {
           database,
-          waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
@@ -662,7 +659,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
         { query },
         {
           database,
-          waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
@@ -721,7 +717,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
       { query, resultBefore, resultAfter },
       {
         database,
-        waitUntil,
         implicit: Boolean(implicitRoot || implicit),
         context,
       },
