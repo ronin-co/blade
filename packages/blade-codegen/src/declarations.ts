@@ -240,7 +240,7 @@ export const jsonArrayType = factory.createTypeAliasDeclaration(
  */
 export const reducedFunctionType = factory.createInterfaceDeclaration(
   [],
-  'ReducedFunction',
+  identifiers.utils.reducedFunction,
   undefined,
   undefined,
   [
