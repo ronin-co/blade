@@ -1,9 +1,5 @@
 import { createSyntaxFactory } from '@/src/index';
-import {
-  type QueriesPerDatabase,
-  type ResultsPerDatabase,
-  runQueries,
-} from '@/src/queries';
+import { type QueryPerDatabase, type ResultPerDatabase, runQueries } from '@/src/queries';
 import type {
   FormattedResults,
   QueryHandlerOptions,
@@ -440,74 +436,53 @@ const invokeTriggers = async (
   return { queries: [], result: EMPTY };
 };
 
+interface QueryFromTrigger extends QueryPerDatabase {
+  /** Whether the query is a diff query for another query. */
+  diffForIndex?: number;
+  /**
+   * Whether the query is a implicit query for another query, and was therefore
+   * generated implicitly by an trigger, instead of being explicitly passed to the
+   * client from the outside.
+   */
+  implicit?: boolean;
+}
+
+interface QueryWithResult<T> extends QueryFromTrigger {
+  result: FormattedResults<T>[number] | typeof EMPTY;
+}
+
+interface TriggerExecutionOptions
+  extends Pick<QueryHandlerOptions, 'waitUntil' | 'implicit' | 'requireTriggers'> {
+  client: ReturnType<typeof createSyntaxFactory>;
+  context: Map<string, any>;
+  triggerError: ClientError;
+}
+
 /**
- * Executes queries and also invokes any potential triggers (such as `followingAdd`)
- * that might have been provided as part of `options.triggers`.
+ * Executes any synchronous triggers that might have been provided for a list of queries,
+ * meaning the kind of triggers that can return queries.
  *
- * @param queries - A list of queries to execute.
- * @param options - A list of options to change how the queries are executed. To
- * run triggers, the `options.triggers` property must contain a map of triggers.
+ * @param queries - A list of queries to execute triggers for.
+ * @param triggers - A list of triggers to filter for relevant ones.
+ * @param options - A list of options to change how the triggers are executed.
  *
- * @returns The results of the queries that were passed.
+ * @returns The list of queries after they were transformed by triggers.
  */
-export const runQueriesWithTriggers = async <T extends ResultRecord>(
-  queries: QueriesPerDatabase,
-  options: QueryHandlerOptions = {},
-): Promise<ResultsPerDatabase<T>> => {
-  const { triggers, waitUntil, requireTriggers, implicit: implicitRoot } = options;
+export const applySyncTriggers = async (
+  queries: Array<QueryPerDatabase>,
+  triggers: Triggers,
+  options: TriggerExecutionOptions,
+): Promise<Array<QueryFromTrigger>> => {
+  const {
+    waitUntil,
+    requireTriggers,
+    implicit: implicitRoot,
+    triggerError,
+    client,
+    context,
+  } = options;
 
-  const triggerErrorType = requireTriggers !== 'all' ? ` ${requireTriggers}` : '';
-  const triggerError = new ClientError({
-    message: `Please define "during" triggers for the provided${triggerErrorType} queries.`,
-    code: 'TRIGGER_REQUIRED',
-  });
-
-  // If no triggers were provided, we can just run all the queries and return the results.
-  if (!triggers) {
-    if (requireTriggers) throw triggerError;
-    return runQueries<T>(queries, options);
-  }
-
-  // If triggers were provided, intialize a new client instance that can be used for
-  // nested queries within triggers.
-  //
-  // We are stripping the `requireTriggers` option, because no triggers should be
-  // required for queries that are nested into triggers.
-  const client = createSyntaxFactory({
-    ...omit(options, ['requireTriggers']),
-    implicit: true,
-  });
-
-  if (typeof process === 'undefined' && !waitUntil) {
-    let message = 'In the case that the "ronin" package receives a value for';
-    message += ' its `triggers` option, it must also receive a value for its';
-    message += ' `waitUntil` option. This requirement only applies when using';
-    message += ' an edge runtime and ensures that the edge worker continues to';
-    message += ' execute until all "following" triggers have been executed.';
-
-    throw new Error(message);
-  }
-
-  // Lets people share arbitrary values between the triggers of a model.
-  const context = new Map<string, any>();
-
-  let queryList: Array<
-    QueriesPerDatabase[number] & {
-      result: FormattedResults<T>[number] | symbol;
-      /** Whether the query is a diff query for another query. */
-      diffForIndex?: number;
-      /**
-       * Whether the query is a implicit query for another query, and was therefore
-       * generated implicitly by an trigger, instead of being explicitly passed to the
-       * client from the outside.
-       */
-      implicit?: boolean;
-    }
-  > = queries.map(({ query, database }) => ({
-    query,
-    result: EMPTY,
-    database,
-  }));
+  const queryList: Array<QueryFromTrigger> = [...queries];
 
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
@@ -527,7 +502,6 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
       const queriesToInsert = triggerResults.queries!.map((query) => ({
         query,
-        result: EMPTY,
         database,
         implicit: true,
       }));
@@ -591,7 +565,6 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
       const queriesToInsert = triggerResults.queries!.map((query) => ({
         query,
-        result: EMPTY,
         database,
         implicit: true,
       }));
@@ -608,7 +581,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // extra `get` query, since `set` queries return the modified record afterward, but in
   // order to get the version of the record *before* the modification, we need a separate
   // query of type `get`.
-  queryList = queryList.flatMap((details, index) => {
+  return queryList.flatMap((details, index) => {
     const { query, database } = details;
 
     if (query.set || query.alter) {
@@ -635,7 +608,6 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
       const diffQuery = {
         query: newQuery,
         diffForIndex: index + 1,
-        result: EMPTY,
         database,
       };
 
@@ -644,6 +616,29 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
     return [details];
   });
+};
+
+/**
+ * Executes any asynchronous triggers that might have been provided for a list of queries,
+ * meaning the kind of triggers that can handle query results.
+ *
+ * @param queries - A list of queries to execute triggers for.
+ * @param triggers - A list of triggers to filter for relevant ones.
+ * @param options - A list of options to change how the triggers are executed.
+ *
+ * @returns The results provided by the triggers.
+ */
+export const applyAsyncTriggers = async <T extends ResultRecord>(
+  queries: Array<QueryFromTrigger>,
+  triggers: Triggers,
+  options: TriggerExecutionOptions,
+): Promise<Array<ResultPerDatabase<T>>> => {
+  const { waitUntil, implicit: implicitRoot, client, context } = options;
+
+  const queryList: Array<QueryWithResult<T>> = queries.map((item) => ({
+    ...item,
+    result: EMPTY,
+  }));
 
   // Invoke `resolvingGet`, `resolvingSet`, `resolvingAdd`, `resolvingRemove`,
   // and `resolvingCount`.
@@ -748,4 +743,63 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
       result: result as FormattedResults<T>[number],
       database,
     }));
+};
+
+/**
+ * Executes queries and also invokes any potential triggers (such as `followingAdd`)
+ * that might have been provided as part of `options.triggers`.
+ *
+ * @param queries - A list of queries to execute.
+ * @param options - A list of options to change how the queries are executed. To
+ * run triggers, the `options.triggers` property must contain a map of triggers.
+ *
+ * @returns The results of the queries that were passed.
+ */
+export const runQueriesWithTriggers = async <T extends ResultRecord>(
+  queries: Array<QueryPerDatabase>,
+  options: QueryHandlerOptions = {},
+): Promise<Array<ResultPerDatabase<T>>> => {
+  const { triggers, waitUntil, requireTriggers } = options;
+
+  const triggerErrorType = requireTriggers !== 'all' ? ` ${requireTriggers}` : '';
+  const triggerError = new ClientError({
+    message: `Please define "during" triggers for the provided${triggerErrorType} queries.`,
+    code: 'TRIGGER_REQUIRED',
+  });
+
+  // If no triggers were provided, we can just run all the queries and return the results.
+  if (!triggers) {
+    if (requireTriggers) throw triggerError;
+    return runQueries<T>(queries, options);
+  }
+
+  // If triggers were provided, intialize a new client instance that can be used for
+  // nested queries within triggers.
+  //
+  // We are stripping the `requireTriggers` option, because no triggers should be
+  // required for queries that are nested into triggers.
+  const client = createSyntaxFactory({
+    ...omit(options, ['requireTriggers']),
+    implicit: true,
+  });
+
+  if (typeof process === 'undefined' && !waitUntil) {
+    let message = 'In the case that the "ronin" package receives a value for';
+    message += ' its `triggers` option, it must also receive a value for its';
+    message += ' `waitUntil` option. This requirement only applies when using';
+    message += ' an edge runtime and ensures that the edge worker continues to';
+    message += ' execute until all "following" triggers have been executed.';
+
+    throw new Error(message);
+  }
+
+  // Lets people share arbitrary values between the triggers of a model.
+  const context = new Map<string, any>();
+
+  const execOptions = { ...options, context, client, triggerError, requireTriggers };
+
+  const queryList = await applySyncTriggers(queries, triggers, execOptions);
+  const queryResults = await applyAsyncTriggers<T>(queryList, triggers, execOptions);
+
+  return queryResults;
 };
