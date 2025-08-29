@@ -300,14 +300,15 @@ const invokeTriggers = async (
     resultBefore?: unknown;
     resultAfter?: unknown;
   },
-  options: Omit<TriggerOptions, 'model'>,
+  options: Omit<TriggerOptions, 'model' | 'client'>,
+  clientOptions: QueryHandlerOptions = {},
 ): Promise<{
   /** A list of queries provided by the trigger. */
   queries?: Array<QueryFromTrigger>;
   /** The result of a query provided by the trigger. */
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
-  const { database, client, waitUntil, implicit, context } = options;
+  const { database, waitUntil, implicit, context } = options;
   const { query } = definition;
 
   const queryType = Object.keys(query)[0] as QueryType;
@@ -344,6 +345,16 @@ const invokeTriggers = async (
   const triggerFile = database ? 'sink' : queryModelDashed;
   const triggersForModel = triggers[triggerFile];
   const triggerName = getMethodName(triggerType, queryType);
+
+  // If triggers were provided, intialize a new client instance that can be used for
+  // nested queries within triggers.
+  //
+  // We are stripping the `requireTriggers` option, because no triggers should be
+  // required for queries that are nested into triggers.
+  const client = createSyntaxFactory({
+    ...omit(clientOptions, ['requireTriggers']),
+    implicit: true,
+  });
 
   // If `oldInstruction` is falsy (e.g. `null`), we want to default to `{}`.
   // This would happen in cases where all records of a particular model are
@@ -475,13 +486,13 @@ export const applySyncTriggers = async (
   queries: Array<QueryPerDatabase>,
   triggers: Triggers,
   options: TriggerExecutionOptions,
+  clientOptions: QueryHandlerOptions,
 ): Promise<Array<QueryFromTrigger>> => {
   const {
     waitUntil,
     requireTriggers,
     implicit: implicitRoot,
     triggerError,
-    client,
     context,
   } = options;
 
@@ -496,15 +507,15 @@ export const applySyncTriggers = async (
         { query },
         {
           database,
-          client,
           waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
+        clientOptions,
       );
 
       const providedQueries = triggerResults.queries!.map((query) => {
-        return applySyncTriggers([query], triggers, options);
+        return applySyncTriggers([query], triggers, options, clientOptions);
       });
 
       const queriesToInsert = (await Promise.all(providedQueries)).flat();
@@ -521,11 +532,11 @@ export const applySyncTriggers = async (
         { query },
         {
           database,
-          client,
           waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
+        clientOptions,
       );
 
       if (triggerResults.queries && triggerResults.queries.length > 0) {
@@ -558,15 +569,15 @@ export const applySyncTriggers = async (
         { query },
         {
           database,
-          client,
           waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
+        clientOptions,
       );
 
       const providedQueries = triggerResults.queries!.map((query) => {
-        return applySyncTriggers([query], triggers, options);
+        return applySyncTriggers([query], triggers, options, clientOptions);
       });
 
       const queriesToInsert = (await Promise.all(providedQueries)).flat();
@@ -633,8 +644,9 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger>,
   triggers: Triggers,
   options: TriggerExecutionOptions,
+  clientOptions: QueryHandlerOptions = {},
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  const { waitUntil, implicit: implicitRoot, client, context } = options;
+  const { waitUntil, implicit: implicitRoot, context } = options;
 
   const queryList: Array<QueryWithResult<T>> = queries.map((item) => ({
     ...item,
@@ -651,12 +663,13 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
         { query },
         {
           database,
-          client,
           waitUntil,
           implicit: Boolean(implicitRoot || implicit),
           context,
         },
+        clientOptions,
       );
+
       queryList[index].result = triggerResults.result as FormattedResults<T>[number];
     }),
   );
@@ -709,11 +722,11 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
       { query, resultBefore, resultAfter },
       {
         database,
-        client,
         waitUntil,
         implicit: Boolean(implicitRoot || implicit),
         context,
       },
+      clientOptions,
     );
 
     // The result of the trigger should not be made available, otherwise
@@ -774,16 +787,6 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
     return runQueries<T>(queries, options);
   }
 
-  // If triggers were provided, intialize a new client instance that can be used for
-  // nested queries within triggers.
-  //
-  // We are stripping the `requireTriggers` option, because no triggers should be
-  // required for queries that are nested into triggers.
-  const client = createSyntaxFactory({
-    ...omit(options, ['requireTriggers']),
-    implicit: true,
-  });
-
   if (typeof process === 'undefined' && !waitUntil) {
     let message = 'In the case that the "ronin" package receives a value for';
     message += ' its `triggers` option, it must also receive a value for its';
@@ -797,10 +800,15 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  const execOptions = { ...options, context, client, triggerError, requireTriggers };
+  const execOptions = { ...options, context, triggerError, requireTriggers };
 
-  const queryList = await applySyncTriggers(queries, triggers, execOptions);
-  const queryResults = await applyAsyncTriggers<T>(queryList, triggers, execOptions);
+  const queryList = await applySyncTriggers(queries, triggers, execOptions, options);
+  const queryResults = await applyAsyncTriggers<T>(
+    queryList,
+    triggers,
+    execOptions,
+    options,
+  );
 
   return queryResults;
 };
