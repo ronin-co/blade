@@ -500,12 +500,17 @@ export const applySyncTriggers = async (
         },
       );
 
-      const queriesToInsert = triggerResults.queries!.map((query) => ({
-        query,
-        database,
-        implicit: true,
-      }));
+      const providedQueries = triggerResults.queries!.map((query) => {
+        const newQuery = {
+          query,
+          database,
+          implicit: true,
+        };
 
+        return applySyncTriggers([newQuery], triggers, options);
+      });
+
+      const queriesToInsert = (await Promise.all(providedQueries)).flat();
       queryList.splice(index, 0, ...queriesToInsert);
     }),
   );
@@ -563,12 +568,17 @@ export const applySyncTriggers = async (
         },
       );
 
-      const queriesToInsert = triggerResults.queries!.map((query) => ({
-        query,
-        database,
-        implicit: true,
-      }));
+      const providedQueries = triggerResults.queries!.map((query) => {
+        const newQuery = {
+          query,
+          database,
+          implicit: true,
+        };
 
+        return applySyncTriggers([newQuery], triggers, options);
+      });
+
+      const queriesToInsert = (await Promise.all(providedQueries)).flat();
       queryList.splice(index + 1, 0, ...queriesToInsert);
     }),
   );
