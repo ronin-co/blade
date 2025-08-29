@@ -290,7 +290,7 @@ export interface TriggerContext {
  *
  * @param triggerType - The type of trigger.
  * @param definition - The definition and other details of a query that is being run.
- * @param options - A list of options to change how the queries are executed.
+ * @param options - A list of options to change how the triggers are executed.
  *
  * @returns The modified query and its results, if any are available.
  */
@@ -495,7 +495,6 @@ interface TriggerExecutionOptions {
  * meaning the kind of triggers that can return queries.
  *
  * @param queries - A list of queries to execute triggers for.
- * @param triggers - A list of triggers to filter for relevant ones.
  * @param options - A list of options to change how the triggers are executed.
  *
  * @returns The list of queries after they were transformed by triggers.
@@ -600,7 +599,6 @@ export const applySyncTriggers = async (
  * meaning the kind of triggers that can handle query results.
  *
  * @param queries - A list of queries to execute triggers for.
- * @param triggers - A list of triggers to filter for relevant ones.
  * @param options - A list of options to change how the triggers are executed.
  *
  * @returns The results provided by the triggers.
@@ -708,8 +706,8 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
  * that might have been provided as part of `options.triggers`.
  *
  * @param queries - A list of queries to execute.
- * @param options - A list of options to change how the queries are executed. To
- * run triggers, the `options.triggers` property must contain a map of triggers.
+ * @param options - A list of options to change how the queries are executed. To run
+ * triggers, the `options.triggers` property must contain a map of triggers.
  *
  * @returns The results of the queries that were passed.
  */
