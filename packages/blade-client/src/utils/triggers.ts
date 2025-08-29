@@ -466,7 +466,7 @@ interface QueryWithResult<T> extends QueryFromTrigger {
  *
  * @returns The list of queries after they were transformed by triggers.
  */
-export const applySynchronousTriggers = async (
+export const applySyncTriggers = async (
   queries: Array<QueryPerDatabase>,
   client: ReturnType<typeof createSyntaxFactory>,
   context: Map<string, any>,
@@ -627,7 +627,7 @@ export const applySynchronousTriggers = async (
  *
  * @returns The results provided by the triggers.
  */
-export const applyAsynchronousTriggers = async <T extends ResultRecord>(
+export const applyAsyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger>,
   client: ReturnType<typeof createSyntaxFactory>,
   context: Map<string, any>,
@@ -796,13 +796,8 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  const queryList = await applySynchronousTriggers(queries, client, context, options);
-  const queryResults = await applyAsynchronousTriggers(
-    queryList,
-    client,
-    context,
-    options,
-  );
+  const queryList = await applySyncTriggers(queries, client, context, options);
+  const queryResults = await applyAsyncTriggers<T>(queryList, client, context, options);
 
   return queryResults;
 };
