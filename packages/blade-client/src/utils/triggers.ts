@@ -477,7 +477,7 @@ export const primeQueriesWithTriggers = async (
     code: 'TRIGGER_REQUIRED',
   });
 
-  const queryList: QueriesFromTriggers = queries;
+  const queryList: QueriesFromTriggers = [...queries];
 
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
