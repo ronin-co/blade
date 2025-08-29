@@ -304,12 +304,11 @@ const invokeTriggers = async (
   /** The result of a query provided by the trigger. */
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
-  const { waitUntil, implicit: implicitRoot, triggers } = options.clientOptions;
   const { query, database, implicit: implicitQuery } = definition;
 
-  const implicit = Boolean(implicitRoot || implicitQuery);
+  const implicit = Boolean(options.clientOptions.implicit || implicitQuery);
 
-  const queryType = Object.keys(query)[0] as QueryType;
+  const queryType = Object.keys(definition.query)[0] as QueryType;
 
   let queryModel: string;
   let queryModelDashed: string;
@@ -341,7 +340,7 @@ const invokeTriggers = async (
   // If the triggers are *not* being executed for a custom database, the trigger file name
   // matches the model that is being addressed by the query.
   const triggerFile = database ? 'sink' : queryModelDashed;
-  const triggersForModel = triggers?.[triggerFile];
+  const triggersForModel = options.clientOptions.triggers?.[triggerFile];
   const triggerName = getMethodName(triggerType, queryType);
 
   // If triggers were provided, intialize a new client instance that can be used for
@@ -374,7 +373,7 @@ const invokeTriggers = async (
     const triggerOptions = {
       implicit,
       client,
-      waitUntil,
+      waitUntil: options.clientOptions.waitUntil,
       context: options.context,
       ...(triggerFile === 'sink' ? { model: queryModel, database } : {}),
     };
@@ -405,8 +404,8 @@ const invokeTriggers = async (
       return (await Promise.all(list)).flat();
     };
 
-    // If the trigger returned multiple queries that should be run before the original query,
-    // we want to return those queries.
+    // If the trigger returned multiple queries that should be run before the original
+    // query, we want to return those queries.
     if (triggerType === 'before') {
       return { queries: await prepareQueries(triggerResult as Array<Query>, true) };
     }
@@ -443,8 +442,7 @@ const invokeTriggers = async (
     // If the trigger returned a record (or multiple), we want to set the query's
     // result to the value returned by the trigger.
     if (triggerType === 'resolving') {
-      const result = triggerResult as FormattedResults<unknown>[number];
-      return { queries: [], result };
+      return { queries: [], result: triggerResult as FormattedResults<unknown>[number] };
     }
 
     // In the case of "following" triggers, we don't need to do anything, because they
