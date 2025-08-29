@@ -309,6 +309,7 @@ const invokeTriggers = async (
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
   const { database, implicit, context } = options;
+  const { waitUntil } = clientOptions;
   const { query } = definition;
 
   const queryType = Object.keys(query)[0] as QueryType;
@@ -376,7 +377,7 @@ const invokeTriggers = async (
     const triggerOptions = {
       implicit,
       client,
-      waitUntil: clientOptions.waitUntil,
+      waitUntil,
       context,
       ...(triggerFile === 'sink' ? { model: queryModel, database } : {}),
     };
@@ -466,7 +467,7 @@ interface QueryWithResult<T> extends QueryFromTrigger {
 }
 
 interface TriggerExecutionOptions
-  extends Pick<QueryHandlerOptions, 'waitUntil' | 'implicit' | 'requireTriggers'> {
+  extends Pick<QueryHandlerOptions, 'implicit' | 'requireTriggers'> {
   context: Map<string, any>;
   triggerError: ClientError;
 }
@@ -487,13 +488,7 @@ export const applySyncTriggers = async (
   options: TriggerExecutionOptions,
   clientOptions: QueryHandlerOptions,
 ): Promise<Array<QueryFromTrigger>> => {
-  const {
-    waitUntil,
-    requireTriggers,
-    implicit: implicitRoot,
-    triggerError,
-    context,
-  } = options;
+  const { requireTriggers, implicit: implicitRoot, triggerError, context } = options;
 
   const queryList: Array<QueryFromTrigger> = [...queries];
 
@@ -642,7 +637,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   options: TriggerExecutionOptions,
   clientOptions: QueryHandlerOptions = {},
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  const { waitUntil, implicit: implicitRoot, context } = options;
+  const { implicit: implicitRoot, context } = options;
 
   const queryList: Array<QueryWithResult<T>> = queries.map((item) => ({
     ...item,
@@ -735,7 +730,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     // the trigger invocation above. This will ensure that the worker will
     // continue to be executed until all of the asynchronous actions
     // (non-awaited promises) have been resolved.
-    if (waitUntil) waitUntil(clearPromise);
+    if (clientOptions.waitUntil) clientOptions.waitUntil(clearPromise);
   }
 
   // Filter the list of queries to remove any potential queries used for "diffing"
