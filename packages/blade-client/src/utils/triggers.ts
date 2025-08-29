@@ -1,6 +1,6 @@
 import { createSyntaxFactory } from '@/src/index';
 import {
-  type QueriesPerDatabase,
+  type QueryPerDatabase,
   type ResultsPerDatabase,
   runQueries,
 } from '@/src/queries';
@@ -440,18 +440,20 @@ const invokeTriggers = async (
   return { queries: [], result: EMPTY };
 };
 
-type QueriesFromTriggers = Array<
-  QueriesPerDatabase[number] & {
-    /** Whether the query is a diff query for another query. */
-    diffForIndex?: number;
-    /**
-     * Whether the query is a implicit query for another query, and was therefore
-     * generated implicitly by an trigger, instead of being explicitly passed to the
-     * client from the outside.
-     */
-    implicit?: boolean;
-  }
->;
+interface QueryFromTrigger extends QueryPerDatabase {
+  /** Whether the query is a diff query for another query. */
+  diffForIndex?: number;
+  /**
+   * Whether the query is a implicit query for another query, and was therefore
+   * generated implicitly by an trigger, instead of being explicitly passed to the
+   * client from the outside.
+   */
+  implicit?: boolean;
+}
+
+interface QueryWithResult<T> extends QueryFromTrigger {
+  result: FormattedResults<T>[number] | typeof EMPTY;
+}
 
 /**
  * Executes queries and also invokes any potential triggers (such as `followingAdd`)
@@ -464,11 +466,11 @@ type QueriesFromTriggers = Array<
  * @returns The results of the queries that were passed.
  */
 export const primeQueriesWithTriggers = async (
-  queries: QueriesPerDatabase,
+  queries: Array<QueryPerDatabase>,
   client: ReturnType<typeof createSyntaxFactory>,
   context: Map<string, any>,
   options: QueryHandlerOptions = {},
-): Promise<QueriesFromTriggers> => {
+): Promise<Array<QueryFromTrigger>> => {
   const { triggers, waitUntil, requireTriggers, implicit: implicitRoot } = options;
 
   const triggerErrorType = requireTriggers !== 'all' ? ` ${requireTriggers}` : '';
@@ -477,7 +479,7 @@ export const primeQueriesWithTriggers = async (
     code: 'TRIGGER_REQUIRED',
   });
 
-  const queryList: QueriesFromTriggers = [...queries];
+  const queryList: Array<QueryFromTrigger> = [...queries];
 
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
@@ -624,7 +626,7 @@ export const primeQueriesWithTriggers = async (
  * @returns The results of the queries that were passed.
  */
 export const runQueriesWithTriggers = async <T extends ResultRecord>(
-  queries: QueriesPerDatabase,
+  queries: Array<QueryPerDatabase>,
   options: QueryHandlerOptions = {},
 ): Promise<ResultsPerDatabase<T>> => {
   const { triggers, waitUntil, requireTriggers, implicit: implicitRoot } = options;
@@ -664,11 +666,9 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  const queryList: Array<
-    QueriesFromTriggers[number] & {
-      result: FormattedResults<T>[number] | symbol;
-    }
-  > = (await primeQueriesWithTriggers(queries, client, context, options)).map((item) => ({
+  const queryList: Array<QueryWithResult<T>> = (
+    await primeQueriesWithTriggers(queries, client, context, options)
+  ).map((item) => ({
     ...item,
     result: EMPTY,
   }));

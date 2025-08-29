@@ -29,8 +29,15 @@ interface RequestPayload {
 
 type RequestBody = RequestPayload | Record<string, RequestPayload>;
 
-export type QueriesPerDatabase = Array<{ query: Query; database?: string }>;
-type StatementsPerDatabase = Array<{ statement: Statement; database?: string }>;
+export interface QueryPerDatabase {
+  query: Query;
+  database?: string;
+}
+
+interface StatementPerDatabase {
+  statement: Statement;
+  database?: string;
+}
 
 export type ResultsPerDatabase<T> = Array<{
   result: FormattedResults<T>[number];
@@ -49,7 +56,7 @@ const clients: Record<string, Hive> = {};
  * @returns Promise resolving the queried data.
  */
 export const runQueries = async <T extends ResultRecord>(
-  queries: QueriesPerDatabase | StatementsPerDatabase,
+  queries: Array<QueryPerDatabase> | Array<StatementPerDatabase>,
   options: QueryHandlerOptions = {},
 ): Promise<ResultsPerDatabase<T>> => {
   // Ensure that a token is present. We must only perform this check if there is a
