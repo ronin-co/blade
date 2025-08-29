@@ -23,13 +23,13 @@ import {
 const EMPTY = Symbol('empty');
 
 interface TriggerOptions {
-  /** Whether the query was generated implicitly by an trigger. */
-  implicit: boolean;
   /** An instance of the current client, which can be used for nested queries. */
   client: ReturnType<typeof createSyntaxFactory>;
   /** Can be used for sharing values between the triggers of a model. */
   context: Map<string, any>;
 
+  /** Whether the query was generated implicitly by an trigger. */
+  parentTrigger?: ParentTrigger;
   /** The model for which the query is being executed. */
   model?: string;
   /** The database for which the query is being executed. */
@@ -304,10 +304,7 @@ const invokeTriggers = async (
   /** The result of a query provided by the trigger. */
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
-  const { query, database, implicit: implicitQuery } = definition;
-
-  const implicit = Boolean(options.clientOptions.implicit || implicitQuery);
-
+  const { query, database } = definition;
   const queryType = Object.keys(definition.query)[0] as QueryType;
 
   let queryModel: string;
@@ -334,6 +331,9 @@ const invokeTriggers = async (
     oldInstruction = queryInstructions[queryModel];
   }
 
+  const parentTrigger = definition.parentTrigger || options.clientOptions.parentTrigger;
+  const currentTrigger = { model: queryModelDashed, type: triggerType };
+
   // If the triggers are being executed for a custom database, all triggers must be located
   // inside a file named `sink.ts`, which catches the queries for all other databases.
   //
@@ -350,7 +350,7 @@ const invokeTriggers = async (
   // required for queries that are nested into triggers.
   const client = createSyntaxFactory({
     ...omit(options.clientOptions, ['requireTriggers']),
-    implicit: true,
+    parentTrigger: currentTrigger,
   });
 
   // If `oldInstruction` is falsy (e.g. `null`), we want to default to `{}`.
@@ -370,8 +370,8 @@ const invokeTriggers = async (
   if (triggersForModel && triggerName in triggersForModel) {
     const trigger = triggersForModel[triggerName as keyof typeof triggersForModel];
 
-    const triggerOptions = {
-      implicit,
+    const triggerOptions: TriggerOptions = {
+      parentTrigger,
       client,
       waitUntil: options.clientOptions.waitUntil,
       context: options.context,
@@ -397,7 +397,11 @@ const invokeTriggers = async (
 
     const prepareQueries = async (queries: Array<Query>, applyTriggers?: boolean) => {
       const list = queries.map((query) => {
-        const newQuery: QueryFromTrigger = { query, database, implicit: true };
+        const newQuery: QueryFromTrigger = {
+          query,
+          database,
+          parentTrigger: currentTrigger,
+        };
         return applyTriggers ? applySyncTriggers([newQuery], options) : newQuery;
       });
 
@@ -452,6 +456,11 @@ const invokeTriggers = async (
   return { queries: [], result: EMPTY };
 };
 
+export interface ParentTrigger {
+  model: string;
+  type: TriggerType;
+}
+
 interface QueryFromTrigger extends QueryPerDatabase {
   /** Whether the query is a diff query for another query. */
   diffForIndex?: number;
@@ -460,7 +469,7 @@ interface QueryFromTrigger extends QueryPerDatabase {
    * generated implicitly by an trigger, instead of being explicitly passed to the
    * client from the outside.
    */
-  implicit?: boolean;
+  parentTrigger?: ParentTrigger;
 }
 
 interface QueryWithResult<T> extends QueryFromTrigger {
@@ -678,7 +687,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     .filter(
       (query) =>
         typeof query.diffForIndex === 'undefined' &&
-        typeof query.implicit === 'undefined',
+        typeof query.parentTrigger === 'undefined',
     )
     .map(({ result, database }) => ({
       result: result as FormattedResults<T>[number],

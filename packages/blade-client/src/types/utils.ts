@@ -1,4 +1,4 @@
-import type { Triggers } from '@/src/utils/triggers';
+import type { ParentTrigger, Triggers } from '@/src/utils/triggers';
 
 import type { Model, Result, ResultRecord } from 'blade-compiler';
 
@@ -47,7 +47,7 @@ export interface QueryHandlerOptions {
    * In order to automatically resume the configuration of the client, it is highly
    * recommended to use the client provided in the `options.client` argument for triggers.
    */
-  implicit?: boolean;
+  parentTrigger?: ParentTrigger;
 
   /** A list of models used for compiling Blade queries to SQL. */
   models?: Array<Model>;

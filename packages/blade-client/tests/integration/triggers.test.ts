@@ -798,12 +798,12 @@ describe('triggers', () => {
     ]);
 
     expect(accountTriggersOptions).toEqual({
-      implicit: true,
+      parentTrigger: { model: 'member', type: 'before' },
       client: expect.any(Object),
       context: expect.any(Map),
     });
     expect(spaceTriggersOptions).toEqual({
-      implicit: true,
+      parentTrigger: { model: 'member', type: 'before' },
       client: expect.any(Object),
       context: expect.any(Map),
     });
