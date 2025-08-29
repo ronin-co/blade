@@ -337,6 +337,17 @@ const invokeTriggers = async (
   const parentTrigger = definition.parentTrigger || options.clientOptions.parentTrigger;
   const currentTrigger = { model: queryModelDashed, type: triggerType };
 
+  // Prevent infinite recursions by ensuring that triggers can't invoke themselves.
+  //
+  // Specifically, if a trigger returns a query that would invoke said trigger or runs a
+  // query that invokes said trigger, this code breaks the recursion.
+  if (
+    parentTrigger?.model === currentTrigger.model &&
+    parentTrigger?.type === currentTrigger.type
+  ) {
+    return { queries: [], result: EMPTY };
+  }
+
   // If the triggers are being executed for a custom database, all triggers must be located
   // inside a file named `sink.ts`, which catches the queries for all other databases.
   //
