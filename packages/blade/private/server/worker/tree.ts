@@ -542,6 +542,7 @@ const renderReactTree = async (
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
 ): Promise<Response> => {
+  // Do not modify the original request URL.
   const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
@@ -582,7 +583,7 @@ const renderReactTree = async (
         : undefined,
     };
 
-    return flushSession(options.stream, url, headers, true, newOptions);
+    return flushSession(options.stream, requestURL, requestHeaders, true, newOptions);
   };
 
   const serverContext: ServerContext = {
