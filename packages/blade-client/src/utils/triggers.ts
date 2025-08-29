@@ -467,7 +467,6 @@ interface QueryWithResult<T> extends QueryFromTrigger {
 
 interface TriggerExecutionOptions
   extends Pick<QueryHandlerOptions, 'waitUntil' | 'implicit' | 'requireTriggers'> {
-  client: ReturnType<typeof createSyntaxFactory>;
   context: Map<string, any>;
   triggerError: ClientError;
 }
