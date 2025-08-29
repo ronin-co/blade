@@ -488,7 +488,7 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async ({ query, database, implicit }, index) => {
       const triggerResults = await invokeTriggers(
-        triggers!,
+        triggers,
         'before',
         { query },
         {
@@ -514,7 +514,7 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async ({ query, database, implicit }, index) => {
       const triggerResults = await invokeTriggers(
-        triggers!,
+        triggers,
         'during',
         { query },
         {
@@ -551,7 +551,7 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async ({ query, database, implicit }, index) => {
       const triggerResults = await invokeTriggers(
-        triggers!,
+        triggers,
         'after',
         { query },
         {
@@ -645,7 +645,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   await Promise.all(
     queryList.map(async ({ query, database, implicit }, index) => {
       const triggerResults = await invokeTriggers(
-        triggers!,
+        triggers,
         'resolving',
         { query },
         {
@@ -703,7 +703,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
 
     // Run the actual trigger functions.
     const promise = invokeTriggers(
-      triggers!,
+      triggers,
       'following',
       { query, resultBefore, resultAfter },
       {
