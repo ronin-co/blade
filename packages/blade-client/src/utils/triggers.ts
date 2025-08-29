@@ -285,7 +285,6 @@ export interface TriggerContext {
  * final list of results. In the case of an "following" trigger, nothing must be done
  * because no output is returned by the trigger.
  *
- * @param triggers - A list of triggers to use.
  * @param triggerType - The type of trigger.
  * @param definition - The definition and other details of a query that is being run.
  * @param options - A list of options to change how the queries are executed.
@@ -293,7 +292,6 @@ export interface TriggerContext {
  * @returns The modified query and its results, if any are available.
  */
 const invokeTriggers = async (
-  triggers: NonNullable<QueryHandlerOptions['triggers']>,
   triggerType: TriggerType,
   definition: QueryFromTrigger & {
     resultBefore?: unknown;
@@ -308,7 +306,7 @@ const invokeTriggers = async (
   result?: FormattedResults<unknown>[number] | symbol;
 }> => {
   const { context } = options;
-  const { waitUntil, implicit: implicitRoot } = clientOptions;
+  const { waitUntil, implicit: implicitRoot, triggers } = clientOptions;
   const { query, database, implicit: implicitQuery } = definition;
 
   const implicit = Boolean(implicitRoot || implicitQuery);
@@ -345,7 +343,7 @@ const invokeTriggers = async (
   // If the triggers are *not* being executed for a custom database, the trigger file name
   // matches the model that is being addressed by the query.
   const triggerFile = database ? 'sink' : queryModelDashed;
-  const triggersForModel = triggers[triggerFile];
+  const triggersForModel = triggers?.[triggerFile];
   const triggerName = getMethodName(triggerType, queryType);
 
   // If triggers were provided, intialize a new client instance that can be used for
@@ -484,7 +482,6 @@ interface TriggerExecutionOptions {
  */
 export const applySyncTriggers = async (
   queries: Array<QueryPerDatabase>,
-  triggers: Triggers,
   options: TriggerExecutionOptions,
   clientOptions: QueryHandlerOptions,
 ): Promise<Array<QueryFromTrigger>> => {
@@ -497,7 +494,6 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
-        triggers,
         'before',
         queryItem,
         {
@@ -507,7 +503,7 @@ export const applySyncTriggers = async (
       );
 
       const providedQueries = triggerResults.queries!.map((query) => {
-        return applySyncTriggers([query], triggers, options, clientOptions);
+        return applySyncTriggers([query], options, clientOptions);
       });
 
       const queriesToInsert = (await Promise.all(providedQueries)).flat();
@@ -519,7 +515,6 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
-        triggers,
         'during',
         queryItem,
         {
@@ -553,7 +548,6 @@ export const applySyncTriggers = async (
   await Promise.all(
     queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
-        triggers,
         'after',
         queryItem,
         {
@@ -563,7 +557,7 @@ export const applySyncTriggers = async (
       );
 
       const providedQueries = triggerResults.queries!.map((query) => {
-        return applySyncTriggers([query], triggers, options, clientOptions);
+        return applySyncTriggers([query], options, clientOptions);
       });
 
       const queriesToInsert = (await Promise.all(providedQueries)).flat();
@@ -628,7 +622,6 @@ export const applySyncTriggers = async (
  */
 export const applyAsyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger>,
-  triggers: Triggers,
   options: TriggerExecutionOptions,
   clientOptions: QueryHandlerOptions = {},
 ): Promise<Array<ResultPerDatabase<T>>> => {
@@ -644,7 +637,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   await Promise.all(
     queryList.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers(
-        triggers,
         'resolving',
         queryItem,
         {
@@ -700,7 +692,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
 
     // Run the actual trigger functions.
     const promise = invokeTriggers(
-      triggers,
       'following',
       { ...queryItem, resultBefore, resultAfter },
       {
@@ -782,13 +773,8 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   const execOptions = { context, triggerError };
 
-  const queryList = await applySyncTriggers(queries, triggers, execOptions, options);
-  const queryResults = await applyAsyncTriggers<T>(
-    queryList,
-    triggers,
-    execOptions,
-    options,
-  );
+  const queryList = await applySyncTriggers(queries, execOptions, options);
+  const queryResults = await applyAsyncTriggers<T>(queryList, execOptions, options);
 
   return queryResults;
 };
