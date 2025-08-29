@@ -506,6 +506,10 @@ export const flushSession = async (
 
     // If the URL of the page changed while it was rendered (for example because of a
     // redirect), we have to update the session URL accordingly.
+    //
+    // In the case that an initial redirect (`Location` header) was performed, we don't
+    // need to update the session URL, because the client will terminate the stream in
+    // that case anyways (that's just default browser behavior).
     const newURL = response.headers.get('Content-Location');
     if (newURL) sessionURL = new URL(newURL, sessionURL);
 
