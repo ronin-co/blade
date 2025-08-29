@@ -440,6 +440,179 @@ const invokeTriggers = async (
   return { queries: [], result: EMPTY };
 };
 
+type QueriesFromTriggers = Array<
+  QueriesPerDatabase[number] & {
+    /** Whether the query is a diff query for another query. */
+    diffForIndex?: number;
+    /**
+     * Whether the query is a implicit query for another query, and was therefore
+     * generated implicitly by an trigger, instead of being explicitly passed to the
+     * client from the outside.
+     */
+    implicit?: boolean;
+  }
+>;
+
+/**
+ * Executes queries and also invokes any potential triggers (such as `followingAdd`)
+ * that might have been provided as part of `options.triggers`.
+ *
+ * @param queries - A list of queries to execute.
+ * @param options - A list of options to change how the queries are executed. To
+ * run triggers, the `options.triggers` property must contain a map of triggers.
+ *
+ * @returns The results of the queries that were passed.
+ */
+export const primeQueriesWithTriggers = async (
+  queries: QueriesPerDatabase,
+  client: ReturnType<typeof createSyntaxFactory>,
+  context: Map<string, any>,
+  options: QueryHandlerOptions = {},
+): Promise<QueriesFromTriggers> => {
+  const { triggers, waitUntil, requireTriggers, implicit: implicitRoot } = options;
+
+  const triggerErrorType = requireTriggers !== 'all' ? ` ${requireTriggers}` : '';
+  const triggerError = new ClientError({
+    message: `Please define "during" triggers for the provided${triggerErrorType} queries.`,
+    code: 'TRIGGER_REQUIRED',
+  });
+
+  const queryList: QueriesFromTriggers = queries;
+
+  // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
+  await Promise.all(
+    queryList.map(async ({ query, database, implicit }, index) => {
+      const triggerResults = await invokeTriggers(
+        triggers!,
+        'before',
+        { query },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
+      );
+
+      const queriesToInsert = triggerResults.queries!.map((query) => ({
+        query,
+        database,
+        implicit: true,
+      }));
+
+      queryList.splice(index, 0, ...queriesToInsert);
+    }),
+  );
+
+  // Invoke `add`, `get`, `set`, `remove`, and `count`.
+  await Promise.all(
+    queryList.map(async ({ query, database, implicit }, index) => {
+      const triggerResults = await invokeTriggers(
+        triggers!,
+        'during',
+        { query },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
+      );
+
+      if (triggerResults.queries && triggerResults.queries.length > 0) {
+        queryList[index].query = triggerResults.queries[0];
+        return;
+      }
+
+      // If "during" triggers are required for the query type of the current query,
+      // we want to throw an error to prevent the query from being executed.
+      if (requireTriggers) {
+        const queryType = Object.keys(query)[0] as QueryType;
+        const requiredTypes: ReadonlyArray<QueryType> =
+          requireTriggers === 'read'
+            ? QUERY_TYPES_READ
+            : requireTriggers === 'write'
+              ? QUERY_TYPES_WRITE
+              : QUERY_TYPES;
+
+        if (requiredTypes.includes(queryType)) throw triggerError;
+      }
+    }),
+  );
+
+  // Invoke `afterAdd`, `afterGet`, `afterSet`, `afterRemove`, and `afterCount`.
+  await Promise.all(
+    queryList.map(async ({ query, database, implicit }, index) => {
+      const triggerResults = await invokeTriggers(
+        triggers!,
+        'after',
+        { query },
+        {
+          database,
+          client,
+          waitUntil,
+          implicit: Boolean(implicitRoot || implicit),
+          context,
+        },
+      );
+
+      const queriesToInsert = triggerResults.queries!.map((query) => ({
+        query,
+        database,
+        implicit: true,
+      }));
+
+      queryList.splice(index + 1, 0, ...queriesToInsert);
+    }),
+  );
+
+  // If triggers are enabled, we want to send a separate `get` query for every `set`
+  // and `alter` query (in the same transaction), so that we can provide the triggers
+  // with a "before and after" of the modified records.
+  //
+  // The version of the record *after* the modification is already available without the
+  // extra `get` query, since `set` queries return the modified record afterward, but in
+  // order to get the version of the record *before* the modification, we need a separate
+  // query of type `get`.
+  return queryList.flatMap((details, index) => {
+    const { query, database } = details;
+
+    if (query.set || query.alter) {
+      let newQuery: Query | undefined;
+
+      if (query.set) {
+        const modelSlug = Object.keys(query.set!)[0];
+
+        newQuery = {
+          get: {
+            [modelSlug]: {
+              with: query.set![modelSlug].with,
+            },
+          },
+        };
+      } else {
+        newQuery = {
+          list: {
+            model: query.alter!.model,
+          },
+        };
+      }
+
+      const diffQuery = {
+        query: newQuery,
+        diffForIndex: index + 1,
+        database,
+      };
+
+      return [diffQuery, details];
+    }
+
+    return [details];
+  });
+};
+
 /**
  * Executes queries and also invokes any potential triggers (such as `followingAdd`)
  * that might have been provided as part of `options.triggers`.
@@ -491,159 +664,16 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  let queryList: Array<
-    QueriesPerDatabase[number] & {
+  const queryList = (await primeQueriesWithTriggers(
+    queries,
+    client,
+    context,
+    options,
+  )) as Array<
+    QueriesFromTriggers[number] & {
       result: FormattedResults<T>[number] | symbol;
-      /** Whether the query is a diff query for another query. */
-      diffForIndex?: number;
-      /**
-       * Whether the query is a implicit query for another query, and was therefore
-       * generated implicitly by an trigger, instead of being explicitly passed to the
-       * client from the outside.
-       */
-      implicit?: boolean;
     }
-  > = queries.map(({ query, database }) => ({
-    query,
-    result: EMPTY,
-    database,
-  }));
-
-  // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
-  await Promise.all(
-    queryList.map(async ({ query, database, implicit }, index) => {
-      const triggerResults = await invokeTriggers(
-        triggers,
-        'before',
-        { query },
-        {
-          database,
-          client,
-          waitUntil,
-          implicit: Boolean(implicitRoot || implicit),
-          context,
-        },
-      );
-
-      const queriesToInsert = triggerResults.queries!.map((query) => ({
-        query,
-        result: EMPTY,
-        database,
-        implicit: true,
-      }));
-
-      queryList.splice(index, 0, ...queriesToInsert);
-    }),
-  );
-
-  // Invoke `add`, `get`, `set`, `remove`, and `count`.
-  await Promise.all(
-    queryList.map(async ({ query, database, implicit }, index) => {
-      const triggerResults = await invokeTriggers(
-        triggers,
-        'during',
-        { query },
-        {
-          database,
-          client,
-          waitUntil,
-          implicit: Boolean(implicitRoot || implicit),
-          context,
-        },
-      );
-
-      if (triggerResults.queries && triggerResults.queries.length > 0) {
-        queryList[index].query = triggerResults.queries[0];
-        return;
-      }
-
-      // If "during" triggers are required for the query type of the current query,
-      // we want to throw an error to prevent the query from being executed.
-      if (requireTriggers) {
-        const queryType = Object.keys(query)[0] as QueryType;
-        const requiredTypes: ReadonlyArray<QueryType> =
-          requireTriggers === 'read'
-            ? QUERY_TYPES_READ
-            : requireTriggers === 'write'
-              ? QUERY_TYPES_WRITE
-              : QUERY_TYPES;
-
-        if (requiredTypes.includes(queryType)) throw triggerError;
-      }
-    }),
-  );
-
-  // Invoke `afterAdd`, `afterGet`, `afterSet`, `afterRemove`, and `afterCount`.
-  await Promise.all(
-    queryList.map(async ({ query, database, implicit }, index) => {
-      const triggerResults = await invokeTriggers(
-        triggers,
-        'after',
-        { query },
-        {
-          database,
-          client,
-          waitUntil,
-          implicit: Boolean(implicitRoot || implicit),
-          context,
-        },
-      );
-
-      const queriesToInsert = triggerResults.queries!.map((query) => ({
-        query,
-        result: EMPTY,
-        database,
-        implicit: true,
-      }));
-
-      queryList.splice(index + 1, 0, ...queriesToInsert);
-    }),
-  );
-
-  // If triggers are enabled, we want to send a separate `get` query for every `set`
-  // and `alter` query (in the same transaction), so that we can provide the triggers
-  // with a "before and after" of the modified records.
-  //
-  // The version of the record *after* the modification is already available without the
-  // extra `get` query, since `set` queries return the modified record afterward, but in
-  // order to get the version of the record *before* the modification, we need a separate
-  // query of type `get`.
-  queryList = queryList.flatMap((details, index) => {
-    const { query, database } = details;
-
-    if (query.set || query.alter) {
-      let newQuery: Query | undefined;
-
-      if (query.set) {
-        const modelSlug = Object.keys(query.set!)[0];
-
-        newQuery = {
-          get: {
-            [modelSlug]: {
-              with: query.set![modelSlug].with,
-            },
-          },
-        };
-      } else {
-        newQuery = {
-          list: {
-            model: query.alter!.model,
-          },
-        };
-      }
-
-      const diffQuery = {
-        query: newQuery,
-        diffForIndex: index + 1,
-        result: EMPTY,
-        database,
-      };
-
-      return [diffQuery, details];
-    }
-
-    return [details];
-  });
+  >;
 
   // Invoke `resolvingGet`, `resolvingSet`, `resolvingAdd`, `resolvingRemove`,
   // and `resolvingCount`.
