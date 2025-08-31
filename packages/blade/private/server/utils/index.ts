@@ -20,12 +20,16 @@ export const generateHashSync = (input: string): number => {
 export class PageStream extends SSEStreamingApi {
   /** The url of the page that is being viewed. */
   url: URL;
+  /** The headers of the request that created the stream. */
+  headers: Headers;
 
   constructor(
-    page: { url: URL },
+    page: { url: URL; headers: Headers },
     stream: { writable: WritableStream; readable: ReadableStream },
   ) {
     super(stream.writable, stream.readable);
+
     this.url = page.url;
+    this.headers = page.headers;
   }
 }

@@ -4,8 +4,6 @@ import type { PageStream } from '@/private/server/utils';
 import type { UniversalContext } from '@/private/universal/context';
 
 export interface DevSession {
-  /** The URL of the last client-to-server request. */
-  url: URL;
   /** The headers of the last client-to-server request. */
   headers: Headers;
   /** The stream through which updates should be pushed. */

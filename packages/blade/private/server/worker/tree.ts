@@ -436,7 +436,6 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * client, which then updates the UI on the client.
  *
  * @param stream - The stream to flush the rendered React tree to.
- * @param headers - The headers of the current request.
  * @param correctBundle - Whether the bundle that is being flushed is the correct one for
  * the current request.
  * @param [options] - Options for flushing the session.
@@ -449,7 +448,6 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  */
 export const flushSession = async (
   stream: PageStream,
-  headers: Headers,
   correctBundle: boolean,
   options?: {
     queries?: Array<QueryItemWrite>;
@@ -461,7 +459,7 @@ export const flushSession = async (
   if (stream.aborted || stream.closed) return;
 
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
-    const newOptions: Parameters<typeof flushSession>[3] = {
+    const newOptions: Parameters<typeof flushSession>[2] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
             hookHash: crypto.randomUUID(),
@@ -471,13 +469,13 @@ export const flushSession = async (
         : undefined,
     };
 
-    return flushSession(stream, headers, true, newOptions);
+    return flushSession(stream, true, newOptions);
   };
 
   try {
     const response = await renderReactTree(
       stream.url,
-      headers,
+      stream.headers,
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
@@ -528,7 +526,7 @@ export const flushSession = async (
   // flushing yet another update.
   if (options?.repeat) {
     await sleep(5000);
-    return flushSession(stream, headers, true, { repeat: options.repeat });
+    return flushSession(stream, true, { repeat: options.repeat });
   }
 
   // If no repetition is desired, signal the end of the stream to the client. But only if
