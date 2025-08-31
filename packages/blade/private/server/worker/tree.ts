@@ -534,8 +534,8 @@ export const flushSession = async (
       throw err;
     }
   } finally {
-    // If the update should be repeated later, wait for 5 seconds and then attempt
-    // flushing yet another update.
+    // If the update should be repeated later, wait for a fixed amount of time and then
+    // attempt flushing yet another update.
     if (options?.repeat) {
       await sleep(REVALIDATION_INTERVAL);
       return flushSession(stream, true, { repeat: options.repeat });
