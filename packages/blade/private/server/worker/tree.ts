@@ -473,6 +473,15 @@ export const flushSession = async (
   };
 
   try {
+    const recentManualFlush = (stream.lastUpdate?.getTime() || 0) > Date.now() - 5000;
+
+    // If a manual update was sent since the last revalidation, we can skip the current
+    // revalidation and wait for the next one, to avoid unnecessary pushes.
+    if (options?.repeat && recentManualFlush) {
+      // The `finally` block will still execute before this.
+      return;
+    }
+
     const response = await renderReactTree(
       stream.url,
       stream.headers,
@@ -497,6 +506,9 @@ export const flushSession = async (
         : undefined,
     );
 
+    // Track the time of the current manual update.
+    if (options?.queries) stream.lastUpdate = new Date();
+
     // If the URL of the page changed while it was rendered (for example because of a
     // redirect), we have to update the session URL accordingly.
     //
@@ -520,19 +532,19 @@ export const flushSession = async (
     } else {
       throw err;
     }
-  }
+  } finally {
+    // If the update should be repeated later, wait for 5 seconds and then attempt
+    // flushing yet another update.
+    if (options?.repeat) {
+      await sleep(5000);
+      return flushSession(stream, true, { repeat: options.repeat });
+    }
 
-  // If the update should be repeated later, wait for 5 seconds and then attempt
-  // flushing yet another update.
-  if (options?.repeat) {
-    await sleep(5000);
-    return flushSession(stream, true, { repeat: options.repeat });
+    // If no repetition is desired, signal the end of the stream to the client. But only if
+    // no queries were provided. Because, if queries were provided, we're dealing with a
+    // flush that was caused by triggers, which should not close the stream.
+    if (!options?.queries) stream.close();
   }
-
-  // If no repetition is desired, signal the end of the stream to the client. But only if
-  // no queries were provided. Because, if queries were provided, we're dealing with a
-  // flush that was caused by triggers, which should not close the stream.
-  if (!options?.queries) stream.close();
 };
 
 const renderReactTree = async (

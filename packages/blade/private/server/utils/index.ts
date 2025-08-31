@@ -21,7 +21,12 @@ export class PageStream extends SSEStreamingApi {
   /** The url of the page that is being viewed. */
   url: URL;
   /** The headers of the request that created the stream. */
-  headers: Headers;
+  readonly headers: Headers;
+  /**
+   * The time at which the last update was sent by the server (excludes revalidation).
+   * If the value is `null`, no update was sent yet.
+   */
+  lastUpdate: Date | null = null;
 
   constructor(
     page: { url: URL; headers: Headers },

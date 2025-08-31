@@ -46,7 +46,8 @@
         "noUnusedImports": "warn",
         "noUnusedVariables": "warn",
         "useExhaustiveDependencies": "off",
-        "noInnerDeclarations": "off"
+        "noInnerDeclarations": "off",
+        "noUnsafeFinally": "off"
       },
       "nursery": {
         "all": true,
