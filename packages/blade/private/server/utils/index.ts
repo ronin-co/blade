@@ -1,3 +1,5 @@
+import { SSEStreamingApi } from 'hono/streaming';
+
 /**
  * Generates a short numeric hash from a string input.
  *
@@ -14,3 +16,8 @@ export const generateHashSync = (input: string): number => {
 
   return hash >>> 0;
 };
+
+export class PageStream extends SSEStreamingApi {
+  /** Mutable timestamp of the last update for this stream. */
+  lastUpdate: Date | null = null;
+}

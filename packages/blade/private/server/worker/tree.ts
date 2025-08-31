@@ -9,7 +9,6 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
-import type { SSEStreamingApi } from 'hono/streaming';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -22,6 +21,7 @@ import { RootServerContext, type ServerContext } from '@/private/server/context'
 import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
+import type { PageStream } from '@/private/server/utils';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { getWaitUntil, runQueries } from '@/private/server/utils/data';
@@ -449,7 +449,7 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * the session continues to exist.
  */
 export const flushSession = async (
-  stream: SSEStreamingApi,
+  stream: PageStream,
   url: URL,
   headers: Headers,
   correctBundle: boolean,

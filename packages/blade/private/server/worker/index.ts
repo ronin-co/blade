@@ -4,11 +4,11 @@ import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compile
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { secureHeaders } from 'hono/secure-headers';
-import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
+import { PageStream } from '@/private/server/utils';
 import {
   getRoninOptions,
   getWaitUntil,
@@ -296,7 +296,7 @@ app.post('*', async (c) => {
   }
 
   const { readable, writable } = new TransformStream();
-  const stream = new SSEStreamingApi(writable, readable);
+  const stream = new PageStream(writable, readable);
 
   const url = new URL(c.req.url);
 
