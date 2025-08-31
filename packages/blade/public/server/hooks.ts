@@ -18,7 +18,7 @@ import { deserializeError } from 'serialize-error';
 
 import { RootServerContext } from '@/private/server/context';
 import type { PageMetadata } from '@/private/server/types';
-import { generateHashSync } from '@/private/server/utils/crypto';
+import { generateHashSync } from '@/private/server/utils';
 import {
   paginateQuery,
   parsePaginationQueryParam,

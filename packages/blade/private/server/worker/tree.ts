@@ -9,7 +9,6 @@ import {
 } from 'cookie';
 import getValue from 'get-value';
 import { verify } from 'hono/jwt';
-import type { SSEStreamingApi } from 'hono/streaming';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -22,7 +21,8 @@ import { RootServerContext, type ServerContext } from '@/private/server/context'
 import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
-import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
+import type { PageStream } from '@/private/server/utils';
+import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { getWaitUntil, runQueries } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
@@ -436,8 +436,6 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * client, which then updates the UI on the client.
  *
  * @param stream - The stream to flush the rendered React tree to.
- * @param url - The URL of the current request.
- * @param headers - The headers of the current request.
  * @param correctBundle - Whether the bundle that is being flushed is the correct one for
  * the current request.
  * @param [options] - Options for flushing the session.
@@ -449,9 +447,7 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * the session continues to exist.
  */
 export const flushSession = async (
-  stream: SSEStreamingApi,
-  url: URL,
-  headers: Headers,
+  stream: PageStream,
   correctBundle: boolean,
   options?: {
     queries?: Array<QueryItemWrite>;
@@ -462,11 +458,8 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
-  // The server-side might decide to change the URL of a session during its lifetime.
-  let sessionURL = new URL(url);
-
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
-    const newOptions: Parameters<typeof flushSession>[4] = {
+    const newOptions: Parameters<typeof flushSession>[2] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
             hookHash: crypto.randomUUID(),
@@ -476,13 +469,23 @@ export const flushSession = async (
         : undefined,
     };
 
-    return flushSession(stream, sessionURL, headers, true, newOptions);
+    return flushSession(stream, true, newOptions);
   };
 
   try {
+    const recentManualFlush =
+      (stream.lastUpdate?.getTime() || 0) > Date.now() - REVALIDATION_INTERVAL;
+
+    // If a manual update was sent since the last revalidation, we can skip the current
+    // revalidation and wait for the next one, to avoid unnecessary pushes.
+    if (options?.repeat && recentManualFlush) {
+      // The `finally` block will still execute before this.
+      return;
+    }
+
     const response = await renderReactTree(
-      sessionURL,
-      headers,
+      stream.url,
+      stream.headers,
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
@@ -504,6 +507,9 @@ export const flushSession = async (
         : undefined,
     );
 
+    // Track the time of the current manual update.
+    if (options?.queries) stream.lastUpdate = new Date();
+
     // If the URL of the page changed while it was rendered (for example because of a
     // redirect), we have to update the session URL accordingly.
     //
@@ -511,7 +517,7 @@ export const flushSession = async (
     // need to update the session URL, because the client will terminate the stream in
     // that case anyways (that's just default browser behavior).
     const newURL = response.headers.get('Content-Location');
-    if (newURL) sessionURL = new URL(newURL, sessionURL);
+    if (newURL) stream.url = new URL(newURL, stream.url);
 
     // Afterward, flush the update over the stream.
     await stream.writeSSE({
@@ -527,19 +533,19 @@ export const flushSession = async (
     } else {
       throw err;
     }
-  }
+  } finally {
+    // If the update should be repeated later, wait for a fixed amount of time and then
+    // attempt flushing yet another update.
+    if (options?.repeat) {
+      await sleep(REVALIDATION_INTERVAL);
+      return flushSession(stream, true, { repeat: options.repeat });
+    }
 
-  // If the update should be repeated later, wait for 5 seconds and then attempt
-  // flushing yet another update.
-  if (options?.repeat) {
-    await sleep(5000);
-    return flushSession(stream, sessionURL, headers, true, { repeat: options.repeat });
+    // If no repetition is desired, signal the end of the stream to the client. But only
+    // if no queries were provided. Because, if queries were provided, we're dealing with
+    // a flush that was caused by triggers, which should not close the stream.
+    if (!options?.queries) stream.close();
   }
-
-  // If no repetition is desired, signal the end of the stream to the client. But only if
-  // no queries were provided. Because, if queries were provided, we're dealing with a
-  // flush that was caused by triggers, which should not close the stream.
-  if (!options?.queries) stream.close();
 };
 
 const renderReactTree = async (
