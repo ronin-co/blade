@@ -18,6 +18,14 @@ export const generateHashSync = (input: string): number => {
 };
 
 export class PageStream extends SSEStreamingApi {
-  /** Mutable timestamp of the last update for this stream. */
-  lastUpdate: Date | null = null;
+  /** The url of the page that is being viewed. */
+  url: URL;
+
+  constructor(
+    page: { url: URL },
+    stream: { writable: WritableStream; readable: ReadableStream },
+  ) {
+    super(stream.writable, stream.readable);
+    this.url = page.url;
+  }
 }

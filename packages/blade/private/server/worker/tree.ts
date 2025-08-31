@@ -436,7 +436,6 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * client, which then updates the UI on the client.
  *
  * @param stream - The stream to flush the rendered React tree to.
- * @param url - The URL of the current request.
  * @param headers - The headers of the current request.
  * @param correctBundle - Whether the bundle that is being flushed is the correct one for
  * the current request.
@@ -450,7 +449,6 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  */
 export const flushSession = async (
   stream: PageStream,
-  url: URL,
   headers: Headers,
   correctBundle: boolean,
   options?: {
@@ -462,11 +460,8 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return;
 
-  // The server-side might decide to change the URL of a session during its lifetime.
-  let sessionURL = new URL(url);
-
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
-    const newOptions: Parameters<typeof flushSession>[4] = {
+    const newOptions: Parameters<typeof flushSession>[3] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
             hookHash: crypto.randomUUID(),
@@ -476,12 +471,12 @@ export const flushSession = async (
         : undefined,
     };
 
-    return flushSession(stream, sessionURL, headers, true, newOptions);
+    return flushSession(stream, headers, true, newOptions);
   };
 
   try {
     const response = await renderReactTree(
-      sessionURL,
+      stream.url,
       headers,
       !correctBundle,
       {
@@ -511,7 +506,7 @@ export const flushSession = async (
     // need to update the session URL, because the client will terminate the stream in
     // that case anyways (that's just default browser behavior).
     const newURL = response.headers.get('Content-Location');
-    if (newURL) sessionURL = new URL(newURL, sessionURL);
+    if (newURL) stream.url = new URL(newURL, stream.url);
 
     // Afterward, flush the update over the stream.
     await stream.writeSSE({
@@ -533,7 +528,7 @@ export const flushSession = async (
   // flushing yet another update.
   if (options?.repeat) {
     await sleep(5000);
-    return flushSession(stream, sessionURL, headers, true, { repeat: options.repeat });
+    return flushSession(stream, headers, true, { repeat: options.repeat });
   }
 
   // If no repetition is desired, signal the end of the stream to the client. But only if

@@ -43,8 +43,8 @@ type Variables = {
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.DEV_SESSIONS) {
-  globalThis.DEV_SESSIONS.forEach(({ stream, url, headers }) => {
-    return flushSession(stream, url, headers, false);
+  globalThis.DEV_SESSIONS.forEach(({ stream, headers }) => {
+    return flushSession(stream, headers, false);
   });
 } else {
   globalThis.DEV_SESSIONS = new Map();
@@ -295,10 +295,10 @@ app.post('*', async (c) => {
     }
   }
 
-  const { readable, writable } = new TransformStream();
-  const stream = new PageStream(writable, readable);
-
   const url = new URL(c.req.url);
+
+  const { readable, writable } = new TransformStream();
+  const stream = new PageStream({ url }, { writable, readable });
 
   // Clone the headers since we will modify them, and runtimes like `workerd` don't allow
   // modifying the headers of the incoming request.
@@ -312,7 +312,7 @@ app.post('*', async (c) => {
   c.header('Cache-Control', 'no-cache, no-transform');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, url, headers, correctBundle, { queries, repeat: subscribe });
+  flushSession(stream, headers, correctBundle, { queries, repeat: subscribe });
 
   const id = crypto.randomUUID();
 
