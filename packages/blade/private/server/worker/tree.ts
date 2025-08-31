@@ -22,7 +22,7 @@ import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import type { PageStream } from '@/private/server/utils';
-import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
+import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { getWaitUntil, runQueries } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
@@ -473,7 +473,8 @@ export const flushSession = async (
   };
 
   try {
-    const recentManualFlush = (stream.lastUpdate?.getTime() || 0) > Date.now() - 5000;
+    const recentManualFlush =
+      (stream.lastUpdate?.getTime() || 0) > Date.now() - REVALIDATION_INTERVAL;
 
     // If a manual update was sent since the last revalidation, we can skip the current
     // revalidation and wait for the next one, to avoid unnecessary pushes.
@@ -536,7 +537,7 @@ export const flushSession = async (
     // If the update should be repeated later, wait for 5 seconds and then attempt
     // flushing yet another update.
     if (options?.repeat) {
-      await sleep(5000);
+      await sleep(REVALIDATION_INTERVAL);
       return flushSession(stream, true, { repeat: options.repeat });
     }
 

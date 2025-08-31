@@ -8,3 +8,6 @@ export const WRITE_QUERY_TYPES = [
   ...DML_QUERY_TYPES_WRITE,
   ...DDL_QUERY_TYPES.filter((item) => item !== 'list'),
 ];
+
+/** How long the server waits after every page revalidation before starting a new one. */
+export const REVALIDATION_INTERVAL = 5000;
