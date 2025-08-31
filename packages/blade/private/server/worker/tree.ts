@@ -481,7 +481,7 @@ export const flushSession = async (
 
   try {
     const response = await renderReactTree(
-      url,
+      sessionURL,
       headers,
       !correctBundle,
       {
@@ -533,7 +533,7 @@ export const flushSession = async (
   // flushing yet another update.
   if (options?.repeat) {
     await sleep(5000);
-    return flushSession(stream, url, headers, true, { repeat: options.repeat });
+    return flushSession(stream, sessionURL, headers, true, { repeat: options.repeat });
   }
 
   // If no repetition is desired, signal the end of the stream to the client. But only if
