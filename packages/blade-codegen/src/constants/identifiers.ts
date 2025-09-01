@@ -39,6 +39,8 @@ export const identifiers = {
   primitive: {
     array: factory.createIdentifier('Array'),
     date: factory.createIdentifier('Date'),
+    object: factory.createIdentifier('object'),
+    partial: factory.createIdentifier('Partial'),
     promise: factory.createIdentifier('Promise'),
     record: factory.createIdentifier('Record'),
   },
@@ -77,6 +79,7 @@ export const identifiers = {
  * Similar to `identifiers` but designed specifically for use as generic names.
  */
 export const genericIdentifiers = {
+  default: factory.createIdentifier('T'),
   key: factory.createIdentifier('TKey'),
   queries: factory.createIdentifier('TQueries'),
   schema: factory.createIdentifier('TSchema'),

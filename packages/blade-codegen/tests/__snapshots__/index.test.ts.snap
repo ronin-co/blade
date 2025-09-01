@@ -40,9 +40,49 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /* Get a single account record */
-        account: DeepCallable<GetQuery[keyof GetQuery], Account | null>;
+        account: ReducedFunction & {
+            <T = Account>(options?: Partial<CombinedInstructions>): T | null;
+            after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
+            before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
+            including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
+            limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
+            orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
+            selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
+            using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+            with: {
+                <T = Account>(options: CombinedInstructions["with"]): T | null;
+                id: <T = Account>(value: ResultRecord["id"]) => T | null;
+                "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
+                "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
+                "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
+                "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+                "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+                name: <T = Account>(value: string) => T | null;
+                email: <T = Account>(value: string) => T | null;
+            };
+        };
         /* Get multiple account records */
-        accounts: DeepCallable<GetQuery[keyof GetQuery], Accounts>;
+        accounts: ReducedFunction & {
+            <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
+            after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
+            before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
+            including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
+            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
+            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
+            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
+            using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+            with: {
+                <T = Accounts>(options: CombinedInstructions["with"]): T | null;
+                id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
+                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
+                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
+                "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
+                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+                name: <T = Accounts>(value: string) => T | null;
+                email: <T = Accounts>(value: string) => T | null;
+            };
+        };
     };
 }
 "
@@ -90,9 +130,51 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /* Get a single account record */
-        account: DeepCallable<GetQuery[keyof GetQuery], Account | null>;
+        account: ReducedFunction & {
+            <T = Account>(options?: Partial<CombinedInstructions>): T | null;
+            after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
+            before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
+            including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
+            limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
+            orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
+            selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
+            using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+            with: {
+                <T = Account>(options: CombinedInstructions["with"]): T | null;
+                id: <T = Account>(value: ResultRecord["id"]) => T | null;
+                "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
+                "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
+                "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
+                "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+                "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+                name: <T = Account>(value: string) => T | null;
+                email: <T = Account>(value: string) => T | null;
+                image: <T = Account>(value: StoredObject) => T | null;
+            };
+        };
         /* Get multiple account records */
-        accounts: DeepCallable<GetQuery[keyof GetQuery], Accounts>;
+        accounts: ReducedFunction & {
+            <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
+            after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
+            before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
+            including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
+            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
+            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
+            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
+            using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+            with: {
+                <T = Accounts>(options: CombinedInstructions["with"]): T | null;
+                id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
+                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
+                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
+                "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
+                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+                name: <T = Accounts>(value: string) => T | null;
+                email: <T = Accounts>(value: string) => T | null;
+                image: <T = Accounts>(value: StoredObject) => T | null;
+            };
+        };
     };
 }
 "

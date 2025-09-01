@@ -1,6 +1,7 @@
 import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';
+import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { convertToPascalCase } from '@/src/utils/slug';
 import { mapRoninFieldToTypeNode, remapNestedFields } from '@/src/utils/types';
 
@@ -11,15 +12,6 @@ import type {
 } from 'typescript';
 
 import type { Model, ModelField } from '@/src/types/model';
-
-const DEFAULT_FIELD_SLUGS = [
-  'id',
-  'ronin.createdAt',
-  'ronin.createdBy',
-  'ronin.locked',
-  'ronin.updatedAt',
-  'ronin.updatedBy',
-] satisfies Array<string>;
 
 /**
  * Generate all required type definitions for a provided RONIN model.

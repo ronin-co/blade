@@ -34,3 +34,17 @@ export const READABLE_DML_QUERY_TYPES = {
   set: 'Set',
   use: 'Get',
 } satisfies Record<(typeof DML_QUERY_TYPES)[number] | 'use', string>;
+
+/**
+ * A list of all default field slugs for RONIN models.
+ *
+ * This is designed to match the properties as part of `ResultRecord`.
+ */
+export const DEFAULT_FIELD_SLUGS = [
+  'id',
+  'ronin.createdAt',
+  'ronin.createdBy',
+  'ronin.locked',
+  'ronin.updatedAt',
+  'ronin.updatedBy',
+] satisfies Array<string>;
