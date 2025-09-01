@@ -111,8 +111,10 @@ They can return multiple queries and must return at least one query.
 
 ```ts
 beforeAdd: (query, multiple, options) => {
+  const { add } = options.client;
+
   return [
-    { add: { team: { with: { name: 'Engineering' } } } },
+    add.team.with.name('Engineering')
   ];
 }
 ```

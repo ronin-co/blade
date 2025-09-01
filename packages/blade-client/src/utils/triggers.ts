@@ -1,13 +1,3 @@
-import { createSyntaxFactory } from '@/src/index';
-import { type QueryPerDatabase, type ResultPerDatabase, runQueries } from '@/src/queries';
-import type {
-  FormattedResults,
-  QueryHandlerOptions,
-  RecursivePartial,
-} from '@/src/types/utils';
-import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
-import { ClientError } from '@/src/utils/errors';
-import { omit, toDashCase } from '@/src/utils/helpers';
 import {
   type CombinedInstructions,
   DDL_QUERY_TYPES,
@@ -19,6 +9,18 @@ import {
   type QueryType,
   type ResultRecord,
 } from 'blade-compiler';
+import { getBatchProxy } from 'blade-syntax/queries';
+
+import { createSyntaxFactory } from '@/src/index';
+import { type QueryPerDatabase, type ResultPerDatabase, runQueries } from '@/src/queries';
+import type {
+  FormattedResults,
+  QueryHandlerOptions,
+  RecursivePartial,
+} from '@/src/types/utils';
+import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
+import { ClientError } from '@/src/utils/errors';
+import { omit, toDashCase } from '@/src/utils/helpers';
 
 const EMPTY = Symbol('empty');
 
@@ -40,6 +42,8 @@ export interface TriggerOptions {
   /** A function for keeping the worker alive as long as a promise is not resolved. */
   waitUntil?: QueryHandlerOptions['waitUntil'];
 }
+
+type ReturnedQueries = () => Array<Promise<any>>;
 
 export type FilteredTriggerQuery<
   TType extends QueryType,
@@ -67,7 +71,7 @@ export type BeforeTriggerHandler<
   query: TQuery,
   multipleRecords: boolean,
   options: TriggerOptions,
-) => Array<Query> | Promise<Array<Query>>;
+) => Array<Query> | Promise<Array<Query>> | ReturnedQueries | Promise<ReturnedQueries>;
 
 export type DuringTriggerHandler<
   TType extends QueryType,
@@ -85,7 +89,7 @@ export type AfterTriggerHandler<
   query: TQuery,
   multipleRecords: boolean,
   options: TriggerOptions,
-) => Array<Query> | Promise<Array<Query>>;
+) => Array<Query> | Promise<Array<Query>> | ReturnedQueries | Promise<ReturnedQueries>;
 
 export type ResolvingTriggerHandler<TType extends QueryType, TSchema = unknown> = (
   query: FilteredTriggerQuery<TType>,
@@ -409,7 +413,14 @@ const invokeTriggers = async (
           triggerOptions,
         ));
 
-    const prepareQueries = async (queries: Array<Query>, applyTriggers?: boolean) => {
+    const prepareQueries = async (result: unknown, applyTriggers?: boolean) => {
+      const queries: Array<Query> =
+        typeof result === 'function'
+          ? getBatchProxy(result as () => Array<Promise<unknown>>).map((item) => {
+              return item.structure;
+            })
+          : (result as Array<Query>);
+
       const list = queries.map((query) => {
         const newQuery: QueryFromTrigger = {
           query,
@@ -425,7 +436,7 @@ const invokeTriggers = async (
     // If the trigger returned multiple queries that should be run before the original
     // query, we want to return those queries.
     if (triggerType === 'before') {
-      return { queries: await prepareQueries(triggerResult as Array<Query>, true) };
+      return { queries: await prepareQueries(triggerResult, true) };
     }
 
     // If the trigger returned a query, we want to replace the original query with
@@ -454,7 +465,7 @@ const invokeTriggers = async (
     // If the trigger returned multiple queries that should be run after the original
     // query, we want to return those queries.
     if (triggerType === 'after') {
-      return { queries: await prepareQueries(triggerResult as Array<Query>, true) };
+      return { queries: await prepareQueries(triggerResult, true) };
     }
 
     // If the trigger returned a record (or multiple), we want to set the query's
