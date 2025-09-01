@@ -29,7 +29,7 @@ export const generateTypes = (models: Array<Model>): Array<TypeAliasDeclaration>
 
     const modelIdentifier = {
       singular: factory.createIdentifier(convertToPascalCase(model.slug)),
-      plural: factory.createIdentifier(convertToPascalCase(model.slug)),
+      plural: factory.createIdentifier(convertToPascalCase(model.pluralSlug)),
     };
 
     const hasLinkFields = fields.some(
