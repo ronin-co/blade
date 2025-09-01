@@ -200,8 +200,10 @@ const generateSchemaProperty = (
               'value',
               undefined,
               factory.createIndexedAccessTypeNode(
-                // TODO(@nurodev): Add `CombinedInstructions` to identifiers
-                factory.createTypeReferenceNode('CombinedInstructions', undefined),
+                factory.createTypeReferenceNode(
+                  identifiers.compiler.combinedInstructions,
+                  undefined,
+                ),
                 factory.createLiteralTypeNode(factory.createStringLiteral(propertyName)),
               ),
               undefined,
@@ -264,7 +266,10 @@ const generateRootInstructionHandler = (
         'options',
         factory.createToken(SyntaxKind.QuestionToken),
         factory.createTypeReferenceNode(identifiers.primitive.partial, [
-          factory.createTypeReferenceNode('CombinedInstructions', undefined),
+          factory.createTypeReferenceNode(
+            identifiers.compiler.combinedInstructions,
+            undefined,
+          ),
         ]),
         undefined,
       ),

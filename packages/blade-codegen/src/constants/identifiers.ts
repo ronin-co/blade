@@ -20,13 +20,7 @@ export const identifiers = {
     },
   },
   compiler: {
-    dmlQueryType: {
-      add: factory.createIdentifier('AddQuery'),
-      count: factory.createIdentifier('CountQuery'),
-      get: factory.createIdentifier('GetQuery'),
-      remove: factory.createIdentifier('RemoveQuery'),
-      set: factory.createIdentifier('SetQuery'),
-    },
+    combinedInstructions: factory.createIdentifier('CombinedInstructions'),
     model: factory.createIdentifier('Model'),
     module: {
       root: factory.createIdentifier(JSON.stringify('blade-compiler')),
