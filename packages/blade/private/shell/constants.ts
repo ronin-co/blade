@@ -9,6 +9,9 @@ export const sourceDirPath = join(dirname(currentFilePath), '..');
 export const publicDirectory = resolve(process.cwd(), 'public');
 export const outputDirectory = resolve(process.cwd(), '.blade');
 
+export const tsconfigFilename = resolve(process.cwd(), 'tsconfig.json');
+export const packageMetaFilename = resolve(process.cwd(), 'package.json');
+
 // The path at which people can define a custom Hono app that Blade will mount.
 export const routerInputFile = join(process.cwd(), 'router.ts');
 

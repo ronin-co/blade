@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   type OutputOptions,
@@ -10,7 +11,9 @@ import {
   clientInputFile,
   nodePath,
   outputDirectory,
+  packageMetaFilename,
   serverInputFolder,
+  tsconfigFilename,
 } from '@/private/shell/constants';
 import {
   getClientReferenceLoader,
@@ -69,8 +72,23 @@ export const composeBuildContext = async (
   const serverEntry = path.join(serverInputFolder, `${provider}.js`);
   const swEntry = path.join(serverInputFolder, 'service-worker.js');
 
-  const tsconfigFilename = path.join(process.cwd(), 'tsconfig.json');
-  const tsconfigExists = options?.virtualFiles ? false : await exists(tsconfigFilename);
+  let tsconfigExists: boolean;
+  let packageMetaFile: string | undefined;
+
+  if (options?.virtualFiles) {
+    const filePath = `/${path.basename(packageMetaFilename)}`;
+
+    packageMetaFile = options?.virtualFiles?.find((item) => {
+      return item.path === filePath;
+    })?.content;
+  } else {
+    [tsconfigExists, packageMetaFile] = await Promise.all([
+      exists(tsconfigFilename),
+      readFile(packageMetaFilename, 'utf-8'),
+    ]);
+  }
+
+  const packageMetaContent = packageMetaFile ? JSON.parse(packageMetaFile) : {};
 
   const input: Record<string, string> = {
     client: clientInputFile,
@@ -99,6 +117,8 @@ export const composeBuildContext = async (
         'react-dom': path.join(nodePath, 'react-dom'),
       },
     },
+
+    external: packageMetaContent?.blade?.external,
 
     plugins: [
       getFileListLoader(options?.virtualFiles),
