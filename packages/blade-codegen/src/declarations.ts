@@ -1,20 +1,18 @@
 import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
-import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';
+import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { createImportDeclaration } from '@/src/generators/import';
 
 /**
  * ```ts
- * import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
+ * import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
  * ```
  */
-export const importRoninQueryTypesType = createImportDeclaration({
+export const importBladeCompilerQueryTypesType = createImportDeclaration({
   identifiers: [
     { name: identifiers.compiler.dmlQueryType.add },
     { name: identifiers.compiler.dmlQueryType.count },
     { name: identifiers.compiler.dmlQueryType.get },
-    { name: identifiers.compiler.ddlQueryType.list },
-    { name: identifiers.compiler.model },
     { name: identifiers.compiler.dmlQueryType.remove },
     { name: identifiers.compiler.dmlQueryType.set },
   ],
@@ -27,7 +25,7 @@ export const importRoninQueryTypesType = createImportDeclaration({
  * import type { StoredObject } from "blade-compiler";
  * ```
  */
-export const importRoninStoredObjectType = createImportDeclaration({
+export const importBladeCompilerStoredObjectType = createImportDeclaration({
   identifiers: [{ name: identifiers.compiler.storedObject }],
   module: identifiers.compiler.module.root,
   type: true,
@@ -35,43 +33,26 @@ export const importRoninStoredObjectType = createImportDeclaration({
 
 /**
  * ```ts
- * import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
+ * import type { ResultRecord } from "blade-syntax/queries";
  * ```
  */
-export const importSyntaxUtiltypesType = createImportDeclaration({
-  identifiers: [
-    { name: identifiers.syntax.deepCallable },
-    { name: identifiers.syntax.resultRecord },
-  ],
+export const importSyntaxUtilTypesType = createImportDeclaration({
+  identifiers: [{ name: identifiers.syntax.resultRecord }],
   module: identifiers.syntax.module.queries,
   type: true,
 });
 
 /**
  * ```ts
- * import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
- * ```
- */
-export const importQueryHandlerOptionsType = createImportDeclaration({
-  identifiers: [
-    { name: identifiers.ronin.promiseTuple },
-    { name: identifiers.ronin.queryHandlerOptions },
-  ],
-  module: identifiers.ronin.module.types,
-  type: true,
-});
-
-/**
- * ```ts
  * type ResolveSchema<
- *  TSchema,
- *  TUsing extends Array<string> | 'all',
- *  TKey extends string
- * > = TUsing extends 'all'
- *  ? TSchema
- *  : TKey extends TUsing[number]
- *    ? TSchema
- *    : TSchema extends Array<any>
+ *  S,
+ *  U extends Array<string> | 'all',
+ *  K extends string
+ * > = U extends 'all'
+ *  ? S
+ *  : K extends U[number]
+ *    ? S
+ *    : S extends Array<any>
  *      ? Array<string>
  *      : string;
  * ```
@@ -82,19 +63,19 @@ export const resolveSchemaType = factory.createTypeAliasDeclaration(
   [
     /**
      * ```ts
-     * TSchema
+     * S
      * ```
      */
-    factory.createTypeParameterDeclaration(undefined, genericIdentifiers.schema),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.schema),
 
     /**
      * ```ts
-     * TUsing extends Array<string> | 'all'
+     * U extends Array<string> | 'all'
      * ```
      */
     factory.createTypeParameterDeclaration(
       undefined,
-      genericIdentifiers.using,
+      typeArgumentIdentifiers.using,
       factory.createUnionTypeNode([
         factory.createTypeReferenceNode(identifiers.primitive.array, [
           factory.createUnionTypeNode([
@@ -109,32 +90,32 @@ export const resolveSchemaType = factory.createTypeAliasDeclaration(
 
     /**
      * ```ts
-     * TKey extends string
+     * K extends string
      * ```
      */
     factory.createTypeParameterDeclaration(
       undefined,
-      genericIdentifiers.key,
+      typeArgumentIdentifiers.key,
       factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
     ),
   ],
   factory.createConditionalTypeNode(
-    factory.createTypeReferenceNode(genericIdentifiers.using),
+    factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
     factory.createLiteralTypeNode(
       factory.createStringLiteral(identifiers.utils.all.text),
     ),
-    factory.createTypeReferenceNode(genericIdentifiers.schema),
+    factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
 
     factory.createConditionalTypeNode(
-      factory.createTypeReferenceNode(genericIdentifiers.key),
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.key),
       factory.createIndexedAccessTypeNode(
-        factory.createTypeReferenceNode(genericIdentifiers.using),
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
         factory.createKeywordTypeNode(SyntaxKind.NumberKeyword),
       ),
-      factory.createTypeReferenceNode(genericIdentifiers.schema),
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
 
       factory.createConditionalTypeNode(
-        factory.createTypeReferenceNode(genericIdentifiers.schema),
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
         factory.createTypeReferenceNode(identifiers.primitive.array, [
           factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
         ]),
@@ -263,7 +244,7 @@ export const reducedFunctionType = factory.createInterfaceDeclaration(
         factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
       ),
       SyntaxKind.MultiLineCommentTrivia,
-      '@deprecated',
+      ' @deprecated ',
       true,
     ),
   ),

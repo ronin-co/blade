@@ -1,6 +1,6 @@
 import { SyntaxKind, factory } from 'typescript';
 
-import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';
+import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { MODEL_TYPE_TO_SYNTAX_KIND_KEYWORD } from '@/src/constants/schema';
 import { convertToPascalCase } from '@/src/utils/slug';
 
@@ -47,7 +47,7 @@ export const mapRoninFieldToTypeNode = (
               ])
             : schemaTypeRef,
 
-          factory.createTypeReferenceNode(genericIdentifiers.using),
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
 
           factory.createLiteralTypeNode(factory.createStringLiteral(field.slug)),
         ],

@@ -1,224 +1,165 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`module a basic model 1`] = `
-"declare module "ronin" {
-    export type Account = ResultRecord & {
-        email: string;
-        name: string;
-    };
-    export type Accounts = Array<Account> & {
-        moreBefore?: string;
-        moreAfter?: string;
-    };
-    declare const get: {
-        /* Get a single account record */
-        account: DeepCallable<GetQuery[keyof GetQuery], Account | null>;
-        /* Get multiple account records */
-        accounts: DeepCallable<GetQuery[keyof GetQuery], Accounts>;
-    };
-    declare const count: {
-        /* Count multiple account records */
-        accounts: DeepCallable<CountQuery[keyof CountQuery], number>;
-    };
-    declare const set: {
-        /* Set a single account record */
-        account: DeepCallable<SetQuery[keyof SetQuery], Account | null>;
-        /* Set multiple account records */
-        accounts: DeepCallable<SetQuery[keyof SetQuery], Accounts>;
-    };
-    declare const add: {
-        /* Add a single account record */
-        account: DeepCallable<AddQuery[keyof AddQuery], Account | null>;
-    };
-    declare const remove: {
-        /* Remove a single account record */
-        account: DeepCallable<RemoveQuery[keyof RemoveQuery], Account | null>;
-        /* Remove multiple account records */
-        accounts: DeepCallable<RemoveQuery[keyof RemoveQuery], Accounts>;
-    };
-    declare const batch: <TQueries extends [
-        Promise,
-        ...Array<Promise>
-    ] | Array<Promise>>(operations: () => TQueries, queryOptions?: Record<string, unknown>) => Promise<PromiseTuple<TQueries>>;
-    declare const list: {
-        /* List all model definitions */
-        models: DeepCallable<ListQuery[keyof ListQuery], Array<Model>>;
-    };
-    declare const createSyntaxFactory: (options: QueryHandlerOptions | (() => QueryHandlerOptions)) => {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-    export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-}
+exports[`module re-export model types a basic model 1`] = `
+"export type { Account, Accounts };
 "
 `;
 
-exports[`module with no modules 1`] = `
-"declare module "ronin" {
-    declare const get: {};
-    declare const count: {};
-    declare const set: {};
-    declare const add: {};
-    declare const remove: {};
-    declare const batch: <TQueries extends [
-        Promise,
-        ...Array<Promise>
-    ] | Array<Promise>>(operations: () => TQueries, queryOptions?: Record<string, unknown>) => Promise<PromiseTuple<TQueries>>;
-    declare const list: {
-        /* List all model definitions */
-        models: DeepCallable<ListQuery[keyof ListQuery], Array<Model>>;
-    };
-    declare const createSyntaxFactory: (options: QueryHandlerOptions | (() => QueryHandlerOptions)) => {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-    export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-}
+exports[`module re-export model types with no models 1`] = `
+"export type {};
 "
 `;
 
-exports[`module with multiple models 1`] = `
-"declare module "ronin" {
-    export type Account = ResultRecord & {
-        email: string;
-        name: string;
+exports[`module re-export model types with multiple models 1`] = `
+"export type { Account, Accounts, Post, Posts };
+"
+`;
+
+exports[`module query declaration constant a basic model 1`] = `
+"declare const get: {
+    /* Get a single account record */
+    account: ReducedFunction & {
+        <T = Account>(options?: Partial<CombinedInstructions>): T | null;
+        after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
+        before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
+        including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
+        limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
+        orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
+        selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
+        using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+        with: {
+            <T = Account>(options: CombinedInstructions["with"]): T | null;
+            id: <T = Account>(value: ResultRecord["id"]) => T | null;
+            "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
+            "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
+            "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
+            "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+            "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+            name: <T = Account>(value: string) => T | null;
+            email: <T = Account>(value: string) => T | null;
+        };
     };
-    export type Accounts = Array<Account> & {
-        moreBefore?: string;
-        moreAfter?: string;
+    /* Get multiple account records */
+    accounts: ReducedFunction & {
+        <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
+        after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
+        before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
+        including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
+        limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
+        orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
+        selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
+        using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+        with: {
+            <T = Accounts>(options: CombinedInstructions["with"]): T | null;
+            id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
+            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
+            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
+            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
+            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+            name: <T = Accounts>(value: string) => T | null;
+            email: <T = Accounts>(value: string) => T | null;
+        };
     };
-    export type Post = ResultRecord & {
-        description: string;
-        title: string;
+};
+"
+`;
+
+exports[`module query declaration constant with no modules 1`] = `
+"declare const get: {};
+"
+`;
+
+exports[`module query declaration constant with multiple models 1`] = `
+"declare const get: {
+    /* Get a single account record */
+    account: ReducedFunction & {
+        <T = Account>(options?: Partial<CombinedInstructions>): T | null;
+        after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
+        before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
+        including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
+        limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
+        orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
+        selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
+        using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+        with: {
+            <T = Account>(options: CombinedInstructions["with"]): T | null;
+            id: <T = Account>(value: ResultRecord["id"]) => T | null;
+            "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
+            "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
+            "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
+            "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+            "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+            name: <T = Account>(value: string) => T | null;
+            email: <T = Account>(value: string) => T | null;
+        };
     };
-    export type Posts = Array<Post> & {
-        moreBefore?: string;
-        moreAfter?: string;
+    /* Get multiple account records */
+    accounts: ReducedFunction & {
+        <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
+        after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
+        before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
+        including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
+        limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
+        orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
+        selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
+        using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+        with: {
+            <T = Accounts>(options: CombinedInstructions["with"]): T | null;
+            id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
+            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
+            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
+            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
+            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+            name: <T = Accounts>(value: string) => T | null;
+            email: <T = Accounts>(value: string) => T | null;
+        };
     };
-    declare const get: {
-        /* Get a single account record */
-        account: DeepCallable<GetQuery[keyof GetQuery], Account | null>;
-        /* Get multiple account records */
-        accounts: DeepCallable<GetQuery[keyof GetQuery], Accounts>;
-        /* Get a single post record */
-        post: DeepCallable<GetQuery[keyof GetQuery], Post | null>;
-        /* Get multiple post records */
-        posts: DeepCallable<GetQuery[keyof GetQuery], Posts>;
+    /* Get a single post record */
+    post: ReducedFunction & {
+        <T = Post>(options?: Partial<CombinedInstructions>): T | null;
+        after: <T = Post>(value: CombinedInstructions["after"]) => T | null;
+        before: <T = Post>(value: CombinedInstructions["before"]) => T | null;
+        including: <T = Post>(value: CombinedInstructions["including"]) => T | null;
+        limitedTo: <T = Post>(value: CombinedInstructions["limitedTo"]) => T | null;
+        orderedBy: <T = Post>(value: CombinedInstructions["orderedBy"]) => T | null;
+        selecting: <T = Post>(value: CombinedInstructions["selecting"]) => T | null;
+        using: <T = Post>(value: CombinedInstructions["using"]) => T | null;
+        with: {
+            <T = Post>(options: CombinedInstructions["with"]): T | null;
+            id: <T = Post>(value: ResultRecord["id"]) => T | null;
+            "ronin.createdAt": <T = Post>(value: ResultRecord["ronin.createdAt"]) => T | null;
+            "ronin.createdBy": <T = Post>(value: ResultRecord["ronin.createdBy"]) => T | null;
+            "ronin.locked": <T = Post>(value: ResultRecord["ronin.locked"]) => T | null;
+            "ronin.updatedAt": <T = Post>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+            "ronin.updatedBy": <T = Post>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+            title: <T = Post>(value: string) => T | null;
+            description: <T = Post>(value: string) => T | null;
+        };
     };
-    declare const count: {
-        /* Count multiple account records */
-        accounts: DeepCallable<CountQuery[keyof CountQuery], number>;
-        /* Count multiple post records */
-        posts: DeepCallable<CountQuery[keyof CountQuery], number>;
+    /* Get multiple post records */
+    posts: ReducedFunction & {
+        <T = Posts>(options?: Partial<CombinedInstructions>): T | null;
+        after: <T = Posts>(value: CombinedInstructions["after"]) => T | null;
+        before: <T = Posts>(value: CombinedInstructions["before"]) => T | null;
+        including: <T = Posts>(value: CombinedInstructions["including"]) => T | null;
+        limitedTo: <T = Posts>(value: CombinedInstructions["limitedTo"]) => T | null;
+        orderedBy: <T = Posts>(value: CombinedInstructions["orderedBy"]) => T | null;
+        selecting: <T = Posts>(value: CombinedInstructions["selecting"]) => T | null;
+        using: <T = Posts>(value: CombinedInstructions["using"]) => T | null;
+        with: {
+            <T = Posts>(options: CombinedInstructions["with"]): T | null;
+            id: <T = Posts>(value: ResultRecord["id"]) => T | null;
+            "ronin.createdAt": <T = Posts>(value: ResultRecord["ronin.createdAt"]) => T | null;
+            "ronin.createdBy": <T = Posts>(value: ResultRecord["ronin.createdBy"]) => T | null;
+            "ronin.locked": <T = Posts>(value: ResultRecord["ronin.locked"]) => T | null;
+            "ronin.updatedAt": <T = Posts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
+            "ronin.updatedBy": <T = Posts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
+            title: <T = Posts>(value: string) => T | null;
+            description: <T = Posts>(value: string) => T | null;
+        };
     };
-    declare const set: {
-        /* Set a single account record */
-        account: DeepCallable<SetQuery[keyof SetQuery], Account | null>;
-        /* Set multiple account records */
-        accounts: DeepCallable<SetQuery[keyof SetQuery], Accounts>;
-        /* Set a single post record */
-        post: DeepCallable<SetQuery[keyof SetQuery], Post | null>;
-        /* Set multiple post records */
-        posts: DeepCallable<SetQuery[keyof SetQuery], Posts>;
-    };
-    declare const add: {
-        /* Add a single account record */
-        account: DeepCallable<AddQuery[keyof AddQuery], Account | null>;
-        /* Add a single post record */
-        post: DeepCallable<AddQuery[keyof AddQuery], Post | null>;
-    };
-    declare const remove: {
-        /* Remove a single account record */
-        account: DeepCallable<RemoveQuery[keyof RemoveQuery], Account | null>;
-        /* Remove multiple account records */
-        accounts: DeepCallable<RemoveQuery[keyof RemoveQuery], Accounts>;
-        /* Remove a single post record */
-        post: DeepCallable<RemoveQuery[keyof RemoveQuery], Post | null>;
-        /* Remove multiple post records */
-        posts: DeepCallable<RemoveQuery[keyof RemoveQuery], Posts>;
-    };
-    declare const batch: <TQueries extends [
-        Promise,
-        ...Array<Promise>
-    ] | Array<Promise>>(operations: () => TQueries, queryOptions?: Record<string, unknown>) => Promise<PromiseTuple<TQueries>>;
-    declare const list: {
-        /* List all model definitions */
-        models: DeepCallable<ListQuery[keyof ListQuery], Array<Model>>;
-    };
-    declare const createSyntaxFactory: (options: QueryHandlerOptions | (() => QueryHandlerOptions)) => {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-    export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-}
+};
 "
 `;

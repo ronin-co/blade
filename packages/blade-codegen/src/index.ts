@@ -2,19 +2,18 @@ import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 import {
-  importQueryHandlerOptionsType,
-  importRoninQueryTypesType,
-  importRoninStoredObjectType,
-  importSyntaxUtiltypesType,
+  importBladeCompilerStoredObjectType,
+  importSyntaxUtilTypesType,
   jsonArrayType,
   jsonObjectType,
   jsonPrimitiveType,
   reducedFunctionType,
   resolveSchemaType,
 } from '@/src/declarations';
+import { importBladeCompilerQueryTypesType } from '@/src/declarations';
 import {
-  generateExportTypeModuleStatements,
-  generateQueryDeclarationStatement,
+  generateModelTypesModule,
+  generateQueryDeclarationStatements,
 } from '@/src/generators/module';
 import { generateTypes } from '@/src/generators/types';
 import { printNodes } from '@/src/utils/print';
@@ -31,21 +30,20 @@ import type { Model } from '@/src/types/model';
  * @returns A string of the complete `index.d.ts` file.
  */
 export const generate = (models: Array<Model>): string => {
+  // Each node represents any kind of "block" like
+  // an import statement, interface, namespace, etc.
+  const nodes = new Array<Node>(
+    importBladeCompilerQueryTypesType,
+    importSyntaxUtilTypesType,
+    reducedFunctionType,
+  );
+
   // If there is any models that have a `blob()` field, we need to import the
   // `StoredObject` type from the `blade-compiler` package.
   const hasStoredObjectFields = models.some((model) =>
     Object.values(model.fields).some((field) => field.type === 'blob'),
   );
-
-  // Each node represents any kind of "block" like
-  // an import statement, interface, namespace, etc.
-  const nodes = new Array<Node>(
-    importRoninQueryTypesType,
-    ...(hasStoredObjectFields ? [importRoninStoredObjectType] : []),
-    importSyntaxUtiltypesType,
-    importQueryHandlerOptionsType,
-    reducedFunctionType,
-  );
+  if (hasStoredObjectFields) nodes.push(importBladeCompilerStoredObjectType);
 
   // If there is any models that have a `link()` field, we need to add the
   // `ResolveSchemaType` type.
@@ -75,8 +73,8 @@ export const generate = (models: Array<Model>): string => {
    * };
    * ```
    */
-  const typeDeclarations = generateTypes(models);
-  nodes.push(...typeDeclarations);
+  const modelTypeDecs = generateTypes(models);
+  nodes.push(...modelTypeDecs);
 
   /**
    * Generate and add the `blade/types` module augmentations.
@@ -92,7 +90,7 @@ export const generate = (models: Array<Model>): string => {
     factory.createModuleDeclaration(
       [factory.createModifier(SyntaxKind.DeclareKeyword)],
       identifiers.blade.module.types,
-      factory.createModuleBlock([generateExportTypeModuleStatements(models)]),
+      factory.createModuleBlock([generateModelTypesModule(models)]),
     ),
   );
 
@@ -110,7 +108,7 @@ export const generate = (models: Array<Model>): string => {
     factory.createModuleDeclaration(
       [factory.createModifier(SyntaxKind.DeclareKeyword)],
       identifiers.blade.module.server.hooks,
-      factory.createModuleBlock([generateQueryDeclarationStatement(models, 'use')]),
+      factory.createModuleBlock([generateQueryDeclarationStatements(models, 'use')]),
     ),
   );
 

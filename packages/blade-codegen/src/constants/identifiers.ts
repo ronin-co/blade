@@ -20,9 +20,6 @@ export const identifiers = {
     },
   },
   compiler: {
-    ddlQueryType: {
-      list: factory.createIdentifier('ListQuery'),
-    },
     dmlQueryType: {
       add: factory.createIdentifier('AddQuery'),
       count: factory.createIdentifier('CountQuery'),
@@ -39,22 +36,9 @@ export const identifiers = {
   primitive: {
     array: factory.createIdentifier('Array'),
     date: factory.createIdentifier('Date'),
-    object: factory.createIdentifier('object'),
     partial: factory.createIdentifier('Partial'),
-    promise: factory.createIdentifier('Promise'),
-    record: factory.createIdentifier('Record'),
-  },
-  ronin: {
-    createSyntaxFactory: factory.createIdentifier('createSyntaxFactory'),
-    promiseTuple: factory.createIdentifier('PromiseTuple'),
-    queryHandlerOptions: factory.createIdentifier('QueryHandlerOptions'),
-    module: {
-      root: factory.createIdentifier(JSON.stringify('ronin')),
-      types: factory.createIdentifier(JSON.stringify('ronin/types')),
-    },
   },
   syntax: {
-    deepCallable: factory.createIdentifier('DeepCallable'),
     module: {
       queries: factory.createIdentifier(JSON.stringify('blade-syntax/queries')),
     },
@@ -74,14 +58,14 @@ export const identifiers = {
 >;
 
 /**
- * A list of all generic names used in the `@ronin/codegen` package.
+ * A list of all generic names used in the `blade-codegen` package.
  *
  * Similar to `identifiers` but designed specifically for use as generic names.
  */
-export const genericIdentifiers = {
+export const typeArgumentIdentifiers = {
   default: factory.createIdentifier('T'),
-  key: factory.createIdentifier('TKey'),
-  queries: factory.createIdentifier('TQueries'),
-  schema: factory.createIdentifier('TSchema'),
-  using: factory.createIdentifier('TUsing'),
+  key: factory.createIdentifier('K'),
+  queries: factory.createIdentifier('Q'),
+  schema: factory.createIdentifier('S'),
+  using: factory.createIdentifier('U'),
 } satisfies Record<string, Identifier>;
