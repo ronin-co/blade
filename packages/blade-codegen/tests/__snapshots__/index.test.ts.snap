@@ -1,36 +1,35 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`generate a basic model 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
-import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
+"import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
+import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
-    /*@deprecated*/
+    /* @deprecated */
     apply: string;
-    /*@deprecated*/
+    /* @deprecated */
     arguments: string;
-    /*@deprecated*/
+    /* @deprecated */
     bind: string;
-    /*@deprecated*/
+    /* @deprecated */
     call: string;
-    /*@deprecated*/
+    /* @deprecated */
     caller: string;
-    /*@deprecated*/
+    /* @deprecated */
     length: string;
-    /*@deprecated*/
+    /* @deprecated */
     name: string;
-    /*@deprecated*/
+    /* @deprecated */
     prototype: string;
-    /*@deprecated*/
+    /* @deprecated */
     toString: string;
-    /*@deprecated*/
+    /* @deprecated */
     unify: string;
 }
 export type Account = ResultRecord & {
     email: string;
     name: string;
 };
-export type Accounts = Array<Account> & {
+export type Account = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
@@ -89,38 +88,37 @@ declare module "blade/server/hooks" {
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
-import type { StoredObject } from "blade-compiler";
-import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
+"import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
+import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
-    /*@deprecated*/
+    /* @deprecated */
     apply: string;
-    /*@deprecated*/
+    /* @deprecated */
     arguments: string;
-    /*@deprecated*/
+    /* @deprecated */
     bind: string;
-    /*@deprecated*/
+    /* @deprecated */
     call: string;
-    /*@deprecated*/
+    /* @deprecated */
     caller: string;
-    /*@deprecated*/
+    /* @deprecated */
     length: string;
-    /*@deprecated*/
+    /* @deprecated */
     name: string;
-    /*@deprecated*/
+    /* @deprecated */
     prototype: string;
-    /*@deprecated*/
+    /* @deprecated */
     toString: string;
-    /*@deprecated*/
+    /* @deprecated */
     unify: string;
 }
+import type { StoredObject } from "blade-compiler";
 export type Account = ResultRecord & {
     email: string;
     image: StoredObject;
     name: string;
 };
-export type Accounts = Array<Account> & {
+export type Account = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
@@ -181,29 +179,28 @@ declare module "blade/server/hooks" {
 `;
 
 exports[`generate with no models 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
-import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
+"import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
+import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
-    /*@deprecated*/
+    /* @deprecated */
     apply: string;
-    /*@deprecated*/
+    /* @deprecated */
     arguments: string;
-    /*@deprecated*/
+    /* @deprecated */
     bind: string;
-    /*@deprecated*/
+    /* @deprecated */
     call: string;
-    /*@deprecated*/
+    /* @deprecated */
     caller: string;
-    /*@deprecated*/
+    /* @deprecated */
     length: string;
-    /*@deprecated*/
+    /* @deprecated */
     name: string;
-    /*@deprecated*/
+    /* @deprecated */
     prototype: string;
-    /*@deprecated*/
+    /* @deprecated */
     toString: string;
-    /*@deprecated*/
+    /* @deprecated */
     unify: string;
 }
 declare module "blade/types" {
