@@ -93,7 +93,7 @@
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
     "bun-bagel": "1.1.0",
-    "hive": "1.0.8",
+    "hive": "1.0.11",
     "ronin": "6.7.4",
     "tsup": "8.5.0",
     "typescript": "5.8.3"
