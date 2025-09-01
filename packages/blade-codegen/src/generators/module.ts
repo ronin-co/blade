@@ -56,24 +56,24 @@ export const generateModelTypesModule = (models: Array<Model>): ExportDeclaratio
  * ```ts
  * declare const use: {
  *    user: ReducedFunction & {
- *      <T = User>(options?: Partial<CombinedInstructions>): T | null;
- *      after: <T = User>(value: CombinedInstructions["after"]) => T | null;
- *      before: <T = User>(value: CombinedInstructions["before"]) => T | null;
- *      including: <T = User>(value: CombinedInstructions["including"]) => T | null;
- *      limitedTo: <T = User>(value: CombinedInstructions["limitedTo"]) => T | null;
- *      orderedBy: <T = User>(value: CombinedInstructions["orderedBy"]) => T | null;
- *      selecting: <T = User>(value: CombinedInstructions["selecting"]) => T | null;
- *      using: <T = User>(value: CombinedInstructions["using"]) => T | null;
+ *      <T = User | null>(options?: Partial<CombinedInstructions>): T;
+ *      after: <T = User | null>(value: CombinedInstructions["after"]) => T;
+ *      before: <T = User | null>(value: CombinedInstructions["before"]) => T;
+ *      including: <T = User | null>(value: CombinedInstructions["including"]) => T;
+ *      limitedTo: <T = User | null>(value: CombinedInstructions["limitedTo"]) => T;
+ *      orderedBy: <T = User | null>(value: CombinedInstructions["orderedBy"]) => T;
+ *      selecting: <T = User | null>(value: CombinedInstructions["selecting"]) => T;
+ *      using: <T = User | null>(value: CombinedInstructions["using"]) => T;
  *      with: {
- *         <T = User>(options: CombinedInstructions["with"]): T | null;
- *         id: <T = User>(value: ResultRecord["id"]) => T | null;
- *         "ronin.createdAt": <T = User>(value: ResultRecord["ronin.createdAt"]) => T | null;
- *         "ronin.createdBy": <T = User>(value: ResultRecord["ronin.createdBy"]) => T | null;
- *         "ronin.locked": <T = User>(value: ResultRecord["ronin.locked"]) => T | null;
- *         "ronin.updatedAt": <T = User>(value: ResultRecord["ronin.updatedAt"]) => T | null;
- *         "ronin.updatedBy": <T = User>(value: ResultRecord["ronin.updatedBy"]) => T | null;
- *         name: <T = User>(value: string) => T | null;
- *         email: <T = User>(value: string) => T | null;
+ *         <T = User | null>(options: CombinedInstructions["with"]): T;
+ *         id: <T = User | null>(value: ResultRecord["id"]) => T;
+ *         "ronin.createdAt": <T = User | null>(value: ResultRecord["ronin.createdAt"]) => T;
+ *         "ronin.createdBy": <T = User | null>(value: ResultRecord["ronin.createdBy"]) => T;
+ *         "ronin.locked": <T = User | null>(value: ResultRecord["ronin.locked"]) => T;
+ *         "ronin.updatedAt": <T = User | null>(value: ResultRecord["ronin.updatedAt"]) => T;
+ *         "ronin.updatedBy": <T = User | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+ *         name: <T = User | null>(value: string) => T;
+ *         email: <T = User | null>(value: string) => T;
  *         // [...]
  *      };
  *    };
@@ -122,15 +122,28 @@ export const generateQueryDeclarationStatements = (
             models.flatMap((model) => {
               const comment = generateQueryTypeComment(model, queryType);
 
+              const singularModelProperty = generateSchemaProperty(
+                model.slug,
+                model.fields,
+                models,
+                true,
+              );
+              const pluralModelProperty = generateSchemaProperty(
+                model.pluralSlug,
+                model.fields,
+                models,
+                false,
+              );
+
               return [
                 addSyntheticLeadingComment(
-                  generateSchemaProperty(model.slug, model.fields, models),
+                  singularModelProperty,
                   SyntaxKind.MultiLineCommentTrivia,
                   comment.singular,
                   true,
                 ),
                 addSyntheticLeadingComment(
-                  generateSchemaProperty(model.pluralSlug, model.fields, models),
+                  pluralModelProperty,
                   SyntaxKind.MultiLineCommentTrivia,
                   comment.plural,
                   true,
@@ -151,31 +164,34 @@ const generateSchemaProperty = (
   modelSlug: string,
   modelFields: Model['fields'],
   models: Array<Model>,
+  isNullable: boolean,
 ) => {
-  const modelIdentifier = factory.createTypeReferenceNode(convertToPascalCase(modelSlug));
+  const modelIdentifierTypes = new Array<TypeNode>(
+    factory.createTypeReferenceNode(convertToPascalCase(modelSlug)),
+  );
+  if (isNullable)
+    modelIdentifierTypes.push(factory.createLiteralTypeNode(factory.createNull()));
+  const modelIdentifier = factory.createUnionTypeNode(modelIdentifierTypes);
 
   /**
    * ```ts
-   * <T = Account>(options?: Partial<CombinedInstructions>): T | null;
+   * <T = Account | null>(options?: Partial<CombinedInstructions>): T;
    * ```
    */
   const rootInstructionHandler = generateRootInstructionHandler(
     modelIdentifier,
-    factory.createUnionTypeNode([
-      factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-      factory.createLiteralTypeNode(factory.createNull()),
-    ]),
+    factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
   );
 
   /**
    * ```ts
-   * after: <T = User>(value: CombinedInstructions['after']) => T | null;
-   * before: <T = User>(value: CombinedInstructions['before'],) => T | null;
-   * including: <T = User>(value: CombinedInstructions['including']) => T | null;
-   * limitedTo: <T = User>(value: CombinedInstructions['limitedTo']) => T | null;
-   * orderedBy: <T = User>(value: CombinedInstructions['orderedBy']) => T | null;
-   * selecting: <T = User>(value: CombinedInstructions['selecting']) => T | null;
-   * using: <T = User>(value: CombinedInstructions['using']) => T | null;
+   * after: <T = User | null>(value: CombinedInstructions['after']) => T ;
+   * before: <T = User | null>(value: CombinedInstructions['before'],) => T ;
+   * including: <T = User | null>(value: CombinedInstructions['including']) => T ;
+   * limitedTo: <T = User | null>(value: CombinedInstructions['limitedTo']) => T ;
+   * orderedBy: <T = User | null>(value: CombinedInstructions['orderedBy']) => T ;
+   * selecting: <T = User | null>(value: CombinedInstructions['selecting']) => T ;
+   * using: <T = User | null>(value: CombinedInstructions['using']) => T ;
    * ```
    */
   const mappedCombinedInstructionProperties =
@@ -209,10 +225,7 @@ const generateSchemaProperty = (
               undefined,
             ),
           ],
-          factory.createUnionTypeNode([
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-            factory.createLiteralTypeNode(factory.createNull()),
-          ]),
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
         ),
       ),
     );
@@ -233,10 +246,7 @@ const generateSchemaProperty = (
           modelIdentifier,
           modelFields,
           models,
-          factory.createUnionTypeNode([
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-            factory.createLiteralTypeNode(factory.createNull()),
-          ]),
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
         ),
       ]),
     ]),
@@ -288,7 +298,7 @@ const generateWithPropertySignature = (
 ): PropertySignature => {
   /**
    * ```ts
-   * <T = User>(options: CombinedInstructions["with"]): T | null;
+   * <T = User | null>(options: CombinedInstructions["with"]): T;
    * ```
    */
   const rootInstructionHandler = factory.createCallSignature(
@@ -307,7 +317,10 @@ const generateWithPropertySignature = (
         'options',
         undefined,
         factory.createIndexedAccessTypeNode(
-          factory.createTypeReferenceNode('CombinedInstructions', undefined),
+          factory.createTypeReferenceNode(
+            identifiers.compiler.combinedInstructions,
+            undefined,
+          ),
           factory.createLiteralTypeNode(factory.createStringLiteral('with')),
         ),
         undefined,
