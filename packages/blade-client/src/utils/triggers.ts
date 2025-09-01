@@ -43,6 +43,8 @@ export interface TriggerOptions {
   waitUntil?: QueryHandlerOptions['waitUntil'];
 }
 
+type ReturnedQueries = () => Array<Promise<any>>;
+
 export type FilteredTriggerQuery<
   TType extends QueryType,
   TQuery extends CombinedInstructions = CombinedInstructions,
@@ -69,7 +71,7 @@ export type BeforeTriggerHandler<
   query: TQuery,
   multipleRecords: boolean,
   options: TriggerOptions,
-) => Array<Query> | Promise<Array<Query>>;
+) => Array<Query> | Promise<Array<Query>> | ReturnedQueries | Promise<ReturnedQueries>;
 
 export type DuringTriggerHandler<
   TType extends QueryType,
@@ -87,7 +89,7 @@ export type AfterTriggerHandler<
   query: TQuery,
   multipleRecords: boolean,
   options: TriggerOptions,
-) => Array<Query> | Promise<Array<Query>>;
+) => Array<Query> | Promise<Array<Query>> | ReturnedQueries | Promise<ReturnedQueries>;
 
 export type ResolvingTriggerHandler<TType extends QueryType, TSchema = unknown> = (
   query: FilteredTriggerQuery<TType>,
