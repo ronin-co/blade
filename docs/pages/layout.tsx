@@ -3,7 +3,7 @@ import { useMetadata } from 'blade/server/hooks';
 import type { TableOfContents } from 'blade/types';
 import type { ComponentProps } from 'react';
 
-import { Code, type CodeProps, InlineCode } from '@/components/code.client';
+import { Code, InlineCode } from '@/components/code.client';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header.client';
 import { Heading } from '@/components/heading.client';
@@ -180,8 +180,8 @@ const DocsLayout = ({
 
 // biome-ignore lint/nursery/useComponentExportOnlyModules: This is needed for the docs.
 export const components = {
-  pre: (props: CodeProps) => <Code {...props} />,
-  code: (props: CodeProps) => <InlineCode {...props} />,
+  pre: (props: ComponentProps<typeof Code>) => <Code {...props} />,
+  code: (props: ComponentProps<typeof InlineCode>) => <InlineCode {...props} />,
   a: (props: ComponentProps<typeof Link>) => <Link {...props} />,
   h1: (props: HeadingProps) => (
     <Heading
