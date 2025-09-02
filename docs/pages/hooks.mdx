@@ -208,7 +208,7 @@ import SomeComponent from './components/test.client';
 const Page = () => {
     const accounts = use.accounts();
 
-    return <SomeComponent records={accounts} recordsNextPage={accounts.nextPage}>;
+    return <SomeComponent records={accounts} recordsNextPage={accounts.moreAfter}>;
 }
 ```
 
@@ -232,7 +232,7 @@ export const SomeComponent = ({ records, recordsNextPage }) => {
 The following options are available:
 
 ```tsx
-usePagination(nextPage, {
+usePagination(moreAfter, {
     // By default, a `?page` parameter will be added to the URL, which allows for sharing
     // the current pagination status of the page with other people. Setting this argument
     // to `false` will avoid that.
@@ -267,7 +267,7 @@ const Page = () => {
     const accounts = use.accounts();
 
     return (
-        <SomeComponent previousPage={accounts.previousPage} nextPage={accounts.nextPage}>
+        <SomeComponent moreBefore={accounts.moreBefore} moreAfter={accounts.moreAfter}>
             {accounts.map(account => <Row record={account} />)}
         </SomeComponent>;
     );
@@ -279,9 +279,9 @@ Within `SomeComponent` (which must be a client component, identified through `.c
 ```tsx
 import { usePagination, usePaginationBuffer } from 'blade/client/hooks';
 
-export const SomeComponent = ({ children: defaultChildren, nextPage, previousPage }) => {
-    const { paginate, resetPagination } = usePagination(nextPage);
-    const [children] = usePaginationBuffer(defaultChildren, { previousPage });
+export const SomeComponent = ({ children: defaultChildren, moreAfter, moreBefore }) => {
+    const { paginate, resetPagination } = usePagination(moreAfter);
+    const [children] = usePaginationBuffer(defaultChildren, { moreBefore });
 
     return <div>{children}</div>;
 };
@@ -294,7 +294,7 @@ The following options are available:
 ```tsx
 usePaginationBuffer(list, {
     // The pagination cursor for the previous page of your record list. Must be provided.
-    previousPage: '...',
+    moreBefore: '...',
 
     // By default, any changes to `list` will be reflected in the concatenated list
     // returned by `usePaginationBuffer()`. This default is useful because that means
