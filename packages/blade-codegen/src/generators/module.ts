@@ -301,6 +301,20 @@ const generateWithPropertySignature = (
 
   for (const slug of DEFAULT_FIELD_SLUGS) {
     const normalizedSlug = slug.includes('.') ? JSON.stringify(slug) : slug;
+    const [slugPrefix, ...slugSuffix] = slug.split('.');
+
+    const valueParamType = slug.includes('.')
+      ? factory.createIndexedAccessTypeNode(
+          factory.createIndexedAccessTypeNode(
+            factory.createTypeReferenceNode(identifiers.syntax.resultRecord),
+            factory.createLiteralTypeNode(factory.createStringLiteral(slugPrefix)),
+          ),
+          factory.createLiteralTypeNode(factory.createStringLiteral(slugSuffix.join(''))),
+        )
+      : factory.createIndexedAccessTypeNode(
+          factory.createTypeReferenceNode(identifiers.syntax.resultRecord, undefined),
+          factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+        );
 
     members.push(
       factory.createPropertySignature(
@@ -322,14 +336,7 @@ const generateWithPropertySignature = (
               undefined,
               'value',
               undefined,
-
-              factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(
-                  identifiers.syntax.resultRecord,
-                  undefined,
-                ),
-                factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
-              ),
+              valueParamType,
               undefined,
             ),
           ],

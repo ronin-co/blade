@@ -15,11 +15,10 @@ exports[`module query declaration constant a basic model 1`] = `
         with: {
             <T = Account | null>(options: CombinedInstructions["with"]): T;
             id: <T = Account | null>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin.createdAt"]) => T;
-            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin.createdBy"]) => T;
-            "ronin.locked": <T = Account | null>(value: ResultRecord["ronin.locked"]) => T;
-            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin.updatedAt"]) => T;
-            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
             name: <T = Account | null>(value: string) => T;
             email: <T = Account | null>(value: string) => T;
         };
@@ -37,11 +36,10 @@ exports[`module query declaration constant a basic model 1`] = `
         with: {
             <T = Accounts>(options: CombinedInstructions["with"]): T;
             id: <T = Accounts>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T;
-            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T;
-            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T;
-            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T;
-            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T;
+            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
             name: <T = Accounts>(value: string) => T;
             email: <T = Accounts>(value: string) => T;
         };
@@ -70,11 +68,10 @@ exports[`module query declaration constant with multiple models 1`] = `
         with: {
             <T = Account | null>(options: CombinedInstructions["with"]): T;
             id: <T = Account | null>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin.createdAt"]) => T;
-            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin.createdBy"]) => T;
-            "ronin.locked": <T = Account | null>(value: ResultRecord["ronin.locked"]) => T;
-            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin.updatedAt"]) => T;
-            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
             name: <T = Account | null>(value: string) => T;
             email: <T = Account | null>(value: string) => T;
         };
@@ -92,11 +89,10 @@ exports[`module query declaration constant with multiple models 1`] = `
         with: {
             <T = Accounts>(options: CombinedInstructions["with"]): T;
             id: <T = Accounts>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T;
-            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T;
-            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T;
-            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T;
-            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T;
+            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
             name: <T = Accounts>(value: string) => T;
             email: <T = Accounts>(value: string) => T;
         };
@@ -114,11 +110,10 @@ exports[`module query declaration constant with multiple models 1`] = `
         with: {
             <T = Post | null>(options: CombinedInstructions["with"]): T;
             id: <T = Post | null>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Post | null>(value: ResultRecord["ronin.createdAt"]) => T;
-            "ronin.createdBy": <T = Post | null>(value: ResultRecord["ronin.createdBy"]) => T;
-            "ronin.locked": <T = Post | null>(value: ResultRecord["ronin.locked"]) => T;
-            "ronin.updatedAt": <T = Post | null>(value: ResultRecord["ronin.updatedAt"]) => T;
-            "ronin.updatedBy": <T = Post | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+            "ronin.createdAt": <T = Post | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            "ronin.createdBy": <T = Post | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            "ronin.updatedAt": <T = Post | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            "ronin.updatedBy": <T = Post | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
             title: <T = Post | null>(value: string) => T;
             description: <T = Post | null>(value: string) => T;
         };
@@ -136,11 +131,10 @@ exports[`module query declaration constant with multiple models 1`] = `
         with: {
             <T = Posts>(options: CombinedInstructions["with"]): T;
             id: <T = Posts>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Posts>(value: ResultRecord["ronin.createdAt"]) => T;
-            "ronin.createdBy": <T = Posts>(value: ResultRecord["ronin.createdBy"]) => T;
-            "ronin.locked": <T = Posts>(value: ResultRecord["ronin.locked"]) => T;
-            "ronin.updatedAt": <T = Posts>(value: ResultRecord["ronin.updatedAt"]) => T;
-            "ronin.updatedBy": <T = Posts>(value: ResultRecord["ronin.updatedBy"]) => T;
+            "ronin.createdAt": <T = Posts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            "ronin.createdBy": <T = Posts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            "ronin.updatedAt": <T = Posts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            "ronin.updatedBy": <T = Posts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
             title: <T = Posts>(value: string) => T;
             description: <T = Posts>(value: string) => T;
         };

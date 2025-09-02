@@ -44,7 +44,6 @@ export const DEFAULT_FIELD_SLUGS = [
   'id',
   'ronin.createdAt',
   'ronin.createdBy',
-  'ronin.locked',
   'ronin.updatedAt',
   'ronin.updatedBy',
 ] satisfies Array<string>;
