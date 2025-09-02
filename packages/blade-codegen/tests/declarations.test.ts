@@ -16,7 +16,7 @@ describe('declarations', () => {
   test('import the query types from `blade-compiler`', () => {
     const output = printNodes([importBladeCompilerQueryTypesType]);
     expect(output).toStrictEqual(
-      `import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from \"blade-compiler\";\n`,
+      `import type { CombinedInstructions } from \"blade-compiler\";\n`,
     );
   });
 
