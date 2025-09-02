@@ -181,3 +181,130 @@ You can even use it on multiple different nesting levels at once:
 ```ts
 use.accounts.with([{ handle: { being: ['juri', 'leo'] } }, { name: { endingWith: 'lamprecht' } }]);
 ```
+
+## Sub Queries
+
+If models in your database schema are related to each other, it is recommended to define
+those relationships using [Link fields](/models/fields#link) instead of using primitive
+field types such as String.
+
+Doing so lets the query syntax behave more intelligently when you interact with the records
+of those models, and thereby enables you to write shorter queries.
+
+For example, let's assume your database schema contains the following models:
+
+```ts title="schema/index.ts"
+export const Account = model({
+  slug: 'account',
+
+  fields: {
+    handle: string()
+  }
+});
+
+export const Member = model({
+  slug: 'member',
+
+  fields:
+    account: link({ target: 'account' })
+  }
+});
+```
+
+Because you've established a relationship between the two models using
+a [Link field](/models/fields#link), you could now run queries like the following:
+
+```ts
+// Add a new account record
+await add.account.with.handle('elaine');
+
+// Add a new member record
+await add.member.with.account({ handle: 'elaine' });
+```
+
+As you can see above, the first query is quite "boring" in the sense that it simply adds a
+new account record whose `handle` field has a value of "elaine". That's it.
+
+The second query, however, is the interesting one. It creates a new member record
+whose `account` field targets the record we previously created. But instead of
+passing the ID of that record, it provides an object of fields, and that object is used
+to **resolve** the target record. In other words, the target record is first
+resolved using the provided object, and then the ID of the record that was found is
+stored as the value of the `account` field.
+
+The provided object follows the syntax of the [`with` instruction](/queries/instructions#asserting-fields-with).
+
+This makes your code more readable, because you don't need to pass the result of
+the first query to the second query, but it also ensures the best possible performance,
+since it avoids a request waterfall to your database. Meaning instead of sending two
+serial requests, only one with two queries inside will be sent, which is faster.
+
+You could therefore even bundle them up into a single transaction, which is necessary
+if you want to execute two queries at once:
+
+```ts
+await batch(() => [
+  add.account.with.handle('elaine'),
+  add.member.with.account({ handle: 'elaine' })
+]);
+```
+
+Thanks to [Dot Notation](#dot-notation), you could even make the second query look more
+similar to the first one, if you are into especially clean code:
+
+```ts
+await batch(() => [
+  add.account.with.handle('elaine'),
+  add.member.with.account.handle('elaine')
+]);
+```
+
+The same syntax also works with any other [Query Type](#query-type), meaning you can use
+it when adding records, retrying, modifying, removing, or even counting them:
+
+```ts
+await set.member({
+  with: { id: '1234' },
+  to: { account: { handle: 'elaine' } }
+});
+```
+
+If you are writing records and the related record you are trying to resolve does not exist,
+the value of the Link field will be `null`. There currently isn't a way to make the query
+fail if the related record doesn't exist, but such a feature is planned.
+
+### Unrelated Records
+
+If the built-in syntax for automatically resolving records via [Link fields](/models/fields#link)
+(described above) is not sufficient for you, you can provide fullly-fledged sub queries instead
+of only providing the object for asserting fields of the target record.
+
+For the other examples above, we had been applying mutations. For the next example, we will read
+records instead, and use a sub query to filter the records. The same syntax can be applied to any
+kind of query, however.
+
+```ts
+use.messages(() => ({
+  with: {
+    pending: false,
+    author: use.author({
+      with: { email: { containing: 'site.co' }},
+      selecting: ['id']
+    })
+  },
+  orderedBy: {
+    ascending: ['readAt']
+  }
+}));
+```
+
+The query above retrieves all records of the "message" model whose `pending` field is `false` and
+whose `author` field matches a record of the "author" model that has an `email` field containing
+the string "@site.co".
+
+The key requirement in order for a sub query to work is `() => ({})`, meaning the arrow function
+you can see in the example above. It tells all nested queries to inline themselves into the parent
+query instead of getting executed. Since executing the nested queries would cause a data waterfall
+(multiple requests to the database), the query is instead merged/inlined into the representation of
+the parent query, which means that only single large query is produced and executed for the entire
+code shown above.
