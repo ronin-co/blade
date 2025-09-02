@@ -20,9 +20,9 @@ For example, your database schema might contain a model called "Account" represe
 
 When using Blade, your database schema is defined in code, which provides maximum flexibility and benefits such as **revisions**, **reviews** and **reverts** via Git. This page provides an overview of how to define your database schema in code.
 
-## Getting Started
+## Defining Models
 
-Start by creating the file (in your project's root directory) that will contain the model definitions for your project:
+At the root of your project, start by creating the file that will contain your model definitions:
 
 ```bash title="Terminal"
 mkdir schema
@@ -49,13 +49,13 @@ export const Account = model({
 
 In the example above, we defined a model named `Account` with three fields: `name`, `handle`, and `verifiedAt`. Each field is defined using a key-value pair where the key is the slug of the field and the value is the type of the field. See all available field types in the [Field Types](#Field%20Types) section.
 
-Once you've defined your models locally, you can compare them to the current state of your database like this:
+Once you've defined your models, you can compare them to the current state of your database:
 
 ```bash title="Terminal"
 blade diff
 ```
 
-Running the command above will produce a so-called "migration protocol" in the `schema` directory. This protocol contains all the steps required to update your database to match your local schema definition.
+Running the command above will produce a so-called "migration protocol" in the `.ronin` directory. This protocol contains all the steps required to update your database to match your local schema definition.
 
 To apply the changes to your database, run the following command:
 
@@ -65,13 +65,17 @@ blade apply
 
 Afterward, you can start sending queries to your database that make use of the newly added (or updated) models in your database schema.
 
-In the future, if you'd like to immediately apply your local changes to your database without first reviewing them, run thhis command:
+In the future, if you'd like to immediately apply your local changes to your database without first reviewing them, run this command:
 
 ```bash title="Terminal"
 blade diff --apply
 ```
 
-Like this, the generated migration protocol will be applied immediately.
+Like this, the generated migration protocol will be applied immediately, without you being able to review it first. This can be especially useful during development as it maximizes efficiency, but we recommend against applying migrations without reviewing them in production.
+
+In general, when working in a team, you most likely want to run `blade diff` in order to generate a migration protocol for your change, commit it to a pull request together with your schema change, have it be reviewed by your team, and then run `blade apply` after the pull request was approved.
+
+An update will also be provided in the future to automatically apply migrations that were merged onto the `main` branch of your repository, so that you don't need to run `blade apply` yourself.
 
 ## Field Types
 
