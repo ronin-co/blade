@@ -35,11 +35,12 @@ import type {
  *      with: ReducedFunction & {
  *         <T = User | null>(options: CombinedInstructions["with"]): T;
  *         id: <T = User | null>(value: ResultRecord["id"]) => T;
- *         "ronin.createdAt": <T = User | null>(value: ResultRecord["ronin.createdAt"]) => T;
- *         "ronin.createdBy": <T = User | null>(value: ResultRecord["ronin.createdBy"]) => T;
- *         "ronin.locked": <T = User | null>(value: ResultRecord["ronin.locked"]) => T;
- *         "ronin.updatedAt": <T = User | null>(value: ResultRecord["ronin.updatedAt"]) => T;
- *         "ronin.updatedBy": <T = User | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+ *         ronin: {
+ *          createdAt: <T = User | null>(value: ResultRecord["ronin.createdAt"]) => T;
+ *          createdBy: <T = User | null>(value: ResultRecord["ronin.createdBy"]) => T;
+ *          updatedAt: <T = User | null>(value: ResultRecord["ronin.updatedAt"]) => T;
+ *          updatedBy: <T = User | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+ *         };
  *         name: <T = User | null>(value: string) => T;
  *         email: <T = User | null>(value: string) => T;
  *         // [...]
@@ -57,11 +58,12 @@ import type {
  *      with: ReducedFunction & {
  *         <T = Users>(options: CombinedInstructions["with"]): T;
  *         id: <T = Users>(value: ResultRecord["id"]) => T;
- *         "ronin.createdAt": <T = Users>(value: ResultRecord["ronin.createdAt"]) => T;
- *         "ronin.createdBy": <T = Users>(value: ResultRecord["ronin.createdBy"]) => T;
- *         "ronin.locked": <T = Users>(value: ResultRecord["ronin.locked"]) => T;
- *         "ronin.updatedAt": <T = Users>(value: ResultRecord["ronin.updatedAt"]) => T;
- *         "ronin.updatedBy": <T = Users>(value: ResultRecord["ronin.updatedBy"]) => T;
+ *         ronin: {
+ *           createdAt: <T = Users>(value: ResultRecord["ronin.createdAt"]) => T;
+ *           createdBy: <T = Users>(value: ResultRecord["ronin.createdBy"]) => T;
+ *           updatedAt: <T = Users>(value: ResultRecord["ronin.updatedAt"]) => T;
+ *           updatedBy: <T = Users>(value: ResultRecord["ronin.updatedBy"]) => T;
+ *         };
  *         name: <T = Users>(value: string) => T;
  *         email: <T = Users>(value: string) => T;
  *         // [...]
@@ -297,57 +299,13 @@ const generateWithPropertySignature = (
     returnTypeNode,
   );
 
-  const members = new Array<TypeElement>(rootInstructionHandler);
-
-  for (const slug of DEFAULT_FIELD_SLUGS) {
-    const normalizedSlug = slug.includes('.') ? JSON.stringify(slug) : slug;
-    const [slugPrefix, ...slugSuffix] = slug.split('.');
-
-    const valueParamType = slug.includes('.')
-      ? factory.createIndexedAccessTypeNode(
-          factory.createIndexedAccessTypeNode(
-            factory.createTypeReferenceNode(identifiers.syntax.resultRecord),
-            factory.createLiteralTypeNode(factory.createStringLiteral(slugPrefix)),
-          ),
-          factory.createLiteralTypeNode(factory.createStringLiteral(slugSuffix.join(''))),
-        )
-      : factory.createIndexedAccessTypeNode(
-          factory.createTypeReferenceNode(identifiers.syntax.resultRecord, undefined),
-          factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
-        );
-
-    members.push(
-      factory.createPropertySignature(
-        undefined,
-        normalizedSlug,
-        undefined,
-        factory.createFunctionTypeNode(
-          [
-            factory.createTypeParameterDeclaration(
-              undefined,
-              typeArgumentIdentifiers.default,
-              undefined,
-              modelIdentifier,
-            ),
-          ],
-          [
-            factory.createParameterDeclaration(
-              undefined,
-              undefined,
-              'value',
-              undefined,
-              valueParamType,
-              undefined,
-            ),
-          ],
-          returnTypeNode,
-        ),
-      ),
-    );
-  }
+  const members = new Array<TypeElement>(
+    rootInstructionHandler,
+    ...generateDefaultFieldWithQueries(modelIdentifier, returnTypeNode),
+  );
 
   for (const [slug, field] of Object.entries(modelFields)) {
-    if (DEFAULT_FIELD_SLUGS.includes(slug)) continue;
+    if (DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug))) continue;
 
     members.push(
       factory.createPropertySignature(
@@ -393,4 +351,106 @@ const generateWithPropertySignature = (
       factory.createTypeLiteralNode(members),
     ]),
   );
+};
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+const generateDefaultFieldWithQueries = (
+  modelIdentifier: TypeNode,
+  returnTypeNode: TypeNode,
+): Array<TypeElement> => {
+  const members = new Array<TypeElement>();
+
+  const topLevelFields = DEFAULT_FIELD_SLUGS.filter((slug) => !slug.startsWith('ronin.'));
+  for (const slug of topLevelFields) {
+    members.push(
+      factory.createPropertySignature(
+        undefined,
+        slug,
+        undefined,
+        factory.createFunctionTypeNode(
+          [
+            factory.createTypeParameterDeclaration(
+              undefined,
+              typeArgumentIdentifiers.default,
+              undefined,
+              modelIdentifier,
+            ),
+          ],
+          [
+            factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              'value',
+              undefined,
+              factory.createIndexedAccessTypeNode(
+                factory.createTypeReferenceNode(
+                  identifiers.syntax.resultRecord,
+                  undefined,
+                ),
+                factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+              ),
+              undefined,
+            ),
+          ],
+          returnTypeNode,
+        ),
+      ),
+    );
+  }
+
+  const metaFields = DEFAULT_FIELD_SLUGS.filter((slug) => slug.startsWith('ronin.'));
+  const metaFieldsPropertySignatures = metaFields.map((slug) => {
+    const normalizedSlug = slug.replaceAll('ronin.', '');
+
+    return factory.createPropertySignature(
+      undefined,
+      normalizedSlug,
+      undefined,
+      factory.createFunctionTypeNode(
+        [
+          factory.createTypeParameterDeclaration(
+            undefined,
+            typeArgumentIdentifiers.default,
+            undefined,
+            modelIdentifier,
+          ),
+        ],
+        [
+          factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            'value',
+            undefined,
+            factory.createIndexedAccessTypeNode(
+              factory.createIndexedAccessTypeNode(
+                factory.createTypeReferenceNode(identifiers.syntax.resultRecord),
+                factory.createLiteralTypeNode(factory.createStringLiteral('ronin')),
+              ),
+              factory.createLiteralTypeNode(factory.createStringLiteral(normalizedSlug)),
+            ),
+            undefined,
+          ),
+        ],
+        returnTypeNode,
+      ),
+    );
+  });
+  members.push(
+    factory.createPropertySignature(
+      undefined,
+      'ronin',
+      undefined,
+      factory.createIntersectionTypeNode([
+        factory.createExpressionWithTypeArguments(
+          identifiers.utils.reducedFunction,
+          undefined,
+        ),
+        factory.createTypeLiteralNode(metaFieldsPropertySignatures),
+      ]),
+    ),
+  );
+
+  return members;
 };
