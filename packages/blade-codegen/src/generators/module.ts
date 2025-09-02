@@ -80,7 +80,7 @@ export const generateQueryDeclarationStatements = (
   queryType: (typeof DML_QUERY_TYPES)[number] | 'use',
 ): VariableStatement =>
   factory.createVariableStatement(
-    [factory.createModifier(SyntaxKind.DeclareKeyword)],
+    undefined,
     factory.createVariableDeclarationList(
       [
         factory.createVariableDeclaration(
