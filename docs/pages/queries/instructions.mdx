@@ -292,4 +292,95 @@ This field should never be exposed to your application (neither client- nor serv
 
 In such a case, you may therefore want to add the `password` field to `selecting`.
 
-Similarly, the value of a particular field on a record might be so large that you don’t want to receive it on a particular client in order to avoid hitting memory constraints. This is another case in which using `selecting` will help you.
+Similarly, the value of a particular field on a record might be so large that you don't want to receive it on a particular client in order to avoid hitting memory constraints. This is another case in which using `selecting` will help you.
+
+## Mounting Fields (`including`)
+
+Every query returns all fields stored in the database for the record that is being
+retrieved, unless you choose to limit which fields get returned using
+the [`selecting` instruction](#selecting-fields-selecting). The values of those
+fields match the exact values stored in the database.
+
+If you would like to add additional properties to the record object you've
+retrieved or replace the values of existing properties, you can use the
+`including` instruction, which lets you mount arbitrary fields with arbitrary values.
+
+For example, let's consider the following model:
+
+```ts title="schema/index.ts"
+export const Team = model({
+  slug: 'team',
+
+  fields: {
+    name: string()
+  }
+});
+```
+
+As you can see, we only store a field called `name` in the database. The model does
+not have any other fields. If we now retrieve a record for this model, we would
+retrieve an object like the following one:
+
+```ts
+const team = use.team();
+
+// { name: 'Engineering' }
+```
+
+Assuming that we want to see another field called `handle`, but we don't want to
+store that field in the database, we can simply attach it like this:
+
+```ts
+const team = use.team.including.handle('engineering');
+
+// { name: 'Engineering', handle: 'engineering' }
+```
+
+The same would work with multiple fields, of course:
+
+```ts
+const team = use.team.including({
+  handle: 'engineering',
+  company: 'acme'
+});
+
+// { name: 'Engineering', handle: 'engineering', company: 'acme' }
+```
+
+### Joining Records
+
+Instead of mounting simple field values (described above), we can also
+mount entire records as fields on the parent record. The SQL equivalent
+of this behavior is called a "Join".
+
+In the majority of cases, if you would like to resolve a record that is
+related to the current record via a [Link field](/models/fields#link),
+there is no need for you to manually join any records. Instead, you only
+need to provide a `using: ['field']` instruction to your query, where
+`field` is the slug of the Link field for which you want to resolve the
+related record.
+
+If you need to join a record for whose model you did not establish a
+relationship using a [Link field](/models/fields#link), or you need to
+customize the join in a special way, you can join the unrelated record
+by placing a fully-fledged [Sub Query](/queries#sub-queries) in the
+`including` instruction:
+
+```ts
+const team = use.team.including(f => ({
+  handle: 'engineering',
+  company: use.company.with.name(f.company)
+}));
+
+// {
+//   name: 'Engineering',
+//   handle: 'engineering',
+//   company: { id: '1234', name: 'acme' }
+// }
+```
+
+Behind the curtains, Blade will automatically, based on the instructions
+provided to the parent query and the sub query, determine whether to generate
+an SQL Join or an SQL Sub Query (since the Blade query syntax compiles to SQL),
+in order to maximize performance.
+
