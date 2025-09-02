@@ -99,23 +99,7 @@ use.accounts.with({
 });
 ```
 
-## Paginating Records (`before`, `after`, `limitedTo`)
-
-When retrieving multiple records (such as using `get.accounts()`), a maximum of 20 records are returned at once.
-
-This limit ensures that memory overflows are avoided by default. This means there cannot be a scenario where your Queries retrieve so many records that the memory available to the receiving application (such as a [Vercel Edge Function](https://vercel.com/docs/functions)]) fills up, and the application crashes.
-
-Furthermore, always returning the same amount of records within your application (rather than returning more records if there are more available) ensures consistent response times, as the response time does not depend on how many records are being provided. Like this, you will be able to track and improve your app’s performance much more easily.
-
-To retrieve more than 20 records, making use of “pagination” is advised, which means additional records are loaded on demand. If your application provides a UI, this may, for example, manifest in the following two ways:
-
-- The user looking at the list of Records may request more by clicking on “Next Page”.
-
-- The user looking at the list of Records may request more by scrolling downward.
-
-Which of these implementations (or any other) you may choose is up to you.
-
-### Next Page
+## Next Page (`after`)
 
 When running a Query such as `get.accounts` while more than 20 records are available for the respective model, a `moreAfter` property will be provided to you (the property only exists if more than 20 records are available; otherwise it is not defined).
 
@@ -139,7 +123,7 @@ moreAccounts.moreAfter;
 
 You can repeat the above as often as you want to until there are no more records available (in which case `moreAfter` will not be defined anymore). Every time you run the query, a new `moreAfter` cursor will be provided to you.
 
-### Previous Page
+## Previous Page (`before`)
 
 If you would like to implement bi-directional pagination, you may use the `before` instruction and its `moreBefore` counterpart, which behave exactly the same as `after` and `moreAfter`, except that they let you paginate “upwards” instead of “downwards”:
 
@@ -152,7 +136,7 @@ moreAccounts.moreBefore;
 
 For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in Blade, which aren’t displayed. You could then use `before` to reveal more of the “previous records” in the list.
 
-### Custom Page Length
+## Limited Amount (`limitedTo`)
 
 As mentioned above, by default, 20 records are provided per page and more records can be obtained by paginating them, meaning by loading more pages.
 

@@ -185,7 +185,19 @@ await add.account.with.handle('elaine', {
 
 ## `usePagination` (Client)
 
-Allows for paginating a read query and thereby modifies the result of the respective `use` hook associated with that read query.
+When retrieving multiple records (such as using `get.accounts()`), a maximum of 20 records are returned at once.
+
+This limit ensures that memory overflows are avoided by default. This means there cannot be a scenario where your Queries retrieve so many records that the memory available to your Blade application (which is determined by your cloud provider) fills up, and the application crashes.
+
+Furthermore, always returning the same amount of records within your application (rather than returning more records if there are more available) ensures consistent response times, as the response time does not depend on how many records are being provided. Like this, you will be able to track and improve your app’s performance much more easily.
+
+To retrieve more than 20 records, making use of “pagination” is advised, which means additional records are loaded on demand. If your application provides a UI, this may, for example, manifest in the following two ways:
+
+- The user looking at the list of Records may request more by clicking on “Next Page”.
+- The user looking at the list of Records may request more by scrolling downward.
+
+Which of these implementations (or any other) you may choose is up to you. The `usePagination` hook provides a function that you can
+call to easily load the next page without having to modify your query.
 
 For example, you might use the following read query in your page (on the server):
 
