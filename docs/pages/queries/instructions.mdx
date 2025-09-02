@@ -99,68 +99,6 @@ use.accounts.with({
 });
 ```
 
-## Next Page (`after`)
-
-When running a Query such as `get.accounts` while more than 20 records are available for the respective model, a `moreAfter` property will be provided to you (the property only exists if more than 20 records are available; otherwise it is not defined).
-
-This property contains a so-called “cursor” pointing to the next page of records:
-
-```ts
-const accounts = use.accounts();
-
-// Contains the cursor of the next page.
-accounts.moreAfter;
-```
-
-Whenever you would like to load more records, you can then pass the value of `moreAfter` back to Blade, and you will be provided with the next 20 records:
-
-```ts
-const moreAccounts = use.accounts.after(accounts.moreAfter);
-
-// Contains the cursor of the next page.
-moreAccounts.moreAfter;
-```
-
-You can repeat the above as often as you want to until there are no more records available (in which case `moreAfter` will not be defined anymore). Every time you run the query, a new `moreAfter` cursor will be provided to you.
-
-## Previous Page (`before`)
-
-If you would like to implement bi-directional pagination, you may use the `before` instruction and its `moreBefore` counterpart, which behave exactly the same as `after` and `moreAfter`, except that they let you paginate “upwards” instead of “downwards”:
-
-```ts
-const moreAccounts = use.accounts.before(accounts.moreBefore);
-
-// Contains the cursor of the next page (upwards).
-moreAccounts.moreBefore;
-```
-
-For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in Blade, which aren’t displayed. You could then use `before` to reveal more of the “previous records” in the list.
-
-## Limited Amount (`limitedTo`)
-
-As mentioned above, by default, 20 records are provided per page and more records can be obtained by paginating them, meaning by loading more pages.
-
-However, in special cases in which you would like to retrieve more than 20 records from Blade without having to load multiple pages, you may decide to use the `limitedTo` instruction to provide a custom page length:
-
-```ts
-use.accounts.limitedTo(50);
-```
-
-As with other query instructions, `limitedTo` can be combined with the `after` and `before` instructions used for retrieving a specific page of records:
-
-```ts
-use.accounts({
-  after: '...',
-  limitedTo: 100,
-});
-```
-
-If you would like to display an infinite amount of records in your UI (for example displaying the list of members of a team in your app, which might be allowed to be infinite), we strongly recommend using pagination due to the reasons mentioned in the section above. In those cases, you should therefore only resort to `limitedTo` if you want to decrease or increase the page size slightly, not to retrieve all records.
-
-If, however, there is a guarantee within the conceptual model of your application that a certain kind of record can only exist a finite amount of times (or to be specific, only a finite amount or less than that is always displayed), you may decide to use `limitedTo` in order to retrieve all records at once.
-
-The maximum value allowed by `limitedTo` (the maximum page length) is `1000`. We strongly advice against making use of such a high value unless truly necessary.
-
 ## Ordering Records (`orderedBy`)
 
 Regardless of whether a singular or multiple records are being retrieved, the returned records will always be ordered by their creation date by default, meaning that the most recently created records will be returned first.
@@ -368,3 +306,64 @@ provided to the parent query and the sub query, determine whether to generate
 an SQL Join or an SQL Sub Query (since the Blade query syntax compiles to SQL),
 in order to maximize performance.
 
+## Next Page (`after`)
+
+When running a Query such as `get.accounts` while more than 20 records are available for the respective model, a `moreAfter` property will be provided to you (the property only exists if more than 20 records are available; otherwise it is not defined).
+
+This property contains a so-called “cursor” pointing to the next page of records:
+
+```ts
+const accounts = use.accounts();
+
+// Contains the cursor of the next page.
+accounts.moreAfter;
+```
+
+Whenever you would like to load more records, you can then pass the value of `moreAfter` back to Blade, and you will be provided with the next 20 records:
+
+```ts
+const moreAccounts = use.accounts.after(accounts.moreAfter);
+
+// Contains the cursor of the next page.
+moreAccounts.moreAfter;
+```
+
+You can repeat the above as often as you want to until there are no more records available (in which case `moreAfter` will not be defined anymore). Every time you run the query, a new `moreAfter` cursor will be provided to you.
+
+## Previous Page (`before`)
+
+If you would like to implement bi-directional pagination, you may use the `before` instruction and its `moreBefore` counterpart, which behave exactly the same as `after` and `moreAfter`, except that they let you paginate “upwards” instead of “downwards”:
+
+```ts
+const moreAccounts = use.accounts.before(accounts.moreBefore);
+
+// Contains the cursor of the next page (upwards).
+moreAccounts.moreBefore;
+```
+
+For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in Blade, which aren’t displayed. You could then use `before` to reveal more of the “previous records” in the list.
+
+## Limited Amount (`limitedTo`)
+
+As mentioned above, by default, 20 records are provided per page and more records can be obtained by paginating them, meaning by loading more pages.
+
+However, in special cases in which you would like to retrieve more than 20 records from Blade without having to load multiple pages, you may decide to use the `limitedTo` instruction to provide a custom page length:
+
+```ts
+use.accounts.limitedTo(50);
+```
+
+As with other query instructions, `limitedTo` can be combined with the `after` and `before` instructions used for retrieving a specific page of records:
+
+```ts
+use.accounts({
+  after: '...',
+  limitedTo: 100,
+});
+```
+
+If you would like to display an infinite amount of records in your UI (for example displaying the list of members of a team in your app, which might be allowed to be infinite), we strongly recommend using pagination due to the reasons mentioned in the section above. In those cases, you should therefore only resort to `limitedTo` if you want to decrease or increase the page size slightly, not to retrieve all records.
+
+If, however, there is a guarantee within the conceptual model of your application that a certain kind of record can only exist a finite amount of times (or to be specific, only a finite amount or less than that is always displayed), you may decide to use `limitedTo` in order to retrieve all records at once.
+
+The maximum value allowed by `limitedTo` (the maximum page length) is `1000`. We strongly advice against making use of such a high value unless truly necessary.
