@@ -263,8 +263,8 @@ export const useLinkEvents = (
 /**
  * Hook for paginating a list of records intelligently.
  *
- * @param nextPage - The pagination identifier provided for a list of records by `use`.
- * In the case of `const accounts = use.accounts();`, for example, `accounts.nextPage`
+ * @param moreAfter - The pagination identifier provided for a list of records by `use`.
+ * In the case of `const accounts = use.accounts();`, for example, `accounts.moreAfter`
  * should be passed.
  * @param options - A list of options for customizing the pagination behavior.
  * @param options.updateAddressBar - By default, a `?page` parameter will be added to the
@@ -274,7 +274,7 @@ export const useLinkEvents = (
  * @returns A function that can be invoked to load the next page.
  */
 export const usePagination = (
-  nextPage: string | null,
+  moreAfter: string | null,
   options?: Partial<Pick<PageFetchingOptions, 'updateAddressBar'>>,
 ): { paginate: () => void; resetPagination: () => void } => {
   const { transitionPage } = usePageTransition();
@@ -287,7 +287,7 @@ export const usePagination = (
   useEffect(() => {
     if (!loadingMore.current) return;
     loadingMore.current = false;
-  }, [nextPage]);
+  }, [moreAfter]);
 
   const resetPagination = () => {
     const privateLocation = privateLocationRef.current;
@@ -307,7 +307,7 @@ export const usePagination = (
     transitionPage(privateLocation.pathname + (params ? `?${params}` : ''));
   };
 
-  if (!nextPage) {
+  if (!moreAfter) {
     return {
       paginate: () => {
         console.debug(
@@ -332,7 +332,7 @@ export const usePagination = (
     // UI, so we're storing it inside a reference that persists across renders. Then the
     // address bar is updated in the effect above.
     const newSearchParams = new URLSearchParams(privateLocation.searchParams);
-    newSearchParams.set('page', nextPage);
+    newSearchParams.set('page', moreAfter);
     const newPath = `${privateLocation.pathname}?${newSearchParams.toString()}`;
 
     loadingMore.current = true;
@@ -349,7 +349,7 @@ export const usePagination = (
  *
  * @param items - An array of items (of any type) that should be accumulated. For example,
  * this could be a list of React children.
- * @param options.previousPage - The `previousPage` property of the record list that
+ * @param options.moreBefore - The `moreBefore` property of the record list that
  * should be paginated.
  * @param options.allowUpdates - Controls whether changes to the provided items should be
  * allowed, or if they should instead just be ignored.
@@ -358,9 +358,9 @@ export const usePagination = (
  */
 export const usePaginationBuffer = <T>(
   items: T[],
-  options: { previousPage?: string; allowUpdates?: boolean },
+  options: { moreBefore?: string; allowUpdates?: boolean },
 ): [T[], (factory: (prevState: T[]) => T[]) => void] => {
-  const { allowUpdates = true, previousPage: page } = options;
+  const { allowUpdates = true, moreBefore: page } = options;
 
   const [renderedChildren, setRenderedChildren] = useReduce<{
     buffered: boolean;
