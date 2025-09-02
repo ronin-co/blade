@@ -38,7 +38,7 @@ declare module "blade/types" {
     };
 }
 declare module "blade/server/hooks" {
-    declare const use: {
+    const use: {
         /* Get a single account record */
         account: ReducedFunction & {
             <T = Account | null>(options?: Partial<CombinedInstructions>): T;
@@ -49,13 +49,15 @@ declare module "blade/server/hooks" {
             orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
             selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
             using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
-            with: {
+            with: ReducedFunction & {
                 <T = Account | null>(options: CombinedInstructions["with"]): T;
                 id: <T = Account | null>(value: ResultRecord["id"]) => T;
-                "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
                 name: <T = Account | null>(value: string) => T;
                 email: <T = Account | null>(value: string) => T;
             };
@@ -70,13 +72,15 @@ declare module "blade/server/hooks" {
             orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
             selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
             using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
-            with: {
+            with: ReducedFunction & {
                 <T = Accounts>(options: CombinedInstructions["with"]): T;
                 id: <T = Accounts>(value: ResultRecord["id"]) => T;
-                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
                 name: <T = Accounts>(value: string) => T;
                 email: <T = Accounts>(value: string) => T;
             };
@@ -126,7 +130,7 @@ declare module "blade/types" {
     };
 }
 declare module "blade/server/hooks" {
-    declare const use: {
+    const use: {
         /* Get a single account record */
         account: ReducedFunction & {
             <T = Account | null>(options?: Partial<CombinedInstructions>): T;
@@ -137,13 +141,15 @@ declare module "blade/server/hooks" {
             orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
             selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
             using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
-            with: {
+            with: ReducedFunction & {
                 <T = Account | null>(options: CombinedInstructions["with"]): T;
                 id: <T = Account | null>(value: ResultRecord["id"]) => T;
-                "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
                 name: <T = Account | null>(value: string) => T;
                 email: <T = Account | null>(value: string) => T;
                 image: <T = Account | null>(value: StoredObject) => T;
@@ -159,13 +165,15 @@ declare module "blade/server/hooks" {
             orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
             selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
             using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
-            with: {
+            with: ReducedFunction & {
                 <T = Accounts>(options: CombinedInstructions["with"]): T;
                 id: <T = Accounts>(value: ResultRecord["id"]) => T;
-                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
                 name: <T = Accounts>(value: string) => T;
                 email: <T = Accounts>(value: string) => T;
                 image: <T = Accounts>(value: StoredObject) => T;
@@ -203,7 +211,7 @@ interface ReducedFunction {
 }
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
-    declare const use: {};
+    const use: {};
 }
 "
 `;

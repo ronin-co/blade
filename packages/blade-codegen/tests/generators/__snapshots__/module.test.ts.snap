@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`module query declaration constant a basic model 1`] = `
-"declare const get: {
+"const get: {
     /* Get a single account record */
     account: ReducedFunction & {
         <T = Account | null>(options?: Partial<CombinedInstructions>): T;
@@ -12,13 +12,15 @@ exports[`module query declaration constant a basic model 1`] = `
         orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
         selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
         using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
-        with: {
+        with: ReducedFunction & {
             <T = Account | null>(options: CombinedInstructions["with"]): T;
             id: <T = Account | null>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            ronin: ReducedFunction & {
+                createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            };
             name: <T = Account | null>(value: string) => T;
             email: <T = Account | null>(value: string) => T;
         };
@@ -33,13 +35,15 @@ exports[`module query declaration constant a basic model 1`] = `
         orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
         selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
         using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
-        with: {
+        with: ReducedFunction & {
             <T = Accounts>(options: CombinedInstructions["with"]): T;
             id: <T = Accounts>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            ronin: ReducedFunction & {
+                createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            };
             name: <T = Accounts>(value: string) => T;
             email: <T = Accounts>(value: string) => T;
         };
@@ -49,12 +53,12 @@ exports[`module query declaration constant a basic model 1`] = `
 `;
 
 exports[`module query declaration constant with no modules 1`] = `
-"declare const get: {};
+"const get: {};
 "
 `;
 
 exports[`module query declaration constant with multiple models 1`] = `
-"declare const get: {
+"const get: {
     /* Get a single account record */
     account: ReducedFunction & {
         <T = Account | null>(options?: Partial<CombinedInstructions>): T;
@@ -65,13 +69,15 @@ exports[`module query declaration constant with multiple models 1`] = `
         orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
         selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
         using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
-        with: {
+        with: ReducedFunction & {
             <T = Account | null>(options: CombinedInstructions["with"]): T;
             id: <T = Account | null>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            ronin: ReducedFunction & {
+                createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            };
             name: <T = Account | null>(value: string) => T;
             email: <T = Account | null>(value: string) => T;
         };
@@ -86,13 +92,15 @@ exports[`module query declaration constant with multiple models 1`] = `
         orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
         selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
         using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
-        with: {
+        with: ReducedFunction & {
             <T = Accounts>(options: CombinedInstructions["with"]): T;
             id: <T = Accounts>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            ronin: ReducedFunction & {
+                createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            };
             name: <T = Accounts>(value: string) => T;
             email: <T = Accounts>(value: string) => T;
         };
@@ -107,13 +115,15 @@ exports[`module query declaration constant with multiple models 1`] = `
         orderedBy: <T = Post | null>(value: CombinedInstructions["orderedBy"]) => T;
         selecting: <T = Post | null>(value: CombinedInstructions["selecting"]) => T;
         using: <T = Post | null>(value: CombinedInstructions["using"]) => T;
-        with: {
+        with: ReducedFunction & {
             <T = Post | null>(options: CombinedInstructions["with"]): T;
             id: <T = Post | null>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Post | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            "ronin.createdBy": <T = Post | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            "ronin.updatedAt": <T = Post | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            "ronin.updatedBy": <T = Post | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            ronin: ReducedFunction & {
+                createdAt: <T = Post | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                createdBy: <T = Post | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                updatedAt: <T = Post | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                updatedBy: <T = Post | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            };
             title: <T = Post | null>(value: string) => T;
             description: <T = Post | null>(value: string) => T;
         };
@@ -128,13 +138,15 @@ exports[`module query declaration constant with multiple models 1`] = `
         orderedBy: <T = Posts>(value: CombinedInstructions["orderedBy"]) => T;
         selecting: <T = Posts>(value: CombinedInstructions["selecting"]) => T;
         using: <T = Posts>(value: CombinedInstructions["using"]) => T;
-        with: {
+        with: ReducedFunction & {
             <T = Posts>(options: CombinedInstructions["with"]): T;
             id: <T = Posts>(value: ResultRecord["id"]) => T;
-            "ronin.createdAt": <T = Posts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            "ronin.createdBy": <T = Posts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            "ronin.updatedAt": <T = Posts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            "ronin.updatedBy": <T = Posts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            ronin: ReducedFunction & {
+                createdAt: <T = Posts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                createdBy: <T = Posts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                updatedAt: <T = Posts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                updatedBy: <T = Posts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+            };
             title: <T = Posts>(value: string) => T;
             description: <T = Posts>(value: string) => T;
         };
