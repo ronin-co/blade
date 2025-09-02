@@ -14,7 +14,6 @@ import type {
   PropertySignature,
   TypeElement,
   TypeNode,
-  TypeReferenceNode,
   VariableStatement,
 } from 'typescript';
 
@@ -257,7 +256,7 @@ const generateSchemaProperty = (
  * @todo(@nurodev): Add documentation
  */
 const generateRootInstructionHandler = (
-  modelIdentifier: TypeReferenceNode,
+  modelIdentifier: TypeNode,
   returnTypeNode: TypeNode,
 ) =>
   factory.createCallSignature(
@@ -291,7 +290,7 @@ const generateRootInstructionHandler = (
  * @todo(@nurodev): Add documentation
  */
 const generateWithPropertySignature = (
-  modelIdentifier: TypeReferenceNode,
+  modelIdentifier: TypeNode,
   modelFields: Model['fields'],
   models: Array<Model>,
   returnTypeNode: TypeNode,
