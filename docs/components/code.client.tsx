@@ -160,7 +160,7 @@ export const CodeBlock = (props: CodeBlockProps) => {
 
 const LANGUAGE_REGEX = /language-(\w+)/;
 
-export interface CodeProps {
+interface CodeProps {
   children: React.ReactElement | Array<React.ReactElement>;
   className?: string;
 }
