@@ -67,25 +67,25 @@ describe('declarations', () => {
   test('create `ReducedFunction` utility interface', () => {
     const output = printNodes([reducedFunctionType]);
     expect(output).toStrictEqual(`interface ReducedFunction {
-    /* @deprecated */
+    /** @deprecated */
     apply: string;
-    /* @deprecated */
+    /** @deprecated */
     arguments: string;
-    /* @deprecated */
+    /** @deprecated */
     bind: string;
-    /* @deprecated */
+    /** @deprecated */
     call: string;
-    /* @deprecated */
+    /** @deprecated */
     caller: string;
-    /* @deprecated */
+    /** @deprecated */
     length: string;
-    /* @deprecated */
+    /** @deprecated */
     name: string;
-    /* @deprecated */
+    /** @deprecated */
     prototype: string;
-    /* @deprecated */
+    /** @deprecated */
     toString: string;
-    /* @deprecated */
+    /** @deprecated */
     unify: string;
 }\n`);
   });
