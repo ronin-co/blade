@@ -105,10 +105,33 @@ could create a model called "Team" which would be the parent model, and a model 
 fields, but they relate to each other.
 
 To establish a relation between both models (or rather between the records of both
-models), you can add a new field of type "Reference" to the "Member" model, which could
+models), you can add a new field of type "Link" to the "Member" model, which could
 have an arbitrary name and slug. For the purpose of the aforementioned example, however,
 you could use "Team" as the field name, and "team" as the field slug, such that the field
 can be used to reference the parent team of every member.
+
+```ts title="schema/index.ts"
+import { model, string, date, link } from 'blade/schema';
+
+export const Account = model({
+  slug: 'account',
+
+  fields: {
+    name: string(),
+    handle: string()
+  }
+});
+
+export const Member = model({
+  slug: 'member',
+
+  fields: {
+    account: link({ target: 'account' })
+  }
+});
+```
+
+In the example above, we defined an additional model named `Member` with a fields named `account` that references the `Account` model.
 
 #### Link Actions
 

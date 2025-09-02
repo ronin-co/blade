@@ -116,35 +116,7 @@ The following types can be used to define fields in a model:
   </TableBody>
 </Table>
 
-## Link Fields
-
-You can define the relationship of a field to another model like so:
-
-```ts title="schema/index.ts"
-import { model, string, date, link } from 'blade/schema';
-
-export const Account = model({
-  slug: 'account',
-
-  fields: {
-    name: string(),
-    handle: string(),
-    verifiedAt: date()
-  }
-});
-
-export const Member = model({
-  slug: 'member',
-
-  fields: {
-    account: link({
-      target: 'account'
-    })
-  }
-});
-```
-
-In the example above, we defined an additional model named `Member` with a fields named `account` that references the `Account` model.
+[Learn more](/models/fields) about how to apply the individual field types.
 
 ## Formatting
 
