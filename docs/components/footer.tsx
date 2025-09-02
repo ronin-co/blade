@@ -49,7 +49,7 @@ export const Footer = (props: FooterProps) => {
 
           <a
             className="rounded-md p-1.5 text-muted-foreground transition duration-200 hover:bg-accent hover:text-primary hover:duration-0"
-            href="https://discord.gg/wHP3z77Yrf"
+            href="https://discord.gg/ronin"
             rel="noreferrer"
             target="_blank">
             <Icons.Discord className="size-4.5" />
