@@ -15,13 +15,17 @@ closely mimics the English language.
 To retrieve a list of records, for example, you could run the following:
 
 ```ts
-use.blogPosts();
+export default function Page() {
+  const accounts = use.accounts();
+
+  return <div>I am a page</div>;
+};
 ```
 
-If you’d like to retrieve only a specific blog post, you could do so like this:
+If you’d like to retrieve only a specific record, you could do so like this:
 
 ```ts
-use.blogPost.with.slug('new-pricing');
+use.account.with.handle('elaine');
 ```
 
 As you can probably already tell, Blade’s query syntax is quite straightforward to use
