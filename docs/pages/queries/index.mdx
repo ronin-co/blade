@@ -54,35 +54,11 @@ Learn more about how to perform different actions with queries:
 
 The second part of every Blade query is its target (“query target”).
 
-Every query is aimed at a particular model, which is addressed using either the **Slug** or the **Plural Slug** of the respective model. Both can be found in the “Settings” section of the model on the dashboard.
+Every query is aimed at a particular model, which is addressed using either the **Slug** or the **Plural Slug** of the respective model. Both are located in your [model definition](/models). The `slug` attribute of models is always required, and the `pluralSlug` is auto-generated, but can be overwritten explicitly.
 
 - Using the **Slug** will result in a singular record getting addressed. Specifically, the most recently created record that matches the query.
 
 - Using the **Plural Slug** will result in multiple records getting addressed. Specifically, all existing records that match the provided query, ordered by their creation date.
-
-#### Formatting
-
-In the “Settings” section of every model on the dashboard, both the Slug and the Plural Slug must be provided in [camel case](https://en.wikipedia.org/wiki/Camel_case), in order to make it easy to re-use the slugs in Blade queries.
-
-For example, the following Slug and Plural Slug **are allowed**:
-
-```plaintext
-blogPost
-blogPosts
-```
-
-While the following are **not allowed**:
-
-```plaintext
-BlogPost
-BlogPosts
-
-blog post
-blog posts
-
-blog_post
-blog_posts
-```
 
 #### Limitations
 

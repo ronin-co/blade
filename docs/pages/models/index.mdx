@@ -142,6 +142,24 @@ export const Member = model({
 
 In the example above, we defined an additional model named `Member` with a fields named `account` that references the `Account` model.
 
+## Formatting
+
+Slugs of models and fields must be provided in [camel case](https://en.wikipedia.org/wiki/Camel_case), since Blade queries are written in TypeScript and camel case is the common formatting choice for property names in the TypeScript ecosystem.
+
+For example, the following slug would be allowed for models:
+
+```plaintext
+productCategory
+```
+
+While the following are **not allowed**:
+
+```plaintext
+product_category
+product category
+ProductCategory
+```
+
 ## What if I have multiple repositories?
 
 Once you apply your local schema definition to your database, your local schema definition will be available in your types package (i.e. `@ronin/YOUR_SPACE_HANDLE`) too. See [TypeScript Types](/docs/types) for more information.
