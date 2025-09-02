@@ -269,6 +269,10 @@ await set.member({
 });
 ```
 
+If you are writing records and the related record you are trying to resolve does not exist,
+the value of the Link field will be `null`. There currently isn't a way to make the query
+fail if the related record doesn't exist, but such a feature is planned.
+
 ### Unrelated Records
 
 If the built-in syntax for automatically resolving records via [Link fields](/models/fields#link)
