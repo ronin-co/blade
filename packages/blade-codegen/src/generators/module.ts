@@ -32,7 +32,7 @@ import type {
  *      orderedBy: <T = User | null>(value: CombinedInstructions["orderedBy"]) => T;
  *      selecting: <T = User | null>(value: CombinedInstructions["selecting"]) => T;
  *      using: <T = User | null>(value: CombinedInstructions["using"]) => T;
- *      with: {
+ *      with: ReducedFunction & {
  *         <T = User | null>(options: CombinedInstructions["with"]): T;
  *         id: <T = User | null>(value: ResultRecord["id"]) => T;
  *         "ronin.createdAt": <T = User | null>(value: ResultRecord["ronin.createdAt"]) => T;
@@ -54,7 +54,7 @@ import type {
  *      orderedBy: <T = Users>(value: CombinedInstructions["orderedBy"]) => T;
  *      selecting: <T = Users>(value: CombinedInstructions["selecting"]) => T;
  *      using: <T = Users>(value: CombinedInstructions["using"]) => T;
- *      with: {
+ *      with: ReducedFunction & {
  *         <T = Users>(options: CombinedInstructions["with"]): T;
  *         id: <T = Users>(value: ResultRecord["id"]) => T;
  *         "ronin.createdAt": <T = Users>(value: ResultRecord["ronin.createdAt"]) => T;
@@ -385,6 +385,12 @@ const generateWithPropertySignature = (
     undefined,
     'with',
     undefined,
-    factory.createTypeLiteralNode(members),
+    factory.createIntersectionTypeNode([
+      factory.createExpressionWithTypeArguments(
+        identifiers.utils.reducedFunction,
+        undefined,
+      ),
+      factory.createTypeLiteralNode(members),
+    ]),
   );
 };
