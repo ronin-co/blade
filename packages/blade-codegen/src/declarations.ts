@@ -238,7 +238,7 @@ export const reducedFunctionType = factory.createInterfaceDeclaration(
         factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
       ),
       SyntaxKind.MultiLineCommentTrivia,
-      ' @deprecated ',
+      '* @deprecated ',
       true,
     ),
   ),

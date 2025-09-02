@@ -4,25 +4,25 @@ exports[`generate a basic model 1`] = `
 "import type { CombinedInstructions } from "blade-compiler";
 import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
-    /* @deprecated */
+    /** @deprecated */
     apply: string;
-    /* @deprecated */
+    /** @deprecated */
     arguments: string;
-    /* @deprecated */
+    /** @deprecated */
     bind: string;
-    /* @deprecated */
+    /** @deprecated */
     call: string;
-    /* @deprecated */
+    /** @deprecated */
     caller: string;
-    /* @deprecated */
+    /** @deprecated */
     length: string;
-    /* @deprecated */
+    /** @deprecated */
     name: string;
-    /* @deprecated */
+    /** @deprecated */
     prototype: string;
-    /* @deprecated */
+    /** @deprecated */
     toString: string;
-    /* @deprecated */
+    /** @deprecated */
     unify: string;
 }
 export type Account = import("blade/types").Account;
@@ -90,25 +90,25 @@ exports[`generate a basic model with blob field 1`] = `
 "import type { CombinedInstructions } from "blade-compiler";
 import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
-    /* @deprecated */
+    /** @deprecated */
     apply: string;
-    /* @deprecated */
+    /** @deprecated */
     arguments: string;
-    /* @deprecated */
+    /** @deprecated */
     bind: string;
-    /* @deprecated */
+    /** @deprecated */
     call: string;
-    /* @deprecated */
+    /** @deprecated */
     caller: string;
-    /* @deprecated */
+    /** @deprecated */
     length: string;
-    /* @deprecated */
+    /** @deprecated */
     name: string;
-    /* @deprecated */
+    /** @deprecated */
     prototype: string;
-    /* @deprecated */
+    /** @deprecated */
     toString: string;
-    /* @deprecated */
+    /** @deprecated */
     unify: string;
 }
 import type { StoredObject } from "blade-compiler";
@@ -180,25 +180,25 @@ exports[`generate with no models 1`] = `
 "import type { CombinedInstructions } from "blade-compiler";
 import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
-    /* @deprecated */
+    /** @deprecated */
     apply: string;
-    /* @deprecated */
+    /** @deprecated */
     arguments: string;
-    /* @deprecated */
+    /** @deprecated */
     bind: string;
-    /* @deprecated */
+    /** @deprecated */
     call: string;
-    /* @deprecated */
+    /** @deprecated */
     caller: string;
-    /* @deprecated */
+    /** @deprecated */
     length: string;
-    /* @deprecated */
+    /** @deprecated */
     name: string;
-    /* @deprecated */
+    /** @deprecated */
     prototype: string;
-    /* @deprecated */
+    /** @deprecated */
     toString: string;
-    /* @deprecated */
+    /** @deprecated */
     unify: string;
 }
 declare module "blade/types" { }
