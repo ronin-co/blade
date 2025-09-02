@@ -11,11 +11,8 @@ import {
   resolveSchemaType,
 } from '@/src/declarations';
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
-import {
-  generateModelTypesModule,
-  generateQueryDeclarationStatements,
-} from '@/src/generators/module';
-import { generateTypes } from '@/src/generators/types';
+import { generateQueryDeclarationStatements } from '@/src/generators/module';
+import { generateTypeReExports, generateTypes } from '@/src/generators/types';
 import { printNodes } from '@/src/utils/print';
 
 import type { Node } from 'typescript';
@@ -62,19 +59,11 @@ export const generate = (models: Array<Model>): string => {
    *
    * @example
    * ```ts
-   * type User = ResultRecord & {
-   *    email: string;
-   *    name: string;
-   * };
-   *
-   * type Users = Array<User> & {
-   *    moreBefore?: string;
-   *    moreAfter?: string;
-   * };
+   * type User = import('blade/types').User;
+   * type Users = import('blade/types').Users;
    * ```
    */
-  const modelTypeDecs = generateTypes(models);
-  nodes.push(...modelTypeDecs);
+  nodes.push(...generateTypeReExports(models));
 
   /**
    * Generate and add the `blade/types` module augmentations.
@@ -82,7 +71,15 @@ export const generate = (models: Array<Model>): string => {
    * @example
    * ```ts
    * declare module "blade/types" {
-   *   export type { ... };
+   *  type User = ResultRecord & {
+   *    email: string;
+   *    name: string;
+   *  };
+   *
+   *  type Users = Array<User> & {
+   *    moreBefore?: string;
+   *    moreAfter?: string;
+   *  };
    * }
    * ```
    */
@@ -90,7 +87,7 @@ export const generate = (models: Array<Model>): string => {
     factory.createModuleDeclaration(
       [factory.createModifier(SyntaxKind.DeclareKeyword)],
       identifiers.blade.module.types,
-      factory.createModuleBlock([generateModelTypesModule(models)]),
+      factory.createModuleBlock(generateTypes(models)),
     ),
   );
 

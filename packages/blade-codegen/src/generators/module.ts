@@ -10,42 +10,11 @@ import { mapRoninFieldToTypeNode } from '@/src/utils/types';
 import type { Model, ModelField } from '@/src/types/model';
 import type { DML_QUERY_TYPES } from 'blade-compiler';
 import type {
-  ExportDeclaration,
   PropertySignature,
   TypeElement,
   TypeNode,
   VariableStatement,
 } from 'typescript';
-
-/**
- * Generate an export declaration to export all model type definitions. This is primarily
- * used to re-export types under the `blade/types` export.
- *
- * @example
- * ```ts
- * export type { User, Users };
- * ```
- *
- * @param models - An array of RONIN models to generate type definitions for.
- *
- * @returns An export declaration for the generated type definitions.
- */
-export const generateModelTypesModule = (models: Array<Model>): ExportDeclaration =>
-  factory.createExportDeclaration(
-    undefined,
-    true,
-    factory.createNamedExports(
-      models.flatMap((model) => {
-        const singularSlug = convertToPascalCase(model.slug);
-        const pluralSlug = convertToPascalCase(model.pluralSlug);
-
-        return [
-          factory.createExportSpecifier(false, undefined, singularSlug),
-          factory.createExportSpecifier(false, undefined, pluralSlug),
-        ];
-      }),
-    ),
-  );
 
 /**
  * Generate a `declare const` statement for a provided query type using a list

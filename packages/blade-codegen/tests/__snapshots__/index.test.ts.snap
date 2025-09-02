@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`generate a basic model 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
+"import type { CombinedInstructions } from "blade-compiler";
 import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
     /* @deprecated */
@@ -25,61 +25,62 @@ interface ReducedFunction {
     /* @deprecated */
     unify: string;
 }
-export type Account = ResultRecord & {
-    email: string;
-    name: string;
-};
-export type Account = Array<Account> & {
-    moreBefore?: string;
-    moreAfter?: string;
-};
+export type Account = import("blade/types").Account;
+export type Accounts = import("blade/types").Accounts;
 declare module "blade/types" {
-    export type { Account, Accounts };
+    export type Account = ResultRecord & {
+        email: string;
+        name: string;
+    };
+    export type Accounts = Array<Account> & {
+        moreBefore?: string;
+        moreAfter?: string;
+    };
 }
 declare module "blade/server/hooks" {
     declare const use: {
         /* Get a single account record */
         account: ReducedFunction & {
-            <T = Account>(options?: Partial<CombinedInstructions>): T | null;
-            after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
-            before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
-            including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
-            limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
-            orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
-            selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
-            using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+            after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
+            before: <T = Account | null>(value: CombinedInstructions["before"]) => T;
+            including: <T = Account | null>(value: CombinedInstructions["including"]) => T;
+            limitedTo: <T = Account | null>(value: CombinedInstructions["limitedTo"]) => T;
+            orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
+            selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
+            using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
             with: {
-                <T = Account>(options: CombinedInstructions["with"]): T | null;
-                id: <T = Account>(value: ResultRecord["id"]) => T | null;
-                "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
-                "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
-                "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
-                "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-                "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-                name: <T = Account>(value: string) => T | null;
-                email: <T = Account>(value: string) => T | null;
+                <T = Account | null>(options: CombinedInstructions["with"]): T;
+                id: <T = Account | null>(value: ResultRecord["id"]) => T;
+                "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin.createdAt"]) => T;
+                "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin.createdBy"]) => T;
+                "ronin.locked": <T = Account | null>(value: ResultRecord["ronin.locked"]) => T;
+                "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin.updatedAt"]) => T;
+                "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+                name: <T = Account | null>(value: string) => T;
+                email: <T = Account | null>(value: string) => T;
             };
         };
         /* Get multiple account records */
         accounts: ReducedFunction & {
-            <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
-            after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
-            before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
-            including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
-            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
-            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
-            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
-            using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+            after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
+            before: <T = Accounts>(value: CombinedInstructions["before"]) => T;
+            including: <T = Accounts>(value: CombinedInstructions["including"]) => T;
+            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T;
+            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
+            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
+            using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
             with: {
-                <T = Accounts>(options: CombinedInstructions["with"]): T | null;
-                id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
-                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
-                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
-                "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
-                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-                name: <T = Accounts>(value: string) => T | null;
-                email: <T = Accounts>(value: string) => T | null;
+                <T = Accounts>(options: CombinedInstructions["with"]): T;
+                id: <T = Accounts>(value: ResultRecord["id"]) => T;
+                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T;
+                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T;
+                "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T;
+                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T;
+                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T;
+                name: <T = Accounts>(value: string) => T;
+                email: <T = Accounts>(value: string) => T;
             };
         };
     };
@@ -88,7 +89,7 @@ declare module "blade/server/hooks" {
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
+"import type { CombinedInstructions } from "blade-compiler";
 import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
     /* @deprecated */
@@ -113,64 +114,65 @@ interface ReducedFunction {
     unify: string;
 }
 import type { StoredObject } from "blade-compiler";
-export type Account = ResultRecord & {
-    email: string;
-    image: StoredObject;
-    name: string;
-};
-export type Account = Array<Account> & {
-    moreBefore?: string;
-    moreAfter?: string;
-};
+export type Account = import("blade/types").Account;
+export type Accounts = import("blade/types").Accounts;
 declare module "blade/types" {
-    export type { Account, Accounts };
+    export type Account = ResultRecord & {
+        email: string;
+        image: StoredObject;
+        name: string;
+    };
+    export type Accounts = Array<Account> & {
+        moreBefore?: string;
+        moreAfter?: string;
+    };
 }
 declare module "blade/server/hooks" {
     declare const use: {
         /* Get a single account record */
         account: ReducedFunction & {
-            <T = Account>(options?: Partial<CombinedInstructions>): T | null;
-            after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
-            before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
-            including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
-            limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
-            orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
-            selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
-            using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+            after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
+            before: <T = Account | null>(value: CombinedInstructions["before"]) => T;
+            including: <T = Account | null>(value: CombinedInstructions["including"]) => T;
+            limitedTo: <T = Account | null>(value: CombinedInstructions["limitedTo"]) => T;
+            orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
+            selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
+            using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
             with: {
-                <T = Account>(options: CombinedInstructions["with"]): T | null;
-                id: <T = Account>(value: ResultRecord["id"]) => T | null;
-                "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
-                "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
-                "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
-                "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-                "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-                name: <T = Account>(value: string) => T | null;
-                email: <T = Account>(value: string) => T | null;
-                image: <T = Account>(value: StoredObject) => T | null;
+                <T = Account | null>(options: CombinedInstructions["with"]): T;
+                id: <T = Account | null>(value: ResultRecord["id"]) => T;
+                "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin.createdAt"]) => T;
+                "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin.createdBy"]) => T;
+                "ronin.locked": <T = Account | null>(value: ResultRecord["ronin.locked"]) => T;
+                "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin.updatedAt"]) => T;
+                "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+                name: <T = Account | null>(value: string) => T;
+                email: <T = Account | null>(value: string) => T;
+                image: <T = Account | null>(value: StoredObject) => T;
             };
         };
         /* Get multiple account records */
         accounts: ReducedFunction & {
-            <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
-            after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
-            before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
-            including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
-            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
-            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
-            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
-            using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+            after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
+            before: <T = Accounts>(value: CombinedInstructions["before"]) => T;
+            including: <T = Accounts>(value: CombinedInstructions["including"]) => T;
+            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T;
+            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
+            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
+            using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
             with: {
-                <T = Accounts>(options: CombinedInstructions["with"]): T | null;
-                id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
-                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
-                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
-                "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
-                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-                name: <T = Accounts>(value: string) => T | null;
-                email: <T = Accounts>(value: string) => T | null;
-                image: <T = Accounts>(value: StoredObject) => T | null;
+                <T = Accounts>(options: CombinedInstructions["with"]): T;
+                id: <T = Accounts>(value: ResultRecord["id"]) => T;
+                "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T;
+                "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T;
+                "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T;
+                "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T;
+                "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T;
+                name: <T = Accounts>(value: string) => T;
+                email: <T = Accounts>(value: string) => T;
+                image: <T = Accounts>(value: StoredObject) => T;
             };
         };
     };
@@ -179,7 +181,7 @@ declare module "blade/server/hooks" {
 `;
 
 exports[`generate with no models 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
+"import type { CombinedInstructions } from "blade-compiler";
 import type { ResultRecord } from "blade-syntax/queries";
 interface ReducedFunction {
     /* @deprecated */
@@ -203,9 +205,7 @@ interface ReducedFunction {
     /* @deprecated */
     unify: string;
 }
-declare module "blade/types" {
-    export type {};
-}
+declare module "blade/types" { }
 declare module "blade/server/hooks" {
     declare const use: {};
 }

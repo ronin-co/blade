@@ -1,6 +1,22 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`types a basic model 1`] = `
+exports[`types re-export model types a basic model 1`] = `
+"export type Account = import("blade/types").Account;
+export type Accounts = import("blade/types").Accounts;
+"
+`;
+
+exports[`types re-export model types with no models 1`] = `""`;
+
+exports[`types re-export model types with multiple models 1`] = `
+"export type Account = import("blade/types").Account;
+export type Accounts = import("blade/types").Accounts;
+export type Post = import("blade/types").Post;
+export type Posts = import("blade/types").Posts;
+"
+`;
+
+exports[`types generate types a basic model 1`] = `
 "export type Account = ResultRecord & {
     avatar: StoredObject;
     email: string;
@@ -10,14 +26,14 @@ exports[`types a basic model 1`] = `
     rewardPoints: number;
     settings: (JsonObject | JsonArray);
 };
-export type Account = Array<Account> & {
+export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
 "
 `;
 
-exports[`types a model with a summary 1`] = `
+exports[`types generate types a model with a summary 1`] = `
 "/**
  * A user account.
  */
@@ -28,30 +44,30 @@ export type Account = ResultRecord & {
 /**
  * A user account.
  */
-export type Account = Array<Account> & {
+export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
 "
 `;
 
-exports[`types a model with an invalid field type 1`] = `
+exports[`types generate types a model with an invalid field type 1`] = `
 "export type Account = ResultRecord & {
     name: unknown;
 };
-export type Account = Array<Account> & {
+export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
 "
 `;
 
-exports[`types a model with a link field 1`] = `
+exports[`types generate types a model with a link field 1`] = `
 "export type Account = ResultRecord & {
     email: string;
     name: string;
 };
-export type Account = Array<Account> & {
+export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
@@ -60,7 +76,7 @@ export type Post<U extends Array<"author"> | "all" = [
     author: ResolveSchema<Account, U, "author">;
     title: string;
 };
-export type Post<U extends Array<"author"> | "all" = [
+export type Posts<U extends Array<"author"> | "all" = [
 ]> = Array<Post<U>> & {
     moreBefore?: string;
     moreAfter?: string;
@@ -68,12 +84,12 @@ export type Post<U extends Array<"author"> | "all" = [
 "
 `;
 
-exports[`types a model with a many-to-many link field 1`] = `
+exports[`types generate types a model with a many-to-many link field 1`] = `
 "export type Account = ResultRecord & {
     email: string;
     name: string;
 };
-export type Account = Array<Account> & {
+export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
@@ -82,7 +98,7 @@ export type Space<U extends Array<"members"> | "all" = [
     members: ResolveSchema<Array<Account>, U, "members">;
     name: string;
 };
-export type Space<U extends Array<"members"> | "all" = [
+export type Spaces<U extends Array<"members"> | "all" = [
 ]> = Array<Space<U>> & {
     moreBefore?: string;
     moreAfter?: string;
@@ -90,20 +106,20 @@ export type Space<U extends Array<"members"> | "all" = [
 "
 `;
 
-exports[`types a model with a link field that does not exist 1`] = `
+exports[`types generate types a model with a link field that does not exist 1`] = `
 "export type Account = ResultRecord & {
     email: string;
     latestPost: unknown;
     name: string;
 };
-export type Account = Array<Account> & {
+export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };
 "
 `;
 
-exports[`types a model with nested fields 1`] = `
+exports[`types generate types a model with nested fields 1`] = `
 "/**
  * A user account.
  */
@@ -117,7 +133,7 @@ export type Account = ResultRecord & {
 /**
  * A user account.
  */
-export type Account = Array<Account> & {
+export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
 };

@@ -1,64 +1,49 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`module re-export model types a basic model 1`] = `
-"export type { Account, Accounts };
-"
-`;
-
-exports[`module re-export model types with no models 1`] = `
-"export type {};
-"
-`;
-
-exports[`module re-export model types with multiple models 1`] = `
-"export type { Account, Accounts, Post, Posts };
-"
-`;
-
 exports[`module query declaration constant a basic model 1`] = `
 "declare const get: {
     /* Get a single account record */
     account: ReducedFunction & {
-        <T = Account>(options?: Partial<CombinedInstructions>): T | null;
-        after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
-        before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
-        including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
-        limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
-        orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
-        selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
-        using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+        <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+        after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
+        before: <T = Account | null>(value: CombinedInstructions["before"]) => T;
+        including: <T = Account | null>(value: CombinedInstructions["including"]) => T;
+        limitedTo: <T = Account | null>(value: CombinedInstructions["limitedTo"]) => T;
+        orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
+        selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
+        using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
         with: {
-            <T = Account>(options: CombinedInstructions["with"]): T | null;
-            id: <T = Account>(value: ResultRecord["id"]) => T | null;
-            "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
-            "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
-            "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
-            "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-            "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-            name: <T = Account>(value: string) => T | null;
-            email: <T = Account>(value: string) => T | null;
+            <T = Account | null>(options: CombinedInstructions["with"]): T;
+            id: <T = Account | null>(value: ResultRecord["id"]) => T;
+            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin.createdAt"]) => T;
+            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin.createdBy"]) => T;
+            "ronin.locked": <T = Account | null>(value: ResultRecord["ronin.locked"]) => T;
+            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin.updatedAt"]) => T;
+            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+            name: <T = Account | null>(value: string) => T;
+            email: <T = Account | null>(value: string) => T;
         };
     };
     /* Get multiple account records */
     accounts: ReducedFunction & {
-        <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
-        after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
-        before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
-        including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
-        limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
-        orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
-        selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
-        using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+        <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+        after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
+        before: <T = Accounts>(value: CombinedInstructions["before"]) => T;
+        including: <T = Accounts>(value: CombinedInstructions["including"]) => T;
+        limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T;
+        orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
+        selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
+        using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
         with: {
-            <T = Accounts>(options: CombinedInstructions["with"]): T | null;
-            id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
-            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
-            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
-            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
-            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-            name: <T = Accounts>(value: string) => T | null;
-            email: <T = Accounts>(value: string) => T | null;
+            <T = Accounts>(options: CombinedInstructions["with"]): T;
+            id: <T = Accounts>(value: ResultRecord["id"]) => T;
+            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T;
+            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T;
+            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T;
+            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T;
+            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T;
+            name: <T = Accounts>(value: string) => T;
+            email: <T = Accounts>(value: string) => T;
         };
     };
 };
@@ -74,90 +59,90 @@ exports[`module query declaration constant with multiple models 1`] = `
 "declare const get: {
     /* Get a single account record */
     account: ReducedFunction & {
-        <T = Account>(options?: Partial<CombinedInstructions>): T | null;
-        after: <T = Account>(value: CombinedInstructions["after"]) => T | null;
-        before: <T = Account>(value: CombinedInstructions["before"]) => T | null;
-        including: <T = Account>(value: CombinedInstructions["including"]) => T | null;
-        limitedTo: <T = Account>(value: CombinedInstructions["limitedTo"]) => T | null;
-        orderedBy: <T = Account>(value: CombinedInstructions["orderedBy"]) => T | null;
-        selecting: <T = Account>(value: CombinedInstructions["selecting"]) => T | null;
-        using: <T = Account>(value: CombinedInstructions["using"]) => T | null;
+        <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+        after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
+        before: <T = Account | null>(value: CombinedInstructions["before"]) => T;
+        including: <T = Account | null>(value: CombinedInstructions["including"]) => T;
+        limitedTo: <T = Account | null>(value: CombinedInstructions["limitedTo"]) => T;
+        orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
+        selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
+        using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
         with: {
-            <T = Account>(options: CombinedInstructions["with"]): T | null;
-            id: <T = Account>(value: ResultRecord["id"]) => T | null;
-            "ronin.createdAt": <T = Account>(value: ResultRecord["ronin.createdAt"]) => T | null;
-            "ronin.createdBy": <T = Account>(value: ResultRecord["ronin.createdBy"]) => T | null;
-            "ronin.locked": <T = Account>(value: ResultRecord["ronin.locked"]) => T | null;
-            "ronin.updatedAt": <T = Account>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-            "ronin.updatedBy": <T = Account>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-            name: <T = Account>(value: string) => T | null;
-            email: <T = Account>(value: string) => T | null;
+            <T = Account | null>(options: CombinedInstructions["with"]): T;
+            id: <T = Account | null>(value: ResultRecord["id"]) => T;
+            "ronin.createdAt": <T = Account | null>(value: ResultRecord["ronin.createdAt"]) => T;
+            "ronin.createdBy": <T = Account | null>(value: ResultRecord["ronin.createdBy"]) => T;
+            "ronin.locked": <T = Account | null>(value: ResultRecord["ronin.locked"]) => T;
+            "ronin.updatedAt": <T = Account | null>(value: ResultRecord["ronin.updatedAt"]) => T;
+            "ronin.updatedBy": <T = Account | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+            name: <T = Account | null>(value: string) => T;
+            email: <T = Account | null>(value: string) => T;
         };
     };
     /* Get multiple account records */
     accounts: ReducedFunction & {
-        <T = Accounts>(options?: Partial<CombinedInstructions>): T | null;
-        after: <T = Accounts>(value: CombinedInstructions["after"]) => T | null;
-        before: <T = Accounts>(value: CombinedInstructions["before"]) => T | null;
-        including: <T = Accounts>(value: CombinedInstructions["including"]) => T | null;
-        limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T | null;
-        orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T | null;
-        selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T | null;
-        using: <T = Accounts>(value: CombinedInstructions["using"]) => T | null;
+        <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+        after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
+        before: <T = Accounts>(value: CombinedInstructions["before"]) => T;
+        including: <T = Accounts>(value: CombinedInstructions["including"]) => T;
+        limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T;
+        orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
+        selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
+        using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
         with: {
-            <T = Accounts>(options: CombinedInstructions["with"]): T | null;
-            id: <T = Accounts>(value: ResultRecord["id"]) => T | null;
-            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T | null;
-            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T | null;
-            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T | null;
-            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-            name: <T = Accounts>(value: string) => T | null;
-            email: <T = Accounts>(value: string) => T | null;
+            <T = Accounts>(options: CombinedInstructions["with"]): T;
+            id: <T = Accounts>(value: ResultRecord["id"]) => T;
+            "ronin.createdAt": <T = Accounts>(value: ResultRecord["ronin.createdAt"]) => T;
+            "ronin.createdBy": <T = Accounts>(value: ResultRecord["ronin.createdBy"]) => T;
+            "ronin.locked": <T = Accounts>(value: ResultRecord["ronin.locked"]) => T;
+            "ronin.updatedAt": <T = Accounts>(value: ResultRecord["ronin.updatedAt"]) => T;
+            "ronin.updatedBy": <T = Accounts>(value: ResultRecord["ronin.updatedBy"]) => T;
+            name: <T = Accounts>(value: string) => T;
+            email: <T = Accounts>(value: string) => T;
         };
     };
     /* Get a single post record */
     post: ReducedFunction & {
-        <T = Post>(options?: Partial<CombinedInstructions>): T | null;
-        after: <T = Post>(value: CombinedInstructions["after"]) => T | null;
-        before: <T = Post>(value: CombinedInstructions["before"]) => T | null;
-        including: <T = Post>(value: CombinedInstructions["including"]) => T | null;
-        limitedTo: <T = Post>(value: CombinedInstructions["limitedTo"]) => T | null;
-        orderedBy: <T = Post>(value: CombinedInstructions["orderedBy"]) => T | null;
-        selecting: <T = Post>(value: CombinedInstructions["selecting"]) => T | null;
-        using: <T = Post>(value: CombinedInstructions["using"]) => T | null;
+        <T = Post | null>(options?: Partial<CombinedInstructions>): T;
+        after: <T = Post | null>(value: CombinedInstructions["after"]) => T;
+        before: <T = Post | null>(value: CombinedInstructions["before"]) => T;
+        including: <T = Post | null>(value: CombinedInstructions["including"]) => T;
+        limitedTo: <T = Post | null>(value: CombinedInstructions["limitedTo"]) => T;
+        orderedBy: <T = Post | null>(value: CombinedInstructions["orderedBy"]) => T;
+        selecting: <T = Post | null>(value: CombinedInstructions["selecting"]) => T;
+        using: <T = Post | null>(value: CombinedInstructions["using"]) => T;
         with: {
-            <T = Post>(options: CombinedInstructions["with"]): T | null;
-            id: <T = Post>(value: ResultRecord["id"]) => T | null;
-            "ronin.createdAt": <T = Post>(value: ResultRecord["ronin.createdAt"]) => T | null;
-            "ronin.createdBy": <T = Post>(value: ResultRecord["ronin.createdBy"]) => T | null;
-            "ronin.locked": <T = Post>(value: ResultRecord["ronin.locked"]) => T | null;
-            "ronin.updatedAt": <T = Post>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-            "ronin.updatedBy": <T = Post>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-            title: <T = Post>(value: string) => T | null;
-            description: <T = Post>(value: string) => T | null;
+            <T = Post | null>(options: CombinedInstructions["with"]): T;
+            id: <T = Post | null>(value: ResultRecord["id"]) => T;
+            "ronin.createdAt": <T = Post | null>(value: ResultRecord["ronin.createdAt"]) => T;
+            "ronin.createdBy": <T = Post | null>(value: ResultRecord["ronin.createdBy"]) => T;
+            "ronin.locked": <T = Post | null>(value: ResultRecord["ronin.locked"]) => T;
+            "ronin.updatedAt": <T = Post | null>(value: ResultRecord["ronin.updatedAt"]) => T;
+            "ronin.updatedBy": <T = Post | null>(value: ResultRecord["ronin.updatedBy"]) => T;
+            title: <T = Post | null>(value: string) => T;
+            description: <T = Post | null>(value: string) => T;
         };
     };
     /* Get multiple post records */
     posts: ReducedFunction & {
-        <T = Posts>(options?: Partial<CombinedInstructions>): T | null;
-        after: <T = Posts>(value: CombinedInstructions["after"]) => T | null;
-        before: <T = Posts>(value: CombinedInstructions["before"]) => T | null;
-        including: <T = Posts>(value: CombinedInstructions["including"]) => T | null;
-        limitedTo: <T = Posts>(value: CombinedInstructions["limitedTo"]) => T | null;
-        orderedBy: <T = Posts>(value: CombinedInstructions["orderedBy"]) => T | null;
-        selecting: <T = Posts>(value: CombinedInstructions["selecting"]) => T | null;
-        using: <T = Posts>(value: CombinedInstructions["using"]) => T | null;
+        <T = Posts>(options?: Partial<CombinedInstructions>): T;
+        after: <T = Posts>(value: CombinedInstructions["after"]) => T;
+        before: <T = Posts>(value: CombinedInstructions["before"]) => T;
+        including: <T = Posts>(value: CombinedInstructions["including"]) => T;
+        limitedTo: <T = Posts>(value: CombinedInstructions["limitedTo"]) => T;
+        orderedBy: <T = Posts>(value: CombinedInstructions["orderedBy"]) => T;
+        selecting: <T = Posts>(value: CombinedInstructions["selecting"]) => T;
+        using: <T = Posts>(value: CombinedInstructions["using"]) => T;
         with: {
-            <T = Posts>(options: CombinedInstructions["with"]): T | null;
-            id: <T = Posts>(value: ResultRecord["id"]) => T | null;
-            "ronin.createdAt": <T = Posts>(value: ResultRecord["ronin.createdAt"]) => T | null;
-            "ronin.createdBy": <T = Posts>(value: ResultRecord["ronin.createdBy"]) => T | null;
-            "ronin.locked": <T = Posts>(value: ResultRecord["ronin.locked"]) => T | null;
-            "ronin.updatedAt": <T = Posts>(value: ResultRecord["ronin.updatedAt"]) => T | null;
-            "ronin.updatedBy": <T = Posts>(value: ResultRecord["ronin.updatedBy"]) => T | null;
-            title: <T = Posts>(value: string) => T | null;
-            description: <T = Posts>(value: string) => T | null;
+            <T = Posts>(options: CombinedInstructions["with"]): T;
+            id: <T = Posts>(value: ResultRecord["id"]) => T;
+            "ronin.createdAt": <T = Posts>(value: ResultRecord["ronin.createdAt"]) => T;
+            "ronin.createdBy": <T = Posts>(value: ResultRecord["ronin.createdBy"]) => T;
+            "ronin.locked": <T = Posts>(value: ResultRecord["ronin.locked"]) => T;
+            "ronin.updatedAt": <T = Posts>(value: ResultRecord["ronin.updatedAt"]) => T;
+            "ronin.updatedBy": <T = Posts>(value: ResultRecord["ronin.updatedBy"]) => T;
+            title: <T = Posts>(value: string) => T;
+            description: <T = Posts>(value: string) => T;
         };
     };
 };
