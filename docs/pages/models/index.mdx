@@ -160,8 +160,8 @@ product category
 ProductCategory
 ```
 
-## What if I have multiple repositories?
+## Multiple Apps
 
-Once you apply your local schema definition to your database, your local schema definition will be available in your types package (i.e. `@ronin/YOUR_SPACE_HANDLE`) too. See [TypeScript Types](/docs/types) for more information.
+If you are maintaining multiple Blade applications that are accessing the same database, make sure to designate only a single application as the "source of truth" in your team. In other words, the commands `blade diff` and `blade apply` should only be run in a single application per database.
 
-The types package is a separate package that you can install in your other repositories to access the same type definitions in those repositories.
+After every update to the database schema, you could then run `blade pull` in all other applications where that same database schema is used, which will re-generate the local model definitions from the current state of the remote database.
