@@ -1,6 +1,6 @@
 {
   "name": "blade-compiler",
-  "version": "3.13.5",
+  "version": "3.13.13",
   "type": "module",
   "description": "Compiles RONIN queries to SQL statements.",
   "main": "./dist/index.js",
@@ -26,7 +26,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.1.14",
-    "hive": "1.0.8",
+    "hive": "1.0.11",
     "title": "4.0.1",
     "tsup": "8.3.5",
     "typescript": "5.7.2"

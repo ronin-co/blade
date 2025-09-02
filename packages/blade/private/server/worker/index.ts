@@ -4,11 +4,11 @@ import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compile
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { secureHeaders } from 'hono/secure-headers';
-import { SSEStreamingApi } from 'hono/streaming';
 import { Hono } from 'hono/tiny';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
+import { PageStream } from '@/private/server/utils';
 import {
   getRoninOptions,
   getWaitUntil,
@@ -43,9 +43,7 @@ type Variables = {
 //
 // In that case, we want to push an updated version of every page to the client.
 if (globalThis.DEV_SESSIONS) {
-  globalThis.DEV_SESSIONS.forEach(({ stream, url, headers }) => {
-    return flushSession(stream, url, headers, false);
-  });
+  globalThis.DEV_SESSIONS.forEach((stream) => flushSession(stream, false));
 } else {
   globalThis.DEV_SESSIONS = new Map();
 }
@@ -295,9 +293,6 @@ app.post('*', async (c) => {
     }
   }
 
-  const { readable, writable } = new TransformStream();
-  const stream = new SSEStreamingApi(writable, readable);
-
   const url = new URL(c.req.url);
 
   // Clone the headers since we will modify them, and runtimes like `workerd` don't allow
@@ -312,13 +307,16 @@ app.post('*', async (c) => {
   c.header('Cache-Control', 'no-cache, no-transform');
   c.header('X-Accel-Buffering', 'no');
 
-  flushSession(stream, url, headers, correctBundle, { queries, repeat: subscribe });
+  const { readable, writable } = new TransformStream();
+  const stream = new PageStream({ url, headers }, { writable, readable });
+
+  flushSession(stream, correctBundle, { queries, repeat: subscribe });
 
   const id = crypto.randomUUID();
 
   if (subscribe) {
     // Track the HMR session.
-    globalThis.DEV_SESSIONS.set(id, { stream, url, headers });
+    globalThis.DEV_SESSIONS.set(id, stream);
 
     // Stop tracking the HMR session when the browser tab is closed.
     stream.onAbort(() => {

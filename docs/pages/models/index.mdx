@@ -14,34 +14,22 @@ import {
 
 # Models
 
-The schema of your RONIN database consistents of multiple models. Each model uses fields to define the shape of a particular kind of record in your database.
+The schema of your database consistents of multiple models. Each model uses fields to define the shape of a particular kind of record in your database.
 
 For example, your database schema might contain a model called "Account" representing a user, and a model called "Team", representing a group of users.
 
-When using RONIN, your database schema is defined in code, which provides maximum flexibility and benefits such as **revisions**, **reviews** and **reverts** via Git. This page provides an overview of how to define your database schema in code.
+When using Blade, your database schema is defined in code, which provides maximum flexibility and benefits such as **revisions**, **reviews** and **reverts** via Git. This page provides an overview of how to define your database schema in code.
 
-## Getting Started
+## Defining Models
 
-If you haven't yet defined your database schema in code in your project, start by installing the [RONIN client](https://www.npmjs.com/package/ronin) on your device, which comes with a CLI that lets you manage your database schema:
-
-```bash title="Terminal"
-npm install -g ronin
-```
-
-Afterward, log into your RONIN account:
-
-```bash title="Terminal"
-blade login
-```
-
-Next, create the file (in your project's root directory) that will contain the model definitions for your project:
+At the root of your project, start by creating the file that will contain your model definitions:
 
 ```bash title="Terminal"
 mkdir schema
 touch schema/index.ts
 ```
 
-A model is defined using the `model()` function provided by the RONIN client under the `blade/schema` path. The `blade/schema` path also provides all field type primitives, such as `string()`, `number()`, or `blob()`.
+A model is defined using the `model()` function provided under the `blade/schema` path. The path also provides all field type primitives, such as `string()`, `number()`, or `blob()`.
 
 Here is an example of a basic schema definition:
 
@@ -61,13 +49,13 @@ export const Account = model({
 
 In the example above, we defined a model named `Account` with three fields: `name`, `handle`, and `verifiedAt`. Each field is defined using a key-value pair where the key is the slug of the field and the value is the type of the field. See all available field types in the [Field Types](#Field%20Types) section.
 
-Once you've defined your models locally, you can compare them to the current state of your database like this:
+Once you've defined your models, you can compare them to the current state of your database:
 
 ```bash title="Terminal"
 blade diff
 ```
 
-Running the command above will produce a so-called "migration protocol" in the `schema` directory. This protocol contains all the steps required to update your database to match your local schema definition.
+Running the command above will produce a so-called "migration protocol" in the `.ronin` directory. This protocol contains all the steps required to update your database to match your local schema definition.
 
 To apply the changes to your database, run the following command:
 
@@ -77,15 +65,19 @@ blade apply
 
 Afterward, you can start sending queries to your database that make use of the newly added (or updated) models in your database schema.
 
-In the future, if you'd like to immediately apply your local changes to your database without first reviewing them, run thhis command:
+In the future, if you'd like to immediately apply your local changes to your database without first reviewing them, run this command:
 
 ```bash title="Terminal"
 blade diff --apply
 ```
 
-Like this, the generated migration protocol will be applied immediately.
+Like this, the generated migration protocol will be applied immediately, without you being able to review it first. This can be especially useful during development as it maximizes efficiency, but we recommend against applying migrations without reviewing them in production.
 
-## Field Types
+In general, when working in a team, you most likely want to run `blade diff` in order to generate a migration protocol for your change, commit it to a pull request together with your schema change, have it be reviewed by your team, and then run `blade apply` after the pull request was approved.
+
+An update will also be provided in the future to automatically apply migrations that were merged onto the `main` branch of your repository, so that you don't need to run `blade apply` yourself.
+
+## Fields
 
 The following types can be used to define fields in a model:
 
@@ -124,38 +116,40 @@ The following types can be used to define fields in a model:
   </TableBody>
 </Table>
 
-## Link Fields
+[Learn more](/models/fields) about how to apply the individual field types.
 
-You can define the relationship of a field to another model like so:
+## TypeScript Types
 
-```ts title="schema/index.ts"
-import { model, string, date, link } from 'blade/schema';
+The queries defined across your application automatically receive TypeScript types that are based on your model definitions. Those types are stored in a file named `.ronin/types.d.ts` and are updated every time your run `blade apply`.
 
-export const Account = model({
-  slug: 'account',
+To prevent the types from getting updated automatically, you can pass a `--skip-types` flag to the `blade apply` command. You could then use the separate `blade types` command to generate fresh TypeScript types from your model definitions whenever you need them.
 
-  fields: {
-    name: string(),
-    handle: string(),
-    verifiedAt: date()
-  }
-});
+Assuming that your application is located in a Git repository for which an automatic CI process with type-checking runs on a Git provider, we advice committing the `.ronin` directory to your repository, such that your CI can validate the TypeScript types.
 
-export const Member = model({
-  slug: 'member',
+In general, however, the `.ronin` directory is ephemeral, meaning it does not need to be committed to your Git repository, since it is automatically re-generated every time you run a migration command (`blade diff` or `blade apply`) in your project.
 
-  fields: {
-    account: link({
-      target: 'account'
-    })
-  }
-});
+## Formatting
+
+Slugs of models and fields must be provided in [camel case](https://en.wikipedia.org/wiki/Camel_case), since Blade queries are written in TypeScript and camel case is the common formatting choice for property names in the TypeScript ecosystem.
+
+For example, the following slug would be allowed for models:
+
+```plaintext
+productCategory
 ```
 
-In the example above, we defined an additional model named `Member` with a fields named `account` that references the `Account` model.
+While the following are **not allowed**:
 
-## What if I have multiple repositories?
+```plaintext
+product_category
+product category
+ProductCategory
+```
 
-Once you apply your local schema definition to your database, your local schema definition will be available in your types package (i.e. `@ronin/YOUR_SPACE_HANDLE`) too. See [TypeScript Types](/docs/types) for more information.
+## Multiple Apps
 
-The types package is a separate package that you can install in your other repositories to access the same type definitions in those repositories.
+If you are maintaining multiple Blade applications that are accessing the same database, make sure to designate only a single application as the "source of truth" in your team. In other words, the commands `blade diff` and `blade apply` should only be run in a single application per database.
+
+After every update to the database schema, you could then run `blade pull` in all other applications where that same database schema is used, which will re-generate the local model definitions from the current state of the remote database.
+
+A future update to Blade will make it possible to run queries from multiple apps without repeating the database schema source code in each one of those applications.

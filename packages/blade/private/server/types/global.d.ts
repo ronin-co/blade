@@ -1,5 +1,5 @@
-import type { DevSession } from '@/private/universal/types/util';
+import type { PageStream } from '@/private/server/utils';
 
 declare global {
-  var DEV_SESSIONS: Map<string, DevSession>;
+  var DEV_SESSIONS: Map<string, PageStream>;
 }

@@ -1,6 +1,7 @@
 import { useCookie } from 'blade/hooks';
 import { useMetadata } from 'blade/server/hooks';
 import type { TableOfContents } from 'blade/types';
+import type { ComponentProps } from 'react';
 
 import type { CodeProps } from '@/components/code.client';
 import { Code, InlineCode } from '@/components/code.client';
@@ -11,7 +12,6 @@ import { Nav, type NavGroup } from '@/components/nav';
 import { TableOfContentsSidebar } from '@/components/table-of-contents.client';
 import type { Theme } from '@/components/theme-toggle.client';
 import { cn } from '@/lib/utils';
-import type { ComponentProps } from 'react';
 
 const NAV: Array<NavGroup> = [
   {
@@ -46,11 +46,6 @@ const NAV: Array<NavGroup> = [
         id: 'deploying',
         name: 'Deploying',
         href: '/deploying',
-      },
-      {
-        id: 'client',
-        name: 'Client',
-        href: '/client',
       },
     ],
   },

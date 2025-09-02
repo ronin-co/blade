@@ -105,10 +105,31 @@ could create a model called "Team" which would be the parent model, and a model 
 fields, but they relate to each other.
 
 To establish a relation between both models (or rather between the records of both
-models), you can add a new field of type "Reference" to the "Member" model, which could
+models), you can add a new field of type "Link" to the "Member" model, which could
 have an arbitrary name and slug. For the purpose of the aforementioned example, however,
 you could use "Team" as the field name, and "team" as the field slug, such that the field
 can be used to reference the parent team of every member.
+
+```ts title="schema/index.ts"
+export const Account = model({
+  slug: 'account',
+
+  fields: {
+    name: string(),
+    handle: string()
+  }
+});
+
+export const Member = model({
+  slug: 'member',
+
+  fields: {
+    account: link({ target: 'account' })
+  }
+});
+```
+
+In the example above, we defined an additional model named `Member` with a fields named `account` that references the `Account` model.
 
 #### Link Actions
 
@@ -151,6 +172,37 @@ following actions are available:
 It is important to note that, at the moment, Link Actions can only be set **when a field
 is added** and can no longer be modified after the field has been added. This is a
 limitation that will be removed in the future.
+
+#### Link Cardinality
+
+By default, every Link field targets a single record (one-to-one).
+
+In the majority of cases, that usually implies a "child to parent" relationship, meaning
+that many child records can target a single parent record, as described [above](#link).
+
+However, there are also cases in which you might want to establish "parent to child"
+relationships, which can also be described as "one-to-many". Defining such a
+relationship in a Blade model is as simple as setting the `kind` attribute of your
+Link field to `many`:
+
+```ts title="schema/index.ts"
+export const Account = model({
+  slug: 'account',
+
+  fields: {
+    name: string(),
+    handle: string(),
+    members: link({ target: 'member', kind: 'many' })
+  }
+});
+
+export const Member = model({
+  slug: 'member',
+});
+```
+
+The default value of the `kind` attribute is "one", which defines a "one-to-one"
+relationship. Setting it to "many" turns the relationship into "one-to-many".
 
 ## Default Fields
 

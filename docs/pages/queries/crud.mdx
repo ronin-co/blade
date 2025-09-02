@@ -4,13 +4,13 @@ title: 'CRUD'
 
 # CRUD
 
-The first and most important part of every RONIN query is its type (“query type”).
+The first and most important part of every Blade query is its type (“query type”).
 
-It represents the operation that is being performed at the time when the query is executed and, therefore, the way in which records are either read or written in the RONIN space that is being addressed by the query.
+It represents the operation that is being performed at the time when the query is executed and, therefore, the way in which records are either read or written in the database that is being addressed by the query.
 
 ## Adding Records (`add`)
 
-To insert individual records for a given RONIN model, the `add` query type can be used:
+To insert individual records for a given Blade model, the `add` query type can be used:
 
 ```ts
 await add.account.with({
@@ -19,7 +19,7 @@ await add.account.with({
 });
 ```
 
-As usual with RONIN’s query syntax, you may choose to nest the different parts of the query in any way you like, at any level you like:
+As usual with Blade’s query syntax, you may choose to nest the different parts of the query in any way you like, at any level you like:
 
 ```ts
 await add.session.with.account('acc_vais0g9rrk995tz0');
@@ -39,7 +39,7 @@ for (const postDetails of posts) {
 }
 ```
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type `add`:
 
@@ -55,7 +55,7 @@ Additionally, the `ronin.createdAt` and `ronin.updatedAt` [metadata](/docs/platf
 
 ## Retrieving Records (`get`)
 
-To obtain all records of a given RONIN model, the `get` query type can be used:
+To obtain all records of a given Blade model, the `get` query type can be used:
 
 ```ts
 use.accounts();
@@ -85,7 +85,7 @@ use.accounts.with({
 });
 ```
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type get:
 
@@ -99,9 +99,9 @@ The following query instructions may be used in combination with queries of type
 
 - Selecting Fields (`selecting`)
 
-## Modifying Records (set)
+## Modifying Records (`set`)
 
-To update individual records of a given RONIN model, the `set` query type can be used:
+To update individual records of a given Blade model, the `set` query type can be used:
 
 ```ts
 await set.account({
@@ -110,7 +110,7 @@ await set.account({
 });
 ```
 
-Similarily, multiple records of the same RONIN model may be updated like so:
+Similarily, multiple records of the same Blade model may be updated like so:
 
 ```ts
 await set.accounts({
@@ -125,7 +125,7 @@ await set.accounts({
 
 Every time you update a record, the updated record (with the modifications applied) is returned.
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type set:
 
@@ -139,7 +139,7 @@ Whenever a record is modified, the `ronin.updatedAt` [metadata](/docs/platform/d
 
 ## Removing Records (`remove`)
 
-To remove individual records of a given RONIN model, the `remove` query type can be used:
+To remove individual records of a given Blade model, the `remove` query type can be used:
 
 ```ts
 await remove.account.with.id('acc_vais0g9rrk995tz0');
@@ -154,13 +154,13 @@ await remove.account.with({
 });
 ```
 
-Similarily, multiple records of the same RONIN model may be removed like so:
+Similarily, multiple records of the same Blade model may be removed like so:
 
 ```ts
 await remove.accounts.with.email.endingWith('kojima-productions.com');
 ```
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type `remove`:
 
@@ -176,7 +176,7 @@ If you would like to remove all records of a model, please retrieve them all usi
 
 ## Counting Records (`count`)
 
-To determine the amount of all the records available for a given RONIN model, the `count` query type can be used:
+To determine the amount of all the records available for a given Blade model, the `count` query type can be used:
 
 ```ts
 await count.accounts();
@@ -184,7 +184,7 @@ await count.accounts();
 
 Note that, as shown above, the `count` query type can only be used with the **Plural Slug** of a model, not the Slug. For example, `count.account()` does not work, whereas `count.accounts()` does.
 
-### Supported Query Instructions
+### Supported Instructions
 
 The following query instructions may be used in combination with queries of type `count`:
 
