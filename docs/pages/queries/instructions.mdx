@@ -193,9 +193,15 @@ Please note that resolving more fields affects the performance of your query, so
 
 ## Selecting Fields (`selecting`)
 
-In order to ensure the maximum security of your data, you might want to prevent specific fields from ever leaving your database. You can achieve this by using the `selecting` instruction.
+By default, every record you query contains all fields that are stored for it in the database.
 
-By default, every record will always contain all of its stored fields when retrieved via the `get` [query type](/queries/crud). To exclude a particular field, it has to be added to `selecting` explicitly.
+This behavior makes it easy to pass records around in your application, since every record always
+contains all available information. Furthermore, Blade is designed in such a way that the
+performance of your application does not change, regardless of whether you obtain all fields of
+a record, or only some of them.
+
+Nevertheless, you might want to restrict which fields are provided to your application, which can
+be done using the `selecting` instruction.
 
 ```ts
 use.account({
@@ -204,17 +210,16 @@ use.account({
 });
 ```
 
-The query shown above will return the first Account record whose `handle` field matches `"elaine"` while preventing the `password` field from getting included in the final result.
+The query shown above will still return an object for your record, but that object will now only
+contain a single field, which is `name`.
 
-### Architecture Example
+Selecting specific fields can be beneficial if the fields you exclude hold extremely large values,
+since those values then no longer need to be transferred into the rendering pipeline of your
+application every time your page renders or gets updated.
 
-For example, if your application uses a password-based login, you might use a model named “Account”, which contains a field of type String (with "Display As" set to "Secret") called “Password”, which holds a hashed version of the Account's password.
-
-This field should never be exposed to your application (neither client- nor server-side) — only when logging in and the hash has to be compared.
-
-In such a case, you may therefore want to add the `password` field to `selecting`.
-
-Similarly, the value of a particular field on a record might be so large that you don't want to receive it on a particular client in order to avoid hitting memory constraints. This is another case in which using `selecting` will help you.
+Similarily, if the fields you exclude contain sensitive data (such as a hashed password), the
+security of your application would be strengthened as well, since the sensitive field would then
+never leave the database and never be exposed to your application.
 
 ## Mounting Fields (`including`)
 
