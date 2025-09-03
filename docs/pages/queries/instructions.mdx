@@ -213,6 +213,8 @@ use.account({
 The query shown above will still return an object for your record, but that object will now only
 contain a single field, which is `name`.
 
+### Use Cases
+
 Selecting specific fields can be beneficial if the fields you exclude hold extremely large values,
 since those values then no longer need to be transferred into the rendering pipeline of your
 application every time your page renders or gets updated.
@@ -232,6 +234,51 @@ use.account.with({
 
 For example, the query above would retrieve an `account` record whose `email` field matches the
 `email` field of the `invitation` record with the most recent `joinedAt` date field.
+
+### Filtering Fields
+
+Every field slug you provide to the `selecting` instruction is matched as-is, meaning only the
+field whose slug matches the provided string 1:1 is returned in the final object.
+
+If you would like to obtain multiple different fields that all match a particular pattern, you
+don't need to specify the field slug for each one. Instead, you can use a
+[glob](https://en.wikipedia.org/wiki/Glob_(programming))-inspired syntax for matching the fields:
+
+```ts
+// All fields at the root level of the record
+selecting(['*'])
+
+// All fields at the root level of the record that start with "na"
+selecting(['na*'])
+
+// All fields at the root level of the record that end with "ame"
+selecting(['*ame'])
+
+// All fields at the root level of the record, except for the "id" field
+selecting(['*', '!id'])
+
+// All fields at any level of the record
+selecting(['**'])
+
+// All fields at any level of the record that start with "ronin."
+selecting(['ronin.**'])
+
+// All fields at any level of the record that end with ".createdAt"
+selecting(['**.createdAt'])
+
+// All fields at any level of the record, except for the "id" field
+selecting(['**', '!id'])
+```
+
+Just like if you were to provide a list of bare field slugs (e.g. `['name', 'handle']`), a list
+of glob filters is additive. Meaning that every subsequent array item refines the final object
+further. As a result, you could even combine the filters with bare fields:
+
+```ts
+// All fields at any level of the record, except for the "id" field,
+// plus we want to include the `name` field specifically
+selecting(['**', '!id', 'name'])
+```
 
 ## Mounting Fields (`including`)
 
