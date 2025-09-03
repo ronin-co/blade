@@ -21,6 +21,14 @@ export const identifiers = {
   },
   compiler: {
     combinedInstructions: factory.createIdentifier('CombinedInstructions'),
+    dmlQueryType: {
+      add: factory.createIdentifier('AddQuery'),
+      count: factory.createIdentifier('CountQuery'),
+      get: factory.createIdentifier('GetQuery'),
+      remove: factory.createIdentifier('RemoveQuery'),
+      set: factory.createIdentifier('SetQuery'),
+      use: factory.createIdentifier('GetQuery'),
+    },
     expression: factory.createIdentifier('Expression'),
     model: factory.createIdentifier('Model'),
     module: {

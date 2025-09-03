@@ -1,13 +1,13 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`generate a basic model 1`] = `
-"import type { CombinedInstructions, Expression } from "blade-compiler";
+"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
-type AccountSyntax<S> = ReducedFunction & {
-    <T = S>(options?: Partial<CombinedInstructions>): T;
+type AccountSyntax<S, Q> = ReducedFunction & {
+    <T = S>(options?: Partial<Q>): T;
     after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
     before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
@@ -47,23 +47,23 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: AccountSyntax<Account | null>;
+        account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
         /** Get multiple account records */
-        accounts: AccountSyntax<Accounts>;
+        accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
     };
 }
 "
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { CombinedInstructions, Expression } from "blade-compiler";
+"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
-type AccountSyntax<S> = ReducedFunction & {
-    <T = S>(options?: Partial<CombinedInstructions>): T;
+type AccountSyntax<S, Q> = ReducedFunction & {
+    <T = S>(options?: Partial<Q>): T;
     after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
     before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
@@ -105,16 +105,16 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: AccountSyntax<Account | null>;
+        account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
         /** Get multiple account records */
-        accounts: AccountSyntax<Accounts>;
+        accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
     };
 }
 "
 `;
 
 exports[`generate with no models 1`] = `
-"import type { CombinedInstructions, Expression } from "blade-compiler";
+"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 declare module "blade/types" { }
 declare module "blade/server/hooks" {

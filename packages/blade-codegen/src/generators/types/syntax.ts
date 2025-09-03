@@ -59,10 +59,7 @@ export const generateModelSyntaxTypes = (
           'options',
           factory.createToken(SyntaxKind.QuestionToken),
           factory.createTypeReferenceNode(identifiers.primitive.partial, [
-            factory.createTypeReferenceNode(
-              identifiers.compiler.combinedInstructions,
-              undefined,
-            ),
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.queries),
           ]),
           undefined,
         ),
@@ -341,6 +338,12 @@ export const generateModelSyntaxTypes = (
           factory.createTypeParameterDeclaration(
             undefined,
             typeArgumentIdentifiers.schema,
+            undefined,
+            undefined,
+          ),
+          factory.createTypeParameterDeclaration(
+            undefined,
+            typeArgumentIdentifiers.queries,
             undefined,
             undefined,
           ),

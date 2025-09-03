@@ -5,13 +5,14 @@ import { createImportDeclaration } from '@/src/generators/import';
 
 /**
  * ```ts
- * import type { CombinedInstructions, Expression } from "blade-compiler";
+ * import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
  * ```
  */
 export const importBladeCompilerQueryTypesType = createImportDeclaration({
   identifiers: [
     { name: identifiers.compiler.combinedInstructions },
     { name: identifiers.compiler.expression },
+    { name: identifiers.compiler.dmlQueryType.get },
   ],
   module: identifiers.compiler.module.root,
   type: true,

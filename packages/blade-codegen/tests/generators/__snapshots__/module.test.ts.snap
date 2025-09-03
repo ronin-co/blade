@@ -3,9 +3,9 @@
 exports[`module query declaration constant a basic model 1`] = `
 "declare const get: {
     /** Get a single account record */
-    account: AccountSyntax<Account | null>;
+    account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
     /** Get multiple account records */
-    accounts: AccountSyntax<Accounts>;
+    accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
 };
 "
 `;
@@ -18,13 +18,13 @@ exports[`module query declaration constant with no modules 1`] = `
 exports[`module query declaration constant with multiple models 1`] = `
 "declare const get: {
     /** Get a single account record */
-    account: AccountSyntax<Account | null>;
+    account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
     /** Get multiple account records */
-    accounts: AccountSyntax<Accounts>;
+    accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
     /** Get a single post record */
-    post: PostSyntax<Post | null>;
+    post: PostSyntax<Post | null, GetQuery[keyof GetQuery]>;
     /** Get multiple post records */
-    posts: PostSyntax<Posts>;
+    posts: PostSyntax<Posts, GetQuery[keyof GetQuery]>;
 };
 "
 `;

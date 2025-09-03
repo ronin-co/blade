@@ -3,6 +3,7 @@ import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'type
 import { generateQueryTypeComment } from '@/src/generators/comment';
 import { convertToPascalCase } from '@/src/utils/slug';
 
+import { identifiers } from '@/src/constants/identifiers';
 import type { Model } from '@/src/types/model';
 import type { DML_QUERY_TYPES } from 'blade-compiler';
 import type { VariableStatement } from 'typescript';
@@ -35,6 +36,22 @@ export const generateQueryDeclarationStatements = (
       `${convertToPascalCase(model.slug)}Syntax`,
     );
 
+    /**
+     * ```ts
+     * GetQuery[keyof GetQuery]
+     * ```
+     */
+    const combinedInstructionsTypes = factory.createIndexedAccessTypeNode(
+      factory.createTypeReferenceNode(
+        identifiers.compiler.dmlQueryType[queryType],
+        undefined,
+      ),
+      factory.createTypeOperatorNode(
+        SyntaxKind.KeyOfKeyword,
+        factory.createTypeReferenceNode(identifiers.compiler.dmlQueryType[queryType]),
+      ),
+    );
+
     const singularModelProperty = factory.createPropertySignature(
       undefined,
       model.slug,
@@ -44,6 +61,7 @@ export const generateQueryDeclarationStatements = (
           factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
           factory.createLiteralTypeNode(factory.createNull()),
         ]),
+        combinedInstructionsTypes,
       ]),
     );
 
@@ -53,6 +71,7 @@ export const generateQueryDeclarationStatements = (
       undefined,
       factory.createTypeReferenceNode(syntaxTypeIdentifier, [
         factory.createTypeReferenceNode(convertToPascalCase(model.pluralSlug)),
+        combinedInstructionsTypes,
       ]),
     );
 
