@@ -5,6 +5,7 @@ exports[`generate a basic model 1`] = `
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
+type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
 type AccountSyntax<S> = ReducedFunction & {
     <T = S>(options?: Partial<CombinedInstructions>): T;
     after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
@@ -12,11 +13,11 @@ type AccountSyntax<S> = ReducedFunction & {
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
     limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
     orderedBy: ReducedFunction & (<T = S>(options: {
-        ascending?: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">;
-        descending?: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">;
+        ascending?: Array<Expression | AccountFieldSlug>;
+        descending?: Array<Expression | AccountFieldSlug>;
     }) => T) & {
-        ascending: <T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">) => T;
-        descending: <T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">) => T;
+        ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
+        descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
     };
     selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
@@ -60,6 +61,7 @@ import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
+type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
 type AccountSyntax<S> = ReducedFunction & {
     <T = S>(options?: Partial<CombinedInstructions>): T;
     after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
@@ -67,11 +69,11 @@ type AccountSyntax<S> = ReducedFunction & {
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
     limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
     orderedBy: ReducedFunction & (<T = S>(options: {
-        ascending?: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">;
-        descending?: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">;
+        ascending?: Array<Expression | AccountFieldSlug>;
+        descending?: Array<Expression | AccountFieldSlug>;
     }) => T) & {
-        ascending: <T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">) => T;
-        descending: <T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">) => T;
+        ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
+        descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
     };
     selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);

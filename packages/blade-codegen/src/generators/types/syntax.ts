@@ -34,8 +34,6 @@ export const generateModelSyntaxTypes = (
   );
 
   for (const model of models) {
-    const fieldSlugs = [...DEFAULT_FIELD_SLUGS, ...Object.keys(model.fields)];
-
     const modelIdentifier = factory.createIdentifier(
       `${convertToPascalCase(model.slug)}Syntax`,
     );
@@ -81,8 +79,8 @@ export const generateModelSyntaxTypes = (
             [
               factory.createUnionTypeNode([
                 factory.createTypeReferenceNode(identifiers.compiler.expression),
-                ...fieldSlugs.map((slug) =>
-                  factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                factory.createTypeReferenceNode(
+                  factory.createIdentifier(`${convertToPascalCase(model.slug)}FieldSlug`),
                 ),
               ]),
             ],

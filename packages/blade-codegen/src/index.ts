@@ -18,6 +18,7 @@ import { printNodes } from '@/src/utils/print';
 
 import type { Node } from 'typescript';
 
+import { generateModelFieldsTypes } from '@/src/generators/types/fields';
 import type { Model } from '@/src/types/model';
 
 /**
@@ -55,8 +56,6 @@ export const generate = (models: Array<Model>): string => {
   if (hasJsonFields) nodes.push(jsonArrayType, jsonObjectType, jsonPrimitiveType);
 
   /**
-   * Generate and add the type declarations for each model.
-   *
    * @example
    * ```ts
    * type User = import('blade/types').User;
@@ -66,8 +65,22 @@ export const generate = (models: Array<Model>): string => {
   nodes.push(...generateTypeReExports(models));
 
   /**
-   * Generate and add all the syntax types for each model.
-   *
+   * @example
+   * ```ts
+   * type UserFieldSlug =
+   *  | 'id'
+   *  | 'ronin.createdAt'
+   *  | 'ronin.createdBy'
+   *  | 'ronin.updatedAt'
+   *  | 'ronin.updatedBy'
+   *  | 'email'
+   *  | 'name'
+   *  // [...]
+   * ```
+   */
+  nodes.push(...generateModelFieldsTypes(models));
+
+  /**
    * @example
    * ```ts
    * type UserSyntax <S> = ReducedFunction & { ... };
@@ -76,8 +89,6 @@ export const generate = (models: Array<Model>): string => {
   nodes.push(...generateModelSyntaxTypes(models));
 
   /**
-   * Generate and add the `blade/types` module augmentations.
-   *
    * @example
    * ```ts
    * declare module "blade/types" {
@@ -101,8 +112,6 @@ export const generate = (models: Array<Model>): string => {
   );
 
   /**
-   * Generate and add the `blade/server/hooks` module augmentations.
-   *
    * @example
    * ```ts
    * declare module "blade/server/hooks" {
