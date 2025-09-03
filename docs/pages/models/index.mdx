@@ -118,15 +118,153 @@ The following types can be used to define fields in a model:
 
 [Learn more](/models/fields) about how to apply the individual field types.
 
+## Presets
+
+As your application grows, you might find yourself repeating similar queries in multiple
+different places across the application. Such duplicated code can be avoided by
+creating [utility files](/queries/instructions#applying-presets-using) that can be imported
+in all the places where the reusable query instructions are needed.
+
+Such utility files are great for reusing entire queries and attaching additional React
+hooks to them, to make them rely on other input, such as cookies or the URL of the current
+page. If you only want to reuse specific instructions of a query and don't need to rely
+on other input, however, **query presets** might be more suitable for you.
+
+Since query presets are defined as part of your database schema, they can also be reused
+across multiple different Blade applications that are accessing the same database, without
+having to share code for potential utility files between them.
+
+You could therefore consider [views](https://www.sqlite.org/lang_createview.html) to be
+the SQL equivalent to presets in Blade. The key difference is that views in SQL represent
+entire queries, whereas in Blade, presets represent only a part of the query (the query
+instructions), which allows multiple presets to co-exist on the same level.
+
+```ts
+export const Member = model({
+  slug: 'member',
+
+  fields: {
+    pending: boolean(),
+    team: string()
+  },
+
+  presets: {
+    active: {
+      instructions: { with: { pending: false, team: null } }
+    }
+  }
+});
+```
+
+The model above contains a preset with the slug `active` that uses
+the [`with` instruction](/queries/instructions#asserting-fields-with#asserting-fields-with)
+to apply filters for two different fields, which allows us to query exactly the kinds
+of records we need, without having to re-define those filters every time.
+
+```ts
+use.member.using(['active']);
+```
+
+In order to generate custom query instructions in the shortest way possible, we can also
+add a dynamic value to the preset, which can be provided with every query:
+
+```ts
+activeAccount: {
+  instructions: {
+    with: { pending: false, team: null, account: QUERY_SYMBOLS.VALUE }
+  }
+}
+```
+
+In the query, we could then provide the value like this:
+
+```ts
+use.member.using({ activeAccount: '1234' });
+```
+
+### Default Presets
+
+Just like every model contains a list of [default fields](/models/fields#default-fields), it
+also contains a list of default presets that are automatically generated for those fields.
+
+With those default presets, you can quickly write extremely short queries that effectively
+produce the desired result, without needing to write out detailed query instructions.
+
+Specifically, for every [link field](/models/fields#link) defined in your model, a preset
+with the same slug is generated that joins the target record if you invoke it. Let's assume,
+for example, that our model looks like this:
+
+```ts
+export const Member = model({
+  slug: 'member',
+
+  fields: {
+    account: link({ target: 'account' })
+  },
+});
+```
+
+Behind the curtains, Blade would then generate the following preset for you:
+
+```ts
+account: {
+  instructions: {
+    including: {
+      account: use.account.with.id(f.account)
+    },
+  },
+  name: 'Account'
+}
+```
+
+Thanks to this auto-generated preset, you can write an extremely short query for joining
+the target record of your link field:
+
+```ts
+use.member.using(['account']);
+
+// { id: '6532', account: { id: '2439', name: 'Elaine' } }
+```
+
+In fact, Blade even auto-generates a second preset for your link fields, however that second
+preset is located on the target model, which lets you easily query the "child records", meaning
+the records that are pointing to the records on the target model:
+
+```ts
+use.account.using(['members']);
+
+// {
+//  id: '2439',
+//  members: [
+//    { id: '6532', account: '2439' },
+//    { id: '53i9', account: '2439' }
+//  ]
+// }
+```
+
+The behavior mentioned above also applies if you've set
+the [cardinality](/models/fields#link#link-cardinality) of your link field to `many` to make
+it target multiple records instead of a single one. The only difference is that, for those
+fields, only a single default preset will be generated, which is the first default preset
+mentioned above. The second default preset (generated on the target model) will not exist.
+
 ## TypeScript Types
 
-The queries defined across your application automatically receive TypeScript types that are based on your model definitions. Those types are stored in a file named `.ronin/types.d.ts` and are updated every time your run `blade apply`.
+The queries defined across your application automatically receive TypeScript types that are
+based on your model definitions. Those types are stored in a file named `.ronin/types.d.ts` and
+are updated every time your run `blade apply`.
 
-To prevent the types from getting updated automatically, you can pass a `--skip-types` flag to the `blade apply` command. You could then use the separate `blade types` command to generate fresh TypeScript types from your model definitions whenever you need them.
+To prevent the types from getting updated automatically, you can pass a `--skip-types` flag to
+the `blade apply` command. You could then use the separate `blade types` command to generate
+fresh TypeScript types from your model definitions whenever you need them.
 
-Assuming that your application is located in a Git repository for which an automatic CI process with type-checking runs on a Git provider, we advice committing the `.ronin` directory to your repository, such that your CI can validate the TypeScript types.
+Assuming that your application is located in a Git repository for which an automatic CI process
+with type-checking runs on a Git provider, we advice committing the `.ronin` directory to your
+repository, such that your CI can validate the TypeScript types.
 
-In general, however, the `.ronin` directory is ephemeral, meaning it does not need to be committed to your Git repository, since it is automatically re-generated every time you run a migration command (`blade diff` or `blade apply`) in your project.
+In general, however, the `.ronin` directory is ephemeral, meaning it does not need to be
+committed to your Git repository, since it is automatically re-generated every time you run
+a migration command (`blade diff` or `blade apply`) in your project.
 
 ## Formatting
 
