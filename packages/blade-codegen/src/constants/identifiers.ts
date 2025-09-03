@@ -21,6 +21,7 @@ export const identifiers = {
   },
   compiler: {
     combinedInstructions: factory.createIdentifier('CombinedInstructions'),
+    expression: factory.createIdentifier('Expression'),
     model: factory.createIdentifier('Model'),
     module: {
       root: factory.createIdentifier(JSON.stringify('blade-compiler')),

@@ -5,11 +5,14 @@ import { createImportDeclaration } from '@/src/generators/import';
 
 /**
  * ```ts
- * import type { CombinedInstructions } from "blade-compiler";
+ * import type { CombinedInstructions, Expression } from "blade-compiler";
  * ```
  */
 export const importBladeCompilerQueryTypesType = createImportDeclaration({
-  identifiers: [{ name: identifiers.compiler.combinedInstructions }],
+  identifiers: [
+    { name: identifiers.compiler.combinedInstructions },
+    { name: identifiers.compiler.expression },
+  ],
   module: identifiers.compiler.module.root,
   type: true,
 });
@@ -185,137 +188,5 @@ export const jsonArrayType = factory.createTypeAliasDeclaration(
       factory.createTypeReferenceNode(identifiers.utils.jsonObject),
       factory.createTypeReferenceNode(identifiers.utils.jsonArray),
     ]),
-  ]),
-);
-
-/**
- * ```ts
- * after: ReducedFunction & (<T = S>(value: CombinedInstructions['after']) => T);
- * ```
- */
-export const afterSyntaxQueryType = factory.createPropertySignature(
-  undefined,
-  'after',
-  undefined,
-  factory.createIntersectionTypeNode([
-    factory.createExpressionWithTypeArguments(
-      identifiers.syntax.reducedFunction,
-      undefined,
-    ),
-    factory.createFunctionTypeNode(
-      [
-        factory.createTypeParameterDeclaration(
-          undefined,
-          typeArgumentIdentifiers.default,
-          undefined,
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
-        ),
-      ],
-      [
-        factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          'value',
-          undefined,
-          factory.createIndexedAccessTypeNode(
-            factory.createTypeReferenceNode(
-              identifiers.compiler.combinedInstructions,
-              undefined,
-            ),
-            factory.createLiteralTypeNode(factory.createStringLiteral('after')),
-          ),
-          undefined,
-        ),
-      ],
-      factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-    ),
-  ]),
-);
-
-/**
- * ```ts
- * before: ReducedFunction & (<T = S>(value: CombinedInstructions['before']) => T);
- * ```
- */
-export const beforeSyntaxQueryType = factory.createPropertySignature(
-  undefined,
-  'before',
-  undefined,
-  factory.createIntersectionTypeNode([
-    factory.createExpressionWithTypeArguments(
-      identifiers.syntax.reducedFunction,
-      undefined,
-    ),
-    factory.createFunctionTypeNode(
-      [
-        factory.createTypeParameterDeclaration(
-          undefined,
-          typeArgumentIdentifiers.default,
-          undefined,
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
-        ),
-      ],
-      [
-        factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          'value',
-          undefined,
-          factory.createIndexedAccessTypeNode(
-            factory.createTypeReferenceNode(
-              identifiers.compiler.combinedInstructions,
-              undefined,
-            ),
-            factory.createLiteralTypeNode(factory.createStringLiteral('before')),
-          ),
-          undefined,
-        ),
-      ],
-      factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-    ),
-  ]),
-);
-
-/**
- * ```ts
- * including: ReducedFunction & (<T = S>(value: CombinedInstructions['including']) => T);
- * ```
- */
-export const includingSyntaxQueryType = factory.createPropertySignature(
-  undefined,
-  'including',
-  undefined,
-  factory.createIntersectionTypeNode([
-    factory.createExpressionWithTypeArguments(
-      identifiers.syntax.reducedFunction,
-      undefined,
-    ),
-    factory.createFunctionTypeNode(
-      [
-        factory.createTypeParameterDeclaration(
-          undefined,
-          typeArgumentIdentifiers.default,
-          undefined,
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
-        ),
-      ],
-      [
-        factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          'value',
-          undefined,
-          factory.createIndexedAccessTypeNode(
-            factory.createTypeReferenceNode(
-              identifiers.compiler.combinedInstructions,
-              undefined,
-            ),
-            factory.createLiteralTypeNode(factory.createStringLiteral('including')),
-          ),
-          undefined,
-        ),
-      ],
-      factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-    ),
   ]),
 );

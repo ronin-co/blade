@@ -144,13 +144,16 @@ export const generateModelSyntaxTypes = (
                         'fields',
                         undefined,
                         factory.createTypeReferenceNode(identifiers.primitive.array, [
-                          factory.createUnionTypeNode(
-                            fieldSlugs.map((slug) =>
+                          factory.createUnionTypeNode([
+                            factory.createTypeReferenceNode(
+                              identifiers.compiler.expression,
+                            ),
+                            ...fieldSlugs.map((slug) =>
                               factory.createLiteralTypeNode(
                                 factory.createStringLiteral(slug),
                               ),
                             ),
-                          ),
+                          ]),
                         ]),
                       ),
                     ],

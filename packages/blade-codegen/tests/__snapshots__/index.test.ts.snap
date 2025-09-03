@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`generate a basic model 1`] = `
-"import type { CombinedInstructions } from "blade-compiler";
+"import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
@@ -12,8 +12,8 @@ type AccountSyntax<S> = ReducedFunction & {
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
     limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
     orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T) & {
-        ascending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">): T;
-        descending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">): T;
+        ascending<T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">): T;
+        descending<T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">): T;
     };
     selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
@@ -52,7 +52,7 @@ declare module "blade/server/hooks" {
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { CombinedInstructions } from "blade-compiler";
+"import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
 export type Account = import("blade/types").Account;
@@ -64,8 +64,8 @@ type AccountSyntax<S> = ReducedFunction & {
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
     limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
     orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T) & {
-        ascending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">): T;
-        descending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">): T;
+        ascending<T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">): T;
+        descending<T = S>(fields: Array<Expression | "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">): T;
     };
     selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
@@ -106,7 +106,7 @@ declare module "blade/server/hooks" {
 `;
 
 exports[`generate with no models 1`] = `
-"import type { CombinedInstructions } from "blade-compiler";
+"import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
