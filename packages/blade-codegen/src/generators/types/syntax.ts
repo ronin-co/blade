@@ -89,9 +89,12 @@ export const generateModelSyntaxTypes = (
           );
 
           /**
-           * orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T) & {
-           *  ascending: (<T = S>(value: Array<string | Expression>) => T);
-           *  descending: (<T = S>(value: Array<string | Expression>) => T);
+           * orderedBy: ReducedFunction & (<T = S>(options: {
+           *  ascending?: Array<Expression | '...' | '...'>;
+           *  descending?: Array<Expression | '...' | '...'>;
+           * }) => T) & {
+           *  ascending: (<T = S>(fields: Array<Expression | '...' | '...'>) => T);
+           *  descending: (<T = S>(fields: Array<Expression | '...' | '...'>) => T);
            * };
            */
           const orderedBySignature = factory.createPropertySignature(
