@@ -70,59 +70,18 @@ export const generateModelSyntaxTypes = (
       factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
     );
 
-    const withLiteralMembers = new Array<TypeElement>(rootInstructionCallSignature);
+    const members = new Array<TypeElement>(rootInstructionCallSignature);
     for (const propertyName of INFERRED_COMBINED_INSTRUCTION_PROPERTIES) {
       /**
-       * after: <T = S>(value: CombinedInstructions["after"]) => T;
-       * before: <T = S>(value: CombinedInstructions["before"]) => T;
-       * including: <T = S>(value: CombinedInstructions["including"]) => T;
-       * limitedTo: <T = S>(value: CombinedInstructions["limitedTo"]) => T;
-       * orderedBy: <T = S>(value: CombinedInstructions["orderedBy"]) => T;
-       * selecting: <T = S>(value: CombinedInstructions["selecting"]) => T;
-       * using: <T = S>(value: CombinedInstructions["using"]) => T;
+       * after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
+       * before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
+       * including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
+       * limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
+       * orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T);
+       * selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
+       * using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
        */
-      const memberSignature = factory.createIntersectionTypeNode([
-        factory.createExpressionWithTypeArguments(
-          identifiers.syntax.reducedFunction,
-          undefined,
-        ),
-        factory.createPropertySignature(
-          undefined,
-          propertyName,
-          undefined,
-          factory.createFunctionTypeNode(
-            [
-              factory.createTypeParameterDeclaration(
-                undefined,
-                typeArgumentIdentifiers.default,
-                undefined,
-                schemaTypeArgumentNode,
-              ),
-            ],
-            [
-              factory.createParameterDeclaration(
-                undefined,
-                undefined,
-                'value',
-                undefined,
-                factory.createIndexedAccessTypeNode(
-                  factory.createTypeReferenceNode(
-                    identifiers.compiler.combinedInstructions,
-                    undefined,
-                  ),
-                  factory.createLiteralTypeNode(
-                    factory.createStringLiteral(propertyName),
-                  ),
-                ),
-                undefined,
-              ),
-            ],
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-          ),
-        ),
-      ]);
-
-      factory.createPropertySignature(
+      const memberSignature = factory.createPropertySignature(
         undefined,
         propertyName,
         undefined,
@@ -155,7 +114,7 @@ export const generateModelSyntaxTypes = (
         ),
       );
 
-      withLiteralMembers.push(memberSignature);
+      members.push(memberSignature);
     }
 
     /**
@@ -217,7 +176,7 @@ export const generateModelSyntaxTypes = (
         ]),
       ]),
     );
-    withLiteralMembers.push(withPropertySignature);
+    members.push(withPropertySignature);
 
     nodes.push(
       factory.createTypeAliasDeclaration(
@@ -236,7 +195,7 @@ export const generateModelSyntaxTypes = (
             identifiers.syntax.reducedFunction,
             undefined,
           ),
-          factory.createTypeLiteralNode(withLiteralMembers),
+          factory.createTypeLiteralNode(members),
         ]),
       ),
     );
