@@ -20,6 +20,6 @@ export const generateQueryTypeComment = (
   model: Model,
   queryType: (typeof DML_QUERY_TYPES)[number] | 'use',
 ): GenerateQueryTypeCommentResult => ({
-  singular: ` ${READABLE_DML_QUERY_TYPES[queryType]} a single ${model.name ?? model.slug} record `,
-  plural: ` ${READABLE_DML_QUERY_TYPES[queryType]} multiple ${model.name ?? model.slug} records `,
+  singular: `* ${READABLE_DML_QUERY_TYPES[queryType]} a single ${model.name ?? model.slug} record `,
+  plural: `* ${READABLE_DML_QUERY_TYPES[queryType]} multiple ${model.name ?? model.slug} records `,
 });
