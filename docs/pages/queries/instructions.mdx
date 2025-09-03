@@ -161,6 +161,24 @@ use.blogPosts.orderedBy({
 
 ## Applying Presets (`using`)
 
+To quickly resolve the target record of [link fields](/models/fields#link#link), you can apply
+a [default preset](/models#default-presets) to your query, which joins the target record onto
+the record that you are retrieving.
+
+If the slug of the link field is `account`, for example, you could resolve it like this:
+
+```ts
+use.member.using(['account']);
+```
+
+Based on which fields you've defined for your model, several different [presets](/models#default-presets)
+are available to you by default, and it is recommended to make as much use of them as possible,
+in order to keep your queries lean and concise.
+
+Furthermore, you can customize the list of presets on a per-model basis, and add additional ones
+in case you would like to [reuse the same query](/hooks#reusing-queries) in multiple places across
+your application.
+
 ## Selecting Fields (`selecting`)
 
 By default, every record you query contains all fields that are stored for it in the database.
