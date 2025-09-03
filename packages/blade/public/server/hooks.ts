@@ -89,14 +89,10 @@ const formatResult = (
 
   const resultArray = result as unknown[] & {
     // Properties that are exposed from the hook.
-    previousPage?: string;
-    nextPage?: string;
-    beforeAmount?: number;
-    afterAmount?: number;
-
-    // Properties that are only used internally.
     moreBefore?: string;
     moreAfter?: string;
+    beforeAmount?: number;
+    afterAmount?: number;
   };
 
   const paginationAmountQueryItem = queries.find((queryDetails) => {
@@ -116,17 +112,13 @@ const formatResult = (
   }
 
   if (resultArray.moreBefore) {
-    resultArray.previousPage = `${leafIndex}-${hookHash}-${queryIndex}-b-${resultArray.moreBefore}`;
-    if (targetModel) resultArray.previousPage += `-${targetModel}`;
-
-    delete resultArray.moreBefore;
+    resultArray.moreBefore = `${leafIndex}-${hookHash}-${queryIndex}-b-${resultArray.moreBefore}`;
+    if (targetModel) resultArray.moreBefore += `-${targetModel}`;
   }
 
   if (resultArray.moreAfter) {
-    resultArray.nextPage = `${leafIndex}-${hookHash}-${queryIndex}-a-${resultArray.moreAfter}`;
-    if (targetModel) resultArray.nextPage += `-${targetModel}`;
-
-    delete resultArray.moreAfter;
+    resultArray.moreAfter = `${leafIndex}-${hookHash}-${queryIndex}-a-${resultArray.moreAfter}`;
+    if (targetModel) resultArray.moreAfter += `-${targetModel}`;
   }
 
   return result;
