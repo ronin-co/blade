@@ -3,6 +3,8 @@ import { SyntaxKind, factory } from 'typescript';
 import { identifiers } from '@/src/constants/identifiers';
 import { convertToPascalCase } from '@/src/utils/slug';
 
+import type { TypeAliasDeclaration } from 'typescript';
+
 import type { Model } from '@/src/types/model';
 
 /**
@@ -25,7 +27,9 @@ import type { Model } from '@/src/types/model';
  *
  * @returns An array of type alias declarations for each model.
  */
-export const generateTypeReExports = (models: Array<Model>) =>
+export const generateTypeReExports = (
+  models: Array<Model>,
+): Array<TypeAliasDeclaration> =>
   models.flatMap((model) => {
     const slug = convertToPascalCase(model.slug);
     const pluralSlug = convertToPascalCase(model.pluralSlug);
