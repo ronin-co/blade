@@ -14,6 +14,7 @@ import { importBladeCompilerQueryTypesType } from '@/src/declarations';
 import { generateQueryDeclarationStatements } from '@/src/generators/module';
 import { generateModelTypes } from '@/src/generators/types/model';
 import { generateTypeReExports } from '@/src/generators/types/re-exports';
+import { generateModelSyntaxTypes } from '@/src/generators/types/syntax';
 import { printNodes } from '@/src/utils/print';
 
 import type { Node } from 'typescript';
@@ -67,6 +68,16 @@ export const generate = (models: Array<Model>): string => {
   nodes.push(...generateTypeReExports(models));
 
   /**
+   * Generate and add all the syntax types for each model.
+   *
+   * @example
+   * ```ts
+   * type UserSyntax <S> = ReducedFunction & { ... };
+   * ```
+   */
+  nodes.push(...generateModelSyntaxTypes(models));
+
+  /**
    * Generate and add the `blade/types` module augmentations.
    *
    * @example
@@ -76,7 +87,6 @@ export const generate = (models: Array<Model>): string => {
    *    email: string;
    *    name: string;
    *  };
-   *
    *  type Users = Array<User> & {
    *    moreBefore?: string;
    *    moreAfter?: string;
@@ -98,7 +108,12 @@ export const generate = (models: Array<Model>): string => {
    * @example
    * ```ts
    * declare module "blade/server/hooks" {
-   *   declare const use: { ... };
+   *  declare const use: {
+   *    // Get a single user record
+   *    user: UserSyntax<User | null>;
+   *    // Get multiple user records
+   *    users: UserSyntax<Users>
+   *  };
    * }
    * ```
    */

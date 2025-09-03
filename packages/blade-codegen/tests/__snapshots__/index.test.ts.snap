@@ -27,6 +27,28 @@ interface ReducedFunction {
 }
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
+type AccountSyntax<S> = ReducedFunction & {
+    <T = S>(options?: Partial<CombinedInstructions>): T;
+    after: <T = S>(value: CombinedInstructions["after"]) => T;
+    before: <T = S>(value: CombinedInstructions["before"]) => T;
+    including: <T = S>(value: CombinedInstructions["including"]) => T;
+    limitedTo: <T = S>(value: CombinedInstructions["limitedTo"]) => T;
+    orderedBy: <T = S>(value: CombinedInstructions["orderedBy"]) => T;
+    selecting: <T = S>(value: CombinedInstructions["selecting"]) => T;
+    using: <T = S>(value: CombinedInstructions["using"]) => T;
+    with: ReducedFunction & {
+        <T = S>(options?: Partial<CombinedInstructions>): T;
+        id: <T = S>(value: ResultRecord["id"]) => T;
+        ronin: ReducedFunction & {
+            createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+        };
+        name: <T = S>(value: string) => T;
+        email: <T = S>(value: string) => T;
+    };
+};
 declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
@@ -40,51 +62,9 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: ReducedFunction & {
-            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
-            after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
-            before: <T = Account | null>(value: CombinedInstructions["before"]) => T;
-            including: <T = Account | null>(value: CombinedInstructions["including"]) => T;
-            limitedTo: <T = Account | null>(value: CombinedInstructions["limitedTo"]) => T;
-            orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
-            selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
-            using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
-            with: ReducedFunction & {
-                <T = Account | null>(options: CombinedInstructions["with"]): T;
-                id: <T = Account | null>(value: ResultRecord["id"]) => T;
-                ronin: ReducedFunction & {
-                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-                };
-                name: <T = Account | null>(value: string) => T;
-                email: <T = Account | null>(value: string) => T;
-            };
-        };
+        account: AccountSyntax<Account | null>;
         /** Get multiple account records */
-        accounts: ReducedFunction & {
-            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
-            after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
-            before: <T = Accounts>(value: CombinedInstructions["before"]) => T;
-            including: <T = Accounts>(value: CombinedInstructions["including"]) => T;
-            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T;
-            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
-            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
-            using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
-            with: ReducedFunction & {
-                <T = Accounts>(options: CombinedInstructions["with"]): T;
-                id: <T = Accounts>(value: ResultRecord["id"]) => T;
-                ronin: ReducedFunction & {
-                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-                };
-                name: <T = Accounts>(value: string) => T;
-                email: <T = Accounts>(value: string) => T;
-            };
-        };
+        accounts: AccountSyntax<Accounts>;
     };
 }
 "
@@ -118,6 +98,29 @@ interface ReducedFunction {
 import type { StoredObject } from "blade-compiler";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
+type AccountSyntax<S> = ReducedFunction & {
+    <T = S>(options?: Partial<CombinedInstructions>): T;
+    after: <T = S>(value: CombinedInstructions["after"]) => T;
+    before: <T = S>(value: CombinedInstructions["before"]) => T;
+    including: <T = S>(value: CombinedInstructions["including"]) => T;
+    limitedTo: <T = S>(value: CombinedInstructions["limitedTo"]) => T;
+    orderedBy: <T = S>(value: CombinedInstructions["orderedBy"]) => T;
+    selecting: <T = S>(value: CombinedInstructions["selecting"]) => T;
+    using: <T = S>(value: CombinedInstructions["using"]) => T;
+    with: ReducedFunction & {
+        <T = S>(options?: Partial<CombinedInstructions>): T;
+        id: <T = S>(value: ResultRecord["id"]) => T;
+        ronin: ReducedFunction & {
+            createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+        };
+        name: <T = S>(value: string) => T;
+        email: <T = S>(value: string) => T;
+        image: <T = S>(value: StoredObject) => T;
+    };
+};
 declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
@@ -132,53 +135,9 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: ReducedFunction & {
-            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
-            after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
-            before: <T = Account | null>(value: CombinedInstructions["before"]) => T;
-            including: <T = Account | null>(value: CombinedInstructions["including"]) => T;
-            limitedTo: <T = Account | null>(value: CombinedInstructions["limitedTo"]) => T;
-            orderedBy: <T = Account | null>(value: CombinedInstructions["orderedBy"]) => T;
-            selecting: <T = Account | null>(value: CombinedInstructions["selecting"]) => T;
-            using: <T = Account | null>(value: CombinedInstructions["using"]) => T;
-            with: ReducedFunction & {
-                <T = Account | null>(options: CombinedInstructions["with"]): T;
-                id: <T = Account | null>(value: ResultRecord["id"]) => T;
-                ronin: ReducedFunction & {
-                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-                };
-                name: <T = Account | null>(value: string) => T;
-                email: <T = Account | null>(value: string) => T;
-                image: <T = Account | null>(value: StoredObject) => T;
-            };
-        };
+        account: AccountSyntax<Account | null>;
         /** Get multiple account records */
-        accounts: ReducedFunction & {
-            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
-            after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
-            before: <T = Accounts>(value: CombinedInstructions["before"]) => T;
-            including: <T = Accounts>(value: CombinedInstructions["including"]) => T;
-            limitedTo: <T = Accounts>(value: CombinedInstructions["limitedTo"]) => T;
-            orderedBy: <T = Accounts>(value: CombinedInstructions["orderedBy"]) => T;
-            selecting: <T = Accounts>(value: CombinedInstructions["selecting"]) => T;
-            using: <T = Accounts>(value: CombinedInstructions["using"]) => T;
-            with: ReducedFunction & {
-                <T = Accounts>(options: CombinedInstructions["with"]): T;
-                id: <T = Accounts>(value: ResultRecord["id"]) => T;
-                ronin: ReducedFunction & {
-                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-                };
-                name: <T = Accounts>(value: string) => T;
-                email: <T = Accounts>(value: string) => T;
-                image: <T = Accounts>(value: StoredObject) => T;
-            };
-        };
+        accounts: AccountSyntax<Accounts>;
     };
 }
 "
