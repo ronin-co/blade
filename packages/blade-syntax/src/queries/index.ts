@@ -270,5 +270,5 @@ const serializeValue = (
 };
 
 export { getProperty, setProperty } from '@/src/utils';
-export type { ResultRecord, DeepCallable } from '@/src/queries/types';
+export type { ResultRecord, DeepCallable, ReducedFunction } from '@/src/queries/types';
 export { getSyntaxProxySQL, getBatchProxySQL } from '@/src/queries/statements';
