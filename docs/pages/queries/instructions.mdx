@@ -159,56 +159,12 @@ use.blogPosts.orderedBy({
 });
 ```
 
-## Resolving Related Records (`using`)
+## Applying Presets (`using`)
 
-While designing an advanced data structure for your application, you will find yourself often wanting to make use of “relations”, which, in Blade, are only a matter of adding a field of type “Record” to a model, and referencing a different model from it.
-
-The `using` query instruction can then be used to resolve the field when needed.
-
-### Architecture Example
-
-For example, your application might have a model called “Team”, and a model called “Member”, in order to allow for multiple members to be part of a single team.
-
-In order to establish a relation, all you need to do is add a Record field named “Team” to the “Member” model and reference the “Team” model from it. You will then be able to write the ID of a related team as a value for this field.
-
-### Query Example
-
-By default, any query of type `get` whose target model contains a field of type “Record” will not automatically resolve the related record (in favor of performance).
-
-In order to resolve the related record, however, you only need to add the Record field (the relational field) to the `using` instruction, like so:
-
-```ts
-// Returns a record where the "team" field is resolved to a related record.
-use.member({
-  with: { id: 'acc_vais0g9rrk995tz0' },
-  using: ['team'],
-});
-```
-
-Once you’ve added a field to `using`, the return types of the query will automatically reflect a full record object for that field, instead of only a record ID.
-
-If you're importing a type explicitly, you can pass fields that should be resolved as a generic argument:
-
-```ts
-type BlogPostsWithAuthor = BlogPosts<['author']>;
-```
-
-You may even pass multiple fields like so:
-
-```ts
-BlogPosts<['author', 'category']>;
-```
-
-In order to resolve all fields at once, you can pass the string `all` instead of an array of field slugs:
-
-```ts
-use.member({
-  with: { id: 'acc_vais0g9rrk995tz0' },
-  using: 'all',
-});
-```
-
-Please note that resolving more fields affects the performance of your query, so you should not use `using: 'all'` unless you really need to resolve all fields. If you only need to resolve some of the fields, define only those fields.
+As your application grows, you might find yourself repeating similar queries in multiple
+different places across the application. Such duplicated code can be avoided by
+creating [utility files](/queries/instructions#applying-presets-using) that can be imported
+in all the places where the re-usable query instructions are needed.
 
 ## Selecting Fields (`selecting`)
 
