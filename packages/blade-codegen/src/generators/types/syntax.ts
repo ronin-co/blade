@@ -34,6 +34,8 @@ export const generateModelSyntaxTypes = (
   );
 
   for (const model of models) {
+    const fieldSlugs = [...DEFAULT_FIELD_SLUGS, ...Object.keys(model.fields)];
+
     const modelIdentifier = factory.createIdentifier(
       `${convertToPascalCase(model.slug)}Syntax`,
     );
@@ -72,57 +74,153 @@ export const generateModelSyntaxTypes = (
 
     const members = new Array<TypeElement>(rootInstructionCallSignature);
     for (const propertyName of INFERRED_COMBINED_INSTRUCTION_PROPERTIES) {
-      /**
-       * after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
-       * before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
-       * including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
-       * limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
-       * orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T);
-       * selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
-       * using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
-       */
-      const memberSignature = factory.createPropertySignature(
-        undefined,
-        propertyName,
-        undefined,
-        factory.createIntersectionTypeNode([
-          factory.createExpressionWithTypeArguments(
-            identifiers.syntax.reducedFunction,
+      switch (propertyName) {
+        case 'orderedBy': {
+          /**
+           * orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T) & {
+           *  ascending: (<T = S>(value: Array<string | Expression>) => T);
+           *  descending: (<T = S>(value: Array<string | Expression>) => T);
+           * };
+           */
+          const orderedBySignature = factory.createPropertySignature(
             undefined,
-          ),
-          factory.createFunctionTypeNode(
-            [
-              factory.createTypeParameterDeclaration(
+            propertyName,
+            undefined,
+            factory.createIntersectionTypeNode([
+              factory.createExpressionWithTypeArguments(
+                identifiers.syntax.reducedFunction,
                 undefined,
-                typeArgumentIdentifiers.default,
-                undefined,
-                schemaTypeArgumentNode,
               ),
-            ],
-            [
-              factory.createParameterDeclaration(
-                undefined,
-                undefined,
-                'value',
-                undefined,
-                factory.createIndexedAccessTypeNode(
-                  factory.createTypeReferenceNode(
-                    identifiers.compiler.combinedInstructions,
+              factory.createFunctionTypeNode(
+                [
+                  factory.createTypeParameterDeclaration(
+                    undefined,
+                    typeArgumentIdentifiers.default,
+                    undefined,
+                    schemaTypeArgumentNode,
+                  ),
+                ],
+                [
+                  factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'value',
+                    undefined,
+                    factory.createIndexedAccessTypeNode(
+                      factory.createTypeReferenceNode(
+                        identifiers.compiler.combinedInstructions,
+                        undefined,
+                      ),
+                      factory.createLiteralTypeNode(
+                        factory.createStringLiteral(propertyName),
+                      ),
+                    ),
                     undefined,
                   ),
-                  factory.createLiteralTypeNode(
-                    factory.createStringLiteral(propertyName),
+                ],
+                factory.createTypeReferenceNode(
+                  typeArgumentIdentifiers.default,
+                  undefined,
+                ),
+              ),
+              factory.createTypeLiteralNode(
+                ['ascending', 'descending'].map((name) =>
+                  factory.createMethodSignature(
+                    undefined,
+                    name,
+                    undefined,
+                    [
+                      factory.createTypeParameterDeclaration(
+                        undefined,
+                        typeArgumentIdentifiers.default,
+                        undefined,
+                        schemaTypeArgumentNode,
+                      ),
+                    ],
+                    [
+                      factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        'fields',
+                        undefined,
+                        factory.createTypeReferenceNode(identifiers.primitive.array, [
+                          factory.createUnionTypeNode(
+                            fieldSlugs.map((slug) =>
+                              factory.createLiteralTypeNode(
+                                factory.createStringLiteral(slug),
+                              ),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ],
+                    factory.createTypeReferenceNode(
+                      typeArgumentIdentifiers.default,
+                      undefined,
+                    ),
                   ),
                 ),
+              ),
+            ]),
+          );
+          members.push(orderedBySignature);
+          continue;
+        }
+        default: {
+          /**
+           * after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
+           * before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
+           * including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
+           * limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
+           * selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
+           * using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
+           */
+          const memberSignature = factory.createPropertySignature(
+            undefined,
+            propertyName,
+            undefined,
+            factory.createIntersectionTypeNode([
+              factory.createExpressionWithTypeArguments(
+                identifiers.syntax.reducedFunction,
                 undefined,
               ),
-            ],
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-          ),
-        ]),
-      );
-
-      members.push(memberSignature);
+              factory.createFunctionTypeNode(
+                [
+                  factory.createTypeParameterDeclaration(
+                    undefined,
+                    typeArgumentIdentifiers.default,
+                    undefined,
+                    schemaTypeArgumentNode,
+                  ),
+                ],
+                [
+                  factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'value',
+                    undefined,
+                    factory.createIndexedAccessTypeNode(
+                      factory.createTypeReferenceNode(
+                        identifiers.compiler.combinedInstructions,
+                        undefined,
+                      ),
+                      factory.createLiteralTypeNode(
+                        factory.createStringLiteral(propertyName),
+                      ),
+                    ),
+                    undefined,
+                  ),
+                ],
+                factory.createTypeReferenceNode(
+                  typeArgumentIdentifiers.default,
+                  undefined,
+                ),
+              ),
+            ]),
+          );
+          members.push(memberSignature);
+        }
+      }
     }
 
     /**
@@ -171,7 +269,6 @@ export const generateModelSyntaxTypes = (
                   ),
                   factory.createLiteralTypeNode(factory.createStringLiteral('with')),
                 ),
-                undefined,
               ),
             ],
             factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),

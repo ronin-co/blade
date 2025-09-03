@@ -1,3 +1,5 @@
+import type { CombinedInstructions } from 'blade-compiler';
+
 /**
  * A list of all inferred combined instruction properties for RONIN models.
  */
@@ -11,4 +13,4 @@ export const INFERRED_COMBINED_INSTRUCTION_PROPERTIES = [
 
   // TODO(@nurodev): Move out & only include `using` if the model includes any link fields.
   'using',
-] satisfies Array<string>;
+] satisfies Array<keyof CombinedInstructions>;

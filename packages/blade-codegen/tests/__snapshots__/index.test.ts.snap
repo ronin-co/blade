@@ -11,7 +11,10 @@ type AccountSyntax<S> = ReducedFunction & {
     before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
     limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
-    orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T);
+    orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T) & {
+        ascending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">): T;
+        descending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email">): T;
+    };
     selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
     with: ReducedFunction & {
@@ -60,7 +63,10 @@ type AccountSyntax<S> = ReducedFunction & {
     before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
     including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
     limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
-    orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T);
+    orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T) & {
+        ascending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">): T;
+        descending<T = S>(fields: Array<"id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image">): T;
+    };
     selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
     with: ReducedFunction & {
