@@ -29,7 +29,7 @@ describe('declarations', () => {
   test('import the utility query types from `blade-syntax/queries`', () => {
     const output = printNodes([importSyntaxUtilTypesType]);
     expect(output).toStrictEqual(
-      `import type { ResultRecord } from \"blade-syntax/queries\";\n`,
+      `import type { ReducedFunction, ResultRecord } from \"blade-syntax/queries\";\n`,
     );
   });
 
