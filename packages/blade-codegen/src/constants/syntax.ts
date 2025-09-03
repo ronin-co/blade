@@ -10,7 +10,7 @@ export const INFERRED_COMBINED_INSTRUCTION_PROPERTIES = [
   'limitedTo',
   'orderedBy',
   'selecting',
-
-  // TODO(@nurodev): Move out & only include `using` if the model includes any link fields.
-  'using',
+  'to',
+  'using', // TODO(@nurodev): Move out & only include `using` if the model includes any link fields.
+  'with',
 ] satisfies Array<keyof CombinedInstructions>;
