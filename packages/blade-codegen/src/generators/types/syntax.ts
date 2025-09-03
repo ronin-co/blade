@@ -217,6 +217,10 @@ export const generateModelSyntaxTypes = (
           members.push(selectingSignature);
           continue;
         }
+        case 'to': {
+          // TODO(@nurodev): Add write query support
+          continue;
+        }
         case 'with': {
           /**
            * ```ts
