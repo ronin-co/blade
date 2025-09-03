@@ -142,7 +142,33 @@ export const generateModelSyntaxTypes = (
           undefined,
         ),
         factory.createTypeLiteralNode([
-          rootInstructionCallSignature,
+          factory.createCallSignature(
+            [
+              factory.createTypeParameterDeclaration(
+                undefined,
+                typeArgumentIdentifiers.default,
+                undefined,
+                schemaTypeArgumentNode,
+              ),
+            ],
+            [
+              factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'options',
+                undefined,
+                factory.createIndexedAccessTypeNode(
+                  factory.createTypeReferenceNode(
+                    identifiers.compiler.combinedInstructions,
+                    undefined,
+                  ),
+                  factory.createLiteralTypeNode(factory.createStringLiteral('with')),
+                ),
+                undefined,
+              ),
+            ],
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+          ),
           ...getWithPropertySignatureMembers(
             models,
             model.fields,

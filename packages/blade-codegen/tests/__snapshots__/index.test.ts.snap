@@ -37,7 +37,7 @@ type AccountSyntax<S> = ReducedFunction & {
     selecting: <T = S>(value: CombinedInstructions["selecting"]) => T;
     using: <T = S>(value: CombinedInstructions["using"]) => T;
     with: ReducedFunction & {
-        <T = S>(options?: Partial<CombinedInstructions>): T;
+        <T = S>(options: CombinedInstructions["with"]): T;
         id: <T = S>(value: ResultRecord["id"]) => T;
         ronin: ReducedFunction & {
             createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
@@ -108,7 +108,7 @@ type AccountSyntax<S> = ReducedFunction & {
     selecting: <T = S>(value: CombinedInstructions["selecting"]) => T;
     using: <T = S>(value: CombinedInstructions["using"]) => T;
     with: ReducedFunction & {
-        <T = S>(options?: Partial<CombinedInstructions>): T;
+        <T = S>(options: CombinedInstructions["with"]): T;
         id: <T = S>(value: ResultRecord["id"]) => T;
         ronin: ReducedFunction & {
             createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
