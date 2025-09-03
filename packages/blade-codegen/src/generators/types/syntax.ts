@@ -85,33 +85,41 @@ export const generateModelSyntaxTypes = (
         undefined,
         propertyName,
         undefined,
-        factory.createFunctionTypeNode(
-          [
-            factory.createTypeParameterDeclaration(
-              undefined,
-              typeArgumentIdentifiers.default,
-              undefined,
-              schemaTypeArgumentNode,
-            ),
-          ],
-          [
-            factory.createParameterDeclaration(
-              undefined,
-              undefined,
-              'value',
-              undefined,
-              factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(
-                  identifiers.compiler.combinedInstructions,
-                  undefined,
-                ),
-                factory.createLiteralTypeNode(factory.createStringLiteral(propertyName)),
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.syntax.reducedFunction,
+            undefined,
+          ),
+          factory.createFunctionTypeNode(
+            [
+              factory.createTypeParameterDeclaration(
+                undefined,
+                typeArgumentIdentifiers.default,
+                undefined,
+                schemaTypeArgumentNode,
               ),
-              undefined,
-            ),
-          ],
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-        ),
+            ],
+            [
+              factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'value',
+                undefined,
+                factory.createIndexedAccessTypeNode(
+                  factory.createTypeReferenceNode(
+                    identifiers.compiler.combinedInstructions,
+                    undefined,
+                  ),
+                  factory.createLiteralTypeNode(
+                    factory.createStringLiteral(propertyName),
+                  ),
+                ),
+                undefined,
+              ),
+            ],
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+          ),
+        ]),
       );
 
       members.push(memberSignature);

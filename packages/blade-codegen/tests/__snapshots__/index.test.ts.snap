@@ -7,13 +7,13 @@ export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
 type AccountSyntax<S> = ReducedFunction & {
     <T = S>(options?: Partial<CombinedInstructions>): T;
-    after: <T = S>(value: CombinedInstructions["after"]) => T;
-    before: <T = S>(value: CombinedInstructions["before"]) => T;
-    including: <T = S>(value: CombinedInstructions["including"]) => T;
-    limitedTo: <T = S>(value: CombinedInstructions["limitedTo"]) => T;
-    orderedBy: <T = S>(value: CombinedInstructions["orderedBy"]) => T;
-    selecting: <T = S>(value: CombinedInstructions["selecting"]) => T;
-    using: <T = S>(value: CombinedInstructions["using"]) => T;
+    after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
+    before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
+    including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
+    limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
+    orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T);
+    selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
+    using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
     with: ReducedFunction & {
         <T = S>(options: CombinedInstructions["with"]): T;
         id: <T = S>(value: ResultRecord["id"]) => T;
@@ -56,13 +56,13 @@ export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
 type AccountSyntax<S> = ReducedFunction & {
     <T = S>(options?: Partial<CombinedInstructions>): T;
-    after: <T = S>(value: CombinedInstructions["after"]) => T;
-    before: <T = S>(value: CombinedInstructions["before"]) => T;
-    including: <T = S>(value: CombinedInstructions["including"]) => T;
-    limitedTo: <T = S>(value: CombinedInstructions["limitedTo"]) => T;
-    orderedBy: <T = S>(value: CombinedInstructions["orderedBy"]) => T;
-    selecting: <T = S>(value: CombinedInstructions["selecting"]) => T;
-    using: <T = S>(value: CombinedInstructions["using"]) => T;
+    after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
+    before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
+    including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
+    limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
+    orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T);
+    selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
+    using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
     with: ReducedFunction & {
         <T = S>(options: CombinedInstructions["with"]): T;
         id: <T = S>(value: ResultRecord["id"]) => T;
