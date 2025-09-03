@@ -409,7 +409,7 @@ client, data can only be [modified](#usemutation-client).
 The queries of your page and its surrounding layouts are executed as a single database transaction,
 in order to ensure instant page renders.
 
-### Re-Using Queries
+### Reusing Queries
 
 If the same read query is used in different layouts surrounding a page (or the page itself),
 Blade will automatically de-deduplicates the queries, such that every query is only run a single
@@ -448,6 +448,10 @@ const [session, team] = useBatch(() => [
     use.team.with.handle('engineering')
 ]);
 ```
+
+If you don't need to reuse entire queries or would like to store queries directly in your
+database like [SQL views](https://www.sqlite.org/lang_createview.html), you should consider
+using [query presets](/models#presets#presets) instead.
 
 ## `useBatch` (Server)
 
