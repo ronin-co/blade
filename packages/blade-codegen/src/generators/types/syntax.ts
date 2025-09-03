@@ -217,6 +217,76 @@ export const generateModelSyntaxTypes = (
           members.push(selectingSignature);
           continue;
         }
+        case 'with': {
+          /**
+           * ```ts
+           * with: ReducedFunction & {
+           *  <T = S>(options: CombinedInstructions["with"]): T;
+           *  id: <T = S>(value: ResultRecord["id"]) => T;
+           *  ronin: ReducedFunction & {
+           *    createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
+           *    createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
+           *    updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+           *    updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+           *  };
+           *  name: <T = S>(value: string) => T;
+           *  email: <T = S>(value: string) => T;
+           *  // [...]
+           * };
+           * ```
+           */
+          const withPropertySignature = factory.createPropertySignature(
+            undefined,
+            'with',
+            undefined,
+            factory.createIntersectionTypeNode([
+              factory.createExpressionWithTypeArguments(
+                identifiers.syntax.reducedFunction,
+                undefined,
+              ),
+              factory.createTypeLiteralNode([
+                factory.createCallSignature(
+                  [
+                    factory.createTypeParameterDeclaration(
+                      undefined,
+                      typeArgumentIdentifiers.default,
+                      undefined,
+                      schemaTypeArgumentNode,
+                    ),
+                  ],
+                  [
+                    factory.createParameterDeclaration(
+                      undefined,
+                      undefined,
+                      'options',
+                      undefined,
+                      factory.createIndexedAccessTypeNode(
+                        factory.createTypeReferenceNode(
+                          identifiers.compiler.combinedInstructions,
+                          undefined,
+                        ),
+                        factory.createLiteralTypeNode(
+                          factory.createStringLiteral('with'),
+                        ),
+                      ),
+                    ),
+                  ],
+                  factory.createTypeReferenceNode(
+                    typeArgumentIdentifiers.default,
+                    undefined,
+                  ),
+                ),
+                ...getWithPropertySignatureMembers(
+                  models,
+                  model.fields,
+                  schemaTypeArgumentNode,
+                ),
+              ]),
+            ]),
+          );
+          members.push(withPropertySignature);
+          continue;
+        }
         default: {
           /**
            * after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
@@ -269,66 +339,6 @@ export const generateModelSyntaxTypes = (
         }
       }
     }
-
-    /**
-     * ```ts
-     * with: ReducedFunction & {
-     *  <T = S>(options?: Partial<CombinedInstructions>): T;
-     *  id: <T = S>(value: ResultRecord["id"]) => T;
-     *  ronin: ReducedFunction & {
-     *    createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
-     *    createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
-     *    updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-     *    updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-     *  };
-     * };
-     * ```
-     */
-    const withPropertySignature = factory.createPropertySignature(
-      undefined,
-      'with',
-      undefined,
-      factory.createIntersectionTypeNode([
-        factory.createExpressionWithTypeArguments(
-          identifiers.syntax.reducedFunction,
-          undefined,
-        ),
-        factory.createTypeLiteralNode([
-          factory.createCallSignature(
-            [
-              factory.createTypeParameterDeclaration(
-                undefined,
-                typeArgumentIdentifiers.default,
-                undefined,
-                schemaTypeArgumentNode,
-              ),
-            ],
-            [
-              factory.createParameterDeclaration(
-                undefined,
-                undefined,
-                'options',
-                undefined,
-                factory.createIndexedAccessTypeNode(
-                  factory.createTypeReferenceNode(
-                    identifiers.compiler.combinedInstructions,
-                    undefined,
-                  ),
-                  factory.createLiteralTypeNode(factory.createStringLiteral('with')),
-                ),
-              ),
-            ],
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-          ),
-          ...getWithPropertySignatureMembers(
-            models,
-            model.fields,
-            schemaTypeArgumentNode,
-          ),
-        ]),
-      ]),
-    );
-    members.push(withPropertySignature);
 
     nodes.push(
       factory.createTypeAliasDeclaration(
