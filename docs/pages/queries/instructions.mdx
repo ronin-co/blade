@@ -201,7 +201,7 @@ performance of your application does not change, regardless of whether you obtai
 a record, or only some of them.
 
 Nevertheless, you might want to restrict which fields are provided to your application, which can
-be done using the `selecting` instruction.
+be done using the `selecting` instruction:
 
 ```ts
 use.account({
@@ -220,6 +220,18 @@ application every time your page renders or gets updated.
 Similarily, if the fields you exclude contain sensitive data (such as a hashed password), the
 security of your application would be strengthened as well, since the sensitive field would then
 never leave the database and never be exposed to your application.
+
+Lastly, selecting individual fields can be beneficial when using [sub queries](/queries#sub-queries),
+since those often require matching against a particular field of the sub query:
+
+```ts
+use.account.with({
+  email: use.invitation.selecting(['email']).orderedBy({ descending: ['joinedAt' ]})
+});
+```
+
+For example, the query above would retrieve an `account` record whose `email` field matches the
+`email` field of the `invitation` record with the most recent `joinedAt` date field.
 
 ## Mounting Fields (`including`)
 
