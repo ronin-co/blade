@@ -38,8 +38,8 @@ declare module "blade/types" {
     };
 }
 declare module "blade/server/hooks" {
-    const use: {
-        /* Get a single account record */
+    declare const use: {
+        /** Get a single account record */
         account: ReducedFunction & {
             <T = Account | null>(options?: Partial<CombinedInstructions>): T;
             after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
@@ -62,7 +62,7 @@ declare module "blade/server/hooks" {
                 email: <T = Account | null>(value: string) => T;
             };
         };
-        /* Get multiple account records */
+        /** Get multiple account records */
         accounts: ReducedFunction & {
             <T = Accounts>(options?: Partial<CombinedInstructions>): T;
             after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
@@ -130,8 +130,8 @@ declare module "blade/types" {
     };
 }
 declare module "blade/server/hooks" {
-    const use: {
-        /* Get a single account record */
+    declare const use: {
+        /** Get a single account record */
         account: ReducedFunction & {
             <T = Account | null>(options?: Partial<CombinedInstructions>): T;
             after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
@@ -155,7 +155,7 @@ declare module "blade/server/hooks" {
                 image: <T = Account | null>(value: StoredObject) => T;
             };
         };
-        /* Get multiple account records */
+        /** Get multiple account records */
         accounts: ReducedFunction & {
             <T = Accounts>(options?: Partial<CombinedInstructions>): T;
             after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
@@ -211,7 +211,7 @@ interface ReducedFunction {
 }
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
-    const use: {};
+    declare const use: {};
 }
 "
 `;

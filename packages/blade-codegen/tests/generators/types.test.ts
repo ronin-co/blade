@@ -10,7 +10,8 @@ import {
   string,
 } from 'blade-syntax/schema';
 
-import { generateTypeReExports, generateTypes } from '@/src/generators/types';
+import { generateModelTypes } from '@/src/generators/types/model';
+import { generateTypeReExports } from '@/src/generators/types/re-exports';
 import { printNodes } from '@/src/utils/print';
 
 import type { Model } from '@/src/types/model';
@@ -64,7 +65,7 @@ describe('types', () => {
     });
   });
 
-  describe('generate types', () => {
+  describe('generate the core model types', () => {
     test('a basic model', () => {
       const AccountModel = model({
         slug: 'account',
@@ -82,7 +83,7 @@ describe('types', () => {
 
       // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
       // @ts-expect-error Codegen models types differ from the schema model types.
-      const typesResult = generateTypes([AccountModel], AccountModel);
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
       expect(typesResult).toHaveLength(2);
 
@@ -105,7 +106,7 @@ describe('types', () => {
 
       // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
       // @ts-expect-error Codegen models types differ from the schema model types.
-      const typesResult = generateTypes([AccountModel], AccountModel);
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
       expect(typesResult).toHaveLength(2);
 
@@ -130,7 +131,7 @@ describe('types', () => {
 
       // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
       // @ts-expect-error Codegen models types differ from the schema model types.
-      const typesResult = generateTypes([AccountModel], AccountModel);
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
       expect(typesResult).toHaveLength(2);
 
@@ -160,7 +161,7 @@ describe('types', () => {
 
       // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
       // @ts-expect-error Codegen models types differ from the schema model types.
-      const typesResult = generateTypes([AccountModel, PostModel], PostModel);
+      const typesResult = generateModelTypes([AccountModel, PostModel], PostModel);
 
       expect(typesResult).toHaveLength(4);
 
@@ -190,7 +191,7 @@ describe('types', () => {
 
       // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
       // @ts-expect-error Codegen models types differ from the schema model types.
-      const typesResult = generateTypes([AccountModel, SpaceModel], SpaceModel);
+      const typesResult = generateModelTypes([AccountModel, SpaceModel], SpaceModel);
 
       expect(typesResult).toHaveLength(4);
 
@@ -212,7 +213,7 @@ describe('types', () => {
 
       // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
       // @ts-expect-error Codegen models types differ from the schema model types.
-      const typesResult = generateTypes([AccountModel], AccountModel);
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
       expect(typesResult).toHaveLength(2);
 
@@ -236,7 +237,7 @@ describe('types', () => {
 
       // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
       // @ts-expect-error Codegen models types differ from the schema model types.
-      const typesResult = generateTypes([AccountModel], AccountModel);
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
       expect(typesResult).toHaveLength(2);
 

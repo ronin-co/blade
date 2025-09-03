@@ -16,7 +16,7 @@ export type Posts = import("blade/types").Posts;
 "
 `;
 
-exports[`types generate types a basic model 1`] = `
+exports[`types generate the core model types a basic model 1`] = `
 "export type Account = ResultRecord & {
     avatar: StoredObject;
     email: string;
@@ -33,7 +33,7 @@ export type Accounts = Array<Account> & {
 "
 `;
 
-exports[`types generate types a model with a summary 1`] = `
+exports[`types generate the core model types a model with a summary 1`] = `
 "/**
  * A user account.
  */
@@ -51,7 +51,7 @@ export type Accounts = Array<Account> & {
 "
 `;
 
-exports[`types generate types a model with an invalid field type 1`] = `
+exports[`types generate the core model types a model with an invalid field type 1`] = `
 "export type Account = ResultRecord & {
     name: unknown;
 };
@@ -62,7 +62,7 @@ export type Accounts = Array<Account> & {
 "
 `;
 
-exports[`types generate types a model with a link field 1`] = `
+exports[`types generate the core model types a model with a link field 1`] = `
 "export type Account = ResultRecord & {
     email: string;
     name: string;
@@ -84,7 +84,7 @@ export type Posts<U extends Array<"author"> | "all" = [
 "
 `;
 
-exports[`types generate types a model with a many-to-many link field 1`] = `
+exports[`types generate the core model types a model with a many-to-many link field 1`] = `
 "export type Account = ResultRecord & {
     email: string;
     name: string;
@@ -106,7 +106,7 @@ export type Spaces<U extends Array<"members"> | "all" = [
 "
 `;
 
-exports[`types generate types a model with a link field that does not exist 1`] = `
+exports[`types generate the core model types a model with a link field that does not exist 1`] = `
 "export type Account = ResultRecord & {
     email: string;
     latestPost: unknown;
@@ -119,7 +119,7 @@ export type Accounts = Array<Account> & {
 "
 `;
 
-exports[`types generate types a model with nested fields 1`] = `
+exports[`types generate the core model types a model with nested fields 1`] = `
 "/**
  * A user account.
  */

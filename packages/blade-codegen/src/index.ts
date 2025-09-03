@@ -12,7 +12,8 @@ import {
 } from '@/src/declarations';
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
 import { generateQueryDeclarationStatements } from '@/src/generators/module';
-import { generateTypeReExports, generateTypes } from '@/src/generators/types';
+import { generateModelTypes } from '@/src/generators/types/model';
+import { generateTypeReExports } from '@/src/generators/types/re-exports';
 import { printNodes } from '@/src/utils/print';
 
 import type { Node } from 'typescript';
@@ -87,7 +88,7 @@ export const generate = (models: Array<Model>): string => {
     factory.createModuleDeclaration(
       [factory.createModifier(SyntaxKind.DeclareKeyword)],
       identifiers.blade.module.types,
-      factory.createModuleBlock(generateTypes(models)),
+      factory.createModuleBlock(generateModelTypes(models)),
     ),
   );
 

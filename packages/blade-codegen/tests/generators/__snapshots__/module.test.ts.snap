@@ -1,8 +1,8 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`module query declaration constant a basic model 1`] = `
-"const get: {
-    /* Get a single account record */
+"declare const get: {
+    /** Get a single account record */
     account: ReducedFunction & {
         <T = Account | null>(options?: Partial<CombinedInstructions>): T;
         after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
@@ -25,7 +25,7 @@ exports[`module query declaration constant a basic model 1`] = `
             email: <T = Account | null>(value: string) => T;
         };
     };
-    /* Get multiple account records */
+    /** Get multiple account records */
     accounts: ReducedFunction & {
         <T = Accounts>(options?: Partial<CombinedInstructions>): T;
         after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
@@ -53,13 +53,13 @@ exports[`module query declaration constant a basic model 1`] = `
 `;
 
 exports[`module query declaration constant with no modules 1`] = `
-"const get: {};
+"declare const get: {};
 "
 `;
 
 exports[`module query declaration constant with multiple models 1`] = `
-"const get: {
-    /* Get a single account record */
+"declare const get: {
+    /** Get a single account record */
     account: ReducedFunction & {
         <T = Account | null>(options?: Partial<CombinedInstructions>): T;
         after: <T = Account | null>(value: CombinedInstructions["after"]) => T;
@@ -82,7 +82,7 @@ exports[`module query declaration constant with multiple models 1`] = `
             email: <T = Account | null>(value: string) => T;
         };
     };
-    /* Get multiple account records */
+    /** Get multiple account records */
     accounts: ReducedFunction & {
         <T = Accounts>(options?: Partial<CombinedInstructions>): T;
         after: <T = Accounts>(value: CombinedInstructions["after"]) => T;
@@ -105,7 +105,7 @@ exports[`module query declaration constant with multiple models 1`] = `
             email: <T = Accounts>(value: string) => T;
         };
     };
-    /* Get a single post record */
+    /** Get a single post record */
     post: ReducedFunction & {
         <T = Post | null>(options?: Partial<CombinedInstructions>): T;
         after: <T = Post | null>(value: CombinedInstructions["after"]) => T;
@@ -128,7 +128,7 @@ exports[`module query declaration constant with multiple models 1`] = `
             description: <T = Post | null>(value: string) => T;
         };
     };
-    /* Get multiple post records */
+    /** Get multiple post records */
     posts: ReducedFunction & {
         <T = Posts>(options?: Partial<CombinedInstructions>): T;
         after: <T = Posts>(value: CombinedInstructions["after"]) => T;
