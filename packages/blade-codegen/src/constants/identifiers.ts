@@ -36,6 +36,7 @@ export const identifiers = {
     module: {
       queries: factory.createIdentifier(JSON.stringify('blade-syntax/queries')),
     },
+    reducedFunction: factory.createIdentifier('ReducedFunction'),
     resultRecord: factory.createIdentifier('ResultRecord'),
   },
   utils: {
@@ -43,7 +44,6 @@ export const identifiers = {
     jsonArray: factory.createIdentifier('JsonArray'),
     jsonObject: factory.createIdentifier('JsonObject'),
     jsonPrimitive: factory.createIdentifier('JsonPrimitive'),
-    reducedFunction: factory.createIdentifier('ReducedFunction'),
     resolveSchema: factory.createIdentifier('ResolveSchema'),
   },
 } satisfies Record<

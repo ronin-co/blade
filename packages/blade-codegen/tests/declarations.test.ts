@@ -7,7 +7,6 @@ import {
   jsonArrayType,
   jsonObjectType,
   jsonPrimitiveType,
-  reducedFunctionType,
   resolveSchemaType,
 } from '@/src/declarations';
 import { printNodes } from '@/src/utils/print';
@@ -62,31 +61,5 @@ describe('declarations', () => {
     expect(output).toStrictEqual(
       'type JsonArray = Array<JsonPrimitive | JsonObject | JsonArray>;\n',
     );
-  });
-
-  test('create `ReducedFunction` utility interface', () => {
-    const output = printNodes([reducedFunctionType]);
-    expect(output).toStrictEqual(`interface ReducedFunction {
-    /** @deprecated */
-    apply: string;
-    /** @deprecated */
-    arguments: string;
-    /** @deprecated */
-    bind: string;
-    /** @deprecated */
-    call: string;
-    /** @deprecated */
-    caller: string;
-    /** @deprecated */
-    length: string;
-    /** @deprecated */
-    name: string;
-    /** @deprecated */
-    prototype: string;
-    /** @deprecated */
-    toString: string;
-    /** @deprecated */
-    unify: string;
-}\n`);
   });
 });

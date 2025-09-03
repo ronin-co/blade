@@ -7,7 +7,6 @@ import {
   jsonArrayType,
   jsonObjectType,
   jsonPrimitiveType,
-  reducedFunctionType,
   resolveSchemaType,
 } from '@/src/declarations';
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
@@ -34,7 +33,6 @@ export const generate = (models: Array<Model>): string => {
   const nodes = new Array<Node>(
     importBladeCompilerQueryTypesType,
     importSyntaxUtilTypesType,
-    reducedFunctionType,
   );
 
   // If there is any models that have a `blob()` field, we need to import the

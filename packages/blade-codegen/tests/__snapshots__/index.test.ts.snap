@@ -2,29 +2,7 @@
 
 exports[`generate a basic model 1`] = `
 "import type { CombinedInstructions } from "blade-compiler";
-import type { ResultRecord } from "blade-syntax/queries";
-interface ReducedFunction {
-    /** @deprecated */
-    apply: string;
-    /** @deprecated */
-    arguments: string;
-    /** @deprecated */
-    bind: string;
-    /** @deprecated */
-    call: string;
-    /** @deprecated */
-    caller: string;
-    /** @deprecated */
-    length: string;
-    /** @deprecated */
-    name: string;
-    /** @deprecated */
-    prototype: string;
-    /** @deprecated */
-    toString: string;
-    /** @deprecated */
-    unify: string;
-}
+import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
 type AccountSyntax<S> = ReducedFunction & {
@@ -72,29 +50,7 @@ declare module "blade/server/hooks" {
 
 exports[`generate a basic model with blob field 1`] = `
 "import type { CombinedInstructions } from "blade-compiler";
-import type { ResultRecord } from "blade-syntax/queries";
-interface ReducedFunction {
-    /** @deprecated */
-    apply: string;
-    /** @deprecated */
-    arguments: string;
-    /** @deprecated */
-    bind: string;
-    /** @deprecated */
-    call: string;
-    /** @deprecated */
-    caller: string;
-    /** @deprecated */
-    length: string;
-    /** @deprecated */
-    name: string;
-    /** @deprecated */
-    prototype: string;
-    /** @deprecated */
-    toString: string;
-    /** @deprecated */
-    unify: string;
-}
+import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
@@ -145,29 +101,7 @@ declare module "blade/server/hooks" {
 
 exports[`generate with no models 1`] = `
 "import type { CombinedInstructions } from "blade-compiler";
-import type { ResultRecord } from "blade-syntax/queries";
-interface ReducedFunction {
-    /** @deprecated */
-    apply: string;
-    /** @deprecated */
-    arguments: string;
-    /** @deprecated */
-    bind: string;
-    /** @deprecated */
-    call: string;
-    /** @deprecated */
-    caller: string;
-    /** @deprecated */
-    length: string;
-    /** @deprecated */
-    name: string;
-    /** @deprecated */
-    prototype: string;
-    /** @deprecated */
-    toString: string;
-    /** @deprecated */
-    unify: string;
-}
+import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
     declare const use: {};

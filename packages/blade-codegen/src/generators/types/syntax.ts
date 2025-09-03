@@ -137,7 +137,7 @@ export const generateModelSyntaxTypes = (
       undefined,
       factory.createIntersectionTypeNode([
         factory.createExpressionWithTypeArguments(
-          identifiers.utils.reducedFunction,
+          identifiers.syntax.reducedFunction,
           undefined,
         ),
         factory.createTypeLiteralNode([
@@ -192,7 +192,7 @@ export const generateModelSyntaxTypes = (
         ],
         factory.createIntersectionTypeNode([
           factory.createExpressionWithTypeArguments(
-            identifiers.utils.reducedFunction,
+            identifiers.syntax.reducedFunction,
             undefined,
           ),
           factory.createTypeLiteralNode(withLiteralMembers),
@@ -296,7 +296,7 @@ const getWithPropertySignatureMembers = (
       undefined,
       factory.createIntersectionTypeNode([
         factory.createExpressionWithTypeArguments(
-          identifiers.utils.reducedFunction,
+          identifiers.syntax.reducedFunction,
           undefined,
         ),
         factory.createTypeLiteralNode(metaFieldsPropertySignatures),
