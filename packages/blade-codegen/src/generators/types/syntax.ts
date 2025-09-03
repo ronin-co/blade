@@ -76,6 +76,18 @@ export const generateModelSyntaxTypes = (
     for (const propertyName of INFERRED_COMBINED_INSTRUCTION_PROPERTIES) {
       switch (propertyName) {
         case 'orderedBy': {
+          const typedFields = factory.createTypeReferenceNode(
+            identifiers.primitive.array,
+            [
+              factory.createUnionTypeNode([
+                factory.createTypeReferenceNode(identifiers.compiler.expression),
+                ...fieldSlugs.map((slug) =>
+                  factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                ),
+              ]),
+            ],
+          );
+
           /**
            * orderedBy: ReducedFunction & (<T = S>(value: CombinedInstructions["orderedBy"]) => T) & {
            *  ascending: (<T = S>(value: Array<string | Expression>) => T);
@@ -104,18 +116,18 @@ export const generateModelSyntaxTypes = (
                   factory.createParameterDeclaration(
                     undefined,
                     undefined,
-                    'value',
+                    'options',
                     undefined,
-                    factory.createIndexedAccessTypeNode(
-                      factory.createTypeReferenceNode(
-                        identifiers.compiler.combinedInstructions,
-                        undefined,
-                      ),
-                      factory.createLiteralTypeNode(
-                        factory.createStringLiteral(propertyName),
+                    factory.createTypeLiteralNode(
+                      ['ascending', 'descending'].map((name) =>
+                        factory.createPropertySignature(
+                          undefined,
+                          name,
+                          factory.createToken(SyntaxKind.QuestionToken),
+                          typedFields,
+                        ),
                       ),
                     ),
-                    undefined,
                   ),
                 ],
                 factory.createTypeReferenceNode(
@@ -125,41 +137,32 @@ export const generateModelSyntaxTypes = (
               ),
               factory.createTypeLiteralNode(
                 ['ascending', 'descending'].map((name) =>
-                  factory.createMethodSignature(
+                  factory.createPropertySignature(
                     undefined,
                     name,
                     undefined,
-                    [
-                      factory.createTypeParameterDeclaration(
-                        undefined,
+                    factory.createFunctionTypeNode(
+                      [
+                        factory.createTypeParameterDeclaration(
+                          undefined,
+                          typeArgumentIdentifiers.default,
+                          undefined,
+                          schemaTypeArgumentNode,
+                        ),
+                      ],
+                      [
+                        factory.createParameterDeclaration(
+                          undefined,
+                          undefined,
+                          'fields',
+                          undefined,
+                          typedFields,
+                        ),
+                      ],
+                      factory.createTypeReferenceNode(
                         typeArgumentIdentifiers.default,
                         undefined,
-                        schemaTypeArgumentNode,
                       ),
-                    ],
-                    [
-                      factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        'fields',
-                        undefined,
-                        factory.createTypeReferenceNode(identifiers.primitive.array, [
-                          factory.createUnionTypeNode([
-                            factory.createTypeReferenceNode(
-                              identifiers.compiler.expression,
-                            ),
-                            ...fieldSlugs.map((slug) =>
-                              factory.createLiteralTypeNode(
-                                factory.createStringLiteral(slug),
-                              ),
-                            ),
-                          ]),
-                        ]),
-                      ),
-                    ],
-                    factory.createTypeReferenceNode(
-                      typeArgumentIdentifiers.default,
-                      undefined,
                     ),
                   ),
                 ),
@@ -439,7 +442,6 @@ const getWithPropertySignatureMembers = (
               factory.createUnionTypeNode(
                 mapRoninFieldToTypeNode(field as ModelField, models),
               ),
-              undefined,
             ),
           ],
           factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
