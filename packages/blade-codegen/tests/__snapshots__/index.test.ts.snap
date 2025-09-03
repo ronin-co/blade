@@ -19,7 +19,7 @@ type AccountSyntax<S> = ReducedFunction & {
         ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
         descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
     };
-    selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
+    selecting: ReducedFunction & (<T = S>(options: Array<AccountFieldSlug>) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
     with: ReducedFunction & {
         <T = S>(options: CombinedInstructions["with"]): T;
@@ -75,7 +75,7 @@ type AccountSyntax<S> = ReducedFunction & {
         ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
         descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
     };
-    selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
+    selecting: ReducedFunction & (<T = S>(options: Array<AccountFieldSlug>) => T);
     using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
     with: ReducedFunction & {
         <T = S>(options: CombinedInstructions["with"]): T;

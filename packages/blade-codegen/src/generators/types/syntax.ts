@@ -173,6 +173,53 @@ export const generateModelSyntaxTypes = (
           members.push(orderedBySignature);
           continue;
         }
+        case 'selecting': {
+          /**
+           * selecting: ReducedFunction & (<T = S>(options: Array<UserFieldSlug>) => T);
+           */
+          const selectingSignature = factory.createPropertySignature(
+            undefined,
+            propertyName,
+            undefined,
+            factory.createIntersectionTypeNode([
+              factory.createExpressionWithTypeArguments(
+                identifiers.syntax.reducedFunction,
+                undefined,
+              ),
+              factory.createFunctionTypeNode(
+                [
+                  factory.createTypeParameterDeclaration(
+                    undefined,
+                    typeArgumentIdentifiers.default,
+                    undefined,
+                    schemaTypeArgumentNode,
+                  ),
+                ],
+                [
+                  factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'options',
+                    undefined,
+                    factory.createTypeReferenceNode(identifiers.primitive.array, [
+                      factory.createTypeReferenceNode(
+                        factory.createIdentifier(
+                          `${convertToPascalCase(model.slug)}FieldSlug`,
+                        ),
+                      ),
+                    ]),
+                  ),
+                ],
+                factory.createTypeReferenceNode(
+                  typeArgumentIdentifiers.default,
+                  undefined,
+                ),
+              ),
+            ]),
+          );
+          members.push(selectingSignature);
+          continue;
+        }
         default: {
           /**
            * after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
@@ -215,13 +262,9 @@ export const generateModelSyntaxTypes = (
                         factory.createStringLiteral(propertyName),
                       ),
                     ),
-                    undefined,
                   ),
                 ],
-                factory.createTypeReferenceNode(
-                  typeArgumentIdentifiers.default,
-                  undefined,
-                ),
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
               ),
             ]),
           );
