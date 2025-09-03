@@ -70,8 +70,7 @@ export const generateModelSyntaxTypes = (
       factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
     );
 
-    const literalMembers = new Array<TypeElement>(rootInstructionCallSignature);
-
+    const withLiteralMembers = new Array<TypeElement>(rootInstructionCallSignature);
     for (const propertyName of INFERRED_COMBINED_INSTRUCTION_PROPERTIES) {
       /**
        * after: <T = S>(value: CombinedInstructions["after"]) => T;
@@ -115,7 +114,7 @@ export const generateModelSyntaxTypes = (
         ),
       );
 
-      literalMembers.push(memberSignature);
+      withLiteralMembers.push(memberSignature);
     }
 
     /**
@@ -177,7 +176,7 @@ export const generateModelSyntaxTypes = (
         ]),
       ]),
     );
-    literalMembers.push(withPropertySignature);
+    withLiteralMembers.push(withPropertySignature);
 
     nodes.push(
       factory.createTypeAliasDeclaration(
@@ -196,7 +195,7 @@ export const generateModelSyntaxTypes = (
             identifiers.utils.reducedFunction,
             undefined,
           ),
-          factory.createTypeLiteralNode(literalMembers),
+          factory.createTypeLiteralNode(withLiteralMembers),
         ]),
       ),
     );
