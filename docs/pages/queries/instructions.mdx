@@ -6,7 +6,9 @@ title: Query Instructions
 
 The third part of every Blade query is its instructions (“query instructions”).
 
-Blade queries generally do not require instructions to be provided, as the purpose of instructions to clarify which records should be affected by given query, and to format how the records should be returned from Blade, meaning in which format.
+Blade queries generally do not require instructions to be provided, as the purpose of
+instructions to clarify which records should be affected by given query, and to format
+how the records should be returned from Blade, meaning in which format.
 
 A query without instructions may look like this, for example:
 
@@ -17,16 +19,20 @@ use.accounts();
 Whereas a query with instructions would look like this:
 
 ```ts
-use.accounts.with.email.endingWith('site.co');
+use.accounts.with.email.containing('site.co');
 ```
 
-Just like with the other levels of a Blade query, you may choose to nest query instructions in any way you like, meaning that you may use object-notation versus dot-notation on any level of your choice, in order to ensure the simplest query possible.
+Just like with the other levels of a Blade query, you may choose to nest query instructions
+in any way you like, meaning that you may use object-notation versus dot-notation on any
+level of your choice, in order to ensure the simplest query possible.
 
-Below, you will find a list of all the different query instructions that are available, of which several are limited to specific query types.
+Below, you will find a list of all the different query instructions that are available, of
+which some are limited to specific query types.
 
 ## Asserting Fields (`with`)
 
-If you only need to apply simple assertions when querying records (meaning ensuring a field matches a particular value directly, using “equals”), you can may choose to use the `with` instruction:
+If you only need to apply simple assertions when querying records (meaning ensuring a field
+matches a particular value directly, using “equals”), you can may choose to use the `with` instruction:
 
 ```ts
 use.account.with.id('acc_fa0k5kkw35fik9pu');
@@ -37,15 +43,18 @@ use.account.with({
 });
 ```
 
-As you can see above, the `with` instruction accepts either a single field (in which case the entire query will only span a single line) or multiple fields (in which case an object with multiple properties can be passed instead).
+As you can see above, the `with` instruction accepts either a single field (in which case the
+entire query will only span a single line) or multiple fields (in which case an object with multiple
+properties can be passed instead).
 
 For more complex assertions that will require a longer syntax, please refer to **Advanced Assertions** below.
 
 ### Filtering Linked Records
 
-When filtering linked records (fields of type “Link”), you can query their fields directly.
+When filtering linked records (fields of type "Link"), you can query their fields directly.
 
-In the example below, `space` is defined as a field of type “Record” that links to the “Space” model. You can therefore directly apply instructions for the “Space” record as well:
+In the example below, `space` is defined as a field of type “Record” that links to the "Space"
+model. You can therefore directly apply instructions for the “Space” record as well:
 
 ```ts
 use.team.with({
@@ -56,13 +65,19 @@ use.team.with({
 });
 ```
 
-In this example, we are asserting the `handle` field of both the “Team” record and the nested “Space” record. The query retrieves the first “Team” record whose `handle` field matches `"my-team"` and whose `space` field points to a record of the “Space” model that has its `handle` field set to `"my-space"`.
+In this example, we are asserting the `handle` field of both the “Team” record and the nested
+"Space" record. The query retrieves the first “Team” record whose `handle` field
+matches `"my-team"` and whose `space` field points to a record of the “Space” model that has
+its `handle` field set to `"my-space"`.
 
 ### Advanced Assertions
 
-If you would like to retrieve records where certain fields match certain values, the syntax shown above would be the simplest solution.
+If you would like to retrieve records where certain fields match certain values, the syntax
+shown above would be the simplest solution.
 
-However, if you would like to assert the value of those fields in a specific way, instead of just via “equals”, you may instead choose to use the advanced sub properties of the `with` query instruction, which allow for asserting the value of fields with special matching operators:
+However, if you would like to assert the value of those fields in a specific way, instead of
+just via “equals”, you may instead choose to use the advanced sub properties of the `with` query
+instruction, which allow for asserting the value of fields with special matching operators:
 
 ```ts
 use.accounts.with.email.startingWith('elaine');
@@ -101,7 +116,9 @@ use.accounts.with({
 
 ## Ordering Records (`orderedBy`)
 
-Regardless of whether a singular or multiple records are being retrieved, the returned records will always be ordered by their creation date by default, meaning that the most recently created records will be returned first.
+Regardless of whether a singular or multiple records are being retrieved, the returned records
+will always be ordered by their creation date (the `ronin.createdAt` field) by default, meaning
+that the most recently created records will be returned first.
 
 ```ts
 // The most recently created record of the model will be returned.
@@ -119,9 +136,11 @@ use.customer.with.country('germany');
 use.customers.with.country('germany');
 ```
 
-In order to define a custom order for the returned records, you may optionally provide the `orderedBy` instruction for any query of type `get`.
+In order to define a custom order for the returned records, you may optionally provide
+the `orderedBy` instruction for any query of type `get`.
 
-Blade offers the default fields `ronin.createdAt` and `ronin.updatedAt` for easily ordering records using their creation and update date:
+Blade offers the default fields `ronin.createdAt` and `ronin.updatedAt` for easily ordering records
+using their creation and update date:
 
 ```ts
 // The 20 most recently updated records of the model will be returned.
@@ -370,32 +389,43 @@ in order to maximize performance.
 
 ## Limited Amount (`limitedTo`)
 
-By default, 20 records are provided per page and more records can be obtained by paginating them with the [`usePagination()`](/hooks#usepagination-client) hook, meaning by loading more pages.
+By default, 20 records are provided per page and more records can be obtained by
+paginating them with the [`usePagination()`](/hooks#usepagination-client) hook, meaning
+by loading more pages.
 
-However, in special cases in which you would like to retrieve more than 20 records from Blade without having to load multiple pages, you may decide to use the `limitedTo` instruction to provide a custom page length:
+However, in special cases in which you would like to retrieve more than 20 records from
+Blade without having to load multiple pages, you may decide to use the `limitedTo` instruction
+to provide a custom page length:
 
 ```ts
 use.accounts.limitedTo(50);
 ```
 
-As with other query instructions, `limitedTo` can be combined with the `after` and `before` instructions used for retrieving a specific page of records:
+If you would like to display an infinite amount of records in your UI (for example displaying
+the list of members of a team in your app, which might be allowed to be infinite), we strongly
+recommend using pagination due to the reasons mentioned in
+the [`usePagination()`](/hooks#usepagination-client) section. In those cases, you should therefore
+only resort to `limitedTo` if you want to decrease or increase the page size slightly, not to
+retrieve all records.
 
-```ts
-use.accounts({
-  after: '...',
-  limitedTo: 100,
-});
-```
+If, however, there is a guarantee within the conceptual model of your application that a certain
+kind of record can only exist a finite amount of times (or to be specific, only a finite amount
+or less than that is always displayed), you may decide to use `limitedTo` in order to retrieve all
+records at once.
 
-If you would like to display an infinite amount of records in your UI (for example displaying the list of members of a team in your app, which might be allowed to be infinite), we strongly recommend using pagination due to the reasons mentioned in the [`usePagination()`](/hooks#usepagination-client) section. In those cases, you should therefore only resort to `limitedTo` if you want to decrease or increase the page size slightly, not to retrieve all records.
-
-If, however, there is a guarantee within the conceptual model of your application that a certain kind of record can only exist a finite amount of times (or to be specific, only a finite amount or less than that is always displayed), you may decide to use `limitedTo` in order to retrieve all records at once.
-
-The maximum value allowed by `limitedTo` (the maximum page length) is `1000`. We strongly advice against making use of such a high value unless truly necessary.
+The maximum value allowed by `limitedTo` (the maximum page length) is `1000`. We strongly advice
+against making use of such a high value unless truly necessary.
 
 ## Next Page (`after`)
 
-When running a Query such as `get.accounts` while more than 20 records are available for the respective model, a `moreAfter` property will be provided to you (the property only exists if more than 20 records are available; otherwise it is not defined).
+Since the [`usePagination()`](/hooks#usepagination-client) hook offers automatic
+pagination, there is no need to use the `after` instruction manually. In the rare case that the
+hook is not flexible enough, however, you may use the instruction instead. Under the
+hood, `usePagination()` generates the instruction automatically.
+
+When running a query such as `use.accounts()` while more than 20 records are available for the
+respective model, a `moreAfter` property will be provided to you (the property only exists if
+more than 20 records are available; otherwise it is not defined).
 
 This property contains a so-called “cursor” pointing to the next page of records:
 
@@ -406,7 +436,8 @@ const accounts = use.accounts();
 accounts.moreAfter;
 ```
 
-Whenever you would like to load more records, you can then pass the value of `moreAfter` back to Blade, and you will be provided with the next 20 records:
+Whenever you would like to load more records, you can then pass the value of `moreAfter` back
+to Blade, and you will be provided with the next 20 records:
 
 ```ts
 const moreAccounts = use.accounts.after(accounts.moreAfter);
@@ -415,11 +446,20 @@ const moreAccounts = use.accounts.after(accounts.moreAfter);
 moreAccounts.moreAfter;
 ```
 
-You can repeat the above as often as you want to until there are no more records available (in which case `moreAfter` will not be defined anymore). Every time you run the query, a new `moreAfter` cursor will be provided to you.
+You can repeat the above as often as you want to until there are no more records available (in
+which case `moreAfter` will not be defined anymore). Every time you run the query, a
+new `moreAfter` cursor will be provided to you.
 
 ## Previous Page (`before`)
 
-If you would like to implement bi-directional pagination, you may use the `before` instruction and its `moreBefore` counterpart, which behave exactly the same as `after` and `moreAfter`, except that they let you paginate “upwards” instead of “downwards”:
+Since the [`usePagination()`](/hooks#usepagination-client) hook offers automatic
+pagination, there is no need to use the `before` instruction manually. In the rare case that the
+hook is not flexible enough, however, you may use the instruction instead. Under the
+hood, `usePagination()` generates the instruction automatically.
+
+If you would like to implement bi-directional pagination, you may use the `before` instruction
+and its `moreBefore` counterpart, which behave exactly the same as `after` and `moreAfter`, except
+that they let you paginate “upwards” instead of “downwards”:
 
 ```ts
 const moreAccounts = use.accounts.before(accounts.moreBefore);
@@ -428,4 +468,6 @@ const moreAccounts = use.accounts.before(accounts.moreBefore);
 moreAccounts.moreBefore;
 ```
 
-For example, this would be useful if you’ve implemented a page that shows a specific range of records that still has more records before and after it in Blade, which aren't displayed. You could then use `before` to reveal more of the “previous records” in the list.
+For example, this would be useful if you've implemented a page that shows a specific range of
+records that still has more records before and after it in Blade, which aren't displayed. You
+could then use `before` to reveal more of the “previous records” in the list.
