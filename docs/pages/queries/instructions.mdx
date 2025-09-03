@@ -193,9 +193,15 @@ Please note that resolving more fields affects the performance of your query, so
 
 ## Selecting Fields (`selecting`)
 
-In order to ensure the maximum security of your data, you might want to prevent specific fields from ever leaving your database. You can achieve this by using the `selecting` instruction.
+By default, every record you query contains all fields that are stored for it in the database.
 
-By default, every record will always contain all of its stored fields when retrieved via the `get` [query type](/queries/crud). To exclude a particular field, it has to be added to `selecting` explicitly.
+This behavior makes it easy to pass records around in your application, since every record always
+contains all available information. Furthermore, Blade is designed in such a way that the
+performance of your application does not change, regardless of whether you obtain all fields of
+a record, or only some of them.
+
+Nevertheless, you might want to restrict which fields are provided to your application, which can
+be done using the `selecting` instruction:
 
 ```ts
 use.account({
@@ -204,17 +210,73 @@ use.account({
 });
 ```
 
-The query shown above will return the first Account record whose `handle` field matches `"elaine"` while preventing the `password` field from getting included in the final result.
+The query shown above will still return an object for your record, but that object will now only
+contain a single field, which is `name`.
 
-### Architecture Example
+Selecting specific fields can be beneficial if the fields you exclude hold extremely large values,
+since those values then no longer need to be transferred into the rendering pipeline of your
+application every time your page renders or gets updated.
 
-For example, if your application uses a password-based login, you might use a model named “Account”, which contains a field of type String (with "Display As" set to "Secret") called “Password”, which holds a hashed version of the Account's password.
+Similarily, if the fields you exclude contain sensitive data (such as a hashed password), the
+security of your application would be strengthened as well, since the sensitive field would then
+never leave the database and never be exposed to your application.
 
-This field should never be exposed to your application (neither client- nor server-side) — only when logging in and the hash has to be compared.
+Lastly, selecting individual fields can be beneficial when using [sub queries](/queries#sub-queries),
+since those often require matching against a particular field of the sub query:
 
-In such a case, you may therefore want to add the `password` field to `selecting`.
+```ts
+use.account.with({
+  email: use.invitation.selecting(['email']).orderedBy({ descending: ['joinedAt' ]})
+});
+```
 
-Similarly, the value of a particular field on a record might be so large that you don't want to receive it on a particular client in order to avoid hitting memory constraints. This is another case in which using `selecting` will help you.
+For example, the query above would retrieve an `account` record whose `email` field matches the
+`email` field of the `invitation` record with the most recent `joinedAt` date field.
+
+### Filtering Fields
+
+Every field slug you provide to the `selecting` instruction is matched as-is, meaning only the
+field whose slug matches the provided string 1:1 is returned in the final object.
+
+If you would like to obtain multiple different fields that all match a particular pattern, you
+don't need to specify the field slug for each one. Instead, you can use a
+[glob](https://en.wikipedia.org/wiki/Glob_(programming))-inspired syntax for matching the fields:
+
+```ts
+// All fields at the root level of the record
+selecting(['*'])
+
+// All fields at the root level of the record that start with "na"
+selecting(['na*'])
+
+// All fields at the root level of the record that end with "ame"
+selecting(['*ame'])
+
+// All fields at the root level of the record, except for the "id" field
+selecting(['*', '!id'])
+
+// All fields at any level of the record
+selecting(['**'])
+
+// All fields at any level of the record that start with "ronin."
+selecting(['ronin.**'])
+
+// All fields at any level of the record that end with ".createdAt"
+selecting(['**.createdAt'])
+
+// All fields at any level of the record, except for the "id" field
+selecting(['**', '!id'])
+```
+
+Just like if you were to provide a list of bare field slugs (e.g. `['name', 'handle']`), a list
+of glob filters is additive. Meaning that every subsequent array item refines the final object
+further. As a result, you could even combine the filters with bare fields:
+
+```ts
+// All fields at any level of the record, except for the "id" field,
+// plus we want to include the `name` field specifically
+selecting(['**', '!id', 'name'])
+```
 
 ## Mounting Fields (`including`)
 
