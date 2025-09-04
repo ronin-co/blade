@@ -346,3 +346,36 @@ query instead of getting executed. Since executing the nested queries would caus
 (multiple requests to the database), the query is instead merged/inlined into the representation of
 the parent query, which means that only single large query is produced and executed for the entire
 code shown above.
+
+## Field References
+
+To access other fields from within a query, you can make use of a function argument that is
+provided to every function call of that query.
+
+Specifically, only a single argument is provided to those function calls, and that argument
+holds an object whose properties are the references to all fields available within the current model.
+
+```ts
+use.accounts(f => ({
+  with: {
+    fullName: concat(f.firstName, ' ', f.lastName)
+  }
+}));
+```
+
+As an example, the query above retrieves all `account` records whose `fullName` field contains a
+string that matches a combination of the `firstName` and `lastName` fields being concatenated, which
+is done using a [query function](/queries/functions#concat).
+
+Referencing fields of the current query can be especially useful
+with [sub queries](/queries#field-references#sub-queries), because you can use them to reference
+fields of the parent query inside the sub query:
+
+```ts
+use.account(f => ({
+  email: use.invitation.with({ name: f.name }).selecting(['email'])
+}));
+```
+
+The query above retrieves an `account` record for which an `invitation` record exists with the same
+`name` field, without performing any data waterfalls.
