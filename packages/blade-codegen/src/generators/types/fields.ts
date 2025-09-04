@@ -13,20 +13,18 @@ import type { Model } from '@/src/types/model';
  * type UserFieldSlug = 'id' | 'ronin.createdAt' | [...] | 'name' | 'email';
  * ```
  *
- * @param models - All models of the addressed space.
+ * @param model - The model for which to generate field slug types.
  *
  * @returns An array of TypeScript type alias declarations for each model's field slugs.
  */
-export const generateModelFieldsTypes = (models: Array<Model>) =>
-  models.map((model) =>
-    factory.createTypeAliasDeclaration(
-      undefined,
-      factory.createIdentifier(`${convertToPascalCase(model.slug)}FieldSlug`),
-      undefined,
-      factory.createUnionTypeNode(
-        [...DEFAULT_FIELD_SLUGS, ...Object.keys(model.fields)].map((slug) =>
-          factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
-        ),
+export const generateModelFieldsTypes = (model: Model) =>
+  factory.createTypeAliasDeclaration(
+    undefined,
+    factory.createIdentifier(`${convertToPascalCase(model.slug)}FieldSlug`),
+    undefined,
+    factory.createUnionTypeNode(
+      [...DEFAULT_FIELD_SLUGS, ...Object.keys(model.fields)].map((slug) =>
+        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
       ),
     ),
   );

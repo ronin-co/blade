@@ -28,38 +28,7 @@ describe('types', () => {
         },
       });
 
-      const models = [AccountModel] as unknown as Array<Model>;
-      const types = generateTypeReExports(models);
-      const typesStr = printNodes(types);
-      expect(typesStr).toMatchSnapshot();
-    });
-
-    test('with no models', () => {
-      const types = generateTypeReExports([]);
-      const typesStr = printNodes(types);
-      expect(typesStr).toMatchSnapshot();
-    });
-
-    test('with multiple models', () => {
-      const AccountModel = model({
-        slug: 'account',
-        pluralSlug: 'accounts',
-        fields: {
-          name: string(),
-          email: string({ required: true }),
-        },
-      });
-      const PostModel = model({
-        slug: 'post',
-        pluralSlug: 'posts',
-        fields: {
-          title: string({ required: true }),
-          description: string(),
-        },
-      });
-
-      const models = [AccountModel, PostModel] as unknown as Array<Model>;
-      const types = generateTypeReExports(models);
+      const types = generateTypeReExports(AccountModel as unknown as Model);
       const typesStr = printNodes(types);
       expect(typesStr).toMatchSnapshot();
     });

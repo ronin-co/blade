@@ -55,38 +55,42 @@ export const generate = (models: Array<Model>): string => {
   );
   if (hasJsonFields) nodes.push(jsonArrayType, jsonObjectType, jsonPrimitiveType);
 
-  /**
-   * @example
-   * ```ts
-   * type User = import('blade/types').User;
-   * type Users = import('blade/types').Users;
-   * ```
-   */
-  nodes.push(...generateTypeReExports(models));
+  for (const model of models) {
+    /**
+     * @example
+     * ```ts
+     * type User = import('blade/types').User;
+     * type Users = import('blade/types').Users;
+     * ```
+     */
+    const reExportTypes = generateTypeReExports(model);
 
-  /**
-   * @example
-   * ```ts
-   * type UserFieldSlug =
-   *  | 'id'
-   *  | 'ronin.createdAt'
-   *  | 'ronin.createdBy'
-   *  | 'ronin.updatedAt'
-   *  | 'ronin.updatedBy'
-   *  | 'email'
-   *  | 'name'
-   *  // [...]
-   * ```
-   */
-  nodes.push(...generateModelFieldsTypes(models));
+    /**
+     * @example
+     * ```ts
+     * type UserFieldSlug =
+     *  | 'id'
+     *  | 'ronin.createdAt'
+     *  | 'ronin.createdBy'
+     *  | 'ronin.updatedAt'
+     *  | 'ronin.updatedBy'
+     *  | 'email'
+     *  | 'name'
+     *  // [...]
+     * ```
+     */
+    const fieldSlugType = generateModelFieldsTypes(model);
 
-  /**
-   * @example
-   * ```ts
-   * type UserSyntax <S, Q> = ReducedFunction & { ... };
-   * ```
-   */
-  nodes.push(...generateModelSyntaxTypes(models));
+    /**
+     * @example
+     * ```ts
+     * type UserSyntax <S, Q> = ReducedFunction & { ... };
+     * ```
+     */
+    const syntaxType = generateModelSyntaxTypes(model);
+
+    nodes.push(...reExportTypes, fieldSlugType, syntaxType);
+  }
 
   /**
    * @example

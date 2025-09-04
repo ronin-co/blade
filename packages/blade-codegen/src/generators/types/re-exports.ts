@@ -16,41 +16,40 @@ import type { Model } from '@/src/types/model';
  * export type Users = import('blade/types').Users;
  * ```
  *
- * @param models - All RONIN models to generate type re-exports for.
+ * @param model - The model to generate type re-exports for.
  *
  * @returns An array of type alias declarations for each model.
  */
 export const generateTypeReExports = (
-  models: Array<Model>,
-): Array<TypeAliasDeclaration> =>
-  models.flatMap((model) => {
-    const slug = convertToPascalCase(model.slug);
-    const pluralSlug = convertToPascalCase(model.pluralSlug);
+  model: Model,
+): [TypeAliasDeclaration, TypeAliasDeclaration] => {
+  const slug = convertToPascalCase(model.slug);
+  const pluralSlug = convertToPascalCase(model.pluralSlug);
 
-    return [
-      factory.createTypeAliasDeclaration(
-        [factory.createModifier(SyntaxKind.ExportKeyword)],
-        slug,
+  return [
+    factory.createTypeAliasDeclaration(
+      [factory.createModifier(SyntaxKind.ExportKeyword)],
+      slug,
+      undefined,
+      factory.createImportTypeNode(
+        factory.createTypeReferenceNode(identifiers.blade.module.types),
         undefined,
-        factory.createImportTypeNode(
-          factory.createTypeReferenceNode(identifiers.blade.module.types),
-          undefined,
-          factory.createIdentifier(slug),
-          undefined,
-          false,
-        ),
-      ),
-      factory.createTypeAliasDeclaration(
-        [factory.createModifier(SyntaxKind.ExportKeyword)],
-        pluralSlug,
+        factory.createIdentifier(slug),
         undefined,
-        factory.createImportTypeNode(
-          factory.createTypeReferenceNode(identifiers.blade.module.types),
-          undefined,
-          factory.createIdentifier(pluralSlug),
-          undefined,
-          false,
-        ),
+        false,
       ),
-    ];
-  });
+    ),
+    factory.createTypeAliasDeclaration(
+      [factory.createModifier(SyntaxKind.ExportKeyword)],
+      pluralSlug,
+      undefined,
+      factory.createImportTypeNode(
+        factory.createTypeReferenceNode(identifiers.blade.module.types),
+        undefined,
+        factory.createIdentifier(pluralSlug),
+        undefined,
+        false,
+      ),
+    ),
+  ];
+};

@@ -6,16 +6,6 @@ export type Accounts = import("blade/types").Accounts;
 "
 `;
 
-exports[`types re-export model types with no models 1`] = `""`;
-
-exports[`types re-export model types with multiple models 1`] = `
-"export type Account = import("blade/types").Account;
-export type Accounts = import("blade/types").Accounts;
-export type Post = import("blade/types").Post;
-export type Posts = import("blade/types").Posts;
-"
-`;
-
 exports[`types generate the core model types a basic model 1`] = `
 "export type Account = ResultRecord & {
     avatar: StoredObject;
