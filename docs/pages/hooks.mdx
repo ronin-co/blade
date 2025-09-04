@@ -361,13 +361,19 @@ const ClientComponent = () => {
 
 ## `use` (Server)
 
-Usually, in React, the [use](https://react.dev/reference/react/use) hook is used to consume a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or [context](https://react.dev/learn/passing-data-deeply-with-context).
+Usually, in React, the [use](https://react.dev/reference/react/use) hook is used to consume
+a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+or [context](https://react.dev/learn/passing-data-deeply-with-context).
 
-In Blade, however, since Blade purposefully does not support Suspense and also does not support asynchronous components, the hook is used to load data instead.
+In Blade, however, since Blade purposefully does not support Suspense and also does not support
+asynchronous components, the hook is used to load data instead.
 
-Specifically, the hook reflects the full capabilities of the [RONIN query syntax](/docs/queries) (which is as powerful as SQL) and thereby allows for easily querying records on your database.
+Specifically, the hook reflects the full capabilities of the [RONIN query syntax](/docs/queries) (which
+is as powerful as SQL) and thereby allows for easily querying records on your database.
 
-By default, if you provide a `RONIN_TOKEN` environment variable that contains a RONIN app token, these queries will simply target your RONIN database. However, if the environment variable is not provided, any other data source can be defined using [triggers](/models/triggers) instead.
+By default, if you provide a `RONIN_TOKEN` environment variable that contains a RONIN app token, these
+queries will simply target your RONIN database. However, if the environment variable is not provided,
+any other data source can be defined using [triggers](/models/triggers) instead.
 
 ```tsx
 import { use } from 'blade/server/hooks';
@@ -380,7 +386,8 @@ const Page = () => {
 };
 ```
 
-The queries you provide can be as complex as you would like them to be (see the [query syntax docs](/queries) for more details on what you can do):
+The queries you provide can be as complex as you would like them to be (see
+the [query syntax docs](/queries) for more details on what you can do):
 
 ```tsx
 import { use } from 'blade/server/hooks';
@@ -396,9 +403,55 @@ const records = use.members({
 });
 ```
 
-Note that, in order to avoid data waterfalls, data can only be read in server components. On the client, data can only be [modified](#usemutation-client).
+Note that, in order to avoid data waterfalls, data can only be read in server components. On the
+client, data can only be [modified](#usemutation-client).
 
-The queries of your page and its surrounding layouts are executed as a single database transaction, in order to ensure instant page renders.
+The queries of your page and its surrounding layouts are executed as a single database transaction,
+in order to ensure instant page renders.
+
+### Reusing Queries
+
+If the same read query is used in different layouts surrounding a page (or the page itself),
+Blade will automatically de-deduplicates the queries, such that every query is only run a single
+time, and all other instances of that same query simply receive its results.
+
+Because of that, if you want to re-use the exact same query in multiple places across your
+application, it is recommended to add a utility file containing a React hook that returns the
+query that you would like to reuse. For example:
+
+```ts
+import { useCookie } from 'blade/hooks';
+import { use } from 'blade/server/hooks';
+
+export const useCurrentSession = () => {
+    const [token] = useCookie('token');
+    if (!token) return null;
+
+    return use.session.with({ token });
+};
+```
+
+The React hook above parses the value of a `token` cookie and then uses that value to query
+a particular record of the `session` model. As you can see, since we are using a React hook,
+we can compose several different other hooks together to create a reusable utility hook that
+performs multiple tasks and then uses their result to query the data we are interested in.
+
+In fact, even the reusable utility hook can, itself, be composed further together with
+other query hooks, if we want to, to enable the leanest code possible:
+
+```ts
+import { use, useBatch } from 'blade/server/hooks';
+import { useCurrentSession } from '@/utils/hooks';
+
+const [session, team] = useBatch(() => [
+    useCurrentSession(),
+    use.team.with.handle('engineering')
+]);
+```
+
+If you don't need to reuse entire queries or would like to store queries directly in your
+database like [SQL views](https://www.sqlite.org/lang_createview.html), you should consider
+using [query presets](/models#presets#presets) instead.
 
 ## `useBatch` (Server)
 
@@ -417,7 +470,8 @@ const [accounts, posts] = useBatch(() => [
 
 To count records, the `useCountOf` hook can be used with the same syntax as the `use` hook.
 
-If the same read query is used in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the query will only be run once and all instances of the hook will return its results. In other words, queries are deduped across layouts and pages.
+The hook always returns a single integer, which reflects the amount of records that were found that
+are matching the provided conditions.
 
 ## `useMetadata` (Server)
 
