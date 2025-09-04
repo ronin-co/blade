@@ -82,7 +82,7 @@ Learn more about how to access specific records and adjust the behavior of the q
 
 ## Composability
 
-As Blade’s query syntax mimics a plain JavaScript or JSON object in its form, you may choose to expand or compress the individual levels of the object at any position of your choice.
+As Blade's query syntax mimics a plain JavaScript or JSON object in its form, you may choose to expand or compress the individual levels of the object at any position of your choice.
 
 For example, both of these queries perform exactly the same action:
 
@@ -95,6 +95,44 @@ use.blogPosts({
 ```
 
 Any level that contains a period (`.`) can instead be a nested object if you decide so. This allows you to structure the query in any way you like, to keep it as simple as possible and as human-readable as possible, even as complexity increases.
+
+## Function Chaining
+
+To keep your query as short as possible, you can also chain its function calls.
+
+While doing so, you only need to keep one rule in mind: All properties for which you
+perform function calls must be on the same level in the "object" of the query.
+
+For example, you could run the following query:
+
+```ts
+use.members.with({ org: 'acme' }).orderedBy({ descending: ['invitedAt' ]});
+```
+
+The query above would be the same as:
+
+```ts
+use.members({
+  with: { org: 'acme' },
+  orderedBy: { descending: ['invitedAt'] }
+});
+```
+
+As long as you make sure that the function calls all happen at the same level, it doesn't
+matter at which level of the "query object" you perform them. For example, this would work too:
+
+```ts
+use.members.with.org('acme').team('engineering');
+```
+
+And it would be the same as writing:
+
+```ts
+use.members.with({
+  org: 'acme',
+  team: 'engineering'
+});
+```
 
 ## Dot Notation
 
