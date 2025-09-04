@@ -13,7 +13,7 @@ import type { Model, ModelField } from '@/src/types/model';
  * Generate all required type definitions for a provided schema model.
  *
  * The plural model type will be mapped to an array of the singular model type and
- * extend it with the plural model properties.
+ * extended with the plural model properties.
  *
  * @param models - All models of the addressed space.
  *
