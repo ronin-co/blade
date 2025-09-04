@@ -10,187 +10,209 @@ import {
   string,
 } from 'blade-syntax/schema';
 
-import { generateTypes } from '@/src/generators/types';
+import { generateModelTypes } from '@/src/generators/types/model';
+import { generateTypeReExports } from '@/src/generators/types/re-exports';
 import { printNodes } from '@/src/utils/print';
 
+import type { Model } from '@/src/types/model';
+
 describe('types', () => {
-  test('a basic model', () => {
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        avatar: blob(),
-        email: string({ required: true }),
-        isActive: boolean(),
-        lastActiveAt: date(),
-        name: string(),
-        rewardPoints: number({ defaultValue: 0, required: true }),
-        settings: json({ defaultValue: {}, required: true }),
-      },
+  describe('re-export model types', () => {
+    test('a basic model', () => {
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          name: string(),
+          email: string({ required: true }),
+        },
+      });
+
+      const types = generateTypeReExports(AccountModel as unknown as Model);
+      const typesStr = printNodes(types);
+      expect(typesStr).toMatchSnapshot();
     });
-
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateTypes([AccountModel], AccountModel);
-
-    expect(typesResult).toHaveLength(2);
-
-    const typesResultStr = printNodes(typesResult);
-
-    expect(typesResultStr).toMatchSnapshot();
   });
 
-  test('a model with a summary', () => {
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        name: string(),
-        email: string({ required: true }),
-      },
-      // @ts-expect-error This property is not native to RONIN models.
-      summary: 'A user account.',
+  describe('generate the core model types', () => {
+    test('a basic model', () => {
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          avatar: blob(),
+          email: string({ required: true }),
+          isActive: boolean(),
+          lastActiveAt: date(),
+          name: string(),
+          rewardPoints: number({ defaultValue: 0, required: true }),
+          settings: json({ defaultValue: {}, required: true }),
+        },
+      });
+
+      // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
+      // @ts-expect-error Codegen models types differ from the schema model types.
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
+
+      expect(typesResult).toHaveLength(2);
+
+      const typesResultStr = printNodes(typesResult);
+
+      expect(typesResultStr).toMatchSnapshot();
     });
 
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateTypes([AccountModel], AccountModel);
+    test('a model with a summary', () => {
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          name: string(),
+          email: string({ required: true }),
+        },
+        // @ts-expect-error This property is not native to RONIN models.
+        summary: 'A user account.',
+      });
 
-    expect(typesResult).toHaveLength(2);
+      // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
+      // @ts-expect-error Codegen models types differ from the schema model types.
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-    const typesResultStr = printNodes(typesResult);
+      expect(typesResult).toHaveLength(2);
 
-    expect(typesResultStr).toMatchSnapshot();
-  });
+      const typesResultStr = printNodes(typesResult);
 
-  test('a model with an invalid field type', () => {
-    const field = string();
-
-    // @ts-expect-error These properties are designed to be read-only.
-    field.type = 'invalid';
-
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        name: field,
-      },
+      expect(typesResultStr).toMatchSnapshot();
     });
 
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateTypes([AccountModel], AccountModel);
+    test('a model with an invalid field type', () => {
+      const field = string();
 
-    expect(typesResult).toHaveLength(2);
+      // @ts-expect-error These properties are designed to be read-only.
+      field.type = 'invalid';
 
-    const typesResultStr = printNodes(typesResult);
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          name: field,
+        },
+      });
 
-    expect(typesResultStr).toMatchSnapshot();
-  });
+      // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
+      // @ts-expect-error Codegen models types differ from the schema model types.
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-  test('a model with a link field', () => {
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        name: string(),
-        email: string({ required: true }),
-      },
+      expect(typesResult).toHaveLength(2);
+
+      const typesResultStr = printNodes(typesResult);
+
+      expect(typesResultStr).toMatchSnapshot();
     });
 
-    const PostModel = model({
-      slug: 'post',
-      pluralSlug: 'posts',
-      fields: {
-        title: string(),
-        author: link({ target: 'account' }),
-      },
+    test('a model with a link field', () => {
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          name: string(),
+          email: string({ required: true }),
+        },
+      });
+
+      const PostModel = model({
+        slug: 'post',
+        pluralSlug: 'posts',
+        fields: {
+          title: string(),
+          author: link({ target: 'account' }),
+        },
+      });
+
+      // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
+      // @ts-expect-error Codegen models types differ from the schema model types.
+      const typesResult = generateModelTypes([AccountModel, PostModel], PostModel);
+
+      expect(typesResult).toHaveLength(4);
+
+      const typesResultStr = printNodes(typesResult);
+
+      expect(typesResultStr).toMatchSnapshot();
     });
 
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateTypes([AccountModel, PostModel], PostModel);
+    test('a model with a many-to-many link field', () => {
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          name: string(),
+          email: string({ required: true }),
+        },
+      });
 
-    expect(typesResult).toHaveLength(4);
+      const SpaceModel = model({
+        slug: 'space',
+        pluralSlug: 'spaces',
+        fields: {
+          name: string(),
+          members: link({ target: 'account', kind: 'many' }),
+        },
+      });
 
-    const typesResultStr = printNodes(typesResult);
+      // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
+      // @ts-expect-error Codegen models types differ from the schema model types.
+      const typesResult = generateModelTypes([AccountModel, SpaceModel], SpaceModel);
 
-    expect(typesResultStr).toMatchSnapshot();
-  });
+      expect(typesResult).toHaveLength(4);
 
-  test('a model with a many-to-many link field', () => {
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        name: string(),
-        email: string({ required: true }),
-      },
+      const typesResultStr = printNodes(typesResult);
+
+      expect(typesResultStr).toMatchSnapshot();
     });
 
-    const SpaceModel = model({
-      slug: 'space',
-      pluralSlug: 'spaces',
-      fields: {
-        name: string(),
-        members: link({ target: 'account', kind: 'many' }),
-      },
+    test('a model with a link field that does not exist', () => {
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          name: string(),
+          email: string({ required: true }),
+          latestPost: link({ target: 'does_not_exist' }),
+        },
+      });
+
+      // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
+      // @ts-expect-error Codegen models types differ from the schema model types.
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
+
+      expect(typesResult).toHaveLength(2);
+
+      const typesResultStr = printNodes(typesResult);
+
+      expect(typesResultStr).toMatchSnapshot();
     });
 
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateTypes([AccountModel, SpaceModel], SpaceModel);
+    test('a model with nested fields', () => {
+      const AccountModel = model({
+        slug: 'account',
+        pluralSlug: 'accounts',
+        fields: {
+          name: string(),
+          'nested.foo': string(),
+          'nested.bar': number(),
+        },
+        // @ts-expect-error This property is not native to RONIN models.
+        summary: 'A user account.',
+      });
 
-    expect(typesResult).toHaveLength(4);
+      // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
+      // @ts-expect-error Codegen models types differ from the schema model types.
+      const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-    const typesResultStr = printNodes(typesResult);
+      expect(typesResult).toHaveLength(2);
 
-    expect(typesResultStr).toMatchSnapshot();
-  });
+      const typesResultStr = printNodes(typesResult);
 
-  test('a model with a link field that does not exist', () => {
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        name: string(),
-        email: string({ required: true }),
-        latestPost: link({ target: 'does_not_exist' }),
-      },
+      expect(typesResultStr).toMatchSnapshot();
     });
-
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateTypes([AccountModel], AccountModel);
-
-    expect(typesResult).toHaveLength(2);
-
-    const typesResultStr = printNodes(typesResult);
-
-    expect(typesResultStr).toMatchSnapshot();
-  });
-
-  test('a model with nested fields', () => {
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        name: string(),
-        'nested.foo': string(),
-        'nested.bar': number(),
-      },
-      // @ts-expect-error This property is not native to RONIN models.
-      summary: 'A user account.',
-    });
-
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateTypes([AccountModel], AccountModel);
-
-    expect(typesResult).toHaveLength(2);
-
-    const typesResultStr = printNodes(typesResult);
-
-    expect(typesResultStr).toMatchSnapshot();
   });
 });

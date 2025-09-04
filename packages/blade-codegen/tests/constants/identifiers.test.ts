@@ -1,11 +1,11 @@
 import { expect, test } from 'bun:test';
 
-import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';
+import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 
 test('identifiers', () => {
   expect(identifiers).toMatchSnapshot();
 });
 
 test('generic identifiers', () => {
-  expect(genericIdentifiers).toMatchSnapshot();
+  expect(typeArgumentIdentifiers).toMatchSnapshot();
 });

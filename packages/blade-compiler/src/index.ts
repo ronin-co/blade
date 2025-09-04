@@ -584,6 +584,8 @@ export type {
   Statement,
   // Miscellaneous
   StoredObject,
+  // Expressions
+  Expression,
 } from '@/src/types/query';
 
 // Expose result types

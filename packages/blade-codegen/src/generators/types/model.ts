@@ -1,55 +1,36 @@
 import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
-import { genericIdentifiers, identifiers } from '@/src/constants/identifiers';
+import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
+import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { convertToPascalCase } from '@/src/utils/slug';
 import { mapRoninFieldToTypeNode, remapNestedFields } from '@/src/utils/types';
 
-import type {
-  InterfaceDeclaration,
-  TypeAliasDeclaration,
-  TypeParameterDeclaration,
-} from 'typescript';
+import type { TypeAliasDeclaration, TypeParameterDeclaration } from 'typescript';
 
 import type { Model, ModelField } from '@/src/types/model';
 
-const DEFAULT_FIELD_SLUGS = [
-  'id',
-  'ronin.createdAt',
-  'ronin.createdBy',
-  'ronin.locked',
-  'ronin.updatedAt',
-  'ronin.updatedBy',
-] satisfies Array<string>;
-
 /**
- * Generate all required type definitions for a provided RONIN model.
+ * Generate all required type definitions for a provided schema model.
  *
- * This will generate a shared schema interface that is then used to create type
- * aliases for both the singular and plural model types.
+ * The plural model type will be mapped to an array of the singular model type and
+ * extended with the plural model properties.
  *
- * The plural model type will be mapped to an array of the singular model type
- * and extend it with the plural model properties.
+ * @param models - All models of the addressed space.
  *
- * @param models - All RONIN models of the addressed space.
- *
- * @returns - An array of type nodes to be added to the `index.d.ts` file.
+ * @returns An array of type nodes to be added to the `index.d.ts` file.
  */
-export const generateTypes = (
-  models: Array<Model>,
-): Array<InterfaceDeclaration | TypeAliasDeclaration> => {
-  const nodes = new Array<InterfaceDeclaration | TypeAliasDeclaration>();
+export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclaration> => {
+  const nodes = new Array<TypeAliasDeclaration>();
 
   for (const model of models) {
     const fields: Array<ModelField> = Object.entries(model.fields)
       .map(([slug, field]) => ({ ...field, slug }) as ModelField)
       .filter((field) => !DEFAULT_FIELD_SLUGS.includes(field.slug));
 
-    const singularModelIdentifier = factory.createIdentifier(
-      convertToPascalCase(model.slug),
-    );
-    const pluralSchemaIdentifier = factory.createIdentifier(
-      convertToPascalCase(model.pluralSlug),
-    );
+    const modelIdentifier = {
+      singular: factory.createIdentifier(convertToPascalCase(model.slug)),
+      plural: factory.createIdentifier(convertToPascalCase(model.pluralSlug)),
+    };
 
     const hasLinkFields = fields.some(
       (field) =>
@@ -59,10 +40,9 @@ export const generateTypes = (
     const modelInterfaceTypeParameters = new Array<TypeParameterDeclaration>();
     const linkFieldKeys = fields
       .filter((field) => field.type === 'link')
-      .map((field) => {
-        const literal = factory.createStringLiteral(field.slug);
-        return factory.createLiteralTypeNode(literal);
-      });
+      .map((field) =>
+        factory.createLiteralTypeNode(factory.createStringLiteral(field.slug)),
+      );
 
     /**
      * ```ts
@@ -71,7 +51,7 @@ export const generateTypes = (
      */
     const usingGenericDec = factory.createTypeParameterDeclaration(
       undefined,
-      genericIdentifiers.using,
+      typeArgumentIdentifiers.using,
       factory.createUnionTypeNode([
         factory.createTypeReferenceNode(identifiers.primitive.array, [
           factory.createUnionTypeNode(linkFieldKeys),
@@ -89,8 +69,10 @@ export const generateTypes = (
      * ```
      */
     const modelSchemaName = factory.createTypeReferenceNode(
-      singularModelIdentifier,
-      hasLinkFields ? [factory.createTypeReferenceNode(genericIdentifiers.using)] : [],
+      modelIdentifier.singular,
+      hasLinkFields
+        ? [factory.createTypeReferenceNode(typeArgumentIdentifiers.using)]
+        : [],
     );
 
     /**
@@ -102,7 +84,7 @@ export const generateTypes = (
      */
     const singularModelTypeDec = factory.createTypeAliasDeclaration(
       [factory.createModifier(SyntaxKind.ExportKeyword)],
-      singularModelIdentifier,
+      modelIdentifier.singular,
       modelInterfaceTypeParameters,
       factory.createIntersectionTypeNode([
         factory.createExpressionWithTypeArguments(
@@ -188,7 +170,7 @@ export const generateTypes = (
      */
     const pluralModelTypeDec = factory.createTypeAliasDeclaration(
       [factory.createModifier(SyntaxKind.ExportKeyword)],
-      pluralSchemaIdentifier,
+      modelIdentifier.plural,
       modelInterfaceTypeParameters,
       factory.createIntersectionTypeNode([
         pluralModelArrayTypeDec,

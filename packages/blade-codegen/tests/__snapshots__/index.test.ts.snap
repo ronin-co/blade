@@ -1,10 +1,40 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`generate a basic model 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
-import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
-declare module "ronin" {
+"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
+export type Account = import("blade/types").Account;
+export type Accounts = import("blade/types").Accounts;
+type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
+type AccountSyntax<S, Q> = ReducedFunction & {
+    <T = S>(options?: Partial<Q>): T;
+    after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
+    before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
+    including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
+    limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
+    orderedBy: ReducedFunction & (<T = S>(options: {
+        ascending?: Array<Expression | AccountFieldSlug>;
+        descending?: Array<Expression | AccountFieldSlug>;
+    }) => T) & {
+        ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
+        descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
+    };
+    selecting: ReducedFunction & (<T = S>(options: Array<AccountFieldSlug>) => T);
+    using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
+    with: ReducedFunction & {
+        <T = S>(options: CombinedInstructions["with"]): T;
+        id: <T = S>(value: ResultRecord["id"]) => T;
+        ronin: ReducedFunction & {
+            createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+        };
+        name: <T = S>(name: Account["name"]) => T;
+        email: <T = S>(email: Account["email"]) => T;
+    };
+};
+declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
         name: string;
@@ -13,78 +43,55 @@ declare module "ronin" {
         moreBefore?: string;
         moreAfter?: string;
     };
-    declare const get: {
-        /* Get a single account record */
-        account: DeepCallable<GetQuery[keyof GetQuery], Account | null>;
-        /* Get multiple account records */
-        accounts: DeepCallable<GetQuery[keyof GetQuery], Accounts>;
-    };
-    declare const count: {
-        /* Count multiple account records */
-        accounts: DeepCallable<CountQuery[keyof CountQuery], number>;
-    };
-    declare const set: {
-        /* Set a single account record */
-        account: DeepCallable<SetQuery[keyof SetQuery], Account | null>;
-        /* Set multiple account records */
-        accounts: DeepCallable<SetQuery[keyof SetQuery], Accounts>;
-    };
-    declare const add: {
-        /* Add a single account record */
-        account: DeepCallable<AddQuery[keyof AddQuery], Account | null>;
-    };
-    declare const remove: {
-        /* Remove a single account record */
-        account: DeepCallable<RemoveQuery[keyof RemoveQuery], Account | null>;
-        /* Remove multiple account records */
-        accounts: DeepCallable<RemoveQuery[keyof RemoveQuery], Accounts>;
-    };
-    declare const batch: <TQueries extends [
-        Promise,
-        ...Array<Promise>
-    ] | Array<Promise>>(operations: () => TQueries, queryOptions?: Record<string, unknown>) => Promise<PromiseTuple<TQueries>>;
-    declare const list: {
-        /* List all model definitions */
-        models: DeepCallable<ListQuery[keyof ListQuery], Array<Model>>;
-    };
-    declare const createSyntaxFactory: (options: QueryHandlerOptions | (() => QueryHandlerOptions)) => {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-    export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+}
+declare module "blade/server/hooks" {
+    declare const use: {
+        /** Get a single account record */
+        account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
+        /** Get multiple account records */
+        accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
     };
 }
 "
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
+"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
-import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
-declare module "ronin" {
+export type Account = import("blade/types").Account;
+export type Accounts = import("blade/types").Accounts;
+type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
+type AccountSyntax<S, Q> = ReducedFunction & {
+    <T = S>(options?: Partial<Q>): T;
+    after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
+    before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
+    including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
+    limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
+    orderedBy: ReducedFunction & (<T = S>(options: {
+        ascending?: Array<Expression | AccountFieldSlug>;
+        descending?: Array<Expression | AccountFieldSlug>;
+    }) => T) & {
+        ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
+        descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
+    };
+    selecting: ReducedFunction & (<T = S>(options: Array<AccountFieldSlug>) => T);
+    using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
+    with: ReducedFunction & {
+        <T = S>(options: CombinedInstructions["with"]): T;
+        id: <T = S>(value: ResultRecord["id"]) => T;
+        ronin: ReducedFunction & {
+            createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
+            createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
+            updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+            updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+        };
+        name: <T = S>(name: Account["name"]) => T;
+        email: <T = S>(email: Account["email"]) => T;
+        image: <T = S>(image: Account["image"]) => T;
+    };
+};
+declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
         image: StoredObject;
@@ -94,118 +101,24 @@ declare module "ronin" {
         moreBefore?: string;
         moreAfter?: string;
     };
-    declare const get: {
-        /* Get a single account record */
-        account: DeepCallable<GetQuery[keyof GetQuery], Account | null>;
-        /* Get multiple account records */
-        accounts: DeepCallable<GetQuery[keyof GetQuery], Accounts>;
-    };
-    declare const count: {
-        /* Count multiple account records */
-        accounts: DeepCallable<CountQuery[keyof CountQuery], number>;
-    };
-    declare const set: {
-        /* Set a single account record */
-        account: DeepCallable<SetQuery[keyof SetQuery], Account | null>;
-        /* Set multiple account records */
-        accounts: DeepCallable<SetQuery[keyof SetQuery], Accounts>;
-    };
-    declare const add: {
-        /* Add a single account record */
-        account: DeepCallable<AddQuery[keyof AddQuery], Account | null>;
-    };
-    declare const remove: {
-        /* Remove a single account record */
-        account: DeepCallable<RemoveQuery[keyof RemoveQuery], Account | null>;
-        /* Remove multiple account records */
-        accounts: DeepCallable<RemoveQuery[keyof RemoveQuery], Accounts>;
-    };
-    declare const batch: <TQueries extends [
-        Promise,
-        ...Array<Promise>
-    ] | Array<Promise>>(operations: () => TQueries, queryOptions?: Record<string, unknown>) => Promise<PromiseTuple<TQueries>>;
-    declare const list: {
-        /* List all model definitions */
-        models: DeepCallable<ListQuery[keyof ListQuery], Array<Model>>;
-    };
-    declare const createSyntaxFactory: (options: QueryHandlerOptions | (() => QueryHandlerOptions)) => {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-    export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
+}
+declare module "blade/server/hooks" {
+    declare const use: {
+        /** Get a single account record */
+        account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
+        /** Get multiple account records */
+        accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
     };
 }
 "
 `;
 
 exports[`generate with no models 1`] = `
-"import type { AddQuery, CountQuery, GetQuery, ListQuery, Model, RemoveQuery, SetQuery } from "blade-compiler";
-import type { DeepCallable, ResultRecord } from "blade-syntax/queries";
-import type { PromiseTuple, QueryHandlerOptions } from "ronin/types";
-declare module "ronin" {
-    declare const get: {};
-    declare const count: {};
-    declare const set: {};
-    declare const add: {};
-    declare const remove: {};
-    declare const batch: <TQueries extends [
-        Promise,
-        ...Array<Promise>
-    ] | Array<Promise>>(operations: () => TQueries, queryOptions?: Record<string, unknown>) => Promise<PromiseTuple<TQueries>>;
-    declare const list: {
-        /* List all model definitions */
-        models: DeepCallable<ListQuery[keyof ListQuery], Array<Model>>;
-    };
-    declare const createSyntaxFactory: (options: QueryHandlerOptions | (() => QueryHandlerOptions)) => {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
-    export default function (options: QueryHandlerOptions | (() => QueryHandlerOptions)): {
-        get: typeof get;
-        count: typeof count;
-        set: typeof set;
-        add: typeof add;
-        remove: typeof remove;
-        list: typeof list;
-        create: typeof import("ronin").create;
-        alter: typeof import("ronin").alter;
-        drop: typeof import("ronin").drop;
-        batch: typeof import("ronin").batch;
-        sql: typeof import("ronin").sql;
-        sqlBatch: typeof import("ronin").sqlBatch;
-    };
+"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
+declare module "blade/types" { }
+declare module "blade/server/hooks" {
+    declare const use: {};
 }
 "
 `;
