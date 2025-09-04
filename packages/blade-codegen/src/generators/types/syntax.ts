@@ -248,6 +248,7 @@ export const generateModelSyntaxTypes = (
                 identifiers.syntax.reducedFunction,
                 undefined,
               ),
+              // TODO(@nurodev): Add support for with conditions like `startingWith`, `notStartingWith`, etc.
               factory.createTypeLiteralNode([
                 factory.createCallSignature(
                   [
