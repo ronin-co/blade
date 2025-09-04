@@ -12,15 +12,8 @@ import type { Model } from '@/src/types/model';
  *
  * @example
  * ```ts
- * type User = ResultRecord & {
- *   email: string;
- *   name: string;
- * };
- *
- * type Users = Array<User> & {
- *   moreBefore?: string;
- *   moreAfter?: string;
- * };
+ * export type User = import('blade/types').User;
+ * export type Users = import('blade/types').Users;
  * ```
  *
  * @param models - All RONIN models to generate type re-exports for.
