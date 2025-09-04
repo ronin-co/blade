@@ -6,9 +6,16 @@ import { convertToPascalCase } from '@/src/utils/slug';
 import type { Model } from '@/src/types/model';
 
 /**
- * TODO(@nurodev): Add documentation
+ * Generates TypeScript type aliases for model field slugs.
+ *
+ * @example
+ * ```ts
+ * type UserFieldSlug = 'id' | 'ronin.createdAt' | [...] | 'name' | 'email';
+ * ```
  *
  * @param models - All models of the addressed space.
+ *
+ * @returns An array of TypeScript type alias declarations for each model's field slugs.
  */
 export const generateModelFieldsTypes = (models: Array<Model>) =>
   models.map((model) =>

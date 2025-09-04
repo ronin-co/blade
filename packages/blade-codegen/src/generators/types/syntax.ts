@@ -10,19 +10,19 @@ import type { TypeAliasDeclaration, TypeElement, TypeNode } from 'typescript';
 
 import type { Model, ModelField } from '@/src/types/model';
 
-import type {} from 'typescript';
-
 /**
- * TODO(@nurodev): Add documentation
+ * Generates TypeScript type aliases for model syntax.
  *
  * @example
  * ```ts
- * type UserSyntax<S> = ReducedFunction & {
+ * type UserSyntax<S, Q> = ReducedFunction & {
  *  // ...
  * };
  * ```
  *
  * @param models - All models of the addressed space.
+ *
+ * @returns An array of type alias declarations for model syntax.
  */
 export const generateModelSyntaxTypes = (
   models: Array<Model>,
@@ -40,7 +40,7 @@ export const generateModelSyntaxTypes = (
 
     /**
      * ```ts
-     * <T = S>(options?: Partial<CombinedInstructions>): T;
+     * <T = S>(options?: Partial<Q>): T;
      * ```
      */
     const rootInstructionCallSignature = factory.createCallSignature(
