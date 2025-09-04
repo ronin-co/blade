@@ -30,8 +30,8 @@ type AccountSyntax<S, Q> = ReducedFunction & {
             updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
             updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
         };
-        name: <T = S>(value: string) => T;
-        email: <T = S>(value: string) => T;
+        name: <T = S>(name: Account["name"]) => T;
+        email: <T = S>(email: Account["email"]) => T;
     };
 };
 declare module "blade/types" {
@@ -86,9 +86,9 @@ type AccountSyntax<S, Q> = ReducedFunction & {
             updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
             updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
         };
-        name: <T = S>(value: string) => T;
-        email: <T = S>(value: string) => T;
-        image: <T = S>(value: StoredObject) => T;
+        name: <T = S>(name: Account["name"]) => T;
+        email: <T = S>(email: Account["email"]) => T;
+        image: <T = S>(image: Account["image"]) => T;
     };
 };
 declare module "blade/types" {

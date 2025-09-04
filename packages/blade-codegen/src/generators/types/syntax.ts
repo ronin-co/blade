@@ -4,11 +4,10 @@ import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifier
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { INFERRED_COMBINED_INSTRUCTION_PROPERTIES } from '@/src/constants/syntax';
 import { convertToPascalCase } from '@/src/utils/slug';
-import { mapRoninFieldToTypeNode } from '@/src/utils/types';
 
 import type { TypeAliasDeclaration, TypeElement, TypeNode } from 'typescript';
 
-import type { Model, ModelField } from '@/src/types/model';
+import type { Model } from '@/src/types/model';
 
 /**
  * Generates TypeScript type aliases for model syntax.
@@ -268,7 +267,6 @@ export const generateModelSyntaxTypes = (
                       factory.createIndexedAccessTypeNode(
                         factory.createTypeReferenceNode(
                           identifiers.compiler.combinedInstructions,
-                          undefined,
                         ),
                         factory.createLiteralTypeNode(
                           factory.createStringLiteral('with'),
@@ -281,11 +279,7 @@ export const generateModelSyntaxTypes = (
                     undefined,
                   ),
                 ),
-                ...getWithPropertySignatureMembers(
-                  models,
-                  model.fields,
-                  schemaTypeArgumentNode,
-                ),
+                ...getWithPropertySignatureMembers(model, schemaTypeArgumentNode),
               ]),
             ]),
           );
@@ -328,7 +322,6 @@ export const generateModelSyntaxTypes = (
                     factory.createIndexedAccessTypeNode(
                       factory.createTypeReferenceNode(
                         identifiers.compiler.combinedInstructions,
-                        undefined,
                       ),
                       factory.createLiteralTypeNode(
                         factory.createStringLiteral(propertyName),
@@ -381,8 +374,7 @@ export const generateModelSyntaxTypes = (
  * @todo(@nurodev): Add documentation
  */
 const getWithPropertySignatureMembers = (
-  models: Array<Model>,
-  fields: Model['fields'],
+  model: Model,
   schemaTypeArgumentNode: TypeNode,
 ): Array<TypeElement> => {
   const members = new Array<TypeElement>();
@@ -411,10 +403,7 @@ const getWithPropertySignatureMembers = (
               'value',
               undefined,
               factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(
-                  identifiers.syntax.resultRecord,
-                  undefined,
-                ),
+                factory.createTypeReferenceNode(identifiers.syntax.resultRecord),
                 factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
               ),
             ),
@@ -478,7 +467,7 @@ const getWithPropertySignatureMembers = (
   );
 
   // Create property signatures for all model fields.
-  for (const [slug, field] of Object.entries(fields)) {
+  for (const slug of Object.keys(model.fields)) {
     if (DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug))) continue;
 
     members.push(
@@ -499,10 +488,11 @@ const getWithPropertySignatureMembers = (
             factory.createParameterDeclaration(
               undefined,
               undefined,
-              'value',
+              slug,
               undefined,
-              factory.createUnionTypeNode(
-                mapRoninFieldToTypeNode(field as ModelField, models),
+              factory.createIndexedAccessTypeNode(
+                factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
               ),
             ),
           ],
