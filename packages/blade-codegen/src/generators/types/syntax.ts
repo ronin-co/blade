@@ -218,8 +218,8 @@ export const generateModelSyntaxTypes = (model: Model): TypeAliasDeclaration => 
          *    updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
          *    updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
          *  };
-         *  name: <T = S>(value: string) => T;
-         *  email: <T = S>(value: string) => T;
+         *  name: <T = S>(value: User["name"]) => T;
+         *  email: <T = S>(value: User["email"]) => T;
          *  // [...]
          * };
          * ```
@@ -350,7 +350,25 @@ export const generateModelSyntaxTypes = (model: Model): TypeAliasDeclaration => 
 };
 
 /**
- * @todo(@nurodev): Add documentation
+ * Generates the members for the `with` property signature.
+ *
+ * @example
+ * ```ts
+ *  id: <T = S>(value: ResultRecord["id"]) => T;
+ *  ronin: ReducedFunction & {
+ *    createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
+ *    createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
+ *    updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+ *    updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+ *  };
+ *  name: <T = S>(value: User["name"]) => T;
+ *  email: <T = S>(value: User["email"]) => T;
+ * ```
+ *
+ * @param model - The model to generate the `with` property signature members for.
+ * @param schemaTypeArgumentNode - The schema type argument node to use for the `with` property signature members.
+
+ * @returns An array of type elements representing the `with` property signature members.
  */
 const getWithPropertySignatureMembers = (
   model: Model,
