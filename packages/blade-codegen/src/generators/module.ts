@@ -15,7 +15,9 @@ import type { VariableStatement } from 'typescript';
  * @example
  * ```ts
  * declare const use: {
+ *    // Get a single user record
  *    user: UserSyntax<User | null>;
+ *    // Get multiple user records
  *    users: UserSyntax<Users>;
  * };
  * ```

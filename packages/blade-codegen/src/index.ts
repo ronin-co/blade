@@ -83,7 +83,7 @@ export const generate = (models: Array<Model>): string => {
   /**
    * @example
    * ```ts
-   * type UserSyntax <S> = ReducedFunction & { ... };
+   * type UserSyntax <S, Q> = ReducedFunction & { ... };
    * ```
    */
   nodes.push(...generateModelSyntaxTypes(models));
