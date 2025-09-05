@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { model, string } from 'blade-syntax/schema';
+import { NodeFlags, SyntaxKind, factory } from 'typescript';
 
-import { generateQueryDeclarationStatements } from '@/src/generators/module';
+import { generateTypedQueryMembers } from '@/src/generators/module';
 import { printNodes } from '@/src/utils/print';
 
 import type { Model } from '@/src/types/model';
@@ -19,14 +20,40 @@ describe('module', () => {
       });
 
       const models = [AccountModel] as unknown as Array<Model>;
-      const statements = generateQueryDeclarationStatements(models, 'get');
-      const statementsStr = printNodes([statements]);
+      const members = generateTypedQueryMembers(models, 'get');
+      const statement = factory.createVariableStatement(
+        [factory.createModifier(SyntaxKind.DeclareKeyword)],
+        factory.createVariableDeclarationList(
+          [
+            factory.createVariableDeclaration(
+              'get',
+              undefined,
+              factory.createTypeLiteralNode(members),
+            ),
+          ],
+          NodeFlags.Const,
+        ),
+      );
+      const statementsStr = printNodes([statement]);
       expect(statementsStr).toMatchSnapshot();
     });
 
     test('with no modules', () => {
-      const statements = generateQueryDeclarationStatements([], 'get');
-      const statementsStr = printNodes([statements]);
+      const members = generateTypedQueryMembers([], 'get');
+      const statement = factory.createVariableStatement(
+        [factory.createModifier(SyntaxKind.DeclareKeyword)],
+        factory.createVariableDeclarationList(
+          [
+            factory.createVariableDeclaration(
+              'get',
+              undefined,
+              factory.createTypeLiteralNode(members),
+            ),
+          ],
+          NodeFlags.Const,
+        ),
+      );
+      const statementsStr = printNodes([statement]);
       expect(statementsStr).toMatchSnapshot();
     });
 
@@ -49,8 +76,21 @@ describe('module', () => {
       });
 
       const models = [AccountModel, PostModel] as unknown as Array<Model>;
-      const statements = generateQueryDeclarationStatements(models, 'get');
-      const statementsStr = printNodes([statements]);
+      const members = generateTypedQueryMembers(models, 'get');
+      const statement = factory.createVariableStatement(
+        [factory.createModifier(SyntaxKind.DeclareKeyword)],
+        factory.createVariableDeclarationList(
+          [
+            factory.createVariableDeclaration(
+              'get',
+              undefined,
+              factory.createTypeLiteralNode(members),
+            ),
+          ],
+          NodeFlags.Const,
+        ),
+      );
+      const statementsStr = printNodes([statement]);
       expect(statementsStr).toMatchSnapshot();
     });
   });

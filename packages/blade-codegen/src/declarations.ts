@@ -5,14 +5,17 @@ import { createImportDeclaration } from '@/src/generators/import';
 
 /**
  * ```ts
- * import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+ * import type { AddQuery, CombinedInstructions, Expression, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
  * ```
  */
 export const importBladeCompilerQueryTypesType = createImportDeclaration({
   identifiers: [
+    { name: identifiers.compiler.dmlQueryType.add },
     { name: identifiers.compiler.combinedInstructions },
     { name: identifiers.compiler.expression },
     { name: identifiers.compiler.dmlQueryType.get },
+    { name: identifiers.compiler.dmlQueryType.remove },
+    { name: identifiers.compiler.dmlQueryType.set },
   ],
   module: identifiers.compiler.module.root,
   type: true,

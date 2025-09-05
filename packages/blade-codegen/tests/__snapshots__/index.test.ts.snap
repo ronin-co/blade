@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`generate a basic model 1`] = `
-"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+"import type { AddQuery, CombinedInstructions, Expression, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 export type Account = import("blade/types").Account;
 export type Accounts = import("blade/types").Accounts;
@@ -52,11 +52,33 @@ declare module "blade/server/hooks" {
         accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
     };
 }
+declare module "blade/client/hooks" {
+    declare const useMutation: () => {
+        add: {
+            /** Add a single account record */
+            account: AccountSyntax<Account | null, AddQuery[keyof AddQuery]>;
+            /** Add multiple account records */
+            accounts: AccountSyntax<Accounts, AddQuery[keyof AddQuery]>;
+        };
+        remove: {
+            /** Remove a single account record */
+            account: AccountSyntax<Account | null, RemoveQuery[keyof RemoveQuery]>;
+            /** Remove multiple account records */
+            accounts: AccountSyntax<Accounts, RemoveQuery[keyof RemoveQuery]>;
+        };
+        set: {
+            /** Set a single account record */
+            account: AccountSyntax<Account | null, SetQuery[keyof SetQuery]>;
+            /** Set multiple account records */
+            accounts: AccountSyntax<Accounts, SetQuery[keyof SetQuery]>;
+        };
+    };
+}
 "
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+"import type { AddQuery, CombinedInstructions, Expression, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
 export type Account = import("blade/types").Account;
@@ -110,15 +132,44 @@ declare module "blade/server/hooks" {
         accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
     };
 }
+declare module "blade/client/hooks" {
+    declare const useMutation: () => {
+        add: {
+            /** Add a single account record */
+            account: AccountSyntax<Account | null, AddQuery[keyof AddQuery]>;
+            /** Add multiple account records */
+            accounts: AccountSyntax<Accounts, AddQuery[keyof AddQuery]>;
+        };
+        remove: {
+            /** Remove a single account record */
+            account: AccountSyntax<Account | null, RemoveQuery[keyof RemoveQuery]>;
+            /** Remove multiple account records */
+            accounts: AccountSyntax<Accounts, RemoveQuery[keyof RemoveQuery]>;
+        };
+        set: {
+            /** Set a single account record */
+            account: AccountSyntax<Account | null, SetQuery[keyof SetQuery]>;
+            /** Set multiple account records */
+            accounts: AccountSyntax<Accounts, SetQuery[keyof SetQuery]>;
+        };
+    };
+}
 "
 `;
 
 exports[`generate with no models 1`] = `
-"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+"import type { AddQuery, CombinedInstructions, Expression, GetQuery, RemoveQuery, SetQuery } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
     declare const use: {};
+}
+declare module "blade/client/hooks" {
+    declare const useMutation: () => {
+        add: {};
+        remove: {};
+        set: {};
+    };
 }
 "
 `;

@@ -4,6 +4,22 @@ exports[`identifiers 1`] = `
 {
   "blade": {
     "module": {
+      "client": {
+        "hooks": IdentifierObject {
+          "emitNode": undefined,
+          "end": -1,
+          "escapedText": ""blade/client/hooks"",
+          "flags": 16,
+          "flowNode": undefined,
+          "id": 0,
+          "jsDoc": undefined,
+          "kind": 80,
+          "parent": undefined,
+          "pos": -1,
+          "symbol": undefined,
+          "transformFlags": 0,
+        },
+      },
       "root": IdentifierObject {
         "emitNode": undefined,
         "end": -1,
@@ -140,6 +156,20 @@ exports[`identifiers 1`] = `
         "emitNode": undefined,
         "end": -1,
         "escapedText": "GetQuery",
+        "flags": 16,
+        "flowNode": undefined,
+        "id": 0,
+        "jsDoc": undefined,
+        "kind": 80,
+        "parent": undefined,
+        "pos": -1,
+        "symbol": undefined,
+        "transformFlags": 0,
+      },
+      "useMutation": IdentifierObject {
+        "emitNode": undefined,
+        "end": -1,
+        "escapedText": "SetQuery",
         "flags": 16,
         "flowNode": undefined,
         "id": 0,

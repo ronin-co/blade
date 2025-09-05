@@ -1,12 +1,13 @@
-import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
+import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
+import { identifiers } from '@/src/constants/identifiers';
 import { generateQueryTypeComment } from '@/src/generators/comment';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import { identifiers } from '@/src/constants/identifiers';
+import type { PropertySignature } from 'typescript';
+
 import type { Model } from '@/src/types/model';
-import type { DML_QUERY_TYPES } from 'blade-compiler';
-import type { VariableStatement } from 'typescript';
+import type { QueryType } from '@/src/types/query';
 
 /**
  * Generate a `declare const` statement for a provided query type using a list
@@ -27,11 +28,11 @@ import type { VariableStatement } from 'typescript';
  *
  * @returns A variable statement for the generated query declarations.
  */
-export const generateQueryDeclarationStatements = (
+export const generateTypedQueryMembers = (
   models: Array<Model>,
-  queryType: (typeof DML_QUERY_TYPES)[number] | 'use',
-): VariableStatement => {
-  const members = models.flatMap((model) => {
+  queryType: QueryType,
+): Array<PropertySignature> =>
+  models.flatMap((model) => {
     const comment = generateQueryTypeComment(model, queryType);
 
     const syntaxTypeIdentifier = factory.createIdentifier(
@@ -92,18 +93,3 @@ export const generateQueryDeclarationStatements = (
       ),
     ];
   });
-
-  return factory.createVariableStatement(
-    [factory.createModifier(SyntaxKind.DeclareKeyword)],
-    factory.createVariableDeclarationList(
-      [
-        factory.createVariableDeclaration(
-          queryType,
-          undefined,
-          factory.createTypeLiteralNode(members),
-        ),
-      ],
-      NodeFlags.Const,
-    ),
-  );
-};

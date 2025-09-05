@@ -1,4 +1,4 @@
-import { SyntaxKind, factory } from 'typescript';
+import { NodeFlags, SyntaxKind, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 import {
@@ -10,7 +10,8 @@ import {
   resolveSchemaType,
 } from '@/src/declarations';
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
-import { generateQueryDeclarationStatements } from '@/src/generators/module';
+import { generateTypedQueryMembers } from '@/src/generators/module';
+import { generateModelFieldsTypes } from '@/src/generators/types/fields';
 import { generateModelTypes } from '@/src/generators/types/model';
 import { generateTypeReExports } from '@/src/generators/types/re-exports';
 import { generateModelSyntaxTypes } from '@/src/generators/types/syntax';
@@ -18,8 +19,8 @@ import { printNodes } from '@/src/utils/print';
 
 import type { Node } from 'typescript';
 
-import { generateModelFieldsTypes } from '@/src/generators/types/fields';
 import type { Model } from '@/src/types/model';
+import type { QueryType } from '@/src/types/query';
 
 /**
  * Generates the complete `index.d.ts` file for a list of RONIN models.
@@ -132,7 +133,71 @@ export const generate = (models: Array<Model>): string => {
     factory.createModuleDeclaration(
       [factory.createModifier(SyntaxKind.DeclareKeyword)],
       identifiers.blade.module.server.hooks,
-      factory.createModuleBlock([generateQueryDeclarationStatements(models, 'use')]),
+      factory.createModuleBlock([
+        factory.createVariableStatement(
+          [factory.createModifier(SyntaxKind.DeclareKeyword)],
+          factory.createVariableDeclarationList(
+            [
+              factory.createVariableDeclaration(
+                'use',
+                undefined,
+                factory.createTypeLiteralNode(generateTypedQueryMembers(models, 'use')),
+              ),
+            ],
+            NodeFlags.Const,
+          ),
+        ),
+      ]),
+    ),
+  );
+
+  /**
+   * @example
+   * ```ts
+   * declare module "blade/client/hooks" {
+   *  declare const useMutation: () => {
+   *    add: { ... }
+   *    remove: { ... }
+   *    set: { ... }
+   *  };
+   * }
+   * ```
+   */
+  nodes.push(
+    factory.createModuleDeclaration(
+      [factory.createModifier(SyntaxKind.DeclareKeyword)],
+      identifiers.blade.module.client.hooks,
+      factory.createModuleBlock([
+        factory.createVariableStatement(
+          [factory.createModifier(SyntaxKind.DeclareKeyword)],
+          factory.createVariableDeclarationList(
+            [
+              factory.createVariableDeclaration(
+                factory.createIdentifier('useMutation'),
+                undefined,
+                factory.createFunctionTypeNode(
+                  undefined,
+                  [],
+                  factory.createTypeLiteralNode(
+                    (['add', 'remove', 'set'] satisfies Array<QueryType>).map(
+                      (queryType) =>
+                        factory.createPropertySignature(
+                          undefined,
+                          queryType,
+                          undefined,
+                          factory.createTypeLiteralNode(
+                            generateTypedQueryMembers(models, queryType),
+                          ),
+                        ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            NodeFlags.Const,
+          ),
+        ),
+      ]),
     ),
   );
 

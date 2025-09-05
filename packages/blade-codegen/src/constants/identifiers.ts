@@ -12,6 +12,9 @@ import type { Identifier } from 'typescript';
 export const identifiers = {
   blade: {
     module: {
+      client: {
+        hooks: factory.createIdentifier(JSON.stringify('blade/client/hooks')),
+      },
       root: factory.createIdentifier(JSON.stringify('blade')),
       server: {
         hooks: factory.createIdentifier(JSON.stringify('blade/server/hooks')),
@@ -28,6 +31,7 @@ export const identifiers = {
       remove: factory.createIdentifier('RemoveQuery'),
       set: factory.createIdentifier('SetQuery'),
       use: factory.createIdentifier('GetQuery'),
+      useMutation: factory.createIdentifier('SetQuery'),
     },
     expression: factory.createIdentifier('Expression'),
     model: factory.createIdentifier('Model'),
