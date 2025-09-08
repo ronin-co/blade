@@ -62,6 +62,11 @@ export const compileQueryInput = (
      * Whether to compute default field values as part of the generated statement.
      */
     inlineDefaults?: boolean;
+    /**
+     * Applies a default `limitedTo` instruction to queries obtaining multiple records.
+     * Useful for environments in which memory is tightly constrained.
+     */
+    defaultRecordLimit?: number;
   },
 ): {
   dependencies: Array<InternalDependencyStatement>;
@@ -83,10 +88,7 @@ export const compileQueryInput = (
     dependencyStatements,
     statementParams,
     defaultQuery,
-    {
-      // biome-ignore lint/complexity/useSimplifiedLogicExpression: This is needed.
-      inlineDefaults: options?.inlineDefaults || false,
-    },
+    { inlineDefaults: options?.inlineDefaults || false },
   );
 
   // If no further query processing should happen, we need to return early. This happens
@@ -134,11 +136,15 @@ export const compileQueryInput = (
     });
   }
 
-  // By default, lists of records should be limited to 50 items.
-  // More details: https://blade.im/queries/instructions
-  if (!single && queryType === 'get' && typeof instructions?.limitedTo === 'undefined') {
+  // If a default maximum amount for record lists was provided, apply it.
+  if (
+    options?.defaultRecordLimit &&
+    !single &&
+    queryType === 'get' &&
+    !instructions?.limitedTo
+  ) {
     if (!instructions) instructions = {} as Instructions & SetInstructions;
-    instructions.limitedTo = 20;
+    instructions.limitedTo = options.defaultRecordLimit;
   }
 
   // If a `limitedTo` instruction was provided, that means the amount of records returned
