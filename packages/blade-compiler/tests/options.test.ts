@@ -12,7 +12,7 @@ import {
   Transaction,
 } from '@/src/index';
 import { getSystemFields } from '@/src/model';
-import type { SingleRecordResult } from '@/src/types/result';
+import type { MultipleRecordResult, SingleRecordResult } from '@/src/types/result';
 import { omit } from '@/src/utils/helpers';
 
 test('inline statement parameters', async () => {
@@ -376,4 +376,43 @@ test('provide models containing default presets', async () => {
   expect(result.record).toMatchObject({
     account: 'acc_39h8fhe98hefah8j',
   });
+});
+
+test('limit amount of records', async () => {
+  const queries: Array<Query> = [
+    {
+      get: {
+        products: null,
+      },
+    },
+  ];
+
+  const models: Array<Model> = [
+    {
+      slug: 'product',
+      fields: {
+        name: {
+          type: 'string',
+        },
+      },
+    },
+  ];
+
+  const transaction = new Transaction(queries, {
+    models,
+    defaultRecordLimit: 2,
+  });
+
+  expect(transaction.statements).toEqual([
+    {
+      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name" FROM "products" ORDER BY "ronin.createdAt" DESC LIMIT 3`,
+      params: [],
+      returning: true,
+    },
+  ]);
+
+  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
+  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+
+  expect(result.records).toHaveLength(3);
 });
