@@ -64,7 +64,6 @@ export const compileQueryInput = (
     inlineDefaults?: boolean;
     /**
      * Applies a default `limitedTo` instruction to queries obtaining multiple records.
-     * Useful for environments in which memory is tightly constrained.
      */
     defaultRecordLimit?: number;
   },
