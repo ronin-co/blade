@@ -70,7 +70,11 @@ export const runQueries = async <T extends ResultRecord>(
       .filter((item) => 'query' in item)
       .map((item) => item.query);
 
-    const transaction = new Transaction(rawQueries, { models: options.models });
+    const transaction = new Transaction(rawQueries, {
+      models: options.models,
+      defaultRecordLimit: options.defaultRecordLimit,
+    });
+
     const rawStatements = transaction.statements.map((item) => {
       return { sql: item.statement, params: item.params as Array<string> };
     });
