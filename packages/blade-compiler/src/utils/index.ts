@@ -134,6 +134,13 @@ export const compileQueryInput = (
     });
   }
 
+  // By default, lists of records should be limited to 50 items.
+  // More details: https://blade.im/queries/instructions
+  if (!single && queryType === 'get' && typeof instructions?.limitedTo === 'undefined') {
+    if (!instructions) instructions = {} as Instructions & SetInstructions;
+    instructions.limitedTo = 20;
+  }
+
   // If a `limitedTo` instruction was provided, that means the amount of records returned
   // by the query will be limited to a specific amount, which, in turn, means that
   // pagination is activated automatically, so a cursor will be provided to the client
