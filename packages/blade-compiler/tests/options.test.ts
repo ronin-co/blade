@@ -414,5 +414,13 @@ test('limit amount of records', async () => {
   const rawResults = await queryEphemeralDatabase(models, transaction.statements);
   const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
 
+  // Assert the amount of records.
   expect(result.records).toHaveLength(3);
+
+  // Assert that records are ordered by creation date.
+  expect(
+    result.records
+      .map((i) => new Date(i.ronin.createdAt).getTime())
+      .every((t, i, arr) => i === 0 || arr[i - 1] >= t),
+  ).toBe(true);
 });
