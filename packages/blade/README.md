@@ -18,7 +18,7 @@ A [React](https://react.dev) framework for building instant web apps.
 - **Automatic REST API** (Blade auto-generates a REST API at `/api` for you, for models that you want to expose)
 - **Zero Config Deployments** (Vercel, Cloudflare, containers, and more)
 
-Blade works most efficiently when using SQLite databases provided by [RONIN](https://ronin.co). You can also use any other data source, however you will see performance drawbacks if that data source isn't fast (if the data isn't replicated).
+Blade works most efficiently when using SQLite databases provided by [RONIN](https://ronin.co). You can also use any other data source, however you will see performance drawbacks if that data source isn't globally fast (replicated).
 
 The first and currently largest known implementation of Blade is the UI of [RONIN](https://ronin.co), which has been implemented with Blade since its inception.
 
