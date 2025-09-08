@@ -132,7 +132,12 @@ new Transaction(queries, {
   // By default, the compiler relies on dynamic column default values for computing the
   // values of all meta fields (such as `id`, `ronin.createdAt`, etc). In order to compute
   // those values at the time of insertion instead, use this option.
-  inlineDefaults: true
+  inlineDefaults: true,
+
+  // If you would like to limit the amount of records that are being returned from the
+  // database by default, use this option. It is especially useful if the environment in
+  // which you execute the queries is tightly memory-constrained.
+  defaultRecordLimit: 20
 });
 ```
 
