@@ -29,7 +29,6 @@ export const generateRootQueryCallSignature = (modelNode: TypeNode) =>
         'options',
         factory.createToken(SyntaxKind.QuestionToken),
         factory.createTypeReferenceNode(identifiers.primitive.partial, [
-          // combinedInstructionsTypes,
           factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
         ]),
         undefined,
