@@ -31,7 +31,6 @@ export const identifiers = {
       remove: factory.createIdentifier('RemoveQuery'),
       set: factory.createIdentifier('SetQuery'),
       use: factory.createIdentifier('GetQuery'),
-      useMutation: factory.createIdentifier('SetQuery'),
     },
     expression: factory.createIdentifier('Expression'),
     model: factory.createIdentifier('Model'),

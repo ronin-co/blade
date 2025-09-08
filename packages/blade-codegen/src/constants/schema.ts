@@ -33,7 +33,6 @@ export const READABLE_DML_QUERY_TYPES = {
   remove: 'Remove',
   set: 'Set',
   use: 'Get',
-  useMutation: 'Set',
 } satisfies Record<QueryType, string>;
 
 /**
