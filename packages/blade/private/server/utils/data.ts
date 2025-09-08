@@ -106,6 +106,7 @@ export const getRoninOptions = (
     requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
     waitUntil,
     models: enableHive ? models : undefined,
+    defaultRecordLimit: 20
   };
 };
 
