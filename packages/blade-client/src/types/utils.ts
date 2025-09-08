@@ -51,6 +51,12 @@ export interface QueryHandlerOptions {
 
   /** A list of models used for compiling Blade queries to SQL. */
   models?: Array<Model>;
+
+  /**
+   * Applies a default `limitedTo` instruction to queries obtaining multiple records.
+   * Useful for environments in which memory is tightly constrained.
+   */
+  defaultRecordLimit?: number;
 }
 
 /**
