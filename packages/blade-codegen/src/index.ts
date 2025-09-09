@@ -13,7 +13,6 @@ import { importBladeCompilerQueryTypesType } from '@/src/declarations';
 import { generateQueryTypeComment } from '@/src/generators/comment';
 import { generateModelFieldsTypes } from '@/src/generators/types/fields';
 import { generateModelTypes } from '@/src/generators/types/model';
-import { generateTypeReExports } from '@/src/generators/types/re-exports';
 import {
   generateDefaultSyntaxProperty,
   generateOrderedBySyntaxProperty,
@@ -62,34 +61,44 @@ export const generate = (models: Array<Model>): string => {
   );
   if (hasJsonFields) nodes.push(jsonArrayType, jsonObjectType, jsonPrimitiveType);
 
-  for (const model of models) {
-    /**
-     * @example
-     * ```ts
-     * type User = import('blade/types').User;
-     * type Users = import('blade/types').Users;
-     * ```
-     */
-    const reExportTypes = generateTypeReExports(model);
+  /**
+   * @example
+   * ```ts
+   * type UserFieldSlug =
+   *  | 'id'
+   *  | 'ronin.createdAt'
+   *  | 'ronin.createdBy'
+   *  | 'ronin.updatedAt'
+   *  | 'ronin.updatedBy'
+   *  | 'email'
+   *  | 'name'
+   *  // [...]
+   * ```
+   */
+  nodes.push(...generateModelFieldsTypes(models));
 
-    /**
-     * @example
-     * ```ts
-     * type UserFieldSlug =
-     *  | 'id'
-     *  | 'ronin.createdAt'
-     *  | 'ronin.createdBy'
-     *  | 'ronin.updatedAt'
-     *  | 'ronin.updatedBy'
-     *  | 'email'
-     *  | 'name'
-     *  // [...]
-     * ```
-     */
-    const fieldSlugType = generateModelFieldsTypes(model);
-
-    nodes.push(...reExportTypes, fieldSlugType);
-  }
+  /**
+   * ```ts
+   * export type { User, Users } from 'blade/types';
+   * ```
+   */
+  nodes.push(
+    factory.createExportDeclaration(
+      undefined,
+      true,
+      factory.createNamedExports(
+        models.flatMap((model) => {
+          const slug = convertToPascalCase(model.slug);
+          const pluralSlug = convertToPascalCase(model.pluralSlug);
+          return [
+            factory.createExportSpecifier(false, undefined, slug),
+            factory.createExportSpecifier(false, undefined, pluralSlug),
+          ];
+        }),
+      ),
+      factory.createStringLiteral('blade/types'),
+    ),
+  );
 
   /**
    * @example
