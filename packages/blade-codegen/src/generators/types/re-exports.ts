@@ -16,6 +16,12 @@ import type { Model } from '@/src/types/model';
  * export type Users = import('blade/types').Users;
  * ```
  *
+ * @example
+ * ```ts
+ * export type Post<U extends Array<"..."> | "all" = []> = import('blade/types').Post<U>;
+ * export type Posts<U extends Array<"..."> | "all" = []> = import('blade/types').Posts<U>;
+ * ```
+ *
  * @param model - The model to generate type re-exports for.
  *
  * @returns An array of type alias declarations for each model.
