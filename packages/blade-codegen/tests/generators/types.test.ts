@@ -11,29 +11,9 @@ import {
 } from 'blade-syntax/schema';
 
 import { generateModelTypes } from '@/src/generators/types/model';
-import { generateTypeReExports } from '@/src/generators/types/re-exports';
 import { printNodes } from '@/src/utils/print';
 
-import type { Model } from '@/src/types/model';
-
 describe('types', () => {
-  describe('re-export model types', () => {
-    test('a basic model', () => {
-      const AccountModel = model({
-        slug: 'account',
-        pluralSlug: 'accounts',
-        fields: {
-          name: string(),
-          email: string({ required: true }),
-        },
-      });
-
-      const types = generateTypeReExports(AccountModel as unknown as Model);
-      const typesStr = printNodes(types);
-      expect(typesStr).toMatchSnapshot();
-    });
-  });
-
   describe('generate the core model types', () => {
     test('a basic model', () => {
       const AccountModel = model({

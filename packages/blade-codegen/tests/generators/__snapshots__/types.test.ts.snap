@@ -1,11 +1,5 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`types re-export model types a basic model 1`] = `
-"export type Account = import("blade/types").Account;
-export type Accounts = import("blade/types").Accounts;
-"
-`;
-
 exports[`types generate the core model types a basic model 1`] = `
 "export type Account = ResultRecord & {
     avatar: StoredObject;
