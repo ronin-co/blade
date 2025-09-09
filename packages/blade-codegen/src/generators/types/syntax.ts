@@ -31,10 +31,9 @@ export const generateRootQueryCallSignature = (modelNode: TypeNode) =>
         factory.createTypeReferenceNode(identifiers.primitive.partial, [
           factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
         ]),
-        undefined,
       ),
     ],
-    factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
   );
 
 /**
@@ -166,7 +165,7 @@ export const generateOrderedBySyntaxProperty = (model: Model, schemaNode: TypeNo
 /**
  * TODO(@nurodev): Add documentation
  */
-export const generateSelectingSyntaxProperty = (model: Model, schemaNode: TypeNode) =>
+export const generateSelectingSyntaxProperty = (model: Model, modelNode: TypeNode) =>
   factory.createPropertySignature(
     undefined,
     'selecting',
@@ -182,7 +181,7 @@ export const generateSelectingSyntaxProperty = (model: Model, schemaNode: TypeNo
             undefined,
             typeArgumentIdentifiers.default,
             undefined,
-            schemaNode,
+            modelNode,
           ),
         ],
         [
@@ -218,7 +217,7 @@ export const generateWithSyntaxProperty = (model: Model, schemaNode: TypeNode) =
         undefined,
         typeArgumentIdentifiers.default,
         undefined,
-        schemaNode,
+        modelNode,
       ),
     ],
     [
@@ -233,7 +232,7 @@ export const generateWithSyntaxProperty = (model: Model, schemaNode: TypeNode) =
         ),
       ),
     ],
-    factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
   );
 
   const members = new Array<TypeElement>(rootCallSignature);
@@ -252,7 +251,7 @@ export const generateWithSyntaxProperty = (model: Model, schemaNode: TypeNode) =
               undefined,
               typeArgumentIdentifiers.default,
               undefined,
-              schemaNode,
+              modelNode,
             ),
           ],
           [
@@ -288,7 +287,7 @@ export const generateWithSyntaxProperty = (model: Model, schemaNode: TypeNode) =
             undefined,
             typeArgumentIdentifiers.default,
             undefined,
-            schemaNode,
+            modelNode,
           ),
         ],
         [
@@ -340,7 +339,7 @@ export const generateWithSyntaxProperty = (model: Model, schemaNode: TypeNode) =
               undefined,
               typeArgumentIdentifiers.default,
               undefined,
-              schemaNode,
+              modelNode,
             ),
           ],
           [
