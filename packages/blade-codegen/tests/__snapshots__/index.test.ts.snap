@@ -3,9 +3,9 @@
 exports[`generate a basic model 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
-export type Account = import("blade/types").Account;
-export type Accounts = import("blade/types").Accounts;
+import type { Account, Accounts } from "blade/types";
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
+export type { Account, Accounts };
 declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
@@ -270,9 +270,9 @@ exports[`generate a basic model with blob field 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
-export type Account = import("blade/types").Account;
-export type Accounts = import("blade/types").Accounts;
+import type { Account, Accounts } from "blade/types";
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
+export type { Account, Accounts };
 declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
@@ -545,6 +545,8 @@ declare module "blade/client/hooks" {
 exports[`generate with no models 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
+import type {} from "blade/types";
+export type {};
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
     declare const use: {};
