@@ -1,9 +1,9 @@
 import { SyntaxKind, factory } from 'typescript';
 
-import { identifiers } from '@/src/constants/identifiers';
+import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { TypeAliasDeclaration } from 'typescript';
+import type { TypeAliasDeclaration, TypeParameterDeclaration } from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
@@ -26,28 +26,64 @@ export const generateTypeReExports = (
   const slug = convertToPascalCase(model.slug);
   const pluralSlug = convertToPascalCase(model.pluralSlug);
 
+  const typeParameters = new Array<TypeParameterDeclaration>();
+
+  const hasLinkFields = Object.values(model.fields).some(
+    (model) => model.type === 'link',
+  );
+  if (hasLinkFields) {
+    /**
+     * ```ts
+     * <U extends Array<...> | 'all' = []>
+     * ```
+     */
+    const usingGenericDec = factory.createTypeParameterDeclaration(
+      undefined,
+      typeArgumentIdentifiers.using,
+      factory.createUnionTypeNode([
+        factory.createTypeReferenceNode(identifiers.primitive.array, [
+          factory.createUnionTypeNode(
+            Object.entries(model.fields)
+              .filter(([, field]) => field.type === 'link')
+              .map(([slug]) =>
+                factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+              ),
+          ),
+        ]),
+        factory.createLiteralTypeNode(factory.createStringLiteral('all')),
+      ]),
+      factory.createTupleTypeNode([]),
+    );
+
+    typeParameters.push(usingGenericDec);
+  }
+
   return [
     factory.createTypeAliasDeclaration(
       [factory.createModifier(SyntaxKind.ExportKeyword)],
       slug,
-      undefined,
+      typeParameters,
       factory.createImportTypeNode(
         factory.createTypeReferenceNode(identifiers.blade.module.types),
         undefined,
         factory.createIdentifier(slug),
-        undefined,
+        hasLinkFields
+          ? [factory.createTypeReferenceNode(typeArgumentIdentifiers.using)]
+          : [],
         false,
       ),
     ),
     factory.createTypeAliasDeclaration(
       [factory.createModifier(SyntaxKind.ExportKeyword)],
       pluralSlug,
-      undefined,
+      typeParameters,
       factory.createImportTypeNode(
         factory.createTypeReferenceNode(identifiers.blade.module.types),
         undefined,
         factory.createIdentifier(pluralSlug),
-        undefined,
+        hasLinkFields
+          ? [factory.createTypeReferenceNode(typeArgumentIdentifiers.using)]
+          : [],
         false,
       ),
     ),

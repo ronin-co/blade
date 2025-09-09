@@ -46,7 +46,7 @@ export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclara
 
     /**
      * ```ts
-     * <TUsing extends Array<...> | 'all' = []>
+     * <U extends Array<...> | 'all' = []>
      * ```
      */
     const usingGenericDec = factory.createTypeParameterDeclaration(
@@ -65,7 +65,7 @@ export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclara
 
     /**
      * ```ts
-     * SchemaSlugSchema<TUsing>
+     * SchemaSlugSchema<U>
      * ```
      */
     const modelSchemaName = factory.createTypeReferenceNode(
@@ -77,7 +77,7 @@ export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclara
 
     /**
      * ```ts
-     * export type SchemaSlug<TUsing extends Array<...> | 'all' = []> = ResultRecord & {
+     * export type SchemaSlug<U extends Array<...> | 'all' = []> = ResultRecord & {
      *  // ...
      * };
      * ```
@@ -162,7 +162,7 @@ export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclara
 
     /**
      * ```ts
-     * export type SchemaPluralSlug<TUsing extends Array<...> | 'all' = []> = Array<SchemaSlug> & {
+     * export type SchemaPluralSlug<U extends Array<...> | 'all' = []> = Array<SchemaSlug> & {
      *  moreBefore?: string;
      *  moreAfter?: string;
      * };
