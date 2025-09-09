@@ -11,6 +11,7 @@ import {
 } from '@/src/declarations';
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
 import { generateQueryTypeComment } from '@/src/generators/comment';
+import { createImportDeclaration } from '@/src/generators/import';
 import { generateModelFieldsTypes } from '@/src/generators/types/fields';
 import { generateModelTypes } from '@/src/generators/types/model';
 import {
@@ -49,6 +50,18 @@ export const generate = (models: Array<Model>): string => {
   );
   if (hasStoredObjectFields) nodes.push(importBladeCompilerStoredObjectType);
 
+  // All model types must be imported in order to be used by the module augments.
+  nodes.push(
+    createImportDeclaration({
+      identifiers: models.flatMap((model) => [
+        { name: factory.createIdentifier(convertToPascalCase(model.slug)) },
+        { name: factory.createIdentifier(convertToPascalCase(model.pluralSlug)) },
+      ]),
+      module: identifiers.blade.module.types,
+      type: true,
+    }),
+  );
+
   // If there is any models that have a `link()` field, we need to add the
   // `ResolveSchemaType` type.
   const hasLinkFields = models.some((model) =>
@@ -79,7 +92,7 @@ export const generate = (models: Array<Model>): string => {
 
   /**
    * ```ts
-   * export type { User, Users } from 'blade/types';
+   * export type { User, Users };
    * ```
    */
   nodes.push(
@@ -87,16 +100,19 @@ export const generate = (models: Array<Model>): string => {
       undefined,
       true,
       factory.createNamedExports(
-        models.flatMap((model) => {
-          const slug = convertToPascalCase(model.slug);
-          const pluralSlug = convertToPascalCase(model.pluralSlug);
-          return [
-            factory.createExportSpecifier(false, undefined, slug),
-            factory.createExportSpecifier(false, undefined, pluralSlug),
-          ];
-        }),
+        models.flatMap((model) => [
+          factory.createExportSpecifier(
+            false,
+            undefined,
+            convertToPascalCase(model.slug),
+          ),
+          factory.createExportSpecifier(
+            false,
+            undefined,
+            convertToPascalCase(model.pluralSlug),
+          ),
+        ]),
       ),
-      factory.createStringLiteral('blade/types'),
     ),
   );
 
