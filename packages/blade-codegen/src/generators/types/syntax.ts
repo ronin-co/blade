@@ -205,7 +205,109 @@ export const generateSelectingSyntaxProperty = (model: Model, modelNode: TypeNod
 /**
  * TODO(@nurodev): Add documentation
  */
-export const generateWithSyntaxProperty = (model: Model, schemaNode: TypeNode) => {
+export const generateUsingSyntaxProperty = (
+  model: Model,
+  modelNode: TypeNode,
+  slug: string,
+  isPlural = false,
+) => {
+  const hasLinkFields = Object.values(model.fields).some(
+    (field) => field.type === 'link',
+  );
+  if (!hasLinkFields) return generateDefaultSyntaxProperty('using', modelNode);
+
+  /**
+   * ```ts
+   * Array<'...'> | 'all'
+   * ```
+   */
+  const arrayFieldsType = factory.createUnionTypeNode([
+    factory.createTypeReferenceNode(identifiers.primitive.array, [
+      factory.createUnionTypeNode(
+        Object.entries(model.fields)
+          .filter(([, field]) => field.type === 'link')
+          .map(([name]) =>
+            factory.createLiteralTypeNode(factory.createStringLiteral(name)),
+          ),
+      ),
+    ]),
+    factory.createLiteralTypeNode(factory.createStringLiteral('all')),
+  ]);
+
+  /**
+   * ```ts
+   * User<U>
+   * ```
+   */
+  const modelNodeWithFields = factory.createTypeReferenceNode(
+    factory.createIdentifier(slug),
+    [factory.createTypeReferenceNode(typeArgumentIdentifiers.using)],
+  );
+
+  return factory.createPropertySignature(
+    undefined,
+    'using',
+    undefined,
+    factory.createIntersectionTypeNode([
+      factory.createExpressionWithTypeArguments(
+        identifiers.syntax.reducedFunction,
+        undefined,
+      ),
+      factory.createTypeLiteralNode([
+        factory.createCallSignature(
+          [
+            factory.createTypeParameterDeclaration(
+              undefined,
+              typeArgumentIdentifiers.using,
+              arrayFieldsType,
+            ),
+          ],
+          [
+            factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              'fields',
+              undefined,
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+            ),
+          ],
+          isPlural
+            ? modelNodeWithFields
+            : factory.createUnionTypeNode([
+                modelNodeWithFields,
+                factory.createLiteralTypeNode(factory.createNull()),
+              ]),
+        ),
+
+        factory.createCallSignature(
+          [
+            factory.createTypeParameterDeclaration(
+              undefined,
+              typeArgumentIdentifiers.default,
+              undefined,
+              modelNode,
+            ),
+          ],
+          [
+            factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              'fields',
+              undefined,
+              arrayFieldsType,
+            ),
+          ],
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        ),
+      ]),
+    ]),
+  );
+};
+
+/**
+ * TODO(@nurodev): Add documentation
+ */
+export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) => {
   /**
    * ```ts
    * <T = User | null>(options: CombinedInstructions["with"]): T

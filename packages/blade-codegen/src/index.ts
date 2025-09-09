@@ -19,6 +19,7 @@ import {
   generateOrderedBySyntaxProperty,
   generateRootQueryCallSignature,
   generateSelectingSyntaxProperty,
+  generateUsingSyntaxProperty,
   generateWithSyntaxProperty,
 } from '@/src/generators/types/syntax';
 import { printNodes } from '@/src/utils/print';
@@ -204,7 +205,11 @@ export const generate = (models: Array<Model>): string => {
                           generateDefaultSyntaxProperty('limitedTo', singularModelNode),
                           generateOrderedBySyntaxProperty(model, singularModelNode),
                           generateSelectingSyntaxProperty(model, singularModelNode),
-                          generateDefaultSyntaxProperty('using', singularModelNode),
+                          generateUsingSyntaxProperty(
+                            model,
+                            singularModelNode,
+                            convertToPascalCase(model.slug),
+                          ),
                           generateWithSyntaxProperty(model, singularModelNode),
                         ]),
                       ]),
@@ -241,7 +246,12 @@ export const generate = (models: Array<Model>): string => {
                           generateDefaultSyntaxProperty('limitedTo', pluralModelNode),
                           generateOrderedBySyntaxProperty(model, pluralModelNode),
                           generateSelectingSyntaxProperty(model, pluralModelNode),
-                          generateDefaultSyntaxProperty('using', pluralModelNode),
+                          generateUsingSyntaxProperty(
+                            model,
+                            pluralModelNode,
+                            convertToPascalCase(model.pluralSlug),
+                            true,
+                          ),
                           generateWithSyntaxProperty(model, pluralModelNode),
                         ]),
                       ]),
