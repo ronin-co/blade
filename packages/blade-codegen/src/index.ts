@@ -51,7 +51,11 @@ export const generate = (models: Array<Model>): string => {
   );
   if (hasStoredObjectFields) nodes.push(importBladeCompilerStoredObjectType);
 
-  // All model types must be imported in order to be used by the module augments.
+  /**
+   * ```ts
+   * import { User, Users } from "blade/types";
+   * ```
+   */
   nodes.push(
     createImportDeclaration({
       identifiers: models.flatMap((model) => [
