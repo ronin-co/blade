@@ -95,7 +95,7 @@ export const runQueries = async <T extends ResultRecord>(
     const db = new Selector({ type: 'database', id: 'main', parent });
 
     const results = await hive.storage.query(db, {
-      statements: transaction.statements.map(item => ({...item, method: 'values'})),
+      statements: transaction.statements.map((item) => ({ ...item, method: 'values' })),
       mode: 'DEFERRED',
     });
 
