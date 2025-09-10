@@ -15,7 +15,16 @@ interface BaseGeneratorOptions {
 }
 
 /**
- * TODO(@nurodev): Add documentation
+ * Generates the call signature for the root query.
+ *
+ * @example
+ * ```ts
+ * <T = User | null>(options?: Partial<CombinedInstructions>): T;
+ * ```
+ *
+ * @param options - The options for generating the call signature.
+ *
+ * @returns A call signature node.
  */
 export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
   factory.createCallSignature(
@@ -46,7 +55,16 @@ export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
   );
 
 /**
- * TODO(@nurodev): Add documentation
+ * Generate a base or default syntax property that falls back to `CombinedInstructions`
+ *
+ * @example
+ * ```ts
+ * after: ReducedFunction & (<T = User | null>(value: CombinedInstructions["after"]) => T);
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
  */
 export const generateDefaultSyntaxProperty = (
   options: BaseGeneratorOptions & {
@@ -93,7 +111,22 @@ export const generateDefaultSyntaxProperty = (
   );
 
 /**
- * TODO(@nurodev): Add documentation
+ * Generate a strictly typed `orderedBy` syntax property.
+ *
+ * @example
+ * ```ts
+ * orderedBy: ReducedFunction & (<T = User | null>(options: {
+ *  ascending?: Array<Expression | UserFieldSlug>;
+ *  descending?: Array<Expression | UserFieldSlug>;
+ * }) => T) & {
+ *  ascending: <T = User | null>(fields: Array<Expression | UserFieldSlug>) => T;
+ *  descending: <T = User | null>(fields: Array<Expression | UserFieldSlug>) => T;
+ * };
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
  */
 export const generateOrderedBySyntaxProperty = (
   options: BaseGeneratorOptions & {
@@ -189,7 +222,16 @@ export const generateOrderedBySyntaxProperty = (
 };
 
 /**
- * TODO(@nurodev): Add documentation
+ * Generates the syntax property for `selecting` fields.
+ *
+ * @example
+ * ```ts
+ * selecting: ReducedFunction & (<T = User | null>(options: Array<UserFieldSlug>) => T);
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
  */
 export const generateSelectingSyntaxProperty = (
   options: BaseGeneratorOptions & {
@@ -239,7 +281,18 @@ export const generateSelectingSyntaxProperty = (
   );
 
 /**
- * TODO(@nurodev): Add documentation
+ * Generates the syntax property for `using` fields.
+ *
+ * @example
+ * ```ts
+ * using: ReducedFunction & {
+ *  <U extends Array<"author"> | "all">(fields: U): Post<U> | null;
+ *  <T = Post | null>(fields: Array<"author"> | "all"): T;
+ * };
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ * @returns A property signature node.
  */
 export const generateUsingSyntaxProperty = (
   options: BaseGeneratorOptions & {
@@ -355,7 +408,27 @@ export const generateUsingSyntaxProperty = (
 };
 
 /**
- * TODO(@nurodev): Add documentation
+ * Generates the syntax property for `with` fields.
+ *
+ * @example
+ * ```ts
+ * with: ReducedFunction & {
+ *  <T = User | null>(options: CombinedInstructions["with"]): T;
+ *  id: <T = User | null>(value: ResultRecord["id"]) => T;
+ *  ronin: ReducedFunction & {
+ *    createdAt: <T = User | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+ *    createdBy: <T = User | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+ *    updatedAt: <T = User | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+ *    updatedBy: <T = User | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+ *  };
+ *  name: <T = User | null>(name: Post["name"]) => T;
+ *  // [...]
+ * };
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
  */
 export const generateWithSyntaxProperty = (
   options: BaseGeneratorOptions & {
