@@ -27,45 +27,6 @@ describe('adapter', () => {
         'Please specify the `RONIN_TOKEN` environment variable or set the `token` option when invoking RONIN.',
       );
     });
-
-    test.skip('with an invalid `RONIN_TOKEN`', async () => {
-      // biome-ignore lint/nursery/noProcessEnv: We're intentionally overriding this environment variable.
-      process.env.RONIN_TOKEN = 'abc123';
-
-      const { auth } = await init({
-        betterAuth: {
-          database: ronin(),
-        },
-      });
-
-      const signUp = async (): Promise<void> => {
-        await auth.api.signUpEmail({ body: TEST_USER });
-      };
-
-      expect(signUp).toThrow('Invalid `Authorization` header: Must be a valid JWT.');
-    });
-
-    test.skip('with a valid mock `RONIN_TOKEN`', async () => {
-      const MOCK_JWT =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIiLCJleHAiOjAsImlhdCI6MCwiaXNzIjoiIiwic3ViIjoiIiwidGtuIjoiIn0.QwdhNGPGS1Rt3se0yBYi6XJLOPEg4cSNdBUjd8EOXaQ';
-
-      // biome-ignore lint/nursery/noProcessEnv: We're intentionally overriding this environment variable.
-      process.env.RONIN_TOKEN = MOCK_JWT;
-
-      const { auth } = await init({
-        betterAuth: {
-          database: ronin(),
-        },
-      });
-
-      const signUp = async (): Promise<void> => {
-        await auth.api.signUpEmail({ body: TEST_USER });
-      };
-
-      expect(signUp).toThrow(
-        'This app has been deleted. Please create a new app in the dashboard.',
-      );
-    });
   });
 
   describe('api', () => {
