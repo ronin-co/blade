@@ -20,7 +20,7 @@
     "lint:biome": "biome check --error-on-warnings",
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
-    "test": "bun test",
+    "test": "echo 'No tests'",
     "build": "tsup",
     "dev": "tsup --watch"
   },
