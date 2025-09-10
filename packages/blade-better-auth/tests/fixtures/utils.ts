@@ -75,14 +75,7 @@ export const init = async (options?: {
   for (const model of models) queries.push({ create: { model } });
   const transaction = new Transaction(queries);
 
-  const hiveStatements = transaction.statements.map(({ statement, params }) => {
-    return {
-      sql: statement,
-      params: params as Array<string>,
-    };
-  });
-
-  await database.resource.query(hiveStatements);
+  await database.resource.query(transaction.statements);
 
   // Create a new RONIN client instance to communicate with the in-memory database.
   const client = createSyntaxFactory({
@@ -91,14 +84,7 @@ export const init = async (options?: {
       const { queries } = (await request.json()) as { queries: Array<object> };
       const transaction = new Transaction(queries, { models });
 
-      const hiveStatements = transaction.statements.map(({ statement, params }) => {
-        return {
-          sql: statement,
-          params: params as Array<string>,
-        };
-      });
-
-      const results = await database.resource.query<Array<ResultRecord>>(hiveStatements);
+      const results = await database.resource.query<Array<ResultRecord>>(transaction.statements);
       const formattedResults = transaction.formatResults(results.map(({ rows }) => rows));
       return Response.json({
         results: formattedResults,

@@ -1,6 +1,6 @@
 import { getFieldFromModel } from '@/src/model';
 import type { Model } from '@/src/types/model';
-import type { GetInstructions, QueryType } from '@/src/types/query';
+import type { GetInstructions, QueryType, Statement } from '@/src/types/query';
 import { CompilerError } from '@/src/utils/helpers';
 import { CURSOR_NULL_PLACEHOLDER, CURSOR_SEPARATOR } from '@/src/utils/pagination';
 import { prepareStatementValue } from '@/src/utils/statement';
@@ -23,7 +23,7 @@ import { prepareStatementValue } from '@/src/utils/statement';
  */
 export const handleBeforeOrAfter = (
   model: Model,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   queryType: QueryType,
   instructions: {
     before?: GetInstructions['before'];

@@ -21,7 +21,7 @@ export const getSyntaxProxySQL = (options: {
 }) => {
   return (strings: TemplateStringsArray, ...values: Array<unknown>): Promise<any> => {
     let text = '';
-    const params: Array<unknown> = [];
+    const params: Array<string | number | bigint | boolean | null> = [];
 
     strings.forEach((string, i) => {
       // Remove comments but preserve the newline
@@ -33,14 +33,14 @@ export const getSyntaxProxySQL = (options: {
 
       if (i < values.length) {
         text += `$${i + 1}`;
-        params.push(values[i]);
+        params.push(values[i] as string);
       }
     });
 
     const statement: Statement = {
       // Collapse whitespace and newlines into single spaces, then trim leading or
       // trailing spaces.
-      statement: text.replace(/\s+/g, ' ').trim(),
+      sql: text.replace(/\s+/g, ' ').trim(),
       params,
     };
 

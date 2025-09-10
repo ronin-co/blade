@@ -1,7 +1,7 @@
 import { type Database, Hive } from 'hive';
 import { BunDriver } from 'hive/bun-driver';
 import { MemoryStorage } from 'hive/memory-storage';
-import type { RowValues } from 'hive/sdk/transaction';
+import type { RowObject } from 'hive/sdk/transaction';
 
 import fixtureData from '@/fixtures/data.json';
 import {
@@ -75,14 +75,7 @@ const prefillDatabase = async (
     ...dataTransaction.statements,
   ];
 
-  const hiveStatements = statements.map(({ statement, params }) => {
-    return {
-      sql: statement,
-      params: params as Array<string>,
-    };
-  });
-
-  await database.query(hiveStatements);
+  await database.query(statements);
 };
 
 const hive = new Hive({
@@ -104,21 +97,14 @@ const hive = new Hive({
 export const queryEphemeralDatabase = async (
   models: Array<Model>,
   statements: Array<Statement>,
-): Promise<Array<Array<RowValues>>> => {
+): Promise<Array<Array<RowObject>>> => {
   const databaseId = Math.random().toString(36).substring(7);
   const database = await hive.create({ type: 'database', id: databaseId });
 
   await prefillDatabase(database.resource, models);
 
-  const hiveStatements = statements.map(({ statement, params }) => {
-    return {
-      sql: statement,
-      params: params as Array<string>,
-    };
-  });
-
-  const results = await database.resource.query(hiveStatements);
-  const formattedResults = results.map((result) => result.rows as Array<RowValues>);
+  const results = await database.resource.query(statements);
+  const formattedResults = results.map((result) => result.rows as Array<RowObject>);
 
   await hive.delete({ type: 'database', id: databaseId });
 

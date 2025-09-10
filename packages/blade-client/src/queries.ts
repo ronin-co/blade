@@ -8,7 +8,7 @@ import {
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
-import type { Statement as HiveStatement, RowValues } from 'hive/sdk/transaction';
+import type { RowValues } from 'hive/sdk/transaction';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import type {
@@ -76,14 +76,6 @@ export const runQueries = async <T extends ResultRecord>(
       defaultRecordLimit: options.defaultRecordLimit,
     });
 
-    const rawStatements = transaction.statements.map((item): HiveStatement => {
-      return {
-        sql: item.statement,
-        params: item.params as Array<string>,
-        method: 'values',
-      };
-    });
-
     const token = options.token as string;
 
     if (!clients[token]) {
@@ -103,7 +95,7 @@ export const runQueries = async <T extends ResultRecord>(
     const db = new Selector({ type: 'database', id: 'main', parent });
 
     const results = await hive.storage.query(db, {
-      statements: rawStatements,
+      statements: transaction.statements.map(item => ({...item, method: 'values'})),
       mode: 'DEFERRED',
     });
 
@@ -162,7 +154,7 @@ export const runQueries = async <T extends ResultRecord>(
       if (!acc[database].nativeQueries) acc[database].nativeQueries = [];
 
       acc[database].nativeQueries.push({
-        query: statement.statement,
+        query: statement.sql,
         values: statement.params,
       });
 

@@ -9,6 +9,7 @@ import type {
   FieldValue,
   InternalDependencyStatement,
   SetInstructions,
+  Statement,
 } from '@/src/types/query';
 import { CURRENT_TIME_EXPRESSION } from '@/src/utils/constants';
 import { flatten, getQuerySymbol, isObject, splitQuery } from '@/src/utils/helpers';
@@ -34,7 +35,7 @@ import { composeConditions, filterSelectedFields } from '@/src/utils/statement';
 export const handleTo = (
   models: Array<Model>,
   model: Model,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   queryType: 'add' | 'set',
   dependencyStatements: Array<InternalDependencyStatement>,
   instructions: {
@@ -121,7 +122,7 @@ export const handleTo = (
 
     statement += compileQueryInput(symbol.value, models, statementParams, {
       inlineDefaults: options?.inlineDefaults || false,
-    }).main.statement;
+    }).main.sql;
     return statement;
   }
 

@@ -233,8 +233,8 @@ export type ModelQueryType = ModelQueryTypeEnum;
 export type ModelEntityType = ModelEntityEnum;
 
 export interface Statement {
-  statement: string;
-  params: Array<unknown>;
+  sql: string;
+  params: Array<string | bigint | number | boolean | null>;
   returning?: boolean;
 }
 

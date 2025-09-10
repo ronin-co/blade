@@ -127,14 +127,7 @@ export const runMigration = async (
     models.map((model) => convertModelToObjectFields(model)),
   );
 
-  const hiveStatements = statements.map(({ statement, params }) => {
-    return {
-      sql: statement,
-      params: params as Array<string>,
-    };
-  });
-
-  await db.query(hiveStatements);
+  await db.query(statements);
 
   return {
     db,
@@ -193,13 +186,6 @@ export const getTableRows = async (
     },
   );
 
-  const hiveStatements = transaction.statements.map(({ statement, params }) => {
-    return {
-      sql: statement,
-      params: params as Array<string>,
-    };
-  });
-
-  const result = await db.query(hiveStatements);
+  const result = await db.query(transaction.statements);
   return result[0].rows;
 };

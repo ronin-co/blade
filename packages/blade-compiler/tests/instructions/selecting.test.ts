@@ -28,7 +28,7 @@ test('get single record with specific field', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT "id" FROM "categories" LIMIT 1',
+      sql: 'SELECT "id" FROM "categories" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -68,7 +68,7 @@ test('get single record with specific fields', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT "id", "name" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "id", "name" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -109,7 +109,7 @@ test('get single record with specific fields (root level)', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT "id", "name" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "id", "name" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -150,7 +150,7 @@ test('get single record with specific fields (root level, except)', async () => 
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT "name" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "name" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -190,7 +190,7 @@ test('get single record with specific fields (root level, any prefix)', async ()
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT "name" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "name" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -230,7 +230,7 @@ test('get single record with specific fields (root level, any suffix)', async ()
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT "name" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "name" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -270,8 +270,7 @@ test('get single record with specific fields (all levels)', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement:
-        'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -318,8 +317,7 @@ test('get single record with specific fields (all levels, except)', async () => 
 
   expect(transaction.statements).toEqual([
     {
-      statement:
-        'SELECT "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -365,7 +363,7 @@ test('get single record with specific fields (all levels, any prefix)', async ()
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT "ronin.createdAt" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "ronin.createdAt" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -407,8 +405,7 @@ test('get single record with specific fields (all levels, any suffix)', async ()
 
   expect(transaction.statements).toEqual([
     {
-      statement:
-        'SELECT "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "beaches" LIMIT 1',
+      sql: 'SELECT "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "beaches" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -465,8 +462,7 @@ test('select same fields as preset does', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement:
-        'SELECT "id", "name", "division", "ronin.createdAt" FROM "beaches" WHERE "name" LIKE ?1 ORDER BY "ronin.createdAt" DESC LIMIT 51',
+      sql: 'SELECT "id", "name", "division", "ronin.createdAt" FROM "beaches" WHERE "name" LIKE ?1 ORDER BY "ronin.createdAt" DESC LIMIT 51',
       params: ['%B%'],
       returning: true,
     },
