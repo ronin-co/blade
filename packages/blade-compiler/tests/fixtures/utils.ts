@@ -1,7 +1,7 @@
 import { type Database, Hive } from 'hive';
 import { BunDriver } from 'hive/bun-driver';
 import { MemoryStorage } from 'hive/memory-storage';
-import type { Row } from 'hive/sdk/query';
+import type { RowValues } from 'hive/sdk/transaction';
 
 import fixtureData from '@/fixtures/data.json';
 import {
@@ -104,11 +104,11 @@ const hive = new Hive({
 export const queryEphemeralDatabase = async (
   models: Array<Model>,
   statements: Array<Statement>,
-): Promise<Array<Array<Row>>> => {
+): Promise<Array<Array<RowValues>>> => {
   const databaseId = Math.random().toString(36).substring(7);
   const database = await hive.create({ type: 'database', id: databaseId });
 
-  await prefillDatabase(database, models);
+  await prefillDatabase(database.resource, models);
 
   const hiveStatements = statements.map(({ statement, params }) => {
     return {
@@ -117,8 +117,8 @@ export const queryEphemeralDatabase = async (
     };
   });
 
-  const results = await database.query(hiveStatements);
-  const formattedResults = results.map((result) => result.rows);
+  const results = await database.resource.query(hiveStatements);
+  const formattedResults = results.map((result) => result.rows as Array<RowValues>);
 
   await hive.delete({ type: 'database', id: databaseId });
 
