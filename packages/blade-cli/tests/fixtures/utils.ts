@@ -1,6 +1,7 @@
 import { type Database, Hive } from 'hive';
 import { BunDriver } from 'hive/bun-driver';
 import { MemoryStorage } from 'hive/memory-storage';
+import type { RowObject } from 'hive/sdk/transaction';
 
 import { Migration, type MigrationOptions } from '@/src/utils/migration';
 import {
@@ -36,9 +37,9 @@ export const queryEphemeralDatabase = async (
   const databaseId = Math.random().toString(36).substring(7);
   const database = await hive.create({ type: 'database', id: databaseId });
 
-  await prefillDatabase(database, models, insertStatements);
+  await prefillDatabase(database.resource, models, insertStatements);
 
-  return database;
+  return database.resource;
 };
 
 /**
@@ -155,7 +156,7 @@ export const runMigration = async (
  */
 export const getRowCount = async (db: Database, modelSlug: string): Promise<number> => {
   const res = await db.query([`SELECT COUNT(*) FROM "${modelSlug}";`]);
-  return res[0].rows[0]['COUNT(*)'];
+  return (res[0].rows as Array<RowObject>)[0]['COUNT(*)'];
 };
 
 /**
@@ -165,9 +166,7 @@ export const getRowCount = async (db: Database, modelSlug: string): Promise<numb
  *
  * @returns A list of table names mapped from the query results.
  */
-export const getSQLTables = async (
-  db: Database,
-): Promise<Array<Record<string, string>>> => {
+export const getSQLTables = async (db: Database): Promise<Array<RowObject>> => {
   const res = await db.query(['SELECT name FROM sqlite_master WHERE type="table";']);
   return res[0].rows;
 };
@@ -185,7 +184,7 @@ export const getTableRows = async (
   db: Database,
   model: Model,
   options?: { models: Array<Model> },
-): Promise<Array<Record<string, string | number>>> => {
+): Promise<Array<RowObject>> => {
   const transaction = new Transaction(
     [{ get: { [model?.pluralSlug || `${model.slug}s`]: null } }],
     {
