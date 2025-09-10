@@ -8,6 +8,7 @@ import {
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
+import type { Statement as HiveStatement, RowValues } from 'hive/sdk/transaction';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import type {
@@ -75,8 +76,12 @@ export const runQueries = async <T extends ResultRecord>(
       defaultRecordLimit: options.defaultRecordLimit,
     });
 
-    const rawStatements = transaction.statements.map((item) => {
-      return { sql: item.statement, params: item.params as Array<string> };
+    const rawStatements = transaction.statements.map((item): HiveStatement => {
+      return {
+        sql: item.statement,
+        params: item.params as Array<string>,
+        method: 'values',
+      };
     });
 
     const token = options.token as string;
@@ -99,12 +104,12 @@ export const runQueries = async <T extends ResultRecord>(
 
     const results = await hive.storage.query(db, {
       statements: rawStatements,
-      transaction: 'DEFERRED',
+      mode: 'DEFERRED',
     });
 
-    const rawResults = results.map((result) => result.rows);
+    const rawResults = results.map((result) => result.rows as Array<RowValues>);
 
-    const usableResults = transaction.formatResults(rawResults).map((result) => {
+    const usableResults = transaction.formatResults(rawResults, true).map((result) => {
       if ('record' in result) {
         const { modelFields, ...rest } = result;
         return { ...rest, schema: modelFields };
