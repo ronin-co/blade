@@ -32,8 +32,7 @@ test('get single record', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement:
-        'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts" LIMIT 1',
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -73,8 +72,7 @@ test('remove single record', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement:
-        'DELETE FROM "accounts" WHERE "handle" = ?1 RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
+      sql: 'DELETE FROM "accounts" WHERE "handle" = ?1 RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
       params: ['elaine'],
       returning: true,
     },
@@ -105,7 +103,7 @@ test('count multiple records', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: `SELECT (COUNT(*)) as "amount" FROM "accounts"`,
+      sql: `SELECT (COUNT(*)) as "amount" FROM "accounts"`,
       params: [],
       returning: true,
     },
@@ -153,18 +151,17 @@ test('pass multiple record queries at once', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: 'SELECT (COUNT(*)) as "amount" FROM "accounts"',
+      sql: 'SELECT (COUNT(*)) as "amount" FROM "accounts"',
       params: [],
       returning: true,
     },
     {
-      statement: 'SELECT "handle" FROM "accounts"',
+      sql: 'SELECT "handle" FROM "accounts"',
       params: [],
       returning: true,
     },
     {
-      statement:
-        'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "accounts" LIMIT 1',
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "accounts" LIMIT 1',
       params: [],
       returning: true,
     },
@@ -233,12 +230,12 @@ test('get all records of all models', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"`,
+      sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"`,
       params: [],
       returning: true,
     },
     {
-      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams"`,
+      sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams"`,
       params: [],
       returning: true,
     },
@@ -327,12 +324,12 @@ test('get all records of all models with instructions', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts" ORDER BY "ronin.createdAt" DESC LIMIT 2`,
+      sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts" ORDER BY "ronin.createdAt" DESC LIMIT 2`,
       params: [],
       returning: true,
     },
     {
-      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams" ORDER BY "ronin.createdAt" DESC LIMIT 2`,
+      sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams" ORDER BY "ronin.createdAt" DESC LIMIT 2`,
       params: [],
       returning: true,
     },
@@ -413,12 +410,12 @@ test('get all records of all models with model-specific instructions', async () 
 
   expect(transaction.statements).toEqual([
     {
-      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts" ORDER BY "ronin.createdAt" DESC LIMIT 2`,
+      sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts" ORDER BY "ronin.createdAt" DESC LIMIT 2`,
       params: [],
       returning: true,
     },
     {
-      statement: `SELECT "id", "ronin.createdAt" FROM "teams" ORDER BY "ronin.createdAt" DESC LIMIT 11`,
+      sql: `SELECT "id", "ronin.createdAt" FROM "teams" ORDER BY "ronin.createdAt" DESC LIMIT 11`,
       params: [],
       returning: true,
     },
@@ -503,12 +500,12 @@ test('get all records of linked models', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"`,
+      sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"`,
       params: [],
       returning: true,
     },
     {
-      statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams"`,
+      sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams"`,
       params: [],
       returning: true,
     },
@@ -630,13 +627,13 @@ test('get all records of linked models between other queries', async () => {
   const transaction = new Transaction(queries, { models });
 
   expect(transaction.statements[1]).toEqual({
-    statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"`,
+    sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"`,
     params: [],
     returning: true,
   });
 
   expect(transaction.statements[2]).toEqual({
-    statement: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams"`,
+    sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "teams"`,
     params: [],
     returning: true,
   });
@@ -745,12 +742,12 @@ test('count all records of all models', async () => {
 
   expect(transaction.statements).toEqual([
     {
-      statement: `SELECT (COUNT(*)) as "amount" FROM "accounts"`,
+      sql: `SELECT (COUNT(*)) as "amount" FROM "accounts"`,
       params: [],
       returning: true,
     },
     {
-      statement: `SELECT (COUNT(*)) as "amount" FROM "beaches"`,
+      sql: `SELECT (COUNT(*)) as "amount" FROM "beaches"`,
       params: [],
       returning: true,
     },

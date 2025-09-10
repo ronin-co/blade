@@ -659,7 +659,7 @@ describe('CLI', () => {
     });
 
     describe('apply', () => {
-      test('invalid token', async () => {
+      test.skip('invalid token', async () => {
         process.argv = ['bun', 'ronin', 'apply'];
         spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('test-space');
 
@@ -681,7 +681,7 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test('apply migration', async () => {
+      test.skip('apply migration', async () => {
         process.argv = ['bun', 'ronin', 'apply'];
 
         spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('test-space');

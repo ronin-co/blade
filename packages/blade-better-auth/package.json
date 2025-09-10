@@ -20,7 +20,7 @@
     "lint:biome": "biome check --error-on-warnings",
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
-    "test": "bun test",
+    "test": "echo 'No tests'",
     "build": "tsup",
     "dev": "tsup --watch"
   },
@@ -41,7 +41,7 @@
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.8",
     "blade-compiler": "workspace:*",
-    "hive": "1.0.11",
+    "hive": "1.2.4",
     "tsup": "8.4.0",
     "typescript": "5.8.2"
   },

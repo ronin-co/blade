@@ -1,7 +1,7 @@
 import type { WithFilters } from '@/src/instructions/with';
 import { getModelBySlug } from '@/src/model';
 import type { InternalModelField, Model } from '@/src/types/model';
-import type { GetInstructions } from '@/src/types/query';
+import type { GetInstructions, Statement } from '@/src/types/query';
 import { composeMountingPath, getQuerySymbol, splitQuery } from '@/src/utils/helpers';
 import { compileQueryInput } from '@/src/utils/index';
 import { composeConditions } from '@/src/utils/statement';
@@ -23,7 +23,7 @@ import { composeConditions } from '@/src/utils/statement';
 export const handleIncluding = (
   models: Array<Model>,
   model: Model,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   single: boolean,
   instructions: {
     with?: GetInstructions['with'];
@@ -120,7 +120,7 @@ export const handleIncluding = (
         { parentModel: model, inlineDefaults: options.inlineDefaults },
       );
 
-      relatedTableSelector = `(${subSelect.main.statement})`;
+      relatedTableSelector = `(${subSelect.main.sql})`;
     }
 
     statement += `${joinType} JOIN ${relatedTableSelector} as "${tableAlias}"`;
@@ -164,7 +164,7 @@ export const handleIncluding = (
         { inlineDefaults: options.inlineDefaults, explicitColumns: false },
       );
 
-      tableSubQuery = subSelect.main.statement;
+      tableSubQuery = subSelect.main.sql;
     }
 
     if (modifiableQueryInstructions?.including) {
