@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { select } from '@inquirer/prompts';
 import { runQueries } from 'blade-client';
-import { CompilerError } from 'blade-compiler';
+import { CompilerError, type Statement } from 'blade-compiler';
 
 import types from '@/src/commands/types';
 import type { MigrationFlags } from '@/src/utils/migration';
@@ -112,7 +112,7 @@ export default async (
  */
 export const applyMigrationStatements = async (
   appTokenOrSessionToken: string | undefined,
-  statements: Array<{ statement: string }>,
+  statements: Array<Statement>,
   slug: string,
 ): Promise<void> => {
   ora.info('Applying migration to production database');
@@ -125,7 +125,7 @@ export const applyMigrationStatements = async (
     },
     body: JSON.stringify({
       nativeQueries: statements.map((query) => ({
-        query: query.statement,
+        query: query.sql,
         mode: 'write',
       })),
     }),

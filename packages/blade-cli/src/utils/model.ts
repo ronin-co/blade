@@ -60,7 +60,7 @@ export const getModels = async (options?: {
 
   try {
     const nativeQueries = transaction.statements.map((statement) => ({
-      query: statement.statement,
+      query: statement.sql,
       values: statement.params,
     }));
 

@@ -1,6 +1,6 @@
 import { getFieldFromModel, getModelBySlug } from '@/src/model';
 import type { InternalModelField, Model, ModelField } from '@/src/types/model';
-import type { Instructions, QueryType } from '@/src/types/query';
+import type { Instructions, QueryType, Statement } from '@/src/types/query';
 import { compileQueryInput } from '@/src/utils';
 import { QUERY_SYMBOLS, RAW_FIELD_TYPES, type RawFieldType } from '@/src/utils/constants';
 import {
@@ -33,7 +33,7 @@ import {
 export const handleSelecting = (
   models: Array<Model>,
   model: Model,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   queryType: QueryType,
   single: boolean,
   instructions: {
@@ -122,7 +122,7 @@ export const handleSelecting = (
             slug: key,
             mountingPath: key,
             type: 'number',
-            mountedValue: `(${subSelect.main.statement})`,
+            mountedValue: `(${subSelect.main.sql})`,
           });
 
           continue;

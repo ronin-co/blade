@@ -21,6 +21,7 @@ import type {
   ModelQueryType,
   Query,
   QueryInstructionType,
+  Statement,
 } from '@/src/types/query';
 import {
   CURRENT_TIME_EXPRESSION,
@@ -632,7 +633,7 @@ const handleSystemModels = (
 export const transformMetaQuery = (
   models: Array<Model>,
   dependencyStatements: Array<InternalDependencyStatement>,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   query: Query,
   options: {
     /**
@@ -756,7 +757,7 @@ export const transformMetaQuery = (
 
       // Compose the SQL statement for creating the table.
       dependencyStatements.push({
-        statement: `CREATE TABLE "${modelWithPresets.table}" (${columns.join(', ')})`,
+        sql: `CREATE TABLE "${modelWithPresets.table}" (${columns.join(', ')})`,
         params: [],
       });
 
@@ -816,7 +817,7 @@ export const transformMetaQuery = (
       // Only push the statement if the table name changed, otherwise we don't need it.
       if (newTableName) {
         dependencyStatements.push({
-          statement: `ALTER TABLE "${model.table}" RENAME TO "${newTableName}"`,
+          sql: `ALTER TABLE "${model.table}" RENAME TO "${newTableName}"`,
           params: [],
         });
       }
@@ -844,7 +845,7 @@ export const transformMetaQuery = (
       // Remove the model from the list of models.
       models.splice(models.indexOf(model), 1);
 
-      dependencyStatements.push({ statement: `DROP TABLE "${model.table}"`, params: [] });
+      dependencyStatements.push({ sql: `DROP TABLE "${model.table}"`, params: [] });
 
       queryTypeDetails = { with: { slug } };
 
@@ -933,7 +934,7 @@ export const transformMetaQuery = (
 
       if (fieldStatement) {
         dependencyStatements.push({
-          statement: `${statement} ADD COLUMN ${fieldStatement}`,
+          sql: `${statement} ADD COLUMN ${fieldStatement}`,
           params: [],
         });
       }
@@ -949,7 +950,7 @@ export const transformMetaQuery = (
         // need it.
         if (!existingLinkField) {
           dependencyStatements.push({
-            statement: `${statement} RENAME COLUMN "${slug}" TO "${newSlug}"`,
+            sql: `${statement} RENAME COLUMN "${slug}" TO "${newSlug}"`,
             params: [],
           });
         }
@@ -966,7 +967,7 @@ export const transformMetaQuery = (
       }
 
       dependencyStatements.push({
-        statement: `${statement} DROP COLUMN "${slug}"`,
+        sql: `${statement} DROP COLUMN "${slug}"`,
         params: [],
       });
     }
@@ -1024,7 +1025,7 @@ export const transformMetaQuery = (
       }
     }
 
-    dependencyStatements.push({ statement, params: [] });
+    dependencyStatements.push({ sql: statement, params: [] });
   }
 
   const field = `${QUERY_SYMBOLS.FIELD}${pluralType}`;

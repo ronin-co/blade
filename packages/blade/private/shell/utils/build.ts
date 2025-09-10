@@ -72,7 +72,7 @@ export const composeBuildContext = async (
   const serverEntry = path.join(serverInputFolder, `${provider}.js`);
   const swEntry = path.join(serverInputFolder, 'service-worker.js');
 
-  let tsconfigExists: boolean;
+  let tsconfigExists: boolean | undefined;
   let packageMetaFile: string | undefined;
 
   if (options?.virtualFiles) {

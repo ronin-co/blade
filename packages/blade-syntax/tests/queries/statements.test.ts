@@ -4,19 +4,19 @@ import type { Statement } from 'blade-compiler';
 import { expectTypeOf } from 'expect-type';
 
 test('using raw SQL', async () => {
-  let statement: Statement | undefined;
+  let sql: Statement | undefined;
 
   const sqlProxy = getSyntaxProxySQL({
     callback: (value) => {
-      statement = value;
+      sql = value;
     },
   });
 
   const accountHandle = 'elaine';
   sqlProxy`SELECT * FROM accounts WHERE handle = ${accountHandle}`;
 
-  expect(statement).toMatchObject({
-    statement: 'SELECT * FROM accounts WHERE handle = $1',
+  expect(sql).toMatchObject({
+    sql: 'SELECT * FROM accounts WHERE handle = $1',
     params: ['elaine'],
   });
 });
@@ -37,7 +37,7 @@ test('using raw SQL in batch', async () => {
 
   expect(batchProxy).toMatchObject([
     {
-      statement: 'SELECT * FROM accounts WHERE handle = $1',
+      sql: 'SELECT * FROM accounts WHERE handle = $1',
       params: ['elaine'],
     },
   ]);
@@ -48,11 +48,11 @@ test('using raw SQL in batch', async () => {
 });
 
 test('using raw SQL with multiple lines', async () => {
-  let statement: Statement | undefined;
+  let sql: Statement | undefined;
 
   const sqlProxy = getSyntaxProxySQL({
     callback: (value) => {
-      statement = value;
+      sql = value;
     },
   });
 
@@ -65,19 +65,19 @@ test('using raw SQL with multiple lines', async () => {
     RETURNING *
   `;
 
-  expect(statement).toMatchObject({
-    statement: 'UPDATE accounts SET "points" = 11 WHERE "handle" = $1 RETURNING *',
+  expect(sql).toMatchObject({
+    sql: 'UPDATE accounts SET "points" = 11 WHERE "handle" = $1 RETURNING *',
     params: ['elaine'],
   });
 });
 
 describe('using raw SQL with comments', () => {
   test('--', async () => {
-    let statement: Statement | undefined;
+    let sql: Statement | undefined;
 
     const sqlProxy = getSyntaxProxySQL({
       callback: (value) => {
-        statement = value;
+        sql = value;
       },
     });
 
@@ -87,18 +87,18 @@ describe('using raw SQL with comments', () => {
       SELECT * FROM accounts WHERE handle = ${accountHandle}
     `;
 
-    expect(statement).toMatchObject({
-      statement: 'SELECT * FROM accounts WHERE handle = $1',
+    expect(sql).toMatchObject({
+      sql: 'SELECT * FROM accounts WHERE handle = $1',
       params: ['elaine'],
     });
   });
 
   test('/* ... */', async () => {
-    let statement: Statement | undefined;
+    let sql: Statement | undefined;
 
     const sqlProxy = getSyntaxProxySQL({
       callback: (value) => {
-        statement = value;
+        sql = value;
       },
     });
 
@@ -108,8 +108,8 @@ describe('using raw SQL with comments', () => {
       SELECT * FROM accounts WHERE handle = ${accountHandle}
     `;
 
-    expect(statement).toMatchObject({
-      statement: 'SELECT * FROM accounts WHERE handle = $1',
+    expect(sql).toMatchObject({
+      sql: 'SELECT * FROM accounts WHERE handle = $1',
       params: ['elaine'],
     });
   });

@@ -16,6 +16,7 @@ import type {
   Query,
   QueryInstructionType,
   SetInstructions,
+  Statement,
   WithInstruction,
 } from '@/src/types/query';
 import { QUERY_SYMBOLS, RONIN_MODEL_FIELD_REGEX } from '@/src/utils/constants';
@@ -114,7 +115,7 @@ export const filterSelectedFields = (
  * @returns A placeholder for the inserted value.
  */
 export const prepareStatementValue = (
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   value: unknown,
 ): string => {
   // If no list of statement values is available, that means we should inline the value,
@@ -140,7 +141,7 @@ export const prepareStatementValue = (
     return formattedValue!.toString();
   }
 
-  const index = statementParams.push(formattedValue);
+  const index = statementParams.push(formattedValue as Statement['params'][number]);
   return `?${index}`;
 };
 
@@ -195,7 +196,7 @@ export const parseFieldExpression = (
 export const composeFieldValues = (
   models: Array<Model>,
   model: Model,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   instructionName: QueryInstructionType,
   value: WithValue | Record<typeof QUERY_SYMBOLS.QUERY, Query>,
   options: {
@@ -241,7 +242,7 @@ export const composeFieldValues = (
     // syntax that can be run.
     if (symbol.type === 'query' && collectStatementValue) {
       conditionValue = `(${
-        compileQueryInput(symbol.value, models, statementParams).main.statement
+        compileQueryInput(symbol.value, models, statementParams).main.sql
       })`;
     }
   } else if (collectStatementValue) {
@@ -270,7 +271,7 @@ export const composeFieldValues = (
 export const composeConditions = (
   models: Array<Model>,
   model: Model,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   instructionName: QueryInstructionType,
   value:
     | WithFilters

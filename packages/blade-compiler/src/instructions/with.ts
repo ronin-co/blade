@@ -1,5 +1,5 @@
 import type { Model } from '@/src/types/model';
-import type { GetInstructions } from '@/src/types/query';
+import type { GetInstructions, Statement } from '@/src/types/query';
 import { composeConditions } from '@/src/utils/statement';
 
 /**
@@ -66,7 +66,7 @@ export type { WithValue, WithValueOptions, WithFilters, WithCondition };
 export const handleWith = (
   models: Array<Model>,
   model: Model,
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   instruction: GetInstructions['with'],
   parentModel?: Model,
 ): string => {

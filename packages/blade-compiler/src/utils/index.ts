@@ -43,7 +43,7 @@ export const compileQueryInput = (
   // SQLite's API later on, so that it can prepare an object that the database can
   // execute in a safe and fast manner. SQLite allows strings, numbers, and booleans to
   // be provided as values.
-  statementParams: Array<unknown> | null,
+  statementParams: Statement['params'] | null,
   options?: {
     /** Whether the query should explicitly return records. Defaults to `true`. */
     returning?: boolean;
@@ -359,7 +359,7 @@ export const compileQueryInput = (
   }
 
   const mainStatement: Statement = {
-    statement: statement.trimEnd(),
+    sql: statement.trimEnd(),
     params: statementParams || [],
   };
 

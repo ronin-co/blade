@@ -56,10 +56,10 @@ const transaction = new Transaction([
 
 transaction.statements;
 // [{
-//   statement: 'CREATE TABLE "accounts" ...',
+//   sql: 'CREATE TABLE "accounts" ...',
 //   params: []
 // }, {
-//   statement: 'SELECT * FROM "accounts"',
+//   sql: 'SELECT * FROM "accounts"',
 //   params: [],
 //   returning: true,
 // }]
