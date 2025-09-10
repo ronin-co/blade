@@ -57,7 +57,7 @@ describe('protocol', () => {
     const originalGetSQLStatements = protocol.getSQLStatements;
     protocol.getSQLStatements = (): Array<Statement> => [
       {
-        statement: 'CREATE SCHEMA my_schema;',
+        sql: 'CREATE SCHEMA my_schema;',
         params: [],
       },
     ];
@@ -101,7 +101,7 @@ describe('protocol', () => {
     const statements = protocol.getSQLStatements(models);
 
     expect(statements).toHaveLength(1);
-    expect(statements[0].statement).toStrictEqual(
+    expect(statements[0].sql).toStrictEqual(
       'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "accounts" WHERE "handle" = \'elaine\' LIMIT 1',
     );
   });

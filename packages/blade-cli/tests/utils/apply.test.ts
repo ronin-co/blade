@@ -42,8 +42,8 @@ describe('applyMigrationStatements', () => {
       getContents: mock(() => Promise.resolve(Buffer.from('mock-db-contents'))),
     };
     const mockStatements = [
-      { statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' },
-      { statement: 'INSERT INTO test VALUES (1)' },
+      { sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] },
+      { sql: 'INSERT INTO test VALUES (1)', params: [] },
     ];
     const mockSlug = 'test-space';
 
@@ -54,7 +54,7 @@ describe('applyMigrationStatements', () => {
     await applyMigrationStatements('mock-token', mockStatements, mockSlug);
 
     expect(mockDb.query).toHaveBeenCalledWith(
-      mockStatements.map(({ statement }) => statement),
+      mockStatements.map(({ sql }) => sql),
     );
     expect(mockDb.getContents).toHaveBeenCalled();
     expect(writeFileSpy).toHaveBeenCalledWith(
@@ -76,8 +76,8 @@ describe('applyMigrationStatements', () => {
 
   test('should apply migration to production database', async () => {
     const mockStatements = [
-      { statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' },
-      { statement: 'INSERT INTO test VALUES (1)' },
+      { sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] },
+      { sql: 'INSERT INTO test VALUES (1)', params: [] },
     ];
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
@@ -104,7 +104,7 @@ describe('applyMigrationStatements', () => {
         },
         body: JSON.stringify({
           nativeQueries: mockStatements.map((query) => ({
-            query: query.statement,
+            query: query.sql,
             mode: 'write',
           })),
         }),
@@ -123,7 +123,7 @@ describe('applyMigrationStatements', () => {
   });
 
   test('should throw error when production API returns error', async () => {
-    const mockStatements = [{ statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' }];
+    const mockStatements = [{ sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] }];
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
     const errorMessage = 'Database error occurred';
@@ -143,7 +143,7 @@ describe('applyMigrationStatements', () => {
   });
 
   test('should handle network failures when applying to production', async () => {
-    const mockStatements = [{ statement: 'CREATE TABLE test (id INTEGER PRIMARY KEY)' }];
+    const mockStatements = [{ sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] }];
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
 

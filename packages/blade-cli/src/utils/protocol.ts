@@ -193,7 +193,7 @@ export default () => [
    */
   saveSQL = async (fileName: string, models: Array<Model>): Promise<void> => {
     const statements = this.getSQLStatements(models);
-    const sqlContent = statements.map(({ statement }) => statement).join('\n');
+    const sqlContent = statements.map(({ sql }) => sql).join('\n');
     fs.writeFileSync(`${this._protocolDir}/${fileName}.sql`, sqlContent);
   };
 
