@@ -53,9 +53,7 @@ describe('applyMigrationStatements', () => {
 
     await applyMigrationStatements('mock-token', mockStatements, mockSlug);
 
-    expect(mockDb.query).toHaveBeenCalledWith(
-      mockStatements.map(({ sql }) => sql),
-    );
+    expect(mockDb.query).toHaveBeenCalledWith(mockStatements.map(({ sql }) => sql));
     expect(mockDb.getContents).toHaveBeenCalled();
     expect(writeFileSpy).toHaveBeenCalledWith(
       '.ronin/db.sqlite',
@@ -123,7 +121,9 @@ describe('applyMigrationStatements', () => {
   });
 
   test('should throw error when production API returns error', async () => {
-    const mockStatements = [{ sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] }];
+    const mockStatements = [
+      { sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] },
+    ];
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
     const errorMessage = 'Database error occurred';
@@ -143,7 +143,9 @@ describe('applyMigrationStatements', () => {
   });
 
   test('should handle network failures when applying to production', async () => {
-    const mockStatements = [{ sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] }];
+    const mockStatements = [
+      { sql: 'CREATE TABLE test (id INTEGER PRIMARY KEY)', params: [] },
+    ];
     const mockSlug = 'test-space';
     const mockToken = 'mock-token';
 

@@ -84,7 +84,9 @@ export const init = async (options?: {
       const { queries } = (await request.json()) as { queries: Array<object> };
       const transaction = new Transaction(queries, { models });
 
-      const results = await database.resource.query<Array<ResultRecord>>(transaction.statements);
+      const results = await database.resource.query<Array<ResultRecord>>(
+        transaction.statements,
+      );
       const formattedResults = transaction.formatResults(results.map(({ rows }) => rows));
       return Response.json({
         results: formattedResults,

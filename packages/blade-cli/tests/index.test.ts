@@ -665,8 +665,6 @@ describe('CLI', () => {
 
         await run({ version: '1.0.0' });
 
-        console.error(stderrSpy.mock.calls);
-
         expect(
           stderrSpy.mock.calls.some(
             (call) =>
