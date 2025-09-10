@@ -269,6 +269,20 @@ exports[`identifiers 1`] = `
       "symbol": undefined,
       "transformFlags": 0,
     },
+    "promise": IdentifierObject {
+      "emitNode": undefined,
+      "end": -1,
+      "escapedText": "Promise",
+      "flags": 16,
+      "flowNode": undefined,
+      "id": 0,
+      "jsDoc": undefined,
+      "kind": 80,
+      "parent": undefined,
+      "pos": -1,
+      "symbol": undefined,
+      "transformFlags": 0,
+    },
   },
   "syntax": {
     "module": {

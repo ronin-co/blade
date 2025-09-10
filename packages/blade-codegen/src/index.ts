@@ -202,19 +202,42 @@ export const generate = (models: Array<Model>): string => {
                           undefined,
                         ),
                         factory.createTypeLiteralNode([
-                          generateRootQueryCallSignature(singularModelNode),
-                          generateDefaultSyntaxProperty('after', singularModelNode),
-                          generateDefaultSyntaxProperty('before', singularModelNode),
-                          generateDefaultSyntaxProperty('including', singularModelNode),
-                          generateDefaultSyntaxProperty('limitedTo', singularModelNode),
-                          generateOrderedBySyntaxProperty(model, singularModelNode),
-                          generateSelectingSyntaxProperty(model, singularModelNode),
-                          generateUsingSyntaxProperty(
+                          generateRootQueryCallSignature({
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'after',
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'before',
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'including',
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'limitedTo',
+                            modelNode: singularModelNode,
+                          }),
+                          generateOrderedBySyntaxProperty({
                             model,
-                            singularModelNode,
-                            convertToPascalCase(model.slug),
-                          ),
-                          generateWithSyntaxProperty(model, singularModelNode),
+                            modelNode: singularModelNode,
+                          }),
+                          generateSelectingSyntaxProperty({
+                            model,
+                            modelNode: singularModelNode,
+                          }),
+                          generateUsingSyntaxProperty({
+                            model,
+                            modelNode: singularModelNode,
+                            slug: convertToPascalCase(model.slug),
+                          }),
+                          generateWithSyntaxProperty({
+                            model,
+                            modelNode: singularModelNode,
+                          }),
                         ]),
                       ]),
                     );
@@ -243,20 +266,41 @@ export const generate = (models: Array<Model>): string => {
                           undefined,
                         ),
                         factory.createTypeLiteralNode([
-                          generateRootQueryCallSignature(pluralModelNode),
-                          generateDefaultSyntaxProperty('after', pluralModelNode),
-                          generateDefaultSyntaxProperty('before', pluralModelNode),
-                          generateDefaultSyntaxProperty('including', pluralModelNode),
-                          generateDefaultSyntaxProperty('limitedTo', pluralModelNode),
-                          generateOrderedBySyntaxProperty(model, pluralModelNode),
-                          generateSelectingSyntaxProperty(model, pluralModelNode),
-                          generateUsingSyntaxProperty(
+                          generateRootQueryCallSignature({ modelNode: pluralModelNode }),
+                          generateDefaultSyntaxProperty({
+                            name: 'after',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'before',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'including',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'limitedTo',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateOrderedBySyntaxProperty({
                             model,
-                            pluralModelNode,
-                            convertToPascalCase(model.pluralSlug),
-                            true,
-                          ),
-                          generateWithSyntaxProperty(model, pluralModelNode),
+                            modelNode: pluralModelNode,
+                          }),
+                          generateSelectingSyntaxProperty({
+                            model,
+                            modelNode: pluralModelNode,
+                          }),
+                          generateUsingSyntaxProperty({
+                            model,
+                            modelNode: pluralModelNode,
+                            slug: convertToPascalCase(model.pluralSlug),
+                            isPlural: true,
+                          }),
+                          generateWithSyntaxProperty({
+                            model,
+                            modelNode: pluralModelNode,
+                          }),
                         ]),
                       ]),
                     );
@@ -349,28 +393,51 @@ export const generate = (models: Array<Model>): string => {
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
-                                generateRootQueryCallSignature(singularModelNode),
-                                generateDefaultSyntaxProperty('after', singularModelNode),
-                                generateDefaultSyntaxProperty(
-                                  'before',
-                                  singularModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'including',
-                                  singularModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'limitedTo',
-                                  singularModelNode,
-                                ),
-                                generateOrderedBySyntaxProperty(model, singularModelNode),
-                                generateSelectingSyntaxProperty(model, singularModelNode),
-                                generateUsingSyntaxProperty(
+                                generateRootQueryCallSignature({
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
                                   model,
-                                  singularModelNode,
-                                  convertToPascalCase(model.slug),
-                                ),
-                                generateWithSyntaxProperty(model, singularModelNode),
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.slug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
                               ]),
                             ]),
                           );
@@ -399,26 +466,52 @@ export const generate = (models: Array<Model>): string => {
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
-                                generateRootQueryCallSignature(pluralModelNode),
-                                generateDefaultSyntaxProperty('after', pluralModelNode),
-                                generateDefaultSyntaxProperty('before', pluralModelNode),
-                                generateDefaultSyntaxProperty(
-                                  'including',
-                                  pluralModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'limitedTo',
-                                  pluralModelNode,
-                                ),
-                                generateOrderedBySyntaxProperty(model, pluralModelNode),
-                                generateSelectingSyntaxProperty(model, pluralModelNode),
-                                generateUsingSyntaxProperty(
+                                generateRootQueryCallSignature({
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
                                   model,
-                                  pluralModelNode,
-                                  convertToPascalCase(model.pluralSlug),
-                                  true,
-                                ),
-                                generateWithSyntaxProperty(model, pluralModelNode),
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  isPlural: true,
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.pluralSlug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
                               ]),
                             ]),
                           );
@@ -475,28 +568,51 @@ export const generate = (models: Array<Model>): string => {
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
-                                generateRootQueryCallSignature(singularModelNode),
-                                generateDefaultSyntaxProperty('after', singularModelNode),
-                                generateDefaultSyntaxProperty(
-                                  'before',
-                                  singularModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'including',
-                                  singularModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'limitedTo',
-                                  singularModelNode,
-                                ),
-                                generateOrderedBySyntaxProperty(model, singularModelNode),
-                                generateSelectingSyntaxProperty(model, singularModelNode),
-                                generateUsingSyntaxProperty(
+                                generateRootQueryCallSignature({
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
                                   model,
-                                  singularModelNode,
-                                  convertToPascalCase(model.slug),
-                                ),
-                                generateWithSyntaxProperty(model, singularModelNode),
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.slug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
                               ]),
                             ]),
                           );
@@ -525,26 +641,52 @@ export const generate = (models: Array<Model>): string => {
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
-                                generateRootQueryCallSignature(pluralModelNode),
-                                generateDefaultSyntaxProperty('after', pluralModelNode),
-                                generateDefaultSyntaxProperty('before', pluralModelNode),
-                                generateDefaultSyntaxProperty(
-                                  'including',
-                                  pluralModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'limitedTo',
-                                  pluralModelNode,
-                                ),
-                                generateOrderedBySyntaxProperty(model, pluralModelNode),
-                                generateSelectingSyntaxProperty(model, pluralModelNode),
-                                generateUsingSyntaxProperty(
+                                generateRootQueryCallSignature({
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
                                   model,
-                                  pluralModelNode,
-                                  convertToPascalCase(model.pluralSlug),
-                                  true,
-                                ),
-                                generateWithSyntaxProperty(model, pluralModelNode),
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  isPlural: true,
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.pluralSlug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
                               ]),
                             ]),
                           );
@@ -601,28 +743,51 @@ export const generate = (models: Array<Model>): string => {
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
-                                generateRootQueryCallSignature(singularModelNode),
-                                generateDefaultSyntaxProperty('after', singularModelNode),
-                                generateDefaultSyntaxProperty(
-                                  'before',
-                                  singularModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'including',
-                                  singularModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'limitedTo',
-                                  singularModelNode,
-                                ),
-                                generateOrderedBySyntaxProperty(model, singularModelNode),
-                                generateSelectingSyntaxProperty(model, singularModelNode),
-                                generateUsingSyntaxProperty(
+                                generateRootQueryCallSignature({
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
                                   model,
-                                  singularModelNode,
-                                  convertToPascalCase(model.slug),
-                                ),
-                                generateWithSyntaxProperty(model, singularModelNode),
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.slug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
                               ]),
                             ]),
                           );
@@ -651,27 +816,57 @@ export const generate = (models: Array<Model>): string => {
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
-                                generateRootQueryCallSignature(pluralModelNode),
-                                generateDefaultSyntaxProperty('after', pluralModelNode),
-                                generateDefaultSyntaxProperty('before', pluralModelNode),
-                                generateDefaultSyntaxProperty(
-                                  'including',
-                                  pluralModelNode,
-                                ),
-                                generateDefaultSyntaxProperty(
-                                  'limitedTo',
-                                  pluralModelNode,
-                                ),
-                                generateOrderedBySyntaxProperty(model, pluralModelNode),
-                                generateSelectingSyntaxProperty(model, pluralModelNode),
-                                generateDefaultSyntaxProperty('to', pluralModelNode),
-                                generateUsingSyntaxProperty(
+                                generateRootQueryCallSignature({
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
                                   model,
-                                  pluralModelNode,
-                                  convertToPascalCase(model.pluralSlug),
-                                  true,
-                                ),
-                                generateWithSyntaxProperty(model, pluralModelNode),
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'to',
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  isPlural: true,
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.pluralSlug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
                               ]),
                             ]),
                           );

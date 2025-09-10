@@ -9,17 +9,22 @@ import type { TypeElement, TypeNode } from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
+interface BaseGeneratorOptions {
+  modelNode: TypeNode;
+  promise?: boolean;
+}
+
 /**
  * TODO(@nurodev): Add documentation
  */
-export const generateRootQueryCallSignature = (modelNode: TypeNode) =>
+export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
   factory.createCallSignature(
     [
       factory.createTypeParameterDeclaration(
         undefined,
         typeArgumentIdentifiers.default,
         undefined,
-        modelNode,
+        options.modelNode,
       ),
     ],
     [
@@ -33,19 +38,24 @@ export const generateRootQueryCallSignature = (modelNode: TypeNode) =>
         ]),
       ),
     ],
-    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    options?.promise
+      ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        ])
+      : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
   );
 
 /**
  * TODO(@nurodev): Add documentation
  */
 export const generateDefaultSyntaxProperty = (
-  propertyName: keyof CombinedInstructions,
-  modelNode: TypeNode,
+  options: BaseGeneratorOptions & {
+    name: keyof CombinedInstructions;
+  },
 ) =>
   factory.createPropertySignature(
     undefined,
-    propertyName,
+    options.name,
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
@@ -58,7 +68,7 @@ export const generateDefaultSyntaxProperty = (
             undefined,
             typeArgumentIdentifiers.default,
             undefined,
-            modelNode,
+            options.modelNode,
           ),
         ],
         [
@@ -69,11 +79,15 @@ export const generateDefaultSyntaxProperty = (
             undefined,
             factory.createIndexedAccessTypeNode(
               factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-              factory.createLiteralTypeNode(factory.createStringLiteral(propertyName)),
+              factory.createLiteralTypeNode(factory.createStringLiteral(options.name)),
             ),
           ),
         ],
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
       ),
     ]),
   );
@@ -81,12 +95,16 @@ export const generateDefaultSyntaxProperty = (
 /**
  * TODO(@nurodev): Add documentation
  */
-export const generateOrderedBySyntaxProperty = (model: Model, schemaNode: TypeNode) => {
+export const generateOrderedBySyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    model: Model;
+  },
+) => {
   const typedFields = factory.createTypeReferenceNode(identifiers.primitive.array, [
     factory.createUnionTypeNode([
       factory.createTypeReferenceNode(identifiers.compiler.expression),
       factory.createTypeReferenceNode(
-        factory.createIdentifier(`${convertToPascalCase(model.slug)}FieldSlug`),
+        factory.createIdentifier(`${convertToPascalCase(options.model.slug)}FieldSlug`),
       ),
     ]),
   ]);
@@ -106,7 +124,7 @@ export const generateOrderedBySyntaxProperty = (model: Model, schemaNode: TypeNo
             undefined,
             typeArgumentIdentifiers.default,
             undefined,
-            schemaNode,
+            options.modelNode,
           ),
         ],
         [
@@ -127,7 +145,11 @@ export const generateOrderedBySyntaxProperty = (model: Model, schemaNode: TypeNo
             ),
           ),
         ],
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
       ),
       factory.createTypeLiteralNode(
         ['ascending', 'descending'].map((name) =>
@@ -141,7 +163,7 @@ export const generateOrderedBySyntaxProperty = (model: Model, schemaNode: TypeNo
                   undefined,
                   typeArgumentIdentifiers.default,
                   undefined,
-                  schemaNode,
+                  options.modelNode,
                 ),
               ],
               [
@@ -153,7 +175,11 @@ export const generateOrderedBySyntaxProperty = (model: Model, schemaNode: TypeNo
                   typedFields,
                 ),
               ],
-              factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+              options?.promise
+                ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ])
+                : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
             ),
           ),
         ),
@@ -165,7 +191,11 @@ export const generateOrderedBySyntaxProperty = (model: Model, schemaNode: TypeNo
 /**
  * TODO(@nurodev): Add documentation
  */
-export const generateSelectingSyntaxProperty = (model: Model, modelNode: TypeNode) =>
+export const generateSelectingSyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    model: Model;
+  },
+) =>
   factory.createPropertySignature(
     undefined,
     'selecting',
@@ -181,7 +211,7 @@ export const generateSelectingSyntaxProperty = (model: Model, modelNode: TypeNod
             undefined,
             typeArgumentIdentifiers.default,
             undefined,
-            modelNode,
+            options.modelNode,
           ),
         ],
         [
@@ -192,12 +222,18 @@ export const generateSelectingSyntaxProperty = (model: Model, modelNode: TypeNod
             undefined,
             factory.createTypeReferenceNode(identifiers.primitive.array, [
               factory.createTypeReferenceNode(
-                factory.createIdentifier(`${convertToPascalCase(model.slug)}FieldSlug`),
+                factory.createIdentifier(
+                  `${convertToPascalCase(options.model.slug)}FieldSlug`,
+                ),
               ),
             ]),
           ),
         ],
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
       ),
     ]),
   );
@@ -206,15 +242,20 @@ export const generateSelectingSyntaxProperty = (model: Model, modelNode: TypeNod
  * TODO(@nurodev): Add documentation
  */
 export const generateUsingSyntaxProperty = (
-  model: Model,
-  modelNode: TypeNode,
-  slug: string,
-  isPlural = false,
+  options: BaseGeneratorOptions & {
+    model: Model;
+    slug: string;
+    isPlural?: boolean;
+  },
 ) => {
-  const hasLinkFields = Object.values(model.fields).some(
+  const hasLinkFields = Object.values(options.model.fields).some(
     (field) => field.type === 'link',
   );
-  if (!hasLinkFields) return generateDefaultSyntaxProperty('using', modelNode);
+  if (!hasLinkFields)
+    return generateDefaultSyntaxProperty({
+      name: 'using',
+      modelNode: options.modelNode,
+    });
 
   /**
    * ```ts
@@ -224,7 +265,7 @@ export const generateUsingSyntaxProperty = (
   const arrayFieldsType = factory.createUnionTypeNode([
     factory.createTypeReferenceNode(identifiers.primitive.array, [
       factory.createUnionTypeNode(
-        Object.entries(model.fields)
+        Object.entries(options.model.fields)
           .filter(([, field]) => field.type === 'link')
           .map(([name]) =>
             factory.createLiteralTypeNode(factory.createStringLiteral(name)),
@@ -239,10 +280,15 @@ export const generateUsingSyntaxProperty = (
    * User<U>
    * ```
    */
-  const modelNodeWithFields = factory.createTypeReferenceNode(
-    factory.createIdentifier(slug),
+  const baseModelWithFields = factory.createTypeReferenceNode(
+    factory.createIdentifier(options.slug),
     [factory.createTypeReferenceNode(typeArgumentIdentifiers.using)],
   );
+  const modelNodeWithFields = options?.promise
+    ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+        baseModelWithFields,
+      ])
+    : baseModelWithFields;
 
   return factory.createPropertySignature(
     undefined,
@@ -271,7 +317,7 @@ export const generateUsingSyntaxProperty = (
               factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
             ),
           ],
-          isPlural
+          options.isPlural
             ? modelNodeWithFields
             : factory.createUnionTypeNode([
                 modelNodeWithFields,
@@ -285,7 +331,7 @@ export const generateUsingSyntaxProperty = (
               undefined,
               typeArgumentIdentifiers.default,
               undefined,
-              modelNode,
+              options.modelNode,
             ),
           ],
           [
@@ -297,7 +343,11 @@ export const generateUsingSyntaxProperty = (
               arrayFieldsType,
             ),
           ],
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+          options?.promise
+            ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+              ])
+            : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
         ),
       ]),
     ]),
@@ -307,7 +357,11 @@ export const generateUsingSyntaxProperty = (
 /**
  * TODO(@nurodev): Add documentation
  */
-export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) => {
+export const generateWithSyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    model: Model;
+  },
+) => {
   /**
    * ```ts
    * <T = User | null>(options: CombinedInstructions["with"]): T
@@ -319,7 +373,7 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
         undefined,
         typeArgumentIdentifiers.default,
         undefined,
-        modelNode,
+        options.modelNode,
       ),
     ],
     [
@@ -334,7 +388,11 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
         ),
       ),
     ],
-    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    options?.promise
+      ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        ])
+      : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
   );
 
   const members = new Array<TypeElement>(rootCallSignature);
@@ -353,7 +411,7 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
               undefined,
               typeArgumentIdentifiers.default,
               undefined,
-              modelNode,
+              options.modelNode,
             ),
           ],
           [
@@ -368,7 +426,11 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
               ),
             ),
           ],
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+          options?.promise
+            ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+              ])
+            : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
         ),
       ),
     );
@@ -389,7 +451,7 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
             undefined,
             typeArgumentIdentifiers.default,
             undefined,
-            modelNode,
+            options.modelNode,
           ),
         ],
         [
@@ -407,7 +469,11 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
             ),
           ),
         ],
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
       ),
     );
   });
@@ -427,7 +493,7 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
   );
 
   // Create property signatures for all model fields.
-  for (const slug of Object.keys(model.fields)) {
+  for (const slug of Object.keys(options.model.fields)) {
     if (DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug))) continue;
 
     members.push(
@@ -441,7 +507,7 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
               undefined,
               typeArgumentIdentifiers.default,
               undefined,
-              modelNode,
+              options.modelNode,
             ),
           ],
           [
@@ -451,12 +517,16 @@ export const generateWithSyntaxProperty = (model: Model, modelNode: TypeNode) =>
               slug,
               undefined,
               factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                factory.createTypeReferenceNode(convertToPascalCase(options.model.slug)),
                 factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
               ),
             ),
           ],
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+          options?.promise
+            ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+              ])
+            : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
         ),
       ),
     );

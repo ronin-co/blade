@@ -210,9 +210,9 @@ describe('types', () => {
   describe('syntax', () => {
     describe('generate root query call signature', () => {
       test('a basic model', () => {
-        const typesResult = generateRootQueryCallSignature(
-          factory.createTypeReferenceNode('Account'),
-        );
+        const typesResult = generateRootQueryCallSignature({
+          modelNode: factory.createTypeReferenceNode('Account'),
+        });
 
         const typesResultStr = printNodes([typesResult]);
 
@@ -221,10 +221,10 @@ describe('types', () => {
     });
     describe('generate `default` syntax property', () => {
       test('a basic model', () => {
-        const typesResult = generateDefaultSyntaxProperty(
-          'including',
-          factory.createTypeReferenceNode('Account'),
-        );
+        const typesResult = generateDefaultSyntaxProperty({
+          name: 'including',
+          modelNode: factory.createTypeReferenceNode('Account'),
+        });
 
         const typesResultStr = printNodes([typesResult]);
 
@@ -247,10 +247,10 @@ describe('types', () => {
           },
         }) as unknown as Model;
 
-        const typesResult = generateOrderedBySyntaxProperty(
-          AccountModel,
-          factory.createTypeReferenceNode(AccountModel.slug),
-        );
+        const typesResult = generateOrderedBySyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode(AccountModel.slug),
+        });
 
         const typesResultStr = printNodes([typesResult]);
 
@@ -273,10 +273,10 @@ describe('types', () => {
           },
         }) as unknown as Model;
 
-        const typesResult = generateSelectingSyntaxProperty(
-          AccountModel,
-          factory.createTypeReferenceNode(AccountModel.slug),
-        );
+        const typesResult = generateSelectingSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode(AccountModel.slug),
+        });
 
         const typesResultStr = printNodes([typesResult]);
 
@@ -294,18 +294,19 @@ describe('types', () => {
           },
         }) as unknown as Model;
 
-        const singularTypesResult = generateUsingSyntaxProperty(
-          PostModel,
-          factory.createTypeReferenceNode('Post'),
-          PostModel.slug,
-          false,
-        );
-        const pluralTypesResult = generateUsingSyntaxProperty(
-          PostModel,
-          factory.createTypeReferenceNode('Post'),
-          PostModel.slug,
-          true,
-        );
+        const singularTypesResult = generateUsingSyntaxProperty({
+          model: PostModel,
+          modelNode: factory.createTypeReferenceNode('Post'),
+          slug: PostModel.slug,
+          isPlural: false,
+        });
+        const pluralTypesResult = generateUsingSyntaxProperty({
+          model: PostModel,
+          modelNode: factory.createTypeReferenceNode('Post'),
+          slug: PostModel.slug,
+          isPlural: true,
+          promise: true,
+        });
 
         const typesResultStr = printNodes([singularTypesResult, pluralTypesResult]);
 
@@ -327,18 +328,18 @@ describe('types', () => {
           },
         }) as unknown as Model;
 
-        const singularTypesResult = generateUsingSyntaxProperty(
-          AccountModel,
-          factory.createTypeReferenceNode('Account'),
-          AccountModel.slug,
-          false,
-        );
-        const pluralTypesResult = generateUsingSyntaxProperty(
-          AccountModel,
-          factory.createTypeReferenceNode('Account'),
-          AccountModel.slug,
-          true,
-        );
+        const singularTypesResult = generateUsingSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode('Account'),
+          slug: AccountModel.slug,
+          isPlural: false,
+        });
+        const pluralTypesResult = generateUsingSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode('Account'),
+          slug: AccountModel.slug,
+          isPlural: true,
+        });
 
         const typesResultStr = printNodes([singularTypesResult, pluralTypesResult]);
 
@@ -361,10 +362,10 @@ describe('types', () => {
           },
         }) as unknown as Model;
 
-        const typesResult = generateWithSyntaxProperty(
-          AccountModel,
-          factory.createTypeReferenceNode('Account'),
-        );
+        const typesResult = generateWithSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode('Account'),
+        });
 
         const typesResultStr = printNodes([typesResult]);
 

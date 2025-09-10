@@ -43,6 +43,7 @@ export const identifiers = {
     array: factory.createIdentifier('Array'),
     date: factory.createIdentifier('Date'),
     partial: factory.createIdentifier('Partial'),
+    promise: factory.createIdentifier('Promise'),
   },
   syntax: {
     module: {

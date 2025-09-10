@@ -156,8 +156,8 @@ exports[`types syntax generate \`using\` syntax property a basic model 1`] = `
     <T = Post>(fields: Array<"author"> | "all"): T;
 };
 using: ReducedFunction & {
-    <U extends Array<"author"> | "all">(fields: U): post<U>;
-    <T = Post>(fields: Array<"author"> | "all"): T;
+    <U extends Array<"author"> | "all">(fields: U): Promise<post<U>>;
+    <T = Post>(fields: Array<"author"> | "all"): Promise<T>;
 };
 "
 `;
