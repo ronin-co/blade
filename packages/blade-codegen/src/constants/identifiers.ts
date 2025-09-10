@@ -12,6 +12,9 @@ import type { Identifier } from 'typescript';
 export const identifiers = {
   blade: {
     module: {
+      client: {
+        hooks: factory.createIdentifier(JSON.stringify('blade/client/hooks')),
+      },
       root: factory.createIdentifier(JSON.stringify('blade')),
       server: {
         hooks: factory.createIdentifier(JSON.stringify('blade/server/hooks')),
@@ -40,6 +43,7 @@ export const identifiers = {
     array: factory.createIdentifier('Array'),
     date: factory.createIdentifier('Date'),
     partial: factory.createIdentifier('Partial'),
+    promise: factory.createIdentifier('Promise'),
   },
   syntax: {
     module: {

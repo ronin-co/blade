@@ -1,39 +1,11 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`generate a basic model 1`] = `
-"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+"import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
-export type Account = import("blade/types").Account;
-export type Accounts = import("blade/types").Accounts;
+import type { Account, Accounts } from "blade/types";
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
-type AccountSyntax<S, Q> = ReducedFunction & {
-    <T = S>(options?: Partial<Q>): T;
-    after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
-    before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
-    including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
-    limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
-    orderedBy: ReducedFunction & (<T = S>(options: {
-        ascending?: Array<Expression | AccountFieldSlug>;
-        descending?: Array<Expression | AccountFieldSlug>;
-    }) => T) & {
-        ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
-        descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
-    };
-    selecting: ReducedFunction & (<T = S>(options: Array<AccountFieldSlug>) => T);
-    using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
-    with: ReducedFunction & {
-        <T = S>(options: CombinedInstructions["with"]): T;
-        id: <T = S>(value: ResultRecord["id"]) => T;
-        ronin: ReducedFunction & {
-            createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-        };
-        name: <T = S>(name: Account["name"]) => T;
-        email: <T = S>(email: Account["email"]) => T;
-    };
-};
+export type { Account, Accounts };
 declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
@@ -47,50 +19,260 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
+        account: ReducedFunction & {
+            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+            after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => T);
+            before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => T);
+            including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => T);
+            limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => T);
+            orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                ascending?: Array<Expression | AccountFieldSlug>;
+                descending?: Array<Expression | AccountFieldSlug>;
+            }) => T) & {
+                ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
+                descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
+            };
+            selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => T);
+            using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+            with: ReducedFunction & {
+                <T = Account | null>(options: CombinedInstructions["with"]): T;
+                id: <T = Account | null>(value: ResultRecord["id"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
+                name: <T = Account | null>(name: Account["name"]) => T;
+                email: <T = Account | null>(email: Account["email"]) => T;
+            };
+        };
         /** Get multiple account records */
-        accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
+        accounts: ReducedFunction & {
+            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+            after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => T);
+            before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => T);
+            including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => T);
+            limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => T);
+            orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                ascending?: Array<Expression | AccountFieldSlug>;
+                descending?: Array<Expression | AccountFieldSlug>;
+            }) => T) & {
+                ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
+                descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
+            };
+            selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => T);
+            using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+            with: ReducedFunction & {
+                <T = Accounts>(options: CombinedInstructions["with"]): T;
+                id: <T = Accounts>(value: ResultRecord["id"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
+                name: <T = Accounts>(name: Account["name"]) => T;
+                email: <T = Accounts>(email: Account["email"]) => T;
+            };
+        };
+    };
+}
+declare module "blade/client/hooks" {
+    declare const useMutation: () => {
+        add: {
+            /** Add a single account record */
+            account: ReducedFunction & {
+                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                };
+            };
+            /** Add multiple account records */
+            accounts: ReducedFunction & {
+                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                };
+            };
+        };
+        remove: {
+            /** Remove a single account record */
+            account: ReducedFunction & {
+                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                };
+            };
+            /** Remove multiple account records */
+            accounts: ReducedFunction & {
+                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                };
+            };
+        };
+        set: {
+            /** Set a single account record */
+            account: ReducedFunction & {
+                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                };
+            };
+            /** Set multiple account records */
+            accounts: ReducedFunction & {
+                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
+                to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"]) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                };
+            };
+        };
     };
 }
 "
 `;
 
 exports[`generate a basic model with blob field 1`] = `
-"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+"import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
-export type Account = import("blade/types").Account;
-export type Accounts = import("blade/types").Accounts;
+import type { Account, Accounts } from "blade/types";
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
-type AccountSyntax<S, Q> = ReducedFunction & {
-    <T = S>(options?: Partial<Q>): T;
-    after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
-    before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
-    including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
-    limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
-    orderedBy: ReducedFunction & (<T = S>(options: {
-        ascending?: Array<Expression | AccountFieldSlug>;
-        descending?: Array<Expression | AccountFieldSlug>;
-    }) => T) & {
-        ascending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
-        descending: <T = S>(fields: Array<Expression | AccountFieldSlug>) => T;
-    };
-    selecting: ReducedFunction & (<T = S>(options: Array<AccountFieldSlug>) => T);
-    using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
-    with: ReducedFunction & {
-        <T = S>(options: CombinedInstructions["with"]): T;
-        id: <T = S>(value: ResultRecord["id"]) => T;
-        ronin: ReducedFunction & {
-            createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
-            createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
-            updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-            updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-        };
-        name: <T = S>(name: Account["name"]) => T;
-        email: <T = S>(email: Account["email"]) => T;
-        image: <T = S>(image: Account["image"]) => T;
-    };
-};
+export type { Account, Accounts };
 declare module "blade/types" {
     export type Account = ResultRecord & {
         email: string;
@@ -105,20 +287,276 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: AccountSyntax<Account | null, GetQuery[keyof GetQuery]>;
+        account: ReducedFunction & {
+            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+            after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => T);
+            before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => T);
+            including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => T);
+            limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => T);
+            orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                ascending?: Array<Expression | AccountFieldSlug>;
+                descending?: Array<Expression | AccountFieldSlug>;
+            }) => T) & {
+                ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
+                descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
+            };
+            selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => T);
+            using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+            with: ReducedFunction & {
+                <T = Account | null>(options: CombinedInstructions["with"]): T;
+                id: <T = Account | null>(value: ResultRecord["id"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
+                name: <T = Account | null>(name: Account["name"]) => T;
+                email: <T = Account | null>(email: Account["email"]) => T;
+                image: <T = Account | null>(image: Account["image"]) => T;
+            };
+        };
         /** Get multiple account records */
-        accounts: AccountSyntax<Accounts, GetQuery[keyof GetQuery]>;
+        accounts: ReducedFunction & {
+            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+            after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => T);
+            before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => T);
+            including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => T);
+            limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => T);
+            orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                ascending?: Array<Expression | AccountFieldSlug>;
+                descending?: Array<Expression | AccountFieldSlug>;
+            }) => T) & {
+                ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
+                descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
+            };
+            selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => T);
+            using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+            with: ReducedFunction & {
+                <T = Accounts>(options: CombinedInstructions["with"]): T;
+                id: <T = Accounts>(value: ResultRecord["id"]) => T;
+                ronin: ReducedFunction & {
+                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
+                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
+                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                };
+                name: <T = Accounts>(name: Account["name"]) => T;
+                email: <T = Accounts>(email: Account["email"]) => T;
+                image: <T = Accounts>(image: Account["image"]) => T;
+            };
+        };
+    };
+}
+declare module "blade/client/hooks" {
+    declare const useMutation: () => {
+        add: {
+            /** Add a single account record */
+            account: ReducedFunction & {
+                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                    image: <T = Account | null>(image: Account["image"]) => Promise<T>;
+                };
+            };
+            /** Add multiple account records */
+            accounts: ReducedFunction & {
+                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                    image: <T = Accounts>(image: Account["image"]) => Promise<T>;
+                };
+            };
+        };
+        remove: {
+            /** Remove a single account record */
+            account: ReducedFunction & {
+                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                    image: <T = Account | null>(image: Account["image"]) => Promise<T>;
+                };
+            };
+            /** Remove multiple account records */
+            accounts: ReducedFunction & {
+                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                    image: <T = Accounts>(image: Account["image"]) => Promise<T>;
+                };
+            };
+        };
+        set: {
+            /** Set a single account record */
+            account: ReducedFunction & {
+                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                    image: <T = Account | null>(image: Account["image"]) => Promise<T>;
+                };
+            };
+            /** Set multiple account records */
+            accounts: ReducedFunction & {
+                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                    ascending?: Array<Expression | AccountFieldSlug>;
+                    descending?: Array<Expression | AccountFieldSlug>;
+                }) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                };
+                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
+                to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"]) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                with: ReducedFunction & {
+                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    ronin: ReducedFunction & {
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                    };
+                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                    image: <T = Accounts>(image: Account["image"]) => Promise<T>;
+                };
+            };
+        };
     };
 }
 "
 `;
 
 exports[`generate with no models 1`] = `
-"import type { CombinedInstructions, Expression, GetQuery } from "blade-compiler";
+"import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
+import type {} from "blade/types";
+export type {};
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
     declare const use: {};
+}
+declare module "blade/client/hooks" {
+    declare const useMutation: () => {
+        add: {};
+        remove: {};
+        set: {};
+    };
 }
 "
 `;

@@ -9,31 +9,22 @@ import {
   number,
   string,
 } from 'blade-syntax/schema';
+import { factory } from 'typescript';
 
 import { generateModelTypes } from '@/src/generators/types/model';
-import { generateTypeReExports } from '@/src/generators/types/re-exports';
+import {
+  generateDefaultSyntaxProperty,
+  generateOrderedBySyntaxProperty,
+  generateRootQueryCallSignature,
+  generateSelectingSyntaxProperty,
+  generateUsingSyntaxProperty,
+  generateWithSyntaxProperty,
+} from '@/src/generators/types/syntax';
 import { printNodes } from '@/src/utils/print';
 
 import type { Model } from '@/src/types/model';
 
 describe('types', () => {
-  describe('re-export model types', () => {
-    test('a basic model', () => {
-      const AccountModel = model({
-        slug: 'account',
-        pluralSlug: 'accounts',
-        fields: {
-          name: string(),
-          email: string({ required: true }),
-        },
-      });
-
-      const types = generateTypeReExports(AccountModel as unknown as Model);
-      const typesStr = printNodes(types);
-      expect(typesStr).toMatchSnapshot();
-    });
-  });
-
   describe('generate the core model types', () => {
     test('a basic model', () => {
       const AccountModel = model({
@@ -213,6 +204,173 @@ describe('types', () => {
       const typesResultStr = printNodes(typesResult);
 
       expect(typesResultStr).toMatchSnapshot();
+    });
+  });
+
+  describe('syntax', () => {
+    describe('generate root query call signature', () => {
+      test('a basic model', () => {
+        const typesResult = generateRootQueryCallSignature({
+          modelNode: factory.createTypeReferenceNode('Account'),
+        });
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+    });
+    describe('generate `default` syntax property', () => {
+      test('a basic model', () => {
+        const typesResult = generateDefaultSyntaxProperty({
+          name: 'including',
+          modelNode: factory.createTypeReferenceNode('Account'),
+        });
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+    });
+    describe('generate `orderedBy` syntax property', () => {
+      test('a basic model', () => {
+        const AccountModel = model({
+          slug: 'account',
+          pluralSlug: 'accounts',
+          fields: {
+            avatar: blob(),
+            email: string({ required: true }),
+            isActive: boolean(),
+            lastActiveAt: date(),
+            name: string(),
+            rewardPoints: number({ defaultValue: 0, required: true }),
+            settings: json({ defaultValue: {}, required: true }),
+          },
+        }) as unknown as Model;
+
+        const typesResult = generateOrderedBySyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode(AccountModel.slug),
+        });
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+    });
+    describe('generate `selecting` syntax property', () => {
+      test('a basic model', () => {
+        const AccountModel = model({
+          slug: 'account',
+          pluralSlug: 'accounts',
+          fields: {
+            avatar: blob(),
+            email: string({ required: true }),
+            isActive: boolean(),
+            lastActiveAt: date(),
+            name: string(),
+            rewardPoints: number({ defaultValue: 0, required: true }),
+            settings: json({ defaultValue: {}, required: true }),
+          },
+        }) as unknown as Model;
+
+        const typesResult = generateSelectingSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode(AccountModel.slug),
+        });
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+    });
+    describe('generate `using` syntax property', () => {
+      test('a basic model', () => {
+        const PostModel = model({
+          slug: 'post',
+          pluralSlug: 'posts',
+          fields: {
+            title: string(),
+            author: link({ target: 'account' }),
+          },
+        }) as unknown as Model;
+
+        const singularTypesResult = generateUsingSyntaxProperty({
+          model: PostModel,
+          modelNode: factory.createTypeReferenceNode('Post'),
+          slug: PostModel.slug,
+          isPlural: false,
+        });
+        const pluralTypesResult = generateUsingSyntaxProperty({
+          model: PostModel,
+          modelNode: factory.createTypeReferenceNode('Post'),
+          slug: PostModel.slug,
+          isPlural: true,
+          promise: true,
+        });
+
+        const typesResultStr = printNodes([singularTypesResult, pluralTypesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+
+      test('a basic model with no link fields', () => {
+        const AccountModel = model({
+          slug: 'account',
+          pluralSlug: 'accounts',
+          fields: {
+            avatar: blob(),
+            email: string({ required: true }),
+            isActive: boolean(),
+            lastActiveAt: date(),
+            name: string(),
+            rewardPoints: number({ defaultValue: 0, required: true }),
+            settings: json({ defaultValue: {}, required: true }),
+          },
+        }) as unknown as Model;
+
+        const singularTypesResult = generateUsingSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode('Account'),
+          slug: AccountModel.slug,
+          isPlural: false,
+        });
+        const pluralTypesResult = generateUsingSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode('Account'),
+          slug: AccountModel.slug,
+          isPlural: true,
+        });
+
+        const typesResultStr = printNodes([singularTypesResult, pluralTypesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+    });
+    describe('generate `with` syntax property', () => {
+      test('a basic model', () => {
+        const AccountModel = model({
+          slug: 'account',
+          pluralSlug: 'accounts',
+          fields: {
+            avatar: blob(),
+            email: string({ required: true }),
+            isActive: boolean(),
+            lastActiveAt: date(),
+            name: string(),
+            rewardPoints: number({ defaultValue: 0, required: true }),
+            settings: json({ defaultValue: {}, required: true }),
+          },
+        }) as unknown as Model;
+
+        const typesResult = generateWithSyntaxProperty({
+          model: AccountModel,
+          modelNode: factory.createTypeReferenceNode('Account'),
+        });
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
     });
   });
 });

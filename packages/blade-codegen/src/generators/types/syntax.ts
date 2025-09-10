@@ -2,48 +2,38 @@ import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
-import { INFERRED_COMBINED_INSTRUCTION_PROPERTIES } from '@/src/constants/syntax';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { TypeAliasDeclaration, TypeElement, TypeNode } from 'typescript';
+import type { CombinedInstructions } from 'blade-compiler';
+import type { TypeElement, TypeNode } from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
+interface BaseGeneratorOptions {
+  modelNode: TypeNode;
+  promise?: boolean;
+}
+
 /**
- * Generates TypeScript type aliases for model syntax.
+ * Generates the call signature for the root query.
  *
  * @example
  * ```ts
- * type UserSyntax<S, Q> = ReducedFunction & {
- *  // ...
- * };
+ * <T = User | null>(options?: Partial<CombinedInstructions>): T;
  * ```
  *
- * @param model - The model to generate syntax types for.
+ * @param options - The options for generating the call signature.
  *
- * @returns An array of type alias declarations for model syntax.
+ * @returns A call signature node.
  */
-export const generateModelSyntaxTypes = (model: Model): TypeAliasDeclaration => {
-  const schemaTypeArgumentNode = factory.createTypeReferenceNode(
-    typeArgumentIdentifiers.schema,
-  );
-
-  const modelIdentifier = factory.createIdentifier(
-    `${convertToPascalCase(model.slug)}Syntax`,
-  );
-
-  /**
-   * ```ts
-   * <T = S>(options?: Partial<Q>): T;
-   * ```
-   */
-  const rootInstructionCallSignature = factory.createCallSignature(
+export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
+  factory.createCallSignature(
     [
       factory.createTypeParameterDeclaration(
         undefined,
         typeArgumentIdentifiers.default,
         undefined,
-        schemaTypeArgumentNode,
+        options.modelNode,
       ),
     ],
     [
@@ -53,328 +43,432 @@ export const generateModelSyntaxTypes = (model: Model): TypeAliasDeclaration => 
         'options',
         factory.createToken(SyntaxKind.QuestionToken),
         factory.createTypeReferenceNode(identifiers.primitive.partial, [
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.queries),
+          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
         ]),
-        undefined,
       ),
     ],
-    factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+    options?.promise
+      ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        ])
+      : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
   );
 
-  const members = new Array<TypeElement>(rootInstructionCallSignature);
-  for (const propertyName of INFERRED_COMBINED_INSTRUCTION_PROPERTIES) {
-    switch (propertyName) {
-      case 'orderedBy': {
-        const typedFields = factory.createTypeReferenceNode(identifiers.primitive.array, [
-          factory.createUnionTypeNode([
-            factory.createTypeReferenceNode(identifiers.compiler.expression),
-            factory.createTypeReferenceNode(
-              factory.createIdentifier(`${convertToPascalCase(model.slug)}FieldSlug`),
-            ),
-          ]),
-        ]);
-
-        /**
-         * orderedBy: ReducedFunction & (<T = S>(options: {
-         *  ascending?: Array<Expression | '...' | '...'>;
-         *  descending?: Array<Expression | '...' | '...'>;
-         * }) => T) & {
-         *  ascending: (<T = S>(fields: Array<Expression | '...' | '...'>) => T);
-         *  descending: (<T = S>(fields: Array<Expression | '...' | '...'>) => T);
-         * };
-         */
-        const orderedBySignature = factory.createPropertySignature(
-          undefined,
-          propertyName,
-          undefined,
-          factory.createIntersectionTypeNode([
-            factory.createExpressionWithTypeArguments(
-              identifiers.syntax.reducedFunction,
-              undefined,
-            ),
-            factory.createFunctionTypeNode(
-              [
-                factory.createTypeParameterDeclaration(
-                  undefined,
-                  typeArgumentIdentifiers.default,
-                  undefined,
-                  schemaTypeArgumentNode,
-                ),
-              ],
-              [
-                factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  'options',
-                  undefined,
-                  factory.createTypeLiteralNode(
-                    ['ascending', 'descending'].map((name) =>
-                      factory.createPropertySignature(
-                        undefined,
-                        name,
-                        factory.createToken(SyntaxKind.QuestionToken),
-                        typedFields,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-            ),
-            factory.createTypeLiteralNode(
-              ['ascending', 'descending'].map((name) =>
-                factory.createPropertySignature(
-                  undefined,
-                  name,
-                  undefined,
-                  factory.createFunctionTypeNode(
-                    [
-                      factory.createTypeParameterDeclaration(
-                        undefined,
-                        typeArgumentIdentifiers.default,
-                        undefined,
-                        schemaTypeArgumentNode,
-                      ),
-                    ],
-                    [
-                      factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        'fields',
-                        undefined,
-                        typedFields,
-                      ),
-                    ],
-                    factory.createTypeReferenceNode(
-                      typeArgumentIdentifiers.default,
-                      undefined,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ]),
-        );
-        members.push(orderedBySignature);
-        continue;
-      }
-      case 'selecting': {
-        /**
-         * selecting: ReducedFunction & (<T = S>(options: Array<UserFieldSlug>) => T);
-         */
-        const selectingSignature = factory.createPropertySignature(
-          undefined,
-          propertyName,
-          undefined,
-          factory.createIntersectionTypeNode([
-            factory.createExpressionWithTypeArguments(
-              identifiers.syntax.reducedFunction,
-              undefined,
-            ),
-            factory.createFunctionTypeNode(
-              [
-                factory.createTypeParameterDeclaration(
-                  undefined,
-                  typeArgumentIdentifiers.default,
-                  undefined,
-                  schemaTypeArgumentNode,
-                ),
-              ],
-              [
-                factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  'options',
-                  undefined,
-                  factory.createTypeReferenceNode(identifiers.primitive.array, [
-                    factory.createTypeReferenceNode(
-                      factory.createIdentifier(
-                        `${convertToPascalCase(model.slug)}FieldSlug`,
-                      ),
-                    ),
-                  ]),
-                ),
-              ],
-              factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
-            ),
-          ]),
-        );
-        members.push(selectingSignature);
-        continue;
-      }
-      case 'to': {
-        // TODO(@nurodev): Add write query support
-        continue;
-      }
-      case 'with': {
-        /**
-         * ```ts
-         * with: ReducedFunction & {
-         *  <T = S>(options: CombinedInstructions["with"]): T;
-         *  id: <T = S>(value: ResultRecord["id"]) => T;
-         *  ronin: ReducedFunction & {
-         *    createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
-         *    createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
-         *    updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-         *    updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
-         *  };
-         *  name: <T = S>(value: User["name"]) => T;
-         *  email: <T = S>(value: User["email"]) => T;
-         *  // [...]
-         * };
-         * ```
-         */
-        const withPropertySignature = factory.createPropertySignature(
-          undefined,
-          'with',
-          undefined,
-          factory.createIntersectionTypeNode([
-            factory.createExpressionWithTypeArguments(
-              identifiers.syntax.reducedFunction,
-              undefined,
-            ),
-            // TODO(@nurodev): Add support for with conditions like `startingWith`, `notStartingWith`, etc.
-            factory.createTypeLiteralNode([
-              factory.createCallSignature(
-                [
-                  factory.createTypeParameterDeclaration(
-                    undefined,
-                    typeArgumentIdentifiers.default,
-                    undefined,
-                    schemaTypeArgumentNode,
-                  ),
-                ],
-                [
-                  factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'options',
-                    undefined,
-                    factory.createIndexedAccessTypeNode(
-                      factory.createTypeReferenceNode(
-                        identifiers.compiler.combinedInstructions,
-                      ),
-                      factory.createLiteralTypeNode(factory.createStringLiteral('with')),
-                    ),
-                  ),
-                ],
-                factory.createTypeReferenceNode(
-                  typeArgumentIdentifiers.default,
-                  undefined,
-                ),
-              ),
-              ...getWithPropertySignatureMembers(model, schemaTypeArgumentNode),
-            ]),
-          ]),
-        );
-        members.push(withPropertySignature);
-        continue;
-      }
-      default: {
-        /**
-         * after: ReducedFunction & (<T = S>(value: CombinedInstructions["after"]) => T);
-         * before: ReducedFunction & (<T = S>(value: CombinedInstructions["before"]) => T);
-         * including: ReducedFunction & (<T = S>(value: CombinedInstructions["including"]) => T);
-         * limitedTo: ReducedFunction & (<T = S>(value: CombinedInstructions["limitedTo"]) => T);
-         * selecting: ReducedFunction & (<T = S>(value: CombinedInstructions["selecting"]) => T);
-         * using: ReducedFunction & (<T = S>(value: CombinedInstructions["using"]) => T);
-         */
-        const memberSignature = factory.createPropertySignature(
-          undefined,
-          propertyName,
-          undefined,
-          factory.createIntersectionTypeNode([
-            factory.createExpressionWithTypeArguments(
-              identifiers.syntax.reducedFunction,
-              undefined,
-            ),
-            factory.createFunctionTypeNode(
-              [
-                factory.createTypeParameterDeclaration(
-                  undefined,
-                  typeArgumentIdentifiers.default,
-                  undefined,
-                  schemaTypeArgumentNode,
-                ),
-              ],
-              [
-                factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  'value',
-                  undefined,
-                  factory.createIndexedAccessTypeNode(
-                    factory.createTypeReferenceNode(
-                      identifiers.compiler.combinedInstructions,
-                    ),
-                    factory.createLiteralTypeNode(
-                      factory.createStringLiteral(propertyName),
-                    ),
-                  ),
-                ),
-              ],
-              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-            ),
-          ]),
-        );
-        members.push(memberSignature);
-      }
-    }
-  }
-
-  return factory.createTypeAliasDeclaration(
+/**
+ * Generate a base or default syntax property that falls back to `CombinedInstructions`
+ *
+ * @example
+ * ```ts
+ * after: ReducedFunction & (<T = User | null>(value: CombinedInstructions["after"]) => T);
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
+ */
+export const generateDefaultSyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    name: keyof CombinedInstructions;
+  },
+) =>
+  factory.createPropertySignature(
     undefined,
-    modelIdentifier,
-    [
-      factory.createTypeParameterDeclaration(
-        undefined,
-        typeArgumentIdentifiers.schema,
-        undefined,
-        undefined,
-      ),
-      factory.createTypeParameterDeclaration(
-        undefined,
-        typeArgumentIdentifiers.queries,
-        undefined,
-        undefined,
-      ),
-    ],
+    options.name,
+    undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
         identifiers.syntax.reducedFunction,
         undefined,
       ),
-      factory.createTypeLiteralNode(members),
+      factory.createFunctionTypeNode(
+        [
+          factory.createTypeParameterDeclaration(
+            undefined,
+            typeArgumentIdentifiers.default,
+            undefined,
+            options.modelNode,
+          ),
+        ],
+        [
+          factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            'value',
+            undefined,
+            factory.createIndexedAccessTypeNode(
+              factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+              factory.createLiteralTypeNode(factory.createStringLiteral(options.name)),
+            ),
+          ),
+        ],
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ),
+    ]),
+  );
+
+/**
+ * Generate a strictly typed `orderedBy` syntax property.
+ *
+ * @example
+ * ```ts
+ * orderedBy: ReducedFunction & (<T = User | null>(options: {
+ *  ascending?: Array<Expression | UserFieldSlug>;
+ *  descending?: Array<Expression | UserFieldSlug>;
+ * }) => T) & {
+ *  ascending: <T = User | null>(fields: Array<Expression | UserFieldSlug>) => T;
+ *  descending: <T = User | null>(fields: Array<Expression | UserFieldSlug>) => T;
+ * };
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
+ */
+export const generateOrderedBySyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    model: Model;
+  },
+) => {
+  const typedFields = factory.createTypeReferenceNode(identifiers.primitive.array, [
+    factory.createUnionTypeNode([
+      factory.createTypeReferenceNode(identifiers.compiler.expression),
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(`${convertToPascalCase(options.model.slug)}FieldSlug`),
+      ),
+    ]),
+  ]);
+
+  return factory.createPropertySignature(
+    undefined,
+    'orderedBy',
+    undefined,
+    factory.createIntersectionTypeNode([
+      factory.createExpressionWithTypeArguments(
+        identifiers.syntax.reducedFunction,
+        undefined,
+      ),
+      factory.createFunctionTypeNode(
+        [
+          factory.createTypeParameterDeclaration(
+            undefined,
+            typeArgumentIdentifiers.default,
+            undefined,
+            options.modelNode,
+          ),
+        ],
+        [
+          factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            'options',
+            undefined,
+            factory.createTypeLiteralNode(
+              ['ascending', 'descending'].map((name) =>
+                factory.createPropertySignature(
+                  undefined,
+                  name,
+                  factory.createToken(SyntaxKind.QuestionToken),
+                  typedFields,
+                ),
+              ),
+            ),
+          ),
+        ],
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ),
+      factory.createTypeLiteralNode(
+        ['ascending', 'descending'].map((name) =>
+          factory.createPropertySignature(
+            undefined,
+            name,
+            undefined,
+            factory.createFunctionTypeNode(
+              [
+                factory.createTypeParameterDeclaration(
+                  undefined,
+                  typeArgumentIdentifiers.default,
+                  undefined,
+                  options.modelNode,
+                ),
+              ],
+              [
+                factory.createParameterDeclaration(
+                  undefined,
+                  undefined,
+                  'fields',
+                  undefined,
+                  typedFields,
+                ),
+              ],
+              options?.promise
+                ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ])
+                : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ),
+          ),
+        ),
+      ),
     ]),
   );
 };
 
 /**
- * Generates the members for the `with` property signature.
+ * Generates the syntax property for `selecting` fields.
  *
  * @example
  * ```ts
- *  id: <T = S>(value: ResultRecord["id"]) => T;
- *  ronin: ReducedFunction & {
- *    createdAt: <T = S>(value: ResultRecord["ronin"]["createdAt"]) => T;
- *    createdBy: <T = S>(value: ResultRecord["ronin"]["createdBy"]) => T;
- *    updatedAt: <T = S>(value: ResultRecord["ronin"]["updatedAt"]) => T;
- *    updatedBy: <T = S>(value: ResultRecord["ronin"]["updatedBy"]) => T;
- *  };
- *  name: <T = S>(value: User["name"]) => T;
- *  email: <T = S>(value: User["email"]) => T;
+ * selecting: ReducedFunction & (<T = User | null>(options: Array<UserFieldSlug>) => T);
  * ```
  *
- * @param model - The model to generate the `with` property signature members for.
- * @param schemaTypeArgumentNode - The schema type argument node to use for the `with` property signature members.
-
- * @returns An array of type elements representing the `with` property signature members.
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
  */
-const getWithPropertySignatureMembers = (
-  model: Model,
-  schemaTypeArgumentNode: TypeNode,
-): Array<TypeElement> => {
-  const members = new Array<TypeElement>();
+export const generateSelectingSyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    model: Model;
+  },
+) =>
+  factory.createPropertySignature(
+    undefined,
+    'selecting',
+    undefined,
+    factory.createIntersectionTypeNode([
+      factory.createExpressionWithTypeArguments(
+        identifiers.syntax.reducedFunction,
+        undefined,
+      ),
+      factory.createFunctionTypeNode(
+        [
+          factory.createTypeParameterDeclaration(
+            undefined,
+            typeArgumentIdentifiers.default,
+            undefined,
+            options.modelNode,
+          ),
+        ],
+        [
+          factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            'options',
+            undefined,
+            factory.createTypeReferenceNode(identifiers.primitive.array, [
+              factory.createTypeReferenceNode(
+                factory.createIdentifier(
+                  `${convertToPascalCase(options.model.slug)}FieldSlug`,
+                ),
+              ),
+            ]),
+          ),
+        ],
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ),
+    ]),
+  );
+
+/**
+ * Generates the syntax property for `using` fields.
+ *
+ * @example
+ * ```ts
+ * using: ReducedFunction & {
+ *  <U extends Array<"author"> | "all">(fields: U): Post<U> | null;
+ *  <T = Post | null>(fields: Array<"author"> | "all"): T;
+ * };
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ * @returns A property signature node.
+ */
+export const generateUsingSyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    model: Model;
+    slug: string;
+    isPlural?: boolean;
+  },
+) => {
+  const hasLinkFields = Object.values(options.model.fields).some(
+    (field) => field.type === 'link',
+  );
+  if (!hasLinkFields)
+    return generateDefaultSyntaxProperty({
+      name: 'using',
+      modelNode: options.modelNode,
+    });
+
+  /**
+   * ```ts
+   * Array<'...'> | 'all'
+   * ```
+   */
+  const arrayFieldsType = factory.createUnionTypeNode([
+    factory.createTypeReferenceNode(identifiers.primitive.array, [
+      factory.createUnionTypeNode(
+        Object.entries(options.model.fields)
+          .filter(([, field]) => field.type === 'link')
+          .map(([name]) =>
+            factory.createLiteralTypeNode(factory.createStringLiteral(name)),
+          ),
+      ),
+    ]),
+    factory.createLiteralTypeNode(factory.createStringLiteral('all')),
+  ]);
+
+  /**
+   * ```ts
+   * User<U>
+   * ```
+   */
+  const baseModelWithFields = factory.createTypeReferenceNode(
+    factory.createIdentifier(options.slug),
+    [factory.createTypeReferenceNode(typeArgumentIdentifiers.using)],
+  );
+  const modelNodeWithFields = options?.promise
+    ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+        baseModelWithFields,
+      ])
+    : baseModelWithFields;
+
+  return factory.createPropertySignature(
+    undefined,
+    'using',
+    undefined,
+    factory.createIntersectionTypeNode([
+      factory.createExpressionWithTypeArguments(
+        identifiers.syntax.reducedFunction,
+        undefined,
+      ),
+      factory.createTypeLiteralNode([
+        factory.createCallSignature(
+          [
+            factory.createTypeParameterDeclaration(
+              undefined,
+              typeArgumentIdentifiers.using,
+              arrayFieldsType,
+            ),
+          ],
+          [
+            factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              'fields',
+              undefined,
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+            ),
+          ],
+          options.isPlural
+            ? modelNodeWithFields
+            : factory.createUnionTypeNode([
+                modelNodeWithFields,
+                factory.createLiteralTypeNode(factory.createNull()),
+              ]),
+        ),
+
+        factory.createCallSignature(
+          [
+            factory.createTypeParameterDeclaration(
+              undefined,
+              typeArgumentIdentifiers.default,
+              undefined,
+              options.modelNode,
+            ),
+          ],
+          [
+            factory.createParameterDeclaration(
+              undefined,
+              undefined,
+              'fields',
+              undefined,
+              arrayFieldsType,
+            ),
+          ],
+          options?.promise
+            ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+              ])
+            : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        ),
+      ]),
+    ]),
+  );
+};
+
+/**
+ * Generates the syntax property for `with` fields.
+ *
+ * @example
+ * ```ts
+ * with: ReducedFunction & {
+ *  <T = User | null>(options: CombinedInstructions["with"]): T;
+ *  id: <T = User | null>(value: ResultRecord["id"]) => T;
+ *  ronin: ReducedFunction & {
+ *    createdAt: <T = User | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
+ *    createdBy: <T = User | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
+ *    updatedAt: <T = User | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
+ *    updatedBy: <T = User | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+ *  };
+ *  name: <T = User | null>(name: Post["name"]) => T;
+ *  // [...]
+ * };
+ * ```
+ *
+ * @param options - The options for generating the syntax property.
+ *
+ * @returns A property signature node.
+ */
+export const generateWithSyntaxProperty = (
+  options: BaseGeneratorOptions & {
+    model: Model;
+  },
+) => {
+  /**
+   * ```ts
+   * <T = User | null>(options: CombinedInstructions["with"]): T
+   * ```
+   */
+  const rootCallSignature = factory.createCallSignature(
+    [
+      factory.createTypeParameterDeclaration(
+        undefined,
+        typeArgumentIdentifiers.default,
+        undefined,
+        options.modelNode,
+      ),
+    ],
+    [
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'options',
+        undefined,
+        factory.createIndexedAccessTypeNode(
+          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+          factory.createLiteralTypeNode(factory.createStringLiteral('with')),
+        ),
+      ),
+    ],
+    options?.promise
+      ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        ])
+      : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+  );
+
+  const members = new Array<TypeElement>(rootCallSignature);
 
   // Add all top-level RONIN fields, such as `id`.
   const topLevelFields = DEFAULT_FIELD_SLUGS.filter((slug) => !slug.startsWith('ronin.'));
@@ -390,7 +484,7 @@ const getWithPropertySignatureMembers = (
               undefined,
               typeArgumentIdentifiers.default,
               undefined,
-              schemaTypeArgumentNode,
+              options.modelNode,
             ),
           ],
           [
@@ -405,7 +499,11 @@ const getWithPropertySignatureMembers = (
               ),
             ),
           ],
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+          options?.promise
+            ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+              ])
+            : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
         ),
       ),
     );
@@ -426,7 +524,7 @@ const getWithPropertySignatureMembers = (
             undefined,
             typeArgumentIdentifiers.default,
             undefined,
-            schemaTypeArgumentNode,
+            options.modelNode,
           ),
         ],
         [
@@ -444,7 +542,11 @@ const getWithPropertySignatureMembers = (
             ),
           ),
         ],
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        options?.promise
+          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ])
+          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
       ),
     );
   });
@@ -464,7 +566,7 @@ const getWithPropertySignatureMembers = (
   );
 
   // Create property signatures for all model fields.
-  for (const slug of Object.keys(model.fields)) {
+  for (const slug of Object.keys(options.model.fields)) {
     if (DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug))) continue;
 
     members.push(
@@ -478,7 +580,7 @@ const getWithPropertySignatureMembers = (
               undefined,
               typeArgumentIdentifiers.default,
               undefined,
-              schemaTypeArgumentNode,
+              options.modelNode,
             ),
           ],
           [
@@ -488,16 +590,32 @@ const getWithPropertySignatureMembers = (
               slug,
               undefined,
               factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                factory.createTypeReferenceNode(convertToPascalCase(options.model.slug)),
                 factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
               ),
             ),
           ],
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default, undefined),
+          options?.promise
+            ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+              ])
+            : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
         ),
       ),
     );
   }
 
-  return members;
+  return factory.createPropertySignature(
+    undefined,
+    'with',
+    undefined,
+    factory.createIntersectionTypeNode([
+      factory.createExpressionWithTypeArguments(
+        identifiers.syntax.reducedFunction,
+        undefined,
+      ),
+      // TODO(@nurodev): Add support for with conditions like `startingWith`, `notStartingWith`, etc.
+      factory.createTypeLiteralNode(members),
+    ]),
+  );
 };

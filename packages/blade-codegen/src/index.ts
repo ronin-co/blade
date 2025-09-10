@@ -1,4 +1,4 @@
-import { SyntaxKind, factory } from 'typescript';
+import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 import {
@@ -10,15 +10,23 @@ import {
   resolveSchemaType,
 } from '@/src/declarations';
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
-import { generateQueryDeclarationStatements } from '@/src/generators/module';
+import { generateQueryTypeComment } from '@/src/generators/comment';
+import { createImportDeclaration } from '@/src/generators/import';
+import { generateModelFieldsTypes } from '@/src/generators/types/fields';
 import { generateModelTypes } from '@/src/generators/types/model';
-import { generateTypeReExports } from '@/src/generators/types/re-exports';
-import { generateModelSyntaxTypes } from '@/src/generators/types/syntax';
+import {
+  generateDefaultSyntaxProperty,
+  generateOrderedBySyntaxProperty,
+  generateRootQueryCallSignature,
+  generateSelectingSyntaxProperty,
+  generateUsingSyntaxProperty,
+  generateWithSyntaxProperty,
+} from '@/src/generators/types/syntax';
 import { printNodes } from '@/src/utils/print';
+import { convertToPascalCase } from '@/src/utils/slug';
 
 import type { Node } from 'typescript';
 
-import { generateModelFieldsTypes } from '@/src/generators/types/fields';
 import type { Model } from '@/src/types/model';
 
 /**
@@ -43,6 +51,22 @@ export const generate = (models: Array<Model>): string => {
   );
   if (hasStoredObjectFields) nodes.push(importBladeCompilerStoredObjectType);
 
+  /**
+   * ```ts
+   * import { User, Users } from "blade/types";
+   * ```
+   */
+  nodes.push(
+    createImportDeclaration({
+      identifiers: models.flatMap((model) => [
+        { name: factory.createIdentifier(convertToPascalCase(model.slug)) },
+        { name: factory.createIdentifier(convertToPascalCase(model.pluralSlug)) },
+      ]),
+      module: identifiers.blade.module.types,
+      type: true,
+    }),
+  );
+
   // If there is any models that have a `link()` field, we need to add the
   // `ResolveSchemaType` type.
   const hasLinkFields = models.some((model) =>
@@ -55,42 +79,47 @@ export const generate = (models: Array<Model>): string => {
   );
   if (hasJsonFields) nodes.push(jsonArrayType, jsonObjectType, jsonPrimitiveType);
 
-  for (const model of models) {
-    /**
-     * @example
-     * ```ts
-     * type User = import('blade/types').User;
-     * type Users = import('blade/types').Users;
-     * ```
-     */
-    const reExportTypes = generateTypeReExports(model);
+  /**
+   * @example
+   * ```ts
+   * type UserFieldSlug =
+   *  | 'id'
+   *  | 'ronin.createdAt'
+   *  | 'ronin.createdBy'
+   *  | 'ronin.updatedAt'
+   *  | 'ronin.updatedBy'
+   *  | 'email'
+   *  | 'name'
+   *  // [...]
+   * ```
+   */
+  nodes.push(...generateModelFieldsTypes(models));
 
-    /**
-     * @example
-     * ```ts
-     * type UserFieldSlug =
-     *  | 'id'
-     *  | 'ronin.createdAt'
-     *  | 'ronin.createdBy'
-     *  | 'ronin.updatedAt'
-     *  | 'ronin.updatedBy'
-     *  | 'email'
-     *  | 'name'
-     *  // [...]
-     * ```
-     */
-    const fieldSlugType = generateModelFieldsTypes(model);
-
-    /**
-     * @example
-     * ```ts
-     * type UserSyntax <S, Q> = ReducedFunction & { ... };
-     * ```
-     */
-    const syntaxType = generateModelSyntaxTypes(model);
-
-    nodes.push(...reExportTypes, fieldSlugType, syntaxType);
-  }
+  /**
+   * ```ts
+   * export type { User, Users };
+   * ```
+   */
+  nodes.push(
+    factory.createExportDeclaration(
+      undefined,
+      true,
+      factory.createNamedExports(
+        models.flatMap((model) => [
+          factory.createExportSpecifier(
+            false,
+            undefined,
+            convertToPascalCase(model.slug),
+          ),
+          factory.createExportSpecifier(
+            false,
+            undefined,
+            convertToPascalCase(model.pluralSlug),
+          ),
+        ]),
+      ),
+    ),
+  );
 
   /**
    * @example
@@ -121,9 +150,13 @@ export const generate = (models: Array<Model>): string => {
    * declare module "blade/server/hooks" {
    *  declare const use: {
    *    // Get a single user record
-   *    user: UserSyntax<User | null>;
+   *    user: ReducedFunction & {
+   *      // ...
+   *    };
    *    // Get multiple user records
-   *    users: UserSyntax<Users>
+   *    users: ReducedFunction & {
+   *      // ...
+   *    };
    *  };
    * }
    * ```
@@ -132,7 +165,737 @@ export const generate = (models: Array<Model>): string => {
     factory.createModuleDeclaration(
       [factory.createModifier(SyntaxKind.DeclareKeyword)],
       identifiers.blade.module.server.hooks,
-      factory.createModuleBlock([generateQueryDeclarationStatements(models, 'use')]),
+      factory.createModuleBlock([
+        factory.createVariableStatement(
+          [factory.createModifier(SyntaxKind.DeclareKeyword)],
+          factory.createVariableDeclarationList(
+            [
+              factory.createVariableDeclaration(
+                'use',
+                undefined,
+                factory.createTypeLiteralNode(
+                  models.flatMap((model) => {
+                    const comment = generateQueryTypeComment(model, 'use');
+
+                    /**
+                     * ```ts
+                     * User | null
+                     * ```
+                     */
+                    const singularModelNode = factory.createUnionTypeNode([
+                      factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                      factory.createLiteralTypeNode(factory.createNull()),
+                    ]);
+
+                    /**
+                     * ```ts
+                     * user: ReducedFunction & { ... };
+                     * ```
+                     */
+                    const singularProperty = factory.createPropertySignature(
+                      undefined,
+                      model.slug,
+                      undefined,
+                      factory.createIntersectionTypeNode([
+                        factory.createExpressionWithTypeArguments(
+                          identifiers.syntax.reducedFunction,
+                          undefined,
+                        ),
+                        factory.createTypeLiteralNode([
+                          generateRootQueryCallSignature({
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'after',
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'before',
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'including',
+                            modelNode: singularModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'limitedTo',
+                            modelNode: singularModelNode,
+                          }),
+                          generateOrderedBySyntaxProperty({
+                            model,
+                            modelNode: singularModelNode,
+                          }),
+                          generateSelectingSyntaxProperty({
+                            model,
+                            modelNode: singularModelNode,
+                          }),
+                          generateUsingSyntaxProperty({
+                            model,
+                            modelNode: singularModelNode,
+                            slug: convertToPascalCase(model.slug),
+                          }),
+                          generateWithSyntaxProperty({
+                            model,
+                            modelNode: singularModelNode,
+                          }),
+                        ]),
+                      ]),
+                    );
+
+                    /**
+                     * ```ts
+                     * Users
+                     * ```
+                     */
+                    const pluralModelNode = factory.createTypeReferenceNode(
+                      convertToPascalCase(model.pluralSlug),
+                    );
+
+                    /**
+                     * ```ts
+                     * users: ReducedFunction & { ... };
+                     * ```
+                     */
+                    const pluralProperty = factory.createPropertySignature(
+                      undefined,
+                      model.pluralSlug,
+                      undefined,
+                      factory.createIntersectionTypeNode([
+                        factory.createExpressionWithTypeArguments(
+                          identifiers.syntax.reducedFunction,
+                          undefined,
+                        ),
+                        factory.createTypeLiteralNode([
+                          generateRootQueryCallSignature({ modelNode: pluralModelNode }),
+                          generateDefaultSyntaxProperty({
+                            name: 'after',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'before',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'including',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateDefaultSyntaxProperty({
+                            name: 'limitedTo',
+                            modelNode: pluralModelNode,
+                          }),
+                          generateOrderedBySyntaxProperty({
+                            model,
+                            modelNode: pluralModelNode,
+                          }),
+                          generateSelectingSyntaxProperty({
+                            model,
+                            modelNode: pluralModelNode,
+                          }),
+                          generateUsingSyntaxProperty({
+                            model,
+                            modelNode: pluralModelNode,
+                            slug: convertToPascalCase(model.pluralSlug),
+                            isPlural: true,
+                          }),
+                          generateWithSyntaxProperty({
+                            model,
+                            modelNode: pluralModelNode,
+                          }),
+                        ]),
+                      ]),
+                    );
+
+                    return [
+                      addSyntheticLeadingComment(
+                        singularProperty,
+                        SyntaxKind.MultiLineCommentTrivia,
+                        comment.singular,
+                        true,
+                      ),
+                      addSyntheticLeadingComment(
+                        pluralProperty,
+                        SyntaxKind.MultiLineCommentTrivia,
+                        comment.plural,
+                        true,
+                      ),
+                    ];
+                  }),
+                ),
+              ),
+            ],
+            NodeFlags.Const,
+          ),
+        ),
+      ]),
+    ),
+  );
+
+  /**
+   * @example
+   * ```ts
+   * declare module "blade/client/hooks" {
+   *  declare const useMutation: () => {
+   *    add: { ... }
+   *    remove: { ... }
+   *    set: { ... }
+   *  };
+   * }
+   * ```
+   */
+  nodes.push(
+    factory.createModuleDeclaration(
+      [factory.createModifier(SyntaxKind.DeclareKeyword)],
+      identifiers.blade.module.client.hooks,
+      factory.createModuleBlock([
+        factory.createVariableStatement(
+          [factory.createModifier(SyntaxKind.DeclareKeyword)],
+          factory.createVariableDeclarationList(
+            [
+              factory.createVariableDeclaration(
+                factory.createIdentifier('useMutation'),
+                undefined,
+                factory.createFunctionTypeNode(
+                  undefined,
+                  [],
+                  factory.createTypeLiteralNode([
+                    factory.createPropertySignature(
+                      undefined,
+                      'add',
+                      undefined,
+                      factory.createTypeLiteralNode(
+                        models.flatMap((model) => {
+                          const comment = generateQueryTypeComment(model, 'add');
+
+                          /**
+                           * ```ts
+                           * User | null
+                           * ```
+                           */
+                          const singularModelNode = factory.createUnionTypeNode([
+                            factory.createTypeReferenceNode(
+                              convertToPascalCase(model.slug),
+                            ),
+                            factory.createLiteralTypeNode(factory.createNull()),
+                          ]);
+
+                          /**
+                           * ```ts
+                           * user: ReducedFunction & { ... };
+                           * ```
+                           */
+                          const singularProperty = factory.createPropertySignature(
+                            undefined,
+                            model.slug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.syntax.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeLiteralNode([
+                                generateRootQueryCallSignature({
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.slug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                              ]),
+                            ]),
+                          );
+
+                          /**
+                           * ```ts
+                           * Users
+                           * ```
+                           */
+                          const pluralModelNode = factory.createTypeReferenceNode(
+                            convertToPascalCase(model.pluralSlug),
+                          );
+
+                          /**
+                           * ```ts
+                           * users: ReducedFunction & { ... };
+                           * ```
+                           */
+                          const pluralProperty = factory.createPropertySignature(
+                            undefined,
+                            model.pluralSlug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.syntax.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeLiteralNode([
+                                generateRootQueryCallSignature({
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  isPlural: true,
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.pluralSlug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                              ]),
+                            ]),
+                          );
+
+                          return [
+                            addSyntheticLeadingComment(
+                              singularProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.singular,
+                              true,
+                            ),
+                            addSyntheticLeadingComment(
+                              pluralProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.plural,
+                              true,
+                            ),
+                          ];
+                        }),
+                      ),
+                    ),
+                    factory.createPropertySignature(
+                      undefined,
+                      'remove',
+                      undefined,
+                      factory.createTypeLiteralNode(
+                        models.flatMap((model) => {
+                          const comment = generateQueryTypeComment(model, 'remove');
+
+                          /**
+                           * ```ts
+                           * User | null
+                           * ```
+                           */
+                          const singularModelNode = factory.createUnionTypeNode([
+                            factory.createTypeReferenceNode(
+                              convertToPascalCase(model.slug),
+                            ),
+                            factory.createLiteralTypeNode(factory.createNull()),
+                          ]);
+
+                          /**
+                           * ```ts
+                           * user: ReducedFunction & { ... };
+                           * ```
+                           */
+                          const singularProperty = factory.createPropertySignature(
+                            undefined,
+                            model.slug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.syntax.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeLiteralNode([
+                                generateRootQueryCallSignature({
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.slug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                              ]),
+                            ]),
+                          );
+
+                          /**
+                           * ```ts
+                           * Users
+                           * ```
+                           */
+                          const pluralModelNode = factory.createTypeReferenceNode(
+                            convertToPascalCase(model.pluralSlug),
+                          );
+
+                          /**
+                           * ```ts
+                           * users: ReducedFunction & { ... };
+                           * ```
+                           */
+                          const pluralProperty = factory.createPropertySignature(
+                            undefined,
+                            model.pluralSlug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.syntax.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeLiteralNode([
+                                generateRootQueryCallSignature({
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  isPlural: true,
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.pluralSlug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                              ]),
+                            ]),
+                          );
+
+                          return [
+                            addSyntheticLeadingComment(
+                              singularProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.singular,
+                              true,
+                            ),
+                            addSyntheticLeadingComment(
+                              pluralProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.plural,
+                              true,
+                            ),
+                          ];
+                        }),
+                      ),
+                    ),
+                    factory.createPropertySignature(
+                      undefined,
+                      'set',
+                      undefined,
+                      factory.createTypeLiteralNode(
+                        models.flatMap((model) => {
+                          const comment = generateQueryTypeComment(model, 'set');
+
+                          /**
+                           * ```ts
+                           * User | null
+                           * ```
+                           */
+                          const singularModelNode = factory.createUnionTypeNode([
+                            factory.createTypeReferenceNode(
+                              convertToPascalCase(model.slug),
+                            ),
+                            factory.createLiteralTypeNode(factory.createNull()),
+                          ]);
+
+                          /**
+                           * ```ts
+                           * user: ReducedFunction & { ... };
+                           * ```
+                           */
+                          const singularProperty = factory.createPropertySignature(
+                            undefined,
+                            model.slug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.syntax.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeLiteralNode([
+                                generateRootQueryCallSignature({
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: singularModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.slug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: singularModelNode,
+                                  promise: true,
+                                }),
+                              ]),
+                            ]),
+                          );
+
+                          /**
+                           * ```ts
+                           * Users
+                           * ```
+                           */
+                          const pluralModelNode = factory.createTypeReferenceNode(
+                            convertToPascalCase(model.pluralSlug),
+                          );
+
+                          /**
+                           * ```ts
+                           * users: ReducedFunction & { ... };
+                           * ```
+                           */
+                          const pluralProperty = factory.createPropertySignature(
+                            undefined,
+                            model.pluralSlug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.syntax.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeLiteralNode([
+                                generateRootQueryCallSignature({
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'after',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'before',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'including',
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'limitedTo',
+                                  promise: true,
+                                }),
+                                generateOrderedBySyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateSelectingSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                                generateDefaultSyntaxProperty({
+                                  modelNode: pluralModelNode,
+                                  name: 'to',
+                                  promise: true,
+                                }),
+                                generateUsingSyntaxProperty({
+                                  isPlural: true,
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                  slug: convertToPascalCase(model.pluralSlug),
+                                }),
+                                generateWithSyntaxProperty({
+                                  model,
+                                  modelNode: pluralModelNode,
+                                  promise: true,
+                                }),
+                              ]),
+                            ]),
+                          );
+
+                          return [
+                            addSyntheticLeadingComment(
+                              singularProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.singular,
+                              true,
+                            ),
+                            addSyntheticLeadingComment(
+                              pluralProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.plural,
+                              true,
+                            ),
+                          ];
+                        }),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ],
+            NodeFlags.Const,
+          ),
+        ),
+      ]),
     ),
   );
 

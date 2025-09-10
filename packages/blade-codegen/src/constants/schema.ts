@@ -2,10 +2,10 @@ import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 
-import type { DML_QUERY_TYPES } from 'blade-compiler';
 import type { TypeNode } from 'typescript';
 
 import type { ModelField } from '@/src/types/model';
+import type { QueryType } from '@/src/types/query';
 
 /**
  * A list of all model field types & their TypeScript type mapping.
@@ -33,7 +33,7 @@ export const READABLE_DML_QUERY_TYPES = {
   remove: 'Remove',
   set: 'Set',
   use: 'Get',
-} satisfies Record<(typeof DML_QUERY_TYPES)[number] | 'use', string>;
+} satisfies Record<QueryType, string>;
 
 /**
  * A list of all default field slugs for RONIN models.
