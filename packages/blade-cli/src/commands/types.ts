@@ -5,7 +5,7 @@ import { generate } from 'blade-codegen';
 import { generateZodSchema } from 'blade-codegen/zod';
 import { CompilerError } from 'blade-compiler';
 
-import { BLADE_CONFIG_DIR, type BaseFlags } from '@/src/utils/misc';
+import type { BaseFlags } from '@/src/utils/misc';
 import { getModels } from '@/src/utils/model';
 import { spinner as ora } from '@/src/utils/spinner';
 import {
@@ -30,7 +30,7 @@ export default async (
   const spinner = ora.info(flags?.zod ? 'Generating Zod schemas' : 'Generating types');
 
   try {
-    const configDir = path.join(process.cwd(), BLADE_CONFIG_DIR);
+    const configDir = path.join(process.cwd(), '.ronin');
     const configDirExists = await fs
       .stat(configDir)
       .then(() => true)

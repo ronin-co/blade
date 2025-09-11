@@ -178,7 +178,7 @@ describe('command', () => {
     spyOn(modelModule, 'getModels').mockResolvedValue([]);
 
     try {
-      await pull(undefined);
+      await pull(undefined, undefined);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       // @ts-expect-error This is a mock.
@@ -201,7 +201,7 @@ describe('command', () => {
       },
     ]);
 
-    await pull(undefined);
+    await pull(undefined, undefined);
 
     // Verify file was created in temp directory.
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
@@ -235,7 +235,7 @@ describe('command', () => {
       },
     ]);
 
-    await pull(undefined);
+    await pull(undefined, undefined);
 
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
 
@@ -268,7 +268,7 @@ describe('command', () => {
       },
     ]);
 
-    await pull(undefined);
+    await pull(undefined, undefined);
 
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
 
@@ -302,7 +302,7 @@ export const User = model({
       },
     ]);
 
-    await pull(undefined);
+    await pull(undefined, undefined);
 
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
 

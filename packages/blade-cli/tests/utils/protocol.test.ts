@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, jest, spyOn, test } from 'bun:test';
 import fs, { type PathOrFileDescriptor } from 'node:fs';
-import { BLADE_CONFIG_DIR } from '@/src/utils/misc';
 import { Protocol } from '@/src/utils/protocol';
 import type { Model, Statement } from 'blade-compiler';
 
@@ -35,7 +34,7 @@ describe('protocol', () => {
       data: string | NodeJS.ArrayBufferView,
     ): void => {
       writeFileSyncCalled = true;
-      expect(path).toBe(`${process.cwd()}/${BLADE_CONFIG_DIR}/migrations/${fileName}.ts`);
+      expect(path).toBe(`${process.cwd()}/.ronin/migrations/${fileName}.ts`);
       expect(data).toContain(
         'create.model.to({ slug: "my_model", pluralSlug: "my_models" })',
       );
@@ -72,9 +71,7 @@ describe('protocol', () => {
       data: string | ArrayBufferView,
     ): void => {
       writeFileSyncCalled = true;
-      expect(path).toBe(
-        `${process.cwd()}/${BLADE_CONFIG_DIR}/migrations/${fileName}.sql`,
-      );
+      expect(path).toBe(`${process.cwd()}/.ronin/migrations/${fileName}.sql`);
       expect(data).toBe('CREATE SCHEMA my_schema;');
     };
 
