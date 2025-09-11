@@ -25,7 +25,10 @@ export const getModels = async (options?: {
   const queries: Array<Query> = [{ list: { models: null } }];
   const { token, fieldArray = true } = options || {};
 
-  const [models] = (await runQueries(queries, { token })) as unknown as [Array<Model>];
+  const [models] = (await runQueries(queries, {
+    token,
+    models: [],
+  })) as unknown as [Array<Model>];
 
   if (fieldArray) {
     return models.map((model) => ({

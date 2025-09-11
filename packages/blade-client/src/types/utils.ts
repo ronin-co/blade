@@ -79,6 +79,13 @@ export type PromiseTuple<
   [P in keyof T]: Awaited<T[P]>;
 };
 
+export type QueryResponse<T> =
+  | { results: Array<Result<T>> }
+  | Record<string, { results: Array<Result<T>> }>
+  | {
+      error: any;
+    };
+
 export type RegularFormattedResult<T> =
   | number
   | (T & ResultRecord)
