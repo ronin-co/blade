@@ -197,7 +197,7 @@ describe('CLI', () => {
 
         // Mock file operations
         spyOn(fs, 'existsSync').mockImplementation(
-          (path) => !path.toString().includes('.ronin/db.sqlite'),
+          (path) => !path.toString().includes('.blade/db.sqlite'),
         );
         spyOn(path, 'resolve').mockReturnValue(
           path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
@@ -264,7 +264,7 @@ describe('CLI', () => {
         ],
       );
       spyOn(fs, 'existsSync').mockImplementation(
-        (path) => !path.toString().includes('.ronin/db.sqlite'),
+        (path) => !path.toString().includes('.blade/db.sqlite'),
       );
       spyOn(path, 'resolve').mockReturnValue(
         path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
@@ -569,7 +569,7 @@ describe('CLI', () => {
         spyOn(fs, 'existsSync').mockImplementation(
           (path) =>
             path.toString().includes('migration-fixture.ts') ||
-            path.toString().includes('.ronin/migrations'),
+            path.toString().includes('.blade/migrations'),
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
@@ -654,7 +654,7 @@ describe('CLI', () => {
         spyOn(fs, 'existsSync').mockImplementation(
           (path) =>
             path.toString().includes('migration-fixture.ts') ||
-            path.toString().includes('.ronin/migrations'),
+            path.toString().includes('.blade/migrations'),
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
@@ -703,7 +703,7 @@ describe('CLI', () => {
         ]);
 
         spyOn(fs, 'existsSync').mockImplementation((path) =>
-          path.toString().includes('.ronin/migrations'),
+          path.toString().includes('.blade/migrations'),
         );
 
         await run({ version: '1.0.0' });
