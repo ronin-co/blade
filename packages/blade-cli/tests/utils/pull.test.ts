@@ -15,7 +15,6 @@ import pull, { getModelDefinitionsFileContent } from '@/src/commands/pull';
 import { formatCode } from '@/src/utils/format';
 import { MODEL_IN_CODE_PATH } from '@/src/utils/misc';
 import * as modelModule from '@/src/utils/model';
-import * as spaceModule from '@/src/utils/space';
 import * as confirmModule from '@inquirer/prompts';
 import { $ } from 'bun';
 
@@ -26,7 +25,6 @@ afterAll(() => {
 
 describe('helper', () => {
   test('no models', async () => {
-    spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('spaceId');
     spyOn(modelModule, 'getModels').mockResolvedValue([]);
 
     const models = await getModelDefinitionsFileContent();
@@ -180,7 +178,7 @@ describe('command', () => {
     spyOn(modelModule, 'getModels').mockResolvedValue([]);
 
     try {
-      await pull(undefined, undefined, true);
+      await pull(undefined, undefined);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       // @ts-expect-error This is a mock.
@@ -189,7 +187,6 @@ describe('command', () => {
   });
 
   test('creates model file', async () => {
-    spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('spaceId');
     // Mock a valid model response.
     spyOn(modelModule, 'getModels').mockResolvedValue([
       {
@@ -204,7 +201,7 @@ describe('command', () => {
       },
     ]);
 
-    await pull(undefined, undefined, true);
+    await pull(undefined, undefined);
 
     // Verify file was created in temp directory.
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
@@ -220,8 +217,6 @@ describe('command', () => {
   test('overwrites model file', async () => {
     // Create a model file.
     await fs.writeFile(MODEL_IN_CODE_PATH, '// This is a test.');
-
-    spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('spaceId');
 
     // Mock confirm to return true.
     spyOn(confirmModule, 'confirm').mockResolvedValue(true);
@@ -240,7 +235,7 @@ describe('command', () => {
       },
     ]);
 
-    await pull(undefined, undefined, true);
+    await pull(undefined, undefined);
 
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
 
@@ -273,7 +268,7 @@ describe('command', () => {
       },
     ]);
 
-    await pull(undefined, undefined, true);
+    await pull(undefined, undefined);
 
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
 
@@ -296,8 +291,6 @@ export const User = model({
 `,
     );
 
-    spyOn(spaceModule, 'getOrSelectSpaceId').mockResolvedValue('spaceId');
-
     // Mock confirm to return true.
     spyOn(confirmModule, 'confirm').mockResolvedValue(false);
 
@@ -309,7 +302,7 @@ export const User = model({
       },
     ]);
 
-    await pull(undefined, undefined, true);
+    await pull(undefined, undefined);
 
     const fileExists = await fs.exists(MODEL_IN_CODE_PATH);
 

@@ -1,14 +1,7 @@
 import { runQueries } from 'blade-client';
-import { type Model, type ModelField, type Query, Transaction } from 'blade-compiler';
+import type { Model, ModelField, Query } from 'blade-compiler';
 
-import logIn from '@/src/commands/login';
 import { IGNORED_FIELDS } from '@/src/utils/migration';
-import {
-  InvalidResponseError,
-  type QueryResponse,
-  getResponseBody,
-} from '@/src/utils/misc';
-import { spinner } from '@/src/utils/spinner';
 
 /**
  * A model with fields in array format.
@@ -19,9 +12,7 @@ export type ModelWithFieldsArray = Omit<Model, 'fields'> & { fields: Array<Model
  * Fetches and formats schema models from either production API or local database.
  *
  * @param token - Optional authentication token for production API requests.
- * @param space - Optional space ID for production API requests.
  * @param fieldArray — Whether to provide an array of fields.
- * @param enableHive — Whether to enable the new database engine.
  *
  * @returns Promise resolving to an array of formatted Model objects.
  *
@@ -29,73 +20,15 @@ export type ModelWithFieldsArray = Omit<Model, 'fields'> & { fields: Array<Model
  */
 export const getModels = async (options?: {
   token?: string;
-  space?: string;
   fieldArray?: boolean;
-  enableHive?: boolean;
 }): Promise<Array<ModelWithFieldsArray | Model>> => {
   const queries: Array<Query> = [{ list: { models: null } }];
-  const { token, space, fieldArray = true } = options || {};
+  const { token, fieldArray = true } = options || {};
 
-  if (options?.enableHive) {
-    const [models] = (await runQueries(queries, {
-      token,
-      models: [],
-    })) as unknown as [Array<Model>];
-
-    if (fieldArray) {
-      return models.map((model) => ({
-        ...model,
-        fields: convertObjectToArray(model.fields || {})?.filter(
-          (field) => !IGNORED_FIELDS.includes(field.slug),
-        ),
-      }));
-    }
-
-    return models;
-  }
-
-  const transaction = new Transaction(queries);
-
-  let rawResults: Array<Array<{ [x: string]: any }>>;
-
-  try {
-    const nativeQueries = transaction.statements.map((statement) => ({
-      query: statement.sql,
-      values: statement.params,
-    }));
-
-    const response = await fetch(`https://data.ronin.co/?data-selector=${space}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ nativeQueries }),
-    });
-
-    const responseResults = await getResponseBody<QueryResponse<Model>>(response);
-
-    rawResults = responseResults.results.map((result) => {
-      return 'records' in result ? result.records : [];
-    });
-  } catch (error) {
-    // If the session is no longer valid, log in again and try to fetch the models again.
-    if (
-      error instanceof InvalidResponseError &&
-      error.code &&
-      error.code === 'AUTH_INVALID_SESSION'
-    ) {
-      spinner.stop();
-      const sessionToken = await logIn(undefined, false);
-      spinner.start();
-      return getModels({ token: sessionToken, space });
-    }
-
-    throw new Error(`Failed to fetch remote models: ${(error as Error).message}`);
-  }
-
-  const results = transaction.formatResults<Model>(rawResults, false);
-  const models = 'records' in results[0] ? results[0].records : [];
+  const [models] = (await runQueries(queries, {
+    token,
+    models: [],
+  })) as unknown as [Array<Model>];
 
   if (fieldArray) {
     return models.map((model) => ({

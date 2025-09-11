@@ -1,13 +1,12 @@
+import path from 'node:path';
 import { parseArgs } from 'node:util';
 
-import path from 'node:path';
 import apply from '@/src/commands/apply';
 import diff from '@/src/commands/diff';
-import logIn from '@/src/commands/login';
 import pull from '@/src/commands/pull';
 import generateTypes, { TYPES_FLAGS } from '@/src/commands/types';
 import { printHelp, printVersion } from '@/src/utils/info';
-import { MIGRATION_FLAGS, type MigrationFlags } from '@/src/utils/migration';
+import { MIGRATION_FLAGS } from '@/src/utils/migration';
 import { BASE_FLAGS, type BaseFlags } from '@/src/utils/misc';
 import { getSession } from '@/src/utils/session';
 import { spinner } from '@/src/utils/spinner';
@@ -77,17 +76,9 @@ export const run = async (config: { version: string }): Promise<void> => {
     process.exit(1);
   }
 
-  if (!(session || normalizedPositionals.includes('login'))) await logIn(appToken, false);
-
-  // `login` sub command
-  if (normalizedPositionals.includes('login')) {
-    await logIn(appToken);
-    return;
-  }
-
   // `diff` sub command
   if (normalizedPositionals.includes('diff')) {
-    return diff(appToken, session?.token, flags, positionals, false);
+    return diff(appToken, session?.token, flags, positionals);
   }
 
   // `apply` sub command
@@ -96,7 +87,7 @@ export const run = async (config: { version: string }): Promise<void> => {
       ? path.join(process.cwd(), positionals[positionals.indexOf('apply') + 1])
       : undefined;
 
-    return apply(appToken, session?.token, flags, false, migrationFilePath);
+    return apply(appToken, session?.token, flags, migrationFilePath);
   }
 
   // `types` sub command.
@@ -105,7 +96,7 @@ export const run = async (config: { version: string }): Promise<void> => {
 
   // `pull` sub command
   if (normalizedPositionals.includes('pull')) {
-    return pull(appToken, session?.token, (flags as MigrationFlags).local);
+    return pull(appToken, session?.token);
   }
 
   // If no matching flags or commands were found, render the help, since we don't want to

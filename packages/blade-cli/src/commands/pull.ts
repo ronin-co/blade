@@ -5,7 +5,6 @@ import { dirname } from 'node:path';
 import { formatCode } from '@/src/utils/format';
 import { MODEL_IN_CODE_PATH } from '@/src/utils/misc';
 import { type ModelWithFieldsArray, getModels } from '@/src/utils/model';
-import { getOrSelectSpaceId } from '@/src/utils/space';
 import { spinner as ora } from '@/src/utils/spinner';
 
 /**
@@ -13,24 +12,15 @@ import { spinner as ora } from '@/src/utils/spinner';
  *
  * @param appToken - The app token to use.
  * @param sessionToken - The session token to use.
- * @param local - Whether to pull models from the local database.
  */
-export default async (
-  appToken?: string,
-  sessionToken?: string,
-  local?: boolean,
-): Promise<void> => {
+export default async (appToken?: string, sessionToken?: string): Promise<void> => {
   const spinner = ora.start('Pulling models');
-
-  const space = await getOrSelectSpaceId(appToken, spinner);
 
   try {
     // Get models from RONIN schema.
     const modelDefinitions = await getModelDefinitionsFileContent({
       appToken,
       sessionToken,
-      local,
-      space,
     });
 
     if (!modelDefinitions) {
@@ -73,13 +63,9 @@ export default async (
 export const getModelDefinitionsFileContent = async (options?: {
   appToken?: string;
   sessionToken?: string;
-  local?: boolean;
-  space?: string;
 }): Promise<string | null> => {
   const models = (await getModels({
     token: options?.appToken || options?.sessionToken,
-    isLocal: options?.local,
-    space: options?.space,
   })) as Array<ModelWithFieldsArray>;
 
   if (models.length === 0) {

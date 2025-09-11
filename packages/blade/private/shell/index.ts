@@ -5,7 +5,6 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import cmdApply from 'blade-cli/commands/apply';
 import cmdDiff from 'blade-cli/commands/diff';
-import cmdLogin from 'blade-cli/commands/login';
 import cmdTypes from 'blade-cli/commands/types';
 import { getSession } from 'blade-cli/utils';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
@@ -58,17 +57,10 @@ const normalizedPositionals = positionals.map((positional) => positional.toLower
 // in CI, which must be independent of individual people.
 const appToken = process.env['RONIN_TOKEN'];
 
-// This determines whether the new database engine should be used.
-const enableHive = process.env['BLADE_DATA_WORKER'] === 'db.ronin.co';
-
 // If there is no active session, automatically start one and then continue with the
 // execution of the requested sub command, if there is one. If the `login` sub command
 // is invoked, we don't need to auto-login, since the command itself will handle it.
 const session = await getSession();
-
-// `blade login` command
-const isLoggingIn = normalizedPositionals.includes('login');
-if (isLoggingIn) await cmdLogin(appToken, true);
 
 // `blade diff` command.
 const isDiffing = normalizedPositionals.includes('diff');
@@ -82,36 +74,25 @@ if (isDiffing)
       ...values,
     },
     positionals,
-    enableHive,
   );
 
 // `blade apply` command.
 const isApplying = normalizedPositionals.includes('apply');
 if (isApplying)
-  await cmdApply(
-    appToken,
-    session?.token,
-    {
-      help: false,
-      version: false,
-      ...values,
-    },
-    enableHive,
-  );
+  await cmdApply(appToken, session?.token, {
+    help: false,
+    version: false,
+    ...values,
+  });
 
 // `blade types` command.
 const isGeneratingTypes = normalizedPositionals.includes('types');
 if (isGeneratingTypes) {
-  await cmdTypes(
-    appToken,
-    session?.token,
-    {
-      help: false,
-      version: false,
-      ...values,
-    },
-    enableHive,
-  );
+  await cmdTypes(appToken, session?.token, {
+    help: false,
+    version: false,
+    ...values,
+  });
   process.exit(0);
 }
 

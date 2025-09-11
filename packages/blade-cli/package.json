@@ -25,10 +25,6 @@
       "import": "./dist/commands/diff.js",
       "types": "./dist/commands/diff.d.ts"
     },
-    "./commands/login": {
-      "import": "./dist/commands/login.js",
-      "types": "./dist/commands/login.d.ts"
-    },
     "./commands/types": {
       "import": "./dist/commands/types.js",
       "types": "./dist/commands/types.d.ts"
@@ -47,9 +43,6 @@
       ],
       "commands/diff": [
         "dist/commands/diff.d.ts"
-      ],
-      "commands/login": [
-        "dist/commands/login.d.ts"
       ],
       "commands/types": [
         "dist/commands/types.d.ts"

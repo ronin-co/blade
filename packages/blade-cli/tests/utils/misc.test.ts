@@ -11,11 +11,9 @@ import {
 
 import fs from 'node:fs';
 import {
-  InvalidResponseError,
   MODEL_IN_CODE_PATH,
   areArraysEqual,
   getModelDefinitions,
-  getResponseBody,
   logDataTable,
   logTableDiff,
   sortModels,
@@ -368,21 +366,5 @@ describe('areArraysEqual', () => {
       // The visit function will try to process 'nonexistentModel' but won't find it
       expect(() => sortModels([modelA])).toThrow();
     });
-  });
-});
-
-describe('getResponseBody', () => {
-  test('get response with broken body', async () => {
-    const response = new Response('test', { status: 400 });
-
-    let error: Error | undefined;
-
-    try {
-      await getResponseBody(response);
-    } catch (err) {
-      error = err as Error;
-    }
-
-    expect(error).toBeInstanceOf(InvalidResponseError);
   });
 });

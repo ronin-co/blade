@@ -52,8 +52,6 @@ export const getWaitUntil = (context?: Context): WaitUntil => {
   return dataFetcherWaitUntil;
 };
 
-const enableHive = import.meta.env.BLADE_DATA_WORKER === 'db.ronin.co';
-
 /**
  * Generate the options passed to the `ronin` JavaScript client.
  *
@@ -68,47 +66,13 @@ export const getRoninOptions = (
   triggers: TriggersList,
   requireTriggers: 'all' | 'write' | 'none',
   waitUntil: WaitUntil,
-): QueryHandlerOptions => {
-  const dataFetcher: typeof fetch = async (input, init) => {
-    // Normalize the parameters of the surrounding function, as the first argument might
-    // either be a URL or a `Request` object.
-
-    const request = new Request(input, init);
-
-    const url = new URL(request.url);
-    const type = url.host === 'data.ronin.co' ? 'data' : 'storage';
-    const customHost =
-      type === 'data'
-        ? import.meta.env.BLADE_DATA_WORKER
-        : import.meta.env.BLADE_STORAGE_WORKER;
-
-    if (customHost) {
-      const parsedCustomHost = new URL(customHost);
-
-      url.protocol = parsedCustomHost.protocol;
-      url.host = parsedCustomHost.host;
-    }
-
-    const start = performance.now();
-
-    const res = await fetch(new Request(url, request));
-
-    if (type === 'data' && VERBOSE_LOGGING) {
-      console.log(`Received response from ${url} in ${performance.now() - start}ms`);
-    }
-
-    return res;
-  };
-
-  return {
-    triggers,
-    fetch: enableHive ? undefined : dataFetcher,
-    requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
-    waitUntil,
-    models: enableHive ? models : undefined,
-    defaultRecordLimit: 20,
-  };
-};
+): QueryHandlerOptions => ({
+  triggers,
+  requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
+  waitUntil,
+  models,
+  defaultRecordLimit: 20,
+});
 
 /**
  * The same as `runQueries` exposed by the `ronin` JavaScript client, except that default
