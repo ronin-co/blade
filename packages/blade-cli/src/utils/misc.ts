@@ -38,7 +38,7 @@ export const BASE_FLAGS = {
 export type BaseFlags = Record<keyof typeof BASE_FLAGS, boolean | undefined>;
 
 /** Directory containing RONIN configuration files */
-export const BLADE_CONFIG_DIR = '.blade';
+export const RONIN_CONFIG_DIR = '.ronin';
 
 /** Directory containing RONIN model definitions */
 export const MODELS_IN_CODE_DIR = 'schema';
@@ -55,7 +55,7 @@ export const MODEL_IN_CODE_PATH = path.resolve(
 /** Directory containing RONIN migrations */
 export const MIGRATIONS_PATH = path.resolve(
   process.cwd(),
-  BLADE_CONFIG_DIR,
+  RONIN_CONFIG_DIR,
   'migrations',
 );
 

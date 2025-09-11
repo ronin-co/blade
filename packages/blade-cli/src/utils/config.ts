@@ -1,15 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { BLADE_CONFIG_DIR } from '@/src/utils/misc';
-
 interface Config {
   space?: string;
   modelsDir?: string;
 }
 
 export const saveConfig = (config: Config): string => {
-  const configDir = path.join(process.cwd(), BLADE_CONFIG_DIR);
+  const configDir = path.join(process.cwd(), '.ronin');
 
   if (!fs.existsSync(configDir)) {
     fs.mkdirSync(configDir, { recursive: true });
@@ -28,7 +26,7 @@ export const saveConfig = (config: Config): string => {
 };
 
 export const resetConfig = (): void => {
-  const configPath = path.join(process.cwd(), BLADE_CONFIG_DIR, 'config.json');
+  const configPath = path.join(process.cwd(), '.ronin', 'config.json');
 
   if (fs.existsSync(configPath)) {
     fs.unlinkSync(configPath);
@@ -36,7 +34,7 @@ export const resetConfig = (): void => {
 };
 
 export const readConfig = (): Config => {
-  const configPath = path.join(process.cwd(), BLADE_CONFIG_DIR, 'config.json');
+  const configPath = path.join(process.cwd(), '.ronin', 'config.json');
 
   if (!fs.existsSync(configPath)) {
     return {};

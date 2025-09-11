@@ -2,10 +2,9 @@ import { afterEach, beforeAll, describe, expect, jest, mock, test } from 'bun:te
 import fs from 'node:fs';
 import path from 'node:path';
 import { readConfig, resetConfig, saveConfig } from '@/src/utils/config';
-import { BLADE_CONFIG_DIR } from '@/src/utils/misc';
 
 describe('config', () => {
-  const configDir = path.join(process.cwd(), BLADE_CONFIG_DIR);
+  const configDir = path.join(process.cwd(), '.ronin');
   const configPath = path.join(configDir, 'config.json');
 
   beforeAll(() => {
