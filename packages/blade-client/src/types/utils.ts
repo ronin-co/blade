@@ -1,6 +1,6 @@
 import type { TriggerOptions, Triggers } from '@/src/utils/triggers';
 
-import type { Model, ResultRecord } from 'blade-compiler';
+import type { Model, Result, ResultRecord } from 'blade-compiler';
 
 export interface QueryHandlerOptions {
   /**
