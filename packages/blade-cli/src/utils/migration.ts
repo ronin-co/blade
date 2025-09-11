@@ -58,7 +58,6 @@ export const IGNORED_FIELDS = [
  */
 export const MIGRATION_FLAGS = {
   sql: { type: 'boolean', short: 's', default: false },
-  local: { type: 'boolean', short: 'l', default: false },
   apply: { type: 'boolean', short: 'a', default: false },
   'skip-types': { type: 'boolean', default: false },
   'force-drop': { type: 'boolean', short: 'd', default: false },

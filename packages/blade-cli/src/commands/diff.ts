@@ -9,7 +9,6 @@ import { Migration, type MigrationFlags } from '@/src/utils/migration';
 import { MIGRATIONS_PATH, getModelDefinitions, logTableDiff } from '@/src/utils/misc';
 import { getModels } from '@/src/utils/model';
 import { Protocol } from '@/src/utils/protocol';
-import { getOrSelectSpaceId } from '@/src/utils/space';
 import { type Status, spinner } from '@/src/utils/spinner';
 
 /**
@@ -17,10 +16,8 @@ import { type Status, spinner } from '@/src/utils/spinner';
  */
 const diff = async (
   appToken: string | undefined,
-  sessionToken: string | undefined,
   flags: MigrationFlags,
   positionals: Array<string>,
-  enableHive: boolean,
 ): Promise<void> => {
   if (flags['force-create'] && flags.apply) {
     throw new Error('Cannot run `--apply` and `--force-create` at the same time');
@@ -37,9 +34,6 @@ const diff = async (
     path.join(process.cwd(), positionals[positionals.indexOf('diff') + 1]);
 
   try {
-    const space = enableHive
-      ? undefined
-      : await getOrSelectSpaceId(sessionToken, spinner);
     status = 'comparing';
     spinner.text = 'Comparing models';
 
@@ -47,9 +41,7 @@ const diff = async (
       flags['force-create']
         ? []
         : getModels({
-            token: appToken ?? sessionToken,
-            space,
-            enableHive,
+            token: appToken,
           }),
       flags['force-drop'] ? [] : getModelDefinitions(modelsInCodePath),
     ]);
@@ -129,7 +121,7 @@ const diff = async (
 
     // If desired, immediately apply the migration
     if (flags.apply) {
-      await apply(appToken, sessionToken, flags, enableHive);
+      await apply(appToken, flags);
     }
 
     process.exit(0);
@@ -148,7 +140,7 @@ const diff = async (
       spinner.succeed();
 
       // Start the diffing again, now that the database is initialized.
-      return diff(appToken, sessionToken, flags, positionals, enableHive);
+      return diff(appToken, flags, positionals);
     }
 
     const message =

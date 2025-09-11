@@ -217,8 +217,6 @@ export const composeEnvironmentVariables = (options: {
     defined['BLADE_PUBLIC_GIT_COMMIT'] = process.env['VERCEL_GIT_COMMIT_SHA'] ?? '';
   }
 
-  defined['BLADE_DATA_WORKER'] ??= 'https://data.ronin.co';
-  defined['BLADE_STORAGE_WORKER'] ??= 'https://storage.ronin.co';
   defined['RONIN_TOKEN'] = process.env['RONIN_TOKEN'] ?? '';
 
   // Used by dependencies and the application itself to understand which environment the

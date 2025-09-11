@@ -1,7 +1,8 @@
 import { afterAll, afterEach, describe, expect, jest, spyOn, test } from 'bun:test';
-import * as logInModule from '@/src/commands/login';
-import * as getModelsModule from '@/src/utils/model';
 import { clearMocks, mock } from 'bun-bagel';
+
+import * as getModelsModule from '@/src/utils/model';
+
 describe('models', async () => {
   afterAll(() => {
     jest.restoreAllMocks();

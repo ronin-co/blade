@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { select } from '@inquirer/prompts';
 import { runQueries } from 'blade-client';
-import { CompilerError, type Statement } from 'blade-compiler';
+import { CompilerError } from 'blade-compiler';
 
 import types from '@/src/commands/types';
 import type { MigrationFlags } from '@/src/utils/migration';
@@ -13,7 +13,6 @@ import {
   getModels,
 } from '@/src/utils/model';
 import { Protocol } from '@/src/utils/protocol';
-import { getOrSelectSpaceId } from '@/src/utils/space';
 import { spinner as ora } from '@/src/utils/spinner';
 
 /**
@@ -21,23 +20,15 @@ import { spinner as ora } from '@/src/utils/spinner';
  */
 export default async (
   appToken: string | undefined,
-  sessionToken: string | undefined,
   flags: MigrationFlags,
-  enableHive: boolean,
   migrationFilePath?: string,
 ): Promise<void> => {
   const spinner = ora.info('Applying migration');
 
   try {
-    const space = enableHive
-      ? undefined
-      : await getOrSelectSpaceId(sessionToken, spinner);
-
     const existingModels = (await getModels({
-      token: appToken ?? sessionToken,
-      space,
+      token: appToken,
       fieldArray: true,
-      enableHive,
     })) as Array<ModelWithFieldsArray>;
 
     // Verify that the migrations directory exists before proceeding.
@@ -74,27 +65,18 @@ export default async (
 
     const protocol = await new Protocol().load(migrationPrompt);
 
-    if (enableHive) {
-      await runQueries(protocol.queries, { token: appToken, models: [] });
-    } else {
-      const statements = protocol.getSQLStatements(
-        existingModels.map((model) => ({
-          ...model,
-          fields: convertArrayFieldToObject(model.fields),
-        })),
-      );
-
-      await applyMigrationStatements(
-        appToken ?? sessionToken,
-        statements,
-        space as string,
-      );
-    }
+    await runQueries(protocol.queries, {
+      token: appToken,
+      models: existingModels.map((model) => ({
+        ...model,
+        fields: convertArrayFieldToObject(model.fields),
+      })),
+    });
 
     spinner.succeed('Successfully applied migration');
 
     // If desired, generate new TypeScript types.
-    if (!flags['skip-types']) await types(appToken, sessionToken);
+    if (!flags['skip-types']) await types(appToken);
 
     process.exit(0);
   } catch (err) {
@@ -104,36 +86,5 @@ export default async (
     !(err instanceof CompilerError) && err instanceof Error && spinner.fail(err.message);
 
     process.exit(1);
-  }
-};
-
-/**
- * Applies migration statements to the database.
- */
-export const applyMigrationStatements = async (
-  appTokenOrSessionToken: string | undefined,
-  statements: Array<Statement>,
-  slug: string,
-): Promise<void> => {
-  ora.info('Applying migration to production database');
-
-  const response = await fetch(`https://data.ronin.co/?data-selector=${slug}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${appTokenOrSessionToken}`,
-    },
-    body: JSON.stringify({
-      nativeQueries: statements.map((query) => ({
-        query: query.sql,
-        mode: 'write',
-      })),
-    }),
-  });
-
-  const result = (await response.json()) as { error: { message: string } };
-
-  if (!response.ok) {
-    throw new Error(result.error.message);
   }
 };
