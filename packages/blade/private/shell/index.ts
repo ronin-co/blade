@@ -6,7 +6,6 @@ import { parseArgs } from 'node:util';
 import cmdApply from 'blade-cli/commands/apply';
 import cmdDiff from 'blade-cli/commands/diff';
 import cmdTypes from 'blade-cli/commands/types';
-import { getSession } from 'blade-cli/utils';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
 import getPort, { portNumbers } from 'get-port';
@@ -57,17 +56,11 @@ const normalizedPositionals = positionals.map((positional) => positional.toLower
 // in CI, which must be independent of individual people.
 const appToken = process.env['RONIN_TOKEN'];
 
-// If there is no active session, automatically start one and then continue with the
-// execution of the requested sub command, if there is one. If the `login` sub command
-// is invoked, we don't need to auto-login, since the command itself will handle it.
-const session = await getSession();
-
 // `blade diff` command.
 const isDiffing = normalizedPositionals.includes('diff');
 if (isDiffing)
   await cmdDiff(
     appToken,
-    session?.token,
     {
       help: false,
       version: false,
@@ -79,7 +72,7 @@ if (isDiffing)
 // `blade apply` command.
 const isApplying = normalizedPositionals.includes('apply');
 if (isApplying)
-  await cmdApply(appToken, session?.token, {
+  await cmdApply(appToken, {
     help: false,
     version: false,
     ...values,
@@ -88,7 +81,7 @@ if (isApplying)
 // `blade types` command.
 const isGeneratingTypes = normalizedPositionals.includes('types');
 if (isGeneratingTypes) {
-  await cmdTypes(appToken, session?.token, {
+  await cmdTypes(appToken, {
     help: false,
     version: false,
     ...values,

@@ -11,17 +11,13 @@ import { spinner as ora } from '@/src/utils/spinner';
  * Pulls models from RONIN schema into model definitions file.
  *
  * @param appToken - The app token to use.
- * @param sessionToken - The session token to use.
  */
-export default async (appToken?: string, sessionToken?: string): Promise<void> => {
+export default async (appToken?: string): Promise<void> => {
   const spinner = ora.start('Pulling models');
 
   try {
     // Get models from RONIN schema.
-    const modelDefinitions = await getModelDefinitionsFileContent({
-      appToken,
-      sessionToken,
-    });
+    const modelDefinitions = await getModelDefinitionsFileContent(appToken);
 
     if (!modelDefinitions) {
       spinner.fail('No models found. Start defining models in your code.');
@@ -60,12 +56,11 @@ export default async (appToken?: string, sessionToken?: string): Promise<void> =
   }
 };
 
-export const getModelDefinitionsFileContent = async (options?: {
-  appToken?: string;
-  sessionToken?: string;
-}): Promise<string | null> => {
+export const getModelDefinitionsFileContent = async (
+  appToken?: string,
+): Promise<string | null> => {
   const models = (await getModels({
-    token: options?.appToken || options?.sessionToken,
+    token: appToken,
   })) as Array<ModelWithFieldsArray>;
 
   if (models.length === 0) {

@@ -20,7 +20,6 @@ import { spinner as ora } from '@/src/utils/spinner';
  */
 export default async (
   appToken: string | undefined,
-  sessionToken: string | undefined,
   flags: MigrationFlags,
   migrationFilePath?: string,
 ): Promise<void> => {
@@ -28,7 +27,7 @@ export default async (
 
   try {
     const existingModels = (await getModels({
-      token: appToken ?? sessionToken,
+      token: appToken,
       fieldArray: true,
     })) as Array<ModelWithFieldsArray>;
 
@@ -77,7 +76,7 @@ export default async (
     spinner.succeed('Successfully applied migration');
 
     // If desired, generate new TypeScript types.
-    if (!flags['skip-types']) await types(appToken, sessionToken);
+    if (!flags['skip-types']) await types(appToken);
 
     process.exit(0);
   } catch (err) {

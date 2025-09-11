@@ -8,7 +8,6 @@ import generateTypes, { TYPES_FLAGS } from '@/src/commands/types';
 import { printHelp, printVersion } from '@/src/utils/info';
 import { MIGRATION_FLAGS } from '@/src/utils/migration';
 import { BASE_FLAGS, type BaseFlags } from '@/src/utils/misc';
-import { getSession } from '@/src/utils/session';
 import { spinner } from '@/src/utils/spinner';
 
 /**
@@ -62,12 +61,7 @@ export const run = async (config: { version: string }): Promise<void> => {
   // in CI, which must be independent of individual people.
   const appToken = process.env.RONIN_TOKEN;
 
-  // If there is no active session, automatically start one and then continue with the
-  // execution of the requested sub command, if there is one. If the `login` sub command
-  // is invoked, we don't need to auto-login, since the command itself will handle it.
-  const session = await getSession();
-
-  if (!(process.stdout.isTTY || session || appToken)) {
+  if (!(process.stdout.isTTY || appToken)) {
     let message = 'If RONIN CLI is invoked from a non-interactive shell, ';
     message +=
       'a `RONIN_TOKEN` environment variable containing an app token must be provided.';
@@ -78,7 +72,7 @@ export const run = async (config: { version: string }): Promise<void> => {
 
   // `diff` sub command
   if (normalizedPositionals.includes('diff')) {
-    return diff(appToken, session?.token, flags, positionals);
+    return diff(appToken, flags, positionals);
   }
 
   // `apply` sub command
@@ -87,16 +81,15 @@ export const run = async (config: { version: string }): Promise<void> => {
       ? path.join(process.cwd(), positionals[positionals.indexOf('apply') + 1])
       : undefined;
 
-    return apply(appToken, session?.token, flags, migrationFilePath);
+    return apply(appToken, flags, migrationFilePath);
   }
 
   // `types` sub command.
-  if (normalizedPositionals.includes('types'))
-    return generateTypes(appToken, session?.token, flags);
+  if (normalizedPositionals.includes('types')) return generateTypes(appToken, flags);
 
   // `pull` sub command
   if (normalizedPositionals.includes('pull')) {
-    return pull(appToken, session?.token);
+    return pull(appToken);
   }
 
   // If no matching flags or commands were found, render the help, since we don't want to

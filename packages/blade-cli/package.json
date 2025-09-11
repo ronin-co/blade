@@ -13,10 +13,6 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./utils": {
-      "import": "./dist/utils.js",
-      "types": "./dist/utils.d.ts"
-    },
     "./commands/apply": {
       "import": "./dist/commands/apply.js",
       "types": "./dist/commands/apply.d.ts"
@@ -34,9 +30,6 @@
     "*": {
       "*": [
         "dist/index.d.ts"
-      ],
-      "utils": [
-        "dist/utils.d.ts"
       ],
       "commands/apply": [
         "dist/commands/apply.d.ts"

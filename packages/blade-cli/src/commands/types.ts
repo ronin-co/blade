@@ -25,7 +25,6 @@ export type TypesFlags = BaseFlags & Partial<Record<keyof typeof TYPES_FLAGS, bo
 
 export default async (
   appToken: string | undefined,
-  sessionToken: string | undefined,
   flags?: TypesFlags,
 ): Promise<void> => {
   const spinner = ora.info(flags?.zod ? 'Generating Zod schemas' : 'Generating types');
@@ -39,7 +38,7 @@ export default async (
     if (!configDirExists) await fs.mkdir(configDir);
 
     const models = (await getModels({
-      token: appToken ?? sessionToken,
+      token: appToken,
       fieldArray: false,
     })) as Parameters<typeof generateZodSchema>[0];
 

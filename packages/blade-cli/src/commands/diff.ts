@@ -16,7 +16,6 @@ import { type Status, spinner } from '@/src/utils/spinner';
  */
 const diff = async (
   appToken: string | undefined,
-  sessionToken: string | undefined,
   flags: MigrationFlags,
   positionals: Array<string>,
 ): Promise<void> => {
@@ -42,7 +41,7 @@ const diff = async (
       flags['force-create']
         ? []
         : getModels({
-            token: appToken ?? sessionToken,
+            token: appToken,
           }),
       flags['force-drop'] ? [] : getModelDefinitions(modelsInCodePath),
     ]);
@@ -122,7 +121,7 @@ const diff = async (
 
     // If desired, immediately apply the migration
     if (flags.apply) {
-      await apply(appToken, sessionToken, flags);
+      await apply(appToken, flags);
     }
 
     process.exit(0);
@@ -141,7 +140,7 @@ const diff = async (
       spinner.succeed();
 
       // Start the diffing again, now that the database is initialized.
-      return diff(appToken, sessionToken, flags, positionals);
+      return diff(appToken, flags, positionals);
     }
 
     const message =

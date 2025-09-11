@@ -23,7 +23,6 @@ import * as infoModule from '@/src/utils/info';
 import * as miscModule from '@/src/utils/misc';
 import * as modelModule from '@/src/utils/model';
 import { type ModelWithFieldsArray, convertObjectToArray } from '@/src/utils/model';
-import * as sessionModule from '@/src/utils/session';
 
 describe('CLI', () => {
   // Store original values
@@ -42,11 +41,6 @@ describe('CLI', () => {
     exitSpy = spyOn(process, 'exit').mockImplementation(() => undefined as never);
     spyOn(console, 'table').mockImplementation(() => {});
     spyOn(fs.promises, 'appendFile').mockImplementation(() => Promise.resolve());
-    spyOn(sessionModule, 'getSession').mockImplementation(() =>
-      Promise.resolve({
-        token: 'Bulgur',
-      }),
-    );
 
     // Prevent actually reading/writing files.
     // @ts-expect-error This is a mock.
@@ -138,7 +132,6 @@ describe('CLI', () => {
       const exitSpy = spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit called');
       });
-      spyOn(sessionModule, 'getSession').mockResolvedValue(null);
 
       try {
         await run({ version: '1.0.0' });
@@ -218,18 +211,9 @@ describe('CLI', () => {
         spyOn(http, 'createServer').mockReturnValue(mockServer as unknown as http.Server);
         spyOn(open, 'default').mockResolvedValue({} as unknown as ChildProcess);
 
-        // Spy on session storage
-        const storeSessionSpy = spyOn(sessionModule, 'storeSession');
-        const storeTokenForNPMSpy = spyOn(sessionModule, 'storeTokenForNPM');
-        const storeTokenForBunSpy = spyOn(sessionModule, 'storeTokenForBun');
         const writeFileSpy = spyOn(fs.promises, 'writeFile').mockResolvedValue();
 
         await run({ version: '1.0.0' });
-
-        // Verify token storage
-        expect(storeSessionSpy).toHaveBeenCalledWith('Bulgur');
-        expect(storeTokenForNPMSpy).toHaveBeenCalledWith('Bulgur');
-        expect(storeTokenForBunSpy).toHaveBeenCalledWith('Bulgur');
 
         // Verify file contents
         expect(
@@ -262,16 +246,7 @@ describe('CLI', () => {
         spyOn(fs.promises, 'writeFile').mockResolvedValue();
         spyOn(fs.promises, 'stat').mockResolvedValue({} as fs.Stats);
 
-        // Spy on session storage
-        const storeSessionSpy = spyOn(sessionModule, 'storeSession');
-        const storeTokenForNPMSpy = spyOn(sessionModule, 'storeTokenForNPM');
-        const storeTokenForBunSpy = spyOn(sessionModule, 'storeTokenForBun');
-
         await run({ version: '1.0.0' });
-
-        expect(storeSessionSpy).not.toHaveBeenCalled();
-        expect(storeTokenForNPMSpy).toHaveBeenCalledWith('Peaches');
-        expect(storeTokenForBunSpy).toHaveBeenCalledWith('Peaches');
       });
     });
 
