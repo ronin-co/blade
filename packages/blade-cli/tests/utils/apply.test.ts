@@ -1,5 +1,4 @@
-import { describe, expect, mock, spyOn, test } from 'bun:test';
-import fs from 'node:fs';
+import { describe, expect, test } from 'bun:test';
 import {
   Account,
   Account3,

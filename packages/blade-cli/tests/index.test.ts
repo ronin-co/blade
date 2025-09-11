@@ -8,15 +8,11 @@ import {
   spyOn,
   test,
 } from 'bun:test';
-import type { ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
-import http from 'node:http';
 import path from 'node:path';
 import * as confirmModule from '@inquirer/prompts';
 import * as selectModule from '@inquirer/prompts';
 import type { Model } from 'blade-compiler';
-import * as getPort from 'get-port';
-import * as open from 'open';
 
 import { run } from '@/src/index';
 import * as infoModule from '@/src/utils/info';
@@ -178,84 +174,11 @@ describe('CLI', () => {
   });
 
   describe('starter', () => {
-    describe('login', () => {
-      test('should login when no token is provided', async () => {
-        process.argv = ['bun', 'ronin', 'login'];
-        const mockPort = 12345;
-
-        spyOn(getPort, 'default').mockResolvedValue(mockPort);
-
-        // Mock HTTP server
-        const mockServer = {
-          listen: () => mockServer,
-          once: (
-            event: string,
-            callback: (req: http.IncomingMessage, res: http.ServerResponse) => void,
-          ) => {
-            if (event === 'request') {
-              setTimeout(() => {
-                callback(
-                  { url: '/?token=Bulgur' } as http.IncomingMessage,
-                  {
-                    setHeader: () => {},
-                    writeHead: () => ({ end: () => {} }),
-                    end: () => {},
-                  } as unknown as http.ServerResponse,
-                );
-              }, 10);
-            }
-            return mockServer;
-          },
-          close: () => {},
-        };
-        spyOn(http, 'createServer').mockReturnValue(mockServer as unknown as http.Server);
-        spyOn(open, 'default').mockResolvedValue({} as unknown as ChildProcess);
-
-        const writeFileSpy = spyOn(fs.promises, 'writeFile').mockResolvedValue();
-
-        await run({ version: '1.0.0' });
-
-        // Verify file contents
-        expect(
-          writeFileSpy.mock.calls.some(
-            (call) =>
-              typeof call[1] === 'string' &&
-              call[1].includes(JSON.stringify({ token: 'Bulgur' }, null, 2)),
-          ),
-        ).toBe(true);
-        expect(
-          writeFileSpy.mock.calls.some(
-            (call) =>
-              typeof call[1] === 'string' &&
-              call[1].includes('https://ronin.supply\n//ronin.supply/:_authToken=Bulgur'),
-          ),
-        ).toBe(true);
-        expect(
-          writeFileSpy.mock.calls.some(
-            (call) => typeof call[1] === 'string' && call[1].includes('token = "Bulgur"'),
-          ),
-        ).toBe(true);
-        expect(exitSpy).toHaveBeenCalledWith(0);
-      });
-
-      test('should login when a token is provided', async () => {
-        process.env.RONIN_TOKEN = 'Peaches';
-        process.argv = ['bun', 'ronin', 'login'];
-
-        // Mock file operations
-        spyOn(fs.promises, 'writeFile').mockResolvedValue();
-        spyOn(fs.promises, 'stat').mockResolvedValue({} as fs.Stats);
-
-        await run({ version: '1.0.0' });
-      });
-    });
-
     describe('init', () => {
       test('diff and apply', async () => {
         process.argv = ['bun', 'ronin', 'diff', '--apply'];
 
-        // Mock space selection and models
-
+        // Mock models
         spyOn(modelModule, 'getModels').mockResolvedValue([
           {
             slug: 'user',
@@ -463,28 +386,8 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test.skip('diff with local flag', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--local'];
-        setupMigrationTest();
-
-        await run({ version: '1.0.0' });
-
-        expect(
-          stderrSpy.mock.calls.some(
-            (call) => typeof call[0] === 'string' && call[0].includes('Comparing models'),
-          ),
-        ).toBe(true);
-        expect(
-          stderrSpy.mock.calls.some(
-            (call) =>
-              typeof call[0] === 'string' &&
-              call[0].includes('Successfully generated migration protocol file'),
-          ),
-        ).toBe(true);
-      });
-
       test('diff with multiple flags', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--local', '--apply'];
+        process.argv = ['bun', 'ronin', 'diff', '--apply'];
         setupMigrationTest();
 
         spyOn(global, 'fetch').mockResolvedValue({
@@ -734,63 +637,8 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test.skip('apply with local flag', async () => {
-        process.argv = ['bun', 'ronin', 'apply', '--local'];
-
-        spyOn(modelModule, 'getModels').mockResolvedValue([
-          {
-            slug: 'user',
-            fields: convertObjectToArray({
-              fields: {
-                name: { type: 'string' },
-              },
-            }),
-          },
-        ]);
-
-        spyOn(fs, 'existsSync').mockImplementation(
-          (path) =>
-            path.toString().includes('migration-fixture.ts') ||
-            path.toString().includes('.ronin/migrations'),
-        );
-        spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
-        spyOn(path, 'resolve').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
-        );
-
-        await run({ version: '1.0.0' });
-
-        expect(
-          stderrSpy.mock.calls.some(
-            (call) =>
-              typeof call[0] === 'string' &&
-              call[0].includes('Applying migration to local database'),
-          ),
-        ).toBe(true);
-        expect(
-          stderrSpy.mock.calls.some(
-            (call) =>
-              typeof call[0] === 'string' &&
-              call[0].includes('Successfully applied migration'),
-          ),
-        ).toBe(true);
-        expect(
-          stderrSpy.mock.calls.some(
-            (call) => typeof call[0] === 'string' && call[0].includes('Generating types'),
-          ),
-        ).toBe(true);
-
-        expect(
-          stderrSpy.mock.calls.some(
-            (call) =>
-              typeof call[0] === 'string' &&
-              call[0].includes('Successfully generated types'),
-          ),
-        ).toBe(true);
-      });
-
       test.skip('skip generating types', async () => {
-        process.argv = ['bun', 'ronin', 'apply', '--local', '--skip-types'];
+        process.argv = ['bun', 'ronin', 'apply', '--skip-types'];
 
         spyOn(modelModule, 'getModels').mockResolvedValue([
           {
