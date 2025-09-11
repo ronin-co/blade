@@ -25,7 +25,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['**/*.ts', '**/*.tsx', '.ronin/*.d.ts'],
+        include: ['**/*.ts', '**/*.tsx', '.blade/*.d.ts'],
       });
     });
 
@@ -43,7 +43,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['**/*.ts', '**/*.tsx', '.ronin/*.d.ts'],
+        include: ['**/*.ts', '**/*.tsx', '.blade/*.d.ts'],
       });
     });
 
@@ -62,7 +62,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['src/**/*', '.ronin/*.d.ts'],
+        include: ['src/**/*', '.blade/*.d.ts'],
       });
     });
 
@@ -81,7 +81,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['**/*.ts', '**/*.tsx', '.ronin/*.d.ts'],
+        include: ['**/*.ts', '**/*.tsx', '.blade/*.d.ts'],
       });
     });
   });
