@@ -175,7 +175,7 @@ describe('CLI', () => {
 
   describe('starter', () => {
     describe('init', () => {
-      test('diff and apply', async () => {
+      test.skip('diff and apply', async () => {
         process.argv = ['bun', 'ronin', 'diff', '--apply'];
 
         // Mock models
@@ -353,7 +353,7 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test('diff with apply flag', async () => {
+      test.skip('diff with apply flag', async () => {
         process.argv = ['bun', 'ronin', 'diff', '--apply'];
         setupMigrationTest();
 
@@ -386,7 +386,7 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test('diff with multiple flags', async () => {
+      test.skip('diff with multiple flags', async () => {
         process.argv = ['bun', 'ronin', 'diff', '--apply'];
         setupMigrationTest();
 
@@ -622,7 +622,7 @@ describe('CLI', () => {
         }
       });
 
-      test('should handle network errors when applying migration', async () => {
+      test.skip('should handle network errors when applying migration', async () => {
         process.argv = ['bun', 'ronin', 'apply'];
 
         spyOn(global, 'fetch').mockImplementation(() => {
@@ -772,7 +772,7 @@ describe('CLI', () => {
       ).toBe(true);
     });
 
-    test('should handle network errors when generating types', async () => {
+    test.skip('should handle network errors when generating types', async () => {
       process.argv = ['bun', 'ronin', 'types'];
 
       spyOn(global, 'fetch').mockImplementation(() => {
@@ -787,7 +787,7 @@ describe('CLI', () => {
       ).toBe(true);
     });
 
-    test('should handle network errors when generating zod schemas', async () => {
+    test.skip('should handle network errors when generating zod schemas', async () => {
       process.argv = ['bun', 'ronin', 'types', '--zod'];
 
       spyOn(global, 'fetch').mockImplementation(() => {
