@@ -131,7 +131,7 @@ const diff = async (
 
       try {
         const queries: Array<Query> = [{ create: { model: ROOT_MODEL } }];
-        await runQueries(queries, { token: appToken, models: [] });
+        await runQueries(queries, { token: appToken });
       } catch (err) {
         spinner.fail('Failed to initialize database');
         console.error(err);
