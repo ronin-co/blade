@@ -1,8 +1,6 @@
 // Can be provided to the shell process of Blade.
 declare namespace NodeJS {
   interface ProcessEnv {
-    BLADE_DATA_WORKER: string;
-    BLADE_STORAGE_WORKER: string;
     BLADE_PUBLIC_GIT_COMMIT?: string;
     BLADE_PUBLIC_GIT_BRANCH?: string;
   }
