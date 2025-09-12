@@ -40,6 +40,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.8",
+    "blade-client": "workspace:*",
     "blade-compiler": "workspace:*",
     "hive": "1.2.4",
     "tsup": "8.4.0",
