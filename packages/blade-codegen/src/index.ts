@@ -4,10 +4,10 @@ import { identifiers } from '@/src/constants/identifiers';
 import {
   importBladeCompilerStoredObjectType,
   importResultRecordType,
-  importSyntaxUtilTypesType,
   jsonArrayType,
   jsonObjectType,
   jsonPrimitiveType,
+  reducedFunctionType,
   resolveSchemaType,
 } from '@/src/declarations';
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
@@ -43,7 +43,6 @@ export const generate = (models: Array<Model>): string => {
   const nodes = new Array<Node>(
     importBladeCompilerQueryTypesType,
     importResultRecordType,
-    importSyntaxUtilTypesType,
   );
 
   // If there is any models that have a `blob()` field, we need to import the
@@ -68,6 +67,8 @@ export const generate = (models: Array<Model>): string => {
       type: true,
     }),
   );
+
+  nodes.push(reducedFunctionType);
 
   // If there is any models that have a `link()` field, we need to add the
   // `ResolveSchemaType` type.
@@ -200,7 +201,7 @@ export const generate = (models: Array<Model>): string => {
                       undefined,
                       factory.createIntersectionTypeNode([
                         factory.createExpressionWithTypeArguments(
-                          identifiers.syntax.reducedFunction,
+                          identifiers.utils.reducedFunction,
                           undefined,
                         ),
                         factory.createTypeLiteralNode([
@@ -264,7 +265,7 @@ export const generate = (models: Array<Model>): string => {
                       undefined,
                       factory.createIntersectionTypeNode([
                         factory.createExpressionWithTypeArguments(
-                          identifiers.syntax.reducedFunction,
+                          identifiers.utils.reducedFunction,
                           undefined,
                         ),
                         factory.createTypeLiteralNode([
@@ -391,7 +392,7 @@ export const generate = (models: Array<Model>): string => {
                             undefined,
                             factory.createIntersectionTypeNode([
                               factory.createExpressionWithTypeArguments(
-                                identifiers.syntax.reducedFunction,
+                                identifiers.utils.reducedFunction,
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
@@ -464,7 +465,7 @@ export const generate = (models: Array<Model>): string => {
                             undefined,
                             factory.createIntersectionTypeNode([
                               factory.createExpressionWithTypeArguments(
-                                identifiers.syntax.reducedFunction,
+                                identifiers.utils.reducedFunction,
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
@@ -566,7 +567,7 @@ export const generate = (models: Array<Model>): string => {
                             undefined,
                             factory.createIntersectionTypeNode([
                               factory.createExpressionWithTypeArguments(
-                                identifiers.syntax.reducedFunction,
+                                identifiers.utils.reducedFunction,
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
@@ -639,7 +640,7 @@ export const generate = (models: Array<Model>): string => {
                             undefined,
                             factory.createIntersectionTypeNode([
                               factory.createExpressionWithTypeArguments(
-                                identifiers.syntax.reducedFunction,
+                                identifiers.utils.reducedFunction,
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
@@ -741,7 +742,7 @@ export const generate = (models: Array<Model>): string => {
                             undefined,
                             factory.createIntersectionTypeNode([
                               factory.createExpressionWithTypeArguments(
-                                identifiers.syntax.reducedFunction,
+                                identifiers.utils.reducedFunction,
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([
@@ -814,7 +815,7 @@ export const generate = (models: Array<Model>): string => {
                             undefined,
                             factory.createIntersectionTypeNode([
                               factory.createExpressionWithTypeArguments(
-                                identifiers.syntax.reducedFunction,
+                                identifiers.utils.reducedFunction,
                                 undefined,
                               ),
                               factory.createTypeLiteralNode([

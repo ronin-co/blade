@@ -3,8 +3,29 @@
 exports[`generate a basic model 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ResultRecord } from "blade/types";
-import type { ReducedFunction } from "blade-syntax/queries";
 import type { Account, Accounts } from "blade/types";
+interface ReducedFunction {
+    /** @deprecated */
+    apply: never;
+    /** @deprecated */
+    arguments: never;
+    /** @deprecated */
+    bind: never;
+    /** @deprecated */
+    call: never;
+    /** @deprecated */
+    caller: never;
+    /** @deprecated */
+    length: never;
+    /** @deprecated */
+    name: any;
+    /** @deprecated */
+    prototype: never;
+    /** @deprecated */
+    toString: never;
+    /** @deprecated */
+    unify: never;
+}
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
 export type { Account, Accounts };
 declare module "blade/types" {
@@ -270,9 +291,30 @@ declare module "blade/client/hooks" {
 exports[`generate a basic model with blob field 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ResultRecord } from "blade/types";
-import type { ReducedFunction } from "blade-syntax/queries";
 import type { StoredObject } from "blade-compiler";
 import type { Account, Accounts } from "blade/types";
+interface ReducedFunction {
+    /** @deprecated */
+    apply: never;
+    /** @deprecated */
+    arguments: never;
+    /** @deprecated */
+    bind: never;
+    /** @deprecated */
+    call: never;
+    /** @deprecated */
+    caller: never;
+    /** @deprecated */
+    length: never;
+    /** @deprecated */
+    name: any;
+    /** @deprecated */
+    prototype: never;
+    /** @deprecated */
+    toString: never;
+    /** @deprecated */
+    unify: never;
+}
 type AccountFieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
 export type { Account, Accounts };
 declare module "blade/types" {
@@ -547,8 +589,29 @@ declare module "blade/client/hooks" {
 exports[`generate with no models 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
 import type { ResultRecord } from "blade/types";
-import type { ReducedFunction } from "blade-syntax/queries";
 import type {} from "blade/types";
+interface ReducedFunction {
+    /** @deprecated */
+    apply: never;
+    /** @deprecated */
+    arguments: never;
+    /** @deprecated */
+    bind: never;
+    /** @deprecated */
+    call: never;
+    /** @deprecated */
+    caller: never;
+    /** @deprecated */
+    length: never;
+    /** @deprecated */
+    name: any;
+    /** @deprecated */
+    prototype: never;
+    /** @deprecated */
+    toString: never;
+    /** @deprecated */
+    unify: never;
+}
 export type {};
 declare module "blade/types" { }
 declare module "blade/server/hooks" {

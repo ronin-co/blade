@@ -21,6 +21,7 @@ export const identifiers = {
       },
       types: factory.createIdentifier(JSON.stringify('blade/types')),
     },
+    resultRecord: factory.createIdentifier('ResultRecord'),
   },
   compiler: {
     combinedInstructions: factory.createIdentifier('CombinedInstructions'),
@@ -45,18 +46,12 @@ export const identifiers = {
     partial: factory.createIdentifier('Partial'),
     promise: factory.createIdentifier('Promise'),
   },
-  syntax: {
-    module: {
-      queries: factory.createIdentifier(JSON.stringify('blade-syntax/queries')),
-    },
-    reducedFunction: factory.createIdentifier('ReducedFunction'),
-    resultRecord: factory.createIdentifier('ResultRecord'),
-  },
   utils: {
     all: factory.createIdentifier('all'),
     jsonArray: factory.createIdentifier('JsonArray'),
     jsonObject: factory.createIdentifier('JsonObject'),
     jsonPrimitive: factory.createIdentifier('JsonPrimitive'),
+    reducedFunction: factory.createIdentifier('ReducedFunction'),
     resolveSchema: factory.createIdentifier('ResolveSchema'),
   },
 } satisfies Record<

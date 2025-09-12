@@ -1,4 +1,4 @@
-import { SyntaxKind, factory } from 'typescript';
+import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { createImportDeclaration } from '@/src/generators/import';
@@ -34,19 +34,8 @@ export const importBladeCompilerStoredObjectType = createImportDeclaration({
  * ```
  */
 export const importResultRecordType = createImportDeclaration({
-  identifiers: [{ name: identifiers.syntax.resultRecord }],
+  identifiers: [{ name: identifiers.blade.resultRecord }],
   module: identifiers.blade.module.types,
-  type: true,
-});
-
-/**
- * ```ts
- * import type { ReducedFunction } from "blade-syntax/queries";
- * ```
- */
-export const importSyntaxUtilTypesType = createImportDeclaration({
-  identifiers: [{ name: identifiers.syntax.reducedFunction }],
-  module: identifiers.syntax.module.queries,
   type: true,
 });
 
@@ -197,4 +186,149 @@ export const jsonArrayType = factory.createTypeAliasDeclaration(
       factory.createTypeReferenceNode(identifiers.utils.jsonArray),
     ]),
   ]),
+);
+
+/**
+ * ```ts
+ * interface ReducedFunction {
+ * // @ deprecated
+ * apply: never;
+ * // @ deprecated
+ * arguments: never;
+ * // @ deprecated
+ * bind: never;
+ * // @ deprecated
+ * call: never;
+ * // @ deprecated
+ * caller: never;
+ * // @ deprecated
+ * length: never;
+ * // @ deprecated
+ * name: any;
+ * // @ deprecated
+ * prototype: never;
+ * // @ deprecated
+ * toString: never;
+ * // @ deprecated
+ * unify: never;
+ * }
+ * ```
+ */
+export const reducedFunctionType = factory.createInterfaceDeclaration(
+  undefined,
+  identifiers.utils.reducedFunction,
+  undefined,
+  undefined,
+  [
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'apply',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'arguments',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'bind',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'call',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'caller',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'length',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'name',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'prototype',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'toString',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'unify',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      '* @deprecated ',
+      true,
+    ),
+  ],
 );

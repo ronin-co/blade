@@ -92,7 +92,7 @@ type ObjectCall<Query, DefaultResult, Arg> = (<FinalResult = DefaultResult>(
  * Utility type to mark all Function.prototype methods as "deprecated" which
  * deranks them in the IDE suggestion popup.
  */
-export interface ReducedFunction {
+interface ReducedFunction {
   /**
    * @deprecated
    */

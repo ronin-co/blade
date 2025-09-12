@@ -77,7 +77,7 @@ export const generateDefaultSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.syntax.reducedFunction,
+        identifiers.utils.reducedFunction,
         undefined,
       ),
       factory.createFunctionTypeNode(
@@ -148,7 +148,7 @@ export const generateOrderedBySyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.syntax.reducedFunction,
+        identifiers.utils.reducedFunction,
         undefined,
       ),
       factory.createFunctionTypeNode(
@@ -244,7 +244,7 @@ export const generateSelectingSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.syntax.reducedFunction,
+        identifiers.utils.reducedFunction,
         undefined,
       ),
       factory.createFunctionTypeNode(
@@ -349,7 +349,7 @@ export const generateUsingSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.syntax.reducedFunction,
+        identifiers.utils.reducedFunction,
         undefined,
       ),
       factory.createTypeLiteralNode([
@@ -494,7 +494,7 @@ export const generateWithSyntaxProperty = (
               'value',
               undefined,
               factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(identifiers.syntax.resultRecord),
+                factory.createTypeReferenceNode(identifiers.blade.resultRecord),
                 factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
               ),
             ),
@@ -535,7 +535,7 @@ export const generateWithSyntaxProperty = (
             undefined,
             factory.createIndexedAccessTypeNode(
               factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(identifiers.syntax.resultRecord),
+                factory.createTypeReferenceNode(identifiers.blade.resultRecord),
                 factory.createLiteralTypeNode(factory.createStringLiteral('ronin')),
               ),
               factory.createLiteralTypeNode(factory.createStringLiteral(normalizedSlug)),
@@ -557,7 +557,7 @@ export const generateWithSyntaxProperty = (
       undefined,
       factory.createIntersectionTypeNode([
         factory.createExpressionWithTypeArguments(
-          identifiers.syntax.reducedFunction,
+          identifiers.utils.reducedFunction,
           undefined,
         ),
         factory.createTypeLiteralNode(metaFieldsPropertySignatures),
@@ -611,7 +611,7 @@ export const generateWithSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.syntax.reducedFunction,
+        identifiers.utils.reducedFunction,
         undefined,
       ),
       // TODO(@nurodev): Add support for with conditions like `startingWith`, `notStartingWith`, etc.
