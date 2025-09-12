@@ -1,4 +1,7 @@
 import { describe, expect, test } from 'bun:test';
+import { type Model, Transaction } from 'blade-compiler';
+import { model, number, random, string } from 'blade/schema';
+
 import {
   Account,
   Account3,
@@ -30,8 +33,6 @@ import {
   TestU,
 } from '@/fixtures/index';
 import { getRowCount, getSQLTables, getTableRows, runMigration } from '@/fixtures/utils';
-import { type Model, Transaction } from 'blade-compiler';
-import { model, number, random, string } from 'ronin/schema';
 
 describe('apply', () => {
   describe('model', () => {
