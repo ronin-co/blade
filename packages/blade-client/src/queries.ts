@@ -74,6 +74,9 @@ export const runQueries = async <T extends ResultRecord>(
     const transaction = new Transaction(rawQueries, {
       models: options.models,
       defaultRecordLimit: options.defaultRecordLimit,
+
+      // Hive doesn't support non-deterministic default values at the moment.
+      inlineDefaults: true,
     });
 
     const token = options.token as string;
