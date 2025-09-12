@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   importBladeCompilerQueryTypesType,
   importBladeCompilerStoredObjectType,
-  importSyntaxUtilTypesType,
+  importBladeUtilsType,
   jsonArrayType,
   jsonObjectType,
   jsonPrimitiveType,
@@ -26,10 +26,10 @@ describe('declarations', () => {
     );
   });
 
-  test('import the utility query types from `blade-syntax/queries`', () => {
-    const output = printNodes([importSyntaxUtilTypesType]);
+  test('import the utility types from `blade/types`', () => {
+    const output = printNodes([importBladeUtilsType]);
     expect(output).toStrictEqual(
-      `import type { ReducedFunction, ResultRecord } from \"blade-syntax/queries\";\n`,
+      `import type { ReducedFunction, ResultRecord } from \"blade/types\";\n`,
     );
   });
 

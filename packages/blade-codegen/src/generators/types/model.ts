@@ -88,7 +88,7 @@ export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclara
       modelInterfaceTypeParameters,
       factory.createIntersectionTypeNode([
         factory.createExpressionWithTypeArguments(
-          identifiers.syntax.resultRecord,
+          identifiers.blade.resultRecord,
           undefined,
         ),
         factory.createTypeLiteralNode(
