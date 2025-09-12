@@ -23,7 +23,7 @@ Or if you want to use a custom client instance:
 ```typescript
 import { betterAuth } from 'better-auth';
 import { ronin } from "blade-better-auth";
-import { createSyntaxFactory } from 'ronin';
+import { createSyntaxFactory } from 'blade-client';
 
 const client = createSyntaxFactory({
   token: process.env.RONIN_TOKEN,

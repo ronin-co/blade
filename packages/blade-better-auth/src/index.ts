@@ -11,7 +11,7 @@ import {
   set,
   sql,
   sqlBatch,
-} from 'ronin';
+} from 'blade-client';
 
 import {
   convertWhereClause,
@@ -22,7 +22,7 @@ import {
 } from '@/transform';
 
 import type { Adapter, AdapterInstance } from 'better-auth/types';
-import type { createSyntaxFactory } from 'ronin';
+import type { createSyntaxFactory } from 'blade-client';
 import type { ResultRecordBase } from 'blade-compiler';
 
 type SyntaxFactory = ReturnType<typeof createSyntaxFactory>;

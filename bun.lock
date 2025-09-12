@@ -77,6 +77,9 @@
         "tsup": "8.4.0",
         "typescript": "5.8.2",
       },
+      "peerDependencies": {
+        "blade-client": ">=3.16.2",
+      },
     },
     "packages/blade-cli": {
       "name": "blade-cli",
