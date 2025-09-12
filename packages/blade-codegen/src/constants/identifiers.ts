@@ -46,6 +46,7 @@ export const identifiers = {
     date: factory.createIdentifier('Date'),
     partial: factory.createIdentifier('Partial'),
     promise: factory.createIdentifier('Promise'),
+    record: factory.createIdentifier('Record'),
   },
   utils: {
     all: factory.createIdentifier('all'),
