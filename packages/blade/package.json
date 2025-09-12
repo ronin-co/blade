@@ -63,8 +63,7 @@
     "@tailwindcss/oxide": "4.1.6",
     "dotenv": "16.5.0",
     "gradient-string": "3.0.0",
-    "rolldown": "1.0.0-beta.32",
-    "ronin": "6.8.0"
+    "rolldown": "1.0.0-beta.32"
   },
   "devDependencies": {
     "@dprint/typescript": "0.93.3",

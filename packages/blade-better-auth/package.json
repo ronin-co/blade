@@ -45,14 +45,8 @@
     "tsup": "8.4.0",
     "typescript": "5.8.2"
   },
-  "peerDependencies": {
-    "ronin": ">=6.4.16"
-  },
   "peerDependenciesMeta": {
     "better-auth": {
-      "optional": false
-    },
-    "ronin": {
       "optional": false
     }
   }
