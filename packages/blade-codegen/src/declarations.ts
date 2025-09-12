@@ -30,14 +30,22 @@ export const importBladeCompilerStoredObjectType = createImportDeclaration({
 
 /**
  * ```ts
- * import type { ReducedFunction, ResultRecord } from "blade-syntax/queries";
+ * import type { ResultRecord } from "blade/types";
+ * ```
+ */
+export const importResultRecordType = createImportDeclaration({
+  identifiers: [{ name: identifiers.syntax.resultRecord }],
+  module: identifiers.blade.module.types,
+  type: true,
+});
+
+/**
+ * ```ts
+ * import type { ReducedFunction } from "blade-syntax/queries";
  * ```
  */
 export const importSyntaxUtilTypesType = createImportDeclaration({
-  identifiers: [
-    { name: identifiers.syntax.reducedFunction },
-    { name: identifiers.syntax.resultRecord },
-  ],
+  identifiers: [{ name: identifiers.syntax.reducedFunction }],
   module: identifiers.syntax.module.queries,
   type: true,
 });

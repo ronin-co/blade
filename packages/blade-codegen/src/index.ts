@@ -3,6 +3,7 @@ import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'type
 import { identifiers } from '@/src/constants/identifiers';
 import {
   importBladeCompilerStoredObjectType,
+  importResultRecordType,
   importSyntaxUtilTypesType,
   jsonArrayType,
   jsonObjectType,
@@ -41,6 +42,7 @@ export const generate = (models: Array<Model>): string => {
   // an import statement, interface, namespace, etc.
   const nodes = new Array<Node>(
     importBladeCompilerQueryTypesType,
+    importResultRecordType,
     importSyntaxUtilTypesType,
   );
 
