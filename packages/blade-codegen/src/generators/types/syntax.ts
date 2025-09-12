@@ -77,7 +77,7 @@ export const generateDefaultSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.utils.reducedFunction,
+        identifiers.blade.reducedFunction,
         undefined,
       ),
       factory.createFunctionTypeNode(
@@ -148,7 +148,7 @@ export const generateOrderedBySyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.utils.reducedFunction,
+        identifiers.blade.reducedFunction,
         undefined,
       ),
       factory.createFunctionTypeNode(
@@ -244,7 +244,7 @@ export const generateSelectingSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.utils.reducedFunction,
+        identifiers.blade.reducedFunction,
         undefined,
       ),
       factory.createFunctionTypeNode(
@@ -349,7 +349,7 @@ export const generateUsingSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.utils.reducedFunction,
+        identifiers.blade.reducedFunction,
         undefined,
       ),
       factory.createTypeLiteralNode([
@@ -557,7 +557,7 @@ export const generateWithSyntaxProperty = (
       undefined,
       factory.createIntersectionTypeNode([
         factory.createExpressionWithTypeArguments(
-          identifiers.utils.reducedFunction,
+          identifiers.blade.reducedFunction,
           undefined,
         ),
         factory.createTypeLiteralNode(metaFieldsPropertySignatures),
@@ -611,7 +611,7 @@ export const generateWithSyntaxProperty = (
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.utils.reducedFunction,
+        identifiers.blade.reducedFunction,
         undefined,
       ),
       // TODO(@nurodev): Add support for with conditions like `startingWith`, `notStartingWith`, etc.

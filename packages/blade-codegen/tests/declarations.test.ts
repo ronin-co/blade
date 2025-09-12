@@ -3,11 +3,10 @@ import { describe, expect, test } from 'bun:test';
 import {
   importBladeCompilerQueryTypesType,
   importBladeCompilerStoredObjectType,
-  importResultRecordType,
+  importBladeUtilsType,
   jsonArrayType,
   jsonObjectType,
   jsonPrimitiveType,
-  reducedFunctionType,
   resolveSchemaType,
 } from '@/src/declarations';
 import { printNodes } from '@/src/utils/print';
@@ -27,9 +26,11 @@ describe('declarations', () => {
     );
   });
 
-  test('import the `ResultRecord` from `blade/types`', () => {
-    const output = printNodes([importResultRecordType]);
-    expect(output).toStrictEqual(`import type { ResultRecord } from \"blade/types\";\n`);
+  test('import the utility types from `blade/types`', () => {
+    const output = printNodes([importBladeUtilsType]);
+    expect(output).toStrictEqual(
+      `import type { ReducedFunction, ResultRecord } from \"blade/types\";\n`,
+    );
   });
 
   test('create `ResolveSchema` utility type`', () => {
@@ -60,31 +61,5 @@ describe('declarations', () => {
     expect(output).toStrictEqual(
       'type JsonArray = Array<JsonPrimitive | JsonObject | JsonArray>;\n',
     );
-  });
-
-  test('create `ReducedFunction` utility type', () => {
-    const output = printNodes([reducedFunctionType]);
-    expect(output).toStrictEqual(`interface ReducedFunction {
-    /** @deprecated */
-    apply: never;
-    /** @deprecated */
-    arguments: never;
-    /** @deprecated */
-    bind: never;
-    /** @deprecated */
-    call: never;
-    /** @deprecated */
-    caller: never;
-    /** @deprecated */
-    length: never;
-    /** @deprecated */
-    name: any;
-    /** @deprecated */
-    prototype: never;
-    /** @deprecated */
-    toString: never;
-    /** @deprecated */
-    unify: never;
-}\n`);
   });
 });
