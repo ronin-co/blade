@@ -20,7 +20,7 @@ declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
         account: ReducedFunction & {
-            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+            <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
             after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => T);
             before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => T);
             including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => T);
@@ -35,7 +35,7 @@ declare module "blade/server/hooks" {
             selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => T);
             using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
             with: ReducedFunction & {
-                <T = Account | null>(options: CombinedInstructions["with"]): T;
+                <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
                 id: <T = Account | null>(value: ResultRecord["id"]) => T;
                 ronin: ReducedFunction & {
                     createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
@@ -49,7 +49,7 @@ declare module "blade/server/hooks" {
         };
         /** Get multiple account records */
         accounts: ReducedFunction & {
-            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+            <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
             after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => T);
             before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => T);
             including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => T);
@@ -64,7 +64,7 @@ declare module "blade/server/hooks" {
             selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => T);
             using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
             with: ReducedFunction & {
-                <T = Accounts>(options: CombinedInstructions["with"]): T;
+                <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
                 id: <T = Accounts>(value: ResultRecord["id"]) => T;
                 ronin: ReducedFunction & {
                     createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
@@ -83,7 +83,7 @@ declare module "blade/client/hooks" {
         add: {
             /** Add a single account record */
             account: ReducedFunction & {
-                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -98,7 +98,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -112,7 +112,7 @@ declare module "blade/client/hooks" {
             };
             /** Add multiple account records */
             accounts: ReducedFunction & {
-                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -127,7 +127,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -143,7 +143,7 @@ declare module "blade/client/hooks" {
         remove: {
             /** Remove a single account record */
             account: ReducedFunction & {
-                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -158,7 +158,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -172,7 +172,7 @@ declare module "blade/client/hooks" {
             };
             /** Remove multiple account records */
             accounts: ReducedFunction & {
-                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -187,7 +187,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -203,7 +203,7 @@ declare module "blade/client/hooks" {
         set: {
             /** Set a single account record */
             account: ReducedFunction & {
-                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -218,7 +218,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -232,7 +232,7 @@ declare module "blade/client/hooks" {
             };
             /** Set multiple account records */
             accounts: ReducedFunction & {
-                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -248,7 +248,7 @@ declare module "blade/client/hooks" {
                 to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"]) => Promise<T>);
                 using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -288,7 +288,7 @@ declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
         account: ReducedFunction & {
-            <T = Account | null>(options?: Partial<CombinedInstructions>): T;
+            <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
             after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => T);
             before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => T);
             including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => T);
@@ -303,7 +303,7 @@ declare module "blade/server/hooks" {
             selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => T);
             using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
             with: ReducedFunction & {
-                <T = Account | null>(options: CombinedInstructions["with"]): T;
+                <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
                 id: <T = Account | null>(value: ResultRecord["id"]) => T;
                 ronin: ReducedFunction & {
                     createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
@@ -318,7 +318,7 @@ declare module "blade/server/hooks" {
         };
         /** Get multiple account records */
         accounts: ReducedFunction & {
-            <T = Accounts>(options?: Partial<CombinedInstructions>): T;
+            <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
             after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => T);
             before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => T);
             including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => T);
@@ -333,7 +333,7 @@ declare module "blade/server/hooks" {
             selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => T);
             using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
             with: ReducedFunction & {
-                <T = Accounts>(options: CombinedInstructions["with"]): T;
+                <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
                 id: <T = Accounts>(value: ResultRecord["id"]) => T;
                 ronin: ReducedFunction & {
                     createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
@@ -353,7 +353,7 @@ declare module "blade/client/hooks" {
         add: {
             /** Add a single account record */
             account: ReducedFunction & {
-                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -368,7 +368,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -383,7 +383,7 @@ declare module "blade/client/hooks" {
             };
             /** Add multiple account records */
             accounts: ReducedFunction & {
-                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -398,7 +398,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -415,7 +415,7 @@ declare module "blade/client/hooks" {
         remove: {
             /** Remove a single account record */
             account: ReducedFunction & {
-                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -430,7 +430,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -445,7 +445,7 @@ declare module "blade/client/hooks" {
             };
             /** Remove multiple account records */
             accounts: ReducedFunction & {
-                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -460,7 +460,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -477,7 +477,7 @@ declare module "blade/client/hooks" {
         set: {
             /** Set a single account record */
             account: ReducedFunction & {
-                <T = Account | null>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -492,7 +492,7 @@ declare module "blade/client/hooks" {
                 selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
                 using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Account | null>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
@@ -507,7 +507,7 @@ declare module "blade/client/hooks" {
             };
             /** Set multiple account records */
             accounts: ReducedFunction & {
-                <T = Accounts>(options?: Partial<CombinedInstructions>): Promise<T>;
+                <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
                 after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
                 before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
                 including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
@@ -523,7 +523,7 @@ declare module "blade/client/hooks" {
                 to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"]) => Promise<T>);
                 using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
                 with: ReducedFunction & {
-                    <T = Accounts>(options: CombinedInstructions["with"]): Promise<T>;
+                    <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
                     id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
                     ronin: ReducedFunction & {
                         createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;

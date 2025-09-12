@@ -125,7 +125,7 @@ export type Accounts = Array<Account> & {
 `;
 
 exports[`types syntax generate root query call signature a basic model 1`] = `
-"<T = Account>(options?: Partial<CombinedInstructions>): T;
+"<T = Account>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
 "
 `;
 
@@ -170,7 +170,7 @@ using: ReducedFunction & (<T = Account>(value: CombinedInstructions["using"]) =>
 
 exports[`types syntax generate \`with\` syntax property a basic model 1`] = `
 "with: ReducedFunction & {
-    <T = Account>(options: CombinedInstructions["with"]): T;
+    <T = Account>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
     id: <T = Account>(value: ResultRecord["id"]) => T;
     ronin: ReducedFunction & {
         createdAt: <T = Account>(value: ResultRecord["ronin"]["createdAt"]) => T;

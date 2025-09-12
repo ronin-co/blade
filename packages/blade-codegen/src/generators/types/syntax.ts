@@ -40,10 +40,20 @@ export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
       factory.createParameterDeclaration(
         undefined,
         undefined,
-        'options',
+        'instructions',
         factory.createToken(SyntaxKind.QuestionToken),
         factory.createTypeReferenceNode(identifiers.primitive.partial, [
           factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+        ]),
+      ),
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'options',
+        factory.createToken(SyntaxKind.QuestionToken),
+        factory.createTypeReferenceNode(identifiers.primitive.record, [
+          factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+          factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
         ]),
       ),
     ],
@@ -453,12 +463,22 @@ export const generateWithSyntaxProperty = (
       factory.createParameterDeclaration(
         undefined,
         undefined,
-        'options',
+        'instructions',
         undefined,
         factory.createIndexedAccessTypeNode(
           factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
           factory.createLiteralTypeNode(factory.createStringLiteral('with')),
         ),
+      ),
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'options',
+        factory.createToken(SyntaxKind.QuestionToken),
+        factory.createTypeReferenceNode(identifiers.primitive.record, [
+          factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+          factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
+        ]),
       ),
     ],
     options?.promise

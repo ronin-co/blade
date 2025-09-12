@@ -311,6 +311,20 @@ exports[`identifiers 1`] = `
       "symbol": undefined,
       "transformFlags": 0,
     },
+    "record": IdentifierObject {
+      "emitNode": undefined,
+      "end": -1,
+      "escapedText": "Record",
+      "flags": 16,
+      "flowNode": undefined,
+      "id": 0,
+      "jsDoc": undefined,
+      "kind": 80,
+      "parent": undefined,
+      "pos": -1,
+      "symbol": undefined,
+      "transformFlags": 0,
+    },
   },
   "utils": {
     "all": IdentifierObject {
