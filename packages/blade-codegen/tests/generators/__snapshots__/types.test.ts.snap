@@ -130,61 +130,61 @@ exports[`types syntax generate root query call signature a basic model 1`] = `
 `;
 
 exports[`types syntax generate \`default\` syntax property a basic model 1`] = `
-"including: ReducedFunction & (<T = Account>(value: CombinedInstructions["including"]) => T);
+"including: ReducedFunction & (<T = Account>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => T);
 "
 `;
 
 exports[`types syntax generate \`orderedBy\` syntax property a basic model 1`] = `
-"orderedBy: ReducedFunction & (<T = account>(options: {
+"orderedBy: ReducedFunction & (<T = account>(instructions: {
     ascending?: Array<Expression | AccountFieldSlug>;
     descending?: Array<Expression | AccountFieldSlug>;
-}) => T) & {
-    ascending: <T = account>(fields: Array<Expression | AccountFieldSlug>) => T;
-    descending: <T = account>(fields: Array<Expression | AccountFieldSlug>) => T;
+}, options?: Record<string, unknown>) => T) & {
+    ascending: <T = account>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
+    descending: <T = account>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
 };
 "
 `;
 
 exports[`types syntax generate \`selecting\` syntax property a basic model 1`] = `
-"selecting: ReducedFunction & (<T = account>(options: Array<AccountFieldSlug>) => T);
+"selecting: ReducedFunction & (<T = account>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => T);
 "
 `;
 
 exports[`types syntax generate \`using\` syntax property a basic model 1`] = `
 "using: ReducedFunction & {
-    <U extends Array<"author"> | "all">(fields: U): post<U> | null;
-    <T = Post>(fields: Array<"author"> | "all"): T;
+    <U extends Array<"author"> | "all">(fields: U, options?: Record<string, unknown>): post<U> | null;
+    <T = Post>(fields: Array<"author"> | "all", options?: Record<string, unknown>): T;
 };
 using: ReducedFunction & {
-    <U extends Array<"author"> | "all">(fields: U): Promise<post<U>>;
-    <T = Post>(fields: Array<"author"> | "all"): Promise<T>;
+    <U extends Array<"author"> | "all">(fields: U, options?: Record<string, unknown>): Promise<post<U>>;
+    <T = Post>(fields: Array<"author"> | "all", options?: Record<string, unknown>): Promise<T>;
 };
 "
 `;
 
 exports[`types syntax generate \`using\` syntax property a basic model with no link fields 1`] = `
-"using: ReducedFunction & (<T = Account>(value: CombinedInstructions["using"]) => T);
-using: ReducedFunction & (<T = Account>(value: CombinedInstructions["using"]) => T);
+"using: ReducedFunction & (<T = Account>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
+using: ReducedFunction & (<T = Account>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
 "
 `;
 
 exports[`types syntax generate \`with\` syntax property a basic model 1`] = `
 "with: ReducedFunction & {
     <T = Account>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
-    id: <T = Account>(value: ResultRecord["id"]) => T;
+    id: <T = Account>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
     ronin: ReducedFunction & {
-        createdAt: <T = Account>(value: ResultRecord["ronin"]["createdAt"]) => T;
-        createdBy: <T = Account>(value: ResultRecord["ronin"]["createdBy"]) => T;
-        updatedAt: <T = Account>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-        updatedBy: <T = Account>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+        createdAt: <T = Account>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
+        createdBy: <T = Account>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
+        updatedAt: <T = Account>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
+        updatedBy: <T = Account>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
     };
-    avatar: <T = Account>(avatar: Account["avatar"]) => T;
-    email: <T = Account>(email: Account["email"]) => T;
-    isActive: <T = Account>(isActive: Account["isActive"]) => T;
-    lastActiveAt: <T = Account>(lastActiveAt: Account["lastActiveAt"]) => T;
-    name: <T = Account>(name: Account["name"]) => T;
-    rewardPoints: <T = Account>(rewardPoints: Account["rewardPoints"]) => T;
-    settings: <T = Account>(settings: Account["settings"]) => T;
+    avatar: <T = Account>(avatar: Account["avatar"], options?: Record<string, unknown>) => T;
+    email: <T = Account>(email: Account["email"], options?: Record<string, unknown>) => T;
+    isActive: <T = Account>(isActive: Account["isActive"], options?: Record<string, unknown>) => T;
+    lastActiveAt: <T = Account>(lastActiveAt: Account["lastActiveAt"], options?: Record<string, unknown>) => T;
+    name: <T = Account>(name: Account["name"], options?: Record<string, unknown>) => T;
+    rewardPoints: <T = Account>(rewardPoints: Account["rewardPoints"], options?: Record<string, unknown>) => T;
+    settings: <T = Account>(settings: Account["settings"], options?: Record<string, unknown>) => T;
 };
 "
 `;

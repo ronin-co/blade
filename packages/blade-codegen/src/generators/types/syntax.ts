@@ -2,6 +2,7 @@ import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
+import { sharedQueryOptionsParameter } from '@/src/declarations';
 import { convertToPascalCase } from '@/src/utils/slug';
 
 import type { CombinedInstructions } from 'blade-compiler';
@@ -46,16 +47,7 @@ export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
           factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
         ]),
       ),
-      factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        'options',
-        factory.createToken(SyntaxKind.QuestionToken),
-        factory.createTypeReferenceNode(identifiers.primitive.record, [
-          factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
-          factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
-        ]),
-      ),
+      sharedQueryOptionsParameter,
     ],
     options?.promise
       ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -110,6 +102,7 @@ export const generateDefaultSyntaxProperty = (
               factory.createLiteralTypeNode(factory.createStringLiteral(options.name)),
             ),
           ),
+          sharedQueryOptionsParameter,
         ],
         options?.promise
           ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -174,7 +167,7 @@ export const generateOrderedBySyntaxProperty = (
           factory.createParameterDeclaration(
             undefined,
             undefined,
-            'options',
+            'instructions',
             undefined,
             factory.createTypeLiteralNode(
               ['ascending', 'descending'].map((name) =>
@@ -187,6 +180,7 @@ export const generateOrderedBySyntaxProperty = (
               ),
             ),
           ),
+          sharedQueryOptionsParameter,
         ],
         options?.promise
           ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -217,6 +211,7 @@ export const generateOrderedBySyntaxProperty = (
                   undefined,
                   typedFields,
                 ),
+                sharedQueryOptionsParameter,
               ],
               options?.promise
                 ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -270,7 +265,7 @@ export const generateSelectingSyntaxProperty = (
           factory.createParameterDeclaration(
             undefined,
             undefined,
-            'options',
+            'instructions',
             undefined,
             factory.createTypeReferenceNode(identifiers.primitive.array, [
               factory.createTypeReferenceNode(
@@ -280,6 +275,7 @@ export const generateSelectingSyntaxProperty = (
               ),
             ]),
           ),
+          sharedQueryOptionsParameter,
         ],
         options?.promise
           ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -379,6 +375,7 @@ export const generateUsingSyntaxProperty = (
               undefined,
               factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
             ),
+            sharedQueryOptionsParameter,
           ],
           options.isPlural
             ? modelNodeWithFields
@@ -405,6 +402,7 @@ export const generateUsingSyntaxProperty = (
               undefined,
               arrayFieldsType,
             ),
+            sharedQueryOptionsParameter,
           ],
           options?.promise
             ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -470,16 +468,7 @@ export const generateWithSyntaxProperty = (
           factory.createLiteralTypeNode(factory.createStringLiteral('with')),
         ),
       ),
-      factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        'options',
-        factory.createToken(SyntaxKind.QuestionToken),
-        factory.createTypeReferenceNode(identifiers.primitive.record, [
-          factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
-          factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
-        ]),
-      ),
+      sharedQueryOptionsParameter,
     ],
     options?.promise
       ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -518,6 +507,7 @@ export const generateWithSyntaxProperty = (
                 factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
               ),
             ),
+            sharedQueryOptionsParameter,
           ],
           options?.promise
             ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -561,6 +551,7 @@ export const generateWithSyntaxProperty = (
               factory.createLiteralTypeNode(factory.createStringLiteral(normalizedSlug)),
             ),
           ),
+          sharedQueryOptionsParameter,
         ],
         options?.promise
           ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -614,6 +605,7 @@ export const generateWithSyntaxProperty = (
                 factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
               ),
             ),
+            sharedQueryOptionsParameter,
           ],
           options?.promise
             ? factory.createTypeReferenceNode(identifiers.primitive.promise, [

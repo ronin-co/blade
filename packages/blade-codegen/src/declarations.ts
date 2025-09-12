@@ -190,3 +190,19 @@ export const jsonArrayType = factory.createTypeAliasDeclaration(
     ]),
   ]),
 );
+
+/**
+ * ```ts
+ * options?: Record<string, unknown>;
+ * ```
+ */
+export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
+  undefined,
+  undefined,
+  'options',
+  factory.createToken(SyntaxKind.QuestionToken),
+  factory.createTypeReferenceNode(identifiers.primitive.record, [
+    factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+    factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
+  ]),
+);

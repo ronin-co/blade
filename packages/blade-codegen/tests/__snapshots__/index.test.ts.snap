@@ -21,59 +21,59 @@ declare module "blade/server/hooks" {
         /** Get a single account record */
         account: ReducedFunction & {
             <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
-            after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => T);
-            before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => T);
-            including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => T);
-            limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => T);
-            orderedBy: ReducedFunction & (<T = Account | null>(options: {
+            after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => T);
+            before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => T);
+            including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => T);
+            limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => T);
+            orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                 ascending?: Array<Expression | AccountFieldSlug>;
                 descending?: Array<Expression | AccountFieldSlug>;
-            }) => T) & {
-                ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
-                descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
+            }, options?: Record<string, unknown>) => T) & {
+                ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
+                descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
             };
-            selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => T);
-            using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+            selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => T);
+            using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
             with: ReducedFunction & {
                 <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
-                id: <T = Account | null>(value: ResultRecord["id"]) => T;
+                id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
                 ronin: ReducedFunction & {
-                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
+                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
+                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
+                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
                 };
-                name: <T = Account | null>(name: Account["name"]) => T;
-                email: <T = Account | null>(email: Account["email"]) => T;
+                name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
             };
         };
         /** Get multiple account records */
         accounts: ReducedFunction & {
             <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
-            after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => T);
-            before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => T);
-            including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => T);
-            limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => T);
-            orderedBy: ReducedFunction & (<T = Accounts>(options: {
+            after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => T);
+            before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => T);
+            including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => T);
+            limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => T);
+            orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                 ascending?: Array<Expression | AccountFieldSlug>;
                 descending?: Array<Expression | AccountFieldSlug>;
-            }) => T) & {
-                ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
-                descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
+            }, options?: Record<string, unknown>) => T) & {
+                ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
+                descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
             };
-            selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => T);
-            using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+            selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => T);
+            using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
             with: ReducedFunction & {
                 <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
-                id: <T = Accounts>(value: ResultRecord["id"]) => T;
+                id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
                 ronin: ReducedFunction & {
-                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
+                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
+                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
+                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
                 };
-                name: <T = Accounts>(name: Account["name"]) => T;
-                email: <T = Accounts>(email: Account["email"]) => T;
+                name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
             };
         };
     };
@@ -84,59 +84,59 @@ declare module "blade/client/hooks" {
             /** Add a single account record */
             account: ReducedFunction & {
                 <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                    name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
             /** Add multiple account records */
             accounts: ReducedFunction & {
                 <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                    name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
         };
@@ -144,59 +144,59 @@ declare module "blade/client/hooks" {
             /** Remove a single account record */
             account: ReducedFunction & {
                 <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                    name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
             /** Remove multiple account records */
             accounts: ReducedFunction & {
                 <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                    name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
         };
@@ -204,60 +204,60 @@ declare module "blade/client/hooks" {
             /** Set a single account record */
             account: ReducedFunction & {
                 <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+                    name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
             /** Set multiple account records */
             accounts: ReducedFunction & {
                 <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
-                to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"]) => Promise<T>);
-                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"], options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+                    name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
         };
@@ -289,61 +289,61 @@ declare module "blade/server/hooks" {
         /** Get a single account record */
         account: ReducedFunction & {
             <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
-            after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => T);
-            before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => T);
-            including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => T);
-            limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => T);
-            orderedBy: ReducedFunction & (<T = Account | null>(options: {
+            after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => T);
+            before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => T);
+            including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => T);
+            limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => T);
+            orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                 ascending?: Array<Expression | AccountFieldSlug>;
                 descending?: Array<Expression | AccountFieldSlug>;
-            }) => T) & {
-                ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
-                descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => T;
+            }, options?: Record<string, unknown>) => T) & {
+                ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
+                descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
             };
-            selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => T);
-            using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+            selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => T);
+            using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
             with: ReducedFunction & {
                 <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
-                id: <T = Account | null>(value: ResultRecord["id"]) => T;
+                id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
                 ronin: ReducedFunction & {
-                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                    createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
+                    createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
+                    updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
+                    updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
                 };
-                name: <T = Account | null>(name: Account["name"]) => T;
-                email: <T = Account | null>(email: Account["email"]) => T;
-                image: <T = Account | null>(image: Account["image"]) => T;
+                name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
+                image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => T;
             };
         };
         /** Get multiple account records */
         accounts: ReducedFunction & {
             <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): T;
-            after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => T);
-            before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => T);
-            including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => T);
-            limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => T);
-            orderedBy: ReducedFunction & (<T = Accounts>(options: {
+            after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => T);
+            before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => T);
+            including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => T);
+            limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => T);
+            orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                 ascending?: Array<Expression | AccountFieldSlug>;
                 descending?: Array<Expression | AccountFieldSlug>;
-            }) => T) & {
-                ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
-                descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => T;
+            }, options?: Record<string, unknown>) => T) & {
+                ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
+                descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => T;
             };
-            selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => T);
-            using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+            selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => T);
+            using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
             with: ReducedFunction & {
                 <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
-                id: <T = Accounts>(value: ResultRecord["id"]) => T;
+                id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
                 ronin: ReducedFunction & {
-                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => T;
-                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => T;
-                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => T;
-                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => T;
+                    createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
+                    createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
+                    updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
+                    updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
                 };
-                name: <T = Accounts>(name: Account["name"]) => T;
-                email: <T = Accounts>(email: Account["email"]) => T;
-                image: <T = Accounts>(image: Account["image"]) => T;
+                name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
+                image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => T;
             };
         };
     };
@@ -354,61 +354,61 @@ declare module "blade/client/hooks" {
             /** Add a single account record */
             account: ReducedFunction & {
                 <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
-                    image: <T = Account | null>(image: Account["image"]) => Promise<T>;
+                    name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                    image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
             /** Add multiple account records */
             accounts: ReducedFunction & {
                 <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
-                    image: <T = Accounts>(image: Account["image"]) => Promise<T>;
+                    name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                    image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
         };
@@ -416,61 +416,61 @@ declare module "blade/client/hooks" {
             /** Remove a single account record */
             account: ReducedFunction & {
                 <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
-                    image: <T = Account | null>(image: Account["image"]) => Promise<T>;
+                    name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                    image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
             /** Remove multiple account records */
             accounts: ReducedFunction & {
                 <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
-                    image: <T = Accounts>(image: Account["image"]) => Promise<T>;
+                    name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                    image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
         };
@@ -478,62 +478,62 @@ declare module "blade/client/hooks" {
             /** Set a single account record */
             account: ReducedFunction & {
                 <T = Account | null>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Account | null>(options: {
+                after: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Account | null>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Account | null>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Account | null>(options: Array<AccountFieldSlug>) => Promise<T>);
-                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Account | null>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Account | null>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Account | null>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Account | null>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Account | null>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Account | null>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Account | null>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Account | null>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-                    email: <T = Account | null>(email: Account["email"]) => Promise<T>;
-                    image: <T = Account | null>(image: Account["image"]) => Promise<T>;
+                    name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                    image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
             /** Set multiple account records */
             accounts: ReducedFunction & {
                 <T = Accounts>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>): Promise<T>;
-                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"]) => Promise<T>);
-                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"]) => Promise<T>);
-                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"]) => Promise<T>);
-                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"]) => Promise<T>);
-                orderedBy: ReducedFunction & (<T = Accounts>(options: {
+                after: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+                before: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+                including: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+                limitedTo: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+                orderedBy: ReducedFunction & (<T = Accounts>(instructions: {
                     ascending?: Array<Expression | AccountFieldSlug>;
                     descending?: Array<Expression | AccountFieldSlug>;
-                }) => Promise<T>) & {
-                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
-                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>) => Promise<T>;
+                }, options?: Record<string, unknown>) => Promise<T>) & {
+                    ascending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
+                    descending: <T = Accounts>(fields: Array<Expression | AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>;
                 };
-                selecting: ReducedFunction & (<T = Accounts>(options: Array<AccountFieldSlug>) => Promise<T>);
-                to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"]) => Promise<T>);
-                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+                selecting: ReducedFunction & (<T = Accounts>(instructions: Array<AccountFieldSlug>, options?: Record<string, unknown>) => Promise<T>);
+                to: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["to"], options?: Record<string, unknown>) => Promise<T>);
+                using: ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"], options?: Record<string, unknown>) => T);
                 with: ReducedFunction & {
                     <T = Accounts>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
-                    id: <T = Accounts>(value: ResultRecord["id"]) => Promise<T>;
+                    id: <T = Accounts>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
                     ronin: ReducedFunction & {
-                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"]) => Promise<T>;
-                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"]) => Promise<T>;
-                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"]) => Promise<T>;
-                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"]) => Promise<T>;
+                        createdAt: <T = Accounts>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+                        createdBy: <T = Accounts>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedAt: <T = Accounts>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+                        updatedBy: <T = Accounts>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
                     };
-                    name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-                    email: <T = Accounts>(email: Account["email"]) => Promise<T>;
-                    image: <T = Accounts>(image: Account["image"]) => Promise<T>;
+                    name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                    email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                    image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
                 };
             };
         };
