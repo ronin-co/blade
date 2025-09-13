@@ -333,11 +333,13 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test('changes detected', async () => {
+      test.only('changes detected', async () => {
         process.argv = ['bun', 'blade', 'diff', '--sql'];
         setupMigrationTest();
 
         await run({ version: '1.0.0' });
+
+        console.error(stderrSpy.mock.calls);
 
         expect(
           stderrSpy.mock.calls.some(
@@ -418,7 +420,7 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test('force-create flag', async () => {
+      test.only('force-create flag', async () => {
         process.argv = ['bun', 'blade', 'diff', '--force-create'];
         setupMigrationTest();
 
@@ -443,7 +445,7 @@ describe('CLI', () => {
         }
       });
 
-      test('force-drop flag', async () => {
+      test.only('force-drop flag', async () => {
         process.argv = ['bun', 'blade', 'diff', '--force-drop'];
         setupMigrationTest();
 
@@ -468,7 +470,7 @@ describe('CLI', () => {
         }
       });
 
-      test('diff with same diff as latest migration and cancel', async () => {
+      test.only('diff with same diff as latest migration and cancel', async () => {
         process.argv = ['bun', 'blade', 'diff'];
         setupMigrationTest({
           modelDiff: [],
@@ -498,7 +500,7 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test('diff with same diff as latest migration and create', async () => {
+      test.only('diff with same diff as latest migration and create', async () => {
         process.argv = ['bun', 'blade', 'diff'];
         setupMigrationTest({
           modelDiff: [],
@@ -519,6 +521,7 @@ describe('CLI', () => {
         spyOn(Math, 'max').mockReturnValue(1);
 
         await run({ version: '1.0.0' });
+        console.error(stderrSpy.mock.calls);
         expect(writeFileSyncSpy.mock.calls[0][0]).toContain('migration-0002.ts');
         expect(
           stderrSpy.mock.calls.some(
