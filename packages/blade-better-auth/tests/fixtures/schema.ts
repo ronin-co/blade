@@ -1,4 +1,4 @@
-import { blob, boolean, date, link, model, string } from 'ronin/schema';
+import { blob, boolean, date, link, model, string } from 'blade/schema';
 
 export const User = model({
   slug: 'user',

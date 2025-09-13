@@ -1,7 +1,7 @@
 import { BetterAuthError } from 'better-auth';
 
 import type { Where } from 'better-auth';
-import type { createSyntaxFactory } from 'ronin';
+import type { createSyntaxFactory } from 'blade-client';
 import type { Model as BaseModel, ResultRecordBase } from 'blade-compiler';
 import type { CombinedInstructions } from 'blade-compiler';
 

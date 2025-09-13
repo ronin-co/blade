@@ -1,5 +1,5 @@
 import type { Model } from 'blade-compiler';
-import { blob, boolean, date, json, link, model, number, string } from 'ronin/schema';
+import { blob, boolean, date, json, link, model, number, string } from 'blade/schema';
 
 export const CONSTANTS = {
   FIRSTNAME: 'Cornelius',

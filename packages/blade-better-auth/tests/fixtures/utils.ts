@@ -1,12 +1,12 @@
 import { betterAuth } from 'better-auth';
 import type { BetterAuthOptions } from 'better-auth';
 import { bearer } from 'better-auth/plugins';
+import { createSyntaxFactory } from 'blade-client';
 import { ROOT_MODEL, Transaction } from 'blade-compiler';
 import type { Model, Query, ResultRecord } from 'blade-compiler';
 import { type Database, Hive } from 'hive';
 import { BunDriver } from 'hive/bun-driver';
 import { MemoryStorage } from 'hive/memory-storage';
-import { createSyntaxFactory } from 'ronin';
 
 import { Account, Session, User, Verification } from '@/fixtures/schema';
 import { ronin } from '@/index';
