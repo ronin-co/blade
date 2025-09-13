@@ -200,7 +200,7 @@ describe('CLI', () => {
           (path) => !path.toString().includes('.ronin/db.sqlite'),
         );
         spyOn(path, 'resolve').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
 
         // Mock fetch
@@ -267,7 +267,7 @@ describe('CLI', () => {
         (path) => !path.toString().includes('.ronin/db.sqlite'),
       );
       spyOn(path, 'resolve').mockReturnValue(
-        path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+        path.join(__dirname, 'fixtures/migration-fixture.ts'),
       );
     };
 
@@ -333,7 +333,7 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test.only('changes detected', async () => {
+      test('changes detected', async () => {
         process.argv = ['bun', 'blade', 'diff', '--sql'];
         setupMigrationTest();
 
@@ -346,6 +346,9 @@ describe('CLI', () => {
             (call) => typeof call[0] === 'string' && call[0].includes('Comparing models'),
           ),
         ).toBe(true);
+
+        console.error(stderrSpy.mock.calls);
+
         expect(
           stderrSpy.mock.calls.some(
             (call) =>
@@ -420,11 +423,13 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test.only('force-create flag', async () => {
+      test('force-create flag', async () => {
         process.argv = ['bun', 'blade', 'diff', '--force-create'];
         setupMigrationTest();
 
         await run({ version: '1.0.0' });
+
+        console.error(writeFileSyncSpy.mock.calls);
 
         expect(writeFileSyncSpy.mock.calls[0][1]).toContain(
           `create.model({ slug: \"user\", fields: { name: { type: \"string\" }, age: { type: \"number\" } } })`,
@@ -445,11 +450,13 @@ describe('CLI', () => {
         }
       });
 
-      test.only('force-drop flag', async () => {
+      test('force-drop flag', async () => {
         process.argv = ['bun', 'blade', 'diff', '--force-drop'];
         setupMigrationTest();
 
         await run({ version: '1.0.0' });
+
+        console.error(writeFileSyncSpy.mock.calls);
 
         expect(writeFileSyncSpy.mock.calls[0][1]).toContain(
           `import { drop } from \"ronin\";\n\nexport default () => [\n  drop.model(\"user\"),\n];\n`,
@@ -470,7 +477,7 @@ describe('CLI', () => {
         }
       });
 
-      test.only('diff with same diff as latest migration and cancel', async () => {
+      test('diff with same diff as latest migration and cancel', async () => {
         process.argv = ['bun', 'blade', 'diff'];
         setupMigrationTest({
           modelDiff: [],
@@ -485,11 +492,13 @@ describe('CLI', () => {
         // @ts-expect-error This is a mock.
         spyOn(fs, 'readdirSync').mockReturnValue(['migration-fixture.ts']);
         spyOn(path, 'join').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
         spyOn(confirmModule, 'confirm').mockResolvedValue(false);
 
         await run({ version: '1.0.0' });
+
+        console.error(stderrSpy.mock.calls);
 
         expect(
           stderrSpy.mock.calls.some(
@@ -500,7 +509,7 @@ describe('CLI', () => {
         ).toBe(true);
       });
 
-      test.only('diff with same diff as latest migration and create', async () => {
+      test('diff with same diff as latest migration and create', async () => {
         process.argv = ['bun', 'blade', 'diff'];
         setupMigrationTest({
           modelDiff: [],
@@ -515,7 +524,7 @@ describe('CLI', () => {
         // @ts-expect-error This is a mock.
         spyOn(fs, 'readdirSync').mockReturnValue(['migration-fixture.ts']);
         spyOn(path, 'join').mockReturnValueOnce(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
         spyOn(confirmModule, 'confirm').mockResolvedValue(true);
         spyOn(Math, 'max').mockReturnValue(1);
@@ -576,7 +585,7 @@ describe('CLI', () => {
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
 
         await run({ version: '1.0.0' });
@@ -661,7 +670,7 @@ describe('CLI', () => {
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
 
         await run({ version: '1.0.0' });
