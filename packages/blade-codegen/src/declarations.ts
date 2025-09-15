@@ -211,85 +211,6 @@ export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
 /**
  * @todo(@nurodev): Add documentation
  */
-export const rootCallerQueryType = factory.createTypeAliasDeclaration(
-  undefined,
-  identifiers.syntax.rootCaller,
-  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
-  factory.createFunctionTypeNode(
-    [
-      factory.createTypeParameterDeclaration(
-        undefined,
-        typeArgumentIdentifiers.default,
-        undefined,
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
-      ),
-    ],
-    [
-      factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        'instructions',
-        factory.createToken(SyntaxKind.QuestionToken),
-        factory.createTypeReferenceNode(identifiers.primitive.partial, [
-          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-        ]),
-      ),
-      sharedQueryOptionsParameter,
-    ],
-    // options?.promise
-    //   ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-    //       factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-    //     ])
-    //   :
-    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-  ),
-);
-
-/**
- * @todo(@nurodev): Add documentation
- */
-export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
-  undefined,
-  identifiers.syntax.rootCallerPromise,
-  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
-  factory.createFunctionTypeNode(
-    [
-      factory.createTypeParameterDeclaration(
-        undefined,
-        typeArgumentIdentifiers.default,
-        undefined,
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
-      ),
-    ],
-    [
-      factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        'instructions',
-        factory.createToken(SyntaxKind.QuestionToken),
-        factory.createTypeReferenceNode(identifiers.primitive.partial, [
-          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-        ]),
-      ),
-      sharedQueryOptionsParameter,
-    ],
-    factory.createTypeReferenceNode(identifiers.primitive.promise, [
-      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-    ]),
-  ),
-);
-
-/**
- * ```ts
- * type OrderedByQuery<U, F> = ReducedFunction & (<T = U>(options: {
- *  ascending?: Array<Expression | F>;
- *  descending?: Array<Expression | F>;
- * }) => T) & {
- *  ascending: <T = U>(fields: Array<Expression | F>) => T;
- *  descending: <T = U>(fields: Array<Expression | F>) => T;
- * };
- * ```
- */
 export const orderedByQueryType = factory.createTypeAliasDeclaration(
   undefined,
   identifiers.syntax.orderedByQuery,
@@ -380,15 +301,7 @@ export const orderedByQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * ```ts
- * type OrderedByQueryPromise<U, F> = ReducedFunction & (<T = U>(options: {
- *  ascending?: Array<Expression | F>;
- *  descending?: Array<Expression | F>;
- * }) => Promise<T>) & {
- *  ascending: <T = U>(fields: Array<Expression | F>) => Promise<T>;
- *  descending: <T = U>(fields: Array<Expression | F>) => Promise<T>;
- * };
- * ```
+ * @todo(@nurodev): Add documentation
  */
 export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -484,18 +397,73 @@ export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * ```ts
- * type WithQuery<U> = ReducedFunction & {
- *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
- *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
- *  ronin: ReducedFunction & {
- *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
- *    createdBy: <T = U>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
- *    updatedAt: <T = U>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
- *    updatedBy: <T = U>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
- *  };
- * };
- * ```
+ * @todo(@nurodev): Add documentation
+ */
+export const rootCallerQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.rootCaller,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createFunctionTypeNode(
+    [
+      factory.createTypeParameterDeclaration(
+        undefined,
+        typeArgumentIdentifiers.default,
+        undefined,
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+      ),
+    ],
+    [
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'instructions',
+        factory.createToken(SyntaxKind.QuestionToken),
+        factory.createTypeReferenceNode(identifiers.primitive.partial, [
+          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+        ]),
+      ),
+      sharedQueryOptionsParameter,
+    ],
+    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+  ),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.rootCallerPromise,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createFunctionTypeNode(
+    [
+      factory.createTypeParameterDeclaration(
+        undefined,
+        typeArgumentIdentifiers.default,
+        undefined,
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+      ),
+    ],
+    [
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'instructions',
+        factory.createToken(SyntaxKind.QuestionToken),
+        factory.createTypeReferenceNode(identifiers.primitive.partial, [
+          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+        ]),
+      ),
+      sharedQueryOptionsParameter,
+    ],
+    factory.createTypeReferenceNode(identifiers.primitive.promise, [
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ]),
+  ),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
  */
 export const withQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -628,18 +596,7 @@ export const withQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * ```ts
- * type WithQueryPromise<U> = ReducedFunction & {
- *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
- *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
- *  ronin: ReducedFunction & {
- *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
- *    createdBy: <T = U>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
- *    updatedAt: <T = U>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
- *    updatedBy: <T = U>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
- *  };
- * };
- * ```
+ * @todo(@nurodev): Add documentation
  */
 export const withQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
