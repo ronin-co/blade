@@ -721,7 +721,7 @@ export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const rootCallerQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.rootCaller,
+  identifiers.syntax.rootQueryCaller,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createFunctionTypeNode(
     [
@@ -753,7 +753,7 @@ export const rootCallerQueryType = factory.createTypeAliasDeclaration(
  */
 export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.rootCallerPromise,
+  identifiers.syntax.rootQueryCallerPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createFunctionTypeNode(
     [
