@@ -531,90 +531,6 @@ export const limitedToQueryPromiseType = factory.createTypeAliasDeclaration(
 /**
  * @todo(@nurodev): Add documentation
  */
-export const selectingQueryType = factory.createTypeAliasDeclaration(
-  undefined,
-  identifiers.syntax.selectingQuery,
-  [
-    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
-    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
-  ],
-  factory.createIntersectionTypeNode([
-    factory.createExpressionWithTypeArguments(
-      identifiers.blade.reducedFunction,
-      undefined,
-    ),
-    factory.createFunctionTypeNode(
-      [
-        factory.createTypeParameterDeclaration(
-          undefined,
-          typeArgumentIdentifiers.default,
-          undefined,
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
-        ),
-      ],
-      [
-        factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          'instructions',
-          undefined,
-          factory.createTypeReferenceNode(identifiers.primitive.array, [
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.options),
-          ]),
-        ),
-        sharedQueryOptionsParameter,
-      ],
-      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-    ),
-  ]),
-);
-
-/**
- * @todo(@nurodev): Add documentation
- */
-export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
-  undefined,
-  identifiers.syntax.selectingQueryPromise,
-  [
-    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
-    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
-  ],
-  factory.createIntersectionTypeNode([
-    factory.createExpressionWithTypeArguments(
-      identifiers.blade.reducedFunction,
-      undefined,
-    ),
-    factory.createFunctionTypeNode(
-      [
-        factory.createTypeParameterDeclaration(
-          undefined,
-          typeArgumentIdentifiers.default,
-          undefined,
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
-        ),
-      ],
-      [
-        factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          'instructions',
-          undefined,
-          factory.createTypeReferenceNode(identifiers.primitive.array, [
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.options),
-          ]),
-        ),
-        sharedQueryOptionsParameter,
-      ],
-      factory.createTypeReferenceNode(identifiers.primitive.promise, [
-        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-      ]),
-    ),
-  ]),
-);
-
-/**
- * @todo(@nurodev): Add documentation
- */
 export const orderedByQueryType = factory.createTypeAliasDeclaration(
   undefined,
   identifiers.syntax.orderedByQuery,
@@ -864,6 +780,90 @@ export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
       factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
     ]),
   ),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const selectingQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.selectingQuery,
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
+  ],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'instructions',
+          undefined,
+          factory.createTypeReferenceNode(identifiers.primitive.array, [
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.options),
+          ]),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ),
+  ]),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.selectingQueryPromise,
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
+  ],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'instructions',
+          undefined,
+          factory.createTypeReferenceNode(identifiers.primitive.array, [
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.options),
+          ]),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(identifiers.primitive.promise, [
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ]),
+    ),
+  ]),
 );
 
 /**
