@@ -479,7 +479,7 @@ export const generateNamespaces = (models: Array<Model>) =>
      */
     const fieldSlugType = factory.createTypeAliasDeclaration(
       undefined,
-      identifiers.syntax.fieldSlug,
+      identifiers.namespace.syntax.fieldSlug,
       undefined,
       factory.createUnionTypeNode(
         [...DEFAULT_FIELD_SLUGS, ...Object.keys(model.fields)].map((slug) =>
@@ -488,50 +488,52 @@ export const generateNamespaces = (models: Array<Model>) =>
       ),
     );
 
-    /**
-     * @example
-     * ```ts
-     * User | null
-     * ```
-     */
     const singularModelNode = factory.createUnionTypeNode([
       factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
       factory.createLiteralTypeNode(factory.createNull()),
     ]);
 
-    /**
-     * @example
-     * ```ts
-     * namespace Singular { ... }
-     * ```
-     */
     const singularNamespace = factory.createModuleDeclaration(
       undefined,
-      identifiers.syntax.singular,
-      factory.createModuleBlock([]),
+      identifiers.namespace.syntax.singular,
+      factory.createModuleBlock([
+        factory.createTypeAliasDeclaration(
+          undefined,
+          identifiers.namespace.utils.rootQueryCaller,
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.utils.name,
+              identifiers.namespace.utils.rootQueryCaller,
+            ),
+            [singularModelNode],
+          ),
+        ),
+      ]),
       NodeFlags.Namespace,
     );
 
-    /**
-     * @example
-     * ```ts
-     * Users
-     * ```
-     */
     const pluralModelNode = factory.createTypeReferenceNode(
       convertToPascalCase(model.pluralSlug),
     );
 
-    /**
-     * @example
-     * ```ts
-     * namespace Plural { ... }
-     * ```
-     */
     const pluralNamespace = factory.createModuleDeclaration(
       undefined,
-      identifiers.syntax.plural,
-      factory.createModuleBlock([]),
+      identifiers.namespace.syntax.plural,
+      factory.createModuleBlock([
+        factory.createTypeAliasDeclaration(
+          undefined,
+          identifiers.namespace.utils.rootQueryCaller,
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.utils.name,
+              identifiers.namespace.utils.rootQueryCaller,
+            ),
+            [pluralModelNode],
+          ),
+        ),
+      ]),
       NodeFlags.Namespace,
     );
 

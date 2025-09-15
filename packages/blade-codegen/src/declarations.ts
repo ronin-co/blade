@@ -213,7 +213,7 @@ export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
  */
 export const afterQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.afterQuery,
+  identifiers.namespace.utils.afterQuery,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -252,7 +252,7 @@ export const afterQueryType = factory.createTypeAliasDeclaration(
  */
 export const afterQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.afterQueryPromise,
+  identifiers.namespace.utils.afterQueryPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -293,7 +293,7 @@ export const afterQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const beforeQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.beforeQuery,
+  identifiers.namespace.utils.beforeQuery,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -332,7 +332,7 @@ export const beforeQueryType = factory.createTypeAliasDeclaration(
  */
 export const beforeQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.beforeQueryPromise,
+  identifiers.namespace.utils.beforeQueryPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -373,7 +373,7 @@ export const beforeQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const includingQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.includingQuery,
+  identifiers.namespace.utils.includingQuery,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -412,7 +412,7 @@ export const includingQueryType = factory.createTypeAliasDeclaration(
  */
 export const includingQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.includingQueryPromise,
+  identifiers.namespace.utils.includingQueryPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -453,7 +453,7 @@ export const includingQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const limitedToQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.limitedToQuery,
+  identifiers.namespace.utils.limitedToQuery,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -492,7 +492,7 @@ export const limitedToQueryType = factory.createTypeAliasDeclaration(
  */
 export const limitedToQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.limitedToQueryPromise,
+  identifiers.namespace.utils.limitedToQueryPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -533,7 +533,7 @@ export const limitedToQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const orderedByQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.orderedByQuery,
+  identifiers.namespace.utils.orderedByQuery,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
     factory.createTypeParameterDeclaration(
@@ -625,7 +625,7 @@ export const orderedByQueryType = factory.createTypeAliasDeclaration(
  */
 export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.orderedByQueryPromise,
+  identifiers.namespace.utils.orderedByQueryPromise,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
     factory.createTypeParameterDeclaration(
@@ -721,7 +721,7 @@ export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const rootCallerQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.rootQueryCaller,
+  identifiers.namespace.utils.rootQueryCaller,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createFunctionTypeNode(
     [
@@ -753,7 +753,7 @@ export const rootCallerQueryType = factory.createTypeAliasDeclaration(
  */
 export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.rootQueryCallerPromise,
+  identifiers.namespace.utils.rootQueryCallerPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createFunctionTypeNode(
     [
@@ -787,7 +787,7 @@ export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const selectingQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.selectingQuery,
+  identifiers.namespace.utils.selectingQuery,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
@@ -828,7 +828,7 @@ export const selectingQueryType = factory.createTypeAliasDeclaration(
  */
 export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.selectingQueryPromise,
+  identifiers.namespace.utils.selectingQueryPromise,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
@@ -871,7 +871,7 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const withQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.withQuery,
+  identifiers.namespace.utils.withQuery,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
@@ -1004,7 +1004,7 @@ export const withQueryType = factory.createTypeAliasDeclaration(
  */
 export const withQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.withQueryPromise,
+  identifiers.namespace.utils.withQueryPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
