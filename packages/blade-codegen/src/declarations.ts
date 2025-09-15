@@ -790,7 +790,7 @@ export const selectingQueryType = factory.createTypeAliasDeclaration(
   identifiers.namespace.utils.selectingQuery,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
-    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.fields),
   ],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -813,7 +813,7 @@ export const selectingQueryType = factory.createTypeAliasDeclaration(
           'instructions',
           undefined,
           factory.createTypeReferenceNode(identifiers.primitive.array, [
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.options),
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.fields),
           ]),
         ),
         sharedQueryOptionsParameter,
@@ -831,7 +831,7 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
   identifiers.namespace.utils.selectingQueryPromise,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
-    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.options),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.fields),
   ],
   factory.createIntersectionTypeNode([
     factory.createExpressionWithTypeArguments(
@@ -854,7 +854,7 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
           'instructions',
           undefined,
           factory.createTypeReferenceNode(identifiers.primitive.array, [
-            factory.createTypeReferenceNode(typeArgumentIdentifiers.options),
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.fields),
           ]),
         ),
         sharedQueryOptionsParameter,

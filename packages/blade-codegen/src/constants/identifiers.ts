@@ -98,7 +98,6 @@ export const typeArgumentIdentifiers = {
   default: factory.createIdentifier('T'),
   fields: factory.createIdentifier('F'),
   key: factory.createIdentifier('K'),
-  options: factory.createIdentifier('O'),
   queries: factory.createIdentifier('Q'),
   schema: factory.createIdentifier('S'),
   using: factory.createIdentifier('U'),
