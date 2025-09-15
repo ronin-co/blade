@@ -20,6 +20,8 @@ import {
   resolveSchemaType,
   rootCallerQueryPromiseType,
   rootCallerQueryType,
+  selectingQueryPromiseType,
+  selectingQueryType,
   withQueryPromiseType,
   withQueryType,
 } from '@/src/declarations';
@@ -90,6 +92,8 @@ export const generate = (models: Array<Model>): string => {
     orderedByQueryPromiseType,
     rootCallerQueryType,
     rootCallerQueryPromiseType,
+    selectingQueryType,
+    selectingQueryPromiseType,
     withQueryType,
     withQueryPromiseType,
   );

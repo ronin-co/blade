@@ -53,16 +53,18 @@ export const identifiers = {
     afterQueryPromise: factory.createIdentifier('AfterQueryPromise'),
     beforeQuery: factory.createIdentifier('BeforeQuery'),
     beforeQueryPromise: factory.createIdentifier('BeforeQueryPromise'),
+    fieldSlug: factory.createIdentifier('FieldSlug'),
     includingQuery: factory.createIdentifier('IncludingQuery'),
     includingQueryPromise: factory.createIdentifier('IncludingQueryPromise'),
     limitedToQuery: factory.createIdentifier('LimitedToQuery'),
     limitedToQueryPromise: factory.createIdentifier('LimitedToQueryPromise'),
-    fieldSlug: factory.createIdentifier('FieldSlug'),
     orderedByQuery: factory.createIdentifier('OrderedByQuery'),
     orderedByQueryPromise: factory.createIdentifier('OrderedByQueryPromise'),
     plural: factory.createIdentifier('Plural'),
     rootCaller: factory.createIdentifier('RootCaller'),
     rootCallerPromise: factory.createIdentifier('RootCallerPromise'),
+    selectingQuery: factory.createIdentifier('SelectingQuery'),
+    selectingQueryPromise: factory.createIdentifier('SelectingQueryPromise'),
     singular: factory.createIdentifier('Singular'),
     withQuery: factory.createIdentifier('WithQuery'),
     withQueryPromise: factory.createIdentifier('WithQueryPromise'),
@@ -83,11 +85,14 @@ export const identifiers = {
  * A list of all generic names used in the `blade-codegen` package.
  *
  * Similar to `identifiers` but designed specifically for use as generic names.
+ *
+ * TODO(@nurodev): Remove unused identifiers
  */
 export const typeArgumentIdentifiers = {
   default: factory.createIdentifier('T'),
   fields: factory.createIdentifier('F'),
   key: factory.createIdentifier('K'),
+  options: factory.createIdentifier('O'),
   queries: factory.createIdentifier('Q'),
   schema: factory.createIdentifier('S'),
   using: factory.createIdentifier('U'),
