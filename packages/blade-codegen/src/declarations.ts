@@ -207,6 +207,78 @@ export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
     factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
   ]),
 );
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const rootCallerQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.rootCaller,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createFunctionTypeNode(
+    [
+      factory.createTypeParameterDeclaration(
+        undefined,
+        typeArgumentIdentifiers.default,
+        undefined,
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+      ),
+    ],
+    [
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'instructions',
+        factory.createToken(SyntaxKind.QuestionToken),
+        factory.createTypeReferenceNode(identifiers.primitive.partial, [
+          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+        ]),
+      ),
+      sharedQueryOptionsParameter,
+    ],
+    // options?.promise
+    //   ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+    //       factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    //     ])
+    //   :
+    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+  ),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.rootCallerPromise,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createFunctionTypeNode(
+    [
+      factory.createTypeParameterDeclaration(
+        undefined,
+        typeArgumentIdentifiers.default,
+        undefined,
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+      ),
+    ],
+    [
+      factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'instructions',
+        factory.createToken(SyntaxKind.QuestionToken),
+        factory.createTypeReferenceNode(identifiers.primitive.partial, [
+          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+        ]),
+      ),
+      sharedQueryOptionsParameter,
+    ],
+    factory.createTypeReferenceNode(identifiers.primitive.promise, [
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ]),
+  ),
+);
+
 /**
  * ```ts
  * type OrderedByQuery<U, F> = ReducedFunction & (<T = U>(options: {
@@ -220,7 +292,7 @@ export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
  */
 export const orderedByQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.utils.orderedByQuery,
+  identifiers.syntax.orderedByQuery,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
     factory.createTypeParameterDeclaration(
@@ -320,7 +392,7 @@ export const orderedByQueryType = factory.createTypeAliasDeclaration(
  */
 export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.utils.orderedByQueryPromise,
+  identifiers.syntax.orderedByQueryPromise,
   [
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
     factory.createTypeParameterDeclaration(
@@ -427,7 +499,7 @@ export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
  */
 export const withQueryType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.utils.withQuery,
+  identifiers.syntax.withQuery,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
@@ -571,7 +643,7 @@ export const withQueryType = factory.createTypeAliasDeclaration(
  */
 export const withQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
-  identifiers.syntax.utils.withQueryPromise,
+  identifiers.syntax.withQueryPromise,
   [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
   factory.createIntersectionTypeNode([
     factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
