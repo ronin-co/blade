@@ -51,6 +51,8 @@ export const identifiers = {
   syntax: {
     afterQuery: factory.createIdentifier('AfterQuery'),
     afterQueryPromise: factory.createIdentifier('AfterQueryPromise'),
+    beforeQuery: factory.createIdentifier('BeforeQuery'),
+    beforeQueryPromise: factory.createIdentifier('BeforeQueryPromise'),
     fieldSlug: factory.createIdentifier('FieldSlug'),
     orderedByQuery: factory.createIdentifier('OrderedByQuery'),
     orderedByQueryPromise: factory.createIdentifier('OrderedByQueryPromise'),

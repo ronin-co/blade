@@ -4,6 +4,8 @@ import { identifiers } from '@/src/constants/identifiers';
 import {
   afterQueryPromiseType,
   afterQueryType,
+  beforeQueryPromiseType,
+  beforeQueryType,
   importBladeCompilerStoredObjectType,
   importBladeUtilsType,
   jsonArrayType,
@@ -74,6 +76,8 @@ export const generate = (models: Array<Model>): string => {
   nodes.push(
     afterQueryType,
     afterQueryPromiseType,
+    beforeQueryType,
+    beforeQueryPromiseType,
     orderedByQueryType,
     orderedByQueryPromiseType,
     rootCallerQueryType,
