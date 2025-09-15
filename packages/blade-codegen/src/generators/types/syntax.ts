@@ -151,106 +151,30 @@ export const generateOrderedBySyntaxProperty = (
   options: BaseGeneratorOptions & {
     model: Model;
   },
-): TypeAliasDeclaration => {
-  const typedFields = factory.createTypeReferenceNode(identifiers.primitive.array, [
-    factory.createUnionTypeNode([
-      factory.createTypeReferenceNode(identifiers.compiler.expression),
-      factory.createTypeReferenceNode(
-        factory.createQualifiedName(
-          factory.createIdentifier(`${convertToPascalCase(options.model.slug)}Syntax`),
-          identifiers.syntax.fieldSlug,
-        ),
-      ),
-    ]),
-  ]);
-
-  return factory.createTypeAliasDeclaration(
+): TypeAliasDeclaration =>
+  factory.createTypeAliasDeclaration(
     undefined,
     options.promise ? identifiers.syntax.orderedByPromise : identifiers.syntax.orderedBy,
     undefined,
     factory.createIntersectionTypeNode([
-      // factory.createExpressionWithTypeArguments(
-      //   identifiers.blade.reducedFunction,
-      //   undefined,
-      // ),
-      // factory.createFunctionTypeNode(
-      //   [
-      //     factory.createTypeParameterDeclaration(
-      //       undefined,
-      //       typeArgumentIdentifiers.default,
-      //       undefined,
-      //       options.modelNode,
-      //     ),
-      //   ],
-      //   [
-      //     factory.createParameterDeclaration(
-      //       undefined,
-      //       undefined,
-      //       'instructions',
-      //       undefined,
-      //       factory.createTypeLiteralNode(
-      //         ['ascending', 'descending'].map((name) =>
-      //           factory.createPropertySignature(
-      //             undefined,
-      //             name,
-      //             factory.createToken(SyntaxKind.QuestionToken),
-      //             typedFields,
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //     sharedQueryOptionsParameter,
-      //   ],
-      //   options?.promise
-      //     ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-      //         factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-      //       ])
-      //     : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-      // ),
-      // factory.createTypeLiteralNode(
-      //   ['ascending', 'descending'].map((name) =>
-      //     factory.createPropertySignature(
-      //       undefined,
-      //       name,
-      //       undefined,
-      //       factory.createFunctionTypeNode(
-      //         [
-      //           factory.createTypeParameterDeclaration(
-      //             undefined,
-      //             typeArgumentIdentifiers.default,
-      //             undefined,
-      //             options.modelNode,
-      //           ),
-      //         ],
-      //         [
-      //           factory.createParameterDeclaration(
-      //             undefined,
-      //             undefined,
-      //             'fields',
-      //             undefined,
-      //             typedFields,
-      //           ),
-      //           sharedQueryOptionsParameter,
-      //         ],
-      //         options?.promise
-      //           ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-      //               factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-      //             ])
-      //           : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-      //       ),
-      //     ),
-      //   ),
-      // ),
-
       factory.createExpressionWithTypeArguments(
         options.promise
           ? identifiers.syntax.utils.orderedByQueryPromise
           : identifiers.syntax.utils.orderedByQuery,
-        [options.modelNode, typedFields],
+        [
+          options.modelNode,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createIdentifier(
+                `${convertToPascalCase(options.model.slug)}Syntax`,
+              ),
+              identifiers.syntax.fieldSlug,
+            ),
+          ),
+        ],
       ),
     ]),
   );
-};
 
 /**
  * Generates the syntax property for `selecting` fields.
