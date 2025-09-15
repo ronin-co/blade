@@ -1,4 +1,4 @@
-import { SyntaxKind, factory } from 'typescript';
+import { NodeFlags, SyntaxKind, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
@@ -6,7 +6,13 @@ import { sharedQueryOptionsParameter } from '@/src/declarations';
 import { convertToPascalCase } from '@/src/utils/slug';
 
 import type { CombinedInstructions } from 'blade-compiler';
-import type { TypeElement, TypeNode } from 'typescript';
+import type {
+  Identifier,
+  ModuleDeclaration,
+  TypeAliasDeclaration,
+  TypeElement,
+  TypeNode,
+} from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
@@ -28,32 +34,39 @@ interface BaseGeneratorOptions {
  * @returns A call signature node.
  */
 export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
-  factory.createCallSignature(
-    [
-      factory.createTypeParameterDeclaration(
-        undefined,
-        typeArgumentIdentifiers.default,
-        undefined,
-        options.modelNode,
-      ),
-    ],
-    [
-      factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        'instructions',
-        factory.createToken(SyntaxKind.QuestionToken),
-        factory.createTypeReferenceNode(identifiers.primitive.partial, [
-          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-        ]),
-      ),
-      sharedQueryOptionsParameter,
-    ],
-    options?.promise
-      ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-        ])
-      : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+  factory.createTypeAliasDeclaration(
+    undefined,
+    options.promise
+      ? identifiers.syntax.rootCallerPromise
+      : identifiers.syntax.rootCaller,
+    undefined,
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          options.modelNode,
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'instructions',
+          factory.createToken(SyntaxKind.QuestionToken),
+          factory.createTypeReferenceNode(identifiers.primitive.partial, [
+            factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+          ]),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      options?.promise
+        ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+          ])
+        : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ),
   );
 
 /**
@@ -70,10 +83,11 @@ export const generateRootQueryCallSignature = (options: BaseGeneratorOptions) =>
  */
 export const generateDefaultSyntaxProperty = (
   options: BaseGeneratorOptions & {
-    name: keyof CombinedInstructions;
+    name: string | Identifier;
+    instruction: keyof CombinedInstructions;
   },
-) =>
-  factory.createPropertySignature(
+): TypeAliasDeclaration =>
+  factory.createTypeAliasDeclaration(
     undefined,
     options.name,
     undefined,
@@ -99,7 +113,9 @@ export const generateDefaultSyntaxProperty = (
             undefined,
             factory.createIndexedAccessTypeNode(
               factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-              factory.createLiteralTypeNode(factory.createStringLiteral(options.name)),
+              factory.createLiteralTypeNode(
+                factory.createStringLiteral(options.instruction),
+              ),
             ),
           ),
           sharedQueryOptionsParameter,
@@ -135,92 +151,102 @@ export const generateOrderedBySyntaxProperty = (
   options: BaseGeneratorOptions & {
     model: Model;
   },
-) => {
+): TypeAliasDeclaration => {
   const typedFields = factory.createTypeReferenceNode(identifiers.primitive.array, [
     factory.createUnionTypeNode([
       factory.createTypeReferenceNode(identifiers.compiler.expression),
       factory.createTypeReferenceNode(
-        factory.createIdentifier(`${convertToPascalCase(options.model.slug)}FieldSlug`),
+        factory.createQualifiedName(
+          factory.createIdentifier(`${convertToPascalCase(options.model.slug)}Syntax`),
+          identifiers.syntax.fieldSlug,
+        ),
       ),
     ]),
   ]);
 
-  return factory.createPropertySignature(
+  return factory.createTypeAliasDeclaration(
     undefined,
-    'orderedBy',
+    options.promise ? identifiers.syntax.orderedByPromise : identifiers.syntax.orderedBy,
     undefined,
     factory.createIntersectionTypeNode([
+      // factory.createExpressionWithTypeArguments(
+      //   identifiers.blade.reducedFunction,
+      //   undefined,
+      // ),
+      // factory.createFunctionTypeNode(
+      //   [
+      //     factory.createTypeParameterDeclaration(
+      //       undefined,
+      //       typeArgumentIdentifiers.default,
+      //       undefined,
+      //       options.modelNode,
+      //     ),
+      //   ],
+      //   [
+      //     factory.createParameterDeclaration(
+      //       undefined,
+      //       undefined,
+      //       'instructions',
+      //       undefined,
+      //       factory.createTypeLiteralNode(
+      //         ['ascending', 'descending'].map((name) =>
+      //           factory.createPropertySignature(
+      //             undefined,
+      //             name,
+      //             factory.createToken(SyntaxKind.QuestionToken),
+      //             typedFields,
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //     sharedQueryOptionsParameter,
+      //   ],
+      //   options?.promise
+      //     ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+      //         factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      //       ])
+      //     : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      // ),
+      // factory.createTypeLiteralNode(
+      //   ['ascending', 'descending'].map((name) =>
+      //     factory.createPropertySignature(
+      //       undefined,
+      //       name,
+      //       undefined,
+      //       factory.createFunctionTypeNode(
+      //         [
+      //           factory.createTypeParameterDeclaration(
+      //             undefined,
+      //             typeArgumentIdentifiers.default,
+      //             undefined,
+      //             options.modelNode,
+      //           ),
+      //         ],
+      //         [
+      //           factory.createParameterDeclaration(
+      //             undefined,
+      //             undefined,
+      //             'fields',
+      //             undefined,
+      //             typedFields,
+      //           ),
+      //           sharedQueryOptionsParameter,
+      //         ],
+      //         options?.promise
+      //           ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+      //               factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      //             ])
+      //           : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      //       ),
+      //     ),
+      //   ),
+      // ),
+
       factory.createExpressionWithTypeArguments(
-        identifiers.blade.reducedFunction,
-        undefined,
-      ),
-      factory.createFunctionTypeNode(
-        [
-          factory.createTypeParameterDeclaration(
-            undefined,
-            typeArgumentIdentifiers.default,
-            undefined,
-            options.modelNode,
-          ),
-        ],
-        [
-          factory.createParameterDeclaration(
-            undefined,
-            undefined,
-            'instructions',
-            undefined,
-            factory.createTypeLiteralNode(
-              ['ascending', 'descending'].map((name) =>
-                factory.createPropertySignature(
-                  undefined,
-                  name,
-                  factory.createToken(SyntaxKind.QuestionToken),
-                  typedFields,
-                ),
-              ),
-            ),
-          ),
-          sharedQueryOptionsParameter,
-        ],
-        options?.promise
-          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-            ])
-          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-      ),
-      factory.createTypeLiteralNode(
-        ['ascending', 'descending'].map((name) =>
-          factory.createPropertySignature(
-            undefined,
-            name,
-            undefined,
-            factory.createFunctionTypeNode(
-              [
-                factory.createTypeParameterDeclaration(
-                  undefined,
-                  typeArgumentIdentifiers.default,
-                  undefined,
-                  options.modelNode,
-                ),
-              ],
-              [
-                factory.createParameterDeclaration(
-                  undefined,
-                  undefined,
-                  'fields',
-                  undefined,
-                  typedFields,
-                ),
-                sharedQueryOptionsParameter,
-              ],
-              options?.promise
-                ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-                  ])
-                : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-            ),
-          ),
-        ),
+        options.promise
+          ? identifiers.syntax.utils.orderedByQueryPromise
+          : identifiers.syntax.utils.orderedByQuery,
+        [options.modelNode, typedFields],
       ),
     ]),
   );
@@ -242,10 +268,10 @@ export const generateSelectingSyntaxProperty = (
   options: BaseGeneratorOptions & {
     model: Model;
   },
-) =>
-  factory.createPropertySignature(
+): TypeAliasDeclaration =>
+  factory.createTypeAliasDeclaration(
     undefined,
-    'selecting',
+    options.promise ? identifiers.syntax.selectingPromise : identifiers.syntax.selecting,
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
@@ -269,8 +295,11 @@ export const generateSelectingSyntaxProperty = (
             undefined,
             factory.createTypeReferenceNode(identifiers.primitive.array, [
               factory.createTypeReferenceNode(
-                factory.createIdentifier(
-                  `${convertToPascalCase(options.model.slug)}FieldSlug`,
+                factory.createQualifiedName(
+                  factory.createIdentifier(
+                    `${convertToPascalCase(options.model.slug)}Syntax`,
+                  ),
+                  identifiers.syntax.fieldSlug,
                 ),
               ),
             ]),
@@ -306,13 +335,14 @@ export const generateUsingSyntaxProperty = (
     slug: string;
     isPlural?: boolean;
   },
-) => {
+): TypeAliasDeclaration => {
   const hasLinkFields = Object.values(options.model.fields).some(
     (field) => field.type === 'link',
   );
   if (!hasLinkFields)
     return generateDefaultSyntaxProperty({
-      name: 'using',
+      instruction: 'using',
+      name: options.promise ? identifiers.syntax.usingPromise : identifiers.syntax.using,
       modelNode: options.modelNode,
     });
 
@@ -349,9 +379,9 @@ export const generateUsingSyntaxProperty = (
       ])
     : baseModelWithFields;
 
-  return factory.createPropertySignature(
+  return factory.createTypeAliasDeclaration(
     undefined,
-    'using',
+    options.promise ? identifiers.syntax.usingPromise : identifiers.syntax.using,
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
@@ -442,141 +472,9 @@ export const generateWithSyntaxProperty = (
   options: BaseGeneratorOptions & {
     model: Model;
   },
-) => {
-  /**
-   * ```ts
-   * <T = User | null>(options: CombinedInstructions["with"]): T
-   * ```
-   */
-  const rootCallSignature = factory.createCallSignature(
-    [
-      factory.createTypeParameterDeclaration(
-        undefined,
-        typeArgumentIdentifiers.default,
-        undefined,
-        options.modelNode,
-      ),
-    ],
-    [
-      factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        'instructions',
-        undefined,
-        factory.createIndexedAccessTypeNode(
-          factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-          factory.createLiteralTypeNode(factory.createStringLiteral('with')),
-        ),
-      ),
-      sharedQueryOptionsParameter,
-    ],
-    options?.promise
-      ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-        ])
-      : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-  );
+): TypeAliasDeclaration => {
+  const members = new Array<TypeElement>();
 
-  const members = new Array<TypeElement>(rootCallSignature);
-
-  // Add all top-level RONIN fields, such as `id`.
-  const topLevelFields = DEFAULT_FIELD_SLUGS.filter((slug) => !slug.startsWith('ronin.'));
-  for (const slug of topLevelFields) {
-    members.push(
-      factory.createPropertySignature(
-        undefined,
-        slug,
-        undefined,
-        factory.createFunctionTypeNode(
-          [
-            factory.createTypeParameterDeclaration(
-              undefined,
-              typeArgumentIdentifiers.default,
-              undefined,
-              options.modelNode,
-            ),
-          ],
-          [
-            factory.createParameterDeclaration(
-              undefined,
-              undefined,
-              'value',
-              undefined,
-              factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(identifiers.blade.resultRecord),
-                factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
-              ),
-            ),
-            sharedQueryOptionsParameter,
-          ],
-          options?.promise
-            ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-                factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-              ])
-            : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-        ),
-      ),
-    );
-  }
-
-  // Add all nested RONIN meta fields, such as `ronin.createdAt`, `ronin.createdBy`, etc.
-  const metaFields = DEFAULT_FIELD_SLUGS.filter((slug) => slug.startsWith('ronin.'));
-  const metaFieldsPropertySignatures = metaFields.map((slug) => {
-    const normalizedSlug = slug.replaceAll('ronin.', '');
-
-    return factory.createPropertySignature(
-      undefined,
-      normalizedSlug,
-      undefined,
-      factory.createFunctionTypeNode(
-        [
-          factory.createTypeParameterDeclaration(
-            undefined,
-            typeArgumentIdentifiers.default,
-            undefined,
-            options.modelNode,
-          ),
-        ],
-        [
-          factory.createParameterDeclaration(
-            undefined,
-            undefined,
-            'value',
-            undefined,
-            factory.createIndexedAccessTypeNode(
-              factory.createIndexedAccessTypeNode(
-                factory.createTypeReferenceNode(identifiers.blade.resultRecord),
-                factory.createLiteralTypeNode(factory.createStringLiteral('ronin')),
-              ),
-              factory.createLiteralTypeNode(factory.createStringLiteral(normalizedSlug)),
-            ),
-          ),
-          sharedQueryOptionsParameter,
-        ],
-        options?.promise
-          ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
-              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-            ])
-          : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-      ),
-    );
-  });
-  members.push(
-    factory.createPropertySignature(
-      undefined,
-      'ronin',
-      undefined,
-      factory.createIntersectionTypeNode([
-        factory.createExpressionWithTypeArguments(
-          identifiers.blade.reducedFunction,
-          undefined,
-        ),
-        factory.createTypeLiteralNode(metaFieldsPropertySignatures),
-      ]),
-    ),
-  );
-
-  // Create property signatures for all model fields.
   for (const slug of Object.keys(options.model.fields)) {
     if (DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug))) continue;
 
@@ -617,17 +515,443 @@ export const generateWithSyntaxProperty = (
     );
   }
 
-  return factory.createPropertySignature(
+  return factory.createTypeAliasDeclaration(
     undefined,
-    'with',
+    options.promise ? identifiers.syntax.withPromise : identifiers.syntax.with,
     undefined,
     factory.createIntersectionTypeNode([
       factory.createExpressionWithTypeArguments(
-        identifiers.blade.reducedFunction,
-        undefined,
+        options.promise
+          ? identifiers.syntax.utils.withQueryPromise
+          : identifiers.syntax.utils.withQuery,
+        [options.modelNode],
       ),
       // TODO(@nurodev): Add support for with conditions like `startingWith`, `notStartingWith`, etc.
       factory.createTypeLiteralNode(members),
     ]),
   );
 };
+
+/**
+ * @todo Add documentation
+ */
+export const generateNamespaces = (models: Array<Model>) => {
+  const nodes = new Array<ModuleDeclaration>();
+
+  for (const model of models) {
+    /**
+     * ```ts
+     * type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
+     * ```
+     */
+    const fieldSlugType = factory.createTypeAliasDeclaration(
+      undefined,
+      identifiers.syntax.fieldSlug,
+      undefined,
+      factory.createUnionTypeNode(
+        [...DEFAULT_FIELD_SLUGS, ...Object.keys(model.fields)].map((slug) =>
+          factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+        ),
+      ),
+    );
+
+    /**
+     * ```ts
+     * User | null
+     * ```
+     */
+    const singularModelNode = factory.createUnionTypeNode([
+      factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+      factory.createLiteralTypeNode(factory.createNull()),
+    ]);
+
+    /**
+     * ```ts
+     * Users
+     * ```
+     */
+    const pluralModelNode = factory.createTypeReferenceNode(
+      convertToPascalCase(model.pluralSlug),
+    );
+
+    nodes.push(
+      factory.createModuleDeclaration(
+        [factory.createModifier(SyntaxKind.DeclareKeyword)],
+        factory.createIdentifier(`${convertToPascalCase(model.slug)}Syntax`),
+        factory.createModuleBlock([
+          fieldSlugType,
+
+          factory.createModuleDeclaration(
+            undefined,
+            identifiers.syntax.singular,
+            factory.createModuleBlock([
+              generateRootQueryCallSignature({
+                modelNode: singularModelNode,
+              }),
+              generateRootQueryCallSignature({
+                modelNode: singularModelNode,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                instruction: 'after',
+                modelNode: singularModelNode,
+                name: identifiers.syntax.after,
+              }),
+              generateDefaultSyntaxProperty({
+                instruction: 'after',
+                modelNode: singularModelNode,
+                name: identifiers.syntax.afterPromise,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                name: identifiers.syntax.before,
+                instruction: 'before',
+                modelNode: singularModelNode,
+              }),
+              generateDefaultSyntaxProperty({
+                instruction: 'before',
+                modelNode: singularModelNode,
+                name: identifiers.syntax.beforePromise,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                name: identifiers.syntax.including,
+                instruction: 'including',
+                modelNode: singularModelNode,
+              }),
+              generateDefaultSyntaxProperty({
+                name: identifiers.syntax.includingPromise,
+                instruction: 'including',
+                modelNode: singularModelNode,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                name: identifiers.syntax.limitedTo,
+                instruction: 'limitedTo',
+                modelNode: singularModelNode,
+              }),
+              generateDefaultSyntaxProperty({
+                name: identifiers.syntax.limitedToPromise,
+                instruction: 'limitedTo',
+                modelNode: singularModelNode,
+                promise: true,
+              }),
+
+              generateOrderedBySyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+              }),
+              generateOrderedBySyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+                promise: true,
+              }),
+
+              generateSelectingSyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+              }),
+              generateSelectingSyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+                promise: true,
+              }),
+
+              generateUsingSyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+                slug: convertToPascalCase(model.slug),
+              }),
+              generateUsingSyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+                slug: convertToPascalCase(model.slug),
+                promise: true,
+              }),
+
+              generateWithSyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+              }),
+              generateWithSyntaxProperty({
+                model,
+                modelNode: singularModelNode,
+                promise: true,
+              }),
+            ]),
+            NodeFlags.Namespace,
+          ),
+
+          factory.createModuleDeclaration(
+            undefined,
+            identifiers.syntax.plural,
+            factory.createModuleBlock([
+              generateRootQueryCallSignature({
+                modelNode: pluralModelNode,
+              }),
+              generateRootQueryCallSignature({
+                modelNode: pluralModelNode,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                instruction: 'after',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.after,
+              }),
+              generateDefaultSyntaxProperty({
+                instruction: 'after',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.afterPromise,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                instruction: 'before',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.before,
+              }),
+              generateDefaultSyntaxProperty({
+                instruction: 'before',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.beforePromise,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                instruction: 'including',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.including,
+              }),
+              generateDefaultSyntaxProperty({
+                instruction: 'including',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.includingPromise,
+                promise: true,
+              }),
+
+              generateDefaultSyntaxProperty({
+                instruction: 'limitedTo',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.limitedTo,
+              }),
+              generateDefaultSyntaxProperty({
+                instruction: 'limitedTo',
+                modelNode: pluralModelNode,
+                name: identifiers.syntax.limitedToPromise,
+                promise: true,
+              }),
+
+              generateOrderedBySyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+              }),
+              generateOrderedBySyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+                promise: true,
+              }),
+
+              generateSelectingSyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+              }),
+              generateSelectingSyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+                promise: true,
+              }),
+
+              generateUsingSyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+                slug: convertToPascalCase(model.slug),
+              }),
+              generateUsingSyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+                slug: convertToPascalCase(model.slug),
+                promise: true,
+              }),
+
+              generateWithSyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+              }),
+              generateWithSyntaxProperty({
+                model,
+                modelNode: pluralModelNode,
+                promise: true,
+              }),
+            ]),
+            NodeFlags.Namespace,
+          ),
+        ]),
+        NodeFlags.Namespace,
+      ),
+    );
+  }
+
+  return nodes;
+};
+
+// const generateAfterTypes = (singularModelNode: TypeNode, pluralModelNode: TypeNode) => {
+//   const singularAfterType = factory.createTypeAliasDeclaration(
+//     undefined,
+//     'SingularAfter',
+//     undefined,
+//     factory.createIntersectionTypeNode([
+//       factory.createExpressionWithTypeArguments(
+//         identifiers.blade.reducedFunction,
+//         undefined,
+//       ),
+//       factory.createFunctionTypeNode(
+//         [
+//           factory.createTypeParameterDeclaration(
+//             undefined,
+//             typeArgumentIdentifiers.default,
+//             undefined,
+//             singularModelNode,
+//           ),
+//         ],
+//         [
+//           factory.createParameterDeclaration(
+//             undefined,
+//             undefined,
+//             'value',
+//             undefined,
+//             factory.createIndexedAccessTypeNode(
+//               factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+//               factory.createLiteralTypeNode(factory.createStringLiteral('after')),
+//             ),
+//           ),
+//           sharedQueryOptionsParameter,
+//         ],
+//         factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+//       ),
+//     ]),
+//   );
+
+//   const singularAfterPromiseType = factory.createTypeAliasDeclaration(
+//     undefined,
+//     'SingularAfterPromise',
+//     undefined,
+//     factory.createIntersectionTypeNode([
+//       factory.createExpressionWithTypeArguments(
+//         identifiers.blade.reducedFunction,
+//         undefined,
+//       ),
+//       factory.createFunctionTypeNode(
+//         [
+//           factory.createTypeParameterDeclaration(
+//             undefined,
+//             typeArgumentIdentifiers.default,
+//             undefined,
+//             singularModelNode,
+//           ),
+//         ],
+//         [
+//           factory.createParameterDeclaration(
+//             undefined,
+//             undefined,
+//             'value',
+//             undefined,
+//             factory.createIndexedAccessTypeNode(
+//               factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+//               factory.createLiteralTypeNode(factory.createStringLiteral('after')),
+//             ),
+//           ),
+//           sharedQueryOptionsParameter,
+//         ],
+//         factory.createTypeReferenceNode(identifiers.primitive.promise, [
+//           factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+//         ]),
+//       ),
+//     ]),
+//   );
+
+//   const pluralAfterType = factory.createTypeAliasDeclaration(
+//     undefined,
+//     'PluralAfter',
+//     undefined,
+//     factory.createIntersectionTypeNode([
+//       factory.createExpressionWithTypeArguments(
+//         identifiers.blade.reducedFunction,
+//         undefined,
+//       ),
+//       factory.createFunctionTypeNode(
+//         [
+//           factory.createTypeParameterDeclaration(
+//             undefined,
+//             typeArgumentIdentifiers.default,
+//             undefined,
+//             pluralModelNode,
+//           ),
+//         ],
+//         [
+//           factory.createParameterDeclaration(
+//             undefined,
+//             undefined,
+//             'value',
+//             undefined,
+//             factory.createIndexedAccessTypeNode(
+//               factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+//               factory.createLiteralTypeNode(factory.createStringLiteral('after')),
+//             ),
+//           ),
+//           sharedQueryOptionsParameter,
+//         ],
+//         factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+//       ),
+//     ]),
+//   );
+
+//   const pluralAfterPromiseType = factory.createTypeAliasDeclaration(
+//     undefined,
+//     'PluralAfterPromise',
+//     undefined,
+//     factory.createIntersectionTypeNode([
+//       factory.createExpressionWithTypeArguments(
+//         identifiers.blade.reducedFunction,
+//         undefined,
+//       ),
+//       factory.createFunctionTypeNode(
+//         [
+//           factory.createTypeParameterDeclaration(
+//             undefined,
+//             typeArgumentIdentifiers.default,
+//             undefined,
+//             pluralModelNode,
+//           ),
+//         ],
+//         [
+//           factory.createParameterDeclaration(
+//             undefined,
+//             undefined,
+//             'value',
+//             undefined,
+//             factory.createIndexedAccessTypeNode(
+//               factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+//               factory.createLiteralTypeNode(factory.createStringLiteral('after')),
+//             ),
+//           ),
+//           sharedQueryOptionsParameter,
+//         ],
+//         factory.createTypeReferenceNode(identifiers.primitive.promise, [
+//           factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+//         ]),
+//       ),
+//     ]),
+//   );
+
+//   return [
+//     singularAfterType,
+//     singularAfterPromiseType,
+//     pluralAfterType,
+//     pluralAfterPromiseType,
+//   ];
+// };

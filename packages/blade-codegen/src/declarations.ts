@@ -1,6 +1,7 @@
 import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
+import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { createImportDeclaration } from '@/src/generators/import';
 
 /**
@@ -204,5 +205,502 @@ export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
   factory.createTypeReferenceNode(identifiers.primitive.record, [
     factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
     factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
+  ]),
+);
+/**
+ * ```ts
+ * type OrderedByQuery<U, F> = ReducedFunction & (<T = U>(options: {
+ *  ascending?: Array<Expression | F>;
+ *  descending?: Array<Expression | F>;
+ * }) => T) & {
+ *  ascending: <T = U>(fields: Array<Expression | F>) => T;
+ *  descending: <T = U>(fields: Array<Expression | F>) => T;
+ * };
+ * ```
+ */
+export const orderedByQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.utils.orderedByQuery,
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(
+      undefined,
+      typeArgumentIdentifiers.fields,
+      factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+    ),
+  ],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'instructions',
+          undefined,
+          factory.createTypeLiteralNode(
+            ['ascending', 'descending'].map((name) =>
+              factory.createPropertySignature(
+                undefined,
+                name,
+                factory.createToken(SyntaxKind.QuestionToken),
+                factory.createTypeReferenceNode(identifiers.primitive.array, [
+                  factory.createUnionTypeNode([
+                    factory.createTypeReferenceNode(identifiers.compiler.expression),
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.fields),
+                  ]),
+                ]),
+              ),
+            ),
+          ),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ),
+    factory.createTypeLiteralNode(
+      ['ascending', 'descending'].map((name) =>
+        factory.createPropertySignature(
+          undefined,
+          name,
+          undefined,
+          factory.createFunctionTypeNode(
+            [
+              factory.createTypeParameterDeclaration(
+                undefined,
+                typeArgumentIdentifiers.default,
+                undefined,
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+              ),
+            ],
+            [
+              factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'fields',
+                undefined,
+                factory.createTypeReferenceNode(identifiers.primitive.array, [
+                  factory.createUnionTypeNode([
+                    factory.createTypeReferenceNode(identifiers.compiler.expression),
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.fields),
+                  ]),
+                ]),
+              ),
+              sharedQueryOptionsParameter,
+            ],
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+          ),
+        ),
+      ),
+    ),
+  ]),
+);
+
+/**
+ * ```ts
+ * type OrderedByQueryPromise<U, F> = ReducedFunction & (<T = U>(options: {
+ *  ascending?: Array<Expression | F>;
+ *  descending?: Array<Expression | F>;
+ * }) => Promise<T>) & {
+ *  ascending: <T = U>(fields: Array<Expression | F>) => Promise<T>;
+ *  descending: <T = U>(fields: Array<Expression | F>) => Promise<T>;
+ * };
+ * ```
+ */
+export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.utils.orderedByQueryPromise,
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(
+      undefined,
+      typeArgumentIdentifiers.fields,
+      factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+    ),
+  ],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'instructions',
+          undefined,
+          factory.createTypeLiteralNode(
+            ['ascending', 'descending'].map((name) =>
+              factory.createPropertySignature(
+                undefined,
+                name,
+                factory.createToken(SyntaxKind.QuestionToken),
+                factory.createTypeReferenceNode(identifiers.primitive.array, [
+                  factory.createUnionTypeNode([
+                    factory.createTypeReferenceNode(identifiers.compiler.expression),
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.fields),
+                  ]),
+                ]),
+              ),
+            ),
+          ),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(identifiers.primitive.promise, [
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ]),
+    ),
+    factory.createTypeLiteralNode(
+      ['ascending', 'descending'].map((name) =>
+        factory.createPropertySignature(
+          undefined,
+          name,
+          undefined,
+          factory.createFunctionTypeNode(
+            [
+              factory.createTypeParameterDeclaration(
+                undefined,
+                typeArgumentIdentifiers.default,
+                undefined,
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+              ),
+            ],
+            [
+              factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'fields',
+                undefined,
+                factory.createTypeReferenceNode(identifiers.primitive.array, [
+                  factory.createUnionTypeNode([
+                    factory.createTypeReferenceNode(identifiers.compiler.expression),
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.fields),
+                  ]),
+                ]),
+              ),
+              sharedQueryOptionsParameter,
+            ],
+            factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ]),
+          ),
+        ),
+      ),
+    ),
+  ]),
+);
+
+/**
+ * ```ts
+ * type WithQuery<U> = ReducedFunction & {
+ *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
+ *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
+ *  ronin: ReducedFunction & {
+ *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
+ *    createdBy: <T = U>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
+ *    updatedAt: <T = U>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
+ *    updatedBy: <T = U>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
+ *  };
+ * };
+ * ```
+ */
+export const withQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.utils.withQuery,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createIntersectionTypeNode([
+    factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
+    factory.createTypeLiteralNode([
+      /**
+       * ```ts
+       * <T = User | null>(options: CombinedInstructions["with"]): T
+       * ```
+       */
+      factory.createCallSignature(
+        [
+          factory.createTypeParameterDeclaration(
+            undefined,
+            typeArgumentIdentifiers.default,
+            undefined,
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+          ),
+        ],
+        [
+          factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            'instructions',
+            undefined,
+            factory.createIndexedAccessTypeNode(
+              factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+              factory.createLiteralTypeNode(factory.createStringLiteral('with')),
+            ),
+          ),
+          sharedQueryOptionsParameter,
+        ],
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ),
+
+      ...DEFAULT_FIELD_SLUGS.filter((slug) => !slug.startsWith('ronin.')).map((slug) =>
+        factory.createPropertySignature(
+          undefined,
+          slug,
+          undefined,
+          factory.createFunctionTypeNode(
+            [
+              factory.createTypeParameterDeclaration(
+                undefined,
+                typeArgumentIdentifiers.default,
+                undefined,
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+              ),
+            ],
+            [
+              factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'value',
+                undefined,
+                factory.createIndexedAccessTypeNode(
+                  factory.createTypeReferenceNode(identifiers.blade.resultRecord),
+                  factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                ),
+              ),
+              sharedQueryOptionsParameter,
+            ],
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+          ),
+        ),
+      ),
+
+      factory.createPropertySignature(
+        undefined,
+        'ronin',
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeLiteralNode(
+            DEFAULT_FIELD_SLUGS.filter((slug) => slug.startsWith('ronin.')).map(
+              (slug) => {
+                const normalizedSlug = slug.replaceAll('ronin.', '');
+
+                return factory.createPropertySignature(
+                  undefined,
+                  normalizedSlug,
+                  undefined,
+                  factory.createFunctionTypeNode(
+                    [
+                      factory.createTypeParameterDeclaration(
+                        undefined,
+                        typeArgumentIdentifiers.default,
+                        undefined,
+                        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+                      ),
+                    ],
+                    [
+                      factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        'value',
+                        undefined,
+                        factory.createIndexedAccessTypeNode(
+                          factory.createIndexedAccessTypeNode(
+                            factory.createTypeReferenceNode(
+                              identifiers.blade.resultRecord,
+                            ),
+                            factory.createLiteralTypeNode(
+                              factory.createStringLiteral('ronin'),
+                            ),
+                          ),
+                          factory.createLiteralTypeNode(
+                            factory.createStringLiteral(normalizedSlug),
+                          ),
+                        ),
+                      ),
+                      sharedQueryOptionsParameter,
+                    ],
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ),
+                );
+              },
+            ),
+          ),
+        ]),
+      ),
+    ]),
+  ]),
+);
+
+/**
+ * ```ts
+ * type WithQueryPromise<U> = ReducedFunction & {
+ *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
+ *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
+ *  ronin: ReducedFunction & {
+ *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+ *    createdBy: <T = U>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+ *    updatedAt: <T = U>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+ *    updatedBy: <T = U>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
+ *  };
+ * };
+ * ```
+ */
+export const withQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.utils.withQueryPromise,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createIntersectionTypeNode([
+    factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
+    factory.createTypeLiteralNode([
+      /**
+       * ```ts
+       * <T = User | null>(options: CombinedInstructions["with"]): T
+       * ```
+       */
+      factory.createCallSignature(
+        [
+          factory.createTypeParameterDeclaration(
+            undefined,
+            typeArgumentIdentifiers.default,
+            undefined,
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+          ),
+        ],
+        [
+          factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            'instructions',
+            undefined,
+            factory.createIndexedAccessTypeNode(
+              factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+              factory.createLiteralTypeNode(factory.createStringLiteral('with')),
+            ),
+          ),
+          sharedQueryOptionsParameter,
+        ],
+        factory.createTypeReferenceNode(identifiers.primitive.promise, [
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+        ]),
+      ),
+
+      ...DEFAULT_FIELD_SLUGS.filter((slug) => !slug.startsWith('ronin.')).map((slug) =>
+        factory.createPropertySignature(
+          undefined,
+          slug,
+          undefined,
+          factory.createFunctionTypeNode(
+            [
+              factory.createTypeParameterDeclaration(
+                undefined,
+                typeArgumentIdentifiers.default,
+                undefined,
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+              ),
+            ],
+            [
+              factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'value',
+                undefined,
+                factory.createIndexedAccessTypeNode(
+                  factory.createTypeReferenceNode(identifiers.blade.resultRecord),
+                  factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                ),
+              ),
+              sharedQueryOptionsParameter,
+            ],
+            factory.createTypeReferenceNode(identifiers.primitive.promise, [
+              factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ]),
+          ),
+        ),
+      ),
+
+      factory.createPropertySignature(
+        undefined,
+        'ronin',
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeLiteralNode(
+            DEFAULT_FIELD_SLUGS.filter((slug) => slug.startsWith('ronin.')).map(
+              (slug) => {
+                const normalizedSlug = slug.replaceAll('ronin.', '');
+
+                return factory.createPropertySignature(
+                  undefined,
+                  normalizedSlug,
+                  undefined,
+                  factory.createFunctionTypeNode(
+                    [
+                      factory.createTypeParameterDeclaration(
+                        undefined,
+                        typeArgumentIdentifiers.default,
+                        undefined,
+                        factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+                      ),
+                    ],
+                    [
+                      factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        'value',
+                        undefined,
+                        factory.createIndexedAccessTypeNode(
+                          factory.createIndexedAccessTypeNode(
+                            factory.createTypeReferenceNode(
+                              identifiers.blade.resultRecord,
+                            ),
+                            factory.createLiteralTypeNode(
+                              factory.createStringLiteral('ronin'),
+                            ),
+                          ),
+                          factory.createLiteralTypeNode(
+                            factory.createStringLiteral(normalizedSlug),
+                          ),
+                        ),
+                      ),
+                      sharedQueryOptionsParameter,
+                    ],
+                    factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                    ]),
+                  ),
+                );
+              },
+            ),
+          ),
+        ]),
+      ),
+    ]),
   ]),
 );
