@@ -2,6 +2,8 @@ import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 import {
+  afterQueryPromiseType,
+  afterQueryType,
   importBladeCompilerStoredObjectType,
   importBladeUtilsType,
   jsonArrayType,
@@ -70,6 +72,8 @@ export const generate = (models: Array<Model>): string => {
    * ```
    */
   nodes.push(
+    afterQueryType,
+    afterQueryPromiseType,
     orderedByQueryType,
     orderedByQueryPromiseType,
     rootCallerQueryType,

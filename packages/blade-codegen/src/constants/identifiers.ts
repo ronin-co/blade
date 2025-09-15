@@ -49,6 +49,8 @@ export const identifiers = {
     record: factory.createIdentifier('Record'),
   },
   syntax: {
+    afterQuery: factory.createIdentifier('AfterQuery'),
+    afterQueryPromise: factory.createIdentifier('AfterQueryPromise'),
     fieldSlug: factory.createIdentifier('FieldSlug'),
     orderedByQuery: factory.createIdentifier('OrderedByQuery'),
     orderedByQueryPromise: factory.createIdentifier('OrderedByQueryPromise'),

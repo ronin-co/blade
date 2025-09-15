@@ -211,6 +211,86 @@ export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
 /**
  * @todo(@nurodev): Add documentation
  */
+export const afterQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.afterQuery,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'value',
+          undefined,
+          factory.createIndexedAccessTypeNode(
+            factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+            factory.createLiteralTypeNode(factory.createStringLiteral('after')),
+          ),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ),
+  ]),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const afterQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.afterQueryPromise,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'value',
+          undefined,
+          factory.createIndexedAccessTypeNode(
+            factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+            factory.createLiteralTypeNode(factory.createStringLiteral('after')),
+          ),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(identifiers.primitive.promise, [
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ]),
+    ),
+  ]),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
 export const orderedByQueryType = factory.createTypeAliasDeclaration(
   undefined,
   identifiers.syntax.orderedByQuery,
