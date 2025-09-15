@@ -451,6 +451,86 @@ export const includingQueryPromiseType = factory.createTypeAliasDeclaration(
 /**
  * @todo(@nurodev): Add documentation
  */
+export const limitedToQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.limitedToQuery,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'value',
+          undefined,
+          factory.createIndexedAccessTypeNode(
+            factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+            factory.createLiteralTypeNode(factory.createStringLiteral('limitedTo')),
+          ),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ),
+  ]),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const limitedToQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.syntax.limitedToQueryPromise,
+  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'value',
+          undefined,
+          factory.createIndexedAccessTypeNode(
+            factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
+            factory.createLiteralTypeNode(factory.createStringLiteral('limitedTo')),
+          ),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(identifiers.primitive.promise, [
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ]),
+    ),
+  ]),
+);
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
 export const orderedByQueryType = factory.createTypeAliasDeclaration(
   undefined,
   identifiers.syntax.orderedByQuery,
