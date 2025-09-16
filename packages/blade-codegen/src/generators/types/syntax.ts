@@ -1,6 +1,6 @@
 import { NodeFlags, SyntaxKind, factory } from 'typescript';
 
-import { identifiers } from '@/src/constants/identifiers';
+import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { convertToPascalCase } from '@/src/utils/slug';
 
@@ -146,17 +146,52 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
+      // TODO(@nurodev): Add `using` support
       with: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.withQuery,
         undefined,
-        factory.createTypeReferenceNode(
-          factory.createQualifiedName(
-            identifiers.namespace.utils.name,
-            identifiers.namespace.utils.withQuery,
+        factory.createIntersectionTypeNode([
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.utils.name,
+              identifiers.namespace.utils.withQuery,
+            ),
+            [singularModelNode],
           ),
-          [singularModelNode],
-        ),
+          factory.createTypeLiteralNode(
+            Object.keys(model.fields).map((slug) =>
+              factory.createPropertySignature(
+                undefined,
+                slug,
+                undefined,
+                factory.createFunctionTypeNode(
+                  [
+                    factory.createTypeParameterDeclaration(
+                      undefined,
+                      typeArgumentIdentifiers.default,
+                      undefined,
+                      singularModelNode,
+                    ),
+                  ],
+                  [
+                    factory.createParameterDeclaration(
+                      undefined,
+                      undefined,
+                      slug,
+                      undefined,
+                      factory.createIndexedAccessTypeNode(
+                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                      ),
+                    ),
+                  ],
+                  factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                ),
+              ),
+            ),
+          ),
+        ]),
       ),
     } satisfies Record<string, TypeAliasDeclaration>;
 
@@ -264,17 +299,52 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
+      // TODO(@nurodev): Add `using` support
       with: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.withQuery,
         undefined,
-        factory.createTypeReferenceNode(
-          factory.createQualifiedName(
-            identifiers.namespace.utils.name,
-            identifiers.namespace.utils.withQuery,
+        factory.createIntersectionTypeNode([
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.utils.name,
+              identifiers.namespace.utils.withQuery,
+            ),
+            [pluralModelNode],
           ),
-          [pluralModelNode],
-        ),
+          factory.createTypeLiteralNode(
+            Object.keys(model.fields).map((slug) =>
+              factory.createPropertySignature(
+                undefined,
+                slug,
+                undefined,
+                factory.createFunctionTypeNode(
+                  [
+                    factory.createTypeParameterDeclaration(
+                      undefined,
+                      typeArgumentIdentifiers.default,
+                      undefined,
+                      pluralModelNode,
+                    ),
+                  ],
+                  [
+                    factory.createParameterDeclaration(
+                      undefined,
+                      undefined,
+                      slug,
+                      undefined,
+                      factory.createIndexedAccessTypeNode(
+                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                      ),
+                    ),
+                  ],
+                  factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                ),
+              ),
+            ),
+          ),
+        ]),
       ),
     } satisfies Record<string, TypeAliasDeclaration>;
 
