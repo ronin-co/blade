@@ -1,8 +1,8 @@
 import { NodeFlags, SyntaxKind, factory } from 'typescript';
 
-import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
+import { identifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
-import { generateUsingSyntax } from '@/src/generators/syntax';
+import { generateUsingSyntax, generateWithSyntax } from '@/src/generators/syntax';
 import { convertToPascalCase } from '@/src/utils/slug';
 
 import type { TypeAliasDeclaration } from 'typescript';
@@ -271,167 +271,17 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         generateUsingSyntax(model, singularModelNode, true, false),
       ),
-      with: factory.createTypeAliasDeclaration(
-        undefined,
+      with: generateWithSyntax(
         identifiers.namespace.utils.withQuery,
-        undefined,
-        factory.createIntersectionTypeNode([
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.utils.name,
-              identifiers.namespace.utils.withQuery,
-            ),
-            [singularModelNode],
-          ),
-          factory.createTypeLiteralNode(
-            Object.entries(model.fields)
-              .filter(
-                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
-              )
-              .map(([slug, field]) =>
-                factory.createPropertySignature(
-                  undefined,
-                  slug,
-                  undefined,
-                  factory.createFunctionTypeNode(
-                    [
-                      factory.createTypeParameterDeclaration(
-                        undefined,
-                        typeArgumentIdentifiers.default,
-                        undefined,
-                        singularModelNode,
-                      ),
-                    ],
-                    [
-                      factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        slug,
-                        undefined,
-                        factory.createUnionTypeNode([
-                          factory.createIndexedAccessTypeNode(
-                            factory.createTypeReferenceNode(
-                              convertToPascalCase(model.slug),
-                            ),
-                            factory.createLiteralTypeNode(
-                              factory.createStringLiteral(slug),
-                            ),
-                          ),
-                          ...(field.type === 'link'
-                            ? [
-                                factory.createTypeReferenceNode(
-                                  identifiers.primitive.partial,
-                                  [
-                                    factory.createIndexedAccessTypeNode(
-                                      factory.createTypeReferenceNode(
-                                        convertToPascalCase(model.slug),
-                                        [
-                                          factory.createTupleTypeNode([
-                                            factory.createLiteralTypeNode(
-                                              factory.createStringLiteral(slug),
-                                            ),
-                                          ]),
-                                        ],
-                                      ),
-                                      factory.createLiteralTypeNode(
-                                        factory.createStringLiteral(slug),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ]
-                            : []),
-                        ]),
-                      ),
-                    ],
-                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-                  ),
-                ),
-              ),
-          ),
-        ]),
+        singularModelNode,
+        model,
+        false,
       ),
-      withPromise: factory.createTypeAliasDeclaration(
-        undefined,
+      withPromise: generateWithSyntax(
         identifiers.namespace.utils.withQueryPromise,
-        undefined,
-        factory.createIntersectionTypeNode([
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.utils.name,
-              identifiers.namespace.utils.withQueryPromise,
-            ),
-            [singularModelNode],
-          ),
-          factory.createTypeLiteralNode(
-            Object.entries(model.fields)
-              .filter(
-                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
-              )
-              .map(([slug, field]) =>
-                factory.createPropertySignature(
-                  undefined,
-                  slug,
-                  undefined,
-                  factory.createFunctionTypeNode(
-                    [
-                      factory.createTypeParameterDeclaration(
-                        undefined,
-                        typeArgumentIdentifiers.default,
-                        undefined,
-                        singularModelNode,
-                      ),
-                    ],
-                    [
-                      factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        slug,
-                        undefined,
-                        factory.createUnionTypeNode([
-                          factory.createIndexedAccessTypeNode(
-                            factory.createTypeReferenceNode(
-                              convertToPascalCase(model.slug),
-                            ),
-                            factory.createLiteralTypeNode(
-                              factory.createStringLiteral(slug),
-                            ),
-                          ),
-                          ...(field.type === 'link'
-                            ? [
-                                factory.createTypeReferenceNode(
-                                  identifiers.primitive.partial,
-                                  [
-                                    factory.createIndexedAccessTypeNode(
-                                      factory.createTypeReferenceNode(
-                                        convertToPascalCase(model.slug),
-                                        [
-                                          factory.createTupleTypeNode([
-                                            factory.createLiteralTypeNode(
-                                              factory.createStringLiteral(slug),
-                                            ),
-                                          ]),
-                                        ],
-                                      ),
-                                      factory.createLiteralTypeNode(
-                                        factory.createStringLiteral(slug),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ]
-                            : []),
-                        ]),
-                      ),
-                    ],
-                    factory.createTypeReferenceNode(identifiers.primitive.promise, [
-                      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-                    ]),
-                  ),
-                ),
-              ),
-          ),
-        ]),
+        singularModelNode,
+        model,
+        true,
       ),
     } satisfies Record<string, TypeAliasDeclaration>;
 
@@ -663,167 +513,17 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         generateUsingSyntax(model, pluralModelNode, true, true),
       ),
-      with: factory.createTypeAliasDeclaration(
-        undefined,
+      with: generateWithSyntax(
         identifiers.namespace.utils.withQuery,
-        undefined,
-        factory.createIntersectionTypeNode([
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.utils.name,
-              identifiers.namespace.utils.withQuery,
-            ),
-            [pluralModelNode],
-          ),
-          factory.createTypeLiteralNode(
-            Object.entries(model.fields)
-              .filter(
-                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
-              )
-              .map(([slug, field]) =>
-                factory.createPropertySignature(
-                  undefined,
-                  slug,
-                  undefined,
-                  factory.createFunctionTypeNode(
-                    [
-                      factory.createTypeParameterDeclaration(
-                        undefined,
-                        typeArgumentIdentifiers.default,
-                        undefined,
-                        pluralModelNode,
-                      ),
-                    ],
-                    [
-                      factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        slug,
-                        undefined,
-                        factory.createUnionTypeNode([
-                          factory.createIndexedAccessTypeNode(
-                            factory.createTypeReferenceNode(
-                              convertToPascalCase(model.slug),
-                            ),
-                            factory.createLiteralTypeNode(
-                              factory.createStringLiteral(slug),
-                            ),
-                          ),
-                          ...(field.type === 'link'
-                            ? [
-                                factory.createTypeReferenceNode(
-                                  identifiers.primitive.partial,
-                                  [
-                                    factory.createIndexedAccessTypeNode(
-                                      factory.createTypeReferenceNode(
-                                        convertToPascalCase(model.slug),
-                                        [
-                                          factory.createTupleTypeNode([
-                                            factory.createLiteralTypeNode(
-                                              factory.createStringLiteral(slug),
-                                            ),
-                                          ]),
-                                        ],
-                                      ),
-                                      factory.createLiteralTypeNode(
-                                        factory.createStringLiteral(slug),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ]
-                            : []),
-                        ]),
-                      ),
-                    ],
-                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-                  ),
-                ),
-              ),
-          ),
-        ]),
+        pluralModelNode,
+        model,
+        false,
       ),
-      withPromise: factory.createTypeAliasDeclaration(
-        undefined,
+      withPromise: generateWithSyntax(
         identifiers.namespace.utils.withQueryPromise,
-        undefined,
-        factory.createIntersectionTypeNode([
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.utils.name,
-              identifiers.namespace.utils.withQueryPromise,
-            ),
-            [pluralModelNode],
-          ),
-          factory.createTypeLiteralNode(
-            Object.entries(model.fields)
-              .filter(
-                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
-              )
-              .map(([slug, field]) =>
-                factory.createPropertySignature(
-                  undefined,
-                  slug,
-                  undefined,
-                  factory.createFunctionTypeNode(
-                    [
-                      factory.createTypeParameterDeclaration(
-                        undefined,
-                        typeArgumentIdentifiers.default,
-                        undefined,
-                        pluralModelNode,
-                      ),
-                    ],
-                    [
-                      factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        slug,
-                        undefined,
-                        factory.createUnionTypeNode([
-                          factory.createIndexedAccessTypeNode(
-                            factory.createTypeReferenceNode(
-                              convertToPascalCase(model.slug),
-                            ),
-                            factory.createLiteralTypeNode(
-                              factory.createStringLiteral(slug),
-                            ),
-                          ),
-                          ...(field.type === 'link'
-                            ? [
-                                factory.createTypeReferenceNode(
-                                  identifiers.primitive.partial,
-                                  [
-                                    factory.createIndexedAccessTypeNode(
-                                      factory.createTypeReferenceNode(
-                                        convertToPascalCase(model.slug),
-                                        [
-                                          factory.createTupleTypeNode([
-                                            factory.createLiteralTypeNode(
-                                              factory.createStringLiteral(slug),
-                                            ),
-                                          ]),
-                                        ],
-                                      ),
-                                      factory.createLiteralTypeNode(
-                                        factory.createStringLiteral(slug),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ]
-                            : []),
-                        ]),
-                      ),
-                    ],
-                    factory.createTypeReferenceNode(identifiers.primitive.promise, [
-                      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-                    ]),
-                  ),
-                ),
-              ),
-          ),
-        ]),
+        pluralModelNode,
+        model,
+        true,
       ),
     } satisfies Record<string, TypeAliasDeclaration>;
 

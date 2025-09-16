@@ -1,9 +1,15 @@
 import { factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
+import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { IntersectionTypeNode, TypeNode } from 'typescript';
+import type {
+  Identifier,
+  IntersectionTypeNode,
+  TypeAliasDeclaration,
+  TypeNode,
+} from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
@@ -146,4 +152,92 @@ export const generateUsingSyntax = (
     ),
     factory.createTypeLiteralNode([inferredCallSignature, overrideCallSignaure]),
   ]);
+};
+
+/**
+ * @todo(@nurodev): Add documentation
+ */
+export const generateWithSyntax = (
+  name: string | Identifier,
+  modelNode: TypeNode,
+  model: Model,
+  promise: boolean,
+): TypeAliasDeclaration => {
+  const modelUserFieldEntries = Object.entries(model.fields).filter(
+    ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
+  );
+
+  return factory.createTypeAliasDeclaration(
+    undefined,
+    name,
+    undefined,
+    factory.createIntersectionTypeNode([
+      factory.createTypeReferenceNode(
+        factory.createQualifiedName(identifiers.namespace.utils.name, name),
+        [modelNode],
+      ),
+      factory.createTypeLiteralNode(
+        modelUserFieldEntries.map(([slug, field]) => {
+          /**
+           * @todo(@nurodev): Add documentation
+           */
+          const baseFieldProperty = factory.createIndexedAccessTypeNode(
+            factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+            factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+          );
+
+          const parameterNodes = new Array<TypeNode>(baseFieldProperty);
+          if (field.type === 'link') {
+            /**
+             * @todo(@nurodev): Add documentation
+             */
+            const nestedFieldProperty = factory.createTypeReferenceNode(
+              identifiers.primitive.partial,
+              [
+                factory.createIndexedAccessTypeNode(
+                  factory.createTypeReferenceNode(convertToPascalCase(model.slug), [
+                    factory.createTupleTypeNode([
+                      factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                    ]),
+                  ]),
+                  factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                ),
+              ],
+            );
+            parameterNodes.push(nestedFieldProperty);
+          }
+
+          return factory.createPropertySignature(
+            undefined,
+            slug,
+            undefined,
+            factory.createFunctionTypeNode(
+              [
+                factory.createTypeParameterDeclaration(
+                  undefined,
+                  typeArgumentIdentifiers.default,
+                  undefined,
+                  modelNode,
+                ),
+              ],
+              [
+                factory.createParameterDeclaration(
+                  undefined,
+                  undefined,
+                  slug,
+                  undefined,
+                  factory.createUnionTypeNode(parameterNodes),
+                ),
+              ],
+              promise
+                ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ])
+                : factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+            ),
+          );
+        }),
+      ),
+    ]),
+  );
 };
