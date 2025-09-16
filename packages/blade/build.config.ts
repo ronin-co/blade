@@ -48,11 +48,11 @@ export default defineBuildConfig({
 
     './public/server/hooks.ts',
     './public/server/errors.ts',
+    './public/server/utils.ts',
 
     './public/universal/hooks.ts',
     './public/universal/schema.ts',
     './public/universal/types.ts',
-    './public/universal/utils.ts',
 
     // These files are used internally by Blade.
     './private/shell/index.ts',
