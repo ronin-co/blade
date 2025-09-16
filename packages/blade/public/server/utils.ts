@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { sign } from 'hono/jwt';
+import { sign, verify } from 'hono/jwt';
 import type { JWTPayload } from 'hono/utils/jwt/types';
 import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
@@ -126,4 +126,4 @@ export const build = async (
   });
 };
 
-export { sign as signJWT, type JWTPayload };
+export { sign as signJWT, verify as verifyJWT, type JWTPayload };
