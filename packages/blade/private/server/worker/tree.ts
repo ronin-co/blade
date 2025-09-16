@@ -205,17 +205,9 @@ export interface Collected {
   redirect?: string;
   metadata: PageMetadata;
   cookies?: Record<string, { value: string | null } & CookieSerializeOptions>;
-  jwts: Record<
-    string,
-    {
-      decodedPayload: unknown;
-      secret: Parameters<typeof verify>[1];
-      algo: Parameters<typeof verify>[2];
-    }
-  >;
 }
 
-interface CollectedRunnable extends Pick<Collected, 'queries' | 'jwts'> {}
+interface CollectedRunnable extends Pick<Collected, 'queries'> {}
 
 const collectPromises = (
   leaves: Map<string, TreeItem>,
@@ -229,7 +221,7 @@ const collectPromises = (
   // @ts-expect-error This is an internal React property.
   RootServerContext._currentValue = serverContext;
 
-  const freshlyAdded: CollectedRunnable = { queries: [], jwts: {} };
+  const freshlyAdded: CollectedRunnable = { queries: [] };
 
   // Start with the uppermost layout.
   const reversedLeaves = Array.from(leaves.entries()).reverse();
@@ -292,22 +284,6 @@ const collectPromises = (
         continue;
       }
 
-      if ('__blade_jwt' in details) {
-        const { token, secret, algo } = details.__blade_jwt;
-
-        // If the query was already collected, don't add it again.
-        if (freshlyAdded.jwts[token]) continue;
-
-        // If the JWT was not collected yet, add it to the collection.
-        freshlyAdded.jwts[token] = {
-          decodedPayload: null,
-          secret,
-          algo,
-        };
-
-        continue;
-      }
-
       // Ignore errors thrown by `use()`.
       if (item instanceof Error && item.message.includes(".use'")) {
         leavesCheckedForQueries++;
@@ -324,21 +300,14 @@ const collectPromises = (
   const checkedAllLeaves = leavesCheckedForQueries === reversedLeaves.length;
 
   const queries = checkedAllLeaves ? freshlyAdded.queries : [];
-  const jwts = freshlyAdded.jwts;
 
   // Assign newly added queries to context.
   for (const newQuery of queries) {
     serverContext.collected.queries.push(newQuery);
   }
 
-  // Assign newly added JWTs to context.
-  for (const [token, details] of Object.entries(jwts)) {
-    serverContext.collected.jwts[token] = details;
-  }
-
   return {
     queries: [...(existingNewlyAdded?.queries || []), ...queries],
-    jwts: { ...existingNewlyAdded?.jwts, ...jwts },
   };
 };
 
@@ -502,7 +471,6 @@ export const flushSession = async (
               hookHash,
             })),
             metadata: {},
-            jwts: {},
           }
         : undefined,
     );
@@ -614,7 +582,6 @@ const renderReactTree = async (
     collected: existingCollected || {
       queries: [],
       metadata: {},
-      jwts: {},
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
@@ -639,11 +606,6 @@ const renderReactTree = async (
     queries: serverContext.collected.queries.filter(({ result, error }) => {
       return typeof result === 'undefined' && typeof error === 'undefined';
     }),
-    jwts: Object.fromEntries(
-      Object.entries(serverContext.collected.jwts).filter(([, value]) => {
-        return !value.decodedPayload;
-      }),
-    ),
   };
 
   // If the `href` (covers both `pathname` and `search` at once) of the page that should
@@ -781,7 +743,6 @@ const renderReactTree = async (
                   ({ type }) => type === 'write',
                 ),
                 metadata: {},
-                jwts: {},
               },
             );
           }
@@ -791,30 +752,9 @@ const renderReactTree = async (
       }
     }
 
-    const normalizedJwts = Object.entries(newlyAdded.jwts);
-
-    if (normalizedJwts.length > 0) {
-      await Promise.all(
-        normalizedJwts.map(async ([token, { secret, algo }]) => {
-          let result = null;
-
-          try {
-            result = await verify(token, secret, algo);
-          } catch (err) {
-            result = err;
-          }
-
-          serverContext.collected.jwts[token].decodedPayload = result;
-        }),
-      );
-    }
-
     index++;
 
-    if (
-      (newlyAdded.queries.length > 0 || normalizedJwts.length > 0) &&
-      !hasPatternInURL
-    ) {
+    if (newlyAdded.queries.length > 0 && !hasPatternInURL) {
       continue;
     }
 
@@ -840,7 +780,6 @@ const renderReactTree = async (
         // the results of the write queries that were executed.
         queries: serverContext.collected.queries,
         // The other properties should be empty, since nothing else was collected yet.
-        jwts: {},
         metadata: {},
       },
     );
