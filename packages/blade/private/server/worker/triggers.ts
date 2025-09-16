@@ -8,12 +8,12 @@ import type {
   TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
-import { type CookieOptions, getCookieSetter } from '@/private/universal/utils';
+import { getCookieSetter } from '@/private/universal/utils';
 
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
  *
- * @param serverContext - A partial server context object.
+ * @param serverContext - A server context object.
  * @param triggers - The triggers that should be prepared for invocation.
  * @param headless - Whether the triggers are being run for a headless source, meaning the
  * application's browser client or REST API. If queries from multiple different sources
@@ -22,16 +22,13 @@ import { type CookieOptions, getCookieSetter } from '@/private/universal/utils';
  * @returns Triggers ready to be passed to RONIN.
  */
 export const prepareTriggers = (
-  serverContext: Partial<ServerContext> &
-    Pick<ServerContext, 'cookies' | 'userAgent' | 'geoLocation' | 'languages' | 'url'>,
+  serverContext: ServerContext,
   triggers: TriggersList,
   headless?: boolean,
 ): TriggersList => {
   const options: Partial<NewTriggerOptions> = {
     cookies: serverContext.cookies,
-    setCookie: (name: string, value: string, options?: CookieOptions) => {
-      return getCookieSetter(serverContext.collected!, name)(value, options);
-    },
+    setCookie: getCookieSetter(serverContext.collected),
     navigator: {
       userAgent: serverContext.userAgent,
       geoLocation: serverContext.geoLocation,

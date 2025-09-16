@@ -4,7 +4,12 @@ import { type RootTransitionOptions, usePageTransition } from '@/private/client/
 import { RootServerContext } from '@/private/server/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
 import type { CustomNavigator } from '@/private/universal/types/util';
-import { type SetCookie, getCookieSetter } from '@/private/universal/utils';
+import {
+  type SetCookie,
+  type SetExistingCookie,
+  getCookieSetter,
+} from '@/private/universal/utils';
+import { DEFAULT_COOKIE_MAX_AGE } from '@/private/universal/utils/constants';
 import { populatePathSegments } from '@/private/universal/utils/paths';
 
 const useParams = <
@@ -87,10 +92,9 @@ const useRedirect = () => {
   };
 };
 
-// 365 days
-const DEFAULT_COOKIE_MAX_AGE = 31536000;
-
-const useCookie = <T extends string | null>(name: string): [T | null, SetCookie<T>] => {
+const useCookie = <T extends string | null>(
+  name: string,
+): [T | null, SetExistingCookie<T>] => {
   // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
   const isNetlify = typeof Netlify !== 'undefined';
   if (typeof window === 'undefined' || isNetlify) {
@@ -99,7 +103,10 @@ const useCookie = <T extends string | null>(name: string): [T | null, SetCookie<
 
     const { cookies, collected } = serverContext;
     const value = cookies[name] as T | null;
-    const setValue = getCookieSetter(collected, name);
+
+    const setValue: SetExistingCookie<T> = (value, options) => {
+      return getCookieSetter(collected)(name, value, options);
+    };
 
     return [value, setValue];
   }
@@ -107,7 +114,7 @@ const useCookie = <T extends string | null>(name: string): [T | null, SetCookie<
   const value =
     (document.cookie.match(`(^|;)\\s*${name}=([^;]*)`)?.pop() as T | undefined) || null;
 
-  const setValue: SetCookie<T> = (value, options) => {
+  const setValue: SetExistingCookie<T> = (value, options) => {
     const shouldDelete = value === null;
     const encodedValue = shouldDelete ? '' : encodeURIComponent(value);
 

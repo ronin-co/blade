@@ -1,6 +1,7 @@
 import type { CookieSerializeOptions } from 'cookie';
 
 import type { ServerContext } from '@/private/server/context';
+import { DEFAULT_COOKIE_MAX_AGE } from '@/private/universal/utils/constants';
 
 /**
  * Generate pseudo-random unique identifiers.
@@ -11,9 +12,13 @@ export const generateUniqueId = (): string => {
   return crypto.getRandomValues(new Uint32Array(1))[0].toString();
 };
 
-export type SetCookie<T> = (value: T, options?: CookieOptions) => void;
+export type SetExistingCookie<T> = (value: T, options?: CookieOptions) => void;
+export type SetCookie<T> = (
+  name: string,
+  ...rest: Parameters<SetExistingCookie<T>>
+) => void;
 
-export interface CookieOptions {
+interface CookieOptions {
   /**
    * Allows for making cookies accessible to the client, instead of allowing only the
    * server to read and modify them.
@@ -27,14 +32,17 @@ export interface CookieOptions {
   path?: string;
 }
 
-// 365 days
-const DEFAULT_COOKIE_MAX_AGE = 31536000;
-
+/**
+ * Generates a function that can be used to set new cookies.
+ *
+ * @param collected - The list of all collected resources in the server context.
+ *
+ * @returns The function that can be used for setting cookies.
+ */
 export const getCookieSetter = <T>(
   collected: ServerContext['collected'],
-  name: string,
 ): SetCookie<T> => {
-  return (value: T, options?: CookieOptions) => {
+  return (name, value, options) => {
     const cookieSettings: CookieSerializeOptions = {
       // 365 days.
       maxAge: DEFAULT_COOKIE_MAX_AGE,
