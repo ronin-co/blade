@@ -1,9 +1,9 @@
-type ErrorDetails = {
+interface ErrorDetails {
   message?: string;
   code?: string;
   fields?: string[];
   instructions?: string[];
-};
+}
 
 /**
  * Utility function for combining field slugs into a human-readable string.
