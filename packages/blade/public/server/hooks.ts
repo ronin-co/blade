@@ -311,12 +311,4 @@ const useJWT = <T>(...args: Parameters<typeof verify>): T => {
   };
 };
 
-const useMutationResult = <T>(): T => {
-  const serverContext = useContext(RootServerContext);
-  if (!serverContext) throw new Error('Missing server context in `useMutationResult`');
-  const { queries } = serverContext.collected;
-
-  return queries.filter(({ type }) => type === 'write').map(({ result }) => result) as T;
-};
-
-export { use, useCountOf, useListOf, useBatch, useMutationResult, useMetadata, useJWT };
+export { use, useCountOf, useListOf, useBatch, useMetadata, useJWT };
