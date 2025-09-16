@@ -45,6 +45,7 @@ export const generateNamespaces = (models: Array<Model>) =>
       factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
       factory.createLiteralTypeNode(factory.createNull()),
     ]);
+    // TODO(@nurodev): Add promise statements
     const singularStatements = {
       after: factory.createTypeAliasDeclaration(
         undefined,
@@ -199,6 +200,7 @@ export const generateNamespaces = (models: Array<Model>) =>
     const pluralModelNode = factory.createTypeReferenceNode(
       convertToPascalCase(model.pluralSlug),
     );
+    // TODO(@nurodev): Add promise statements
     const pluralStatements = {
       after: factory.createTypeAliasDeclaration(
         undefined,
