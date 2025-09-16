@@ -2,10 +2,11 @@ import { describe, expect, test } from 'bun:test';
 import { link, model, string } from 'blade-syntax/schema';
 import { factory } from 'typescript';
 
-import { generateUsingSyntax } from '@/src/generators/syntax';
+import { generateUsingSyntax, generateWithSyntax } from '@/src/generators/syntax';
 import { printNodes } from '@/src/utils/print';
 import { convertToPascalCase } from '@/src/utils/slug';
 
+import { identifiers } from '@/src/constants/identifiers';
 import type { Model } from '@/src/types/model';
 
 describe('syntax', () => {
@@ -152,6 +153,78 @@ describe('syntax', () => {
 
           expect(typesResultStr).toMatchSnapshot();
         });
+      });
+    });
+  });
+
+  describe('with', () => {
+    const AccountModel = model({
+      slug: 'account',
+      pluralSlug: 'accounts',
+      fields: {
+        name: string(),
+        email: string({ required: true, unique: true }),
+      },
+    }) as unknown as Model;
+    const SingularAccountModelNode = factory.createUnionTypeNode([
+      factory.createTypeReferenceNode(convertToPascalCase(AccountModel.slug)),
+      factory.createLiteralTypeNode(factory.createNull()),
+    ]);
+    const PluralAccountModelNode = factory.createArrayTypeNode(
+      factory.createTypeReferenceNode(convertToPascalCase(AccountModel.slug)),
+    );
+
+    describe('singular', () => {
+      test('synchronous', () => {
+        const typesResult = generateWithSyntax(
+          identifiers.namespace.utils.withQuery,
+          SingularAccountModelNode,
+          AccountModel,
+          false,
+        );
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+      test('asynchronous', () => {
+        const typesResult = generateWithSyntax(
+          identifiers.namespace.utils.withQueryPromise,
+          SingularAccountModelNode,
+          AccountModel,
+          true,
+        );
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+    });
+
+    describe('plural', () => {
+      test('synchronous', () => {
+        const typesResult = generateWithSyntax(
+          identifiers.namespace.utils.withQuery,
+          PluralAccountModelNode,
+          AccountModel,
+          false,
+        );
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
+      });
+      test('asynchronous', () => {
+        const typesResult = generateWithSyntax(
+          identifiers.namespace.utils.withQueryPromise,
+          PluralAccountModelNode,
+          AccountModel,
+          true,
+        );
+
+        const typesResultStr = printNodes([typesResult]);
+
+        expect(typesResultStr).toMatchSnapshot();
       });
     });
   });
