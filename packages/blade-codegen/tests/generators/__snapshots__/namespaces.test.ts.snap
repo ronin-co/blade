@@ -1,0 +1,220 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`namespaces with a basic model 1`] = `
+"declare namespace AccountSyntax {
+    type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "avatar" | "email" | "isActive" | "lastActiveAt" | "name" | "rewardPoints" | "settings";
+    namespace Singular {
+        type AfterQuery = Utils.AfterQuery<Account | null>;
+        type AfterQueryPromise = Utils.AfterQueryPromise<Account | null>;
+        type BeforeQuery = Utils.BeforeQuery<Account | null>;
+        type BeforeQueryPromise = Utils.BeforeQueryPromise<Account | null>;
+        type IncludingQuery = Utils.IncludingQuery<Account | null>;
+        type IncludingQueryPromise = Utils.IncludingQueryPromise<Account | null>;
+        type LimitedToQuery = Utils.LimitedToQuery<Account | null>;
+        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Account | null>;
+        type OrderedByQuery = Utils.OrderedByQuery<Account | null, AccountSyntax.FieldSlug>;
+        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Account | null, AccountSyntax.FieldSlug>;
+        type RootQueryCaller = Utils.RootQueryCaller<Account | null>;
+        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
+        type SelectingQuery = Utils.SelectingQuery<Account | null, AccountSyntax.FieldSlug>;
+        type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, AccountSyntax.FieldSlug>;
+        type ToQuery = any;
+        type ToQueryPromise = any;
+        type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+        type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
+        type WithQuery = Utils.WithQuery<Account | null> & {
+            avatar: <T = Account | null>(avatar: Account["avatar"]) => T;
+            email: <T = Account | null>(email: Account["email"]) => T;
+            isActive: <T = Account | null>(isActive: Account["isActive"]) => T;
+            lastActiveAt: <T = Account | null>(lastActiveAt: Account["lastActiveAt"]) => T;
+            name: <T = Account | null>(name: Account["name"]) => T;
+            rewardPoints: <T = Account | null>(rewardPoints: Account["rewardPoints"]) => T;
+            settings: <T = Account | null>(settings: Account["settings"]) => T;
+        };
+        type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
+            avatar: <T = Account | null>(avatar: Account["avatar"]) => Promise<T>;
+            email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+            isActive: <T = Account | null>(isActive: Account["isActive"]) => Promise<T>;
+            lastActiveAt: <T = Account | null>(lastActiveAt: Account["lastActiveAt"]) => Promise<T>;
+            name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+            rewardPoints: <T = Account | null>(rewardPoints: Account["rewardPoints"]) => Promise<T>;
+            settings: <T = Account | null>(settings: Account["settings"]) => Promise<T>;
+        };
+    }
+    namespace Plural {
+        type AfterQuery = Utils.AfterQuery<Accounts>;
+        type AfterQueryPromise = Utils.AfterQueryPromise<Accounts>;
+        type BeforeQuery = Utils.BeforeQuery<Accounts>;
+        type BeforeQueryPromise = Utils.BeforeQueryPromise<Accounts>;
+        type IncludingQuery = Utils.IncludingQuery<Accounts>;
+        type IncludingQueryPromise = Utils.IncludingQueryPromise<Accounts>;
+        type LimitedToQuery = Utils.LimitedToQuery<Accounts>;
+        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Accounts>;
+        type OrderedByQuery = Utils.OrderedByQuery<Accounts, AccountSyntax.FieldSlug>;
+        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Accounts, AccountSyntax.FieldSlug>;
+        type RootQueryCaller = Utils.RootQueryCaller<Accounts>;
+        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
+        type SelectingQuery = Utils.SelectingQuery<Accounts, AccountSyntax.FieldSlug>;
+        type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, AccountSyntax.FieldSlug>;
+        type ToQuery = any;
+        type ToQueryPromise = any;
+        type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+        type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
+        type WithQuery = Utils.WithQuery<Accounts> & {
+            avatar: <T = Accounts>(avatar: Account["avatar"]) => T;
+            email: <T = Accounts>(email: Account["email"]) => T;
+            isActive: <T = Accounts>(isActive: Account["isActive"]) => T;
+            lastActiveAt: <T = Accounts>(lastActiveAt: Account["lastActiveAt"]) => T;
+            name: <T = Accounts>(name: Account["name"]) => T;
+            rewardPoints: <T = Accounts>(rewardPoints: Account["rewardPoints"]) => T;
+            settings: <T = Accounts>(settings: Account["settings"]) => T;
+        };
+        type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
+            avatar: <T = Accounts>(avatar: Account["avatar"]) => Promise<T>;
+            email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+            isActive: <T = Accounts>(isActive: Account["isActive"]) => Promise<T>;
+            lastActiveAt: <T = Accounts>(lastActiveAt: Account["lastActiveAt"]) => Promise<T>;
+            name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+            rewardPoints: <T = Accounts>(rewardPoints: Account["rewardPoints"]) => Promise<T>;
+            settings: <T = Accounts>(settings: Account["settings"]) => Promise<T>;
+        };
+    }
+}
+"
+`;
+
+exports[`namespaces with a link field 1`] = `
+"declare namespace AccountSyntax {
+    type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
+    namespace Singular {
+        type AfterQuery = Utils.AfterQuery<Account | null>;
+        type AfterQueryPromise = Utils.AfterQueryPromise<Account | null>;
+        type BeforeQuery = Utils.BeforeQuery<Account | null>;
+        type BeforeQueryPromise = Utils.BeforeQueryPromise<Account | null>;
+        type IncludingQuery = Utils.IncludingQuery<Account | null>;
+        type IncludingQueryPromise = Utils.IncludingQueryPromise<Account | null>;
+        type LimitedToQuery = Utils.LimitedToQuery<Account | null>;
+        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Account | null>;
+        type OrderedByQuery = Utils.OrderedByQuery<Account | null, AccountSyntax.FieldSlug>;
+        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Account | null, AccountSyntax.FieldSlug>;
+        type RootQueryCaller = Utils.RootQueryCaller<Account | null>;
+        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
+        type SelectingQuery = Utils.SelectingQuery<Account | null, AccountSyntax.FieldSlug>;
+        type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, AccountSyntax.FieldSlug>;
+        type ToQuery = any;
+        type ToQueryPromise = any;
+        type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+        type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
+        type WithQuery = Utils.WithQuery<Account | null> & {
+            name: <T = Account | null>(name: Account["name"]) => T;
+            email: <T = Account | null>(email: Account["email"]) => T;
+        };
+        type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
+            name: <T = Account | null>(name: Account["name"]) => Promise<T>;
+            email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+        };
+    }
+    namespace Plural {
+        type AfterQuery = Utils.AfterQuery<Accounts>;
+        type AfterQueryPromise = Utils.AfterQueryPromise<Accounts>;
+        type BeforeQuery = Utils.BeforeQuery<Accounts>;
+        type BeforeQueryPromise = Utils.BeforeQueryPromise<Accounts>;
+        type IncludingQuery = Utils.IncludingQuery<Accounts>;
+        type IncludingQueryPromise = Utils.IncludingQueryPromise<Accounts>;
+        type LimitedToQuery = Utils.LimitedToQuery<Accounts>;
+        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Accounts>;
+        type OrderedByQuery = Utils.OrderedByQuery<Accounts, AccountSyntax.FieldSlug>;
+        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Accounts, AccountSyntax.FieldSlug>;
+        type RootQueryCaller = Utils.RootQueryCaller<Accounts>;
+        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
+        type SelectingQuery = Utils.SelectingQuery<Accounts, AccountSyntax.FieldSlug>;
+        type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, AccountSyntax.FieldSlug>;
+        type ToQuery = any;
+        type ToQueryPromise = any;
+        type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+        type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
+        type WithQuery = Utils.WithQuery<Accounts> & {
+            name: <T = Accounts>(name: Account["name"]) => T;
+            email: <T = Accounts>(email: Account["email"]) => T;
+        };
+        type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
+            name: <T = Accounts>(name: Account["name"]) => Promise<T>;
+            email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+        };
+    }
+}
+declare namespace PostSyntax {
+    type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "title" | "author";
+    namespace Singular {
+        type AfterQuery = Utils.AfterQuery<Post | null>;
+        type AfterQueryPromise = Utils.AfterQueryPromise<Post | null>;
+        type BeforeQuery = Utils.BeforeQuery<Post | null>;
+        type BeforeQueryPromise = Utils.BeforeQueryPromise<Post | null>;
+        type IncludingQuery = Utils.IncludingQuery<Post | null>;
+        type IncludingQueryPromise = Utils.IncludingQueryPromise<Post | null>;
+        type LimitedToQuery = Utils.LimitedToQuery<Post | null>;
+        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Post | null>;
+        type OrderedByQuery = Utils.OrderedByQuery<Post | null, PostSyntax.FieldSlug>;
+        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Post | null, PostSyntax.FieldSlug>;
+        type RootQueryCaller = Utils.RootQueryCaller<Post | null>;
+        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Post | null>;
+        type SelectingQuery = Utils.SelectingQuery<Post | null, PostSyntax.FieldSlug>;
+        type SelectingQueryPromise = Utils.SelectingQueryPromise<Post | null, PostSyntax.FieldSlug>;
+        type ToQuery = any;
+        type ToQueryPromise = any;
+        type UsingQuery = ReducedFunction & {
+            <U extends Array<"author"> | "all">(fields: U): Post<U> | null;
+            <T = Post | null>(fields: Array<"author"> | "all"): T;
+        };
+        type UsingQueryPromise = ReducedFunction & {
+            <U extends Array<"author"> | "all">(fields: U): Promise<Post<U>> | null;
+            <T = Post | null>(fields: Array<"author"> | "all"): Promise<T>;
+        };
+        type WithQuery = Utils.WithQuery<Post | null> & {
+            title: <T = Post | null>(title: Post["title"]) => T;
+            author: <T = Post | null>(author: Post["author"]) => T;
+        };
+        type WithQueryPromise = Utils.WithQueryPromise<Post | null> & {
+            title: <T = Post | null>(title: Post["title"]) => Promise<T>;
+            author: <T = Post | null>(author: Post["author"]) => Promise<T>;
+        };
+    }
+    namespace Plural {
+        type AfterQuery = Utils.AfterQuery<Posts>;
+        type AfterQueryPromise = Utils.AfterQueryPromise<Posts>;
+        type BeforeQuery = Utils.BeforeQuery<Posts>;
+        type BeforeQueryPromise = Utils.BeforeQueryPromise<Posts>;
+        type IncludingQuery = Utils.IncludingQuery<Posts>;
+        type IncludingQueryPromise = Utils.IncludingQueryPromise<Posts>;
+        type LimitedToQuery = Utils.LimitedToQuery<Posts>;
+        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Posts>;
+        type OrderedByQuery = Utils.OrderedByQuery<Posts, PostSyntax.FieldSlug>;
+        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Posts, PostSyntax.FieldSlug>;
+        type RootQueryCaller = Utils.RootQueryCaller<Posts>;
+        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Posts>;
+        type SelectingQuery = Utils.SelectingQuery<Posts, PostSyntax.FieldSlug>;
+        type SelectingQueryPromise = Utils.SelectingQueryPromise<Posts, PostSyntax.FieldSlug>;
+        type ToQuery = any;
+        type ToQueryPromise = any;
+        type UsingQuery = ReducedFunction & {
+            <U extends Array<"author"> | "all">(fields: U): Post<U>;
+            <T = Posts>(fields: Array<"author"> | "all"): T;
+        };
+        type UsingQueryPromise = ReducedFunction & {
+            <U extends Array<"author"> | "all">(fields: U): Promise<Post<U>>;
+            <T = Posts>(fields: Array<"author"> | "all"): Promise<T>;
+        };
+        type WithQuery = Utils.WithQuery<Posts> & {
+            title: <T = Posts>(title: Post["title"]) => T;
+            author: <T = Posts>(author: Post["author"]) => T;
+        };
+        type WithQueryPromise = Utils.WithQueryPromise<Posts> & {
+            title: <T = Posts>(title: Post["title"]) => Promise<T>;
+            author: <T = Posts>(author: Post["author"]) => Promise<T>;
+        };
+    }
+}
+"
+`;
+
+exports[`namespaces with no models 1`] = `""`;

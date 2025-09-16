@@ -1,0 +1,53 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`syntax using singular synchronous with no link fields 1`] = `
+"ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T)
+"
+`;
+
+exports[`syntax using singular synchronous with a link field 1`] = `
+"ReducedFunction & {
+    <U extends Array<"author"> | "all">(fields: U): Post<U> | null;
+    <T = Post | null>(fields: Array<"author"> | "all"): T;
+}
+"
+`;
+
+exports[`syntax using singular asynchronous with no link fields 1`] = `
+"ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>)
+"
+`;
+
+exports[`syntax using singular asynchronous with a link field 1`] = `
+"ReducedFunction & {
+    <U extends Array<"author"> | "all">(fields: U): Promise<Post<U>> | null;
+    <T = Post | null>(fields: Array<"author"> | "all"): Promise<T>;
+}
+"
+`;
+
+exports[`syntax using plural synchronous with no link fields 1`] = `
+"ReducedFunction & (<T = Account[]>(value: CombinedInstructions["using"]) => T)
+"
+`;
+
+exports[`syntax using plural synchronous with a link field 1`] = `
+"ReducedFunction & {
+    <U extends Array<"author"> | "all">(fields: U): Post<U>;
+    <T = Post[]>(fields: Array<"author"> | "all"): T;
+}
+"
+`;
+
+exports[`syntax using plural asynchronous with no link fields 1`] = `
+"ReducedFunction & (<T = Account[]>(value: CombinedInstructions["using"]) => Promise<T>)
+"
+`;
+
+exports[`syntax using plural asynchronous with a link field 1`] = `
+"ReducedFunction & {
+    <U extends Array<"author"> | "all">(fields: U): Promise<Post<U>>;
+    <T = Post[]>(fields: Array<"author"> | "all"): Promise<T>;
+}
+"
+`;
