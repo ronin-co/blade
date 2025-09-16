@@ -75,12 +75,12 @@ declare namespace AccountSyntax {
         type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Account | null> & {
-            name: <T = Account | null>(name: Account["name"]) => T;
-            email: <T = Account | null>(email: Account["email"]) => T;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
-            name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-            email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
     namespace Plural {
@@ -103,12 +103,12 @@ declare namespace AccountSyntax {
         type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Accounts> & {
-            name: <T = Accounts>(name: Account["name"]) => T;
-            email: <T = Accounts>(email: Account["email"]) => T;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
-            name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-            email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
 }
@@ -309,14 +309,14 @@ declare namespace AccountSyntax {
         type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Account | null> & {
-            name: <T = Account | null>(name: Account["name"]) => T;
-            email: <T = Account | null>(email: Account["email"]) => T;
-            image: <T = Account | null>(image: Account["image"]) => T;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
+            image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
-            name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-            email: <T = Account | null>(email: Account["email"]) => Promise<T>;
-            image: <T = Account | null>(image: Account["image"]) => Promise<T>;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+            image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
     namespace Plural {
@@ -339,14 +339,14 @@ declare namespace AccountSyntax {
         type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Accounts> & {
-            name: <T = Accounts>(name: Account["name"]) => T;
-            email: <T = Accounts>(email: Account["email"]) => T;
-            image: <T = Accounts>(image: Account["image"]) => T;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
+            image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
-            name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-            email: <T = Accounts>(email: Account["email"]) => Promise<T>;
-            image: <T = Accounts>(image: Account["image"]) => Promise<T>;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+            image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
 }

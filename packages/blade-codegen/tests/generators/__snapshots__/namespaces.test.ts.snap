@@ -23,22 +23,22 @@ exports[`namespaces with a basic model 1`] = `
         type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Account | null> & {
-            avatar: <T = Account | null>(avatar: Account["avatar"]) => T;
-            email: <T = Account | null>(email: Account["email"]) => T;
-            isActive: <T = Account | null>(isActive: Account["isActive"]) => T;
-            lastActiveAt: <T = Account | null>(lastActiveAt: Account["lastActiveAt"]) => T;
-            name: <T = Account | null>(name: Account["name"]) => T;
-            rewardPoints: <T = Account | null>(rewardPoints: Account["rewardPoints"]) => T;
-            settings: <T = Account | null>(settings: Account["settings"]) => T;
+            avatar: <T = Account | null>(avatar: Account["avatar"], options?: Record<string, unknown>) => T;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
+            isActive: <T = Account | null>(isActive: Account["isActive"], options?: Record<string, unknown>) => T;
+            lastActiveAt: <T = Account | null>(lastActiveAt: Account["lastActiveAt"], options?: Record<string, unknown>) => T;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+            rewardPoints: <T = Account | null>(rewardPoints: Account["rewardPoints"], options?: Record<string, unknown>) => T;
+            settings: <T = Account | null>(settings: Account["settings"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
-            avatar: <T = Account | null>(avatar: Account["avatar"]) => Promise<T>;
-            email: <T = Account | null>(email: Account["email"]) => Promise<T>;
-            isActive: <T = Account | null>(isActive: Account["isActive"]) => Promise<T>;
-            lastActiveAt: <T = Account | null>(lastActiveAt: Account["lastActiveAt"]) => Promise<T>;
-            name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-            rewardPoints: <T = Account | null>(rewardPoints: Account["rewardPoints"]) => Promise<T>;
-            settings: <T = Account | null>(settings: Account["settings"]) => Promise<T>;
+            avatar: <T = Account | null>(avatar: Account["avatar"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+            isActive: <T = Account | null>(isActive: Account["isActive"], options?: Record<string, unknown>) => Promise<T>;
+            lastActiveAt: <T = Account | null>(lastActiveAt: Account["lastActiveAt"], options?: Record<string, unknown>) => Promise<T>;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            rewardPoints: <T = Account | null>(rewardPoints: Account["rewardPoints"], options?: Record<string, unknown>) => Promise<T>;
+            settings: <T = Account | null>(settings: Account["settings"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
     namespace Plural {
@@ -61,22 +61,22 @@ exports[`namespaces with a basic model 1`] = `
         type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Accounts> & {
-            avatar: <T = Accounts>(avatar: Account["avatar"]) => T;
-            email: <T = Accounts>(email: Account["email"]) => T;
-            isActive: <T = Accounts>(isActive: Account["isActive"]) => T;
-            lastActiveAt: <T = Accounts>(lastActiveAt: Account["lastActiveAt"]) => T;
-            name: <T = Accounts>(name: Account["name"]) => T;
-            rewardPoints: <T = Accounts>(rewardPoints: Account["rewardPoints"]) => T;
-            settings: <T = Accounts>(settings: Account["settings"]) => T;
+            avatar: <T = Accounts>(avatar: Account["avatar"], options?: Record<string, unknown>) => T;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
+            isActive: <T = Accounts>(isActive: Account["isActive"], options?: Record<string, unknown>) => T;
+            lastActiveAt: <T = Accounts>(lastActiveAt: Account["lastActiveAt"], options?: Record<string, unknown>) => T;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+            rewardPoints: <T = Accounts>(rewardPoints: Account["rewardPoints"], options?: Record<string, unknown>) => T;
+            settings: <T = Accounts>(settings: Account["settings"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
-            avatar: <T = Accounts>(avatar: Account["avatar"]) => Promise<T>;
-            email: <T = Accounts>(email: Account["email"]) => Promise<T>;
-            isActive: <T = Accounts>(isActive: Account["isActive"]) => Promise<T>;
-            lastActiveAt: <T = Accounts>(lastActiveAt: Account["lastActiveAt"]) => Promise<T>;
-            name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-            rewardPoints: <T = Accounts>(rewardPoints: Account["rewardPoints"]) => Promise<T>;
-            settings: <T = Accounts>(settings: Account["settings"]) => Promise<T>;
+            avatar: <T = Accounts>(avatar: Account["avatar"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+            isActive: <T = Accounts>(isActive: Account["isActive"], options?: Record<string, unknown>) => Promise<T>;
+            lastActiveAt: <T = Accounts>(lastActiveAt: Account["lastActiveAt"], options?: Record<string, unknown>) => Promise<T>;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            rewardPoints: <T = Accounts>(rewardPoints: Account["rewardPoints"], options?: Record<string, unknown>) => Promise<T>;
+            settings: <T = Accounts>(settings: Account["settings"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
 }
@@ -106,12 +106,12 @@ exports[`namespaces with a link field 1`] = `
         type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Account | null> & {
-            name: <T = Account | null>(name: Account["name"]) => T;
-            email: <T = Account | null>(email: Account["email"]) => T;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
-            name: <T = Account | null>(name: Account["name"]) => Promise<T>;
-            email: <T = Account | null>(email: Account["email"]) => Promise<T>;
+            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
     namespace Plural {
@@ -134,12 +134,12 @@ exports[`namespaces with a link field 1`] = `
         type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Accounts> & {
-            name: <T = Accounts>(name: Account["name"]) => T;
-            email: <T = Accounts>(email: Account["email"]) => T;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
-            name: <T = Accounts>(name: Account["name"]) => Promise<T>;
-            email: <T = Accounts>(email: Account["email"]) => Promise<T>;
+            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
         };
     }
 }
@@ -171,16 +171,16 @@ declare namespace PostSyntax {
             <T = Post | null>(fields: Array<"author"> | "all"): Promise<T>;
         };
         type WithQuery = Utils.WithQuery<Post | null> & {
-            title: <T = Post | null>(title: Post["title"]) => T;
+            title: <T = Post | null>(title: Post["title"], options?: Record<string, unknown>) => T;
             author: <T = Post | null>(author: Post["author"] | Partial<Post<[
                 "author"
-            ]>["author"]>) => T;
+            ]>["author"]>, options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Post | null> & {
-            title: <T = Post | null>(title: Post["title"]) => Promise<T>;
+            title: <T = Post | null>(title: Post["title"], options?: Record<string, unknown>) => Promise<T>;
             author: <T = Post | null>(author: Post["author"] | Partial<Post<[
                 "author"
-            ]>["author"]>) => Promise<T>;
+            ]>["author"]>, options?: Record<string, unknown>) => Promise<T>;
         };
     }
     namespace Plural {
@@ -209,16 +209,16 @@ declare namespace PostSyntax {
             <T = Posts>(fields: Array<"author"> | "all"): Promise<T>;
         };
         type WithQuery = Utils.WithQuery<Posts> & {
-            title: <T = Posts>(title: Post["title"]) => T;
+            title: <T = Posts>(title: Post["title"], options?: Record<string, unknown>) => T;
             author: <T = Posts>(author: Post["author"] | Partial<Post<[
                 "author"
-            ]>["author"]>) => T;
+            ]>["author"]>, options?: Record<string, unknown>) => T;
         };
         type WithQueryPromise = Utils.WithQueryPromise<Posts> & {
-            title: <T = Posts>(title: Post["title"]) => Promise<T>;
+            title: <T = Posts>(title: Post["title"], options?: Record<string, unknown>) => Promise<T>;
             author: <T = Posts>(author: Post["author"] | Partial<Post<[
                 "author"
-            ]>["author"]>) => Promise<T>;
+            ]>["author"]>, options?: Record<string, unknown>) => Promise<T>;
         };
     }
 }

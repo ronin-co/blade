@@ -2,6 +2,7 @@ import { factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
+import { sharedQueryOptionsParameter } from '@/src/declarations';
 import { convertToPascalCase } from '@/src/utils/slug';
 
 import type {
@@ -228,6 +229,7 @@ export const generateWithSyntax = (
                   undefined,
                   factory.createUnionTypeNode(parameterNodes),
                 ),
+                sharedQueryOptionsParameter,
               ],
               promise
                 ? factory.createTypeReferenceNode(identifiers.primitive.promise, [
