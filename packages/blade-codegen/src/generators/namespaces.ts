@@ -284,36 +284,44 @@ export const generateNamespaces = (models: Array<Model>) =>
             [singularModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields).map((slug) =>
-              factory.createPropertySignature(
-                undefined,
-                slug,
-                undefined,
-                factory.createFunctionTypeNode(
-                  [
-                    factory.createTypeParameterDeclaration(
-                      undefined,
-                      typeArgumentIdentifiers.default,
-                      undefined,
-                      singularModelNode,
-                    ),
-                  ],
-                  [
-                    factory.createParameterDeclaration(
-                      undefined,
-                      undefined,
-                      slug,
-                      undefined,
-                      factory.createIndexedAccessTypeNode(
-                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
-                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+            Object.keys(model.fields)
+              .filter((slug) =>
+                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              )
+              .map((slug) =>
+                factory.createPropertySignature(
+                  undefined,
+                  slug,
+                  undefined,
+                  factory.createFunctionTypeNode(
+                    [
+                      factory.createTypeParameterDeclaration(
+                        undefined,
+                        typeArgumentIdentifiers.default,
+                        undefined,
+                        singularModelNode,
                       ),
-                    ),
-                  ],
-                  factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                    ],
+                    [
+                      factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        slug,
+                        undefined,
+                        factory.createIndexedAccessTypeNode(
+                          factory.createTypeReferenceNode(
+                            convertToPascalCase(model.slug),
+                          ),
+                          factory.createLiteralTypeNode(
+                            factory.createStringLiteral(slug),
+                          ),
+                        ),
+                      ),
+                    ],
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ),
                 ),
               ),
-            ),
           ),
         ]),
       ),
@@ -330,38 +338,46 @@ export const generateNamespaces = (models: Array<Model>) =>
             [singularModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields).map((slug) =>
-              factory.createPropertySignature(
-                undefined,
-                slug,
-                undefined,
-                factory.createFunctionTypeNode(
-                  [
-                    factory.createTypeParameterDeclaration(
-                      undefined,
-                      typeArgumentIdentifiers.default,
-                      undefined,
-                      singularModelNode,
-                    ),
-                  ],
-                  [
-                    factory.createParameterDeclaration(
-                      undefined,
-                      undefined,
-                      slug,
-                      undefined,
-                      factory.createIndexedAccessTypeNode(
-                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
-                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+            Object.keys(model.fields)
+              .filter((slug) =>
+                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              )
+              .map((slug) =>
+                factory.createPropertySignature(
+                  undefined,
+                  slug,
+                  undefined,
+                  factory.createFunctionTypeNode(
+                    [
+                      factory.createTypeParameterDeclaration(
+                        undefined,
+                        typeArgumentIdentifiers.default,
+                        undefined,
+                        singularModelNode,
                       ),
-                    ),
-                  ],
-                  factory.createTypeReferenceNode(identifiers.primitive.promise, [
-                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-                  ]),
+                    ],
+                    [
+                      factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        slug,
+                        undefined,
+                        factory.createIndexedAccessTypeNode(
+                          factory.createTypeReferenceNode(
+                            convertToPascalCase(model.slug),
+                          ),
+                          factory.createLiteralTypeNode(
+                            factory.createStringLiteral(slug),
+                          ),
+                        ),
+                      ),
+                    ],
+                    factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                    ]),
+                  ),
                 ),
               ),
-            ),
           ),
         ]),
       ),
@@ -608,36 +624,44 @@ export const generateNamespaces = (models: Array<Model>) =>
             [pluralModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields).map((slug) =>
-              factory.createPropertySignature(
-                undefined,
-                slug,
-                undefined,
-                factory.createFunctionTypeNode(
-                  [
-                    factory.createTypeParameterDeclaration(
-                      undefined,
-                      typeArgumentIdentifiers.default,
-                      undefined,
-                      pluralModelNode,
-                    ),
-                  ],
-                  [
-                    factory.createParameterDeclaration(
-                      undefined,
-                      undefined,
-                      slug,
-                      undefined,
-                      factory.createIndexedAccessTypeNode(
-                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
-                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+            Object.keys(model.fields)
+              .filter((slug) =>
+                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              )
+              .map((slug) =>
+                factory.createPropertySignature(
+                  undefined,
+                  slug,
+                  undefined,
+                  factory.createFunctionTypeNode(
+                    [
+                      factory.createTypeParameterDeclaration(
+                        undefined,
+                        typeArgumentIdentifiers.default,
+                        undefined,
+                        pluralModelNode,
                       ),
-                    ),
-                  ],
-                  factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                    ],
+                    [
+                      factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        slug,
+                        undefined,
+                        factory.createIndexedAccessTypeNode(
+                          factory.createTypeReferenceNode(
+                            convertToPascalCase(model.slug),
+                          ),
+                          factory.createLiteralTypeNode(
+                            factory.createStringLiteral(slug),
+                          ),
+                        ),
+                      ),
+                    ],
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ),
                 ),
               ),
-            ),
           ),
         ]),
       ),
@@ -654,38 +678,46 @@ export const generateNamespaces = (models: Array<Model>) =>
             [pluralModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields).map((slug) =>
-              factory.createPropertySignature(
-                undefined,
-                slug,
-                undefined,
-                factory.createFunctionTypeNode(
-                  [
-                    factory.createTypeParameterDeclaration(
-                      undefined,
-                      typeArgumentIdentifiers.default,
-                      undefined,
-                      pluralModelNode,
-                    ),
-                  ],
-                  [
-                    factory.createParameterDeclaration(
-                      undefined,
-                      undefined,
-                      slug,
-                      undefined,
-                      factory.createIndexedAccessTypeNode(
-                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
-                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+            Object.keys(model.fields)
+              .filter((slug) =>
+                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              )
+              .map((slug) =>
+                factory.createPropertySignature(
+                  undefined,
+                  slug,
+                  undefined,
+                  factory.createFunctionTypeNode(
+                    [
+                      factory.createTypeParameterDeclaration(
+                        undefined,
+                        typeArgumentIdentifiers.default,
+                        undefined,
+                        pluralModelNode,
                       ),
-                    ),
-                  ],
-                  factory.createTypeReferenceNode(identifiers.primitive.promise, [
-                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
-                  ]),
+                    ],
+                    [
+                      factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        slug,
+                        undefined,
+                        factory.createIndexedAccessTypeNode(
+                          factory.createTypeReferenceNode(
+                            convertToPascalCase(model.slug),
+                          ),
+                          factory.createLiteralTypeNode(
+                            factory.createStringLiteral(slug),
+                          ),
+                        ),
+                      ),
+                    ],
+                    factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                    ]),
+                  ),
                 ),
               ),
-            ),
           ),
         ]),
       ),
