@@ -290,25 +290,4 @@ const useBatch = (<T extends [any, ...any[]]>(
   queryOptions?: Record<string, unknown>,
 ) => PromiseTuple<T>;
 
-const useJWT = <T>(...args: Parameters<typeof verify>): T => {
-  const [token, secret, algo] = args;
-
-  const serverContext = useContext(RootServerContext);
-  if (!serverContext) throw new Error('Missing server context in `useJWT`');
-  const result = serverContext.collected.jwts[token];
-
-  if (result?.decodedPayload) {
-    if (result.decodedPayload instanceof Error) throw result.decodedPayload;
-    return result.decodedPayload as T;
-  }
-
-  throw {
-    __blade_jwt: {
-      token,
-      secret,
-      algo,
-    },
-  };
-};
-
-export { use, useCountOf, useListOf, useBatch, useMetadata, useJWT };
+export { use, useCountOf, useListOf, useBatch, useMetadata };
