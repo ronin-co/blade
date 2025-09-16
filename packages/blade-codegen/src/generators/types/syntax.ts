@@ -45,7 +45,6 @@ export const generateNamespaces = (models: Array<Model>) =>
       factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
       factory.createLiteralTypeNode(factory.createNull()),
     ]);
-    // TODO(@nurodev): Add promise statements
     const singularStatements = {
       after: factory.createTypeAliasDeclaration(
         undefined,
@@ -55,6 +54,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           factory.createQualifiedName(
             identifiers.namespace.utils.name,
             identifiers.namespace.utils.afterQuery,
+          ),
+          [singularModelNode],
+        ),
+      ),
+      afterPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.afterQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.afterQueryPromise,
           ),
           [singularModelNode],
         ),
@@ -71,6 +82,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           [singularModelNode],
         ),
       ),
+      beforePromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.beforeQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.beforeQueryPromise,
+          ),
+          [singularModelNode],
+        ),
+      ),
       including: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.includingQuery,
@@ -79,6 +102,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           factory.createQualifiedName(
             identifiers.namespace.utils.name,
             identifiers.namespace.utils.includingQuery,
+          ),
+          [singularModelNode],
+        ),
+      ),
+      includingPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.includingQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.includingQueryPromise,
           ),
           [singularModelNode],
         ),
@@ -95,6 +130,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           [singularModelNode],
         ),
       ),
+      limitedToPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.limitedToQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.limitedToQueryPromise,
+          ),
+          [singularModelNode],
+        ),
+      ),
       orderedBy: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.orderedByQuery,
@@ -103,6 +150,26 @@ export const generateNamespaces = (models: Array<Model>) =>
           factory.createQualifiedName(
             identifiers.namespace.utils.name,
             identifiers.namespace.utils.orderedByQuery,
+          ),
+          [
+            singularModelNode,
+            factory.createTypeReferenceNode(
+              factory.createQualifiedName(
+                syntaxNamespaceIdentifier,
+                identifiers.namespace.syntax.fieldSlug,
+              ),
+            ),
+          ],
+        ),
+      ),
+      orderedByPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.orderedByQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.orderedByQueryPromise,
           ),
           [
             singularModelNode,
@@ -159,15 +226,47 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
+      selectingPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.selectingQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.selectingQueryPromise,
+          ),
+          [
+            singularModelNode,
+            factory.createTypeReferenceNode(
+              factory.createQualifiedName(
+                syntaxNamespaceIdentifier,
+                identifiers.namespace.syntax.fieldSlug,
+              ),
+            ),
+          ],
+        ),
+      ),
       to: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.toQuery,
         undefined,
         factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
       ),
+      toPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.toQueryPromise,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
       using: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.usingQuery,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      usingPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.usingQueryPromise,
         undefined,
         factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
       ),
@@ -217,12 +316,59 @@ export const generateNamespaces = (models: Array<Model>) =>
           ),
         ]),
       ),
+      withPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.withQueryPromise,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.utils.name,
+              identifiers.namespace.utils.withQueryPromise,
+            ),
+            [singularModelNode],
+          ),
+          factory.createTypeLiteralNode(
+            Object.keys(model.fields).map((slug) =>
+              factory.createPropertySignature(
+                undefined,
+                slug,
+                undefined,
+                factory.createFunctionTypeNode(
+                  [
+                    factory.createTypeParameterDeclaration(
+                      undefined,
+                      typeArgumentIdentifiers.default,
+                      undefined,
+                      singularModelNode,
+                    ),
+                  ],
+                  [
+                    factory.createParameterDeclaration(
+                      undefined,
+                      undefined,
+                      slug,
+                      undefined,
+                      factory.createIndexedAccessTypeNode(
+                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                      ),
+                    ),
+                  ],
+                  factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      ),
     } satisfies Record<string, TypeAliasDeclaration>;
 
     const pluralModelNode = factory.createTypeReferenceNode(
       convertToPascalCase(model.pluralSlug),
     );
-    // TODO(@nurodev): Add promise statements
     const pluralStatements = {
       after: factory.createTypeAliasDeclaration(
         undefined,
@@ -232,6 +378,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           factory.createQualifiedName(
             identifiers.namespace.utils.name,
             identifiers.namespace.utils.afterQuery,
+          ),
+          [pluralModelNode],
+        ),
+      ),
+      afterPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.afterQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.afterQueryPromise,
           ),
           [pluralModelNode],
         ),
@@ -248,6 +406,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           [pluralModelNode],
         ),
       ),
+      beforePromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.beforeQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.beforeQueryPromise,
+          ),
+          [pluralModelNode],
+        ),
+      ),
       including: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.includingQuery,
@@ -256,6 +426,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           factory.createQualifiedName(
             identifiers.namespace.utils.name,
             identifiers.namespace.utils.includingQuery,
+          ),
+          [pluralModelNode],
+        ),
+      ),
+      includingPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.includingQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.includingQueryPromise,
           ),
           [pluralModelNode],
         ),
@@ -272,6 +454,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           [pluralModelNode],
         ),
       ),
+      limitedToPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.limitedToQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.limitedToQueryPromise,
+          ),
+          [pluralModelNode],
+        ),
+      ),
       orderedBy: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.orderedByQuery,
@@ -280,6 +474,26 @@ export const generateNamespaces = (models: Array<Model>) =>
           factory.createQualifiedName(
             identifiers.namespace.utils.name,
             identifiers.namespace.utils.orderedByQuery,
+          ),
+          [
+            pluralModelNode,
+            factory.createTypeReferenceNode(
+              factory.createQualifiedName(
+                syntaxNamespaceIdentifier,
+                identifiers.namespace.syntax.fieldSlug,
+              ),
+            ),
+          ],
+        ),
+      ),
+      orderedByPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.orderedByQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.orderedByQueryPromise,
           ),
           [
             pluralModelNode,
@@ -336,15 +550,47 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
+      selectingPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.selectingQueryPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.selectingQueryPromise,
+          ),
+          [
+            pluralModelNode,
+            factory.createTypeReferenceNode(
+              factory.createQualifiedName(
+                syntaxNamespaceIdentifier,
+                identifiers.namespace.syntax.fieldSlug,
+              ),
+            ),
+          ],
+        ),
+      ),
       to: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.toQuery,
         undefined,
         factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
       ),
+      toPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.toQueryPromise,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
       using: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.usingQuery,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      usingPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.usingQueryPromise,
         undefined,
         factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
       ),
@@ -394,6 +640,54 @@ export const generateNamespaces = (models: Array<Model>) =>
           ),
         ]),
       ),
+      withPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.withQueryPromise,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.utils.name,
+              identifiers.namespace.utils.withQueryPromise,
+            ),
+            [pluralModelNode],
+          ),
+          factory.createTypeLiteralNode(
+            Object.keys(model.fields).map((slug) =>
+              factory.createPropertySignature(
+                undefined,
+                slug,
+                undefined,
+                factory.createFunctionTypeNode(
+                  [
+                    factory.createTypeParameterDeclaration(
+                      undefined,
+                      typeArgumentIdentifiers.default,
+                      undefined,
+                      pluralModelNode,
+                    ),
+                  ],
+                  [
+                    factory.createParameterDeclaration(
+                      undefined,
+                      undefined,
+                      slug,
+                      undefined,
+                      factory.createIndexedAccessTypeNode(
+                        factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
+                        factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
+                      ),
+                    ),
+                  ],
+                  factory.createTypeReferenceNode(identifiers.primitive.promise, [
+                    factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      ),
     } satisfies Record<string, TypeAliasDeclaration>;
 
     return factory.createModuleDeclaration(
@@ -406,16 +700,25 @@ export const generateNamespaces = (models: Array<Model>) =>
           identifiers.namespace.syntax.singular,
           factory.createModuleBlock([
             singularStatements.after,
+            singularStatements.afterPromise,
             singularStatements.before,
+            singularStatements.beforePromise,
             singularStatements.including,
+            singularStatements.includingPromise,
             singularStatements.limitedTo,
+            singularStatements.limitedToPromise,
             singularStatements.orderedBy,
+            singularStatements.orderedByPromise,
             singularStatements.rootQueryCaller,
             singularStatements.rootQueryCallerPromise,
             singularStatements.selecting,
+            singularStatements.selectingPromise,
             singularStatements.to,
+            singularStatements.toPromise,
             singularStatements.using,
+            singularStatements.usingPromise,
             singularStatements.with,
+            singularStatements.withPromise,
           ]),
           NodeFlags.Namespace,
         ),
@@ -424,16 +727,25 @@ export const generateNamespaces = (models: Array<Model>) =>
           identifiers.namespace.syntax.plural,
           factory.createModuleBlock([
             pluralStatements.after,
+            pluralStatements.afterPromise,
             pluralStatements.before,
+            pluralStatements.beforePromise,
             pluralStatements.including,
+            pluralStatements.includingPromise,
             pluralStatements.limitedTo,
+            pluralStatements.limitedToPromise,
             pluralStatements.orderedBy,
+            pluralStatements.orderedByPromise,
             pluralStatements.rootQueryCaller,
             pluralStatements.rootQueryCallerPromise,
             pluralStatements.selecting,
+            pluralStatements.selectingPromise,
             pluralStatements.to,
+            pluralStatements.toPromise,
             pluralStatements.using,
+            pluralStatements.usingPromise,
             pluralStatements.with,
+            pluralStatements.withPromise,
           ]),
           NodeFlags.Namespace,
         ),
