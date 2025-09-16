@@ -1,6 +1,6 @@
 import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
-import { identifiers } from '@/src/constants/identifiers';
+import { identifiers, instructionIdentifiers } from '@/src/constants/identifiers';
 import {
   afterQueryPromiseType,
   afterQueryType,
@@ -209,24 +209,9 @@ export const generate = (models: Array<Model>): string => {
                     const comment = generateQueryTypeComment(model, 'use');
 
                     const modelSyntaxIdentifier = factory.createIdentifier(
-                      `${convertToPascalCase(model.slug)}Syntax`,
+                      `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                     );
 
-                    // /**
-                    //  * ```ts
-                    //  * User | null
-                    //  * ```
-                    //  */
-                    // const singularModelNode = factory.createUnionTypeNode([
-                    //   factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
-                    //   factory.createLiteralTypeNode(factory.createNull()),
-                    // ]);
-
-                    /**
-                     * ```ts
-                     * user: ReducedFunction & UserSyntax.Singular.RootCaller & { ... };
-                     * ```
-                     */
                     const singularProperty = factory.createPropertySignature(
                       undefined,
                       model.slug,
@@ -245,34 +230,28 @@ export const generate = (models: Array<Model>): string => {
                             identifiers.namespace.utils.rootQueryCaller,
                           ),
                         ),
-                        factory.createTypeLiteralNode([
-                          // generateRootQueryCallSignature({ modelNode: singularModelNode, }),
-                          // generateDefaultSyntaxProperty({ name: 'after', modelNode: singularModelNode, }),
-                          // generateDefaultSyntaxProperty({ name: 'before', modelNode: singularModelNode, }),
-                          // generateDefaultSyntaxProperty({ name: 'including', modelNode: singularModelNode, }),
-                          // generateDefaultSyntaxProperty({ name: 'limitedTo', modelNode: singularModelNode, }),
-                          // generateOrderedBySyntaxProperty({ model, modelNode: singularModelNode, }),
-                          // generateSelectingSyntaxProperty({ model, modelNode: singularModelNode, }),
-                          // generateUsingSyntaxProperty({ model, modelNode: singularModelNode, slug: convertToPascalCase(model.slug), }),
-                          // generateWithSyntaxProperty({ model, modelNode: singularModelNode, }),
-                        ]),
+                        factory.createTypeLiteralNode(
+                          Object.entries(instructionIdentifiers).map(
+                            ([instruction, utilIdentifier]) =>
+                              factory.createPropertySignature(
+                                undefined,
+                                instruction,
+                                undefined,
+                                factory.createTypeReferenceNode(
+                                  factory.createQualifiedName(
+                                    factory.createQualifiedName(
+                                      modelSyntaxIdentifier,
+                                      identifiers.namespace.syntax.singular,
+                                    ),
+                                    utilIdentifier,
+                                  ),
+                                ),
+                              ),
+                          ),
+                        ),
                       ]),
                     );
 
-                    // /**
-                    //  * ```ts
-                    //  * Users
-                    //  * ```
-                    //  */
-                    // const pluralModelNode = factory.createTypeReferenceNode(
-                    //   convertToPascalCase(model.pluralSlug),
-                    // );
-
-                    /**
-                     * ```ts
-                     * users: ReducedFunction & UserSyntax.Plural.RootCaller & { ... };
-                     * ```
-                     */
                     const pluralProperty = factory.createPropertySignature(
                       undefined,
                       model.pluralSlug,
@@ -292,17 +271,25 @@ export const generate = (models: Array<Model>): string => {
                           ),
                         ),
 
-                        factory.createTypeLiteralNode([
-                          // generateRootQueryCallSignature({ modelNode: pluralModelNode }),
-                          // generateDefaultSyntaxProperty({ name: 'after', modelNode: pluralModelNode, }),
-                          // generateDefaultSyntaxProperty({ name: 'before', modelNode: pluralModelNode, }),
-                          // generateDefaultSyntaxProperty({ name: 'including', modelNode: pluralModelNode, }),
-                          // generateDefaultSyntaxProperty({ name: 'limitedTo', modelNode: pluralModelNode, }),
-                          // generateOrderedBySyntaxProperty({ model, modelNode: pluralModelNode, }),
-                          // generateSelectingSyntaxProperty({ model, modelNode: pluralModelNode, }),
-                          // generateUsingSyntaxProperty({ model, modelNode: pluralModelNode, slug: convertToPascalCase(model.pluralSlug), isPlural: true, }),
-                          // generateWithSyntaxProperty({ model, modelNode: pluralModelNode,}),
-                        ]),
+                        factory.createTypeLiteralNode(
+                          Object.entries(instructionIdentifiers).map(
+                            ([instruction, utilIdentifier]) =>
+                              factory.createPropertySignature(
+                                undefined,
+                                instruction,
+                                undefined,
+                                factory.createTypeReferenceNode(
+                                  factory.createQualifiedName(
+                                    factory.createQualifiedName(
+                                      modelSyntaxIdentifier,
+                                      identifiers.namespace.syntax.plural,
+                                    ),
+                                    utilIdentifier,
+                                  ),
+                                ),
+                              ),
+                          ),
+                        ),
                       ]),
                     );
 

@@ -102,3 +102,13 @@ export const typeArgumentIdentifiers = {
   schema: factory.createIdentifier('S'),
   using: factory.createIdentifier('U'),
 } satisfies Record<string, Identifier>;
+
+export const instructionIdentifiers = {
+  after: identifiers.namespace.utils.afterQuery,
+  before: identifiers.namespace.utils.beforeQuery,
+  including: identifiers.namespace.utils.includingQuery,
+  limitedTo: identifiers.namespace.utils.limitedToQuery,
+  orderedBy: identifiers.namespace.utils.orderedByQuery,
+  selecting: identifiers.namespace.utils.selectingQuery,
+  with: identifiers.namespace.utils.withQuery,
+} satisfies Record<string, Identifier>;
