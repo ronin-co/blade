@@ -30,7 +30,7 @@ import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
-import type { CookieOptions, SetCookie } from '@/private/universal/utils/crypto';
+import type { CookieOptions, SetCookie } from '@/private/universal/utils';
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 
 export type WaitUntil = (promise: Promise<unknown>) => void;

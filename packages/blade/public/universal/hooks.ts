@@ -4,7 +4,7 @@ import { type RootTransitionOptions, usePageTransition } from '@/private/client/
 import { RootServerContext } from '@/private/server/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
 import type { CustomNavigator } from '@/private/universal/types/util';
-import { type SetCookie, getCookieSetter } from '@/private/universal/utils/crypto';
+import { type SetCookie, getCookieSetter } from '@/private/universal/utils';
 import { populatePathSegments } from '@/private/universal/utils/paths';
 
 const useParams = <

@@ -8,7 +8,7 @@ import type {
   TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
-import { type CookieOptions, getCookieSetter } from '@/private/universal/utils/crypto';
+import { type CookieOptions, getCookieSetter } from '@/private/universal/utils';
 
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
