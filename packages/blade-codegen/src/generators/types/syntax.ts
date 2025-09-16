@@ -127,6 +127,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           [singularModelNode],
         ),
       ),
+      rootCallerQueryPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.rootQueryCallerPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.rootQueryCallerPromise,
+          ),
+          [singularModelNode],
+        ),
+      ),
       selecting: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.selectingQuery,
@@ -282,6 +294,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           [pluralModelNode],
         ),
       ),
+      rootCallerQueryPromise: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.rootQueryCallerPromise,
+        undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.rootQueryCallerPromise,
+          ),
+          [pluralModelNode],
+        ),
+      ),
       selecting: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.selectingQuery,
@@ -367,6 +391,7 @@ export const generateNamespaces = (models: Array<Model>) =>
             singularStatements.limitedTo,
             singularStatements.orderedBy,
             singularStatements.rootCallerQuery,
+            singularStatements.rootCallerQueryPromise,
             singularStatements.selecting,
             singularStatements.with,
           ]),
@@ -382,6 +407,7 @@ export const generateNamespaces = (models: Array<Model>) =>
             pluralStatements.limitedTo,
             pluralStatements.orderedBy,
             pluralStatements.rootCallerQuery,
+            pluralStatements.rootCallerQueryPromise,
             pluralStatements.selecting,
             pluralStatements.with,
           ]),
