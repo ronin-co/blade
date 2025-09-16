@@ -278,12 +278,6 @@ const normalizeResults = (result: unknown) => {
   return structuredClone(value);
 };
 
-export interface TriggerContext {
-  triggerType: TriggerType;
-  queryType: QueryType;
-  queryModel: string;
-}
-
 /**
  * Invokes a particular trigger (such as `followingAdd`) and handles its output.
  * In the case of an "before" trigger, a query is returned from the trigger, which

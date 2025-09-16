@@ -53,8 +53,6 @@ export type {
   FollowingTriggerHandler,
   AfterTriggerHandler,
   ResolvingTriggerHandler,
-  // Async Context surrounding Triggers
-  TriggerContext,
 } from '@/src/triggers';
 
 export type {
