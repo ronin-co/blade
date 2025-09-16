@@ -95,14 +95,11 @@ export const identifiers = {
  * A list of all generic names used in the `blade-codegen` package.
  *
  * Similar to `identifiers` but designed specifically for use as generic names.
- *
- * TODO(@nurodev): Remove unused identifiers
  */
 export const typeArgumentIdentifiers = {
   default: factory.createIdentifier('T'),
   fields: factory.createIdentifier('F'),
   key: factory.createIdentifier('K'),
-  queries: factory.createIdentifier('Q'),
   schema: factory.createIdentifier('S'),
   using: factory.createIdentifier('U'),
 } satisfies Record<string, Identifier>;
