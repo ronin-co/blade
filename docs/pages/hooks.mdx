@@ -527,29 +527,3 @@ useMetadata({
     bodyClassName: 'text-gray-800'
 });
 ```
-
-## `useJWT` (Server)
-
-Allows for parsing [JSON Web Tokens](https://jwt.io) without blocking the page render.
-
-```tsx
-import { useJWT } from 'blade/server/hooks';
-
-const payload = useJWT(token, secret);
-```
-
-You may also decide to pass a TypeScript generic with the type of payload:
-
-```tsx
-interface SessionToken {
-    iss: string;
-    sub: string;
-    aud: string;
-    iat?: number | undefined;
-    exp?: number | undefined;
-};
-
-useJWT<SessionToken>(token, secret);
-```
-
-If the same JSON Web Token is parsed in different layouts surrounding a page or the page itself (this would happen if you place the hook in a shared utility hook in your app, for example), the token will only be parsed once and all instances of the hook will return its payload. In other words, JWTs are deduped across layouts and pages.
