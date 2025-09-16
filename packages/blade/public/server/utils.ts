@@ -126,4 +126,4 @@ export const build = async (
   });
 };
 
-export { sign, type JWTPayload };
+export { sign as signJWT, type JWTPayload };
