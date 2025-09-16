@@ -20,7 +20,7 @@ type TypeScriptConfig = { compilerOptions?: { paths?: Record<string, string[]> }
  *
  * @returns A list of aliases.
  */
-export const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
+const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
   const content = JSON.parse(config) as TypeScriptConfig;
   const paths = content?.compilerOptions?.paths || {};
 
