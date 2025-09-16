@@ -208,10 +208,16 @@ export const generate = (models: Array<Model>): string => {
                   models.flatMap((model) => {
                     const comment = generateQueryTypeComment(model, 'use');
 
+                    /**
+                     * @todo(@nurodev): Add documentation
+                     */
                     const modelSyntaxIdentifier = factory.createIdentifier(
                       `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                     );
 
+                    /**
+                     * @todo(@nurodev): Add documentation
+                     */
                     const singularProperty = factory.createPropertySignature(
                       undefined,
                       model.slug,
@@ -260,6 +266,9 @@ export const generate = (models: Array<Model>): string => {
                       ]),
                     );
 
+                    /**
+                     * @todo(@nurodev): Add documentation
+                     */
                     const pluralProperty = factory.createPropertySignature(
                       undefined,
                       model.pluralSlug,
@@ -369,10 +378,16 @@ export const generate = (models: Array<Model>): string => {
                         models.flatMap((model) => {
                           const comment = generateQueryTypeComment(model, 'add');
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const modelSyntaxIdentifier = factory.createIdentifier(
                             `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                           );
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const singularProperty = factory.createPropertySignature(
                             undefined,
                             model.slug,
@@ -422,6 +437,9 @@ export const generate = (models: Array<Model>): string => {
                             ]),
                           );
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const pluralProperty = factory.createPropertySignature(
                             undefined,
                             model.pluralSlug,
@@ -496,10 +514,16 @@ export const generate = (models: Array<Model>): string => {
                         models.flatMap((model) => {
                           const comment = generateQueryTypeComment(model, 'remove');
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const modelSyntaxIdentifier = factory.createIdentifier(
                             `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                           );
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const singularProperty = factory.createPropertySignature(
                             undefined,
                             model.slug,
@@ -549,6 +573,9 @@ export const generate = (models: Array<Model>): string => {
                             ]),
                           );
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const pluralProperty = factory.createPropertySignature(
                             undefined,
                             model.pluralSlug,
@@ -623,10 +650,16 @@ export const generate = (models: Array<Model>): string => {
                         models.flatMap((model) => {
                           const comment = generateQueryTypeComment(model, 'set');
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const modelSyntaxIdentifier = factory.createIdentifier(
                             `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                           );
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const singularProperty = factory.createPropertySignature(
                             undefined,
                             model.slug,
@@ -676,6 +709,9 @@ export const generate = (models: Array<Model>): string => {
                             ]),
                           );
 
+                          /**
+                           * @todo(@nurodev): Add documentation
+                           */
                           const pluralProperty = factory.createPropertySignature(
                             undefined,
                             model.pluralSlug,
