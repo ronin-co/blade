@@ -1,10 +1,15 @@
-import type { CookieSerializeOptions } from 'cookie';
 import { useContext } from 'react';
 
 import { type RootTransitionOptions, usePageTransition } from '@/private/client/hooks';
 import { RootServerContext } from '@/private/server/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
 import type { CustomNavigator } from '@/private/universal/types/util';
+import {
+  type SetCookie,
+  type SetExistingCookie,
+  getCookieSetter,
+} from '@/private/universal/utils';
+import { DEFAULT_COOKIE_MAX_AGE } from '@/private/universal/utils/constants';
 import { populatePathSegments } from '@/private/universal/utils/paths';
 
 const useParams = <
@@ -87,26 +92,9 @@ const useRedirect = () => {
   };
 };
 
-export type CookieHookOptions = {
-  /**
-   * Allows for making cookies accessible to the client, instead of allowing only the
-   * server to read and modify them.
-   */
-  client?: true;
-  /**
-   * Allows for restricting the cookie to a specific URL path of the app.
-   *
-   * @default '/'
-   */
-  path?: string;
-};
-
-// 365 days
-const DEFAULT_COOKIE_MAX_AGE = 31536000;
-
 const useCookie = <T extends string | null>(
   name: string,
-): [T | null, (value: T, options?: CookieHookOptions) => void] => {
+): [T | null, SetExistingCookie<T>] => {
   // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
   const isNetlify = typeof Netlify !== 'undefined';
   if (typeof window === 'undefined' || isNetlify) {
@@ -116,35 +104,8 @@ const useCookie = <T extends string | null>(
     const { cookies, collected } = serverContext;
     const value = cookies[name] as T | null;
 
-    const setValue = (value: T, options?: CookieHookOptions) => {
-      const cookieSettings: CookieSerializeOptions = {
-        // 365 days.
-        maxAge: DEFAULT_COOKIE_MAX_AGE,
-        httpOnly: !options?.client,
-        path: options?.path || '/',
-      };
-
-      // To delete cookies, we have to set their expiration time to the past.
-      if (value === null) {
-        cookieSettings.expires = new Date(Date.now() - 1000000);
-        delete cookieSettings.maxAge;
-      }
-      // As per the types defined for the surrounding function, this condition would never
-      // be met. But we'd like to keep it regardless, to catch cases where the types
-      // provided to the developer aren't smart enough to avoid `undefined` or similar
-      // getting passed.
-      else if (typeof value !== 'string') {
-        let message = 'Cookies can only be set to a string value, or `null` ';
-        message += `for deleting them. Please adjust "${name}".`;
-        throw new Error(message);
-      }
-
-      if (!collected.cookies) collected.cookies = {};
-
-      collected.cookies[name] = {
-        value,
-        ...cookieSettings,
-      };
+    const setValue: SetExistingCookie<T> = (value, options) => {
+      return getCookieSetter(collected)(name, value, options);
     };
 
     return [value, setValue];
@@ -153,7 +114,7 @@ const useCookie = <T extends string | null>(
   const value =
     (document.cookie.match(`(^|;)\\s*${name}=([^;]*)`)?.pop() as T | undefined) || null;
 
-  const setValue = (value: T, options?: CookieHookOptions) => {
+  const setValue: SetExistingCookie<T> = (value, options) => {
     const shouldDelete = value === null;
     const encodedValue = shouldDelete ? '' : encodeURIComponent(value);
 

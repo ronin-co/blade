@@ -35,7 +35,7 @@ import {
   transformToVercelBuildOutput,
 } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { generateUniqueId } from '@/private/universal/utils';
 
 export const getClientReferenceLoader = (): RolldownPlugin => ({
   name: 'Client Reference Loader',
