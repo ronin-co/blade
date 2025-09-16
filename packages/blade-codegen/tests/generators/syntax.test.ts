@@ -6,7 +6,6 @@ import { generateUsingSyntax, generateWithSyntax } from '@/src/generators/syntax
 import { printNodes } from '@/src/utils/print';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import { identifiers } from '@/src/constants/identifiers';
 import type { Model } from '@/src/types/model';
 
 describe('syntax', () => {
@@ -177,7 +176,6 @@ describe('syntax', () => {
     describe('singular', () => {
       test('synchronous', () => {
         const typesResult = generateWithSyntax(
-          identifiers.namespace.utils.withQuery,
           SingularAccountModelNode,
           AccountModel,
           false,
@@ -189,7 +187,6 @@ describe('syntax', () => {
       });
       test('asynchronous', () => {
         const typesResult = generateWithSyntax(
-          identifiers.namespace.utils.withQueryPromise,
           SingularAccountModelNode,
           AccountModel,
           true,
@@ -204,7 +201,6 @@ describe('syntax', () => {
     describe('plural', () => {
       test('synchronous', () => {
         const typesResult = generateWithSyntax(
-          identifiers.namespace.utils.withQuery,
           PluralAccountModelNode,
           AccountModel,
           false,
@@ -216,7 +212,6 @@ describe('syntax', () => {
       });
       test('asynchronous', () => {
         const typesResult = generateWithSyntax(
-          identifiers.namespace.utils.withQueryPromise,
           PluralAccountModelNode,
           AccountModel,
           true,

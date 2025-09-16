@@ -159,7 +159,6 @@ export const generateUsingSyntax = (
  * @todo(@nurodev): Add documentation
  */
 export const generateWithSyntax = (
-  name: string | Identifier,
   modelNode: TypeNode,
   model: Model,
   promise: boolean,
@@ -167,6 +166,10 @@ export const generateWithSyntax = (
   const modelUserFieldEntries = Object.entries(model.fields).filter(
     ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
   );
+
+  const name = promise
+    ? identifiers.namespace.utils.withQueryPromise
+    : identifiers.namespace.utils.withQuery;
 
   return factory.createTypeAliasDeclaration(
     undefined,

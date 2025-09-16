@@ -271,18 +271,8 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         generateUsingSyntax(model, singularModelNode, true, false),
       ),
-      with: generateWithSyntax(
-        identifiers.namespace.utils.withQuery,
-        singularModelNode,
-        model,
-        false,
-      ),
-      withPromise: generateWithSyntax(
-        identifiers.namespace.utils.withQueryPromise,
-        singularModelNode,
-        model,
-        true,
-      ),
+      with: generateWithSyntax(singularModelNode, model, false),
+      withPromise: generateWithSyntax(singularModelNode, model, true),
     } satisfies Record<string, TypeAliasDeclaration>;
 
     const pluralModelNode = factory.createTypeReferenceNode(
@@ -513,18 +503,8 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         generateUsingSyntax(model, pluralModelNode, true, true),
       ),
-      with: generateWithSyntax(
-        identifiers.namespace.utils.withQuery,
-        pluralModelNode,
-        model,
-        false,
-      ),
-      withPromise: generateWithSyntax(
-        identifiers.namespace.utils.withQueryPromise,
-        pluralModelNode,
-        model,
-        true,
-      ),
+      with: generateWithSyntax(pluralModelNode, model, false),
+      withPromise: generateWithSyntax(pluralModelNode, model, true),
     } satisfies Record<string, TypeAliasDeclaration>;
 
     return factory.createModuleDeclaration(
