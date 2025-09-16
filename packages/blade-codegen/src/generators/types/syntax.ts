@@ -146,6 +146,7 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
+      // TODO(@nurodev): Add `to` support
       // TODO(@nurodev): Add `using` support
       with: factory.createTypeAliasDeclaration(
         undefined,
@@ -299,6 +300,7 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
+      // TODO(@nurodev): Add `to` support
       // TODO(@nurodev): Add `using` support
       with: factory.createTypeAliasDeclaration(
         undefined,
