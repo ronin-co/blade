@@ -159,8 +159,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
-      // TODO(@nurodev): Add `to` support
-      // TODO(@nurodev): Add `using` support
+      to: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.toQuery,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      using: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.usingQuery,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
       with: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.withQuery,
@@ -326,8 +336,18 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
-      // TODO(@nurodev): Add `to` support
-      // TODO(@nurodev): Add `using` support
+      to: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.toQuery,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
+      using: factory.createTypeAliasDeclaration(
+        undefined,
+        identifiers.namespace.utils.usingQuery,
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.NeverKeyword),
+      ),
       with: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.withQuery,
@@ -393,6 +413,8 @@ export const generateNamespaces = (models: Array<Model>) =>
             singularStatements.rootQueryCaller,
             singularStatements.rootQueryCallerPromise,
             singularStatements.selecting,
+            singularStatements.to,
+            singularStatements.using,
             singularStatements.with,
           ]),
           NodeFlags.Namespace,
@@ -409,6 +431,8 @@ export const generateNamespaces = (models: Array<Model>) =>
             pluralStatements.rootQueryCaller,
             pluralStatements.rootQueryCallerPromise,
             pluralStatements.selecting,
+            pluralStatements.to,
+            pluralStatements.using,
             pluralStatements.with,
           ]),
           NodeFlags.Namespace,
