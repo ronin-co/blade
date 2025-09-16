@@ -285,8 +285,8 @@ export const generateNamespaces = (models: Array<Model>) =>
           ),
           factory.createTypeLiteralNode(
             Object.keys(model.fields)
-              .filter((slug) =>
-                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              .filter(
+                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
               .map((slug) =>
                 factory.createPropertySignature(
@@ -339,8 +339,8 @@ export const generateNamespaces = (models: Array<Model>) =>
           ),
           factory.createTypeLiteralNode(
             Object.keys(model.fields)
-              .filter((slug) =>
-                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              .filter(
+                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
               .map((slug) =>
                 factory.createPropertySignature(
@@ -625,8 +625,8 @@ export const generateNamespaces = (models: Array<Model>) =>
           ),
           factory.createTypeLiteralNode(
             Object.keys(model.fields)
-              .filter((slug) =>
-                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              .filter(
+                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
               .map((slug) =>
                 factory.createPropertySignature(
@@ -679,8 +679,8 @@ export const generateNamespaces = (models: Array<Model>) =>
           ),
           factory.createTypeLiteralNode(
             Object.keys(model.fields)
-              .filter((slug) =>
-                DEFAULT_FIELD_SLUGS.some((field) => !field.includes(slug)),
+              .filter(
+                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
               .map((slug) =>
                 factory.createPropertySignature(
