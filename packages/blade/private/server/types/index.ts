@@ -1,3 +1,4 @@
+import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import type {
   AddTrigger as OriginalAddTrigger,
   AfterAddTrigger as OriginalAfterAddTrigger,
@@ -30,8 +31,7 @@ import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
-import type { CookieOptions, SetCookie } from '@/private/universal/utils';
-import type { Toc } from '@stefanprobst/rehype-extract-toc';
+import type { CookieOptions } from '@/private/universal/utils';
 
 export type WaitUntil = (promise: Promise<unknown>) => void;
 
