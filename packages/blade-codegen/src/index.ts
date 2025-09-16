@@ -270,7 +270,6 @@ export const generate = (models: Array<Model>): string => {
                             identifiers.namespace.utils.rootQueryCaller,
                           ),
                         ),
-
                         factory.createTypeLiteralNode(
                           Object.entries(instructionIdentifiers).map(
                             ([instruction, utilIdentifier]) =>
@@ -376,7 +375,25 @@ export const generate = (models: Array<Model>): string => {
                                   identifiers.namespace.utils.rootQueryCallerPromise,
                                 ),
                               ),
-                              factory.createTypeLiteralNode([]),
+                              factory.createTypeLiteralNode(
+                                Object.entries(instructionIdentifiers).map(
+                                  ([instruction, utilIdentifier]) =>
+                                    factory.createPropertySignature(
+                                      undefined,
+                                      instruction,
+                                      undefined,
+                                      factory.createTypeReferenceNode(
+                                        factory.createQualifiedName(
+                                          factory.createQualifiedName(
+                                            modelSyntaxIdentifier,
+                                            identifiers.namespace.syntax.singular,
+                                          ),
+                                          utilIdentifier,
+                                        ),
+                                      ),
+                                    ),
+                                ),
+                              ),
                             ]),
                           );
 
@@ -398,7 +415,25 @@ export const generate = (models: Array<Model>): string => {
                                   identifiers.namespace.utils.rootQueryCallerPromise,
                                 ),
                               ),
-                              factory.createTypeLiteralNode([]),
+                              factory.createTypeLiteralNode(
+                                Object.entries(instructionIdentifiers).map(
+                                  ([instruction, utilIdentifier]) =>
+                                    factory.createPropertySignature(
+                                      undefined,
+                                      instruction,
+                                      undefined,
+                                      factory.createTypeReferenceNode(
+                                        factory.createQualifiedName(
+                                          factory.createQualifiedName(
+                                            modelSyntaxIdentifier,
+                                            identifiers.namespace.syntax.plural,
+                                          ),
+                                          utilIdentifier,
+                                        ),
+                                      ),
+                                    ),
+                                ),
+                              ),
                             ]),
                           );
 
@@ -449,7 +484,25 @@ export const generate = (models: Array<Model>): string => {
                                   identifiers.namespace.utils.rootQueryCallerPromise,
                                 ),
                               ),
-                              factory.createTypeLiteralNode([]),
+                              factory.createTypeLiteralNode(
+                                Object.entries(instructionIdentifiers).map(
+                                  ([instruction, utilIdentifier]) =>
+                                    factory.createPropertySignature(
+                                      undefined,
+                                      instruction,
+                                      undefined,
+                                      factory.createTypeReferenceNode(
+                                        factory.createQualifiedName(
+                                          factory.createQualifiedName(
+                                            modelSyntaxIdentifier,
+                                            identifiers.namespace.syntax.singular,
+                                          ),
+                                          utilIdentifier,
+                                        ),
+                                      ),
+                                    ),
+                                ),
+                              ),
                             ]),
                           );
 
@@ -471,7 +524,25 @@ export const generate = (models: Array<Model>): string => {
                                   identifiers.namespace.utils.rootQueryCallerPromise,
                                 ),
                               ),
-                              factory.createTypeLiteralNode([]),
+                              factory.createTypeLiteralNode(
+                                Object.entries(instructionIdentifiers).map(
+                                  ([instruction, utilIdentifier]) =>
+                                    factory.createPropertySignature(
+                                      undefined,
+                                      instruction,
+                                      undefined,
+                                      factory.createTypeReferenceNode(
+                                        factory.createQualifiedName(
+                                          factory.createQualifiedName(
+                                            modelSyntaxIdentifier,
+                                            identifiers.namespace.syntax.plural,
+                                          ),
+                                          utilIdentifier,
+                                        ),
+                                      ),
+                                    ),
+                                ),
+                              ),
                             ]),
                           );
 
@@ -522,7 +593,25 @@ export const generate = (models: Array<Model>): string => {
                                   identifiers.namespace.utils.rootQueryCallerPromise,
                                 ),
                               ),
-                              factory.createTypeLiteralNode([]),
+                              factory.createTypeLiteralNode(
+                                Object.entries(instructionIdentifiers).map(
+                                  ([instruction, utilIdentifier]) =>
+                                    factory.createPropertySignature(
+                                      undefined,
+                                      instruction,
+                                      undefined,
+                                      factory.createTypeReferenceNode(
+                                        factory.createQualifiedName(
+                                          factory.createQualifiedName(
+                                            modelSyntaxIdentifier,
+                                            identifiers.namespace.syntax.singular,
+                                          ),
+                                          utilIdentifier,
+                                        ),
+                                      ),
+                                    ),
+                                ),
+                              ),
                             ]),
                           );
 
@@ -544,7 +633,25 @@ export const generate = (models: Array<Model>): string => {
                                   identifiers.namespace.utils.rootQueryCallerPromise,
                                 ),
                               ),
-                              factory.createTypeLiteralNode([]),
+                              factory.createTypeLiteralNode(
+                                Object.entries(instructionIdentifiers).map(
+                                  ([instruction, utilIdentifier]) =>
+                                    factory.createPropertySignature(
+                                      undefined,
+                                      instruction,
+                                      undefined,
+                                      factory.createTypeReferenceNode(
+                                        factory.createQualifiedName(
+                                          factory.createQualifiedName(
+                                            modelSyntaxIdentifier,
+                                            identifiers.namespace.syntax.plural,
+                                          ),
+                                          utilIdentifier,
+                                        ),
+                                      ),
+                                    ),
+                                ),
+                              ),
                             ]),
                           );
 
