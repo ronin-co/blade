@@ -284,11 +284,11 @@ export const generateNamespaces = (models: Array<Model>) =>
             [singularModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields)
+            Object.entries(model.fields)
               .filter(
-                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
+                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
-              .map((slug) =>
+              .map(([slug, field]) =>
                 factory.createPropertySignature(
                   undefined,
                   slug,
@@ -303,21 +303,45 @@ export const generateNamespaces = (models: Array<Model>) =>
                       ),
                     ],
                     [
-                      // TODO(@nurodev): Add union support for link fields
-                      // `team: <T = Projects>(team: Project["team"] | Partial<Team>) => T;`
                       factory.createParameterDeclaration(
                         undefined,
                         undefined,
                         slug,
                         undefined,
-                        factory.createIndexedAccessTypeNode(
-                          factory.createTypeReferenceNode(
-                            convertToPascalCase(model.slug),
+                        factory.createUnionTypeNode([
+                          factory.createIndexedAccessTypeNode(
+                            factory.createTypeReferenceNode(
+                              convertToPascalCase(model.slug),
+                            ),
+                            factory.createLiteralTypeNode(
+                              factory.createStringLiteral(slug),
+                            ),
                           ),
-                          factory.createLiteralTypeNode(
-                            factory.createStringLiteral(slug),
-                          ),
-                        ),
+                          ...(field.type === 'link'
+                            ? [
+                                factory.createTypeReferenceNode(
+                                  identifiers.primitive.partial,
+                                  [
+                                    factory.createIndexedAccessTypeNode(
+                                      factory.createTypeReferenceNode(
+                                        convertToPascalCase(model.slug),
+                                        [
+                                          factory.createTupleTypeNode([
+                                            factory.createLiteralTypeNode(
+                                              factory.createStringLiteral(slug),
+                                            ),
+                                          ]),
+                                        ],
+                                      ),
+                                      factory.createLiteralTypeNode(
+                                        factory.createStringLiteral(slug),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ]
+                            : []),
+                        ]),
                       ),
                     ],
                     factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
@@ -340,11 +364,11 @@ export const generateNamespaces = (models: Array<Model>) =>
             [singularModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields)
+            Object.entries(model.fields)
               .filter(
-                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
+                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
-              .map((slug) =>
+              .map(([slug, field]) =>
                 factory.createPropertySignature(
                   undefined,
                   slug,
@@ -364,14 +388,40 @@ export const generateNamespaces = (models: Array<Model>) =>
                         undefined,
                         slug,
                         undefined,
-                        factory.createIndexedAccessTypeNode(
-                          factory.createTypeReferenceNode(
-                            convertToPascalCase(model.slug),
+                        factory.createUnionTypeNode([
+                          factory.createIndexedAccessTypeNode(
+                            factory.createTypeReferenceNode(
+                              convertToPascalCase(model.slug),
+                            ),
+                            factory.createLiteralTypeNode(
+                              factory.createStringLiteral(slug),
+                            ),
                           ),
-                          factory.createLiteralTypeNode(
-                            factory.createStringLiteral(slug),
-                          ),
-                        ),
+                          ...(field.type === 'link'
+                            ? [
+                                factory.createTypeReferenceNode(
+                                  identifiers.primitive.partial,
+                                  [
+                                    factory.createIndexedAccessTypeNode(
+                                      factory.createTypeReferenceNode(
+                                        convertToPascalCase(model.slug),
+                                        [
+                                          factory.createTupleTypeNode([
+                                            factory.createLiteralTypeNode(
+                                              factory.createStringLiteral(slug),
+                                            ),
+                                          ]),
+                                        ],
+                                      ),
+                                      factory.createLiteralTypeNode(
+                                        factory.createStringLiteral(slug),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ]
+                            : []),
+                        ]),
                       ),
                     ],
                     factory.createTypeReferenceNode(identifiers.primitive.promise, [
@@ -626,11 +676,11 @@ export const generateNamespaces = (models: Array<Model>) =>
             [pluralModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields)
+            Object.entries(model.fields)
               .filter(
-                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
+                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
-              .map((slug) =>
+              .map(([slug, field]) =>
                 factory.createPropertySignature(
                   undefined,
                   slug,
@@ -650,14 +700,40 @@ export const generateNamespaces = (models: Array<Model>) =>
                         undefined,
                         slug,
                         undefined,
-                        factory.createIndexedAccessTypeNode(
-                          factory.createTypeReferenceNode(
-                            convertToPascalCase(model.slug),
+                        factory.createUnionTypeNode([
+                          factory.createIndexedAccessTypeNode(
+                            factory.createTypeReferenceNode(
+                              convertToPascalCase(model.slug),
+                            ),
+                            factory.createLiteralTypeNode(
+                              factory.createStringLiteral(slug),
+                            ),
                           ),
-                          factory.createLiteralTypeNode(
-                            factory.createStringLiteral(slug),
-                          ),
-                        ),
+                          ...(field.type === 'link'
+                            ? [
+                                factory.createTypeReferenceNode(
+                                  identifiers.primitive.partial,
+                                  [
+                                    factory.createIndexedAccessTypeNode(
+                                      factory.createTypeReferenceNode(
+                                        convertToPascalCase(model.slug),
+                                        [
+                                          factory.createTupleTypeNode([
+                                            factory.createLiteralTypeNode(
+                                              factory.createStringLiteral(slug),
+                                            ),
+                                          ]),
+                                        ],
+                                      ),
+                                      factory.createLiteralTypeNode(
+                                        factory.createStringLiteral(slug),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ]
+                            : []),
+                        ]),
                       ),
                     ],
                     factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
@@ -680,11 +756,11 @@ export const generateNamespaces = (models: Array<Model>) =>
             [pluralModelNode],
           ),
           factory.createTypeLiteralNode(
-            Object.keys(model.fields)
+            Object.entries(model.fields)
               .filter(
-                (slug) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
+                ([slug]) => !DEFAULT_FIELD_SLUGS.some((field) => field.includes(slug)),
               )
-              .map((slug) =>
+              .map(([slug, field]) =>
                 factory.createPropertySignature(
                   undefined,
                   slug,
@@ -704,14 +780,40 @@ export const generateNamespaces = (models: Array<Model>) =>
                         undefined,
                         slug,
                         undefined,
-                        factory.createIndexedAccessTypeNode(
-                          factory.createTypeReferenceNode(
-                            convertToPascalCase(model.slug),
+                        factory.createUnionTypeNode([
+                          factory.createIndexedAccessTypeNode(
+                            factory.createTypeReferenceNode(
+                              convertToPascalCase(model.slug),
+                            ),
+                            factory.createLiteralTypeNode(
+                              factory.createStringLiteral(slug),
+                            ),
                           ),
-                          factory.createLiteralTypeNode(
-                            factory.createStringLiteral(slug),
-                          ),
-                        ),
+                          ...(field.type === 'link'
+                            ? [
+                                factory.createTypeReferenceNode(
+                                  identifiers.primitive.partial,
+                                  [
+                                    factory.createIndexedAccessTypeNode(
+                                      factory.createTypeReferenceNode(
+                                        convertToPascalCase(model.slug),
+                                        [
+                                          factory.createTupleTypeNode([
+                                            factory.createLiteralTypeNode(
+                                              factory.createStringLiteral(slug),
+                                            ),
+                                          ]),
+                                        ],
+                                      ),
+                                      factory.createLiteralTypeNode(
+                                        factory.createStringLiteral(slug),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ]
+                            : []),
+                        ]),
                       ),
                     ],
                     factory.createTypeReferenceNode(identifiers.primitive.promise, [
