@@ -32,7 +32,7 @@ import {
   useReduce,
 } from '@/private/client/hooks';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { generateUniqueId } from '@/private/universal/utils';
 import { useLocation, usePopulatePathname, useRedirect } from '@/public/universal/hooks';
 
 interface MutationOptions {

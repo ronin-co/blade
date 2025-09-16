@@ -25,7 +25,7 @@ import {
 } from '@/private/shell/loaders';
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
-import { generateUniqueId } from '@/private/universal/utils/crypto';
+import { generateUniqueId } from '@/private/universal/utils';
 import { getOutputFile } from '@/private/universal/utils/paths';
 
 export interface VirtualFileItem {
