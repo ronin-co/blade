@@ -28,7 +28,7 @@ export const prepareTriggers = (
 ): TriggersList => {
   const options: Partial<NewTriggerOptions> = {
     cookies: serverContext.cookies,
-    setCookie: getCookieSetter(serverContext.collected),
+    setCookie: getCookieSetter(serverContext),
     navigator: {
       userAgent: serverContext.userAgent,
       geoLocation: serverContext.geoLocation,
