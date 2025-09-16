@@ -318,574 +318,263 @@ export const generate = (models: Array<Model>): string => {
     ),
   );
 
-  // /**
-  //  * @example
-  //  * ```ts
-  //  * declare module "blade/client/hooks" {
-  //  *  declare const useMutation: () => {
-  //  *    add: { ... }
-  //  *    remove: { ... }
-  //  *    set: { ... }
-  //  *  };
-  //  * }
-  //  * ```
-  //  */
-  // nodes.push(
-  //   factory.createModuleDeclaration(
-  //     [factory.createModifier(SyntaxKind.DeclareKeyword)],
-  //     identifiers.blade.module.client.hooks,
-  //     factory.createModuleBlock([
-  //       factory.createVariableStatement(
-  //         [factory.createModifier(SyntaxKind.DeclareKeyword)],
-  //         factory.createVariableDeclarationList(
-  //           [
-  //             factory.createVariableDeclaration(
-  //               factory.createIdentifier('useMutation'),
-  //               undefined,
-  //               factory.createFunctionTypeNode(
-  //                 undefined,
-  //                 [],
-  //                 factory.createTypeLiteralNode([
-  //                   factory.createPropertySignature(
-  //                     undefined,
-  //                     'add',
-  //                     undefined,
-  //                     factory.createTypeLiteralNode(
-  //                       models.flatMap((model) => {
-  //                         const comment = generateQueryTypeComment(model, 'add');
+  /**
+   * @example
+   * ```ts
+   * declare module "blade/client/hooks" {
+   *  declare const useMutation: () => {
+   *    add: { ... }
+   *    remove: { ... }
+   *    set: { ... }
+   *  };
+   * }
+   * ```
+   */
+  nodes.push(
+    factory.createModuleDeclaration(
+      [factory.createModifier(SyntaxKind.DeclareKeyword)],
+      identifiers.blade.module.client.hooks,
+      factory.createModuleBlock([
+        factory.createVariableStatement(
+          [factory.createModifier(SyntaxKind.DeclareKeyword)],
+          factory.createVariableDeclarationList(
+            [
+              factory.createVariableDeclaration(
+                factory.createIdentifier('useMutation'),
+                undefined,
+                factory.createFunctionTypeNode(
+                  undefined,
+                  [],
+                  factory.createTypeLiteralNode([
+                    factory.createPropertySignature(
+                      undefined,
+                      'add',
+                      undefined,
+                      factory.createTypeLiteralNode(
+                        models.flatMap((model) => {
+                          const comment = generateQueryTypeComment(model, 'add');
 
-  //                         /**
-  //                          * ```ts
-  //                          * User | null
-  //                          * ```
-  //                          */
-  //                         const singularModelNode = factory.createUnionTypeNode([
-  //                           factory.createTypeReferenceNode(
-  //                             convertToPascalCase(model.slug),
-  //                           ),
-  //                           factory.createLiteralTypeNode(factory.createNull()),
-  //                         ]);
+                          const modelSyntaxIdentifier = factory.createIdentifier(
+                            `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * user: ReducedFunction & { ... };
-  //                          * ```
-  //                          */
-  //                         const singularProperty = factory.createPropertySignature(
-  //                           undefined,
-  //                           model.slug,
-  //                           undefined,
-  //                           factory.createIntersectionTypeNode([
-  //                             factory.createExpressionWithTypeArguments(
-  //                               identifiers.blade.reducedFunction,
-  //                               undefined,
-  //                             ),
-  //                             factory.createTypeLiteralNode([
-  //                               // generateRootQueryCallSignature({
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'after',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'before',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'including',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'limitedTo',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateOrderedBySyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateSelectingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateUsingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               //   slug: convertToPascalCase(model.slug),
-  //                               // }),
-  //                               // generateWithSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                             ]),
-  //                           ]),
-  //                         );
+                          const singularProperty = factory.createPropertySignature(
+                            undefined,
+                            model.slug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.blade.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
+                                  factory.createQualifiedName(
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.singular,
+                                  ),
+                                  identifiers.namespace.utils.rootQueryCaller,
+                                ),
+                              ),
+                              factory.createTypeLiteralNode([]),
+                            ]),
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * Users
-  //                          * ```
-  //                          */
-  //                         const pluralModelNode = factory.createTypeReferenceNode(
-  //                           convertToPascalCase(model.pluralSlug),
-  //                         );
+                          const pluralProperty = factory.createPropertySignature(
+                            undefined,
+                            model.pluralSlug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.blade.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
+                                  factory.createQualifiedName(
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.plural,
+                                  ),
+                                  identifiers.namespace.utils.rootQueryCaller,
+                                ),
+                              ),
+                              factory.createTypeLiteralNode([]),
+                            ]),
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * users: ReducedFunction & { ... };
-  //                          * ```
-  //                          */
-  //                         const pluralProperty = factory.createPropertySignature(
-  //                           undefined,
-  //                           model.pluralSlug,
-  //                           undefined,
-  //                           factory.createIntersectionTypeNode([
-  //                             factory.createExpressionWithTypeArguments(
-  //                               identifiers.blade.reducedFunction,
-  //                               undefined,
-  //                             ),
-  //                             factory.createTypeLiteralNode([
-  //                               // generateRootQueryCallSignature({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'after',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'before',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'including',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'limitedTo',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateOrderedBySyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateSelectingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateUsingSyntaxProperty({
-  //                               //   isPlural: true,
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               //   slug: convertToPascalCase(model.pluralSlug),
-  //                               // }),
-  //                               // generateWithSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                             ]),
-  //                           ]),
-  //                         );
+                          return [
+                            addSyntheticLeadingComment(
+                              singularProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.singular,
+                              true,
+                            ),
+                            addSyntheticLeadingComment(
+                              pluralProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.plural,
+                              true,
+                            ),
+                          ];
+                        }),
+                      ),
+                    ),
+                    factory.createPropertySignature(
+                      undefined,
+                      'remove',
+                      undefined,
+                      factory.createTypeLiteralNode(
+                        models.flatMap((model) => {
+                          const comment = generateQueryTypeComment(model, 'remove');
 
-  //                         return [
-  //                           addSyntheticLeadingComment(
-  //                             singularProperty,
-  //                             SyntaxKind.MultiLineCommentTrivia,
-  //                             comment.singular,
-  //                             true,
-  //                           ),
-  //                           addSyntheticLeadingComment(
-  //                             pluralProperty,
-  //                             SyntaxKind.MultiLineCommentTrivia,
-  //                             comment.plural,
-  //                             true,
-  //                           ),
-  //                         ];
-  //                       }),
-  //                     ),
-  //                   ),
-  //                   factory.createPropertySignature(
-  //                     undefined,
-  //                     'remove',
-  //                     undefined,
-  //                     factory.createTypeLiteralNode(
-  //                       models.flatMap((model) => {
-  //                         const comment = generateQueryTypeComment(model, 'remove');
+                          const modelSyntaxIdentifier = factory.createIdentifier(
+                            `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * User | null
-  //                          * ```
-  //                          */
-  //                         const singularModelNode = factory.createUnionTypeNode([
-  //                           factory.createTypeReferenceNode(
-  //                             convertToPascalCase(model.slug),
-  //                           ),
-  //                           factory.createLiteralTypeNode(factory.createNull()),
-  //                         ]);
+                          const singularProperty = factory.createPropertySignature(
+                            undefined,
+                            model.slug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.blade.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
+                                  factory.createQualifiedName(
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.singular,
+                                  ),
+                                  identifiers.namespace.utils.rootQueryCaller,
+                                ),
+                              ),
+                              factory.createTypeLiteralNode([]),
+                            ]),
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * user: ReducedFunction & { ... };
-  //                          * ```
-  //                          */
-  //                         const singularProperty = factory.createPropertySignature(
-  //                           undefined,
-  //                           model.slug,
-  //                           undefined,
-  //                           factory.createIntersectionTypeNode([
-  //                             factory.createExpressionWithTypeArguments(
-  //                               identifiers.blade.reducedFunction,
-  //                               undefined,
-  //                             ),
-  //                             factory.createTypeLiteralNode([
-  //                               // generateRootQueryCallSignature({
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'after',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'before',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'including',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'limitedTo',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateOrderedBySyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateSelectingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateUsingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               //   slug: convertToPascalCase(model.slug),
-  //                               // }),
-  //                               // generateWithSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                             ]),
-  //                           ]),
-  //                         );
+                          const pluralProperty = factory.createPropertySignature(
+                            undefined,
+                            model.pluralSlug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.blade.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
+                                  factory.createQualifiedName(
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.plural,
+                                  ),
+                                  identifiers.namespace.utils.rootQueryCaller,
+                                ),
+                              ),
+                              factory.createTypeLiteralNode([]),
+                            ]),
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * Users
-  //                          * ```
-  //                          */
-  //                         const pluralModelNode = factory.createTypeReferenceNode(
-  //                           convertToPascalCase(model.pluralSlug),
-  //                         );
+                          return [
+                            addSyntheticLeadingComment(
+                              singularProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.singular,
+                              true,
+                            ),
+                            addSyntheticLeadingComment(
+                              pluralProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.plural,
+                              true,
+                            ),
+                          ];
+                        }),
+                      ),
+                    ),
+                    factory.createPropertySignature(
+                      undefined,
+                      'set',
+                      undefined,
+                      factory.createTypeLiteralNode(
+                        models.flatMap((model) => {
+                          const comment = generateQueryTypeComment(model, 'set');
 
-  //                         /**
-  //                          * ```ts
-  //                          * users: ReducedFunction & { ... };
-  //                          * ```
-  //                          */
-  //                         const pluralProperty = factory.createPropertySignature(
-  //                           undefined,
-  //                           model.pluralSlug,
-  //                           undefined,
-  //                           factory.createIntersectionTypeNode([
-  //                             factory.createExpressionWithTypeArguments(
-  //                               identifiers.blade.reducedFunction,
-  //                               undefined,
-  //                             ),
-  //                             factory.createTypeLiteralNode([
-  //                               // generateRootQueryCallSignature({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'after',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'before',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'including',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'limitedTo',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateOrderedBySyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateSelectingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateUsingSyntaxProperty({
-  //                               //   isPlural: true,
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               //   slug: convertToPascalCase(model.pluralSlug),
-  //                               // }),
-  //                               // generateWithSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                             ]),
-  //                           ]),
-  //                         );
+                          const modelSyntaxIdentifier = factory.createIdentifier(
+                            `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+                          );
 
-  //                         return [
-  //                           addSyntheticLeadingComment(
-  //                             singularProperty,
-  //                             SyntaxKind.MultiLineCommentTrivia,
-  //                             comment.singular,
-  //                             true,
-  //                           ),
-  //                           addSyntheticLeadingComment(
-  //                             pluralProperty,
-  //                             SyntaxKind.MultiLineCommentTrivia,
-  //                             comment.plural,
-  //                             true,
-  //                           ),
-  //                         ];
-  //                       }),
-  //                     ),
-  //                   ),
-  //                   factory.createPropertySignature(
-  //                     undefined,
-  //                     'set',
-  //                     undefined,
-  //                     factory.createTypeLiteralNode(
-  //                       models.flatMap((model) => {
-  //                         const comment = generateQueryTypeComment(model, 'set');
+                          const singularProperty = factory.createPropertySignature(
+                            undefined,
+                            model.slug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.blade.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
+                                  factory.createQualifiedName(
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.singular,
+                                  ),
+                                  identifiers.namespace.utils.rootQueryCaller,
+                                ),
+                              ),
+                              factory.createTypeLiteralNode([]),
+                            ]),
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * User | null
-  //                          * ```
-  //                          */
-  //                         const singularModelNode = factory.createUnionTypeNode([
-  //                           factory.createTypeReferenceNode(
-  //                             convertToPascalCase(model.slug),
-  //                           ),
-  //                           factory.createLiteralTypeNode(factory.createNull()),
-  //                         ]);
+                          const pluralProperty = factory.createPropertySignature(
+                            undefined,
+                            model.pluralSlug,
+                            undefined,
+                            factory.createIntersectionTypeNode([
+                              factory.createExpressionWithTypeArguments(
+                                identifiers.blade.reducedFunction,
+                                undefined,
+                              ),
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
+                                  factory.createQualifiedName(
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.plural,
+                                  ),
+                                  identifiers.namespace.utils.rootQueryCaller,
+                                ),
+                              ),
+                              factory.createTypeLiteralNode([]),
+                            ]),
+                          );
 
-  //                         /**
-  //                          * ```ts
-  //                          * user: ReducedFunction & { ... };
-  //                          * ```
-  //                          */
-  //                         const singularProperty = factory.createPropertySignature(
-  //                           undefined,
-  //                           model.slug,
-  //                           undefined,
-  //                           factory.createIntersectionTypeNode([
-  //                             factory.createExpressionWithTypeArguments(
-  //                               identifiers.blade.reducedFunction,
-  //                               undefined,
-  //                             ),
-  //                             factory.createTypeLiteralNode([
-  //                               // generateRootQueryCallSignature({
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'after',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'before',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'including',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: singularModelNode,
-  //                               //   name: 'limitedTo',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateOrderedBySyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateSelectingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateUsingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               //   slug: convertToPascalCase(model.slug),
-  //                               // }),
-  //                               // generateWithSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: singularModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                             ]),
-  //                           ]),
-  //                         );
-
-  //                         /**
-  //                          * ```ts
-  //                          * Users
-  //                          * ```
-  //                          */
-  //                         const pluralModelNode = factory.createTypeReferenceNode(
-  //                           convertToPascalCase(model.pluralSlug),
-  //                         );
-
-  //                         /**
-  //                          * ```ts
-  //                          * users: ReducedFunction & { ... };
-  //                          * ```
-  //                          */
-  //                         const pluralProperty = factory.createPropertySignature(
-  //                           undefined,
-  //                           model.pluralSlug,
-  //                           undefined,
-  //                           factory.createIntersectionTypeNode([
-  //                             factory.createExpressionWithTypeArguments(
-  //                               identifiers.blade.reducedFunction,
-  //                               undefined,
-  //                             ),
-  //                             factory.createTypeLiteralNode([
-  //                               // generateRootQueryCallSignature({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'after',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'before',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'including',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'limitedTo',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateOrderedBySyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateSelectingSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateDefaultSyntaxProperty({
-  //                               //   modelNode: pluralModelNode,
-  //                               //   name: 'to',
-  //                               //   promise: true,
-  //                               // }),
-  //                               // generateUsingSyntaxProperty({
-  //                               //   isPlural: true,
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               //   slug: convertToPascalCase(model.pluralSlug),
-  //                               // }),
-  //                               // generateWithSyntaxProperty({
-  //                               //   model,
-  //                               //   modelNode: pluralModelNode,
-  //                               //   promise: true,
-  //                               // }),
-  //                             ]),
-  //                           ]),
-  //                         );
-
-  //                         return [
-  //                           addSyntheticLeadingComment(
-  //                             singularProperty,
-  //                             SyntaxKind.MultiLineCommentTrivia,
-  //                             comment.singular,
-  //                             true,
-  //                           ),
-  //                           addSyntheticLeadingComment(
-  //                             pluralProperty,
-  //                             SyntaxKind.MultiLineCommentTrivia,
-  //                             comment.plural,
-  //                             true,
-  //                           ),
-  //                         ];
-  //                       }),
-  //                     ),
-  //                   ),
-  //                 ]),
-  //               ),
-  //             ),
-  //           ],
-  //           NodeFlags.Const,
-  //         ),
-  //       ),
-  //     ]),
-  //   ),
-  // );
+                          return [
+                            addSyntheticLeadingComment(
+                              singularProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.singular,
+                              true,
+                            ),
+                            addSyntheticLeadingComment(
+                              pluralProperty,
+                              SyntaxKind.MultiLineCommentTrivia,
+                              comment.plural,
+                              true,
+                            ),
+                          ];
+                        }),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ],
+            NodeFlags.Const,
+          ),
+        ),
+      ]),
+    ),
+  );
 
   return printNodes(nodes);
 };
