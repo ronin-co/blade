@@ -407,16 +407,20 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                // TODO(@nurodev): Add `to` query
-                                // TODO(@nurodev): Add `using` query
                                 Object.entries({
-                                  after: identifiers.namespace.utils.afterQuery,
-                                  before: identifiers.namespace.utils.beforeQuery,
-                                  including: identifiers.namespace.utils.includingQuery,
-                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
-                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
-                                  selecting: identifiers.namespace.utils.selectingQuery,
-                                  with: identifiers.namespace.utils.withQuery,
+                                  after: identifiers.namespace.utils.afterQueryPromise,
+                                  before: identifiers.namespace.utils.beforeQueryPromise,
+                                  including:
+                                    identifiers.namespace.utils.includingQueryPromise,
+                                  limitedTo:
+                                    identifiers.namespace.utils.limitedToQueryPromise,
+                                  orderedBy:
+                                    identifiers.namespace.utils.orderedByQueryPromise,
+                                  selecting:
+                                    identifiers.namespace.utils.selectingQueryPromise,
+                                  to: identifiers.namespace.utils.toQueryPromise,
+                                  using: identifiers.namespace.utils.usingQueryPromise,
+                                  with: identifiers.namespace.utils.withQueryPromise,
                                 }).map(([instruction, utilIdentifier]) =>
                                   factory.createPropertySignature(
                                     undefined,
@@ -459,16 +463,20 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                // TODO(@nurodev): Add `to` query
-                                // TODO(@nurodev): Add `using` query
                                 Object.entries({
-                                  after: identifiers.namespace.utils.afterQuery,
-                                  before: identifiers.namespace.utils.beforeQuery,
-                                  including: identifiers.namespace.utils.includingQuery,
-                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
-                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
-                                  selecting: identifiers.namespace.utils.selectingQuery,
-                                  with: identifiers.namespace.utils.withQuery,
+                                  after: identifiers.namespace.utils.afterQueryPromise,
+                                  before: identifiers.namespace.utils.beforeQueryPromise,
+                                  including:
+                                    identifiers.namespace.utils.includingQueryPromise,
+                                  limitedTo:
+                                    identifiers.namespace.utils.limitedToQueryPromise,
+                                  orderedBy:
+                                    identifiers.namespace.utils.orderedByQueryPromise,
+                                  selecting:
+                                    identifiers.namespace.utils.selectingQueryPromise,
+                                  to: identifiers.namespace.utils.toQueryPromise,
+                                  using: identifiers.namespace.utils.usingQueryPromise,
+                                  with: identifiers.namespace.utils.withQueryPromise,
                                 }).map(([instruction, utilIdentifier]) =>
                                   factory.createPropertySignature(
                                     undefined,
@@ -543,16 +551,20 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                // TODO(@nurodev): Add `to` query
-                                // TODO(@nurodev): Add `using` query
                                 Object.entries({
-                                  after: identifiers.namespace.utils.afterQuery,
-                                  before: identifiers.namespace.utils.beforeQuery,
-                                  including: identifiers.namespace.utils.includingQuery,
-                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
-                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
-                                  selecting: identifiers.namespace.utils.selectingQuery,
-                                  with: identifiers.namespace.utils.withQuery,
+                                  after: identifiers.namespace.utils.afterQueryPromise,
+                                  before: identifiers.namespace.utils.beforeQueryPromise,
+                                  including:
+                                    identifiers.namespace.utils.includingQueryPromise,
+                                  limitedTo:
+                                    identifiers.namespace.utils.limitedToQueryPromise,
+                                  orderedBy:
+                                    identifiers.namespace.utils.orderedByQueryPromise,
+                                  selecting:
+                                    identifiers.namespace.utils.selectingQueryPromise,
+                                  to: identifiers.namespace.utils.toQueryPromise,
+                                  using: identifiers.namespace.utils.usingQueryPromise,
+                                  with: identifiers.namespace.utils.withQueryPromise,
                                 }).map(([instruction, utilIdentifier]) =>
                                   factory.createPropertySignature(
                                     undefined,
@@ -595,16 +607,20 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                // TODO(@nurodev): Add `to` query
-                                // TODO(@nurodev): Add `using` query
                                 Object.entries({
-                                  after: identifiers.namespace.utils.afterQuery,
-                                  before: identifiers.namespace.utils.beforeQuery,
-                                  including: identifiers.namespace.utils.includingQuery,
-                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
-                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
-                                  selecting: identifiers.namespace.utils.selectingQuery,
-                                  with: identifiers.namespace.utils.withQuery,
+                                  after: identifiers.namespace.utils.afterQueryPromise,
+                                  before: identifiers.namespace.utils.beforeQueryPromise,
+                                  including:
+                                    identifiers.namespace.utils.includingQueryPromise,
+                                  limitedTo:
+                                    identifiers.namespace.utils.limitedToQueryPromise,
+                                  orderedBy:
+                                    identifiers.namespace.utils.orderedByQueryPromise,
+                                  selecting:
+                                    identifiers.namespace.utils.selectingQueryPromise,
+                                  to: identifiers.namespace.utils.toQueryPromise,
+                                  using: identifiers.namespace.utils.usingQueryPromise,
+                                  with: identifiers.namespace.utils.withQueryPromise,
                                 }).map(([instruction, utilIdentifier]) =>
                                   factory.createPropertySignature(
                                     undefined,
@@ -679,16 +695,20 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                // TODO(@nurodev): Add `to` query
-                                // TODO(@nurodev): Add `using` query
                                 Object.entries({
-                                  after: identifiers.namespace.utils.afterQuery,
-                                  before: identifiers.namespace.utils.beforeQuery,
-                                  including: identifiers.namespace.utils.includingQuery,
-                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
-                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
-                                  selecting: identifiers.namespace.utils.selectingQuery,
-                                  with: identifiers.namespace.utils.withQuery,
+                                  after: identifiers.namespace.utils.afterQueryPromise,
+                                  before: identifiers.namespace.utils.beforeQueryPromise,
+                                  including:
+                                    identifiers.namespace.utils.includingQueryPromise,
+                                  limitedTo:
+                                    identifiers.namespace.utils.limitedToQueryPromise,
+                                  orderedBy:
+                                    identifiers.namespace.utils.orderedByQueryPromise,
+                                  selecting:
+                                    identifiers.namespace.utils.selectingQueryPromise,
+                                  to: identifiers.namespace.utils.toQueryPromise,
+                                  using: identifiers.namespace.utils.usingQueryPromise,
+                                  with: identifiers.namespace.utils.withQueryPromise,
                                 }).map(([instruction, utilIdentifier]) =>
                                   factory.createPropertySignature(
                                     undefined,
@@ -731,16 +751,20 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                // TODO(@nurodev): Add `to` query
-                                // TODO(@nurodev): Add `using` query
                                 Object.entries({
-                                  after: identifiers.namespace.utils.afterQuery,
-                                  before: identifiers.namespace.utils.beforeQuery,
-                                  including: identifiers.namespace.utils.includingQuery,
-                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
-                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
-                                  selecting: identifiers.namespace.utils.selectingQuery,
-                                  with: identifiers.namespace.utils.withQuery,
+                                  after: identifiers.namespace.utils.afterQueryPromise,
+                                  before: identifiers.namespace.utils.beforeQueryPromise,
+                                  including:
+                                    identifiers.namespace.utils.includingQueryPromise,
+                                  limitedTo:
+                                    identifiers.namespace.utils.limitedToQueryPromise,
+                                  orderedBy:
+                                    identifiers.namespace.utils.orderedByQueryPromise,
+                                  selecting:
+                                    identifiers.namespace.utils.selectingQueryPromise,
+                                  to: identifiers.namespace.utils.toQueryPromise,
+                                  using: identifiers.namespace.utils.usingQueryPromise,
+                                  with: identifiers.namespace.utils.withQueryPromise,
                                 }).map(([instruction, utilIdentifier]) =>
                                   factory.createPropertySignature(
                                     undefined,
