@@ -1,6 +1,6 @@
 import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
-import { identifiers, instructionIdentifiers } from '@/src/constants/identifiers';
+import { identifiers } from '@/src/constants/identifiers';
 import {
   afterQueryPromiseType,
   afterQueryType,
@@ -231,22 +231,30 @@ export const generate = (models: Array<Model>): string => {
                           ),
                         ),
                         factory.createTypeLiteralNode(
-                          Object.entries(instructionIdentifiers).map(
-                            ([instruction, utilIdentifier]) =>
-                              factory.createPropertySignature(
-                                undefined,
-                                instruction,
-                                undefined,
-                                factory.createTypeReferenceNode(
+                          // TODO(@nurodev): Add `using` query
+                          Object.entries({
+                            after: identifiers.namespace.utils.afterQuery,
+                            before: identifiers.namespace.utils.beforeQuery,
+                            including: identifiers.namespace.utils.includingQuery,
+                            limitedTo: identifiers.namespace.utils.limitedToQuery,
+                            orderedBy: identifiers.namespace.utils.orderedByQuery,
+                            selecting: identifiers.namespace.utils.selectingQuery,
+                            with: identifiers.namespace.utils.withQuery,
+                          }).map(([instruction, utilIdentifier]) =>
+                            factory.createPropertySignature(
+                              undefined,
+                              instruction,
+                              undefined,
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    factory.createQualifiedName(
-                                      modelSyntaxIdentifier,
-                                      identifiers.namespace.syntax.singular,
-                                    ),
-                                    utilIdentifier,
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.singular,
                                   ),
+                                  utilIdentifier,
                                 ),
                               ),
+                            ),
                           ),
                         ),
                       ]),
@@ -271,22 +279,30 @@ export const generate = (models: Array<Model>): string => {
                           ),
                         ),
                         factory.createTypeLiteralNode(
-                          Object.entries(instructionIdentifiers).map(
-                            ([instruction, utilIdentifier]) =>
-                              factory.createPropertySignature(
-                                undefined,
-                                instruction,
-                                undefined,
-                                factory.createTypeReferenceNode(
+                          // TODO(@nurodev): Add `using` query
+                          Object.entries({
+                            after: identifiers.namespace.utils.afterQuery,
+                            before: identifiers.namespace.utils.beforeQuery,
+                            including: identifiers.namespace.utils.includingQuery,
+                            limitedTo: identifiers.namespace.utils.limitedToQuery,
+                            orderedBy: identifiers.namespace.utils.orderedByQuery,
+                            selecting: identifiers.namespace.utils.selectingQuery,
+                            with: identifiers.namespace.utils.withQuery,
+                          }).map(([instruction, utilIdentifier]) =>
+                            factory.createPropertySignature(
+                              undefined,
+                              instruction,
+                              undefined,
+                              factory.createTypeReferenceNode(
+                                factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    factory.createQualifiedName(
-                                      modelSyntaxIdentifier,
-                                      identifiers.namespace.syntax.plural,
-                                    ),
-                                    utilIdentifier,
+                                    modelSyntaxIdentifier,
+                                    identifiers.namespace.syntax.plural,
                                   ),
+                                  utilIdentifier,
                                 ),
                               ),
+                            ),
                           ),
                         ),
                       ]),
@@ -376,22 +392,31 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                Object.entries(instructionIdentifiers).map(
-                                  ([instruction, utilIdentifier]) =>
-                                    factory.createPropertySignature(
-                                      undefined,
-                                      instruction,
-                                      undefined,
-                                      factory.createTypeReferenceNode(
+                                // TODO(@nurodev): Add `to` query
+                                // TODO(@nurodev): Add `using` query
+                                Object.entries({
+                                  after: identifiers.namespace.utils.afterQuery,
+                                  before: identifiers.namespace.utils.beforeQuery,
+                                  including: identifiers.namespace.utils.includingQuery,
+                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
+                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
+                                  selecting: identifiers.namespace.utils.selectingQuery,
+                                  with: identifiers.namespace.utils.withQuery,
+                                }).map(([instruction, utilIdentifier]) =>
+                                  factory.createPropertySignature(
+                                    undefined,
+                                    instruction,
+                                    undefined,
+                                    factory.createTypeReferenceNode(
+                                      factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          factory.createQualifiedName(
-                                            modelSyntaxIdentifier,
-                                            identifiers.namespace.syntax.singular,
-                                          ),
-                                          utilIdentifier,
+                                          modelSyntaxIdentifier,
+                                          identifiers.namespace.syntax.singular,
                                         ),
+                                        utilIdentifier,
                                       ),
                                     ),
+                                  ),
                                 ),
                               ),
                             ]),
@@ -416,22 +441,31 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                Object.entries(instructionIdentifiers).map(
-                                  ([instruction, utilIdentifier]) =>
-                                    factory.createPropertySignature(
-                                      undefined,
-                                      instruction,
-                                      undefined,
-                                      factory.createTypeReferenceNode(
+                                // TODO(@nurodev): Add `to` query
+                                // TODO(@nurodev): Add `using` query
+                                Object.entries({
+                                  after: identifiers.namespace.utils.afterQuery,
+                                  before: identifiers.namespace.utils.beforeQuery,
+                                  including: identifiers.namespace.utils.includingQuery,
+                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
+                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
+                                  selecting: identifiers.namespace.utils.selectingQuery,
+                                  with: identifiers.namespace.utils.withQuery,
+                                }).map(([instruction, utilIdentifier]) =>
+                                  factory.createPropertySignature(
+                                    undefined,
+                                    instruction,
+                                    undefined,
+                                    factory.createTypeReferenceNode(
+                                      factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          factory.createQualifiedName(
-                                            modelSyntaxIdentifier,
-                                            identifiers.namespace.syntax.plural,
-                                          ),
-                                          utilIdentifier,
+                                          modelSyntaxIdentifier,
+                                          identifiers.namespace.syntax.plural,
                                         ),
+                                        utilIdentifier,
                                       ),
                                     ),
+                                  ),
                                 ),
                               ),
                             ]),
@@ -485,22 +519,31 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                Object.entries(instructionIdentifiers).map(
-                                  ([instruction, utilIdentifier]) =>
-                                    factory.createPropertySignature(
-                                      undefined,
-                                      instruction,
-                                      undefined,
-                                      factory.createTypeReferenceNode(
+                                // TODO(@nurodev): Add `to` query
+                                // TODO(@nurodev): Add `using` query
+                                Object.entries({
+                                  after: identifiers.namespace.utils.afterQuery,
+                                  before: identifiers.namespace.utils.beforeQuery,
+                                  including: identifiers.namespace.utils.includingQuery,
+                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
+                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
+                                  selecting: identifiers.namespace.utils.selectingQuery,
+                                  with: identifiers.namespace.utils.withQuery,
+                                }).map(([instruction, utilIdentifier]) =>
+                                  factory.createPropertySignature(
+                                    undefined,
+                                    instruction,
+                                    undefined,
+                                    factory.createTypeReferenceNode(
+                                      factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          factory.createQualifiedName(
-                                            modelSyntaxIdentifier,
-                                            identifiers.namespace.syntax.singular,
-                                          ),
-                                          utilIdentifier,
+                                          modelSyntaxIdentifier,
+                                          identifiers.namespace.syntax.singular,
                                         ),
+                                        utilIdentifier,
                                       ),
                                     ),
+                                  ),
                                 ),
                               ),
                             ]),
@@ -525,22 +568,31 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                Object.entries(instructionIdentifiers).map(
-                                  ([instruction, utilIdentifier]) =>
-                                    factory.createPropertySignature(
-                                      undefined,
-                                      instruction,
-                                      undefined,
-                                      factory.createTypeReferenceNode(
+                                // TODO(@nurodev): Add `to` query
+                                // TODO(@nurodev): Add `using` query
+                                Object.entries({
+                                  after: identifiers.namespace.utils.afterQuery,
+                                  before: identifiers.namespace.utils.beforeQuery,
+                                  including: identifiers.namespace.utils.includingQuery,
+                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
+                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
+                                  selecting: identifiers.namespace.utils.selectingQuery,
+                                  with: identifiers.namespace.utils.withQuery,
+                                }).map(([instruction, utilIdentifier]) =>
+                                  factory.createPropertySignature(
+                                    undefined,
+                                    instruction,
+                                    undefined,
+                                    factory.createTypeReferenceNode(
+                                      factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          factory.createQualifiedName(
-                                            modelSyntaxIdentifier,
-                                            identifiers.namespace.syntax.plural,
-                                          ),
-                                          utilIdentifier,
+                                          modelSyntaxIdentifier,
+                                          identifiers.namespace.syntax.plural,
                                         ),
+                                        utilIdentifier,
                                       ),
                                     ),
+                                  ),
                                 ),
                               ),
                             ]),
@@ -594,22 +646,31 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                Object.entries(instructionIdentifiers).map(
-                                  ([instruction, utilIdentifier]) =>
-                                    factory.createPropertySignature(
-                                      undefined,
-                                      instruction,
-                                      undefined,
-                                      factory.createTypeReferenceNode(
+                                // TODO(@nurodev): Add `to` query
+                                // TODO(@nurodev): Add `using` query
+                                Object.entries({
+                                  after: identifiers.namespace.utils.afterQuery,
+                                  before: identifiers.namespace.utils.beforeQuery,
+                                  including: identifiers.namespace.utils.includingQuery,
+                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
+                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
+                                  selecting: identifiers.namespace.utils.selectingQuery,
+                                  with: identifiers.namespace.utils.withQuery,
+                                }).map(([instruction, utilIdentifier]) =>
+                                  factory.createPropertySignature(
+                                    undefined,
+                                    instruction,
+                                    undefined,
+                                    factory.createTypeReferenceNode(
+                                      factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          factory.createQualifiedName(
-                                            modelSyntaxIdentifier,
-                                            identifiers.namespace.syntax.singular,
-                                          ),
-                                          utilIdentifier,
+                                          modelSyntaxIdentifier,
+                                          identifiers.namespace.syntax.singular,
                                         ),
+                                        utilIdentifier,
                                       ),
                                     ),
+                                  ),
                                 ),
                               ),
                             ]),
@@ -634,22 +695,31 @@ export const generate = (models: Array<Model>): string => {
                                 ),
                               ),
                               factory.createTypeLiteralNode(
-                                Object.entries(instructionIdentifiers).map(
-                                  ([instruction, utilIdentifier]) =>
-                                    factory.createPropertySignature(
-                                      undefined,
-                                      instruction,
-                                      undefined,
-                                      factory.createTypeReferenceNode(
+                                // TODO(@nurodev): Add `to` query
+                                // TODO(@nurodev): Add `using` query
+                                Object.entries({
+                                  after: identifiers.namespace.utils.afterQuery,
+                                  before: identifiers.namespace.utils.beforeQuery,
+                                  including: identifiers.namespace.utils.includingQuery,
+                                  limitedTo: identifiers.namespace.utils.limitedToQuery,
+                                  orderedBy: identifiers.namespace.utils.orderedByQuery,
+                                  selecting: identifiers.namespace.utils.selectingQuery,
+                                  with: identifiers.namespace.utils.withQuery,
+                                }).map(([instruction, utilIdentifier]) =>
+                                  factory.createPropertySignature(
+                                    undefined,
+                                    instruction,
+                                    undefined,
+                                    factory.createTypeReferenceNode(
+                                      factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          factory.createQualifiedName(
-                                            modelSyntaxIdentifier,
-                                            identifiers.namespace.syntax.plural,
-                                          ),
-                                          utilIdentifier,
+                                          modelSyntaxIdentifier,
+                                          identifiers.namespace.syntax.plural,
                                         ),
+                                        utilIdentifier,
                                       ),
                                     ),
+                                  ),
                                 ),
                               ),
                             ]),
