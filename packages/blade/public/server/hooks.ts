@@ -12,7 +12,6 @@ import {
   getBatchProxy,
   getSyntaxProxy,
 } from 'blade-syntax/queries';
-import type { verify } from 'hono/jwt';
 import { useContext } from 'react';
 import { deserializeError } from 'serialize-error';
 

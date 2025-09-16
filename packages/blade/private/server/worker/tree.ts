@@ -8,7 +8,6 @@ import {
   serialize as serializeCookie,
 } from 'cookie';
 import getValue from 'get-value';
-import { verify } from 'hono/jwt';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -239,14 +238,7 @@ const collectPromises = (
       const details = item as
         | Error
         | { __blade_redirect: string }
-        | { __blade_queries: QueryItemRead[] }
-        | {
-            __blade_jwt: {
-              token: Parameters<typeof verify>[0];
-              secret: Parameters<typeof verify>[1];
-              algo: Parameters<typeof verify>[2];
-            };
-          };
+        | { __blade_queries: QueryItemRead[] };
 
       if ('__blade_redirect' in details) {
         const { redirect: existingRedirect } = serverContext.collected;
