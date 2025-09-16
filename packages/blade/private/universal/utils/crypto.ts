@@ -11,7 +11,9 @@ export const generateUniqueId = (): string => {
   return crypto.getRandomValues(new Uint32Array(1))[0].toString();
 };
 
-interface CookieOptions {
+export type SetCookie<T> = (value: T, options?: CookieOptions) => void;
+
+export interface CookieOptions {
   /**
    * Allows for making cookies accessible to the client, instead of allowing only the
    * server to read and modify them.
@@ -31,7 +33,7 @@ const DEFAULT_COOKIE_MAX_AGE = 31536000;
 export const getCookieSetter = <T>(
   collected: ServerContext['collected'],
   name: string,
-): ((value: T, options?: CookieOptions) => void) => {
+): SetCookie<T> => {
   return (value: T, options?: CookieOptions) => {
     const cookieSettings: CookieSerializeOptions = {
       // 365 days.

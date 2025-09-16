@@ -1,11 +1,10 @@
-import type { CookieSerializeOptions } from 'cookie';
 import { useContext } from 'react';
 
 import { type RootTransitionOptions, usePageTransition } from '@/private/client/hooks';
 import { RootServerContext } from '@/private/server/context';
 import { usePrivateLocation, useUniversalContext } from '@/private/universal/hooks';
 import type { CustomNavigator } from '@/private/universal/types/util';
-import { getCookieSetter } from '@/private/universal/utils/crypto';
+import { type SetCookie, getCookieSetter } from '@/private/universal/utils/crypto';
 import { populatePathSegments } from '@/private/universal/utils/paths';
 
 const useParams = <
@@ -91,9 +90,7 @@ const useRedirect = () => {
 // 365 days
 const DEFAULT_COOKIE_MAX_AGE = 31536000;
 
-const useCookie = <T extends string | null>(
-  name: string,
-): [T | null, ReturnType<typeof getCookieSetter<T>>] => {
+const useCookie = <T extends string | null>(name: string): [T | null, SetCookie<T>] => {
   // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
   const isNetlify = typeof Netlify !== 'undefined';
   if (typeof window === 'undefined' || isNetlify) {
@@ -110,7 +107,7 @@ const useCookie = <T extends string | null>(
   const value =
     (document.cookie.match(`(^|;)\\s*${name}=([^;]*)`)?.pop() as T | undefined) || null;
 
-  const setValue: ReturnType<typeof getCookieSetter<T>> = (value, options) => {
+  const setValue: SetCookie<T> = (value, options) => {
     const shouldDelete = value === null;
     const encodedValue = shouldDelete ? '' : encodeURIComponent(value);
 

@@ -30,6 +30,7 @@ import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
+import type { CookieOptions, SetCookie } from '@/private/universal/utils/crypto';
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 
 export type WaitUntil = (promise: Promise<unknown>) => void;
@@ -77,6 +78,11 @@ export interface TriggerOptions extends ClientTriggerOptions {
    * A list of cookies that are stored on the client.
    */
   cookies: ServerContext['cookies'];
+  /**
+   * Used for setting new cookies that should be stored on the client, updating existing
+   * ones or deleting existing ones.
+   */
+  setCookie: (name: string, value: string, options?: CookieOptions) => void;
   /**
    * Details about the client that is accessing the application.
    */

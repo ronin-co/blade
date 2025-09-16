@@ -8,6 +8,7 @@ import type {
   TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
+import { type CookieOptions, getCookieSetter } from '@/private/universal/utils/crypto';
 
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
@@ -28,6 +29,9 @@ export const prepareTriggers = (
 ): TriggersList => {
   const options: Partial<NewTriggerOptions> = {
     cookies: serverContext.cookies,
+    setCookie: (name: string, value: string, options?: CookieOptions) => {
+      return getCookieSetter(serverContext.collected!, name)(value, options);
+    },
     navigator: {
       userAgent: serverContext.userAgent,
       geoLocation: serverContext.geoLocation,
