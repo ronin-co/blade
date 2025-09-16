@@ -231,7 +231,6 @@ export const generate = (models: Array<Model>): string => {
                           ),
                         ),
                         factory.createTypeLiteralNode(
-                          // TODO(@nurodev): Add `using` query
                           Object.entries({
                             after: identifiers.namespace.utils.afterQuery,
                             before: identifiers.namespace.utils.beforeQuery,
@@ -239,6 +238,7 @@ export const generate = (models: Array<Model>): string => {
                             limitedTo: identifiers.namespace.utils.limitedToQuery,
                             orderedBy: identifiers.namespace.utils.orderedByQuery,
                             selecting: identifiers.namespace.utils.selectingQuery,
+                            using: identifiers.namespace.utils.usingQuery,
                             with: identifiers.namespace.utils.withQuery,
                           }).map(([instruction, utilIdentifier]) =>
                             factory.createPropertySignature(
@@ -279,7 +279,6 @@ export const generate = (models: Array<Model>): string => {
                           ),
                         ),
                         factory.createTypeLiteralNode(
-                          // TODO(@nurodev): Add `using` query
                           Object.entries({
                             after: identifiers.namespace.utils.afterQuery,
                             before: identifiers.namespace.utils.beforeQuery,
@@ -287,6 +286,7 @@ export const generate = (models: Array<Model>): string => {
                             limitedTo: identifiers.namespace.utils.limitedToQuery,
                             orderedBy: identifiers.namespace.utils.orderedByQuery,
                             selecting: identifiers.namespace.utils.selectingQuery,
+                            using: identifiers.namespace.utils.usingQuery,
                             with: identifiers.namespace.utils.withQuery,
                           }).map(([instruction, utilIdentifier]) =>
                             factory.createPropertySignature(
