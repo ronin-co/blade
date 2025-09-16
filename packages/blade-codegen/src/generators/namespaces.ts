@@ -303,6 +303,8 @@ export const generateNamespaces = (models: Array<Model>) =>
                       ),
                     ],
                     [
+                      // TODO(@nurodev): Add union support for link fields
+                      // `team: <T = Projects>(team: Project["team"] | Partial<Team>) => T;`
                       factory.createParameterDeclaration(
                         undefined,
                         undefined,
