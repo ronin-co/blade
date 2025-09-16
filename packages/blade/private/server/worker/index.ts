@@ -24,7 +24,7 @@ import renderReactTree, { flushSession } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions, QueryItemWrite } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX, CUSTOM_HEADERS } from '@/private/universal/utils/constants';
-import { TriggerError } from '@/public/server/utils/errors';
+import { TriggerError } from '@/public/server/errors';
 
 type Bindings = {
   ASSETS: {

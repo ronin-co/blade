@@ -47,7 +47,7 @@ export default defineBuildConfig({
     './public/client/hooks.ts',
 
     './public/server/hooks.ts',
-    './public/server/utils/errors.ts',
+    './public/server/errors.ts',
 
     './public/universal/hooks.ts',
     './public/universal/schema.ts',

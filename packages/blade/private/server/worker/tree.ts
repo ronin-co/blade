@@ -44,7 +44,7 @@ import type {
   QueryItemWrite,
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
-import { TriggerError } from '@/public/server/utils/errors';
+import { TriggerError } from '@/public/server/errors';
 
 const pages: PageList = {
   ...pageList,
