@@ -2,6 +2,7 @@ import { NodeFlags, SyntaxKind, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
+import { generateUsingSyntax } from '@/src/generators/syntax';
 import { convertToPascalCase } from '@/src/utils/slug';
 
 import type { TypeAliasDeclaration } from 'typescript';
@@ -262,13 +263,13 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         identifiers.namespace.utils.usingQuery,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        generateUsingSyntax(model, singularModelNode, false, false),
       ),
       usingPromise: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.usingQueryPromise,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        generateUsingSyntax(model, singularModelNode, true, false),
       ),
       with: factory.createTypeAliasDeclaration(
         undefined,
@@ -586,13 +587,13 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         identifiers.namespace.utils.usingQuery,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        generateUsingSyntax(model, pluralModelNode, false, true),
       ),
       usingPromise: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.usingQueryPromise,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        generateUsingSyntax(model, pluralModelNode, true, true),
       ),
       with: factory.createTypeAliasDeclaration(
         undefined,

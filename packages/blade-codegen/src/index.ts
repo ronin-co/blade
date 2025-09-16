@@ -28,8 +28,8 @@ import {
 import { importBladeCompilerQueryTypesType } from '@/src/declarations';
 import { generateQueryTypeComment } from '@/src/generators/comment';
 import { createImportDeclaration } from '@/src/generators/import';
-import { generateModelTypes } from '@/src/generators/types/model';
-import { generateNamespaces } from '@/src/generators/types/syntax';
+import { generateModelTypes } from '@/src/generators/model';
+import { generateNamespaces } from '@/src/generators/namespaces';
 import { printNodes } from '@/src/utils/print';
 import { convertToPascalCase } from '@/src/utils/slug';
 
