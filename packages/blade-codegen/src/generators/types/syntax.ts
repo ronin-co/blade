@@ -115,7 +115,7 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
-      rootCallerQuery: factory.createTypeAliasDeclaration(
+      rootQueryCaller: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.rootQueryCaller,
         undefined,
@@ -127,7 +127,7 @@ export const generateNamespaces = (models: Array<Model>) =>
           [singularModelNode],
         ),
       ),
-      rootCallerQueryPromise: factory.createTypeAliasDeclaration(
+      rootQueryCallerPromise: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.rootQueryCallerPromise,
         undefined,
@@ -282,7 +282,7 @@ export const generateNamespaces = (models: Array<Model>) =>
           ],
         ),
       ),
-      rootCallerQuery: factory.createTypeAliasDeclaration(
+      rootQueryCaller: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.rootQueryCaller,
         undefined,
@@ -294,7 +294,7 @@ export const generateNamespaces = (models: Array<Model>) =>
           [pluralModelNode],
         ),
       ),
-      rootCallerQueryPromise: factory.createTypeAliasDeclaration(
+      rootQueryCallerPromise: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.rootQueryCallerPromise,
         undefined,
@@ -390,8 +390,8 @@ export const generateNamespaces = (models: Array<Model>) =>
             singularStatements.including,
             singularStatements.limitedTo,
             singularStatements.orderedBy,
-            singularStatements.rootCallerQuery,
-            singularStatements.rootCallerQueryPromise,
+            singularStatements.rootQueryCaller,
+            singularStatements.rootQueryCallerPromise,
             singularStatements.selecting,
             singularStatements.with,
           ]),
@@ -406,8 +406,8 @@ export const generateNamespaces = (models: Array<Model>) =>
             pluralStatements.including,
             pluralStatements.limitedTo,
             pluralStatements.orderedBy,
-            pluralStatements.rootCallerQuery,
-            pluralStatements.rootCallerQueryPromise,
+            pluralStatements.rootQueryCaller,
+            pluralStatements.rootQueryCallerPromise,
             pluralStatements.selecting,
             pluralStatements.with,
           ]),
