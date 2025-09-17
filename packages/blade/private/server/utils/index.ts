@@ -30,6 +30,11 @@ export class PageStream extends SSEStreamingApi {
   /** The first response object returned to the client. */
   readonly response: Response;
 
+  /** Allows for tracking whether the response is ready to be returned. */
+  readonly headersReady: Promise<void>;
+  private setHeadersReady!: () => void;
+  private headersMarkedReady = false;
+
   constructor(request: Request) {
     const { readable, writable } = new TransformStream();
     super(writable, readable);
@@ -51,6 +56,15 @@ export class PageStream extends SSEStreamingApi {
         'X-Accel-Buffering': 'no',
       },
     });
+
+    this.headersReady = new Promise<void>((resolve) => {
+      this.setHeadersReady = () => {
+        if (this.headersMarkedReady) return;
+
+        this.headersMarkedReady = true;
+        resolve();
+      };
+    });
   }
 
   /**
@@ -67,6 +81,11 @@ export class PageStream extends SSEStreamingApi {
       const headerValue = response.headers.get(headerKey) as string;
       this.response.headers.set(headerKey, headerValue);
     }
+
+    // Inform any outside watchers that the response now has headers and can be returned,
+    // such that the response is returned to the client even before the first body chunk
+    // is being flushed further below.
+    this.setHeadersReady();
 
     // If the URL of the page changed while it was rendered (for example because of a
     // redirect), we have to update the session URL accordingly.

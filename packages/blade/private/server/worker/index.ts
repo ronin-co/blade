@@ -308,6 +308,11 @@ app.post('*', async (c) => {
     });
   }
 
+  // Wait for the response to be populated with headers, then return it. We purposefully
+  // don't want to wait for the body to be ready, because we want to return the response
+  // as soon as possible.
+  await stream.headersReady;
+
   return stream.response;
 });
 
