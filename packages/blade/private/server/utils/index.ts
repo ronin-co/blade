@@ -19,7 +19,7 @@ export const generateHashSync = (input: string): number => {
   return hash >>> 0;
 };
 
-export class PageStream extends SSEStreamingApi {
+export class ResponseStream extends SSEStreamingApi {
   /**
    * The time at which the last update was sent by the server (excludes revalidation).
    * If the value is `null`, no update was sent yet.

@@ -20,7 +20,7 @@ import { RootServerContext, type ServerContext } from '@/private/server/context'
 import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
-import type { PageStream } from '@/private/server/utils';
+import type { ResponseStream } from '@/private/server/utils';
 import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { getWaitUntil, runQueries } from '@/private/server/utils/data';
@@ -407,7 +407,7 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * the session continues to exist.
  */
 export const flushSession = async (
-  stream: PageStream,
+  stream: ResponseStream,
   correctBundle: boolean,
   options?: {
     queries?: Array<QueryItemWrite>;

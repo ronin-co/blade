@@ -8,7 +8,7 @@ import { Hono } from 'hono/tiny';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
-import { PageStream } from '@/private/server/utils';
+import { ResponseStream } from '@/private/server/utils';
 import {
   getRoninOptions,
   getWaitUntil,
@@ -291,7 +291,7 @@ app.post('*', async (c) => {
     }
   }
 
-  const stream = new PageStream(c.req.raw);
+  const stream = new ResponseStream(c.req.raw);
 
   flushSession(stream, correctBundle, { queries, repeat: subscribe });
 
