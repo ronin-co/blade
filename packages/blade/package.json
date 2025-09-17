@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.17.0",
+  "version": "3.17.2",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -26,8 +26,7 @@
     "./server/utils/*": "./dist/public/server/utils/*.js",
     "./hooks": "./dist/public/universal/hooks.js",
     "./schema": "./dist/public/universal/schema.js",
-    "./types": "./dist/public/universal/types.js",
-    "./utils": "./dist/public/universal/utils.js"
+    "./types": "./dist/public/universal/types.js"
   },
   "typesVersions": {
     "*": {
@@ -45,9 +44,6 @@
       ],
       "types": [
         "./dist/public/universal/types"
-      ],
-      "utils": [
-        "./dist/public/universal/utils"
       ]
     }
   },

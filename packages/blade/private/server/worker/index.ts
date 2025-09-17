@@ -121,7 +121,6 @@ const simulateServerContext = (c: Context): ServerContext => {
     collected: {
       queries: [],
       metadata: {},
-      jwts: {},
     },
     currentLeafIndex: null,
     waitUntil,

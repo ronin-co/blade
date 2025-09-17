@@ -101,11 +101,11 @@ const useCookie = <T extends string | null>(
     const serverContext = useContext(RootServerContext);
     if (!serverContext) throw new Error('Missing server context in `useCookie`');
 
-    const { cookies, collected } = serverContext;
+    const { cookies } = serverContext;
     const value = cookies[name] as T | null;
 
     const setValue: SetExistingCookie<T> = (value, options) => {
-      return getCookieSetter(collected)(name, value, options);
+      return getCookieSetter(serverContext)(name, value, options);
     };
 
     return [value, setValue];

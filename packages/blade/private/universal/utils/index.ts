@@ -35,13 +35,13 @@ interface CookieOptions {
 /**
  * Generates a function that can be used to set new cookies.
  *
- * @param collected - The list of all collected resources in the server context.
+ * @param serverContext - A server context object.
  *
  * @returns The function that can be used for setting cookies.
  */
-export const getCookieSetter = <T>(
-  collected: ServerContext['collected'],
-): SetCookie<T> => {
+export const getCookieSetter = <T>(serverContext: ServerContext): SetCookie<T> => {
+  const { collected, cookies } = serverContext;
+
   return (name, value, options) => {
     const cookieSettings: CookieSerializeOptions = {
       // 365 days.
@@ -54,6 +54,9 @@ export const getCookieSetter = <T>(
     if (value === null) {
       cookieSettings.expires = new Date(Date.now() - 1000000);
       delete cookieSettings.maxAge;
+
+      // Remove the cookie from the current list.
+      delete cookies[name];
     }
     // As per the types defined for the surrounding function, this condition would never
     // be met. But we'd like to keep it regardless, to catch cases where the types
@@ -71,5 +74,8 @@ export const getCookieSetter = <T>(
       value: value as string | null,
       ...cookieSettings,
     };
+
+    // Make the cookie available in the current list.
+    cookies[name] = value as string;
   };
 };
