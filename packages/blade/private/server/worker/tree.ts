@@ -1,6 +1,6 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import type { FormattedResults } from 'blade-client/types';
-import { ClientError } from 'blade-client/utils';
+import { ClientError, TriggerError } from 'blade-client/utils';
 import type { Query } from 'blade-compiler';
 import {
   type CookieSerializeOptions,
@@ -43,7 +43,6 @@ import type {
   QueryItemWrite,
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
-import { TriggerError } from '@/public/server/errors';
 
 const pages: PageList = {
   ...pageList,
