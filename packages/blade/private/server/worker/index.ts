@@ -1,5 +1,5 @@
 import { createSyntaxFactory } from 'blade-client';
-import { ClientError, TriggerError } from 'blade-client/utils';
+import { ClientError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
 import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
@@ -24,6 +24,7 @@ import renderReactTree, { flushSession } from '@/private/server/worker/tree';
 import { prepareTriggers } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions, QueryItemWrite } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX, CUSTOM_HEADERS } from '@/private/universal/utils/constants';
+import { TriggerError } from '@/public/server/errors';
 
 type Bindings = {
   ASSETS: {

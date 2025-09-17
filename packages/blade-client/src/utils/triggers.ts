@@ -18,7 +18,6 @@ import type {
   QueryHandlerOptions,
   RecursivePartial,
 } from '@/src/types/utils';
-import { InvalidPermissionsError } from '@/src/utils';
 import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { ClientError } from '@/src/utils/errors';
 import { omit, toDashCase } from '@/src/utils/helpers';
@@ -279,11 +278,10 @@ const normalizeResults = (result: unknown) => {
   return structuredClone(value);
 };
 
-interface TriggerResults<T> {
-  /** A list of queries provided by the trigger. */
-  queries?: Array<QueryFromTrigger<T>>;
-  /** The result of a query provided by the trigger. */
-  result?: FormattedResults<unknown>[number] | symbol;
+export interface TriggerContext {
+  triggerType: TriggerType;
+  queryType: QueryType;
+  queryModel: string;
 }
 
 /**
@@ -300,14 +298,19 @@ interface TriggerResults<T> {
  *
  * @returns The modified query and its results, if any are available.
  */
-const invokeTriggers = async <T extends ResultRecord>(
+const invokeTriggers = async (
   triggerType: TriggerType,
-  definition: QueryFromTrigger<T> & {
+  definition: QueryFromTrigger & {
     resultBefore?: unknown;
     resultAfter?: unknown;
   },
   options: TriggerExecutionOptions,
-): Promise<TriggerResults<T>> => {
+): Promise<{
+  /** A list of queries provided by the trigger. */
+  queries?: Array<QueryFromTrigger>;
+  /** The result of a query provided by the trigger. */
+  result?: FormattedResults<unknown>[number] | symbol;
+}> => {
   const { query, database } = definition;
   const queryType = Object.keys(definition.query)[0] as QueryType;
 
@@ -418,17 +421,14 @@ const invokeTriggers = async <T extends ResultRecord>(
             })
           : (result as Array<Query>);
 
-      const list = queries.map(
-        async (query): Promise<QueryFromTrigger<T> | Array<QueryFromTrigger<T>>> => {
-          const newQuery = {
-            query,
-            database,
-            parentTrigger: currentTrigger,
-          };
-
-          return applyTriggers ? await applySyncTriggers([newQuery], options) : newQuery;
-        },
-      );
+      const list = queries.map((query) => {
+        const newQuery: QueryFromTrigger = {
+          query,
+          database,
+          parentTrigger: currentTrigger,
+        };
+        return applyTriggers ? applySyncTriggers([newQuery], options) : newQuery;
+      });
 
       return (await Promise.all(list)).flat();
     };
@@ -481,7 +481,7 @@ const invokeTriggers = async <T extends ResultRecord>(
   return { queries: [], result: EMPTY };
 };
 
-interface QueryFromTrigger<T> extends QueryPerDatabase {
+interface QueryFromTrigger extends QueryPerDatabase {
   /** Whether the query is a diff query for another query. */
   diffForIndex?: number;
   /**
@@ -489,8 +489,10 @@ interface QueryFromTrigger<T> extends QueryPerDatabase {
    * information about that trigger.
    */
   parentTrigger?: TriggerOptions['parentTrigger'];
-  /** A pre-populated query result provided by the trigger. */
-  result?: FormattedResults<T>[number] | typeof EMPTY;
+}
+
+interface QueryWithResult<T> extends QueryFromTrigger {
+  result: FormattedResults<T>[number] | typeof EMPTY;
 }
 
 interface TriggerExecutionOptions {
@@ -508,11 +510,11 @@ interface TriggerExecutionOptions {
  *
  * @returns The list of queries after they were transformed by triggers.
  */
-export const applySyncTriggers = async <T extends ResultRecord>(
+export const applySyncTriggers = async (
   queries: Array<QueryPerDatabase>,
   options: TriggerExecutionOptions,
-): Promise<Array<QueryFromTrigger<T>>> => {
-  const queryList: Array<QueryFromTrigger<T>> = [...queries];
+): Promise<Array<QueryFromTrigger>> => {
+  const queryList: Array<QueryFromTrigger> = [...queries];
 
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
@@ -525,18 +527,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   // Invoke `add`, `get`, `set`, `remove`, and `count`.
   await Promise.all(
     queryList.map(async (queryItem, index) => {
-      let triggerResults: TriggerResults<T> | undefined;
-
-      try {
-        triggerResults = await invokeTriggers('during', queryItem, options);
-      } catch (err) {
-        if (err instanceof InvalidPermissionsError) {
-          queryList[index].result = null;
-          return;
-        }
-
-        throw err;
-      }
+      const triggerResults = await invokeTriggers('during', queryItem, options);
 
       if (triggerResults.queries && triggerResults.queries.length > 0) {
         queryList[index].query = triggerResults.queries[0].query;
@@ -564,10 +555,6 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   // Invoke `afterAdd`, `afterGet`, `afterSet`, `afterRemove`, and `afterCount`.
   await Promise.all(
     queryList.map(async (queryItem, index) => {
-      // If the query already has a result, it won't hit the database, so there is no
-      // need to collect additional queries that should run in the same transaction.
-      if (typeof queryItem.result !== 'undefined') return;
-
       const triggerResults = await invokeTriggers('after', queryItem, options);
       queryList.splice(index + 1, 0, ...(triggerResults?.queries || []));
     }),
@@ -628,10 +615,10 @@ export const applySyncTriggers = async <T extends ResultRecord>(
  * @returns The results provided by the triggers.
  */
 export const applyAsyncTriggers = async <T extends ResultRecord>(
-  queries: Array<QueryFromTrigger<T>>,
+  queries: Array<QueryFromTrigger>,
   options: TriggerExecutionOptions,
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  const queryList: Array<QueryFromTrigger<T>> = queries.map((item) => ({
+  const queryList: Array<QueryWithResult<T>> = queries.map((item) => ({
     ...item,
     result: EMPTY,
   }));
@@ -640,9 +627,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   // and `resolvingCount`.
   await Promise.all(
     queryList.map(async (queryItem, index) => {
-      // If the query already has a result, we don't need to try and obtain one.
-      if (typeof queryItem.result !== 'undefined') return;
-
       const triggerResults = await invokeTriggers('resolving', queryItem, options);
       queryList[index].result = triggerResults.result as FormattedResults<T>[number];
     }),
@@ -767,7 +751,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   const execOptions = { context, triggerError, clientOptions: options };
 
-  const queryList = await applySyncTriggers<T>(queries, execOptions);
+  const queryList = await applySyncTriggers(queries, execOptions);
   const queryResults = await applyAsyncTriggers<T>(queryList, execOptions);
 
   return queryResults;

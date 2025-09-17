@@ -53,7 +53,9 @@ export type {
   FollowingTriggerHandler,
   AfterTriggerHandler,
   ResolvingTriggerHandler,
-} from '@/src/triggers';
+  // Async Context surrounding Triggers
+  TriggerContext,
+} from '@/src/utils/triggers';
 
 export type {
   // Queries

@@ -1,4 +1,4 @@
-import type { TriggerOptions, Triggers } from '@/src/triggers';
+import type { TriggerOptions, Triggers } from '@/src/utils/triggers';
 
 import type { Model, Result, ResultRecord } from 'blade-compiler';
 

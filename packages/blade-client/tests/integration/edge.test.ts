@@ -1,7 +1,7 @@
 import { describe, expect, spyOn, test } from 'bun:test';
 
 import createSyntaxFactory from '@/src/index';
-import { runQueriesWithTriggers } from '@/src/triggers';
+import { runQueriesWithTriggers } from '@/src/utils/triggers';
 
 describe('edge runtime', () => {
   test('invoke `ronin` from an edge runtime without passing a token', async () => {
