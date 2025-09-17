@@ -306,8 +306,7 @@ app.post('*', async (c) => {
   c.header('Cache-Control', 'no-cache, no-transform');
   c.header('X-Accel-Buffering', 'no');
 
-  const { readable, writable } = new TransformStream();
-  const stream = new PageStream({ url, headers }, { writable, readable });
+  const stream = new PageStream({ url, headers });
 
   flushSession(stream, correctBundle, { queries, repeat: subscribe });
 

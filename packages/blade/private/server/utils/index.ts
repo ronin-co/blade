@@ -28,11 +28,10 @@ export class PageStream extends SSEStreamingApi {
    */
   lastUpdate: Date | null = null;
 
-  constructor(
-    page: { url: URL; headers: Headers },
-    stream: { writable: WritableStream; readable: ReadableStream },
-  ) {
-    super(stream.writable, stream.readable);
+  constructor(page: { url: URL; headers: Headers }) {
+    const { readable, writable } = new TransformStream();
+
+    super(writable, readable);
 
     this.url = page.url;
     this.headers = page.headers;
