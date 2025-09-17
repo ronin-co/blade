@@ -31,5 +31,6 @@ export type {
 
 export type * from 'blade-client';
 export type * from 'blade-client/types';
-export type { ResultRecord } from 'blade-compiler';
-export type { ReducedFunction } from 'blade-syntax/queries';
+
+export type ReducedFunction = any;
+export type ResultRecord = any;
