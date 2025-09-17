@@ -75,9 +75,7 @@ export class PageStream extends SSEStreamingApi {
     // need to update the session URL, because the client will terminate the stream in
     // that case anyways (that's just default browser behavior).
     const newURL = response.headers.get('Content-Location');
-    if (newURL) {
-      this.request = new Request(new URL(newURL, this.request.url), this.request);
-    }
+    if (newURL) this.request = new Request(newURL, this.request);
 
     return this.writeSSE({
       id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,
