@@ -11,6 +11,7 @@ import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
+import { runQueriesWithTriggers } from '@/src/triggers';
 import type {
   ExpandedFormattedResult,
   FormattedResults,
@@ -21,7 +22,6 @@ import type {
 import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { getResponseBody } from '@/src/utils/errors';
 import { formatDateFields, validateToken } from '@/src/utils/helpers';
-import { runQueriesWithTriggers } from '@/src/utils/triggers';
 
 interface RequestPayload {
   queries?: Array<Query>;
