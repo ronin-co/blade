@@ -1,7 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { formatCode } from '@/src/utils/format';
-import { MIGRATIONS_PATH } from '@/src/utils/misc';
 import {
   type Model,
   QUERY_SYMBOLS,
@@ -10,6 +8,9 @@ import {
   Transaction,
 } from 'blade-compiler';
 import { getSyntaxProxy } from 'blade-syntax/queries';
+
+import { formatCode } from '@/src/utils/format';
+import { MIGRATIONS_PATH } from '@/src/utils/misc';
 
 /**
  * Protocol represents a set of database migration queries that can be executed in sequence.
@@ -158,7 +159,9 @@ export default [
 
     const queries = await import(filePath);
 
-    this._queries = queries.default.map((query: { structure: Query }) => query.structure);
+    this._queries = queries.default.map(
+      (query: Record<typeof QUERY_SYMBOLS.QUERY, Query>) => query[QUERY_SYMBOLS.QUERY],
+    );
 
     return this;
   };
