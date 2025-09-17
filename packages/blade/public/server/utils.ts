@@ -1,4 +1,6 @@
 import path from 'node:path';
+import { sign, verify } from 'hono/jwt';
+import type { JWTPayload } from 'hono/utils/jwt/types';
 import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
@@ -20,7 +22,7 @@ type TypeScriptConfig = { compilerOptions?: { paths?: Record<string, string[]> }
  *
  * @returns A list of aliases.
  */
-export const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
+const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
   const content = JSON.parse(config) as TypeScriptConfig;
   const paths = content?.compilerOptions?.paths || {};
 
@@ -123,3 +125,5 @@ export const build = async (
     assetPrefix: config.assetPrefix,
   });
 };
+
+export { sign as signJWT, verify as verifyJWT, type JWTPayload };

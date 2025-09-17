@@ -39,7 +39,10 @@ export const mapRoninFieldToTypeNode = (
         convertToPascalCase(targetModel.slug),
       );
       const resolvedLinkFieldNode = factory.createTypeReferenceNode(
-        identifiers.utils.resolveSchema,
+        factory.createQualifiedName(
+          identifiers.namespace.utils.name,
+          identifiers.utils.resolveSchema,
+        ),
         [
           field.kind === 'many'
             ? factory.createTypeReferenceNode(identifiers.primitive.array, [

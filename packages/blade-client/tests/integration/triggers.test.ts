@@ -8,7 +8,7 @@ import {
   type FollowingAddTrigger,
   type ResolvingAddTrigger,
   runQueriesWithTriggers,
-} from '@/src/utils/triggers';
+} from '@/src/triggers';
 import type { CombinedInstructions, Query, QueryType } from 'blade-compiler';
 
 let mockResolvedRequestText: any;

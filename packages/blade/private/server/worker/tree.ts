@@ -1,6 +1,6 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import type { FormattedResults } from 'blade-client/types';
-import { ClientError } from 'blade-client/utils';
+import { ClientError, TriggerError } from 'blade-client/utils';
 import type { Query } from 'blade-compiler';
 import {
   type CookieSerializeOptions,
@@ -8,7 +8,6 @@ import {
   serialize as serializeCookie,
 } from 'cookie';
 import getValue from 'get-value';
-import { verify } from 'hono/jwt';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
@@ -21,7 +20,7 @@ import { RootServerContext, type ServerContext } from '@/private/server/context'
 import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
-import type { PageStream } from '@/private/server/utils';
+import type { ResponseStream } from '@/private/server/utils';
 import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { getWaitUntil, runQueries } from '@/private/server/utils/data';
@@ -44,7 +43,6 @@ import type {
   QueryItemWrite,
 } from '@/private/universal/types/util';
 import { DEFAULT_PAGE_PATH } from '@/private/universal/utils/constants';
-import { TriggerError } from '@/public/server/utils/errors';
 
 const pages: PageList = {
   ...pageList,
@@ -205,17 +203,9 @@ export interface Collected {
   redirect?: string;
   metadata: PageMetadata;
   cookies?: Record<string, { value: string | null } & CookieSerializeOptions>;
-  jwts: Record<
-    string,
-    {
-      decodedPayload: unknown;
-      secret: Parameters<typeof verify>[1];
-      algo: Parameters<typeof verify>[2];
-    }
-  >;
 }
 
-interface CollectedRunnable extends Pick<Collected, 'queries' | 'jwts'> {}
+interface CollectedRunnable extends Pick<Collected, 'queries'> {}
 
 const collectPromises = (
   leaves: Map<string, TreeItem>,
@@ -229,7 +219,7 @@ const collectPromises = (
   // @ts-expect-error This is an internal React property.
   RootServerContext._currentValue = serverContext;
 
-  const freshlyAdded: CollectedRunnable = { queries: [], jwts: {} };
+  const freshlyAdded: CollectedRunnable = { queries: [] };
 
   // Start with the uppermost layout.
   const reversedLeaves = Array.from(leaves.entries()).reverse();
@@ -247,14 +237,7 @@ const collectPromises = (
       const details = item as
         | Error
         | { __blade_redirect: string }
-        | { __blade_queries: QueryItemRead[] }
-        | {
-            __blade_jwt: {
-              token: Parameters<typeof verify>[0];
-              secret: Parameters<typeof verify>[1];
-              algo: Parameters<typeof verify>[2];
-            };
-          };
+        | { __blade_queries: QueryItemRead[] };
 
       if ('__blade_redirect' in details) {
         const { redirect: existingRedirect } = serverContext.collected;
@@ -292,22 +275,6 @@ const collectPromises = (
         continue;
       }
 
-      if ('__blade_jwt' in details) {
-        const { token, secret, algo } = details.__blade_jwt;
-
-        // If the query was already collected, don't add it again.
-        if (freshlyAdded.jwts[token]) continue;
-
-        // If the JWT was not collected yet, add it to the collection.
-        freshlyAdded.jwts[token] = {
-          decodedPayload: null,
-          secret,
-          algo,
-        };
-
-        continue;
-      }
-
       // Ignore errors thrown by `use()`.
       if (item instanceof Error && item.message.includes(".use'")) {
         leavesCheckedForQueries++;
@@ -324,21 +291,14 @@ const collectPromises = (
   const checkedAllLeaves = leavesCheckedForQueries === reversedLeaves.length;
 
   const queries = checkedAllLeaves ? freshlyAdded.queries : [];
-  const jwts = freshlyAdded.jwts;
 
   // Assign newly added queries to context.
   for (const newQuery of queries) {
     serverContext.collected.queries.push(newQuery);
   }
 
-  // Assign newly added JWTs to context.
-  for (const [token, details] of Object.entries(jwts)) {
-    serverContext.collected.jwts[token] = details;
-  }
-
   return {
     queries: [...(existingNewlyAdded?.queries || []), ...queries],
-    jwts: { ...existingNewlyAdded?.jwts, ...jwts },
   };
 };
 
@@ -447,7 +407,7 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * the session continues to exist.
  */
 export const flushSession = async (
-  stream: PageStream,
+  stream: ResponseStream,
   correctBundle: boolean,
   options?: {
     queries?: Array<QueryItemWrite>;
@@ -484,8 +444,8 @@ export const flushSession = async (
     }
 
     const response = await renderReactTree(
-      stream.url,
-      stream.headers,
+      new URL(stream.request.url),
+      stream.request.headers,
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
@@ -502,7 +462,6 @@ export const flushSession = async (
               hookHash,
             })),
             metadata: {},
-            jwts: {},
           }
         : undefined,
     );
@@ -510,21 +469,8 @@ export const flushSession = async (
     // Track the time of the current manual update.
     if (options?.queries) stream.lastUpdate = new Date();
 
-    // If the URL of the page changed while it was rendered (for example because of a
-    // redirect), we have to update the session URL accordingly.
-    //
-    // In the case that an initial redirect (`Location` header) was performed, we don't
-    // need to update the session URL, because the client will terminate the stream in
-    // that case anyways (that's just default browser behavior).
-    const newURL = response.headers.get('Content-Location');
-    if (newURL) stream.url = new URL(newURL, stream.url);
-
     // Afterward, flush the update over the stream.
-    await stream.writeSSE({
-      id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,
-      event: correctBundle ? 'update' : 'update-bundle',
-      data: response.text(),
-    });
+    await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
     // error, since that would also prevent the repeated update later on.
@@ -614,7 +560,6 @@ const renderReactTree = async (
     collected: existingCollected || {
       queries: [],
       metadata: {},
-      jwts: {},
     },
     currentLeafIndex: null,
     waitUntil: options.waitUntil,
@@ -639,11 +584,6 @@ const renderReactTree = async (
     queries: serverContext.collected.queries.filter(({ result, error }) => {
       return typeof result === 'undefined' && typeof error === 'undefined';
     }),
-    jwts: Object.fromEntries(
-      Object.entries(serverContext.collected.jwts).filter(([, value]) => {
-        return !value.decodedPayload;
-      }),
-    ),
   };
 
   // If the `href` (covers both `pathname` and `search` at once) of the page that should
@@ -781,7 +721,6 @@ const renderReactTree = async (
                   ({ type }) => type === 'write',
                 ),
                 metadata: {},
-                jwts: {},
               },
             );
           }
@@ -791,30 +730,9 @@ const renderReactTree = async (
       }
     }
 
-    const normalizedJwts = Object.entries(newlyAdded.jwts);
-
-    if (normalizedJwts.length > 0) {
-      await Promise.all(
-        normalizedJwts.map(async ([token, { secret, algo }]) => {
-          let result = null;
-
-          try {
-            result = await verify(token, secret, algo);
-          } catch (err) {
-            result = err;
-          }
-
-          serverContext.collected.jwts[token].decodedPayload = result;
-        }),
-      );
-    }
-
     index++;
 
-    if (
-      (newlyAdded.queries.length > 0 || normalizedJwts.length > 0) &&
-      !hasPatternInURL
-    ) {
+    if (newlyAdded.queries.length > 0 && !hasPatternInURL) {
       continue;
     }
 
@@ -840,7 +758,6 @@ const renderReactTree = async (
         // the results of the write queries that were executed.
         queries: serverContext.collected.queries,
         // The other properties should be empty, since nothing else was collected yet.
-        jwts: {},
         metadata: {},
       },
     );

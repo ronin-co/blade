@@ -1,3 +1,4 @@
+import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import type {
   AddTrigger as OriginalAddTrigger,
   AfterAddTrigger as OriginalAfterAddTrigger,
@@ -30,7 +31,7 @@ import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
 import type { CustomNavigator } from '@/private/universal/types/util';
-import type { Toc } from '@stefanprobst/rehype-extract-toc';
+import type { SetCookie } from '@/private/universal/utils';
 
 export type WaitUntil = (promise: Promise<unknown>) => void;
 
@@ -77,6 +78,11 @@ export interface TriggerOptions extends ClientTriggerOptions {
    * A list of cookies that are stored on the client.
    */
   cookies: ServerContext['cookies'];
+  /**
+   * Used for setting new cookies that should be stored on the client, updating existing
+   * ones or deleting existing ones.
+   */
+  setCookie: SetCookie<string>;
   /**
    * Details about the client that is accessing the application.
    */

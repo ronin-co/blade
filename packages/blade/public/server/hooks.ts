@@ -12,7 +12,6 @@ import {
   getBatchProxy,
   getSyntaxProxy,
 } from 'blade-syntax/queries';
-import type { verify } from 'hono/jwt';
 import { useContext } from 'react';
 import { deserializeError } from 'serialize-error';
 
@@ -290,33 +289,4 @@ const useBatch = (<T extends [any, ...any[]]>(
   queryOptions?: Record<string, unknown>,
 ) => PromiseTuple<T>;
 
-const useJWT = <T>(...args: Parameters<typeof verify>): T => {
-  const [token, secret, algo] = args;
-
-  const serverContext = useContext(RootServerContext);
-  if (!serverContext) throw new Error('Missing server context in `useJWT`');
-  const result = serverContext.collected.jwts[token];
-
-  if (result?.decodedPayload) {
-    if (result.decodedPayload instanceof Error) throw result.decodedPayload;
-    return result.decodedPayload as T;
-  }
-
-  throw {
-    __blade_jwt: {
-      token,
-      secret,
-      algo,
-    },
-  };
-};
-
-const useMutationResult = <T>(): T => {
-  const serverContext = useContext(RootServerContext);
-  if (!serverContext) throw new Error('Missing server context in `useMutationResult`');
-  const { queries } = serverContext.collected;
-
-  return queries.filter(({ type }) => type === 'write').map(({ result }) => result) as T;
-};
-
-export { use, useCountOf, useListOf, useBatch, useMutationResult, useMetadata, useJWT };
+export { use, useCountOf, useListOf, useBatch, useMetadata };
