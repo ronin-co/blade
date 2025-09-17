@@ -801,7 +801,7 @@ const renderReactTree = async (
     headers.set('Document-Policy', 'js-profiling');
   } else {
     headers.set('Content-Type', 'application/json');
-    headers.set('Content-Location', url.href);
+    headers.set('Content-Location', url.pathname + url.search);
   }
 
   return new Response(body, { headers });
