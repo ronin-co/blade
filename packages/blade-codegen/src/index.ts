@@ -147,12 +147,19 @@ export const generate = (models: Array<Model>): string => {
 
   /**
    * ```ts
-   * declare namespace UserSyntax {
+   * declare namespace Syntax {
    *  // ...
    * }
    * ```
    */
-  nodes.push(...generateNamespaces(models));
+  nodes.push(
+    factory.createModuleDeclaration(
+      [factory.createModifier(SyntaxKind.DeclareKeyword)],
+      identifiers.namespace.syntax.name,
+      factory.createModuleBlock(generateNamespaces(models)),
+      NodeFlags.Namespace,
+    ),
+  );
 
   /**
    * @example
@@ -183,13 +190,9 @@ export const generate = (models: Array<Model>): string => {
    * declare module "blade/server/hooks" {
    *  declare const use: {
    *    // Get a single user record
-   *    user: ReducedFunction & {
-   *      // ...
-   *    };
+   *    user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
    *    // Get multiple user records
-   *    users: ReducedFunction & {
-   *      // ...
-   *    };
+   *    users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
    *  };
    * }
    * ```
@@ -210,20 +213,14 @@ export const generate = (models: Array<Model>): string => {
                   models.flatMap((model) => {
                     const comment = generateQueryTypeComment(model, 'use');
 
-                    /**
-                     * @example
-                     * ```ts
-                     * UserSyntax
-                     * ```
-                     */
                     const modelSyntaxIdentifier = factory.createIdentifier(
-                      `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+                      convertToPascalCase(model.slug),
                     );
 
                     /**
                      * @example
                      * ```ts
-                     * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                     * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
                      * ```
                      */
                     const singularProperty = factory.createPropertySignature(
@@ -238,7 +235,10 @@ export const generate = (models: Array<Model>): string => {
                         factory.createTypeReferenceNode(
                           factory.createQualifiedName(
                             factory.createQualifiedName(
-                              modelSyntaxIdentifier,
+                              factory.createQualifiedName(
+                                identifiers.namespace.syntax.name,
+                                modelSyntaxIdentifier,
+                              ),
                               identifiers.namespace.syntax.singular,
                             ),
                             identifiers.namespace.utils.rootQueryCaller,
@@ -262,7 +262,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.singular,
                                   ),
                                   utilIdentifier,
@@ -277,7 +280,7 @@ export const generate = (models: Array<Model>): string => {
                     /**
                      * @example
                      * ```ts
-                     * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                     * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
                      * ```
                      */
                     const pluralProperty = factory.createPropertySignature(
@@ -292,7 +295,10 @@ export const generate = (models: Array<Model>): string => {
                         factory.createTypeReferenceNode(
                           factory.createQualifiedName(
                             factory.createQualifiedName(
-                              modelSyntaxIdentifier,
+                              factory.createQualifiedName(
+                                identifiers.namespace.syntax.name,
+                                modelSyntaxIdentifier,
+                              ),
                               identifiers.namespace.syntax.plural,
                             ),
                             identifiers.namespace.utils.rootQueryCaller,
@@ -316,7 +322,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.plural,
                                   ),
                                   utilIdentifier,
@@ -389,20 +398,14 @@ export const generate = (models: Array<Model>): string => {
                         models.flatMap((model) => {
                           const comment = generateQueryTypeComment(model, 'add');
 
-                          /**
-                           * @example
-                           * ```ts
-                           * UserSyntax
-                           * ```
-                           */
                           const modelSyntaxIdentifier = factory.createIdentifier(
-                            `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+                            convertToPascalCase(model.slug),
                           );
 
                           /**
                            * @example
                            * ```ts
-                           * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                           * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
                            * ```
                            */
                           const singularProperty = factory.createPropertySignature(
@@ -417,7 +420,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.singular,
                                   ),
                                   identifiers.namespace.utils.rootQueryCallerPromise,
@@ -446,7 +452,10 @@ export const generate = (models: Array<Model>): string => {
                                     factory.createTypeReferenceNode(
                                       factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          modelSyntaxIdentifier,
+                                          factory.createQualifiedName(
+                                            identifiers.namespace.syntax.name,
+                                            modelSyntaxIdentifier,
+                                          ),
                                           identifiers.namespace.syntax.singular,
                                         ),
                                         utilIdentifier,
@@ -461,7 +470,7 @@ export const generate = (models: Array<Model>): string => {
                           /**
                            * @example
                            * ```ts
-                           * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                           * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
                            * ```
                            */
                           const pluralProperty = factory.createPropertySignature(
@@ -476,7 +485,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.plural,
                                   ),
                                   identifiers.namespace.utils.rootQueryCallerPromise,
@@ -505,7 +517,10 @@ export const generate = (models: Array<Model>): string => {
                                     factory.createTypeReferenceNode(
                                       factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          modelSyntaxIdentifier,
+                                          factory.createQualifiedName(
+                                            identifiers.namespace.syntax.name,
+                                            modelSyntaxIdentifier,
+                                          ),
                                           identifiers.namespace.syntax.plural,
                                         ),
                                         utilIdentifier,
@@ -542,14 +557,8 @@ export const generate = (models: Array<Model>): string => {
                         models.flatMap((model) => {
                           const comment = generateQueryTypeComment(model, 'remove');
 
-                          /**
-                           * @example
-                           * ```ts
-                           * UserSyntax
-                           * ```
-                           */
                           const modelSyntaxIdentifier = factory.createIdentifier(
-                            `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+                            convertToPascalCase(model.slug),
                           );
 
                           /**
@@ -570,7 +579,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.singular,
                                   ),
                                   identifiers.namespace.utils.rootQueryCallerPromise,
@@ -599,7 +611,10 @@ export const generate = (models: Array<Model>): string => {
                                     factory.createTypeReferenceNode(
                                       factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          modelSyntaxIdentifier,
+                                          factory.createQualifiedName(
+                                            identifiers.namespace.syntax.name,
+                                            modelSyntaxIdentifier,
+                                          ),
                                           identifiers.namespace.syntax.singular,
                                         ),
                                         utilIdentifier,
@@ -629,7 +644,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.plural,
                                   ),
                                   identifiers.namespace.utils.rootQueryCallerPromise,
@@ -658,7 +676,10 @@ export const generate = (models: Array<Model>): string => {
                                     factory.createTypeReferenceNode(
                                       factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          modelSyntaxIdentifier,
+                                          factory.createQualifiedName(
+                                            identifiers.namespace.syntax.name,
+                                            modelSyntaxIdentifier,
+                                          ),
                                           identifiers.namespace.syntax.plural,
                                         ),
                                         utilIdentifier,
@@ -695,14 +716,8 @@ export const generate = (models: Array<Model>): string => {
                         models.flatMap((model) => {
                           const comment = generateQueryTypeComment(model, 'set');
 
-                          /**
-                           * @example
-                           * ```ts
-                           * UserSyntax
-                           * ```
-                           */
                           const modelSyntaxIdentifier = factory.createIdentifier(
-                            `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+                            convertToPascalCase(model.slug),
                           );
 
                           /**
@@ -723,7 +738,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.singular,
                                   ),
                                   identifiers.namespace.utils.rootQueryCallerPromise,
@@ -752,7 +770,10 @@ export const generate = (models: Array<Model>): string => {
                                     factory.createTypeReferenceNode(
                                       factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          modelSyntaxIdentifier,
+                                          factory.createQualifiedName(
+                                            identifiers.namespace.syntax.name,
+                                            modelSyntaxIdentifier,
+                                          ),
                                           identifiers.namespace.syntax.singular,
                                         ),
                                         utilIdentifier,
@@ -782,7 +803,10 @@ export const generate = (models: Array<Model>): string => {
                               factory.createTypeReferenceNode(
                                 factory.createQualifiedName(
                                   factory.createQualifiedName(
-                                    modelSyntaxIdentifier,
+                                    factory.createQualifiedName(
+                                      identifiers.namespace.syntax.name,
+                                      modelSyntaxIdentifier,
+                                    ),
                                     identifiers.namespace.syntax.plural,
                                   ),
                                   identifiers.namespace.utils.rootQueryCallerPromise,
@@ -811,7 +835,10 @@ export const generate = (models: Array<Model>): string => {
                                     factory.createTypeReferenceNode(
                                       factory.createQualifiedName(
                                         factory.createQualifiedName(
-                                          modelSyntaxIdentifier,
+                                          factory.createQualifiedName(
+                                            identifiers.namespace.syntax.name,
+                                            modelSyntaxIdentifier,
+                                          ),
                                           identifiers.namespace.syntax.plural,
                                         ),
                                         utilIdentifier,

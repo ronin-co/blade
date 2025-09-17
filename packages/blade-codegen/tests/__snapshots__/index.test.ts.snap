@@ -53,63 +53,65 @@ declare namespace Utils {
         };
     };
 }
-declare namespace AccountSyntax {
-    type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
-    namespace Singular {
-        type AfterQuery = Utils.AfterQuery<Account | null>;
-        type AfterQueryPromise = Utils.AfterQueryPromise<Account | null>;
-        type BeforeQuery = Utils.BeforeQuery<Account | null>;
-        type BeforeQueryPromise = Utils.BeforeQueryPromise<Account | null>;
-        type IncludingQuery = Utils.IncludingQuery<Account | null>;
-        type IncludingQueryPromise = Utils.IncludingQueryPromise<Account | null>;
-        type LimitedToQuery = Utils.LimitedToQuery<Account | null>;
-        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Account | null>;
-        type OrderedByQuery = Utils.OrderedByQuery<Account | null, AccountSyntax.FieldSlug>;
-        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Account | null, AccountSyntax.FieldSlug>;
-        type RootQueryCaller = Utils.RootQueryCaller<Account | null>;
-        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
-        type SelectingQuery = Utils.SelectingQuery<Account | null, AccountSyntax.FieldSlug>;
-        type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, AccountSyntax.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
-        type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
-        type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
-        type WithQuery = Utils.WithQuery<Account | null> & {
-            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
-            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
-        };
-        type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
-            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
-            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
-        };
-    }
-    namespace Plural {
-        type AfterQuery = Utils.AfterQuery<Accounts>;
-        type AfterQueryPromise = Utils.AfterQueryPromise<Accounts>;
-        type BeforeQuery = Utils.BeforeQuery<Accounts>;
-        type BeforeQueryPromise = Utils.BeforeQueryPromise<Accounts>;
-        type IncludingQuery = Utils.IncludingQuery<Accounts>;
-        type IncludingQueryPromise = Utils.IncludingQueryPromise<Accounts>;
-        type LimitedToQuery = Utils.LimitedToQuery<Accounts>;
-        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Accounts>;
-        type OrderedByQuery = Utils.OrderedByQuery<Accounts, AccountSyntax.FieldSlug>;
-        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Accounts, AccountSyntax.FieldSlug>;
-        type RootQueryCaller = Utils.RootQueryCaller<Accounts>;
-        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
-        type SelectingQuery = Utils.SelectingQuery<Accounts, AccountSyntax.FieldSlug>;
-        type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, AccountSyntax.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
-        type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
-        type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
-        type WithQuery = Utils.WithQuery<Accounts> & {
-            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
-            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
-        };
-        type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
-            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
-            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
-        };
+declare namespace Syntax {
+    namespace Account {
+        type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email";
+        namespace Singular {
+            type AfterQuery = Utils.AfterQuery<Account | null>;
+            type AfterQueryPromise = Utils.AfterQueryPromise<Account | null>;
+            type BeforeQuery = Utils.BeforeQuery<Account | null>;
+            type BeforeQueryPromise = Utils.BeforeQueryPromise<Account | null>;
+            type IncludingQuery = Utils.IncludingQuery<Account | null>;
+            type IncludingQueryPromise = Utils.IncludingQueryPromise<Account | null>;
+            type LimitedToQuery = Utils.LimitedToQuery<Account | null>;
+            type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Account | null>;
+            type OrderedByQuery = Utils.OrderedByQuery<Account | null, Account.FieldSlug>;
+            type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Account | null, Account.FieldSlug>;
+            type RootQueryCaller = Utils.RootQueryCaller<Account | null>;
+            type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
+            type SelectingQuery = Utils.SelectingQuery<Account | null, Account.FieldSlug>;
+            type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, Account.FieldSlug>;
+            type ToQuery = any;
+            type ToQueryPromise = any;
+            type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+            type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
+            type WithQuery = Utils.WithQuery<Account | null> & {
+                name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
+            };
+            type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
+                name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+            };
+        }
+        namespace Plural {
+            type AfterQuery = Utils.AfterQuery<Accounts>;
+            type AfterQueryPromise = Utils.AfterQueryPromise<Accounts>;
+            type BeforeQuery = Utils.BeforeQuery<Accounts>;
+            type BeforeQueryPromise = Utils.BeforeQueryPromise<Accounts>;
+            type IncludingQuery = Utils.IncludingQuery<Accounts>;
+            type IncludingQueryPromise = Utils.IncludingQueryPromise<Accounts>;
+            type LimitedToQuery = Utils.LimitedToQuery<Accounts>;
+            type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Accounts>;
+            type OrderedByQuery = Utils.OrderedByQuery<Accounts, Account.FieldSlug>;
+            type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Accounts, Account.FieldSlug>;
+            type RootQueryCaller = Utils.RootQueryCaller<Accounts>;
+            type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
+            type SelectingQuery = Utils.SelectingQuery<Accounts, Account.FieldSlug>;
+            type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, Account.FieldSlug>;
+            type ToQuery = any;
+            type ToQueryPromise = any;
+            type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+            type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
+            type WithQuery = Utils.WithQuery<Accounts> & {
+                name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
+            };
+            type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
+                name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+            };
+        }
     }
 }
 declare module "blade/types" {
@@ -125,26 +127,26 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: ReducedFunction & AccountSyntax.Singular.RootQueryCaller & {
-            after: AccountSyntax.Singular.AfterQuery;
-            before: AccountSyntax.Singular.BeforeQuery;
-            including: AccountSyntax.Singular.IncludingQuery;
-            limitedTo: AccountSyntax.Singular.LimitedToQuery;
-            orderedBy: AccountSyntax.Singular.OrderedByQuery;
-            selecting: AccountSyntax.Singular.SelectingQuery;
-            using: AccountSyntax.Singular.UsingQuery;
-            with: AccountSyntax.Singular.WithQuery;
+        account: ReducedFunction & Syntax.Account.Singular.RootQueryCaller & {
+            after: Syntax.Account.Singular.AfterQuery;
+            before: Syntax.Account.Singular.BeforeQuery;
+            including: Syntax.Account.Singular.IncludingQuery;
+            limitedTo: Syntax.Account.Singular.LimitedToQuery;
+            orderedBy: Syntax.Account.Singular.OrderedByQuery;
+            selecting: Syntax.Account.Singular.SelectingQuery;
+            using: Syntax.Account.Singular.UsingQuery;
+            with: Syntax.Account.Singular.WithQuery;
         };
         /** Get multiple account records */
-        accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCaller & {
-            after: AccountSyntax.Plural.AfterQuery;
-            before: AccountSyntax.Plural.BeforeQuery;
-            including: AccountSyntax.Plural.IncludingQuery;
-            limitedTo: AccountSyntax.Plural.LimitedToQuery;
-            orderedBy: AccountSyntax.Plural.OrderedByQuery;
-            selecting: AccountSyntax.Plural.SelectingQuery;
-            using: AccountSyntax.Plural.UsingQuery;
-            with: AccountSyntax.Plural.WithQuery;
+        accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCaller & {
+            after: Syntax.Account.Plural.AfterQuery;
+            before: Syntax.Account.Plural.BeforeQuery;
+            including: Syntax.Account.Plural.IncludingQuery;
+            limitedTo: Syntax.Account.Plural.LimitedToQuery;
+            orderedBy: Syntax.Account.Plural.OrderedByQuery;
+            selecting: Syntax.Account.Plural.SelectingQuery;
+            using: Syntax.Account.Plural.UsingQuery;
+            with: Syntax.Account.Plural.WithQuery;
         };
     };
 }
@@ -152,80 +154,80 @@ declare module "blade/client/hooks" {
     declare const useMutation: () => {
         add: {
             /** Add a single account record */
-            account: ReducedFunction & AccountSyntax.Singular.RootQueryCallerPromise & {
-                after: AccountSyntax.Singular.AfterQueryPromise;
-                before: AccountSyntax.Singular.BeforeQueryPromise;
-                including: AccountSyntax.Singular.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Singular.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Singular.OrderedByQueryPromise;
-                selecting: AccountSyntax.Singular.SelectingQueryPromise;
-                to: AccountSyntax.Singular.ToQueryPromise;
-                using: AccountSyntax.Singular.UsingQueryPromise;
-                with: AccountSyntax.Singular.WithQueryPromise;
+            account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+                after: Syntax.Account.Singular.AfterQueryPromise;
+                before: Syntax.Account.Singular.BeforeQueryPromise;
+                including: Syntax.Account.Singular.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+                selecting: Syntax.Account.Singular.SelectingQueryPromise;
+                to: Syntax.Account.Singular.ToQueryPromise;
+                using: Syntax.Account.Singular.UsingQueryPromise;
+                with: Syntax.Account.Singular.WithQueryPromise;
             };
             /** Add multiple account records */
-            accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCallerPromise & {
-                after: AccountSyntax.Plural.AfterQueryPromise;
-                before: AccountSyntax.Plural.BeforeQueryPromise;
-                including: AccountSyntax.Plural.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Plural.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Plural.OrderedByQueryPromise;
-                selecting: AccountSyntax.Plural.SelectingQueryPromise;
-                to: AccountSyntax.Plural.ToQueryPromise;
-                using: AccountSyntax.Plural.UsingQueryPromise;
-                with: AccountSyntax.Plural.WithQueryPromise;
+            accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+                after: Syntax.Account.Plural.AfterQueryPromise;
+                before: Syntax.Account.Plural.BeforeQueryPromise;
+                including: Syntax.Account.Plural.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+                selecting: Syntax.Account.Plural.SelectingQueryPromise;
+                to: Syntax.Account.Plural.ToQueryPromise;
+                using: Syntax.Account.Plural.UsingQueryPromise;
+                with: Syntax.Account.Plural.WithQueryPromise;
             };
         };
         remove: {
             /** Remove a single account record */
-            account: ReducedFunction & AccountSyntax.Singular.RootQueryCallerPromise & {
-                after: AccountSyntax.Singular.AfterQueryPromise;
-                before: AccountSyntax.Singular.BeforeQueryPromise;
-                including: AccountSyntax.Singular.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Singular.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Singular.OrderedByQueryPromise;
-                selecting: AccountSyntax.Singular.SelectingQueryPromise;
-                to: AccountSyntax.Singular.ToQueryPromise;
-                using: AccountSyntax.Singular.UsingQueryPromise;
-                with: AccountSyntax.Singular.WithQueryPromise;
+            account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+                after: Syntax.Account.Singular.AfterQueryPromise;
+                before: Syntax.Account.Singular.BeforeQueryPromise;
+                including: Syntax.Account.Singular.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+                selecting: Syntax.Account.Singular.SelectingQueryPromise;
+                to: Syntax.Account.Singular.ToQueryPromise;
+                using: Syntax.Account.Singular.UsingQueryPromise;
+                with: Syntax.Account.Singular.WithQueryPromise;
             };
             /** Remove multiple account records */
-            accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCallerPromise & {
-                after: AccountSyntax.Plural.AfterQueryPromise;
-                before: AccountSyntax.Plural.BeforeQueryPromise;
-                including: AccountSyntax.Plural.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Plural.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Plural.OrderedByQueryPromise;
-                selecting: AccountSyntax.Plural.SelectingQueryPromise;
-                to: AccountSyntax.Plural.ToQueryPromise;
-                using: AccountSyntax.Plural.UsingQueryPromise;
-                with: AccountSyntax.Plural.WithQueryPromise;
+            accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+                after: Syntax.Account.Plural.AfterQueryPromise;
+                before: Syntax.Account.Plural.BeforeQueryPromise;
+                including: Syntax.Account.Plural.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+                selecting: Syntax.Account.Plural.SelectingQueryPromise;
+                to: Syntax.Account.Plural.ToQueryPromise;
+                using: Syntax.Account.Plural.UsingQueryPromise;
+                with: Syntax.Account.Plural.WithQueryPromise;
             };
         };
         set: {
             /** Set a single account record */
-            account: ReducedFunction & AccountSyntax.Singular.RootQueryCallerPromise & {
-                after: AccountSyntax.Singular.AfterQueryPromise;
-                before: AccountSyntax.Singular.BeforeQueryPromise;
-                including: AccountSyntax.Singular.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Singular.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Singular.OrderedByQueryPromise;
-                selecting: AccountSyntax.Singular.SelectingQueryPromise;
-                to: AccountSyntax.Singular.ToQueryPromise;
-                using: AccountSyntax.Singular.UsingQueryPromise;
-                with: AccountSyntax.Singular.WithQueryPromise;
+            account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+                after: Syntax.Account.Singular.AfterQueryPromise;
+                before: Syntax.Account.Singular.BeforeQueryPromise;
+                including: Syntax.Account.Singular.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+                selecting: Syntax.Account.Singular.SelectingQueryPromise;
+                to: Syntax.Account.Singular.ToQueryPromise;
+                using: Syntax.Account.Singular.UsingQueryPromise;
+                with: Syntax.Account.Singular.WithQueryPromise;
             };
             /** Set multiple account records */
-            accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCallerPromise & {
-                after: AccountSyntax.Plural.AfterQueryPromise;
-                before: AccountSyntax.Plural.BeforeQueryPromise;
-                including: AccountSyntax.Plural.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Plural.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Plural.OrderedByQueryPromise;
-                selecting: AccountSyntax.Plural.SelectingQueryPromise;
-                to: AccountSyntax.Plural.ToQueryPromise;
-                using: AccountSyntax.Plural.UsingQueryPromise;
-                with: AccountSyntax.Plural.WithQueryPromise;
+            accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+                after: Syntax.Account.Plural.AfterQueryPromise;
+                before: Syntax.Account.Plural.BeforeQueryPromise;
+                including: Syntax.Account.Plural.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+                selecting: Syntax.Account.Plural.SelectingQueryPromise;
+                to: Syntax.Account.Plural.ToQueryPromise;
+                using: Syntax.Account.Plural.UsingQueryPromise;
+                with: Syntax.Account.Plural.WithQueryPromise;
             };
         };
     };
@@ -287,67 +289,69 @@ declare namespace Utils {
         };
     };
 }
-declare namespace AccountSyntax {
-    type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
-    namespace Singular {
-        type AfterQuery = Utils.AfterQuery<Account | null>;
-        type AfterQueryPromise = Utils.AfterQueryPromise<Account | null>;
-        type BeforeQuery = Utils.BeforeQuery<Account | null>;
-        type BeforeQueryPromise = Utils.BeforeQueryPromise<Account | null>;
-        type IncludingQuery = Utils.IncludingQuery<Account | null>;
-        type IncludingQueryPromise = Utils.IncludingQueryPromise<Account | null>;
-        type LimitedToQuery = Utils.LimitedToQuery<Account | null>;
-        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Account | null>;
-        type OrderedByQuery = Utils.OrderedByQuery<Account | null, AccountSyntax.FieldSlug>;
-        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Account | null, AccountSyntax.FieldSlug>;
-        type RootQueryCaller = Utils.RootQueryCaller<Account | null>;
-        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
-        type SelectingQuery = Utils.SelectingQuery<Account | null, AccountSyntax.FieldSlug>;
-        type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, AccountSyntax.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
-        type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
-        type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
-        type WithQuery = Utils.WithQuery<Account | null> & {
-            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
-            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
-            image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => T;
-        };
-        type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
-            name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
-            email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
-            image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
-        };
-    }
-    namespace Plural {
-        type AfterQuery = Utils.AfterQuery<Accounts>;
-        type AfterQueryPromise = Utils.AfterQueryPromise<Accounts>;
-        type BeforeQuery = Utils.BeforeQuery<Accounts>;
-        type BeforeQueryPromise = Utils.BeforeQueryPromise<Accounts>;
-        type IncludingQuery = Utils.IncludingQuery<Accounts>;
-        type IncludingQueryPromise = Utils.IncludingQueryPromise<Accounts>;
-        type LimitedToQuery = Utils.LimitedToQuery<Accounts>;
-        type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Accounts>;
-        type OrderedByQuery = Utils.OrderedByQuery<Accounts, AccountSyntax.FieldSlug>;
-        type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Accounts, AccountSyntax.FieldSlug>;
-        type RootQueryCaller = Utils.RootQueryCaller<Accounts>;
-        type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
-        type SelectingQuery = Utils.SelectingQuery<Accounts, AccountSyntax.FieldSlug>;
-        type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, AccountSyntax.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
-        type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
-        type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
-        type WithQuery = Utils.WithQuery<Accounts> & {
-            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
-            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
-            image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => T;
-        };
-        type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
-            name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
-            email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
-            image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
-        };
+declare namespace Syntax {
+    namespace Account {
+        type FieldSlug = "id" | "ronin.createdAt" | "ronin.createdBy" | "ronin.updatedAt" | "ronin.updatedBy" | "name" | "email" | "image";
+        namespace Singular {
+            type AfterQuery = Utils.AfterQuery<Account | null>;
+            type AfterQueryPromise = Utils.AfterQueryPromise<Account | null>;
+            type BeforeQuery = Utils.BeforeQuery<Account | null>;
+            type BeforeQueryPromise = Utils.BeforeQueryPromise<Account | null>;
+            type IncludingQuery = Utils.IncludingQuery<Account | null>;
+            type IncludingQueryPromise = Utils.IncludingQueryPromise<Account | null>;
+            type LimitedToQuery = Utils.LimitedToQuery<Account | null>;
+            type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Account | null>;
+            type OrderedByQuery = Utils.OrderedByQuery<Account | null, Account.FieldSlug>;
+            type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Account | null, Account.FieldSlug>;
+            type RootQueryCaller = Utils.RootQueryCaller<Account | null>;
+            type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
+            type SelectingQuery = Utils.SelectingQuery<Account | null, Account.FieldSlug>;
+            type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, Account.FieldSlug>;
+            type ToQuery = any;
+            type ToQueryPromise = any;
+            type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
+            type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
+            type WithQuery = Utils.WithQuery<Account | null> & {
+                name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
+                image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => T;
+            };
+            type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
+                name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                image: <T = Account | null>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
+            };
+        }
+        namespace Plural {
+            type AfterQuery = Utils.AfterQuery<Accounts>;
+            type AfterQueryPromise = Utils.AfterQueryPromise<Accounts>;
+            type BeforeQuery = Utils.BeforeQuery<Accounts>;
+            type BeforeQueryPromise = Utils.BeforeQueryPromise<Accounts>;
+            type IncludingQuery = Utils.IncludingQuery<Accounts>;
+            type IncludingQueryPromise = Utils.IncludingQueryPromise<Accounts>;
+            type LimitedToQuery = Utils.LimitedToQuery<Accounts>;
+            type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Accounts>;
+            type OrderedByQuery = Utils.OrderedByQuery<Accounts, Account.FieldSlug>;
+            type OrderedByQueryPromise = Utils.OrderedByQueryPromise<Accounts, Account.FieldSlug>;
+            type RootQueryCaller = Utils.RootQueryCaller<Accounts>;
+            type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
+            type SelectingQuery = Utils.SelectingQuery<Accounts, Account.FieldSlug>;
+            type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, Account.FieldSlug>;
+            type ToQuery = any;
+            type ToQueryPromise = any;
+            type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
+            type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
+            type WithQuery = Utils.WithQuery<Accounts> & {
+                name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => T;
+                email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => T;
+                image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => T;
+            };
+            type WithQueryPromise = Utils.WithQueryPromise<Accounts> & {
+                name: <T = Accounts>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
+                email: <T = Accounts>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
+                image: <T = Accounts>(image: Account["image"], options?: Record<string, unknown>) => Promise<T>;
+            };
+        }
     }
 }
 declare module "blade/types" {
@@ -364,26 +368,26 @@ declare module "blade/types" {
 declare module "blade/server/hooks" {
     declare const use: {
         /** Get a single account record */
-        account: ReducedFunction & AccountSyntax.Singular.RootQueryCaller & {
-            after: AccountSyntax.Singular.AfterQuery;
-            before: AccountSyntax.Singular.BeforeQuery;
-            including: AccountSyntax.Singular.IncludingQuery;
-            limitedTo: AccountSyntax.Singular.LimitedToQuery;
-            orderedBy: AccountSyntax.Singular.OrderedByQuery;
-            selecting: AccountSyntax.Singular.SelectingQuery;
-            using: AccountSyntax.Singular.UsingQuery;
-            with: AccountSyntax.Singular.WithQuery;
+        account: ReducedFunction & Syntax.Account.Singular.RootQueryCaller & {
+            after: Syntax.Account.Singular.AfterQuery;
+            before: Syntax.Account.Singular.BeforeQuery;
+            including: Syntax.Account.Singular.IncludingQuery;
+            limitedTo: Syntax.Account.Singular.LimitedToQuery;
+            orderedBy: Syntax.Account.Singular.OrderedByQuery;
+            selecting: Syntax.Account.Singular.SelectingQuery;
+            using: Syntax.Account.Singular.UsingQuery;
+            with: Syntax.Account.Singular.WithQuery;
         };
         /** Get multiple account records */
-        accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCaller & {
-            after: AccountSyntax.Plural.AfterQuery;
-            before: AccountSyntax.Plural.BeforeQuery;
-            including: AccountSyntax.Plural.IncludingQuery;
-            limitedTo: AccountSyntax.Plural.LimitedToQuery;
-            orderedBy: AccountSyntax.Plural.OrderedByQuery;
-            selecting: AccountSyntax.Plural.SelectingQuery;
-            using: AccountSyntax.Plural.UsingQuery;
-            with: AccountSyntax.Plural.WithQuery;
+        accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCaller & {
+            after: Syntax.Account.Plural.AfterQuery;
+            before: Syntax.Account.Plural.BeforeQuery;
+            including: Syntax.Account.Plural.IncludingQuery;
+            limitedTo: Syntax.Account.Plural.LimitedToQuery;
+            orderedBy: Syntax.Account.Plural.OrderedByQuery;
+            selecting: Syntax.Account.Plural.SelectingQuery;
+            using: Syntax.Account.Plural.UsingQuery;
+            with: Syntax.Account.Plural.WithQuery;
         };
     };
 }
@@ -391,80 +395,80 @@ declare module "blade/client/hooks" {
     declare const useMutation: () => {
         add: {
             /** Add a single account record */
-            account: ReducedFunction & AccountSyntax.Singular.RootQueryCallerPromise & {
-                after: AccountSyntax.Singular.AfterQueryPromise;
-                before: AccountSyntax.Singular.BeforeQueryPromise;
-                including: AccountSyntax.Singular.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Singular.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Singular.OrderedByQueryPromise;
-                selecting: AccountSyntax.Singular.SelectingQueryPromise;
-                to: AccountSyntax.Singular.ToQueryPromise;
-                using: AccountSyntax.Singular.UsingQueryPromise;
-                with: AccountSyntax.Singular.WithQueryPromise;
+            account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+                after: Syntax.Account.Singular.AfterQueryPromise;
+                before: Syntax.Account.Singular.BeforeQueryPromise;
+                including: Syntax.Account.Singular.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+                selecting: Syntax.Account.Singular.SelectingQueryPromise;
+                to: Syntax.Account.Singular.ToQueryPromise;
+                using: Syntax.Account.Singular.UsingQueryPromise;
+                with: Syntax.Account.Singular.WithQueryPromise;
             };
             /** Add multiple account records */
-            accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCallerPromise & {
-                after: AccountSyntax.Plural.AfterQueryPromise;
-                before: AccountSyntax.Plural.BeforeQueryPromise;
-                including: AccountSyntax.Plural.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Plural.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Plural.OrderedByQueryPromise;
-                selecting: AccountSyntax.Plural.SelectingQueryPromise;
-                to: AccountSyntax.Plural.ToQueryPromise;
-                using: AccountSyntax.Plural.UsingQueryPromise;
-                with: AccountSyntax.Plural.WithQueryPromise;
+            accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+                after: Syntax.Account.Plural.AfterQueryPromise;
+                before: Syntax.Account.Plural.BeforeQueryPromise;
+                including: Syntax.Account.Plural.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+                selecting: Syntax.Account.Plural.SelectingQueryPromise;
+                to: Syntax.Account.Plural.ToQueryPromise;
+                using: Syntax.Account.Plural.UsingQueryPromise;
+                with: Syntax.Account.Plural.WithQueryPromise;
             };
         };
         remove: {
             /** Remove a single account record */
-            account: ReducedFunction & AccountSyntax.Singular.RootQueryCallerPromise & {
-                after: AccountSyntax.Singular.AfterQueryPromise;
-                before: AccountSyntax.Singular.BeforeQueryPromise;
-                including: AccountSyntax.Singular.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Singular.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Singular.OrderedByQueryPromise;
-                selecting: AccountSyntax.Singular.SelectingQueryPromise;
-                to: AccountSyntax.Singular.ToQueryPromise;
-                using: AccountSyntax.Singular.UsingQueryPromise;
-                with: AccountSyntax.Singular.WithQueryPromise;
+            account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+                after: Syntax.Account.Singular.AfterQueryPromise;
+                before: Syntax.Account.Singular.BeforeQueryPromise;
+                including: Syntax.Account.Singular.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+                selecting: Syntax.Account.Singular.SelectingQueryPromise;
+                to: Syntax.Account.Singular.ToQueryPromise;
+                using: Syntax.Account.Singular.UsingQueryPromise;
+                with: Syntax.Account.Singular.WithQueryPromise;
             };
             /** Remove multiple account records */
-            accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCallerPromise & {
-                after: AccountSyntax.Plural.AfterQueryPromise;
-                before: AccountSyntax.Plural.BeforeQueryPromise;
-                including: AccountSyntax.Plural.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Plural.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Plural.OrderedByQueryPromise;
-                selecting: AccountSyntax.Plural.SelectingQueryPromise;
-                to: AccountSyntax.Plural.ToQueryPromise;
-                using: AccountSyntax.Plural.UsingQueryPromise;
-                with: AccountSyntax.Plural.WithQueryPromise;
+            accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+                after: Syntax.Account.Plural.AfterQueryPromise;
+                before: Syntax.Account.Plural.BeforeQueryPromise;
+                including: Syntax.Account.Plural.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+                selecting: Syntax.Account.Plural.SelectingQueryPromise;
+                to: Syntax.Account.Plural.ToQueryPromise;
+                using: Syntax.Account.Plural.UsingQueryPromise;
+                with: Syntax.Account.Plural.WithQueryPromise;
             };
         };
         set: {
             /** Set a single account record */
-            account: ReducedFunction & AccountSyntax.Singular.RootQueryCallerPromise & {
-                after: AccountSyntax.Singular.AfterQueryPromise;
-                before: AccountSyntax.Singular.BeforeQueryPromise;
-                including: AccountSyntax.Singular.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Singular.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Singular.OrderedByQueryPromise;
-                selecting: AccountSyntax.Singular.SelectingQueryPromise;
-                to: AccountSyntax.Singular.ToQueryPromise;
-                using: AccountSyntax.Singular.UsingQueryPromise;
-                with: AccountSyntax.Singular.WithQueryPromise;
+            account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+                after: Syntax.Account.Singular.AfterQueryPromise;
+                before: Syntax.Account.Singular.BeforeQueryPromise;
+                including: Syntax.Account.Singular.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+                selecting: Syntax.Account.Singular.SelectingQueryPromise;
+                to: Syntax.Account.Singular.ToQueryPromise;
+                using: Syntax.Account.Singular.UsingQueryPromise;
+                with: Syntax.Account.Singular.WithQueryPromise;
             };
             /** Set multiple account records */
-            accounts: ReducedFunction & AccountSyntax.Plural.RootQueryCallerPromise & {
-                after: AccountSyntax.Plural.AfterQueryPromise;
-                before: AccountSyntax.Plural.BeforeQueryPromise;
-                including: AccountSyntax.Plural.IncludingQueryPromise;
-                limitedTo: AccountSyntax.Plural.LimitedToQueryPromise;
-                orderedBy: AccountSyntax.Plural.OrderedByQueryPromise;
-                selecting: AccountSyntax.Plural.SelectingQueryPromise;
-                to: AccountSyntax.Plural.ToQueryPromise;
-                using: AccountSyntax.Plural.UsingQueryPromise;
-                with: AccountSyntax.Plural.WithQueryPromise;
+            accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+                after: Syntax.Account.Plural.AfterQueryPromise;
+                before: Syntax.Account.Plural.BeforeQueryPromise;
+                including: Syntax.Account.Plural.IncludingQueryPromise;
+                limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+                orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+                selecting: Syntax.Account.Plural.SelectingQueryPromise;
+                to: Syntax.Account.Plural.ToQueryPromise;
+                using: Syntax.Account.Plural.UsingQueryPromise;
+                with: Syntax.Account.Plural.WithQueryPromise;
             };
         };
     };
@@ -525,6 +529,7 @@ declare namespace Utils {
         };
     };
 }
+declare namespace Syntax { }
 declare module "blade/types" { }
 declare module "blade/server/hooks" {
     declare const use: {};

@@ -44,7 +44,7 @@ export const identifiers = {
   namespace: {
     syntax: {
       fieldSlug: factory.createIdentifier('FieldSlug'),
-      suffix: factory.createIdentifier('Syntax'),
+      name: factory.createIdentifier('Syntax'),
       singular: factory.createIdentifier('Singular'),
       plural: factory.createIdentifier('Plural'),
     },

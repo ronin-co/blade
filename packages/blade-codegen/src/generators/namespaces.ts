@@ -29,7 +29,7 @@ import type { Model } from '@/src/types/model';
 export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaration> =>
   models.map((model) => {
     const syntaxNamespaceIdentifier = factory.createIdentifier(
-      `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
+      convertToPascalCase(model.slug),
     );
 
     /**
@@ -522,7 +522,7 @@ export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaratio
     } satisfies Record<string, TypeAliasDeclaration>;
 
     return factory.createModuleDeclaration(
-      [factory.createModifier(SyntaxKind.DeclareKeyword)],
+      undefined,
       syntaxNamespaceIdentifier,
       factory.createModuleBlock([
         fieldSlugType,
