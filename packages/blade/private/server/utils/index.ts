@@ -1,5 +1,7 @@
 import { SSEStreamingApi } from 'hono/streaming';
 
+import { CUSTOM_HEADERS } from '@/private/universal/utils/constants';
+
 /**
  * Generates a short numeric hash from a string input.
  *
@@ -28,12 +30,18 @@ export class PageStream extends SSEStreamingApi {
   /** The first response object returned to the client. */
   readonly response: Response;
 
-  constructor(page: { url: URL; headers: Headers }) {
+  constructor(request: Request) {
     const { readable, writable } = new TransformStream();
-
     super(writable, readable);
 
-    this.request = new Request(page.url, { headers: page.headers });
+    // Clone the headers since we will modify them, and runtimes like `workerd` don't allow
+    // modifying the headers of the incoming request.
+    const newRequest = new Request(request);
+
+    // Remove meta headers from the incoming headers.
+    Object.values(CUSTOM_HEADERS).forEach((header) => newRequest.headers.delete(header));
+
+    this.request = newRequest;
 
     this.response = new Response(this.responseReadable, {
       headers: {

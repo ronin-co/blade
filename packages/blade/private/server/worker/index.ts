@@ -292,16 +292,7 @@ app.post('*', async (c) => {
     }
   }
 
-  const url = new URL(c.req.url);
-
-  // Clone the headers since we will modify them, and runtimes like `workerd` don't allow
-  // modifying the headers of the incoming request.
-  const headers = new Headers(c.req.raw.headers);
-
-  // Remove meta headers from the incoming headers.
-  Object.values(CUSTOM_HEADERS).forEach((header) => headers.delete(header));
-
-  const stream = new PageStream({ url, headers });
+  const stream = new PageStream(c.req.raw);
 
   flushSession(stream, correctBundle, { queries, repeat: subscribe });
 
