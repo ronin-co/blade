@@ -11,7 +11,7 @@
     },
     "packages/blade": {
       "name": "blade",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "bin": {
         "blade": "./dist/private/shell/index.js",
       },
@@ -65,7 +65,7 @@
     },
     "packages/blade-better-auth": {
       "name": "blade-better-auth",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "dependencies": {
         "better-auth": "1.2.5",
       },
@@ -84,7 +84,7 @@
     },
     "packages/blade-cli": {
       "name": "blade-cli",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "dependencies": {
         "@dprint/formatter": "0.4.1",
         "@dprint/typescript": "0.93.3",
@@ -114,7 +114,7 @@
     },
     "packages/blade-client": {
       "name": "blade-client",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
@@ -127,7 +127,7 @@
     },
     "packages/blade-codegen": {
       "name": "blade-codegen",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "dependencies": {
         "typescript": "5.7.3",
       },
@@ -141,7 +141,7 @@
     },
     "packages/blade-compiler": {
       "name": "blade-compiler",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
@@ -153,7 +153,7 @@
     },
     "packages/blade-syntax": {
       "name": "blade-syntax",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
@@ -165,7 +165,7 @@
     },
     "packages/create-blade": {
       "name": "create-blade",
-      "version": "3.16.2",
+      "version": "3.17.3",
       "bin": {
         "create-blade": "./dist/index.js",
       },
