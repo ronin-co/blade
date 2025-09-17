@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import gradient from 'gradient-string';
 
 const currentFilePath = fileURLToPath(import.meta.url);
-export const sourceDirPath = join(dirname(currentFilePath), '..');
+export const sourceDirPath = dirname(currentFilePath);
 
 export const publicDirectory = resolve(process.cwd(), 'public');
 export const outputDirectory = resolve(process.cwd(), '.blade');
