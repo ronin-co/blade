@@ -176,8 +176,8 @@ describe('syntax', () => {
     describe('singular', () => {
       test('synchronous', () => {
         const typesResult = generateWithSyntax(
-          SingularAccountModelNode,
           AccountModel,
+          SingularAccountModelNode,
           false,
         );
 
@@ -187,8 +187,8 @@ describe('syntax', () => {
       });
       test('asynchronous', () => {
         const typesResult = generateWithSyntax(
-          SingularAccountModelNode,
           AccountModel,
+          SingularAccountModelNode,
           true,
         );
 
@@ -201,8 +201,8 @@ describe('syntax', () => {
     describe('plural', () => {
       test('synchronous', () => {
         const typesResult = generateWithSyntax(
-          PluralAccountModelNode,
           AccountModel,
+          PluralAccountModelNode,
           false,
         );
 
@@ -212,8 +212,8 @@ describe('syntax', () => {
       });
       test('asynchronous', () => {
         const typesResult = generateWithSyntax(
-          PluralAccountModelNode,
           AccountModel,
+          PluralAccountModelNode,
           true,
         );
 
