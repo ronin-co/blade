@@ -420,10 +420,11 @@ const invokeTriggers = async <T extends ResultRecord>(
 
       const list = queries.map(
         async (query): Promise<QueryFromTrigger<T> | Array<QueryFromTrigger<T>>> => {
-          const newQuery = {
+          const newQuery: QueryFromTrigger<T> = {
             query,
             database,
             parentTrigger: currentTrigger,
+            result: EMPTY,
           };
 
           return applyTriggers ? await applySyncTriggers([newQuery], options) : newQuery;
@@ -490,7 +491,7 @@ interface QueryFromTrigger<T> extends QueryPerDatabase {
    */
   parentTrigger?: TriggerOptions['parentTrigger'];
   /** A pre-populated query result provided by the trigger. */
-  result?: FormattedResults<T>[number] | typeof EMPTY;
+  result: FormattedResults<T>[number] | typeof EMPTY;
 }
 
 interface TriggerExecutionOptions {
@@ -509,29 +510,27 @@ interface TriggerExecutionOptions {
  * @returns The list of queries after they were transformed by triggers.
  */
 export const applySyncTriggers = async <T extends ResultRecord>(
-  queries: Array<QueryPerDatabase>,
+  queries: Array<QueryFromTrigger<T>>,
   options: TriggerExecutionOptions,
 ): Promise<Array<QueryFromTrigger<T>>> => {
-  const queryList: Array<QueryFromTrigger<T>> = [...queries];
-
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
-    queryList.map(async (queryItem, index) => {
+    queries.map(async (queryItem, index) => {
       const triggerResults = await invokeTriggers('before', queryItem, options);
-      queryList.splice(index, 0, ...(triggerResults?.queries || []));
+      queries.splice(index, 0, ...(triggerResults?.queries || []));
     }),
   );
 
   // Invoke `add`, `get`, `set`, `remove`, and `count`.
   await Promise.all(
-    queryList.map(async (queryItem, index) => {
+    queries.map(async (queryItem, index) => {
       let triggerResults: TriggerResults<T> | undefined;
 
       try {
         triggerResults = await invokeTriggers('during', queryItem, options);
       } catch (err) {
         if (err instanceof InvalidPermissionsError) {
-          queryList[index].result = null;
+          queries[index].result = null;
           return;
         }
 
@@ -539,7 +538,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
       }
 
       if (triggerResults.queries && triggerResults.queries.length > 0) {
-        queryList[index].query = triggerResults.queries[0].query;
+        queries[index].query = triggerResults.queries[0].query;
         return;
       }
 
@@ -563,13 +562,13 @@ export const applySyncTriggers = async <T extends ResultRecord>(
 
   // Invoke `afterAdd`, `afterGet`, `afterSet`, `afterRemove`, and `afterCount`.
   await Promise.all(
-    queryList.map(async (queryItem, index) => {
+    queries.map(async (queryItem, index) => {
       // If the query already has a result, it won't hit the database, so there is no
       // need to collect additional queries that should run in the same transaction.
       if (typeof queryItem.result !== 'undefined') return;
 
       const triggerResults = await invokeTriggers('after', queryItem, options);
-      queryList.splice(index + 1, 0, ...(triggerResults?.queries || []));
+      queries.splice(index + 1, 0, ...(triggerResults?.queries || []));
     }),
   );
 
@@ -581,7 +580,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   // extra `get` query, since `set` queries return the modified record afterward, but in
   // order to get the version of the record *before* the modification, we need a separate
   // query of type `get`.
-  return queryList.flatMap((details, index) => {
+  return queries.flatMap((details, index) => {
     const { query, database } = details;
 
     if (query.set || query.alter) {
@@ -605,10 +604,11 @@ export const applySyncTriggers = async <T extends ResultRecord>(
         };
       }
 
-      const diffQuery = {
+      const diffQuery: QueryFromTrigger<T> = {
         query: newQuery,
         diffForIndex: index + 1,
         database,
+        result: EMPTY,
       };
 
       return [diffQuery, details];
@@ -631,24 +631,19 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger<T>>,
   options: TriggerExecutionOptions,
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  const queryList: Array<QueryFromTrigger<T>> = queries.map((item) => ({
-    ...item,
-    result: EMPTY,
-  }));
-
   // Invoke `resolvingGet`, `resolvingSet`, `resolvingAdd`, `resolvingRemove`,
   // and `resolvingCount`.
   await Promise.all(
-    queryList.map(async (queryItem, index) => {
+    queries.map(async (queryItem, index) => {
       // If the query already has a result, we don't need to try and obtain one.
       if (typeof queryItem.result !== 'undefined') return;
 
       const triggerResults = await invokeTriggers('resolving', queryItem, options);
-      queryList[index].result = triggerResults.result as FormattedResults<T>[number];
+      queries[index].result = triggerResults.result as FormattedResults<T>[number];
     }),
   );
 
-  const queriesWithoutResults = queryList
+  const queriesWithoutResults = queries
     .map((query, index) => ({ ...query, index }))
     .filter((query) => query.result === EMPTY);
 
@@ -663,20 +658,20 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
       const query = queriesWithoutResults[index];
       const result = resultsFromDatabase[index].result;
 
-      queryList[query.index].result = result;
+      queries[query.index].result = result;
     }
   }
 
   // Asynchronously invoke `followingAdd`, `followingSet`, `followingRemove`,
   // `followingCreate`, `followingAlter`, and `followingDrop`.
-  for (let index = 0; index < queryList.length; index++) {
-    const queryItem = queryList[index];
+  for (let index = 0; index < queries.length; index++) {
+    const queryItem = queries[index];
     const queryType = Object.keys(queryItem.query)[0] as QueryType;
 
     // "following" triggers should only fire for writes — not reads.
     if (!(WRITE_QUERY_TYPES as ReadonlyArray<string>).includes(queryType)) continue;
 
-    const diffMatch = queryList.find((item) => item.diffForIndex === index);
+    const diffMatch = queries.find((item) => item.diffForIndex === index);
 
     let resultBefore = diffMatch ? diffMatch.result : EMPTY;
     let resultAfter = queryItem.result;
@@ -712,7 +707,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   // Filter the list of queries to remove any potential queries used for "diffing"
   // (retrieving the previous value of a record) and any potential queries resulting from
   // "before" or "after" triggers. Then return only the results of the queries.
-  return queryList
+  return queries
     .filter(
       (query) =>
         typeof query.diffForIndex === 'undefined' &&
@@ -767,7 +762,12 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   const execOptions = { context, triggerError, clientOptions: options };
 
-  const queryList = await applySyncTriggers<T>(queries, execOptions);
+  const initialList: Array<QueryFromTrigger<T>> = queries.map((item) => ({
+    ...item,
+    result: EMPTY,
+  }));
+
+  const queryList = await applySyncTriggers<T>(initialList, execOptions);
   const queryResults = await applyAsyncTriggers<T>(queryList, execOptions);
 
   return queryResults;
