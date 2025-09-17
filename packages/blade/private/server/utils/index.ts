@@ -18,15 +18,17 @@ export const generateHashSync = (input: string): number => {
 };
 
 export class PageStream extends SSEStreamingApi {
-  /** The url of the page that is being viewed. */
+  /** The incoming url of the page that is being viewed. */
   url: URL;
-  /** The headers of the request that created the stream. */
+  /** The incoming headers of the request that created the stream. */
   readonly headers: Headers;
   /**
    * The time at which the last update was sent by the server (excludes revalidation).
    * If the value is `null`, no update was sent yet.
    */
   lastUpdate: Date | null = null;
+  /** The first response object returned to the client. */
+  readonly response: Response;
 
   constructor(page: { url: URL; headers: Headers }) {
     const { readable, writable } = new TransformStream();
@@ -35,5 +37,14 @@ export class PageStream extends SSEStreamingApi {
 
     this.url = page.url;
     this.headers = page.headers;
+
+    this.response = new Response(this.responseReadable, {
+      headers: {
+        'Transfer-Encoding': 'chunked',
+        'Content-Type': 'text/plain',
+        'Cache-Control': 'no-cache, no-transform',
+        'X-Accel-Buffering': 'no',
+      },
+    });
   }
 }

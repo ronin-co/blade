@@ -301,11 +301,6 @@ app.post('*', async (c) => {
   // Remove meta headers from the incoming headers.
   Object.values(CUSTOM_HEADERS).forEach((header) => headers.delete(header));
 
-  c.header('Transfer-Encoding', 'chunked');
-  c.header('Content-Type', 'text/plain');
-  c.header('Cache-Control', 'no-cache, no-transform');
-  c.header('X-Accel-Buffering', 'no');
-
   const stream = new PageStream({ url, headers });
 
   flushSession(stream, correctBundle, { queries, repeat: subscribe });
@@ -322,7 +317,7 @@ app.post('*', async (c) => {
     });
   }
 
-  return c.newResponse(stream.responseReadable);
+  return stream.response;
 });
 
 // Handle errors that occurred during the request lifecycle.
