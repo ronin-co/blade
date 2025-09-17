@@ -36,7 +36,7 @@ type SyntaxFactory = ReturnType<typeof createSyntaxFactory>;
  *
  * @example
  * ```ts
- * import { ronin } from '@ronin/better-auth';
+ * import { ronin } from 'blade-better-auth';
  * import { betterAuth } from 'better-auth';
  *
  * const auth = betterAuth({
@@ -46,8 +46,8 @@ type SyntaxFactory = ReturnType<typeof createSyntaxFactory>;
  *
  * @example
  * ```ts
- * import { ronin } from '@ronin/better-auth';
- * import { createSyntaxFactory } from 'ronin';
+ * import { ronin } from 'blade-better-auth';
+ * import { createSyntaxFactory } from 'blade-client';
  * import { betterAuth } from 'better-auth';
  *
  * const client = createSyntaxFactory({
