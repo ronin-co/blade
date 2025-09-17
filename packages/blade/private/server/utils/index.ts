@@ -64,8 +64,8 @@ export class PageStream extends SSEStreamingApi {
   writeChunk(type: 'update' | 'update-bundle', response: Response) {
     // Migrate the headers to the final response.
     for (const headerKey in response.headers) {
-      const headerValue = response.headers.get(headerKey);
-      this.response.headers.set(headerKey, headerValue!);
+      const headerValue = response.headers.get(headerKey) as string;
+      this.response.headers.set(headerKey, headerValue);
     }
 
     // If the URL of the page changed while it was rendered (for example because of a
