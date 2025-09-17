@@ -41,11 +41,43 @@ export const identifiers = {
     },
     storedObject: factory.createIdentifier('StoredObject'),
   },
+  namespace: {
+    syntax: {
+      fieldSlug: factory.createIdentifier('FieldSlug'),
+      name: factory.createIdentifier('Syntax'),
+      singular: factory.createIdentifier('Singular'),
+      plural: factory.createIdentifier('Plural'),
+    },
+    utils: {
+      afterQuery: factory.createIdentifier('AfterQuery'),
+      afterQueryPromise: factory.createIdentifier('AfterQueryPromise'),
+      beforeQuery: factory.createIdentifier('BeforeQuery'),
+      beforeQueryPromise: factory.createIdentifier('BeforeQueryPromise'),
+      includingQuery: factory.createIdentifier('IncludingQuery'),
+      includingQueryPromise: factory.createIdentifier('IncludingQueryPromise'),
+      limitedToQuery: factory.createIdentifier('LimitedToQuery'),
+      limitedToQueryPromise: factory.createIdentifier('LimitedToQueryPromise'),
+      name: factory.createIdentifier('Utils'),
+      orderedByQuery: factory.createIdentifier('OrderedByQuery'),
+      orderedByQueryPromise: factory.createIdentifier('OrderedByQueryPromise'),
+      rootQueryCaller: factory.createIdentifier('RootQueryCaller'),
+      rootQueryCallerPromise: factory.createIdentifier('RootQueryCallerPromise'),
+      selectingQuery: factory.createIdentifier('SelectingQuery'),
+      selectingQueryPromise: factory.createIdentifier('SelectingQueryPromise'),
+      toQuery: factory.createIdentifier('ToQuery'),
+      toQueryPromise: factory.createIdentifier('ToQueryPromise'),
+      usingQuery: factory.createIdentifier('UsingQuery'),
+      usingQueryPromise: factory.createIdentifier('UsingQueryPromise'),
+      withQuery: factory.createIdentifier('WithQuery'),
+      withQueryPromise: factory.createIdentifier('WithQueryPromise'),
+    },
+  },
   primitive: {
     array: factory.createIdentifier('Array'),
     date: factory.createIdentifier('Date'),
     partial: factory.createIdentifier('Partial'),
     promise: factory.createIdentifier('Promise'),
+    record: factory.createIdentifier('Record'),
   },
   utils: {
     all: factory.createIdentifier('all'),
@@ -66,8 +98,8 @@ export const identifiers = {
  */
 export const typeArgumentIdentifiers = {
   default: factory.createIdentifier('T'),
+  fields: factory.createIdentifier('F'),
   key: factory.createIdentifier('K'),
-  queries: factory.createIdentifier('Q'),
   schema: factory.createIdentifier('S'),
   using: factory.createIdentifier('U'),
 } satisfies Record<string, Identifier>;
