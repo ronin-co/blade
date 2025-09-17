@@ -209,14 +209,20 @@ export const generate = (models: Array<Model>): string => {
                     const comment = generateQueryTypeComment(model, 'use');
 
                     /**
-                     * @todo(@nurodev): Add documentation
+                     * @example
+                     * ```ts
+                     * UserSyntax
+                     * ```
                      */
                     const modelSyntaxIdentifier = factory.createIdentifier(
                       `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                     );
 
                     /**
-                     * @todo(@nurodev): Add documentation
+                     * @example
+                     * ```ts
+                     * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                     * ```
                      */
                     const singularProperty = factory.createPropertySignature(
                       undefined,
@@ -267,7 +273,10 @@ export const generate = (models: Array<Model>): string => {
                     );
 
                     /**
-                     * @todo(@nurodev): Add documentation
+                     * @example
+                     * ```ts
+                     * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                     * ```
                      */
                     const pluralProperty = factory.createPropertySignature(
                       undefined,
@@ -379,14 +388,20 @@ export const generate = (models: Array<Model>): string => {
                           const comment = generateQueryTypeComment(model, 'add');
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * UserSyntax
+                           * ```
                            */
                           const modelSyntaxIdentifier = factory.createIdentifier(
                             `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                           );
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                           * ```
                            */
                           const singularProperty = factory.createPropertySignature(
                             undefined,
@@ -442,7 +457,10 @@ export const generate = (models: Array<Model>): string => {
                           );
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                           * ```
                            */
                           const pluralProperty = factory.createPropertySignature(
                             undefined,
@@ -523,14 +541,20 @@ export const generate = (models: Array<Model>): string => {
                           const comment = generateQueryTypeComment(model, 'remove');
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * UserSyntax
+                           * ```
                            */
                           const modelSyntaxIdentifier = factory.createIdentifier(
                             `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                           );
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                           * ```
                            */
                           const singularProperty = factory.createPropertySignature(
                             undefined,
@@ -586,7 +610,10 @@ export const generate = (models: Array<Model>): string => {
                           );
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                           * ```
                            */
                           const pluralProperty = factory.createPropertySignature(
                             undefined,
@@ -667,14 +694,20 @@ export const generate = (models: Array<Model>): string => {
                           const comment = generateQueryTypeComment(model, 'set');
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * UserSyntax
+                           * ```
                            */
                           const modelSyntaxIdentifier = factory.createIdentifier(
                             `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
                           );
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                           * ```
                            */
                           const singularProperty = factory.createPropertySignature(
                             undefined,
@@ -730,7 +763,10 @@ export const generate = (models: Array<Model>): string => {
                           );
 
                           /**
-                           * @todo(@nurodev): Add documentation
+                           * @example
+                           * ```ts
+                           * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                           * ```
                            */
                           const pluralProperty = factory.createPropertySignature(
                             undefined,

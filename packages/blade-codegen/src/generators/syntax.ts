@@ -5,17 +5,19 @@ import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { sharedQueryOptionsParameter } from '@/src/declarations';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type {
-  Identifier,
-  IntersectionTypeNode,
-  TypeAliasDeclaration,
-  TypeNode,
-} from 'typescript';
+import type { IntersectionTypeNode, TypeAliasDeclaration, TypeNode } from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
 /**
- * @todo(@nurodev): Add documentation
+ * Generate the syntax for a `using` query.
+ *
+ * @param model - The model to generate the syntax for.
+ * @param modelNode - The TypeNode representing the model.
+ * @param promise - Whether the return type should be a Promise.
+ * @param plural - Whether the return type should be plural (array) or singular.
+ *
+ * @returns An IntersectionTypeNode representing the `using` syntax.
  */
 export const generateUsingSyntax = (
   model: Model,
@@ -62,7 +64,10 @@ export const generateUsingSyntax = (
     ]);
 
   /**
-   * @todo(@nurodev): Add documentation
+   * @example
+   * ```ts
+   * Array<'...'> | 'all'
+   * ```
    */
   const arrayFieldsType = factory.createUnionTypeNode([
     factory.createTypeReferenceNode(identifiers.primitive.array, [
@@ -78,7 +83,10 @@ export const generateUsingSyntax = (
   ]);
 
   /**
-   * @todo(@nurodev): Add documentation
+   * @example
+   * ```ts
+   * User<U>
+   * ```
    */
   const baseModelWithFields = factory.createTypeReferenceNode(
     factory.createIdentifier(convertToPascalCase(model.slug)),
@@ -91,7 +99,10 @@ export const generateUsingSyntax = (
     : baseModelWithFields;
 
   /**
-   * @todo(@nurodev): Add documentation
+   * @example
+   * ```ts
+   * <U extends Array<"..."> | "all">(fields: U): Post<U> | null;
+   * ```
    */
   const inferredCallSignature = factory.createCallSignature(
     [
@@ -119,7 +130,10 @@ export const generateUsingSyntax = (
   );
 
   /**
-   * @todo(@nurodev): Add documentation
+   * @example
+   * ```ts
+   * <T = Post | null>(fields: Array<"..."> | "all"): T;
+   * ```
    */
   const overrideCallSignaure = factory.createCallSignature(
     [
@@ -156,11 +170,17 @@ export const generateUsingSyntax = (
 };
 
 /**
- * @todo(@nurodev): Add documentation
+ * Generate the syntax for a `with` query.
+ *
+ * @param model - The model to generate the syntax for.
+ * @param modelNode - The TypeNode representing the model.
+ * @param promise - Whether the return type should be a Promise.
+ *
+ * @returns A TypeAliasDeclaration representing the `with` syntax.
  */
 export const generateWithSyntax = (
-  modelNode: TypeNode,
   model: Model,
+  modelNode: TypeNode,
   promise: boolean,
 ): TypeAliasDeclaration => {
   const modelUserFieldEntries = Object.entries(model.fields).filter(
@@ -183,7 +203,10 @@ export const generateWithSyntax = (
       factory.createTypeLiteralNode(
         modelUserFieldEntries.map(([slug, field]) => {
           /**
-           * @todo(@nurodev): Add documentation
+           * @example
+           * ```ts
+           * Post["author"]
+           * ```
            */
           const baseFieldProperty = factory.createIndexedAccessTypeNode(
             factory.createTypeReferenceNode(convertToPascalCase(model.slug)),
@@ -193,7 +216,10 @@ export const generateWithSyntax = (
           const parameterNodes = new Array<TypeNode>(baseFieldProperty);
           if (field.type === 'link') {
             /**
-             * @todo(@nurodev): Add documentation
+             * @example
+             * ```ts
+             * Partial<Post<["author"]>["author"]>
+             * ```
              */
             const nestedFieldProperty = factory.createTypeReferenceNode(
               identifiers.primitive.partial,

@@ -5,14 +5,28 @@ import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { generateUsingSyntax, generateWithSyntax } from '@/src/generators/syntax';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { TypeAliasDeclaration } from 'typescript';
+import type { ModuleDeclaration, TypeAliasDeclaration } from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
 /**
- * @todo Add documentation
+ * Generate syntax namespaces for each model.
+ *
+ * @example
+ * ```ts
+ * declare namespace UserSyntax {
+ *  type FieldSlug = 'id' | '...';
+ *
+ *  namespace Singular { ... }
+ *  namespace Plural { ... }
+ * }
+ * ```
+ *
+ * @param models - Array of models to generate namespaces for.
+ *
+ * @returns Array of module declarations representing the namespaces.
  */
-export const generateNamespaces = (models: Array<Model>) =>
+export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaration> =>
   models.map((model) => {
     const syntaxNamespaceIdentifier = factory.createIdentifier(
       `${convertToPascalCase(model.slug)}${identifiers.namespace.syntax.suffix.text}`,
@@ -271,8 +285,8 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         generateUsingSyntax(model, singularModelNode, true, false),
       ),
-      with: generateWithSyntax(singularModelNode, model, false),
-      withPromise: generateWithSyntax(singularModelNode, model, true),
+      with: generateWithSyntax(model, singularModelNode, false),
+      withPromise: generateWithSyntax(model, singularModelNode, true),
     } satisfies Record<string, TypeAliasDeclaration>;
 
     const pluralModelNode = factory.createTypeReferenceNode(
@@ -503,8 +517,8 @@ export const generateNamespaces = (models: Array<Model>) =>
         undefined,
         generateUsingSyntax(model, pluralModelNode, true, true),
       ),
-      with: generateWithSyntax(pluralModelNode, model, false),
-      withPromise: generateWithSyntax(pluralModelNode, model, true),
+      with: generateWithSyntax(model, pluralModelNode, false),
+      withPromise: generateWithSyntax(model, pluralModelNode, true),
     } satisfies Record<string, TypeAliasDeclaration>;
 
     return factory.createModuleDeclaration(

@@ -5,6 +5,7 @@ import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
 import { createImportDeclaration } from '@/src/generators/import';
 
 /**
+ * @example
  * ```ts
  * import type { CombinedInstructions, Expression } from "blade-compiler";
  * ```
@@ -19,6 +20,7 @@ export const importBladeCompilerQueryTypesType = createImportDeclaration({
 });
 
 /**
+ * @example
  * ```ts
  * import type { StoredObject } from "blade-compiler";
  * ```
@@ -30,6 +32,7 @@ export const importBladeCompilerStoredObjectType = createImportDeclaration({
 });
 
 /**
+ * @example
  * ```ts
  * import type { ReducedFunction, ResultRecord } from "blade/types";
  * ```
@@ -44,6 +47,7 @@ export const importBladeUtilsType = createImportDeclaration({
 });
 
 /**
+ * @example
  * ```ts
  * type ResolveSchema<
  *  S,
@@ -63,6 +67,7 @@ export const resolveSchemaType = factory.createTypeAliasDeclaration(
   identifiers.utils.resolveSchema,
   [
     /**
+     * @example
      * ```ts
      * S
      * ```
@@ -70,6 +75,7 @@ export const resolveSchemaType = factory.createTypeAliasDeclaration(
     factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.schema),
 
     /**
+     * @example
      * ```ts
      * U extends Array<string> | 'all'
      * ```
@@ -88,6 +94,7 @@ export const resolveSchemaType = factory.createTypeAliasDeclaration(
     ),
 
     /**
+     * @example
      * ```ts
      * K extends string
      * ```
@@ -128,6 +135,7 @@ export const resolveSchemaType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @example
  * ```ts
  * type JsonPrimitive = string | number | boolean | null;
  * ```
@@ -145,6 +153,7 @@ export const jsonPrimitiveType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @example
  * ```ts
  * type JsonObject = { [key: string]: JsonPrimitive | JsonObject | JsonArray };
  * ```
@@ -175,6 +184,7 @@ export const jsonObjectType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @example
  * ```ts
  * type JsonArray = Array<JsonPrimitive | JsonObject | JsonArray>;
  * ```
@@ -193,6 +203,7 @@ export const jsonArrayType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @example
  * ```ts
  * options?: Record<string, unknown>;
  * ```
@@ -209,7 +220,10 @@ export const sharedQueryOptionsParameter = factory.createParameterDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type AfterQuery<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => T);
+ * ```
  */
 export const afterQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -248,7 +262,10 @@ export const afterQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type AfterQueryPromise<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["after"], options?: Record<string, unknown>) => Promise<T>);
+ * ```
  */
 export const afterQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -289,7 +306,10 @@ export const afterQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type BeforeQuery<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => T);
+ * ```
  */
 export const beforeQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -328,7 +348,10 @@ export const beforeQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type BeforeQueryPromise<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["before"], options?: Record<string, unknown>) => Promise<T>);
+ * ```
  */
 export const beforeQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -369,7 +392,10 @@ export const beforeQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type IncludingQuery<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => T);
+ * ```
  */
 export const includingQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -408,7 +434,10 @@ export const includingQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type IncludingQueryPromise<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["including"], options?: Record<string, unknown>) => Promise<T>);
+ * ```
  */
 export const includingQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -449,7 +478,10 @@ export const includingQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type LimitedToQuery<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => T);
+ * ```
  */
 export const limitedToQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -488,7 +520,10 @@ export const limitedToQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type LimitedToQueryPromise<U> = ReducedFunction & (<T = U>(value: CombinedInstructions["limitedTo"], options?: Record<string, unknown>) => Promise<T>);
+ * ```
  */
 export const limitedToQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -529,7 +564,16 @@ export const limitedToQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type OrderedByQuery<U, F extends string> = ReducedFunction & (<T = U>(instructions: {
+ *  ascending?: Array<Expression | F>;
+ *  descending?: Array<Expression | F>;
+ * }, options?: Record<string, unknown>) => T) & {
+ *  ascending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => T;
+ *  descending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => T;
+ * };
+ * ```
  */
 export const orderedByQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -621,7 +665,16 @@ export const orderedByQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type OrderedByQueryPromise<U, F extends string> = ReducedFunction & (<T = U>(instructions: {
+ *  ascending?: Array<Expression | F>;
+ *  descending?: Array<Expression | F>;
+ * }, options?: Record<string, unknown>) => Promise<T>) & {
+ *  ascending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
+ *  descending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
+ * };
+ * ```
  */
 export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -717,7 +770,10 @@ export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type RootQueryCaller<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => T;
+ * ```
  */
 export const rootCallerQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -749,7 +805,10 @@ export const rootCallerQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type RootQueryCallerPromise<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => Promise<T>;
+ * ```
  */
 export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -783,7 +842,10 @@ export const rootCallerQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type SelectingQuery<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => T);
+ * ```
  */
 export const selectingQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -824,7 +886,10 @@ export const selectingQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type SelectingQueryPromise<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => Promise<T>);
+ * ```
  */
 export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
@@ -867,7 +932,19 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type WithQuery<U> = ReducedFunction & {
+ *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
+ *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
+ *  ronin: ReducedFunction & {
+ *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
+ *    createdBy: <T = U>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => T;
+ *    updatedAt: <T = U>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => T;
+ *    updatedBy: <T = U>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => T;
+ *  };
+ * };
+ * ```
  */
 export const withQueryType = factory.createTypeAliasDeclaration(
   undefined,
@@ -1000,7 +1077,19 @@ export const withQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
- * @todo(@nurodev): Add documentation
+ * @example
+ * ```ts
+ * type WithQueryPromise<U> = ReducedFunction & {
+ *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
+ *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
+ *  ronin: ReducedFunction & {
+ *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
+ *    createdBy: <T = U>(value: ResultRecord["ronin"]["createdBy"], options?: Record<string, unknown>) => Promise<T>;
+ *    updatedAt: <T = U>(value: ResultRecord["ronin"]["updatedAt"], options?: Record<string, unknown>) => Promise<T>;
+ *    updatedBy: <T = U>(value: ResultRecord["ronin"]["updatedBy"], options?: Record<string, unknown>) => Promise<T>;
+ *  };
+ * };
+ * ```
  */
 export const withQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
