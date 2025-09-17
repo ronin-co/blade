@@ -22,4 +22,7 @@ export default defineConfig({
     // using `global`, so we're aliasing it ourselves.
     global: 'globalThis',
   },
+  // Deno requires Node.js primitives to be imported with the `node:` prefix and certain
+  // dependencies that Blade uses don't do that, so we're aliasin them ourselves.
+  nodeProtocol: true,
 });
