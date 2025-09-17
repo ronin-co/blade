@@ -53,16 +53,18 @@
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {
+    "@dprint/typescript": "0.95.11",
+    "@inquirer/prompts": "7.8.6",
     "@stefanprobst/rehype-extract-toc": "3.0.0",
     "@tailwindcss/node": "4.1.6",
     "@tailwindcss/oxide": "4.1.6",
     "dotenv": "16.5.0",
     "gradient-string": "3.0.0",
+    "resolve-from": "5.0.0",
     "rolldown": "1.0.0-beta.32",
     "ronin": "6.8.0"
   },
   "devDependencies": {
-    "@dprint/typescript": "0.93.3",
     "@hono/node-server": "1.14.4",
     "@mdx-js/mdx": "3.0.1",
     "@types/async-retry": "1.4.8",
@@ -93,7 +95,6 @@
     "magic-string": "0.30.17",
     "ora": "8.1.0",
     "radash": "12.1.0",
-    "resolve-from": "5.0.0",
     "serialize-error": "11.0.3",
     "tsdown": "0.15.2",
     "typescript": "5.6.2",
