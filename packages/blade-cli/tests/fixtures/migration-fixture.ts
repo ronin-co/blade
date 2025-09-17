@@ -1,6 +1,6 @@
 import { create } from 'blade/schema';
 
-export default () => [
+export default [
   create.model({
     slug: 'user',
     fields: {

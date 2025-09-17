@@ -115,7 +115,7 @@ export class Protocol {
 
     return `${imports}
     
-export default () => [
+export default [
   ${this._roninQueries.map((query) => ` ${query}`).join(',\n')}
 ];`;
   };
