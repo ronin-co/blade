@@ -39,9 +39,9 @@ export class PageStream extends SSEStreamingApi {
     const { readable, writable } = new TransformStream();
     super(writable, readable);
 
-    // Clone the request (and drop the body from memory) since we will modify the headers,
-    // and runtimes like `workerd` don't allow modifying the incoming request.
-    const newRequest = new Request(request, { body: null });
+    // Create a fresh request with only the URL and headers, since we will modify the
+    // headers and runtimes like `workerd` don't allow that on the incoming request.
+    const newRequest = new Request(request.url, { headers: request.headers });
 
     // Remove meta headers from the incoming headers.
     Object.values(CUSTOM_HEADERS).forEach((header) => newRequest.headers.delete(header));
