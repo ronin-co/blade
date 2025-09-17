@@ -465,7 +465,7 @@ const invokeTriggers = async <T extends ResultRecord>(
     // If the trigger returned multiple queries that should be run after the original
     // query, we want to return those queries.
     if (triggerType === 'after') {
-      return { queries: await prepareQueries<T>(triggerResult, true) };
+      return { queries: await prepareQueries(triggerResult, true) };
     }
 
     // If the trigger returned a record (or multiple), we want to set the query's
@@ -564,6 +564,10 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   // Invoke `afterAdd`, `afterGet`, `afterSet`, `afterRemove`, and `afterCount`.
   await Promise.all(
     queryList.map(async (queryItem, index) => {
+      // If the query already has a result, it won't hit the database, so there is no
+      // need to collect additional queries that should run in the same transaction.
+      if (typeof queryItem.result !== 'undefined') return;
+
       const triggerResults = await invokeTriggers('after', queryItem, options);
       queryList.splice(index + 1, 0, ...(triggerResults?.queries || []));
     }),
@@ -636,6 +640,9 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   // and `resolvingCount`.
   await Promise.all(
     queryList.map(async (queryItem, index) => {
+      // If the query already has a result, we don't need to try and obtain one.
+      if (typeof queryItem.result !== 'undefined') return;
+
       const triggerResults = await invokeTriggers('resolving', queryItem, options);
       queryList[index].result = triggerResults.result as FormattedResults<T>[number];
     }),
