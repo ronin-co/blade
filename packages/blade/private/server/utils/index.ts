@@ -18,15 +18,13 @@ export const generateHashSync = (input: string): number => {
 };
 
 export class PageStream extends SSEStreamingApi {
-  /** The incoming url of the page that is being viewed. */
-  url: URL;
-  /** The incoming headers of the request that created the stream. */
-  readonly headers: Headers;
   /**
    * The time at which the last update was sent by the server (excludes revalidation).
    * If the value is `null`, no update was sent yet.
    */
   lastUpdate: Date | null = null;
+  /** The first request object provided by the client. */
+  request: Request;
   /** The first response object returned to the client. */
   readonly response: Response;
 
@@ -35,8 +33,7 @@ export class PageStream extends SSEStreamingApi {
 
     super(writable, readable);
 
-    this.url = page.url;
-    this.headers = page.headers;
+    this.request = new Request(page.url, { headers: page.headers });
 
     this.response = new Response(this.responseReadable, {
       headers: {
@@ -70,7 +67,9 @@ export class PageStream extends SSEStreamingApi {
     // need to update the session URL, because the client will terminate the stream in
     // that case anyways (that's just default browser behavior).
     const newURL = response.headers.get('Content-Location');
-    if (newURL) this.url = new URL(newURL, this.url);
+    if (newURL) {
+      this.request = new Request(new URL(newURL, this.request.url), this.request);
+    }
 
     return this.writeSSE({
       id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,

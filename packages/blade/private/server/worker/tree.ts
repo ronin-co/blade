@@ -445,8 +445,8 @@ export const flushSession = async (
     }
 
     const response = await renderReactTree(
-      stream.url,
-      stream.headers,
+      new URL(stream.request.url),
+      stream.request.headers,
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
