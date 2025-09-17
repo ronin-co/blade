@@ -1,26 +1,26 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`import a simple import statement 1`] = `
-"import { RONIN } from "ronin";
+"import { RONIN } from "blade/schema";
 "
 `;
 
 exports[`import a type import statement 1`] = `
-"import type { RONIN } from "ronin";
+"import type { RONIN } from "blade/schema";
 "
 `;
 
 exports[`import an import statement with individual type imports 1`] = `
-"import { type RONIN } from "ronin";
+"import { type RONIN } from "blade/schema";
 "
 `;
 
 exports[`import an import with multiple identifiers 1`] = `
-"import { Foo, Bar } from "ronin";
+"import { Foo, Bar } from "blade/schema";
 "
 `;
 
 exports[`import an import with mixed typed identifiers 1`] = `
-"import { Foo, type Bar } from "ronin";
+"import { Foo, type Bar } from "blade/schema";
 "
 `;

@@ -124,7 +124,7 @@ describe('protocol', () => {
 
     // Check the content of the first call to `fs.writeFileSync`
     const createFileContent = writeFileSpy.mock.calls[0][1] as string;
-    expect(createFileContent).toContain('import { create } from "ronin";');
+    expect(createFileContent).toContain('import { create } from "blade/schema";');
     expect(createFileContent).not.toContain('get');
     expect(createFileContent).not.toContain('set');
 
@@ -147,7 +147,9 @@ describe('protocol', () => {
 
     // Check the content of the first call to `fs.writeFileSync`
     const mixedFileContent = mixedWriteFileSpy.mock.calls[0][1] as string;
-    expect(mixedFileContent).toContain('import { create, get, set } from "ronin";');
+    expect(mixedFileContent).toContain(
+      'import { create, get, set } from "blade/schema";',
+    );
     expect(mixedFileContent).not.toContain('alter');
     expect(mixedFileContent).not.toContain('drop');
   });
@@ -168,7 +170,9 @@ describe('protocol', () => {
     createProtocol.save(fileName);
 
     const createFileContent = writeFileSpy.mock.calls[0][1] as string;
-    expect(createFileContent).toContain('import { add, create, get } from "ronin";');
+    expect(createFileContent).toContain(
+      'import { add, create, get } from "blade/schema";',
+    );
   });
 
   test('load specific migration file', async () => {

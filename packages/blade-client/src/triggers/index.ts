@@ -753,7 +753,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   }
 
   if (typeof process === 'undefined' && !waitUntil) {
-    let message = 'In the case that the "ronin" package receives a value for';
+    let message = 'In the case that the "blade-client" package receives a value for';
     message += ' its `triggers` option, it must also receive a value for its';
     message += ' `waitUntil` option. This requirement only applies when using';
     message += ' an edge runtime and ensures that the edge worker continues to';

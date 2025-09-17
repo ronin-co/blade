@@ -4,7 +4,7 @@
 [![code coverage](https://img.shields.io/codecov/c/github/ronin-co/cli)](https://codecov.io/github/ronin-co/cli)
 [![install size](https://packagephobia.com/badge?p=blade-cli)](https://packagephobia.com/result?p=blade-cli)
 
-This package exposes the `ronin` command, which you can run from your terminal to interact with [RONIN](https://ronin.co).
+This package exposes the `blade` command, which you can run from your terminal to interact with [RONIN](https://ronin.co).
 
 ## Setup
 
