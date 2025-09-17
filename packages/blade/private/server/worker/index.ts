@@ -8,7 +8,7 @@ import { Hono } from 'hono/tiny';
 import { router as projectRouter, triggers as triggerList } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
-import { PageStream } from '@/private/server/utils';
+import { ResponseStream } from '@/private/server/utils';
 import {
   getRoninOptions,
   getWaitUntil,
@@ -292,28 +292,13 @@ app.post('*', async (c) => {
     }
   }
 
-  const url = new URL(c.req.url);
-
-  // Clone the headers since we will modify them, and runtimes like `workerd` don't allow
-  // modifying the headers of the incoming request.
-  const headers = new Headers(c.req.raw.headers);
-
-  // Remove meta headers from the incoming headers.
-  Object.values(CUSTOM_HEADERS).forEach((header) => headers.delete(header));
-
-  c.header('Transfer-Encoding', 'chunked');
-  c.header('Content-Type', 'text/plain');
-  c.header('Cache-Control', 'no-cache, no-transform');
-  c.header('X-Accel-Buffering', 'no');
-
-  const { readable, writable } = new TransformStream();
-  const stream = new PageStream({ url, headers }, { writable, readable });
+  const stream = new ResponseStream(c.req.raw);
 
   flushSession(stream, correctBundle, { queries, repeat: subscribe });
 
-  const id = crypto.randomUUID();
-
   if (subscribe) {
+    const id = crypto.randomUUID();
+
     // Track the HMR session.
     globalThis.DEV_SESSIONS.set(id, stream);
 
@@ -323,7 +308,12 @@ app.post('*', async (c) => {
     });
   }
 
-  return c.newResponse(stream.responseReadable);
+  // Wait for the response to be populated with headers, then return it. We purposefully
+  // don't want to wait for the body to be ready, because we want to return the response
+  // as soon as possible.
+  await stream.headersReady;
+
+  return stream.response;
 });
 
 // Handle errors that occurred during the request lifecycle.

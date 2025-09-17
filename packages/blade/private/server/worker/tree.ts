@@ -20,7 +20,7 @@ import { RootServerContext, type ServerContext } from '@/private/server/context'
 import * as DefaultPage404 from '@/private/server/pages/404';
 import * as DefaultPage500 from '@/private/server/pages/500';
 import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
-import type { PageStream } from '@/private/server/utils';
+import type { ResponseStream } from '@/private/server/utils';
 import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 import { getWaitUntil, runQueries } from '@/private/server/utils/data';
@@ -408,7 +408,7 @@ const getCookieHeaders = (cookies: Collected['cookies'] = {}): Headers => {
  * the session continues to exist.
  */
 export const flushSession = async (
-  stream: PageStream,
+  stream: ResponseStream,
   correctBundle: boolean,
   options?: {
     queries?: Array<QueryItemWrite>;
@@ -445,8 +445,8 @@ export const flushSession = async (
     }
 
     const response = await renderReactTree(
-      stream.url,
-      stream.headers,
+      new URL(stream.request.url),
+      stream.request.headers,
       !correctBundle,
       {
         waitUntil: getWaitUntil(),
@@ -470,21 +470,8 @@ export const flushSession = async (
     // Track the time of the current manual update.
     if (options?.queries) stream.lastUpdate = new Date();
 
-    // If the URL of the page changed while it was rendered (for example because of a
-    // redirect), we have to update the session URL accordingly.
-    //
-    // In the case that an initial redirect (`Location` header) was performed, we don't
-    // need to update the session URL, because the client will terminate the stream in
-    // that case anyways (that's just default browser behavior).
-    const newURL = response.headers.get('Content-Location');
-    if (newURL) stream.url = new URL(newURL, stream.url);
-
     // Afterward, flush the update over the stream.
-    await stream.writeSSE({
-      id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,
-      event: correctBundle ? 'update' : 'update-bundle',
-      data: response.text(),
-    });
+    await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
     // error, since that would also prevent the repeated update later on.
