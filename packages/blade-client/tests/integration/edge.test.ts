@@ -4,7 +4,7 @@ import createSyntaxFactory from '@/src/index';
 import { runQueriesWithTriggers } from '@/src/triggers';
 
 describe('edge runtime', () => {
-  test('invoke `ronin` from an edge runtime without passing a token', async () => {
+  test('invoke from an edge runtime without passing a token', async () => {
     let error: Error | undefined;
 
     // Simulate a web runtime.
@@ -31,7 +31,7 @@ describe('edge runtime', () => {
     );
   });
 
-  test('invoke `ronin` from an edge runtime without `waitUntil` set', async () => {
+  test('invoke from an edge runtime without `waitUntil` set', async () => {
     let error: Error | undefined;
 
     // Simulate a web runtime.
@@ -56,11 +56,11 @@ describe('edge runtime', () => {
     global.process = oldProcess;
 
     expect(error?.message).toMatch(
-      `In the case that the "ronin" package receives a value for its \`triggers\` option, it must also receive a value for its \`waitUntil\` option. This requirement only applies when using an edge runtime and ensures that the edge worker continues to execute until all "following" triggers have been executed.`,
+      `In the case that the "blade-client" package receives a value for its \`triggers\` option, it must also receive a value for its \`waitUntil\` option. This requirement only applies when using an edge runtime and ensures that the edge worker continues to execute until all "following" triggers have been executed.`,
     );
   });
 
-  test('invoke `ronin` from an edge runtime with `waitUntil` set', async () => {
+  test('invoke from an edge runtime with `waitUntil` set', async () => {
     const queries = [
       {
         add: { account: { with: { handle: 'leo' } } },
@@ -121,7 +121,7 @@ describe('edge runtime', () => {
     expect(triggerInvocationHappened).toHaveBeenCalled();
   });
 
-  test('invoke `ronin` from an edge runtime with `waitUntil` set and error being thrown', async () => {
+  test('invoke from an edge runtime with `waitUntil` set and error being thrown', async () => {
     const queries = [
       {
         add: { account: { with: { handle: 'leo' } } },
@@ -173,7 +173,7 @@ describe('edge runtime', () => {
     expect(promisesToAwait[0]).rejects.toThrow(errorText);
   });
 
-  test('invoke `ronin` from an edge runtime with `waitUntil` set and ensure hidden result', async () => {
+  test('invoke from an edge runtime with `waitUntil` set and ensure hidden result', async () => {
     const queries = [
       {
         add: { account: { with: { handle: 'leo' } } },

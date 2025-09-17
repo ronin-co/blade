@@ -1,4 +1,4 @@
-import { create } from 'ronin';
+import { create } from 'blade/schema';
 
 export default () => [
   create.model({

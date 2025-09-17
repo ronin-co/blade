@@ -93,7 +93,7 @@ export const run = async (config: { version: string }): Promise<void> => {
   }
 
   // If no matching flags or commands were found, render the help, since we don't want to
-  // use the main `ronin` command for anything yet.
+  // use the main `blade` command for anything yet.
   return printHelp();
 };
 

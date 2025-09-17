@@ -7,7 +7,7 @@ import { $ } from 'bun';
 describe('CLI Integration Tests', () => {
   let tempDir: string;
   let originalDir: string;
-  const CLI_PATH = path.resolve(process.cwd(), 'tests/fixtures/cli.ts');
+  const CLI_PATH = path.resolve(__dirname, 'fixtures/cli.ts');
 
   beforeEach(async () => {
     // Save original directory to return to it later

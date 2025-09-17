@@ -11,7 +11,7 @@ import {
   set,
   sql,
   sqlBatch,
-} from 'ronin';
+} from 'blade-client';
 
 import {
   convertWhereClause,
@@ -22,7 +22,7 @@ import {
 } from '@/transform';
 
 import type { Adapter, AdapterInstance } from 'better-auth/types';
-import type { createSyntaxFactory } from 'ronin';
+import type { createSyntaxFactory } from 'blade-client';
 import type { ResultRecordBase } from 'blade-compiler';
 
 type SyntaxFactory = ReturnType<typeof createSyntaxFactory>;
@@ -36,7 +36,7 @@ type SyntaxFactory = ReturnType<typeof createSyntaxFactory>;
  *
  * @example
  * ```ts
- * import { ronin } from '@ronin/better-auth';
+ * import { ronin } from 'blade-better-auth';
  * import { betterAuth } from 'better-auth';
  *
  * const auth = betterAuth({
@@ -46,8 +46,8 @@ type SyntaxFactory = ReturnType<typeof createSyntaxFactory>;
  *
  * @example
  * ```ts
- * import { ronin } from '@ronin/better-auth';
- * import { createSyntaxFactory } from 'ronin';
+ * import { ronin } from 'blade-better-auth';
+ * import { createSyntaxFactory } from 'blade-client';
  * import { betterAuth } from 'better-auth';
  *
  * const client = createSyntaxFactory({

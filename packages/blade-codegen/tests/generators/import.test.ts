@@ -6,7 +6,7 @@ import { printNodes } from '@/src/utils/print';
 
 // Note: We need to `JSON.stringify` the module name to ensure that the
 // module name is wrapped in quotes for the import statement.
-const roninModuleIdentifier = factory.createIdentifier(JSON.stringify('ronin'));
+const roninModuleIdentifier = factory.createIdentifier(JSON.stringify('blade/schema'));
 const roninNamespaceIdentifier = factory.createIdentifier('RONIN');
 
 describe('import', () => {

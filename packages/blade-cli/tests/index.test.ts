@@ -69,7 +69,7 @@ describe('CLI', () => {
 
   describe('misc', () => {
     test('should break arg parse', async () => {
-      process.argv = ['bun', 'ronin', '--invalid-flag'];
+      process.argv = ['bun', 'blade', '--invalid-flag'];
       const exitSpy = spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit called');
       });
@@ -89,7 +89,7 @@ describe('CLI', () => {
     });
 
     test('should handle SIGINT gracefully', async () => {
-      process.argv = ['bun', 'ronin'];
+      process.argv = ['bun', 'blade'];
       const exitSpy = spyOn(process, 'exit').mockImplementation(() => 'Exited' as never);
 
       try {
@@ -106,7 +106,7 @@ describe('CLI', () => {
     });
 
     test('should handle SIGTERM gracefully', async () => {
-      process.argv = ['bun', 'ronin'];
+      process.argv = ['bun', 'blade'];
       const exitSpy = spyOn(process, 'exit').mockImplementation(() => 'Exited' as never);
 
       try {
@@ -123,7 +123,7 @@ describe('CLI', () => {
     });
 
     test('should exit when running in non-interactive shell without app token', async () => {
-      process.argv = ['bun', 'ronin'];
+      process.argv = ['bun', 'blade'];
       process.stdout.isTTY = false;
       const exitSpy = spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit called');
@@ -139,7 +139,7 @@ describe('CLI', () => {
 
   describe('help', () => {
     test('should print help when --help flag is provided', async () => {
-      process.argv = ['bun', 'ronin', '--help'];
+      process.argv = ['bun', 'blade', '--help'];
       const helpSpy = spyOn(infoModule, 'printHelp');
 
       await run({ version: '1.0.0' });
@@ -151,7 +151,7 @@ describe('CLI', () => {
     });
 
     test('should print version when --version flag is provided', async () => {
-      process.argv = ['bun', 'ronin', '--version'];
+      process.argv = ['bun', 'blade', '--version'];
       const versionSpy = spyOn(infoModule, 'printVersion');
 
       await run({ version: '1.0.0' });
@@ -161,7 +161,7 @@ describe('CLI', () => {
     });
 
     test('should print help when no command is provided', async () => {
-      process.argv = ['bun', 'ronin'];
+      process.argv = ['bun', 'blade'];
       const helpSpy = spyOn(infoModule, 'printHelp');
 
       await run({ version: '1.0.0' });
@@ -176,7 +176,7 @@ describe('CLI', () => {
   describe('starter', () => {
     describe('init', () => {
       test.skip('diff and apply', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--apply'];
+        process.argv = ['bun', 'blade', 'diff', '--apply'];
 
         // Mock models
         spyOn(modelModule, 'getModels').mockResolvedValue([
@@ -200,7 +200,7 @@ describe('CLI', () => {
           (path) => !path.toString().includes('.ronin/db.sqlite'),
         );
         spyOn(path, 'resolve').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
 
         // Mock fetch
@@ -267,13 +267,13 @@ describe('CLI', () => {
         (path) => !path.toString().includes('.ronin/db.sqlite'),
       );
       spyOn(path, 'resolve').mockReturnValue(
-        path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+        path.join(__dirname, 'fixtures/migration-fixture.ts'),
       );
     };
 
     describe('diff', () => {
       test('should fail if no schema file is provided', async () => {
-        process.argv = ['bun', 'ronin', 'diff'];
+        process.argv = ['bun', 'blade', 'diff'];
 
         await run({ version: '1.0.0' });
 
@@ -298,7 +298,7 @@ describe('CLI', () => {
       });
 
       test('no changes detected', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--debug'];
+        process.argv = ['bun', 'blade', 'diff', '--debug'];
 
         spyOn(modelModule, 'getModels').mockResolvedValue([
           {
@@ -334,16 +334,21 @@ describe('CLI', () => {
       });
 
       test('changes detected', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--sql'];
+        process.argv = ['bun', 'blade', 'diff', '--sql'];
         setupMigrationTest();
 
         await run({ version: '1.0.0' });
+
+        console.error(stderrSpy.mock.calls);
 
         expect(
           stderrSpy.mock.calls.some(
             (call) => typeof call[0] === 'string' && call[0].includes('Comparing models'),
           ),
         ).toBe(true);
+
+        console.error(stderrSpy.mock.calls);
+
         expect(
           stderrSpy.mock.calls.some(
             (call) =>
@@ -354,7 +359,7 @@ describe('CLI', () => {
       });
 
       test.skip('diff with apply flag', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--apply'];
+        process.argv = ['bun', 'blade', 'diff', '--apply'];
         setupMigrationTest();
 
         // Mock fetch
@@ -387,7 +392,7 @@ describe('CLI', () => {
       });
 
       test.skip('diff with multiple flags', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--apply'];
+        process.argv = ['bun', 'blade', 'diff', '--apply'];
         setupMigrationTest();
 
         spyOn(global, 'fetch').mockResolvedValue({
@@ -419,10 +424,12 @@ describe('CLI', () => {
       });
 
       test('force-create flag', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--force-create'];
+        process.argv = ['bun', 'blade', 'diff', '--force-create'];
         setupMigrationTest();
 
         await run({ version: '1.0.0' });
+
+        console.error(writeFileSyncSpy.mock.calls);
 
         expect(writeFileSyncSpy.mock.calls[0][1]).toContain(
           `create.model({ slug: \"user\", fields: { name: { type: \"string\" }, age: { type: \"number\" } } })`,
@@ -430,7 +437,7 @@ describe('CLI', () => {
       });
 
       test('force-create flag with apply flag', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--force-create', '--apply'];
+        process.argv = ['bun', 'blade', 'diff', '--force-create', '--apply'];
         setupMigrationTest();
 
         try {
@@ -444,18 +451,20 @@ describe('CLI', () => {
       });
 
       test('force-drop flag', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--force-drop'];
+        process.argv = ['bun', 'blade', 'diff', '--force-drop'];
         setupMigrationTest();
 
         await run({ version: '1.0.0' });
 
+        console.error(writeFileSyncSpy.mock.calls);
+
         expect(writeFileSyncSpy.mock.calls[0][1]).toContain(
-          `import { drop } from \"ronin\";\n\nexport default () => [\n  drop.model(\"user\"),\n];\n`,
+          `import { drop } from \"blade/schema\";\n\nexport default () => [\n  drop.model(\"user\"),\n];\n`,
         );
       });
 
       test('force-drop flag with force-create flag', async () => {
-        process.argv = ['bun', 'ronin', 'diff', '--force-drop', '--force-create'];
+        process.argv = ['bun', 'blade', 'diff', '--force-drop', '--force-create'];
         setupMigrationTest();
 
         try {
@@ -469,7 +478,7 @@ describe('CLI', () => {
       });
 
       test('diff with same diff as latest migration and cancel', async () => {
-        process.argv = ['bun', 'ronin', 'diff'];
+        process.argv = ['bun', 'blade', 'diff'];
         setupMigrationTest({
           modelDiff: [],
           modelDefinitions: [
@@ -483,11 +492,13 @@ describe('CLI', () => {
         // @ts-expect-error This is a mock.
         spyOn(fs, 'readdirSync').mockReturnValue(['migration-fixture.ts']);
         spyOn(path, 'join').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
         spyOn(confirmModule, 'confirm').mockResolvedValue(false);
 
         await run({ version: '1.0.0' });
+
+        console.error(stderrSpy.mock.calls);
 
         expect(
           stderrSpy.mock.calls.some(
@@ -499,7 +510,7 @@ describe('CLI', () => {
       });
 
       test('diff with same diff as latest migration and create', async () => {
-        process.argv = ['bun', 'ronin', 'diff'];
+        process.argv = ['bun', 'blade', 'diff'];
         setupMigrationTest({
           modelDiff: [],
           modelDefinitions: [
@@ -513,12 +524,13 @@ describe('CLI', () => {
         // @ts-expect-error This is a mock.
         spyOn(fs, 'readdirSync').mockReturnValue(['migration-fixture.ts']);
         spyOn(path, 'join').mockReturnValueOnce(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
         spyOn(confirmModule, 'confirm').mockResolvedValue(true);
         spyOn(Math, 'max').mockReturnValue(1);
 
         await run({ version: '1.0.0' });
+        console.error(stderrSpy.mock.calls);
         expect(writeFileSyncSpy.mock.calls[0][0]).toContain('migration-0002.ts');
         expect(
           stderrSpy.mock.calls.some(
@@ -532,7 +544,7 @@ describe('CLI', () => {
 
     describe('apply', () => {
       test.skip('invalid token', async () => {
-        process.argv = ['bun', 'ronin', 'apply'];
+        process.argv = ['bun', 'blade', 'apply'];
 
         await run({ version: '1.0.0' });
 
@@ -553,7 +565,7 @@ describe('CLI', () => {
       });
 
       test.skip('apply migration', async () => {
-        process.argv = ['bun', 'ronin', 'apply'];
+        process.argv = ['bun', 'blade', 'apply'];
 
         spyOn(modelModule, 'getModels').mockResolvedValue([
           {
@@ -573,7 +585,7 @@ describe('CLI', () => {
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
 
         await run({ version: '1.0.0' });
@@ -595,7 +607,7 @@ describe('CLI', () => {
       });
 
       test('apply migration without migrations directory', async () => {
-        process.argv = ['bun', 'ronin', 'apply'];
+        process.argv = ['bun', 'blade', 'apply'];
 
         spyOn(modelModule, 'getModels').mockResolvedValue([
           {
@@ -623,7 +635,7 @@ describe('CLI', () => {
       });
 
       test.skip('should handle network errors when applying migration', async () => {
-        process.argv = ['bun', 'ronin', 'apply'];
+        process.argv = ['bun', 'blade', 'apply'];
 
         spyOn(global, 'fetch').mockImplementation(() => {
           throw new Error('Network error');
@@ -638,7 +650,7 @@ describe('CLI', () => {
       });
 
       test.skip('skip generating types', async () => {
-        process.argv = ['bun', 'ronin', 'apply', '--skip-types'];
+        process.argv = ['bun', 'blade', 'apply', '--skip-types'];
 
         spyOn(modelModule, 'getModels').mockResolvedValue([
           {
@@ -658,7 +670,7 @@ describe('CLI', () => {
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
-          path.join(process.cwd(), 'tests/fixtures/migration-fixture.ts'),
+          path.join(__dirname, 'fixtures/migration-fixture.ts'),
         );
 
         await run({ version: '1.0.0' });
@@ -690,7 +702,7 @@ describe('CLI', () => {
       });
 
       test('try to apply with non-existent migration file', async () => {
-        process.argv = ['bun', 'ronin', 'apply'];
+        process.argv = ['bun', 'blade', 'apply'];
 
         spyOn(fs, 'existsSync').mockReturnValue(false);
 
@@ -730,7 +742,7 @@ describe('CLI', () => {
 
   describe('types', () => {
     test('should throw with an invalid token', async () => {
-      process.argv = ['bun', 'ronin', 'types'];
+      process.argv = ['bun', 'blade', 'types'];
 
       await run({ version: '1.0.0' });
 
@@ -743,7 +755,7 @@ describe('CLI', () => {
     });
 
     test('generate zod schema', async () => {
-      process.argv = ['bun', 'ronin', 'types', '--zod'];
+      process.argv = ['bun', 'blade', 'types', '--zod'];
 
       spyOn(modelModule, 'getModels').mockResolvedValue([
         {
@@ -773,7 +785,7 @@ describe('CLI', () => {
     });
 
     test.skip('should handle network errors when generating types', async () => {
-      process.argv = ['bun', 'ronin', 'types'];
+      process.argv = ['bun', 'blade', 'types'];
 
       spyOn(global, 'fetch').mockImplementation(() => {
         throw new Error('Network error');
@@ -788,7 +800,7 @@ describe('CLI', () => {
     });
 
     test.skip('should handle network errors when generating zod schemas', async () => {
-      process.argv = ['bun', 'ronin', 'types', '--zod'];
+      process.argv = ['bun', 'blade', 'types', '--zod'];
 
       spyOn(global, 'fetch').mockImplementation(() => {
         throw new Error('Network error');
@@ -805,7 +817,7 @@ describe('CLI', () => {
 
   describe('pull', () => {
     test('pulled model are up to date', async () => {
-      process.argv = ['bun', 'ronin', 'pull'];
+      process.argv = ['bun', 'blade', 'pull'];
 
       await run({ version: '1.0.0' });
 
