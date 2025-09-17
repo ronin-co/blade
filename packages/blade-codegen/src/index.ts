@@ -33,7 +33,7 @@ import { generateNamespaces } from '@/src/generators/namespaces';
 import { printNodes } from '@/src/utils/print';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { Node } from 'typescript';
+import type { Node, TypeAliasDeclaration } from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
@@ -72,13 +72,6 @@ export const generate = (models: Array<Model>): string => {
     }),
   );
 
-  // If there is any models that have a `link()` field, we need to add the
-  // `ResolveSchemaType` type.
-  const hasLinkFields = models.some((model) =>
-    Object.values(model.fields).some((field) => field.type === 'link'),
-  );
-  if (hasLinkFields) nodes.push(resolveSchemaType);
-
   const hasJsonFields = models.some((model) =>
     Object.values(model.fields).some((field) => field.type === 'json'),
   );
@@ -110,6 +103,32 @@ export const generate = (models: Array<Model>): string => {
     ),
   );
 
+  const utilsNamespaceStatements = new Array<TypeAliasDeclaration>(
+    afterQueryType,
+    afterQueryPromiseType,
+    beforeQueryType,
+    beforeQueryPromiseType,
+    includingQueryType,
+    includingQueryPromiseType,
+    limitedToQueryType,
+    limitedToQueryPromiseType,
+    orderedByQueryType,
+    orderedByQueryPromiseType,
+    rootCallerQueryType,
+    rootCallerQueryPromiseType,
+    selectingQueryType,
+    selectingQueryPromiseType,
+    withQueryType,
+    withQueryPromiseType,
+  );
+
+  // If there is any models that have a `link()` field, we need to add the
+  // `ResolveSchemaType` type.
+  const hasLinkFields = models.some((model) =>
+    Object.values(model.fields).some((field) => field.type === 'link'),
+  );
+  if (hasLinkFields) utilsNamespaceStatements.push(resolveSchemaType);
+
   /**
    * ```ts
    * declare namespace Utils {
@@ -121,24 +140,7 @@ export const generate = (models: Array<Model>): string => {
     factory.createModuleDeclaration(
       [factory.createModifier(SyntaxKind.DeclareKeyword)],
       identifiers.namespace.utils.name,
-      factory.createModuleBlock([
-        afterQueryType,
-        afterQueryPromiseType,
-        beforeQueryType,
-        beforeQueryPromiseType,
-        includingQueryType,
-        includingQueryPromiseType,
-        limitedToQueryType,
-        limitedToQueryPromiseType,
-        orderedByQueryType,
-        orderedByQueryPromiseType,
-        rootCallerQueryType,
-        rootCallerQueryPromiseType,
-        selectingQueryType,
-        selectingQueryPromiseType,
-        withQueryType,
-        withQueryPromiseType,
-      ]),
+      factory.createModuleBlock(utilsNamespaceStatements),
       NodeFlags.Namespace,
     ),
   );
