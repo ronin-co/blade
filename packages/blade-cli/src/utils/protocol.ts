@@ -158,7 +158,7 @@ export default [
 
     const queries = await import(filePath);
 
-    this._queries = queries.map((query: { structure: Query }) => query.structure);
+    this._queries = queries.default.map((query: { structure: Query }) => query.structure);
 
     return this;
   };
