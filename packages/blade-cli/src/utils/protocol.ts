@@ -9,7 +9,7 @@ import {
   type Statement,
   Transaction,
 } from 'blade-compiler';
-import { getBatchProxy, getSyntaxProxy } from 'blade-syntax/queries';
+import { getSyntaxProxy } from 'blade-syntax/queries';
 
 /**
  * Protocol represents a set of database migration queries that can be executed in sequence.
@@ -158,9 +158,7 @@ export default [
 
     const queries = await import(filePath);
 
-    const queryObjects = getBatchProxy(() => queries.default());
-
-    this._queries = queryObjects.map((query: { structure: Query }) => query.structure);
+    this._queries = queries.map((query: { structure: Query }) => query.structure);
 
     return this;
   };
