@@ -529,7 +529,12 @@ export const applySyncTriggers = async <T extends ResultRecord>(
       try {
         triggerResults = await invokeTriggers('during', queryItem, options);
       } catch (err) {
-        if (err instanceof InvalidPermissionsError) {
+        const queryType = Object.keys(queryItem.query)[0] as QueryType;
+
+        // If a read query is being performed and a `InvalidPermissionsError` was
+        // returned by a trigger, we want to set its result to `null`, since read queries
+        // (`use` hooks) in Blade aren't supposed to throw errors.
+        if (queryType === 'get' && err instanceof InvalidPermissionsError) {
           queries[index].result = null;
           return;
         }
