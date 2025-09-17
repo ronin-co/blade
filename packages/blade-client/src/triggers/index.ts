@@ -570,7 +570,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
     queries.map(async (queryItem, index) => {
       // If the query already has a result, it won't hit the database, so there is no
       // need to collect additional queries that should run in the same transaction.
-      if (typeof queryItem.result !== 'undefined') return;
+      if (queryItem.result !== EMPTY) return;
 
       const triggerResults = await invokeTriggers('after', queryItem, options);
       queries.splice(index + 1, 0, ...(triggerResults?.queries || []));
@@ -641,7 +641,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
   await Promise.all(
     queries.map(async (queryItem, index) => {
       // If the query already has a result, we don't need to try and obtain one.
-      if (typeof queryItem.result !== 'undefined') return;
+      if (queryItem.result !== EMPTY) return;
 
       const triggerResults = await invokeTriggers('resolving', queryItem, options);
       queries[index].result = triggerResults.result as FormattedResults<T>[number];
