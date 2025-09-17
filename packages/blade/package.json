@@ -23,7 +23,6 @@
   "exports": {
     "./client/*": "./dist/public/client/*.js",
     "./server/*": "./dist/public/server/*.js",
-    "./server/utils/*": "./dist/public/server/utils/*.js",
     "./hooks": "./dist/public/universal/hooks.js",
     "./schema": "./dist/public/universal/schema.js",
     "./types": "./dist/public/universal/types.js"

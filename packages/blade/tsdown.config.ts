@@ -15,7 +15,16 @@ export default defineConfig({
   format: 'esm',
   clean: true,
   dts: { resolve: true },
-  external: ['server-list', 'client-list', 'react', 'react-dom', 'typescript'],
+  external: [
+    'server-list',
+    'client-list',
+    'react',
+    'react/jsx-runtime',
+    'react-dom',
+    'react-dom/client',
+    'react-dom/server.browser',
+    'typescript',
+  ],
   treeshake: true,
   define: {
     // Deno does not support `global` and certain dependencies that Blade uses are
