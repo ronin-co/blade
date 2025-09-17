@@ -305,9 +305,9 @@ app.post('*', async (c) => {
 
   flushSession(stream, correctBundle, { queries, repeat: subscribe });
 
-  const id = crypto.randomUUID();
-
   if (subscribe) {
+    const id = crypto.randomUUID();
+
     // Track the HMR session.
     globalThis.DEV_SESSIONS.set(id, stream);
 
