@@ -564,7 +564,7 @@ export const generate = (models: Array<Model>): string => {
                           /**
                            * @example
                            * ```ts
-                           * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                           * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
                            * ```
                            */
                           const singularProperty = factory.createPropertySignature(
@@ -629,7 +629,7 @@ export const generate = (models: Array<Model>): string => {
                           /**
                            * @example
                            * ```ts
-                           * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                           * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
                            * ```
                            */
                           const pluralProperty = factory.createPropertySignature(
@@ -723,7 +723,7 @@ export const generate = (models: Array<Model>): string => {
                           /**
                            * @example
                            * ```ts
-                           * user: ReducedFunction & UserSyntax.Singular.RootQueryCaller & { ... };
+                           * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
                            * ```
                            */
                           const singularProperty = factory.createPropertySignature(
@@ -788,7 +788,7 @@ export const generate = (models: Array<Model>): string => {
                           /**
                            * @example
                            * ```ts
-                           * users: ReducedFunction & UserSyntax.Plural.RootQueryCaller & { ... };
+                           * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
                            * ```
                            */
                           const pluralProperty = factory.createPropertySignature(

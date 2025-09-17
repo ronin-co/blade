@@ -14,11 +14,13 @@ import type { Model } from '@/src/types/model';
  *
  * @example
  * ```ts
- * declare namespace UserSyntax {
- *  type FieldSlug = 'id' | '...';
+ * declare namespace Syntax {
+ *  namespace User {
+ *    type FieldSlug = 'id' | '...';
  *
- *  namespace Singular { ... }
- *  namespace Plural { ... }
+ *    namespace Singular { ... }
+ *    namespace Plural { ... }
+ *  }
  * }
  * ```
  *
