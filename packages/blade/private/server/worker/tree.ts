@@ -480,11 +480,7 @@ export const flushSession = async (
     if (newURL) stream.url = new URL(newURL, stream.url);
 
     // Afterward, flush the update over the stream.
-    await stream.writeSSE({
-      id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,
-      event: correctBundle ? 'update' : 'update-bundle',
-      data: response.text(),
-    });
+    await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
     // error, since that would also prevent the repeated update later on.

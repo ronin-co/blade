@@ -47,4 +47,26 @@ export class PageStream extends SSEStreamingApi {
       },
     });
   }
+
+  /**
+   * Consumes a `Response`, which is converted into a chunk on the current stream.
+   *
+   * @param type - The type of chunk that should be sent.
+   * @param response - The response that should be consumed.
+   *
+   * @returns A `Promise` that will resolve once the chunk has been flushed.
+   */
+  writeChunk(type: 'update' | 'update-bundle', response: Response) {
+    // Migrate the headers to the final response.
+    for (const headerKey in response.headers) {
+      const headerValue = response.headers.get(headerKey);
+      this.response.headers.set(headerKey, headerValue!);
+    }
+
+    return this.writeSSE({
+      id: `${crypto.randomUUID()}-${import.meta.env.__BLADE_BUNDLE_ID}`,
+      event: type,
+      data: response.text(),
+    });
+  }
 }
