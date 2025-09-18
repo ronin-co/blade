@@ -19,6 +19,7 @@ import type {
   RecursivePartial,
 } from '@/src/types/utils';
 import { InvalidPermissionsError } from '@/src/utils';
+// import { InvalidPermissionsError } from '@/src/utils';
 import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { ClientError } from '@/src/utils/errors';
 import { omit, toDashCase } from '@/src/utils/helpers';
@@ -418,20 +419,37 @@ const invokeTriggers = async <T extends ResultRecord>(
             })
           : (result as Array<Query>);
 
-      const list = queries.map(
-        async (query): Promise<QueryFromTrigger<T> | Array<QueryFromTrigger<T>>> => {
-          const newQuery: QueryFromTrigger<T> = {
-            query,
-            database,
-            parentTrigger: currentTrigger,
-            result: EMPTY,
-          };
+      if (applyTriggers) {
+        console.log('BEEFORE FOR APPLIED LIST', JSON.stringify(queries, null, 2));
+      }
 
-          return applyTriggers ? await applySyncTriggers([newQuery], options) : newQuery;
-        },
-      );
+      const list = queries.map((query) => {
+        const newQuery: any = {
+          query,
+          database,
+          parentTrigger: currentTrigger,
+          result: definition.result,
+        };
+        // console.log('RESULT', definition.result)
+        //           console.log('ITEMS', JSON.stringify(newQuery, null, 2))
 
-      return (await Promise.all(list)).flat();
+        return applyTriggers ? applySyncTriggers([newQuery], options) : newQuery;
+      });
+
+      let final;
+
+      try {
+        final = (await Promise.all(list)).flat();
+      } catch (err) {
+        console.log('LOG ERR', err);
+        throw err;
+      }
+
+      if (applyTriggers) {
+        console.log('APPLIED LIST', JSON.stringify(final, null, 2));
+      }
+
+      return final;
     };
 
     // If the trigger returned multiple queries that should be run before the original
@@ -551,7 +569,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
 
       // If "during" triggers are required for the query type of the current query,
       // we want to throw an error to prevent the query from being executed.
-      if (requireTriggers) {
+      if (requireTriggers && !queryItem.parentTrigger) {
         const queryType = Object.keys(queryItem.query)[0] as QueryType;
         const requiredTypes: ReadonlyArray<QueryType> =
           requireTriggers === 'read'
@@ -748,7 +766,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   // If no triggers were provided, we can just run all the queries and return the results.
   if (!triggers) {
-    if (requireTriggers) throw triggerError;
+    if (requireTriggers && !options.parentTrigger) throw triggerError;
     return runQueries<T>(queries, options);
   }
 
