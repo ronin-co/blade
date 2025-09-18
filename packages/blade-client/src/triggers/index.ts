@@ -424,7 +424,7 @@ const invokeTriggers = async <T extends ResultRecord>(
             query,
             database,
             parentTrigger: currentTrigger,
-            result: EMPTY,
+            result: definition.result,
           };
 
           return applyTriggers ? await applySyncTriggers([newQuery], options) : newQuery;
@@ -551,7 +551,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
 
       // If "during" triggers are required for the query type of the current query,
       // we want to throw an error to prevent the query from being executed.
-      if (requireTriggers) {
+      if (requireTriggers && !queryItem.parentTrigger) {
         const queryType = Object.keys(queryItem.query)[0] as QueryType;
         const requiredTypes: ReadonlyArray<QueryType> =
           requireTriggers === 'read'
@@ -748,7 +748,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   // If no triggers were provided, we can just run all the queries and return the results.
   if (!triggers) {
-    if (requireTriggers) throw triggerError;
+    if (requireTriggers && !options.parentTrigger) throw triggerError;
     return runQueries<T>(queries, options);
   }
 
