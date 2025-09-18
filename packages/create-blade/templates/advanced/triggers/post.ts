@@ -1,4 +1,4 @@
-import { MultipleWithInstructionsError } from 'blade/server/utils/errors';
+import { MultipleWithInstructionsError } from 'blade/server/errors';
 
 import type { ResolvingAddTrigger, ResolvingGetTrigger } from 'blade/types';
 
