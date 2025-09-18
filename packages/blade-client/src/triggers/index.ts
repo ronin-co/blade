@@ -423,18 +423,18 @@ const invokeTriggers = async <T extends ResultRecord>(
         console.log('BEEFORE FOR APPLIED LIST', JSON.stringify(queries, null, 2));
       }
 
-      const list = queries.map((query) => {
-        const newQuery: any = {
-          query,
-          database,
-          parentTrigger: currentTrigger,
-          result: definition.result,
-        };
-        // console.log('RESULT', definition.result)
-        //           console.log('ITEMS', JSON.stringify(newQuery, null, 2))
+      const list = queries.map(
+        async (query): Promise<QueryFromTrigger<T> | Array<QueryFromTrigger<T>>> => {
+          const newQuery: QueryFromTrigger<T> = {
+            query,
+            database,
+            parentTrigger: currentTrigger,
+            result: definition.result,
+          };
 
-        return applyTriggers ? applySyncTriggers([newQuery], options) : newQuery;
-      });
+          return applyTriggers ? await applySyncTriggers([newQuery], options) : newQuery;
+        },
+      );
 
       let final;
 
@@ -443,10 +443,6 @@ const invokeTriggers = async <T extends ResultRecord>(
       } catch (err) {
         console.log('LOG ERR', err);
         throw err;
-      }
-
-      if (applyTriggers) {
-        console.log('APPLIED LIST', JSON.stringify(final, null, 2));
       }
 
       return final;

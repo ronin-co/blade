@@ -75,8 +75,6 @@ export const getCookieSetter = <T>(serverContext: ServerContext): SetCookie<T> =
       ...cookieSettings,
     };
 
-    console.log('SETTER CALLED', collected.cookies);
-
     // Make the cookie available in the current list.
     cookies[name] = value as string;
   };
