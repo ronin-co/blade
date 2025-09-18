@@ -431,16 +431,7 @@ const invokeTriggers = async <T extends ResultRecord>(
         },
       );
 
-      let final;
-
-      try {
-        final = (await Promise.all(list)).flat();
-      } catch (err) {
-        console.log('LOG ERR', err);
-        throw err;
-      }
-
-      return final;
+      return (await Promise.all(list)).flat();
     };
 
     // If the trigger returned multiple queries that should be run before the original
