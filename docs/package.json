@@ -33,6 +33,7 @@
     "@biomejs/biome": "1.9.4",
     "@tailwindcss/typography": "0.5.16",
     "@types/react": "19.1.4",
-    "@types/react-dom": "19.1.5"
+    "@types/react-dom": "19.1.5",
+    "typescript": "5.9.2"
   }
 }
