@@ -19,7 +19,6 @@ import type {
   RecursivePartial,
 } from '@/src/types/utils';
 import { InvalidPermissionsError } from '@/src/utils';
-// import { InvalidPermissionsError } from '@/src/utils';
 import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { ClientError } from '@/src/utils/errors';
 import { omit, toDashCase } from '@/src/utils/helpers';
@@ -418,10 +417,6 @@ const invokeTriggers = async <T extends ResultRecord>(
               return item.structure;
             })
           : (result as Array<Query>);
-
-      if (applyTriggers) {
-        console.log('BEEFORE FOR APPLIED LIST', JSON.stringify(queries, null, 2));
-      }
 
       const list = queries.map(
         async (query): Promise<QueryFromTrigger<T> | Array<QueryFromTrigger<T>>> => {
