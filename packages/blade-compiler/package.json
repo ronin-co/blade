@@ -14,7 +14,8 @@
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "bun test",
-    "build": "tsdown ./src/index.ts --dts --format esm"
+    "build": "tsdown",
+    "dev": "tsdown --watch"
   },
   "keywords": [
     "query",

@@ -1,9 +1,7 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  dts: {
-    resolve: true,
-  },
+  dts: true,
   entry: {
     index: 'src/index.ts',
   },
