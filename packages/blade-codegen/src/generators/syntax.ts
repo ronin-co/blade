@@ -198,7 +198,12 @@ export const generateWithSyntax = (
     factory.createIntersectionTypeNode([
       factory.createTypeReferenceNode(
         factory.createQualifiedName(identifiers.namespace.utils.name, name),
-        [modelNode],
+        [
+          modelNode,
+          factory.createTypeReferenceNode(
+            factory.createIdentifier(convertToPascalCase(model.slug)),
+          ),
+        ],
       ),
       factory.createTypeLiteralNode(
         modelUserFieldEntries.map(([slug, field]) => {
