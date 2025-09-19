@@ -17,6 +17,16 @@ Even the application itself is revalidated. Whenever you deploy a new version of
 
 Lastly, even React itself is revalidated. If you upgrade React, Blade will unmount the old React on the client, mount the new React, and then re-mount your application.
 
+## Static Assets
+
+Static assets or files can be served from the `public` directory at the root of your project. Files in this directory can be referenced by your code starting from the base URL (`/`).
+
+For example, if you have an image at `public/logo.png`, you can reference it in your code as follows:
+
+```tsx
+<img src="/logo.png" alt="Logo" />
+```
+
 ## MDX
 
 [MDX](https://mdxjs.com/) (Markdown + JSX) is a powerful way to write content that combines the best of both worlds: Markdown and React. It allows you to write content in a way that is easy to read and write, while also being able to use React components within your content.
