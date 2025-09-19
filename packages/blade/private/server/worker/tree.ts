@@ -24,7 +24,7 @@ import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import type { ResponseStream } from '@/private/server/utils';
 import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
-import { getWaitUntil } from '@/private/server/utils/data';
+import { getClientConfig, getWaitUntil } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
 import { getParentDirectories, joinPaths } from '@/private/server/utils/paths';
 import {
@@ -37,7 +37,6 @@ import {
   renderToReadableStream,
 } from '@/private/server/utils/serializer';
 import { type PageEntry, getEntry, getPathSegments } from '@/private/server/worker/pages';
-import { getClientConfig } from '@/private/server/worker/triggers';
 import type {
   PageFetchingOptions,
   QueryItemRead,

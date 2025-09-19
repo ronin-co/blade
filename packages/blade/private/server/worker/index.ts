@@ -9,14 +9,13 @@ import { router as projectRouter } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
 import { ResponseStream } from '@/private/server/utils';
-import { getWaitUntil, toDashCase } from '@/private/server/utils/data';
+import { getClientConfig, getWaitUntil, toDashCase } from '@/private/server/utils/data';
 import {
   getRequestGeoLocation,
   getRequestLanguages,
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
 import renderReactTree, { flushSession } from '@/private/server/worker/tree';
-import { getClientConfig } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions, QueryItemWrite } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX, CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 
