@@ -1,6 +1,6 @@
 import type { TriggerOptions, Triggers } from '@/src/triggers';
 
-import type { Model, Result, ResultRecord } from 'blade-compiler';
+import type { Model, Query, Result, ResultRecord } from 'blade-compiler';
 
 export interface QueryHandlerOptions {
   /**
@@ -26,6 +26,12 @@ export interface QueryHandlerOptions {
    * Alternatively, an entire `fetch` replacement function may be passed.
    */
   fetch?: Parameters<typeof fetch>[1] | typeof fetch;
+
+  /** Allows for processing the queries in a custom way. */
+  callback?: <T>(
+    queries: Array<Query>,
+    options: QueryHandlerOptions,
+  ) => Promise<FormattedResults<T>>;
 
   /**
    * Allows for extending the lifetime of the edge worker invocation until the
