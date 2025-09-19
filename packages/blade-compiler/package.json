@@ -14,7 +14,8 @@
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "bun test",
-    "build": "tsup ./src/index.ts --dts --format esm"
+    "build": "tsdown",
+    "dev": "tsdown --watch"
   },
   "keywords": [
     "query",
@@ -28,7 +29,7 @@
     "@types/bun": "1.1.14",
     "hive": "1.2.4",
     "title": "4.0.1",
-    "tsup": "8.3.5",
+    "tsdown": "0.15.2",
     "typescript": "5.7.2"
   }
 }
