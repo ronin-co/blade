@@ -97,13 +97,13 @@ export const createSyntaxFactory = (
     queryOptions?: Record<string, unknown>,
   ) => Promise<PromiseTuple<T>>;
 } => {
-  const callback = (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
+  const callback = async (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
     const finalOptions = mergeOptions(options, queryOptions);
 
     const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
     const finalQuery = query[QUERY_SYMBOLS.QUERY];
 
-    return finalOptions.callback([finalQuery], finalOptions);
+    return (await finalOptions.callback([finalQuery], finalOptions))[0];
   };
 
   // Ensure that storable objects are retained as-is instead of being serialized.
