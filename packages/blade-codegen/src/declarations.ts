@@ -932,6 +932,8 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @todo(@nurodev): Replace `Partial<S> | CombinedInstructions["with"]` with utility to map advanced assertions
+ *
  * @example
  * ```ts
  * type WithQuery<U, S> = ReducedFunction & {
@@ -1087,6 +1089,8 @@ export const withQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @todo(@nurodev): Replace `Partial<S> | CombinedInstructions["with"]` with utility to map advanced assertions
+ *
  * @example
  * ```ts
  * type WithQueryPromise<U, S> = ReducedFunction & {
