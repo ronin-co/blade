@@ -103,9 +103,7 @@ export const createSyntaxFactory = (
     const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
     const finalQuery = query[QUERY_SYMBOLS.QUERY];
 
-    if (finalOptions.callback) return finalOptions.callback([finalQuery], finalOptions);
-
-    return queryHandler(finalQuery, finalOptions);
+    return finalOptions.callback([finalQuery], finalOptions);
   };
 
   // Ensure that storable objects are retained as-is instead of being serialized.
@@ -170,11 +168,7 @@ export const createSyntaxFactory = (
       const queries = getBatchProxy(batchOperations).map(({ structure }) => structure);
       const finalOptions = mergeOptions(options, queryOptions);
 
-      if (finalOptions.callback) {
-        return finalOptions.callback(queries, finalOptions) as Promise<PromiseTuple<T>>;
-      }
-
-      return queriesHandler(queries, finalOptions) as Promise<PromiseTuple<T>>;
+      return finalOptions.callback(queries, finalOptions) as Promise<PromiseTuple<T>>;
     },
 
     sql: getSyntaxProxySQL({

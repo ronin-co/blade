@@ -1,6 +1,8 @@
-import type { QueryHandlerOptions } from '@/src/types/utils';
 import type { ResultRecord } from 'blade-compiler';
 import { getProperty, setProperty } from 'blade-syntax/queries';
+
+import type { QueryHandlerOptions } from '@/src/types/utils';
+import { queriesHandler } from '@/src/utils/handlers';
 
 /**
  * Turn the given string into "dash-case", which we use for slugs.
@@ -54,14 +56,19 @@ export const formatDateFields = <T extends ResultRecord>(
  *
  * @returns A single option object.
  */
-export const mergeOptions = (
+export const mergeOptions = <
+  T extends QueryHandlerOptions & Required<Pick<QueryHandlerOptions, 'callback'>>,
+>(
   ...options: Array<undefined | QueryHandlerOptions | (() => QueryHandlerOptions)>
-): QueryHandlerOptions => {
-  return options.reduce((acc: QueryHandlerOptions, opt) => {
-    const resolvedOpt = typeof opt === 'function' ? opt() : opt;
-    Object.assign(acc, resolvedOpt);
-    return acc;
-  }, {});
+): T => {
+  return options.reduce(
+    (acc: T, opt) => {
+      const resolvedOpt = typeof opt === 'function' ? opt() : opt;
+      Object.assign(acc, resolvedOpt);
+      return acc;
+    },
+    { callback: (queries, options) => queriesHandler(queries, options) } as T,
+  );
 };
 
 /**

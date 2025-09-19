@@ -28,10 +28,10 @@ export interface QueryHandlerOptions {
   fetch?: Parameters<typeof fetch>[1] | typeof fetch;
 
   /** Allows for processing the queries in a custom way. */
-  callback?: <T>(
+  callback?: (
     queries: Array<Query>,
     options: QueryHandlerOptions,
-  ) => Promise<FormattedResults<T>>;
+  ) => Promise<FormattedResults<ResultRecord>>;
 
   /**
    * Allows for extending the lifetime of the edge worker invocation until the
