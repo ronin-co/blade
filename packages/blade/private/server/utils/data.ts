@@ -1,14 +1,8 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
-import { runQueries as runQueriesOnRonin } from 'blade-client';
-import type { FormattedResults, QueryHandlerOptions } from 'blade-client/types';
-import type { Model, Query, ResultRecord } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
-import { schema } from 'server-list';
 
-import type { TriggersList, WaitUntil } from '@/private/server/types';
+import type { WaitUntil } from '@/private/server/types';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
-
-const models: Array<Model> = Object.values(schema['index.ts'] || {});
 
 /**
  * A minimal mock implementation of the `ExecutionContext` interface.
@@ -50,50 +44,6 @@ export const getWaitUntil = (context?: Context): WaitUntil => {
   }
 
   return dataFetcherWaitUntil;
-};
-
-/**
- * Generate the options passed to the `ronin` JavaScript client.
- *
- * @param triggers - A list of triggers that should be executed.
- * @param requireTriggers - Determines which triggers are required to be present.
- * @param waitUntil - A function for keeping the process alive until a promise has
- * been resolved.
- *
- * @returns Options that can be passed to the `ronin` JavaScript client.
- */
-export const getRoninOptions = (
-  triggers: TriggersList,
-  requireTriggers: 'all' | 'write' | 'none',
-  waitUntil: WaitUntil,
-): QueryHandlerOptions => ({
-  triggers,
-  requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
-  waitUntil,
-  models,
-  defaultRecordLimit: 20,
-});
-
-/**
- * The same as `runQueries` exposed by the `ronin` JavaScript client, except that default
- * configuration options are provided.
- *
- * @param queries - A list of RONIN queries that should be executed.
- * @param triggers - A list of triggers that should be executed.
- * @param requireTriggers - Determines which triggers are required to be present.
- * @param waitUntil - A function for keeping the process alive until a promise has
- * been resolved.
- *
- * @returns The results of the passed queries.
- */
-export const runQueries = <T extends ResultRecord>(
-  queries: Record<string, Array<Query>>,
-  triggers: TriggersList,
-  requireTriggers: 'all' | 'write',
-  waitUntil: WaitUntil,
-): Promise<Record<string, FormattedResults<T>>> => {
-  const options = getRoninOptions(triggers, requireTriggers, waitUntil);
-  return runQueriesOnRonin<T>(queries, options);
 };
 
 /**

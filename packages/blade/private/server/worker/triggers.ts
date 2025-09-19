@@ -1,15 +1,17 @@
-import type { BeforeGetTrigger } from 'blade-client/types';
-import { triggers } from 'server-list';
+import type { BeforeGetTrigger, QueryHandlerOptions } from 'blade-client/types';
+import type { Model } from 'blade-compiler';
+import { schema, triggers } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
   ClientTriggerOptions,
   TriggerOptions as NewTriggerOptions,
   Triggers,
-  TriggersList,
 } from '@/private/server/types';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
 import { getCookieSetter } from '@/private/universal/utils';
+
+const models: Array<Model> = Object.values(schema['index.ts'] || {});
 
 /**
  * Convert a list of trigger files to triggers that can be passed to RONIN.
@@ -23,8 +25,8 @@ import { getCookieSetter } from '@/private/universal/utils';
  */
 export const getClientConfig = (
   serverContext: ServerContext,
-  headless?: boolean,
-): TriggersList => {
+  requireTriggers: 'all' | 'write' | 'none',
+): QueryHandlerOptions => {
   const options: Partial<NewTriggerOptions> = {
     cookies: serverContext.cookies,
     setCookie: getCookieSetter(serverContext),
@@ -55,10 +57,10 @@ export const getClientConfig = (
             // function, in order to avoid modifying the global object.
             const newOptions: Partial<NewTriggerOptions> = { ...options };
 
-            if (typeof headless === 'boolean') {
+            if (requireTriggers === 'all') {
               // If all queries provided to the triggers stem from the same data source,
               // we can explicitly set the headless property to `true` or `false`.
-              newOptions.headless = headless;
+              newOptions.headless = true;
             } else {
               const triggerNameSlug = triggerName.toLowerCase();
 
@@ -97,5 +99,13 @@ export const getClientConfig = (
     },
   );
 
-  return Object.fromEntries(list);
+  const finalTriggers = Object.fromEntries(list);
+
+  return {
+    triggers: finalTriggers,
+    requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
+    waitUntil: serverContext.waitUntil,
+    models,
+    defaultRecordLimit: 20,
+  };
 };

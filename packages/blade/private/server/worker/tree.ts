@@ -1,4 +1,5 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
+import { runQueries } from 'blade-client';
 import type { FormattedResults } from 'blade-client/types';
 import { ClientError, TriggerError } from 'blade-client/utils';
 import type { Query } from 'blade-compiler';
@@ -23,7 +24,7 @@ import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import type { ResponseStream } from '@/private/server/utils';
 import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
-import { getWaitUntil, runQueries } from '@/private/server/utils/data';
+import { getWaitUntil } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
 import { getParentDirectories, joinPaths } from '@/private/server/utils/paths';
 import {
@@ -77,16 +78,14 @@ const runQueriesWithTime = async (
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
-  const triggers = getClientConfig(serverContext);
+  const config = getClientConfig(serverContext, 'write');
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
 
   const results: Record<string, FormattedResults<unknown>> = await runQueries(
     queries,
-    triggers,
-    'write',
-    serverContext.waitUntil,
+    config,
   );
 
   const end = Date.now();

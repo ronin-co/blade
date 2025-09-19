@@ -1,4 +1,4 @@
-import { createSyntaxFactory } from 'blade-client';
+import { createSyntaxFactory, runQueries } from 'blade-client';
 import { ClientError, TriggerError } from 'blade-client/utils';
 import { DML_QUERY_TYPES_WRITE, type Query, type QueryType } from 'blade-compiler';
 import type { Context } from 'hono';
@@ -9,12 +9,7 @@ import { router as projectRouter } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
 import { ResponseStream } from '@/private/server/utils';
-import {
-  getRoninOptions,
-  getWaitUntil,
-  runQueries,
-  toDashCase,
-} from '@/private/server/utils/data';
+import { getWaitUntil, toDashCase } from '@/private/server/utils/data';
 import {
   getRequestGeoLocation,
   getRequestLanguages,
@@ -152,10 +147,7 @@ app.post('/api', async (c) => {
   }
 
   const serverContext = simulateServerContext(c);
-
-  // Generate a list of trigger functions based on the trigger files that exist in the
-  // source code of the application.
-  const triggers = getClientConfig(serverContext, true);
+  const config = getClientConfig(serverContext, 'all');
 
   // For every query, check whether an trigger exists that is being publicly exposed.
   // If none exists, prevent the query from being executed.
@@ -168,9 +160,9 @@ app.post('/api', async (c) => {
       : querySchema;
 
     const triggerSlug = toDashCase(schemaSlug);
-    const triggerFile = triggers[triggerSlug];
+    const triggerFile = config.triggers![triggerSlug];
 
-    if (!triggerFile || !triggerFile['exposed']) {
+    if (!triggerFile || !(triggerFile as { exposed: boolean })['exposed']) {
       throw new ClientError({
         message: 'Please provide a trigger that is marked as `exposed`.',
         code: 'TRIGGER_REQUIRED',
@@ -182,9 +174,7 @@ app.post('/api', async (c) => {
 
   // Run the queries and handle any errors that might occur.
   try {
-    results = (
-      await runQueries({ default: queries }, triggers, 'all', serverContext.waitUntil)
-    )['default'];
+    results = (await runQueries({ default: queries }, config))['default'];
   } catch (err) {
     if (err instanceof TriggerError || err instanceof ClientError) {
       const allowedFields = ['message', 'code', 'path', 'query', 'details', 'fields'];
@@ -208,9 +198,8 @@ app.post('/api', async (c) => {
 app.use('*', async (c, next) => {
   const serverContext = simulateServerContext(c);
 
-  const triggers = getClientConfig(serverContext);
-  const options = getRoninOptions(triggers, 'none', serverContext.waitUntil);
-  const client = createSyntaxFactory(options);
+  const config = getClientConfig(serverContext, 'none');
+  const client = createSyntaxFactory(config);
 
   c.set('client', client);
 
