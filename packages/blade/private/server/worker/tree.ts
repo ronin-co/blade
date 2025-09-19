@@ -13,7 +13,7 @@ import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
 import { serializeError } from 'serialize-error';
-import { pages as pageList, triggers as triggerList } from 'server-list';
+import { pages as pageList } from 'server-list';
 
 import Root from '@/private/server/components/root';
 import { RootServerContext, type ServerContext } from '@/private/server/context';
@@ -36,7 +36,7 @@ import {
   renderToReadableStream,
 } from '@/private/server/utils/serializer';
 import { type PageEntry, getEntry, getPathSegments } from '@/private/server/worker/pages';
-import { prepareTriggers } from '@/private/server/worker/triggers';
+import { getClientConfig } from '@/private/server/worker/triggers';
 import type {
   PageFetchingOptions,
   QueryItemRead,
@@ -77,7 +77,7 @@ const runQueriesWithTime = async (
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
-  const triggers = prepareTriggers(serverContext, triggerList);
+  const triggers = getClientConfig(serverContext);
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;

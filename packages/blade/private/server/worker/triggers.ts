@@ -1,4 +1,5 @@
 import type { BeforeGetTrigger } from 'blade-client/types';
+import { triggers } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
 import type {
@@ -14,16 +15,14 @@ import { getCookieSetter } from '@/private/universal/utils';
  * Convert a list of trigger files to triggers that can be passed to RONIN.
  *
  * @param serverContext - A server context object.
- * @param triggers - The triggers that should be prepared for invocation.
- * @param headless - Whether the triggers are being run for a headless source, meaning the
- * application's browser client or REST API. If queries from multiple different sources
- * are provided, this argument should be omitted.
+ * @param headless - Whether the triggers are being run for a headless source, meaning
+ * the application's browser client or REST API. If queries from multiple different
+ * sources are provided, this argument should be omitted.
  *
  * @returns Triggers ready to be passed to RONIN.
  */
-export const prepareTriggers = (
+export const getClientConfig = (
   serverContext: ServerContext,
-  triggers: TriggersList,
   headless?: boolean,
 ): TriggersList => {
   const options: Partial<NewTriggerOptions> = {

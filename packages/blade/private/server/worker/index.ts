@@ -5,7 +5,7 @@ import type { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { secureHeaders } from 'hono/secure-headers';
 import { Hono } from 'hono/tiny';
-import { router as projectRouter, triggers as triggerList } from 'server-list';
+import { router as projectRouter } from 'server-list';
 
 import type { ServerContext } from '@/private/server/context';
 import { ResponseStream } from '@/private/server/utils';
@@ -21,7 +21,7 @@ import {
   getRequestUserAgent,
 } from '@/private/server/utils/request-context';
 import renderReactTree, { flushSession } from '@/private/server/worker/tree';
-import { prepareTriggers } from '@/private/server/worker/triggers';
+import { getClientConfig } from '@/private/server/worker/triggers';
 import type { PageFetchingOptions, QueryItemWrite } from '@/private/universal/types/util';
 import { CLIENT_ASSET_PREFIX, CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 
@@ -155,7 +155,7 @@ app.post('/api', async (c) => {
 
   // Generate a list of trigger functions based on the trigger files that exist in the
   // source code of the application.
-  const triggers = prepareTriggers(serverContext, triggerList, true);
+  const triggers = getClientConfig(serverContext, true);
 
   // For every query, check whether an trigger exists that is being publicly exposed.
   // If none exists, prevent the query from being executed.
@@ -208,7 +208,7 @@ app.post('/api', async (c) => {
 app.use('*', async (c, next) => {
   const serverContext = simulateServerContext(c);
 
-  const triggers = prepareTriggers(serverContext, triggerList);
+  const triggers = getClientConfig(serverContext);
   const options = getRoninOptions(triggers, 'none', serverContext.waitUntil);
   const client = createSyntaxFactory(options);
 
