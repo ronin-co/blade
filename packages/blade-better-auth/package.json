@@ -21,8 +21,8 @@
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "echo 'No tests'",
-    "build": "tsup",
-    "dev": "tsup --watch"
+    "build": "tsdown",
+    "dev": "tsdown --watch"
   },
   "keywords": [
     "auth",
@@ -43,7 +43,7 @@
     "blade-client": "workspace:*",
     "blade-compiler": "workspace:*",
     "hive": "1.2.4",
-    "tsup": "8.4.0",
+    "tsdown": "0.15.2",
     "typescript": "5.8.2"
   },
   "peerDependencies": {

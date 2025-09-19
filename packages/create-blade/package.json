@@ -19,8 +19,8 @@
     "templates/**/*"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "typecheck": "tsc --pretty"
   },
   "keywords": [
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@types/gradient-string": "1.1.6",
-    "tsup": "8.5.0",
+    "tsdown": "0.15.2",
     "typescript": "5.8.3"
   }
 }

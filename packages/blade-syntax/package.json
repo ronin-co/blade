@@ -26,8 +26,8 @@
     "lint:tsc": "tsc --pretty",
     "format": "biome check --write && biome format --write",
     "test": "bun test",
-    "build": "tsup",
-    "dev": "tsup --watch"
+    "build": "tsdown",
+    "dev": "tsdown --watch"
   },
   "keywords": [
     "database",
@@ -41,7 +41,7 @@
     "@types/bun": "1.2.4",
     "blade-compiler": "workspace:*",
     "expect-type": "1.2.0",
-    "tsup": "8.4.0",
+    "tsdown": "0.15.2",
     "typescript": "5.8.2"
   }
 }
