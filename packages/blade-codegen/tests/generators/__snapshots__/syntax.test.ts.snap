@@ -53,7 +53,7 @@ exports[`syntax using plural asynchronous with a link field 1`] = `
 `;
 
 exports[`syntax with singular synchronous 1`] = `
-"type WithQuery = Utils.WithQuery<Account | null> & {
+"type WithQuery = Utils.WithQuery<Account | null, Account> & {
     name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => T;
     email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => T;
 };
@@ -61,7 +61,7 @@ exports[`syntax with singular synchronous 1`] = `
 `;
 
 exports[`syntax with singular asynchronous 1`] = `
-"type WithQueryPromise = Utils.WithQueryPromise<Account | null> & {
+"type WithQueryPromise = Utils.WithQueryPromise<Account | null, Account> & {
     name: <T = Account | null>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
     email: <T = Account | null>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
 };
@@ -69,7 +69,7 @@ exports[`syntax with singular asynchronous 1`] = `
 `;
 
 exports[`syntax with plural synchronous 1`] = `
-"type WithQuery = Utils.WithQuery<Account[]> & {
+"type WithQuery = Utils.WithQuery<Account[], Account> & {
     name: <T = Account[]>(name: Account["name"], options?: Record<string, unknown>) => T;
     email: <T = Account[]>(email: Account["email"], options?: Record<string, unknown>) => T;
 };
@@ -77,7 +77,7 @@ exports[`syntax with plural synchronous 1`] = `
 `;
 
 exports[`syntax with plural asynchronous 1`] = `
-"type WithQueryPromise = Utils.WithQueryPromise<Account[]> & {
+"type WithQueryPromise = Utils.WithQueryPromise<Account[], Account> & {
     name: <T = Account[]>(name: Account["name"], options?: Record<string, unknown>) => Promise<T>;
     email: <T = Account[]>(email: Account["email"], options?: Record<string, unknown>) => Promise<T>;
 };
