@@ -1,5 +1,6 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import type {
+  TriggerOptions as ClientTriggerOptions,
   AddTrigger as OriginalAddTrigger,
   AfterAddTrigger as OriginalAfterAddTrigger,
   AfterCountTrigger as OriginalAfterCountTrigger,
@@ -69,9 +70,6 @@ export interface PageMetadata {
   htmlClassName?: string;
   bodyClassName?: string;
 }
-
-/** The original trigger options provided by the RONIN client. */
-export type ClientTriggerOptions = Parameters<OriginalBeforeGetTrigger>[2];
 
 export interface TriggerOptions extends ClientTriggerOptions {
   /**

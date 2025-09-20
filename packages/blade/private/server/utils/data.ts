@@ -1,5 +1,9 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
-import type { BeforeGetTrigger, QueryHandlerOptions } from 'blade-client/types';
+import type {
+  BeforeGetTrigger,
+  TriggerOptions as ClientTriggerOptions,
+  QueryHandlerOptions,
+} from 'blade-client/types';
 import type { Model } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
 import { schema, triggers } from 'server-list';
@@ -7,7 +11,6 @@ import { schema, triggers } from 'server-list';
 import type { ServerContext } from '@/private/server/context';
 import type { WaitUntil } from '@/private/server/types';
 import type {
-  ClientTriggerOptions,
   TriggerOptions as NewTriggerOptions,
   Triggers,
 } from '@/private/server/types';
