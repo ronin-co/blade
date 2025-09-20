@@ -89,7 +89,7 @@ const models: Array<Model> = Object.values(schema['index.ts'] || {});
 /**
  * Generate the options passed to the query client.
  *
- * @param triggers - A list of triggers that should be executed.
+ * @param serverContext A server context object.
  * @param requireTriggers - Determines which triggers are required to be present.
  *
  * @returns Options that can be passed to the query client.
