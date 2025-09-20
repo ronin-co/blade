@@ -93,7 +93,7 @@ export const validateToken = (options: QueryHandlerOptions = {}) => {
  * Omit a list of properties from an object returning a new object with the properties
  * that remain.
  *
- * @param obj — The object to omit properties from.
+ * @param obj - The object to omit properties from.
  * @param keys - The keys of the properties that should be omitted.
  *
  * @returns The updated object.

@@ -28,7 +28,7 @@ export class ClientError extends Error {
  * Parses the response as JSON or, alternatively, throws an error containing
  * potential error details that might have been included in the response.
  *
- * @param response The response of a fetch request.
+ * @param response - The response of a fetch request.
  *
  * @returns The response body as a JSON object.
  */
