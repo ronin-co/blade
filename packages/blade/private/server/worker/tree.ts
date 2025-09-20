@@ -82,10 +82,7 @@ const runQueriesWithTime = async (
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
 
-  const results: Record<string, FormattedResults<unknown>> = await runQueries(
-    queries,
-    config,
-  );
+  const results = await runQueries(queries, config);
 
   const end = Date.now();
 
