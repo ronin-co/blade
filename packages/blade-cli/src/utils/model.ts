@@ -12,7 +12,7 @@ export type ModelWithFieldsArray = Omit<Model, 'fields'> & { fields: Array<Model
  * Fetches and formats schema models from either production API or local database.
  *
  * @param token - Optional authentication token for production API requests.
- * @param fieldArray — Whether to provide an array of fields.
+ * @param fieldArray - Whether to provide an array of fields.
  *
  * @returns Promise resolving to an array of formatted Model objects.
  *

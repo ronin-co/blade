@@ -1,14 +1,22 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
-import { runQueries as runQueriesOnRonin } from 'blade-client';
-import type { FormattedResults, QueryHandlerOptions } from 'blade-client/types';
-import type { Model, Query, ResultRecord } from 'blade-compiler';
+import type {
+  BeforeGetTrigger,
+  TriggerOptions as ClientTriggerOptions,
+  QueryHandlerOptions,
+} from 'blade-client/types';
+import type { Model } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
-import { schema } from 'server-list';
+import { schema, triggers } from 'server-list';
 
-import type { TriggersList, WaitUntil } from '@/private/server/types';
+import type { ServerContext } from '@/private/server/context';
+import type { WaitUntil } from '@/private/server/types';
+import type {
+  TriggerOptions as NewTriggerOptions,
+  Triggers,
+} from '@/private/server/types';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
-
-const models: Array<Model> = Object.values(schema['index.ts'] || {});
+import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
+import { getCookieSetter } from '@/private/universal/utils';
 
 /**
  * A minimal mock implementation of the `ExecutionContext` interface.
@@ -53,50 +61,6 @@ export const getWaitUntil = (context?: Context): WaitUntil => {
 };
 
 /**
- * Generate the options passed to the `ronin` JavaScript client.
- *
- * @param triggers - A list of triggers that should be executed.
- * @param requireTriggers - Determines which triggers are required to be present.
- * @param waitUntil - A function for keeping the process alive until a promise has
- * been resolved.
- *
- * @returns Options that can be passed to the `ronin` JavaScript client.
- */
-export const getRoninOptions = (
-  triggers: TriggersList,
-  requireTriggers: 'all' | 'write' | 'none',
-  waitUntil: WaitUntil,
-): QueryHandlerOptions => ({
-  triggers,
-  requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
-  waitUntil,
-  models,
-  defaultRecordLimit: 20,
-});
-
-/**
- * The same as `runQueries` exposed by the `ronin` JavaScript client, except that default
- * configuration options are provided.
- *
- * @param queries - A list of RONIN queries that should be executed.
- * @param triggers - A list of triggers that should be executed.
- * @param requireTriggers - Determines which triggers are required to be present.
- * @param waitUntil - A function for keeping the process alive until a promise has
- * been resolved.
- *
- * @returns The results of the passed queries.
- */
-export const runQueries = <T extends ResultRecord>(
-  queries: Record<string, Array<Query>>,
-  triggers: TriggersList,
-  requireTriggers: 'all' | 'write',
-  waitUntil: WaitUntil,
-): Promise<Record<string, FormattedResults<T>>> => {
-  const options = getRoninOptions(triggers, requireTriggers, waitUntil);
-  return runQueriesOnRonin<T>(queries, options);
-};
-
-/**
  * Turn the given string into "dash-case", which we use for slugs.
  *
  * @param string - String to turn into dash-case.
@@ -121,4 +85,101 @@ export const toDashCase = (string?: string | null): string => {
   if (parts.length === 1) return parts[0];
 
   return parts.reduce((acc, part) => `${acc}-${part.toLowerCase()}`);
+};
+
+const models: Array<Model> = Object.values(schema['index.ts'] || {});
+
+/**
+ * Generate the options passed to the query client.
+ *
+ * @param serverContext - A server context object.
+ * @param requireTriggers - Determines which triggers are required to be present.
+ *
+ * @returns Options that can be passed to the query client.
+ */
+export const getClientConfig = (
+  serverContext: ServerContext,
+  requireTriggers: 'all' | 'write' | 'none',
+): QueryHandlerOptions => {
+  const options: Partial<NewTriggerOptions> = {
+    cookies: serverContext.cookies,
+    setCookie: getCookieSetter(serverContext),
+    navigator: {
+      userAgent: serverContext.userAgent,
+      geoLocation: serverContext.geoLocation,
+      languages: serverContext.languages,
+    },
+    location: new URL(serverContext.url),
+    flushSession: serverContext.flushSession,
+  };
+
+  const list = Object.entries(triggers || {}).map(
+    ([fileName, triggerList]): [string, Triggers] => {
+      // For every trigger, update the existing options argument to provide additional
+      // options that are specific to BLADE.
+      const extendedTriggerEntries = Object.entries(triggerList).map(
+        ([triggerName, triggerFunction]) => [
+          triggerName,
+          // This handles triggers of all types, but for the sake of being able to parse
+          // the arguments of the original trigger type, we're using only the type of
+          // `before*` triggers.
+          (...args: Parameters<BeforeGetTrigger>) => {
+            const argsBeforeLast = args.slice(0, -1);
+            const oldOptions = args.at(-1) as ClientTriggerOptions;
+
+            // Create an object of options that are specific to the current trigger
+            // function, in order to avoid modifying the global object.
+            const newOptions: Partial<NewTriggerOptions> = { ...options };
+
+            if (requireTriggers === 'all') {
+              // If all queries provided to the triggers stem from the same data source,
+              // we can explicitly set the headless property to `true` or `false`.
+              newOptions.headless = true;
+            } else {
+              const triggerNameSlug = triggerName.toLowerCase();
+
+              // If the client informs us that the query was generated by a trigger, we
+              // don't need to perform further checks, because it is guaranteed that the
+              // query is not headless.
+              //
+              // Otherwise, if the client does not provide us with such information, we
+              // need to check if the query is headless based on Blade's own primitives.
+              if (oldOptions.parentTrigger) {
+                newOptions.headless = false;
+              } else {
+                // If the queries stem from multiple different data sources, the type of
+                // query that is being executed determines whether it stems from a
+                // headless source, or not.
+                //
+                // Specifically, read queries are never headless because they always stem
+                // from the server (where the database is located), whereas write queries
+                // are always headless because they always stem from the client (where the
+                // user expressing the intent is located). The only exception to this rule
+                // is handled above, if `headless` is defined explicitly.
+                newOptions.headless = WRITE_QUERY_TYPES.some((queryType) => {
+                  return triggerNameSlug.endsWith(queryType);
+                });
+              }
+            }
+
+            const finalArgs = [...argsBeforeLast, { ...oldOptions, ...newOptions }];
+
+            return triggerFunction(...finalArgs);
+          },
+        ],
+      );
+
+      return [fileName.replace('.ts', ''), Object.fromEntries(extendedTriggerEntries)];
+    },
+  );
+
+  const finalTriggers = Object.fromEntries(list);
+
+  return {
+    triggers: finalTriggers,
+    requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
+    waitUntil: serverContext.waitUntil,
+    models,
+    defaultRecordLimit: 20,
+  };
 };

@@ -119,7 +119,7 @@ export const capitalize = (str: string): string => {
  * - Replaces special characters with spaces.
  * - Strips leading and trailing whitespace.
  *
- * @param str – The string to sanitize.
+ * @param str - The string to sanitize.
  *
  * @returns The sanitized string.
  */
@@ -144,7 +144,7 @@ const sanitize = (str: string): string => {
 /**
  * Utility function to convert a given string to snake-case.
  *
- * @param str – The string to convert.
+ * @param str - The string to convert.
  *
  * @returns The converted string.
  */
@@ -160,7 +160,7 @@ export const convertToSnakeCase = (str: string): string => {
 /**
  * Utility function to convert a given string to camel-case.
  *
- * @param str – The string to convert.
+ * @param str - The string to convert.
  *
  * @returns The converted string.
  */

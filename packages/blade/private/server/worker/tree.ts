@@ -1,4 +1,5 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
+import { runQueries } from 'blade-client';
 import type { FormattedResults } from 'blade-client/types';
 import { ClientError, TriggerError } from 'blade-client/utils';
 import type { Query } from 'blade-compiler';
@@ -13,7 +14,7 @@ import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
 import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
 import { serializeError } from 'serialize-error';
-import { pages as pageList, triggers as triggerList } from 'server-list';
+import { pages as pageList } from 'server-list';
 
 import Root from '@/private/server/components/root';
 import { RootServerContext, type ServerContext } from '@/private/server/context';
@@ -23,7 +24,7 @@ import type { PageList, PageMetadata, TreeItem } from '@/private/server/types';
 import type { ResponseStream } from '@/private/server/utils';
 import { REVALIDATION_INTERVAL, VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
-import { getWaitUntil, runQueries } from '@/private/server/utils/data';
+import { getClientConfig, getWaitUntil } from '@/private/server/utils/data';
 import { assignFiles } from '@/private/server/utils/files';
 import { getParentDirectories, joinPaths } from '@/private/server/utils/paths';
 import {
@@ -36,7 +37,6 @@ import {
   renderToReadableStream,
 } from '@/private/server/utils/serializer';
 import { type PageEntry, getEntry, getPathSegments } from '@/private/server/worker/pages';
-import { prepareTriggers } from '@/private/server/worker/triggers';
 import type {
   PageFetchingOptions,
   QueryItemRead,
@@ -77,17 +77,12 @@ const runQueriesWithTime = async (
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
-  const triggers = prepareTriggers(serverContext, triggerList);
+  const config = getClientConfig(serverContext, 'write');
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
 
-  const results: Record<string, FormattedResults<unknown>> = await runQueries(
-    queries,
-    triggers,
-    'write',
-    serverContext.waitUntil,
-  );
+  const results = await runQueries(queries, config);
 
   const end = Date.now();
 

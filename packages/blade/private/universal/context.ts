@@ -27,7 +27,7 @@ export type UniversalContext<
  * Picks the properties of the available server context that can be serialized and passed
  * on to the client-side.
  *
- * @param serverContext A server context object.
+ * @param serverContext - A server context object.
  *
  * @returns All server context that can be passed to the client-side.
  */
