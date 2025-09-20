@@ -932,10 +932,12 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @todo(@nurodev): Replace `Partial<S> | CombinedInstructions["with"]` with utility to map advanced assertions
+ *
  * @example
  * ```ts
- * type WithQuery<U> = ReducedFunction & {
- *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): T;
+ * type WithQuery<U, S> = ReducedFunction & {
+ *  <T = U>(instructions: Partial<S> | CombinedInstructions["with"], options?: Record<string, unknown>): T;
  *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
  *  ronin: ReducedFunction & {
  *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => T;
@@ -949,13 +951,16 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
 export const withQueryType = factory.createTypeAliasDeclaration(
   undefined,
   identifiers.namespace.utils.withQuery,
-  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.schema),
+  ],
   factory.createIntersectionTypeNode([
     factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
     factory.createTypeLiteralNode([
       /**
        * ```ts
-       * <T = User | null>(options: CombinedInstructions["with"]): T
+       * <T = U>(instructions: Partial<S> | CombinedInstructions["with"], options?: Record<string, unknown>): T
        * ```
        */
       factory.createCallSignature(
@@ -973,10 +978,17 @@ export const withQueryType = factory.createTypeAliasDeclaration(
             undefined,
             'instructions',
             undefined,
-            factory.createIndexedAccessTypeNode(
-              factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-              factory.createLiteralTypeNode(factory.createStringLiteral('with')),
-            ),
+            factory.createUnionTypeNode([
+              factory.createTypeReferenceNode(identifiers.primitive.partial, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
+              ]),
+              factory.createIndexedAccessTypeNode(
+                factory.createTypeReferenceNode(
+                  identifiers.compiler.combinedInstructions,
+                ),
+                factory.createLiteralTypeNode(factory.createStringLiteral('with')),
+              ),
+            ]),
           ),
           sharedQueryOptionsParameter,
         ],
@@ -1077,10 +1089,12 @@ export const withQueryType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @todo(@nurodev): Replace `Partial<S> | CombinedInstructions["with"]` with utility to map advanced assertions
+ *
  * @example
  * ```ts
- * type WithQueryPromise<U> = ReducedFunction & {
- *  <T = U>(instructions: CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
+ * type WithQueryPromise<U, S> = ReducedFunction & {
+ *  <T = U>(instructions: Partial<S> | CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>;
  *  id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => Promise<T>;
  *  ronin: ReducedFunction & {
  *    createdAt: <T = U>(value: ResultRecord["ronin"]["createdAt"], options?: Record<string, unknown>) => Promise<T>;
@@ -1094,13 +1108,16 @@ export const withQueryType = factory.createTypeAliasDeclaration(
 export const withQueryPromiseType = factory.createTypeAliasDeclaration(
   undefined,
   identifiers.namespace.utils.withQueryPromise,
-  [factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using)],
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.schema),
+  ],
   factory.createIntersectionTypeNode([
     factory.createTypeReferenceNode(identifiers.blade.reducedFunction),
     factory.createTypeLiteralNode([
       /**
        * ```ts
-       * <T = User | null>(options: CombinedInstructions["with"]): T
+       * <T = U>(instructions: Partial<S> | CombinedInstructions["with"], options?: Record<string, unknown>): Promise<T>
        * ```
        */
       factory.createCallSignature(
@@ -1118,10 +1135,17 @@ export const withQueryPromiseType = factory.createTypeAliasDeclaration(
             undefined,
             'instructions',
             undefined,
-            factory.createIndexedAccessTypeNode(
-              factory.createTypeReferenceNode(identifiers.compiler.combinedInstructions),
-              factory.createLiteralTypeNode(factory.createStringLiteral('with')),
-            ),
+            factory.createUnionTypeNode([
+              factory.createTypeReferenceNode(identifiers.primitive.partial, [
+                factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
+              ]),
+              factory.createIndexedAccessTypeNode(
+                factory.createTypeReferenceNode(
+                  identifiers.compiler.combinedInstructions,
+                ),
+                factory.createLiteralTypeNode(factory.createStringLiteral('with')),
+              ),
+            ]),
           ),
           sharedQueryOptionsParameter,
         ],
