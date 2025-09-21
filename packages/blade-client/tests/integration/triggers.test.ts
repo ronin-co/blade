@@ -124,7 +124,9 @@ describe('triggers', () => {
   });
 
   test('run `get` query through factory with dynamically generated config', async () => {
-    const { get } = createSyntaxFactory(() => ({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory(() => ({
       triggers: {
         account: {
           get(query, multiple) {
@@ -144,20 +146,36 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' }, email: { type: 'string' } },
+        },
+      ],
     }));
 
-    await get.account.with.handle('juri');
-    // Make sure `leo` is resolved as the account handle.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"account":{"with":{"handle":"leo"}}}}]}',
-    );
+    await factory.get.account.with.handle('juri');
 
-    await get.accounts();
+    // Make sure `leo` is resolved as the account handle.
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "handle" = ?1 LIMIT 1',
+      params: ['leo'],
+    });
+
+    await factory.get.accounts.with({
+      email: { endingWith: '@ronin.co' },
+    });
+
     // Make sure the email address of all resolved accounts ends with the
     // `@ronin.co` domain name.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"accounts":{"with":{"email":{"endingWith":"@ronin.co"}}}}}]}',
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "email" LIKE ?1',
+      params: ['%@ronin.co'],
+    });
   });
 
   test('run `get` query through factory containing `resolving` trigger', async () => {
