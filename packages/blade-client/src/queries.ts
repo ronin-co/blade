@@ -228,9 +228,9 @@ export const runQueries = async <T extends ResultRecord>(
   const VERBOSE_LOGGING =
     (typeof process !== 'undefined' &&
       process?.env &&
-      process.env.__RENDER_DEBUG_LEVEL === 'verbose') ||
+      process.env.__BLADE_DEBUG_LEVEL === 'verbose') ||
     (typeof import.meta?.env !== 'undefined' &&
-      import.meta.env.__RENDER_DEBUG_LEVEL === 'verbose');
+      import.meta.env.__BLADE_DEBUG_LEVEL === 'verbose');
 
   if (VERBOSE_LOGGING) {
     console.log(`Formatting took ${endFormatting - startFormatting}ms`);

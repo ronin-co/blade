@@ -10,7 +10,7 @@ import {
   type ResolvingAddTrigger,
   runQueriesWithTriggers,
 } from '@/src/triggers';
-import type { CombinedInstructions, Query, QueryType } from 'blade-compiler';
+import type { CombinedInstructions, Query, QueryType, Statement } from 'blade-compiler';
 
 let mockResolvedRequestText: any;
 
@@ -546,20 +546,16 @@ describe('triggers', () => {
   test('run normal queries alongside queries that are handled by `resolving` trigger', async () => {
     let finalQuery: FilteredTriggerQuery<QueryType> | undefined;
     let finalMultiple: boolean | undefined;
-    let mockResolvedRequestText: string | undefined;
+    let mockStatements: Array<Statement> | undefined;
 
     const { get, batch } = createSyntaxFactory({
-      fetch: async (request) => {
-        mockResolvedRequestText = await (request as Request).text();
-
-        return Response.json({
-          results: [
-            {
-              records: [{ id: 'mem_1' }, { id: 'mem_2' }],
-            },
-          ],
-        });
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return {
+          results: [[{ id: 'mem_1' }, { id: 'mem_2' }]],
+        };
       },
+      models: [{ slug: 'member' }],
       triggers: {
         account: {
           resolvingGet(query, multiple) {
@@ -581,11 +577,11 @@ describe('triggers', () => {
       get.members(),
     ]);
 
-    // Make sure only one request is sent to the server and the request which
-    // was handled by the "resolving" "get" trigger is dropped out.
-    expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"members":{}}}]}');
+    // Make sure only one query is executed and the query which was handled by the
+    // "resolving" "get" trigger is dropped out.
+    expect(mockStatements).toHaveLength(1);
 
-    expect(result.length).toBe(2);
+    expect(result).toHaveLength(2);
 
     expect(result[0]).toMatchObject({ id: 'juri' });
 

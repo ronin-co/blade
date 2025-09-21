@@ -74,50 +74,6 @@ describe('queries handler', () => {
     );
   });
 
-  test('use the custom fetcher', async () => {
-    const mockFetchNew = mock((request) => {
-      mockRequestResolvedValue = request;
-
-      return Response.json({
-        results: [],
-      });
-    });
-
-    await queriesHandler([], {
-      fetch: async (request) => mockFetchNew(request),
-      token: 'takashitoken',
-    });
-
-    expect(mockFetchNew).toHaveBeenCalledTimes(1);
-    expect(mockRequestResolvedValue?.headers.get('Authorization')).toBe(
-      'Bearer takashitoken',
-    );
-  });
-
-  test('handle BAD_REQUEST response', async () => {
-    const requestPromise = queriesHandler([], {
-      token: 'takashitoken',
-      fetch: async (request) => {
-        mockRequestResolvedValue = request as Request;
-
-        return new Response(
-          JSON.stringify({
-            results: [],
-            error: {
-              message: 'Invalid query provided.',
-              code: 'BAD_REQUEST',
-            },
-          }),
-          {
-            status: 400,
-          },
-        );
-      },
-    });
-
-    expect(requestPromise).rejects.toThrow('Invalid query provided.');
-  });
-
   test('enable verbose logging', async () => {
     const currentConsoleLog = console.log;
     const logSpy = spyOn(console, 'log').mockImplementation(currentConsoleLog);
@@ -127,12 +83,12 @@ describe('queries handler', () => {
     // Make sure that no logs were printed without the verbose flag.
     expect(logSpy).not.toHaveBeenCalled();
 
-    const originalDebugLevel = import.meta.env.__RENDER_DEBUG_LEVEL;
-    import.meta.env.__RENDER_DEBUG_LEVEL = 'verbose';
+    const originalDebugLevel = import.meta.env.__BLADE_DEBUG_LEVEL;
+    import.meta.env.__BLADE_DEBUG_LEVEL = 'verbose';
 
     await queriesHandler([]);
 
-    import.meta.env.__RENDER_DEBUG_LEVEL = originalDebugLevel;
+    import.meta.env.__BLADE_DEBUG_LEVEL = originalDebugLevel;
 
     // Make sure that the logs were printed with the verbose flag.
     expect(logSpy).toHaveBeenCalled();
