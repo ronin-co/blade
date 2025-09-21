@@ -240,7 +240,7 @@ describe('triggers', () => {
     let finalBeforeResult: unknown;
     let finalAfterResult: unknown;
 
-    const { create } = createSyntaxFactory({
+    const factory = createSyntaxFactory({
       fetch: async () => {
         return Response.json({
           results: [
@@ -256,17 +256,34 @@ describe('triggers', () => {
           ],
         });
       },
-      // databaseCaller: () => ({
-      //   results: [
-      //     [{
-      //           id: '1',
-      //           slug: 'account',
-      //           pluralSlug: 'accounts',
-      //           name: 'Account',
-      //           pluralName: 'Accounts',
-      //         }]
-      //   ]
-      // }),
+      databaseCaller: (statements) => {
+        console.log(statements);
+        return {
+          results: [
+            [],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                name: 'Account',
+                pluralName: 'Accounts',
+                slug: 'account',
+                pluralSlug: 'accounts',
+                idPrefix: null,
+                table: null,
+                'identifiers.name': 'id',
+                'identifiers.slug': 'id',
+                fields: '{}',
+                indexes: '{}',
+                presets: '{}',
+              },
+            ],
+          ],
+        };
+      },
       triggers: {
         model: {
           followingCreate(query, multiple, beforeResult, afterResult) {
@@ -279,9 +296,9 @@ describe('triggers', () => {
       },
     });
 
-    const model = await create.model({
+    const model = await factory.create.model({
       slug: 'account',
-    } as Parameters<typeof create.model>[0]);
+    } as Parameters<typeof factory.create.model>[0]);
 
     // Make sure `finalQuery` matches the initial query.
     expect(finalQuery).toMatchObject({
