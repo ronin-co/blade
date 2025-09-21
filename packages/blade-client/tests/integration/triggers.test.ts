@@ -415,22 +415,32 @@ describe('triggers', () => {
     let finalBeforeResult: unknown;
     let finalAfterResult: unknown;
 
-    const { drop } = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
-          results: [
+    const factory = createSyntaxFactory({
+      databaseCaller: () => ({
+        results: [
+          [],
+          [
             {
-              record: {
-                id: '1',
-                slug: 'account',
-                pluralSlug: 'accounts',
-                name: 'Account',
-                pluralName: 'Accounts',
-              },
+              id: '1',
+              'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+              'ronin.createdBy': '1234',
+              'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+              'ronin.updatedBy': '1234',
+              name: 'Account',
+              pluralName: 'Accounts',
+              slug: 'account',
+              pluralSlug: 'accounts',
+              idPrefix: null,
+              table: null,
+              'identifiers.name': 'id',
+              'identifiers.slug': 'id',
+              fields: '{}',
+              indexes: '{}',
+              presets: '{}',
             },
           ],
-        });
-      },
+        ],
+      }),
       triggers: {
         model: {
           followingDrop(query, multiple, beforeResult, afterResult) {
@@ -441,9 +451,12 @@ describe('triggers', () => {
           },
         },
       },
+      models: [{ slug: 'account' }],
     });
 
-    const model = await drop.model('account' as Parameters<typeof drop.model>[0]);
+    const model = await factory.drop.model(
+      'account' as Parameters<typeof factory.drop.model>[0],
+    );
 
     // Make sure `finalQuery` matches the initial query payload.
     expect(finalQuery).toMatchObject({
