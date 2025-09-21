@@ -5,9 +5,11 @@ import type {
   Result,
   ResultRecord,
   Statement,
+  StoredObject,
 } from 'blade-compiler';
 
 import type { TriggerOptions, Triggers } from '@/src/triggers';
+import type { StorableObject } from '@/src/types/storage';
 
 type DatabaseResult =
   | { results: Array<Array<RawRow>>; raw: true }
@@ -43,6 +45,11 @@ export interface QueryHandlerOptions {
     statements: Array<Statement>,
     token: string,
   ) => Promise<DatabaseResult> | DatabaseResult;
+
+  storageCaller?: (
+    object: StorableObject,
+    token: string,
+  ) => Promise<StoredObject> | StoredObject;
 
   /**
    * Allows for extending the lifetime of the edge worker invocation until the
