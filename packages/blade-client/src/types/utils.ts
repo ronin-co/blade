@@ -9,6 +9,11 @@ import type {
 
 import type { TriggerOptions, Triggers } from '@/src/triggers';
 
+type DatabaseResult =
+  | { results: Array<Array<RawRow>>; raw: true }
+  | { results: Array<Array<ObjectRow>>; raw: false }
+  | { results: Array<Array<ObjectRow>> };
+
 export interface QueryHandlerOptions {
   /**
    * Object containing triggers for defined schemas.
@@ -37,10 +42,7 @@ export interface QueryHandlerOptions {
   databaseCaller?: (
     statements: Array<Statement>,
     token: string,
-  ) => Promise<
-    | { results: Array<Array<RawRow>>; raw: true }
-    | { results: Array<Array<ObjectRow>>; raw: false }
-  >;
+  ) => Promise<DatabaseResult> | DatabaseResult;
 
   /**
    * Allows for extending the lifetime of the edge worker invocation until the

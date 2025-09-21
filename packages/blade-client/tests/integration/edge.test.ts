@@ -79,20 +79,24 @@ describe('edge runtime', () => {
     await runQueriesWithTriggers(
       queries.map((query) => ({ query })),
       {
-        fetch: async () => {
-          return Response.json({
-            results: [
+        databaseCaller: () => ({
+          results: [
+            [
               {
-                record: {
-                  id: '1',
-                  handle: 'leo',
-                  firstName: 'Leo',
-                  lastName: 'Lamprecht',
-                },
+                id: '1',
+                handle: 'leo',
+                firstName: 'Leo',
+                lastName: 'Lamprecht',
               },
             ],
-          });
-        },
+          ],
+        }),
+        models: [
+          {
+            slug: 'account',
+            fields: { handle: { type: 'string' } },
+          },
+        ],
         triggers: {
           account: {
             followingAdd: async () => {

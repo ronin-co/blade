@@ -442,17 +442,20 @@ describe('factory', () => {
 
   test('correctly format `amount`', async () => {
     const factory = createSyntaxFactory({
-      fetch: async (request) => {
-        mockRequestResolvedValue = request as Request;
-
-        return Response.json({
-          results: [
+      databaseCaller: () => ({
+        results: [
+          [
             {
               amount: 10,
             },
           ],
-        });
-      },
+        ],
+      }),
+      models: [
+        {
+          slug: 'account',
+        },
+      ],
     });
 
     const result = await factory.count.accounts();
@@ -462,16 +465,17 @@ describe('factory', () => {
 
   test('correctly format not found result', async () => {
     const factory = createSyntaxFactory({
-      fetch: async (request) => {
-        mockRequestResolvedValue = request as Request;
-
-        return Response.json({
-          results: [{ record: null }],
-        });
-      },
+      databaseCaller: () => ({
+        results: [[]],
+      }),
+      models: [
+        {
+          slug: 'account',
+        },
+      ],
     });
 
-    const result = await factory.count.accounts();
+    const result = await factory.get.account();
 
     expect(result).toBeNull();
   });

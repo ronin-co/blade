@@ -1,5 +1,7 @@
 import {
+  type ObjectRow,
   type Query,
+  type RawRow,
   type RegularResult,
   type Result,
   type ResultRecord,
@@ -113,9 +115,10 @@ export const runQueries = async <T extends ResultRecord>(
     const callDatabase = options.databaseCaller || defaultDatabaseCaller;
     const output = await callDatabase(transaction.statements, options.token as string);
 
-    const formattedResults = output.raw
-      ? transaction.formatResults(output.results, true)
-      : transaction.formatResults(output.results, false);
+    const formattedResults =
+      'raw' in output && output.raw
+        ? transaction.formatResults(output.results as Array<Array<RawRow>>, true)
+        : transaction.formatResults(output.results as Array<Array<ObjectRow>>, false);
 
     const usableResults = formattedResults.map((result) => {
       if ('record' in result) {

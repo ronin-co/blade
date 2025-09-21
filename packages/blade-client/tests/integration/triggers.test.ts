@@ -1003,10 +1003,13 @@ describe('triggers', () => {
 
   test('run queries with triggers required for write queries', async () => {
     const { remove } = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: We need this to satisfy the types.
-      fetch: async () => {
-        return Response.json({ results: [] });
-      },
+      databaseCaller: () => ({ results: [] }),
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' } },
+        },
+      ],
       requireTriggers: 'write',
       triggers: {
         team: {
