@@ -487,12 +487,9 @@ describe('triggers', () => {
     }));
 
     const { set } = createSyntaxFactory({
-      databaseCaller: (statements) => {
-        console.log(statements);
-        return {
-          results: [previousAccounts, nextAccounts],
-        };
-      },
+      databaseCaller: () => ({
+        results: [previousAccounts, nextAccounts],
+      }),
       models: [
         {
           slug: 'account',
