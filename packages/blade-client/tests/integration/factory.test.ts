@@ -171,7 +171,7 @@ describe('factory', () => {
     ]);
   });
 
-  test('send correct statements for single `get` request', async () => {
+  test('run correct statements for single `get` query', async () => {
     let mockStatements: Array<Statement> | undefined;
 
     const factory = createSyntaxFactory({
@@ -189,7 +189,7 @@ describe('factory', () => {
     );
   });
 
-  test('send correct statements for consecutive mixed requests', async () => {
+  test('run correct statements for consecutive mixed queries', async () => {
     let mockStatements: Array<Statement> | undefined;
 
     const factory = createSyntaxFactory({
@@ -226,7 +226,7 @@ describe('factory', () => {
     );
   });
 
-  test('send correct statements for `get` only `batch` request', async () => {
+  test('run correct statements for `get` only `batch`', async () => {
     let mockStatements: Array<Statement> = [];
 
     const factory = createSyntaxFactory({
@@ -256,37 +256,6 @@ describe('factory', () => {
       'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "spaces" ORDER BY "ronin.createdAt" DESC',
       'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "members" WHERE "id" = ?1 LIMIT 1',
     ]);
-  });
-
-  test('send correct `queries` for mixed `batch` request', async () => {
-    await batch((() => [
-      set.members({
-        with: {
-          createdAt: {
-            lessThan: new Date('2024-04-16T15:02:12.710Z'),
-          },
-          paid: true,
-        },
-        to: {
-          status: 'active',
-          activeFrom: new Date('2024-04-16T15:02:12.710Z'),
-        },
-      }),
-      get.accounts(),
-      // @ts-expect-error `notBeing` is undefined due not not having the
-      // schema types.
-      count.spaces.with.membersCount.notBeing(0),
-      // @ts-expect-error `emailVerified` is undefined due not not having the
-      // schema types.
-      remove.accounts.with.emailVerified(false),
-      add.spaces({
-        with: { handle: 'test-space', members: ['member1', 'member2'] },
-      }),
-    ]) as Parameters<typeof batch>[0]);
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"set":{"members":{"with":{"createdAt":{"lessThan":"2024-04-16T15:02:12.710Z"},"paid":true},"to":{"status":"active","activeFrom":"2024-04-16T15:02:12.710Z"}}}},{"get":{"accounts":{}}},{"count":{"spaces":{"with":{"membersCount":{"notBeing":0}}}}},{"remove":{"accounts":{"with":{"emailVerified":false}}}},{"add":{"spaces":{"with":{"handle":"test-space","members":["member1","member2"]}}}}]}',
-    );
   });
 
   test('make sure `batch` extracts queries synchronously', async () => {
@@ -323,99 +292,6 @@ describe('factory', () => {
 
     expect(mockStatements).toHaveLength(3);
     expect(mockStatements[0]).toHaveLength(2);
-  });
-
-  test('send correct `queries` for single `get` request using `with`', async () => {
-    // @ts-expect-error `startingWith` is undefined due not not having the schema types.
-    await get.accounts.with.handle.startingWith('a');
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"accounts":{"with":{"handle":{"startingWith":"a"}}}}}]}',
-    );
-  });
-
-  test('send correct `queries` for consecutive mixed requests using `with`', async () => {
-    await get.accounts();
-
-    expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"accounts":{}}}]}');
-
-    await get.spaces({
-      with: {
-        createdAt: {
-          lessThan: new Date('2024-04-16T15:02:12.710Z'),
-        },
-      },
-      using: ['members'],
-      orderedBy: {
-        ascending: ['createdAt'],
-      },
-    });
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"spaces":{"with":{"createdAt":{"lessThan":"2024-04-16T15:02:12.710Z"}},"using":["members"],"orderedBy":{"ascending":["createdAt"]}}}}]}',
-    );
-
-    // @ts-expect-error `emailVerified` is undefined due not not having the schema types.
-    await remove.accounts.with.emailVerified(false);
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"remove":{"accounts":{"with":{"emailVerified":false}}}}]}',
-    );
-
-    // @ts-expect-error `greaterThan` is undefined due not not having the schema types.
-    await count.spaces.with.membersCount.greaterThan(10);
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"count":{"spaces":{"with":{"membersCount":{"greaterThan":10}}}}}]}',
-    );
-
-    await set.members({
-      with: {
-        createdAt: {
-          lessThan: new Date('2024-04-16T15:02:12.710Z'),
-        },
-        paid: true,
-      },
-      to: {
-        status: 'active',
-        activeFrom: new Date('2024-04-16T15:02:12.710Z'),
-      },
-    });
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"set":{"members":{"with":{"createdAt":{"lessThan":"2024-04-16T15:02:12.710Z"},"paid":true},"to":{"status":"active","activeFrom":"2024-04-16T15:02:12.710Z"}}}}]}',
-    );
-  });
-
-  test('send correct `queries` for mixed `batch` request using `with`', async () => {
-    await batch((() => [
-      set.members({
-        with: {
-          createdAt: {
-            lessThan: new Date('2024-04-16T15:02:12.710Z'),
-          },
-          paid: true,
-        },
-        to: {
-          status: 'active',
-          activeFrom: new Date('2024-04-16T15:02:12.710Z'),
-        },
-      }),
-      get.accounts(),
-      // @ts-expect-error `notBeing` is undefined due not not having the
-      // schema types.
-      count.spaces.with.membersCount.notBeing(0),
-      // @ts-expect-error `emailVerified` is undefined due not not having the
-      // schema types.
-      remove.accounts.with.emailVerified(false),
-      add.spaces({
-        with: { handle: 'test-space', members: ['member1', 'member2'] },
-      }),
-    ]) as Parameters<typeof batch>[0]);
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"set":{"members":{"with":{"createdAt":{"lessThan":"2024-04-16T15:02:12.710Z"},"paid":true},"to":{"status":"active","activeFrom":"2024-04-16T15:02:12.710Z"}}}},{"get":{"accounts":{}}},{"count":{"spaces":{"with":{"membersCount":{"notBeing":0}}}}},{"remove":{"accounts":{"with":{"emailVerified":false}}}},{"add":{"spaces":{"with":{"handle":"test-space","members":["member1","member2"]}}}}]}',
-    );
   });
 
   test('correctly format `amount`', async () => {
