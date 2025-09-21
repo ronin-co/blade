@@ -939,20 +939,37 @@ describe('triggers', () => {
 
     expect(mockStatements).toMatchObject([
       {
-        sql: 'INSERT INTO "accounts" ("handle") VALUES (?)',
-        params: ['elaine'],
+        sql: 'INSERT INTO "accounts" ("handle", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
+        params: ['elaine', expect.any(String), expect.any(String), expect.any(String)],
+        returning: true,
       },
       {
-        sql: 'INSERT INTO "spaces" ("handle") VALUES (?)',
-        params: ['company'],
+        sql: 'INSERT INTO "spaces" ("handle", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
+        params: ['company', expect.any(String), expect.any(String), expect.any(String)],
+        returning: true,
       },
       {
-        sql: 'INSERT INTO "members" ("account", "space", "role") VALUES (?, ?, ?)',
-        params: ['elaine', 'company', 'owner'],
+        sql: 'INSERT INTO "members" ("account", "space", "role", "id", "ronin.createdAt", "ronin.updatedAt") VALUES ((SELECT "id" FROM "accounts" WHERE "handle" = ?1 LIMIT 1), (SELECT "id" FROM "spaces" WHERE "handle" = ?2 LIMIT 1), ?3, ?4, ?5, ?6) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "account", "space", "role"',
+        params: [
+          'elaine',
+          'company',
+          'owner',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+        returning: true,
       },
       {
-        sql: 'INSERT INTO "products" ("name", "color") VALUES (?, ?)',
-        params: ['MacBook', 'Space Black'],
+        sql: 'INSERT INTO "products" ("name", "color", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name", "color"',
+        params: [
+          'MacBook',
+          'Space Black',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+        returning: true,
       },
     ]);
   });
