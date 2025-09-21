@@ -186,7 +186,9 @@ describe('triggers', () => {
   });
 
   test('run `get` query through factory containing `resolving` trigger', async () => {
-    const { get } = createSyntaxFactory({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory({
       triggers: {
         schema: {
           resolvingGet(_query, multiple) {
@@ -207,20 +209,29 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        { slug: 'schema' },
+        { slug: 'account', fields: { handle: { type: 'string' } } },
+      ],
     });
 
-    const schema = await get.schema.with.id('1');
+    const schema = await factory.get.schema.with.id('1');
     // Make sure a single schema is resolved.
     expect(schema.id).toBe('1');
 
-    const schemas = await get.schemas<Array<unknown>>();
+    const schemas = await factory.get.schemas<Array<unknown>>();
     // Make sure multiple schemas are resolved.
     expect(schemas.length).toBe(2);
 
-    await get.account.with.handle('juri');
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"account":{"with":{"handle":"juri"}}}}]}',
-    );
+    await factory.get.account.with.handle('juri');
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "accounts" WHERE "handle" = ?1 LIMIT 1',
+      params: ['juri'],
+    });
   });
 
   test('run `create` query through factory containing `following` trigger', async () => {
