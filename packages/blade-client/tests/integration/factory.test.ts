@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
 
 import { createSyntaxFactory } from '@/src/index';
-import type { StoredObject } from 'blade-compiler';
+import type { Statement, StoredObject } from 'blade-compiler';
 import type { ResultRecord } from 'blade-syntax/queries';
 
 let mockRequestResolvedValue: Request | undefined;
@@ -320,16 +320,24 @@ describe('factory', () => {
   });
 
   test('make sure `batch` extracts queries synchronously', async () => {
-    const mockFetchNew = mock((request) => {
-      mockRequestResolvedValue = request;
-
-      return Response.json({
-        results: [{ ok: true }],
-      });
-    });
+    const mockStatements: Array<Array<Statement>> = [];
 
     const factory = createSyntaxFactory({
-      fetch: async (request) => mockFetchNew(request),
+      databaseCaller: (statements) => {
+        mockStatements.push(statements);
+
+        if (statements[0].sql.startsWith('DELETE')) {
+          return { results: [[], []] };
+        }
+
+        return { results: [[]] };
+      },
+      models: [
+        { slug: 'account' },
+        { slug: 'space' },
+        { slug: 'member' },
+        { slug: 'user' },
+      ],
       token: 'takashitoken',
     });
 
@@ -337,15 +345,14 @@ describe('factory', () => {
     // `get` requests will be triggered while the `batch` is still being
     // processed and that in turn will make the `get` requests act like they
     // are in a batch.
-    const res = (await Promise.all([
+    (await Promise.all([
       factory.batch(() => [factory.remove.accounts(), factory.remove.spaces()]),
       factory.get.members(),
       factory.get.users(),
     ])) as any;
 
-    expect(res[0][0].ok).toBe(true);
-    expect(res[1].ok).toBe(true);
-    expect(res[2].ok).toBe(true);
+    expect(mockStatements).toHaveLength(3);
+    expect(mockStatements[0]).toHaveLength(2);
   });
 
   test('send correct `queries` for single `get` request using `with`', async () => {
