@@ -420,7 +420,20 @@ describe('triggers', () => {
 
     const { remove } = createSyntaxFactory({
       databaseCaller: () => ({
-        results: [[{ id: '1', handle: 'juri', firstName: 'Juri', lastName: 'Adams' }]],
+        results: [
+          [
+            {
+              id: '1',
+              'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+              'ronin.createdBy': '1234',
+              'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+              'ronin.updatedBy': '1234',
+              handle: 'juri',
+              firstName: 'Juri',
+              lastName: 'Adams',
+            },
+          ],
+        ],
       }),
       models: [
         {
