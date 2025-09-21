@@ -1,42 +1,11 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
 
 import { createSyntaxFactory } from '@/src/index';
+import type { StorableObject } from '@/src/types/storage';
 import type { Statement, StoredObject } from 'blade-compiler';
 import type { ResultRecord } from 'blade-syntax/queries';
 
-let mockRequestResolvedValue: Request | undefined;
-let mockResolvedRequestText: any;
-
-const mockFetch = mock(async (request) => {
-  mockRequestResolvedValue = request;
-  mockResolvedRequestText = await request.text();
-
-  if (request.url === 'https://storage.ronin.co/') {
-    return Response.json({
-      results: [],
-    });
-  }
-
-  return Response.json({
-    results: [],
-  });
-});
-
-global.fetch = mockFetch;
-
 describe('factory', () => {
-  let { get, set, add, remove, count, batch } = {} as ReturnType<
-    typeof createSyntaxFactory
-  >;
-
-  beforeEach(() => {
-    ({ get, set, add, remove, count, batch } = createSyntaxFactory({}));
-
-    mockFetch.mockClear();
-    mockRequestResolvedValue = undefined;
-    mockResolvedRequestText = undefined;
-  });
-
   test('can create multiple factories with different configurations', async () => {
     const factory1 = createSyntaxFactory({ token: 'takashitoken' });
 
@@ -494,53 +463,35 @@ describe('factory', () => {
       type: 'image/jpeg',
     });
 
-    let mockResolvedStorageRequest: Request | undefined;
+    let mockStorableObject: StorableObject | undefined;
 
     const factory = createSyntaxFactory({
-      fetch: async (request) => {
-        if ((request as Request).url === 'https://storage.ronin.co/') {
-          mockResolvedStorageRequest = request as Request;
+      storageCaller: (object) => {
+        mockStorableObject = object;
 
-          const responseBody: StoredObject = {
-            key: 'test-key',
-            name: 'example.jpeg',
-            src: 'https://storage.ronin.co/test-key',
-            meta: {
-              height: 100,
-              width: 100,
-              size: 100,
-              type: 'image/jpeg',
-            },
-            placeholder: {
-              base64: '',
-            },
-          };
-
-          return Response.json(responseBody);
-        }
-
-        return mockFetch(request);
+        return {
+          key: 'test-key',
+          name: 'example.jpeg',
+          src: 'https://storage.ronin.co/test-key',
+          meta: {
+            height: 100,
+            width: 100,
+            size: 100,
+            type: 'image/jpeg',
+          },
+          placeholder: {
+            base64: '',
+          },
+        };
       },
     });
 
-    await factory.add.account({
-      with: {
-        avatar: file,
-      },
-    });
+    await factory.add.account.with.avatar(file);
 
-    const body = await (mockResolvedStorageRequest as Request | undefined)?.text();
+    expect(mockStorableObject?.contentType).toBe('image/jpeg');
 
-    expect(
-      (mockResolvedStorageRequest as Request | undefined)?.headers.get('Content-Type'),
-    ).toBe('image/jpeg');
-
-    expect(
-      (mockResolvedStorageRequest as Request | undefined)?.headers.get(
-        'Content-Disposition',
-      ),
-    ).toBe('form-data; filename="example.jpeg"');
-    expect(body).toBe(await file.text());
+    expect(mockStorableObject?.name).toBe('example.jpeg');
+    expect(mockStorableObject?.value).toBe(file);
 
     expect(mockResolvedRequestText).toEqual(
       '{"queries":[{"add":{"account":{"with":{"avatar":{"key":"test-key","name":"example.jpeg","src":"https://storage.ronin.co/test-key","meta":{"height":100,"width":100,"size":100,"type":"image/jpeg"},"placeholder":{"base64":""}}}}}}]}',
