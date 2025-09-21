@@ -241,21 +241,6 @@ describe('triggers', () => {
     let finalAfterResult: unknown;
 
     const factory = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
-          results: [
-            {
-              record: {
-                id: '1',
-                slug: 'account',
-                pluralSlug: 'accounts',
-                name: 'Account',
-                pluralName: 'Accounts',
-              },
-            },
-          ],
-        });
-      },
       databaseCaller: (statements) => {
         console.log(statements);
         return {
