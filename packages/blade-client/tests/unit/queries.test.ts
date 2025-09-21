@@ -1,26 +1,10 @@
-import { beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
+import { describe, expect, mock, spyOn, test } from 'bun:test';
+import type { Query } from 'blade-compiler';
 
 import { runQueriesWithStorageAndTriggers } from '@/src/queries';
 import { queriesHandler } from '@/src/utils/handlers';
-import type { Query } from 'blade-compiler';
-
-let mockRequestResolvedValue: Request | undefined;
-
-const mockFetch = mock(async (request) => {
-  mockRequestResolvedValue = request;
-
-  return Response.json({
-    results: [],
-  });
-});
-
-global.fetch = mockFetch;
 
 describe('queries handler', () => {
-  beforeEach(() => {
-    mockFetch.mockClear();
-  });
-
   test('throw if called without token', () => {
     const originalToken = import.meta.env.RONIN_TOKEN;
 

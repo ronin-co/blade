@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
+import { describe, expect, mock, spyOn, test } from 'bun:test';
+import type { CombinedInstructions, Query, QueryType, Statement } from 'blade-compiler';
 
 import { createSyntaxFactory } from '@/src/index';
 import { runQueriesWithStorageAndTriggers } from '@/src/queries';
@@ -9,27 +10,8 @@ import {
   type ResolvingAddTrigger,
   runQueriesWithTriggers,
 } from '@/src/triggers';
-import type { CombinedInstructions, Query, QueryType, Statement } from 'blade-compiler';
-
-let mockResolvedRequestText: any;
-
-const mockFetch = mock(async (request) => {
-  mockResolvedRequestText = await request.text();
-
-  return Response.json({
-    results: [],
-  });
-});
-
-global.fetch = mockFetch;
 
 describe('triggers', () => {
-  beforeEach(() => {
-    mockFetch.mockClear();
-
-    mockResolvedRequestText = undefined;
-  });
-
   test('run `get` query with a trigger and ensure the trigger does not modify the original query', async () => {
     const query = {
       get: {
