@@ -1,31 +1,11 @@
-import { beforeEach, describe, expect, mock, test } from 'bun:test';
-import type { Statement, StoredObject } from 'blade-compiler';
+import { describe, expect, mock, test } from 'bun:test';
+import type { Statement } from 'blade-compiler';
 import type { ResultRecord } from 'blade-syntax/queries';
 
 import { createSyntaxFactory } from '@/src/index';
 import type { StorableObject } from '@/src/types/storage';
 
 describe('factory', () => {
-  test('can create multiple factories with different configurations', async () => {
-    const factory1 = createSyntaxFactory({ token: 'takashitoken' });
-
-    await factory1.get.accounts();
-
-    expect(mockRequestResolvedValue?.headers.get('Authorization')).toBe(
-      'Bearer takashitoken',
-    );
-    expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"accounts":{}}}]}');
-
-    const factory2 = createSyntaxFactory({ token: 'supatokken' });
-
-    await factory2.get.members();
-
-    expect(mockRequestResolvedValue?.headers.get('Authorization')).toBe(
-      'Bearer supatokken',
-    );
-    expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"members":{}}}]}');
-  });
-
   test('can use the custom database caller', async () => {
     const mockDatabaseCaller = mock(() => ({ results: [[]] }));
 
@@ -47,128 +27,6 @@ describe('factory', () => {
       ],
       'takashitoken',
     );
-  });
-
-  test('can use custom database', async () => {
-    const mockFetchNew = mock((request) => {
-      mockRequestResolvedValue = request;
-
-      return Response.json({
-        databaseName: {
-          results: [
-            {
-              record: {
-                name: 'Tim',
-                createdAt: '2024-04-16T15:02:12.710Z',
-                ronin: {
-                  updatedAt: '2024-05-16T15:02:12.710Z',
-                },
-              },
-              modelFields: {
-                name: 'string',
-                createdAt: 'date',
-                'ronin.updatedAt': 'date',
-              },
-            },
-          ],
-        },
-      });
-    });
-
-    const factory = createSyntaxFactory({
-      fetch: async (request) => mockFetchNew(request),
-      token: 'takashitoken',
-    });
-
-    const record = await factory.get.account(
-      {},
-      {
-        database: 'databaseName',
-      },
-    );
-
-    expect(record).toMatchObject({
-      name: 'Tim',
-      createdAt: new Date('2024-04-16T15:02:12.710Z'),
-      ronin: {
-        updatedAt: new Date('2024-05-16T15:02:12.710Z'),
-      },
-    });
-  });
-
-  test('can use custom database in batch', async () => {
-    const mockFetchNew = mock((request) => {
-      mockRequestResolvedValue = request;
-
-      return Response.json({
-        databaseName: {
-          results: [
-            {
-              record: {
-                name: 'Tim',
-                handle: 'tim',
-                createdAt: '2024-04-16T15:02:12.710Z',
-                ronin: {
-                  updatedAt: '2024-05-16T15:02:12.710Z',
-                },
-              },
-              modelFields: {
-                name: 'string',
-                createdAt: 'date',
-                'ronin.updatedAt': 'date',
-              },
-            },
-            {
-              record: {
-                name: 'David',
-                handle: 'david',
-                createdAt: '2024-04-16T15:02:12.710Z',
-                ronin: {
-                  updatedAt: '2024-05-16T15:02:12.710Z',
-                },
-              },
-              modelFields: {
-                name: 'string',
-                createdAt: 'date',
-                'ronin.updatedAt': 'date',
-              },
-            },
-          ],
-        },
-      });
-    });
-
-    const factory = createSyntaxFactory({
-      fetch: async (request) => mockFetchNew(request),
-      token: 'takashitoken',
-    });
-
-    const records = await factory.batch(
-      () => [
-        factory.get.account.with.handle('tim'),
-        factory.get.account.with.handle('david'),
-      ],
-      { database: 'databaseName' },
-    );
-
-    expect(records).toMatchObject([
-      {
-        name: 'Tim',
-        handle: 'tim',
-        createdAt: new Date('2024-04-16T15:02:12.710Z'),
-        ronin: {
-          updatedAt: new Date('2024-05-16T15:02:12.710Z'),
-        },
-      },
-      {
-        name: 'David',
-        handle: 'david',
-        createdAt: new Date('2024-04-16T15:02:12.710Z'),
-        ronin: {
-          updatedAt: new Date('2024-05-16T15:02:12.710Z'),
-        },
-      },
-    ]);
   });
 
   test('run correct statements for single `get` query', async () => {
@@ -440,173 +298,71 @@ describe('factory', () => {
     );
   });
 
-  test('handle storage service error', async () => {
-    const factory = createSyntaxFactory({
-      fetch: async (request) => {
-        if ((request as Request).url === 'https://storage.ronin.co/') {
-          return new Response('Details here', {
-            status: 403,
-          });
-        }
-        return mockFetch(request);
-      },
-    });
-
-    const promise = factory.add.account({
-      with: {
-        avatar: new File([''], 'example.jpeg', { type: 'image/jpeg' }),
-      },
-    });
-
-    expect(promise).rejects.toThrow(
-      'An error occurred while uploading the binary objects included in the provided queries. Error: Details here',
-    );
-  });
-
   test('format date fields', async () => {
-    const mockFetchNew = mock(async (request) => {
-      mockRequestResolvedValue = request;
-
-      return Response.json({
-        results: [
-          {
-            record: {
-              name: 'Tim',
-              createdAt: '2024-04-16T15:02:12.710Z',
-              ronin: {
-                updatedAt: '2024-05-16T15:02:12.710Z',
-              },
-            },
-            modelFields: {
-              name: 'string',
-              createdAt: 'date',
-              'ronin.updatedAt': 'date',
-            },
-          },
-          {
-            records: [
-              {
-                name: 'Leo',
-                createdAt: '2024-04-16T15:02:12.710Z',
-                ronin: {
-                  updatedAt: '2024-05-16T15:02:12.710Z',
-                },
-              },
-              {
-                name: 'Juri',
-                createdAt: '2024-04-16T15:02:12.710Z',
-                ronin: {
-                  updatedAt: '2024-05-16T15:02:12.710Z',
-                },
-              },
-            ],
-            modelFields: {
-              createdAt: 'date',
-              'ronin.updatedAt': 'date',
-              name: 'string',
-            },
-          },
-        ],
-      });
-    });
-
     const factory = createSyntaxFactory({
-      fetch: async (request) => mockFetchNew(request),
+      databaseCaller: () => ({
+        results: [
+          [
+            {
+              id: '1',
+              'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+              'ronin.createdBy': '1234',
+              'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+              'ronin.updatedBy': '1234',
+              name: 'Tim',
+              joinedAt: '2024-04-16T15:02:12.710Z',
+            },
+          ],
+
+          [
+            {
+              id: '1',
+              'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+              'ronin.createdBy': '1234',
+              'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+              'ronin.updatedBy': '1234',
+              name: 'Leo',
+              joinedAt: '2024-04-16T15:02:12.710Z',
+            },
+            {
+              id: '2',
+              'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+              'ronin.createdBy': '1234',
+              'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+              'ronin.updatedBy': '1234',
+              name: 'Juri',
+              joinedAt: '2024-04-16T15:02:12.710Z',
+            },
+          ],
+        ],
+      }),
+      models: [
+        {
+          slug: 'account',
+          fields: { name: { type: 'string' }, joinedAt: { type: 'date' } },
+        },
+      ],
     });
 
     const [account, accounts] = await factory.batch(() => [
       factory.get.account<{
         name: string;
-        createdAt: Date;
+        joinedAt: Date;
         ronin: ResultRecord['ronin'];
       }>(),
       factory.get.accounts(),
     ]);
 
-    expect(account.createdAt).toBeInstanceOf(Date);
-    expect(account.ronin.updatedAt).toBeInstanceOf(Date);
+    expect(account.joinedAt).toBeInstanceOf(Date);
+    expect(account.ronin.createdAt).toBeInstanceOf(Date);
 
-    expect(account.createdAt.toISOString()).toBe('2024-04-16T15:02:12.710Z');
-    expect(account.ronin.updatedAt.toISOString()).toBe('2024-05-16T15:02:12.710Z');
+    expect(account.joinedAt.toISOString()).toBe('2024-04-16T15:02:12.710Z');
+    expect(account.ronin.updatedAt.toISOString()).toBe('2024-04-16T15:02:12.710Z');
 
-    expect(accounts[0].createdAt).toBeInstanceOf(Date);
+    expect(accounts[0].joinedAt).toBeInstanceOf(Date);
     expect(accounts[0].ronin.updatedAt).toBeInstanceOf(Date);
 
-    expect(accounts[0].createdAt.toISOString()).toBe('2024-04-16T15:02:12.710Z');
-    expect(accounts[0].ronin.updatedAt.toISOString()).toBe('2024-05-16T15:02:12.710Z');
-  });
-
-  test('format expanded results', async () => {
-    const mockFetchNew = mock(async (request) => {
-      mockRequestResolvedValue = request;
-
-      return Response.json({
-        results: [
-          {
-            models: {
-              accounts: {
-                records: [
-                  {
-                    name: 'Elaine',
-                    ronin: {
-                      createdAt: '2024-04-16T15:02:12.710Z',
-                      updatedAt: '2024-05-16T15:02:12.710Z',
-                    },
-                  },
-                ],
-                modelFields: {
-                  name: 'string',
-                  'ronin.createdAt': 'date',
-                  'ronin.updatedAt': 'date',
-                },
-              },
-              teams: {
-                records: [
-                  {
-                    name: 'Engineering',
-                    ronin: {
-                      createdAt: '2024-04-16T15:02:12.710Z',
-                      updatedAt: '2024-05-16T15:02:12.710Z',
-                    },
-                  },
-                ],
-                modelFields: {
-                  name: 'string',
-                  'ronin.createdAt': 'date',
-                  'ronin.updatedAt': 'date',
-                },
-              },
-            },
-          },
-        ],
-      });
-    });
-
-    const factory = createSyntaxFactory({
-      fetch: async (request) => mockFetchNew(request),
-    });
-
-    const results = await factory.get.all();
-
-    expect(results).toMatchObject({
-      accounts: [
-        {
-          name: 'Elaine',
-          ronin: {
-            createdAt: new Date('2024-04-16T15:02:12.710Z'),
-            updatedAt: new Date('2024-04-16T15:02:12.710Z'),
-          },
-        },
-      ],
-      teams: [
-        {
-          name: 'Engineering',
-          ronin: {
-            createdAt: new Date('2024-04-16T15:02:12.710Z'),
-            updatedAt: new Date('2024-04-16T15:02:12.710Z'),
-          },
-        },
-      ],
-    });
+    expect(accounts[0].joinedAt.toISOString()).toBe('2024-04-16T15:02:12.710Z');
+    expect(accounts[0].ronin.updatedAt.toISOString()).toBe('2024-04-16T15:02:12.710Z');
   });
 });

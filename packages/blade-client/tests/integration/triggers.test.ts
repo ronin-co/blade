@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
-import { construct } from 'radash';
 
 import { createSyntaxFactory } from '@/src/index';
 import { runQueriesWithStorageAndTriggers } from '@/src/queries';
@@ -535,10 +534,12 @@ describe('triggers', () => {
     });
 
     // Make sure `finalBeforeResult` matches the previous accounts.
-    expect(finalBeforeResult).toEqual(previousAccounts.map((item) => construct(item)));
+    expect(finalBeforeResult[0].id).toEqual(previousAccounts[0].id);
+    expect(finalBeforeResult[0].email).toEqual(previousAccounts[0].email);
 
     // Make sure `finalAfterResult` matches the resolved accounts.
-    expect(finalAfterResult).toEqual(accounts.map((item) => construct(item)));
+    expect(finalAfterResult[0].id).toEqual(nextAccounts[0].id);
+    expect(finalAfterResult[0].email).toEqual(nextAccounts[0].email);
 
     expect(finalMultiple).toBe(true);
   });

@@ -120,25 +120,11 @@ export const runQueries = async <T extends ResultRecord>(
         ? transaction.formatResults(output.results as Array<Array<RawRow>>, true)
         : transaction.formatResults(output.results as Array<Array<ObjectRow>>, false);
 
-    const usableResults = formattedResults.map((result) => {
-      if ('record' in result) {
-        const { modelFields, ...rest } = result;
-        return { ...rest, schema: modelFields };
-      }
-
-      if ('records' in result) {
-        const { modelFields, ...rest } = result;
-        return { ...rest, schema: modelFields };
-      }
-
-      return result;
-    });
-
     // The `transaction.formatResults` logic of the query compiler (which is invoked
     // above), purposefully only formats results in a network-serializable manner. The
     // formatting logic below applies formatting that is specific to the JavaScript
     // environment, such as using `Date` instances for timestamps.
-    const finalResults = formatResults<T>(usableResults as Array<Result<T>>);
+    const finalResults = formatResults<T>(formattedResults as Array<Result<T>>);
 
     return finalResults.map((result) => ({ result }));
   }
