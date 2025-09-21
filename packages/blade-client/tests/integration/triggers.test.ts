@@ -45,7 +45,9 @@ describe('triggers', () => {
   });
 
   test('run `get` query through factory containing `during` trigger', async () => {
-    const { get } = createSyntaxFactory({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory({
       triggers: {
         account: {
           get(query, multiple) {
@@ -65,20 +67,32 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' }, email: { type: 'string' } },
+        },
+      ],
     });
 
-    await get.account.with.handle('juri');
+    await factory.get.account.with.handle('juri');
     // Make sure `leo` is resolved as the account handle.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"account":{"with":{"handle":"leo"}}}}]}',
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "handle" = ?1 LIMIT 1',
+      params: ['leo'],
+    });
 
-    await get.accounts();
+    await factory.get.accounts();
     // Make sure the email address of all resolved accounts ends with the
     // `@ronin.co` domain name.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"accounts":{"with":{"email":{"endingWith":"@ronin.co"}}}}}]}',
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "email" LIKE ?1',
+      params: ['%@ronin.co'],
+    });
   });
 
   test('return full query from `during` trigger', async () => {
