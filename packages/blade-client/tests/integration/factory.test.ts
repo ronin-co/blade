@@ -189,7 +189,7 @@ describe('factory', () => {
     );
   });
 
-  test('send correct `queries` for consecutive mixed requests', async () => {
+  test('send correct statements for consecutive mixed requests', async () => {
     let mockStatements: Array<Statement> | undefined;
 
     const factory = createSyntaxFactory({
@@ -226,31 +226,36 @@ describe('factory', () => {
     );
   });
 
-  test('send correct `queries` for `get` only `batch` request', async () => {
-    await batch((() => [
-      get.accounts(),
-      // @ts-expect-error `startingWith` is undefined due not not having the
-      // schema types.
-      get.members.with.handle.startingWith('ronin'),
-      get.spaces({
-        with: {
-          createdAt: {
-            lessThan: new Date('2024-04-16T15:02:12.710Z'),
-          },
-        },
-        using: ['members'],
-        orderedBy: {
-          ascending: ['createdAt'],
-        },
-      }),
-      get.members.limitedTo(100),
-      get.spaces.orderedBy.descending(['handle']),
-      get.member.with.id('123'),
-    ]) as Parameters<typeof batch>[0]);
+  test('send correct statements for `get` only `batch` request', async () => {
+    let mockStatements: Array<Statement> = [];
 
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"accounts":{}}},{"get":{"members":{"with":{"handle":{"startingWith":"ronin"}}}}},{"get":{"spaces":{"with":{"createdAt":{"lessThan":"2024-04-16T15:02:12.710Z"}},"using":["members"],"orderedBy":{"ascending":["createdAt"]}}}},{"get":{"members":{"limitedTo":100}}},{"get":{"spaces":{"orderedBy":{"descending":["handle"]}}}},{"get":{"member":{"with":{"id":"123"}}}}]}',
-    );
+    const factory = createSyntaxFactory({
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[], [], [], [], []] };
+      },
+      models: [
+        { slug: 'account' },
+        { slug: 'member', fields: { handle: { type: 'string' } } },
+        { slug: 'space' },
+      ],
+    });
+
+    await factory.batch(() => [
+      factory.get.accounts(),
+      factory.get.members.with.handle('ronin'),
+      factory.get.members.limitedTo(100),
+      factory.get.spaces.orderedBy.descending(['ronin.createdAt']),
+      factory.get.member.with.id('123'),
+    ]);
+
+    expect(mockStatements.map((item) => item.sql)).toEqual([
+      'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"',
+      'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "members" WHERE "handle" = ?1',
+      'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "members" ORDER BY "ronin.createdAt" DESC LIMIT 101',
+      'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "spaces" ORDER BY "ronin.createdAt" DESC',
+      'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "members" WHERE "id" = ?1 LIMIT 1',
+    ]);
   });
 
   test('send correct `queries` for mixed `batch` request', async () => {
