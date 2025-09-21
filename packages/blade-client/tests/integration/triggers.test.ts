@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
+import { construct } from 'radash';
 
 import { createSyntaxFactory } from '@/src/index';
 import { runQueriesWithStorageAndTriggers } from '@/src/queries';
@@ -464,31 +465,40 @@ describe('triggers', () => {
     const previousAccounts = [
       {
         id: '1',
+        'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+        'ronin.createdBy': '1234',
+        'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+        'ronin.updatedBy': '1234',
         email: 'prev@ronin.co',
       },
       {
         id: '2',
+        'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+        'ronin.createdBy': '1234',
+        'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+        'ronin.updatedBy': '1234',
         email: 'prev@ronin.co',
       },
     ];
 
-    const nextAccounts = [
-      {
-        id: '1',
-        email: 'test@ronin.co',
-      },
-      {
-        id: '2',
-        email: 'test@ronin.co',
-      },
-    ];
+    const nextAccounts = previousAccounts.map((account) => ({
+      ...account,
+      email: 'test@ronin.co',
+    }));
 
     const { set } = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
-          results: [{ records: previousAccounts }, { records: nextAccounts }],
-        });
+      databaseCaller: (statements) => {
+        console.log(statements);
+        return {
+          results: [previousAccounts, nextAccounts],
+        };
       },
+      models: [
+        {
+          slug: 'account',
+          fields: { email: { type: 'string' } },
+        },
+      ],
       triggers: {
         account: {
           followingSet(query, multiple, beforeResult, afterResult) {
@@ -528,10 +538,10 @@ describe('triggers', () => {
     });
 
     // Make sure `finalBeforeResult` matches the previous accounts.
-    expect(finalBeforeResult).toEqual(previousAccounts);
+    expect(finalBeforeResult).toEqual(previousAccounts.map((item) => construct(item)));
 
     // Make sure `finalAfterResult` matches the resolved accounts.
-    expect(finalAfterResult).toEqual(accounts);
+    expect(finalAfterResult).toEqual(accounts.map((item) => construct(item)));
 
     expect(finalMultiple).toBe(true);
   });

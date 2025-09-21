@@ -491,8 +491,6 @@ class Transaction {
               });
             }) as Array<Array<Array<RawRow>>>);
 
-        console.log('TSET', absoluteResults)
-
         if (queryModel === 'all') {
           const models: ExpandedResult<RecordType>['models'] = {};
 
