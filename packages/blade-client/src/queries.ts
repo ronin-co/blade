@@ -18,20 +18,9 @@ import type {
   ExpandedFormattedResult,
   FormattedResults,
   QueryHandlerOptions,
-  QueryResponse,
   RegularFormattedResult,
 } from '@/src/types/utils';
-import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
-import { getResponseBody } from '@/src/utils/errors';
 import { formatDateFields, validateToken } from '@/src/utils/helpers';
-
-interface RequestPayload {
-  queries?: Array<Query>;
-  nativeQueries?: Array<{ query: string; values: Array<unknown> }>;
-}
-
-type RequestBody = RequestPayload | Record<string, RequestPayload>;
-
 export interface QueryPerDatabase {
   query: Query;
   database?: string;
@@ -99,115 +88,31 @@ export const runQueries = async <T extends ResultRecord>(
   // we don't want to require a token.
   validateToken(options);
 
-  if (options.models || options.databaseCaller) {
-    const rawQueries = queries
-      .filter((item) => 'query' in item)
-      .map((item) => item.query);
+  const rawQueries = queries.filter((item) => 'query' in item).map((item) => item.query);
 
-    const transaction = new Transaction(rawQueries, {
-      models: options.models,
-      defaultRecordLimit: options.defaultRecordLimit,
+  const transaction = new Transaction(rawQueries, {
+    models: options.models,
+    defaultRecordLimit: options.defaultRecordLimit,
 
-      // Hive doesn't support non-deterministic default values at the moment.
-      inlineDefaults: true,
-    });
-
-    const callDatabase = options.databaseCaller || defaultDatabaseCaller;
-    const output = await callDatabase(transaction.statements, options.token as string);
-
-    const formattedResults =
-      'raw' in output && output.raw
-        ? transaction.formatResults(output.results as Array<Array<RawRow>>, true)
-        : transaction.formatResults(output.results as Array<Array<ObjectRow>>, false);
-
-    // The `transaction.formatResults` logic of the query compiler (which is invoked
-    // above), purposefully only formats results in a network-serializable manner. The
-    // formatting logic below applies formatting that is specific to the JavaScript
-    // environment, such as using `Date` instances for timestamps.
-    const finalResults = formatResults<T>(formattedResults as Array<Result<T>>);
-
-    return finalResults.map((result) => ({ result }));
-  }
-
-  let hasWriteQuery: boolean | null = null;
-  let hasSingleQuery = true;
-
-  const operations = queries.reduce(
-    (acc, details) => {
-      const { database = 'default' } = details;
-      if (!acc[database]) acc[database] = {};
-
-      // If a database is being selected that isn't the default database, that means a
-      // different format should be chosen for the request body.
-      if (database !== 'default') hasSingleQuery = false;
-
-      if ('query' in details) {
-        const { query } = details;
-
-        if (!acc[database].queries) acc[database].queries = [];
-        acc[database].queries.push(query);
-
-        const queryType = Object.keys(query)[0];
-        hasWriteQuery =
-          hasWriteQuery ||
-          (WRITE_QUERY_TYPES as ReadonlyArray<string>).includes(queryType);
-
-        return acc;
-      }
-
-      const { statement } = details;
-      if (!acc[database].nativeQueries) acc[database].nativeQueries = [];
-
-      acc[database].nativeQueries.push({
-        query: statement.sql,
-        values: statement.params,
-      });
-
-      return acc;
-    },
-    {} as Record<string, RequestPayload>,
-  );
-
-  const requestBody: RequestBody = hasSingleQuery ? operations.default : operations;
-
-  // Runtimes like Cloudflare Workers don't support `cache` yet.
-  const hasCachingSupport = 'cache' in new Request('https://ronin.co');
-
-  const request = new Request('https://data.ronin.co', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${options.token}`,
-    },
-    body: JSON.stringify(requestBody),
-
-    // Disable cache if write queries are performed, as those must be
-    // guaranteed to reach RONIN.
-    ...(hasWriteQuery && hasCachingSupport ? { cache: 'no-store' } : {}),
-
-    // Allow for passing custom `fetch` options (e.g. in Next.js).
-    ...(typeof options?.fetch === 'object' ? options.fetch : {}),
+    // Hive doesn't support non-deterministic default values at the moment.
+    inlineDefaults: true,
   });
 
-  const fetcher = typeof options?.fetch === 'function' ? options.fetch : fetch;
-  const response = await fetcher(request);
-
-  const responseResults = await getResponseBody<QueryResponse<T>>(response);
+  const callDatabase = options.databaseCaller || defaultDatabaseCaller;
+  const output = await callDatabase(transaction.statements, options.token as string);
 
   const startFormatting = performance.now();
-  const formattedResults: Array<ResultPerDatabase<T>> = [];
 
-  if ('results' in responseResults) {
-    const usableResults = responseResults.results as Array<Result<T>>;
-    const finalResults = formatResults<T>(usableResults);
+  const formattedResults =
+    'raw' in output && output.raw
+      ? transaction.formatResults(output.results as Array<Array<RawRow>>, true)
+      : transaction.formatResults(output.results as Array<Array<ObjectRow>>, false);
 
-    formattedResults.push(...finalResults.map((result) => ({ result })));
-  } else {
-    for (const [database, { results }] of Object.entries(responseResults)) {
-      const finalResults = formatResults<T>(results);
-      formattedResults.push(...finalResults.map((result) => ({ result, database })));
-    }
-  }
+  // The `transaction.formatResults` logic of the query compiler (which is invoked
+  // above), purposefully only formats results in a network-serializable manner. The
+  // formatting logic below applies formatting that is specific to the JavaScript
+  // environment, such as using `Date` instances for timestamps.
+  const finalResults = formatResults<T>(formattedResults as Array<Result<T>>);
 
   const endFormatting = performance.now();
 
@@ -222,7 +127,7 @@ export const runQueries = async <T extends ResultRecord>(
     console.log(`Formatting took ${endFormatting - startFormatting}ms`);
   }
 
-  return formattedResults;
+  return finalResults.map((result) => ({ result }));
 };
 
 export async function runQueriesWithStorageAndTriggers<T extends ResultRecord>(
