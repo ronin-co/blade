@@ -1,6 +1,13 @@
-import type { TriggerOptions, Triggers } from '@/src/triggers';
+import type {
+  Model,
+  ObjectRow,
+  RawRow,
+  Result,
+  ResultRecord,
+  Statement,
+} from 'blade-compiler';
 
-import type { Model, Result, ResultRecord } from 'blade-compiler';
+import type { TriggerOptions, Triggers } from '@/src/triggers';
 
 export interface QueryHandlerOptions {
   /**
@@ -26,6 +33,14 @@ export interface QueryHandlerOptions {
    * Alternatively, an entire `fetch` replacement function may be passed.
    */
   fetch?: Parameters<typeof fetch>[1] | typeof fetch;
+
+  databaseCaller?: (
+    statements: Array<Statement>,
+    token: string,
+  ) => Promise<
+    | { results: Array<Array<RawRow>>; raw: true }
+    | { results: Array<Array<ObjectRow>>; raw: false }
+  >;
 
   /**
    * Allows for extending the lifetime of the edge worker invocation until the

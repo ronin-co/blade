@@ -47,6 +47,37 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
+const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
+  statements,
+  token,
+) => {
+  if (!clients[token]) {
+    clients[token] = new Hive({
+      storage: ({ logger, events }) =>
+        new RemoteStorage({
+          logger,
+          events,
+          remote: 'https://db.ronin.co/api',
+          token,
+        }),
+    });
+  }
+
+  const hive = clients[token];
+  const parent = new Selector({ type: 'namespace', id: 'ronin' });
+  const db = new Selector({ type: 'database', id: 'main', parent });
+
+  const results = await hive.storage.query(db, {
+    statements: statements.map((item) => ({ ...item, method: 'values' })),
+    mode: 'DEFERRED',
+  });
+
+  return {
+    results: results.map((result) => result.rows as Array<RowValues>),
+    raw: true,
+  };
+};
+
 /**
  * Run a set of given queries.
  *
@@ -79,32 +110,14 @@ export const runQueries = async <T extends ResultRecord>(
       inlineDefaults: true,
     });
 
-    const token = options.token as string;
+    const callDatabase = options.databaseCaller || defaultDatabaseCaller;
+    const output = await callDatabase(transaction.statements, options.token as string);
 
-    if (!clients[token]) {
-      clients[token] = new Hive({
-        storage: ({ logger, events }) =>
-          new RemoteStorage({
-            logger,
-            events,
-            remote: 'https://db.ronin.co/api',
-            token: options.token,
-          }),
-      });
-    }
+    const formattedResults = output.raw
+      ? transaction.formatResults(output.results, true)
+      : transaction.formatResults(output.results, false);
 
-    const hive = clients[token];
-    const parent = new Selector({ type: 'namespace', id: 'ronin' });
-    const db = new Selector({ type: 'database', id: 'main', parent });
-
-    const results = await hive.storage.query(db, {
-      statements: transaction.statements.map((item) => ({ ...item, method: 'values' })),
-      mode: 'DEFERRED',
-    });
-
-    const rawResults = results.map((result) => result.rows as Array<RowValues>);
-
-    const usableResults = transaction.formatResults(rawResults, true).map((result) => {
+    const usableResults = formattedResults.map((result) => {
       if ('record' in result) {
         const { modelFields, ...rest } = result;
         return { ...rest, schema: modelFields };
