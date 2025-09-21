@@ -1115,17 +1115,7 @@ describe('triggers', () => {
         params: ['company', expect.any(String), expect.any(String), expect.any(String)],
       },
       {
-        sql: 'INSERT INTO "products" ("name", "color", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name", "color"',
-        params: [
-          'MacBook',
-          'Space Black',
-          expect.any(String),
-          expect.any(String),
-          expect.any(String),
-        ],
-      },
-      {
-        sql: 'INSERT INTO "members" ("space", "role", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "role"',
+        sql: 'INSERT INTO "members" ("space", "role", "id", "ronin.createdAt", "ronin.updatedAt") VALUES ((SELECT "id" FROM "spaces" WHERE "handle" = ?1 LIMIT 1), ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "role"',
         params: [
           'company',
           'owner',
@@ -1135,10 +1125,20 @@ describe('triggers', () => {
         ],
       },
       {
-        sql: 'INSERT INTO "apps" ("space", "token", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "token"',
+        sql: 'INSERT INTO "apps" ("space", "token", "id", "ronin.createdAt", "ronin.updatedAt") VALUES ((SELECT "id" FROM "spaces" WHERE "handle" = ?1 LIMIT 1), ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "token"',
         params: [
           'company',
           '1234',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+      },
+      {
+        sql: 'INSERT INTO "products" ("name", "color", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name", "color"',
+        params: [
+          'MacBook',
+          'Space Black',
           expect.any(String),
           expect.any(String),
           expect.any(String),
