@@ -171,62 +171,58 @@ describe('factory', () => {
     ]);
   });
 
-  test('send correct `queries` for single `get` request', async () => {
-    await get.accounts();
+  test('send correct statements for single `get` request', async () => {
+    let mockStatements: Array<Statement> | undefined;
 
-    expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"accounts":{}}}]}');
+    const factory = createSyntaxFactory({
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [{ slug: 'account' }],
+    });
+
+    await factory.get.accounts();
+
+    expect(mockStatements?.[0]?.sql).toBe(
+      'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"',
+    );
   });
 
   test('send correct `queries` for consecutive mixed requests', async () => {
-    await get.accounts();
+    let mockStatements: Array<Statement> | undefined;
 
-    expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"accounts":{}}}]}');
-
-    await get.spaces({
-      with: {
-        createdAt: {
-          lessThan: new Date('2024-04-16T15:02:12.710Z'),
+    const factory = createSyntaxFactory({
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        {
+          slug: 'space',
+          fields: { createdAt: { type: 'date' }, memberCount: { type: 'number' } },
         },
-      },
-      using: ['members'],
-      orderedBy: {
-        ascending: ['createdAt'],
-      },
+        {
+          slug: 'account',
+          fields: { emailVerified: { type: 'boolean' } },
+        },
+      ],
     });
 
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"spaces":{"with":{"createdAt":{"lessThan":"2024-04-16T15:02:12.710Z"}},"using":["members"],"orderedBy":{"ascending":["createdAt"]}}}}]}',
-    );
-
-    // @ts-expect-error `emailVerified` is undefined due not not having the schema types.
-    await remove.accounts.with.emailVerified(false);
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"remove":{"accounts":{"with":{"emailVerified":false}}}}]}',
-    );
-
-    // @ts-expect-error `greaterThan` is undefined due not not having the schema types.
-    await count.spaces.with.membersCount.greaterThan(10);
-
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"count":{"spaces":{"with":{"membersCount":{"greaterThan":10}}}}}]}',
-    );
-
-    await set.members({
-      with: {
-        createdAt: {
-          lessThan: new Date('2024-04-16T15:02:12.710Z'),
-        },
-        paid: true,
-      },
-      to: {
-        status: 'active',
-        activeFrom: new Date('2024-04-16T15:02:12.710Z'),
-      },
+    await factory.get.spaces.with({
+      createdAt: { lessThan: new Date('2024-04-16T15:02:12.710Z') },
     });
 
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"set":{"members":{"with":{"createdAt":{"lessThan":"2024-04-16T15:02:12.710Z"},"paid":true},"to":{"status":"active","activeFrom":"2024-04-16T15:02:12.710Z"}}}}]}',
+    expect(mockStatements?.[0]?.sql).toBe(
+      'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "createdAt", "memberCount" FROM "spaces" WHERE "createdAt" < ?1',
+    );
+
+    await factory.remove.accounts.with({
+      emailVerified: { being: false },
+    });
+
+    expect(mockStatements?.[0]?.sql).toBe(
+      'DELETE FROM "accounts" WHERE "emailVerified" = ?1 RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "emailVerified"',
     );
   });
 
