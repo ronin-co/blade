@@ -972,54 +972,7 @@ describe('triggers', () => {
   });
 
   test('return queries from `after` trigger', async () => {
-    const mockFetchNew: typeof fetch = async (input: string | URL | Request) => {
-      mockResolvedRequestText = await (input as Request).text();
-
-      return Response.json({
-        default: {
-          results: [
-            {
-              record: {
-                handle: 'company',
-              },
-              modelFields: {
-                handle: 'string',
-              },
-            },
-            {
-              record: {
-                space: '1234',
-                role: 'owner',
-              },
-              modelFields: {
-                space: 'link',
-                role: 'string',
-              },
-            },
-            {
-              record: {
-                space: '1234',
-                token: '1234',
-              },
-              modelFields: {
-                space: 'link',
-                role: 'string',
-              },
-            },
-            {
-              record: {
-                name: 'MacBook',
-                color: 'Space Black',
-              },
-              modelFields: {
-                name: 'string',
-                color: 'string',
-              },
-            },
-          ],
-        },
-      });
-    };
+    let mockStatements: Array<Statement> | undefined;
 
     const memberTriggers = { followingAdd: () => undefined };
     const memberTriggersSpy = spyOn(memberTriggers, 'followingAdd');
@@ -1027,7 +980,7 @@ describe('triggers', () => {
     const appTriggers = { followingAdd: () => undefined };
     const appTriggersSpy = spyOn(appTriggers, 'followingAdd');
 
-    const { batch, add } = createSyntaxFactory({
+    const factory = createSyntaxFactory({
       triggers: {
         space: {
           afterAdd(query) {
@@ -1064,20 +1017,86 @@ describe('triggers', () => {
         member: memberTriggers,
         app: appTriggers,
       },
-      fetch: mockFetchNew,
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+
+        return {
+          results: [
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                handle: 'company',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                space: '1234',
+                role: 'owner',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                space: '1234',
+                token: '1234',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                name: 'MacBook',
+                color: 'Space Black',
+              },
+            ],
+          ],
+        };
+      },
+
+      models: [
+        { slug: 'space', fields: { handle: { type: 'string' } } },
+        {
+          slug: 'member',
+          fields: { space: { type: 'link', target: 'space' }, role: { type: 'string' } },
+        },
+        {
+          slug: 'app',
+          fields: { space: { type: 'link', target: 'space' }, token: { type: 'string' } },
+        },
+        {
+          slug: 'product',
+          fields: { name: { type: 'string' }, color: { type: 'string' } },
+        },
+      ],
     });
 
     // We're using a batch to be able to check whether the results of the queries
     // returned from the `after` trigger are being excluded correctly.
-    const results = await batch(() => [
-      add.space.with.handle('company'),
-      add.product.with({
+    const results = await factory.batch(() => [
+      factory.add.space.with.handle('company'),
+      factory.add.product.with({
         name: 'MacBook',
         color: 'Space Black',
       }),
     ]);
 
-    expect(results).toEqual([
+    expect(results).toMatchObject([
       {
         handle: 'company',
       },
@@ -1090,16 +1109,42 @@ describe('triggers', () => {
     expect(memberTriggersSpy).toHaveBeenCalled();
     expect(appTriggersSpy).toHaveBeenCalled();
 
-    expect(mockResolvedRequestText).toEqual(
-      JSON.stringify({
-        queries: [
-          { add: { space: { with: { handle: 'company' } } } },
-          { add: { member: { with: { space: { handle: 'company' }, role: 'owner' } } } },
-          { add: { app: { with: { space: { handle: 'company' }, token: '1234' } } } },
-          { add: { product: { with: { name: 'MacBook', color: 'Space Black' } } } },
+    expect(mockStatements).toMatchObject([
+      {
+        sql: 'INSERT INTO "spaces" ("handle", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
+        params: ['company', expect.any(String), expect.any(String), expect.any(String)],
+      },
+      {
+        sql: 'INSERT INTO "products" ("name", "color", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name", "color"',
+        params: [
+          'MacBook',
+          'Space Black',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
         ],
-      }),
-    );
+      },
+      {
+        sql: 'INSERT INTO "members" ("space", "role", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "role"',
+        params: [
+          'company',
+          'owner',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+      },
+      {
+        sql: 'INSERT INTO "apps" ("space", "token", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "token"',
+        params: [
+          'company',
+          '1234',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+      },
+    ]);
   });
 
   test('run queries with triggers required for all queries', async () => {
