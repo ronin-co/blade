@@ -96,7 +96,9 @@ describe('triggers', () => {
   });
 
   test('return full query from `during` trigger', async () => {
-    const { get } = createSyntaxFactory({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory({
       triggers: {
         account: {
           get(query) {
@@ -110,13 +112,22 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        { slug: 'account', fields: { handle: { type: 'string' } } },
+        { slug: 'team', fields: { handle: { type: 'string' } } },
+      ],
     });
 
-    await get.account.with.handle('elaine');
+    await factory.get.account.with.handle('elaine');
 
-    expect(mockResolvedRequestText).toEqual(
-      JSON.stringify({ queries: [{ get: { team: { with: { handle: 'elaine' } } } }] }),
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "teams" WHERE "handle" = ?1 LIMIT 1',
+      params: ['elaine'],
+    });
   });
 
   test('run `get` query through factory with dynamically generated config', async () => {
