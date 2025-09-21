@@ -419,20 +419,15 @@ describe('triggers', () => {
     let finalAfterResult: unknown;
 
     const { remove } = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
-          results: [
-            {
-              record: {
-                id: '1',
-                handle: 'juri',
-                firstName: 'Juri',
-                lastName: 'Adams',
-              },
-            },
-          ],
-        });
-      },
+      databaseCaller: () => ({
+        results: [[{ id: '1', handle: 'juri', firstName: 'Juri', lastName: 'Adams' }]],
+      }),
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' } },
+        },
+      ],
       triggers: {
         account: {
           followingRemove(_query, _multiple, beforeResult, afterResult) {
