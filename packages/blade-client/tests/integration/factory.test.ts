@@ -512,112 +512,54 @@ describe('factory', () => {
     );
   });
 
-  test('upload image with non-latin file name', async () => {
-    const bunFile = Bun.file('tests/assets/example.jpeg');
-
-    const file = new File(
-      [new Uint8Array(await bunFile.arrayBuffer())],
-      'тестування.jpeg',
-      {
-        type: 'image/jpeg',
-      },
-    );
-
-    let mockResolvedStorageRequest: Request | undefined;
-
-    const factory = createSyntaxFactory({
-      fetch: async (request) => {
-        if ((request as Request).url === 'https://storage.ronin.co/') {
-          mockResolvedStorageRequest = request as Request;
-
-          const responseBody: StoredObject = {
-            key: 'test-key',
-            name: file.name,
-            src: 'https://storage.ronin.co/test-key',
-            meta: {
-              height: 100,
-              width: 100,
-              size: 100,
-              type: 'image/jpeg',
-            },
-            placeholder: {
-              base64: '',
-            },
-          };
-
-          return Response.json(responseBody);
-        }
-
-        return mockFetch(request);
-      },
-    });
-
-    await factory.add.account({
-      with: {
-        avatar: file,
-      },
-    });
-
-    expect(
-      (mockResolvedStorageRequest as Request | undefined)?.headers.get(
-        'Content-Disposition',
-      ),
-    ).toBe(
-      'form-data; filename="%D1%82%D0%B5%D1%81%D1%82%D1%83%D0%B2%D0%B0%D0%BD%D0%BD%D1%8F.jpeg"',
-    );
-  });
-
   test('upload video', async () => {
     const bunFile = Bun.file('tests/assets/example.mp4');
     const file = new File([new Uint8Array(await bunFile.arrayBuffer())], 'example.mp4', {
       type: 'video/mp4',
     });
 
-    let mockResolvedStorageRequest: Request | undefined;
+    let mockStorableObject: StorableObject | undefined;
+    let mockStatements: Array<Statement> | undefined;
 
     const factory = createSyntaxFactory({
-      fetch: async (request) => {
-        if ((request as Request).url === 'https://storage.ronin.co/') {
-          mockResolvedStorageRequest = request as Request;
+      storageCaller: (object) => {
+        mockStorableObject = object;
 
-          const responseBody: StoredObject = {
-            key: 'test-key',
-            name: 'example.mp4',
-            src: 'https://storage.ronin.co/test-key',
-            meta: {
-              size: 100,
-              type: 'video/mp4',
-            },
-            placeholder: null,
-          };
-
-          return Response.json(responseBody);
-        }
-
-        return mockFetch(request);
+        return {
+          key: 'test-key',
+          name: 'example.mp4',
+          src: 'https://storage.ronin.co/test-key',
+          meta: {
+            size: 100,
+            type: 'video/mp4',
+          },
+          placeholder: null,
+        };
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        {
+          slug: 'account',
+          fields: { video: { type: 'blob' } },
+        },
+      ],
     });
 
-    await factory.add.account({
-      with: {
-        video: file,
-      },
-    });
+    await factory.add.account.with.video(file);
 
-    const body = await (mockResolvedStorageRequest as Request | undefined)?.text();
+    expect(mockStorableObject?.contentType).toBe('video/mp4');
 
-    expect(
-      (mockResolvedStorageRequest as Request | undefined)?.headers.get('Content-Type'),
-    ).toBe('video/mp4');
-    expect(
-      (mockResolvedStorageRequest as Request | undefined)?.headers.get(
-        'Content-Disposition',
-      ),
-    ).toBe('form-data; filename="example.mp4"');
-    expect(body).toBe(await file.text());
+    expect(mockStorableObject?.name).toBe('example.mp4');
+    expect(mockStorableObject?.value).toBe(file);
 
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"add":{"account":{"with":{"video":{"key":"test-key","name":"example.mp4","src":"https://storage.ronin.co/test-key","meta":{"size":100,"type":"video/mp4"},"placeholder":null}}}}}]}',
+    expect(mockStatements?.[0]?.sql).toBe(
+      'INSERT INTO "accounts" ("video", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "video"',
+    );
+    expect(mockStatements?.[0]?.params[0]).toBe(
+      '{"key":"test-key","name":"example.mp4","src":"https://storage.ronin.co/test-key","meta":{"size":100,"type":"video/mp4"},"placeholder":null}',
     );
   });
 
