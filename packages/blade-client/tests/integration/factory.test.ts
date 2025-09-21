@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
+import type { Statement, StoredObject } from 'blade-compiler';
+import type { ResultRecord } from 'blade-syntax/queries';
 
 import { createSyntaxFactory } from '@/src/index';
 import type { StorableObject } from '@/src/types/storage';
-import type { Statement, StoredObject } from 'blade-compiler';
-import type { ResultRecord } from 'blade-syntax/queries';
 
 describe('factory', () => {
   test('can create multiple factories with different configurations', async () => {
@@ -464,6 +464,7 @@ describe('factory', () => {
     });
 
     let mockStorableObject: StorableObject | undefined;
+    let mockStatements: Array<Statement> | undefined;
 
     const factory = createSyntaxFactory({
       storageCaller: (object) => {
@@ -484,6 +485,16 @@ describe('factory', () => {
           },
         };
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        {
+          slug: 'account',
+          fields: { avatar: { type: 'blob' } },
+        },
+      ],
     });
 
     await factory.add.account.with.avatar(file);
@@ -493,8 +504,11 @@ describe('factory', () => {
     expect(mockStorableObject?.name).toBe('example.jpeg');
     expect(mockStorableObject?.value).toBe(file);
 
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"add":{"account":{"with":{"avatar":{"key":"test-key","name":"example.jpeg","src":"https://storage.ronin.co/test-key","meta":{"height":100,"width":100,"size":100,"type":"image/jpeg"},"placeholder":{"base64":""}}}}}}]}',
+    expect(mockStatements?.[0]?.sql).toBe(
+      'INSERT INTO "accounts" ("avatar", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "avatar"',
+    );
+    expect(mockStatements?.[0]?.params[0]).toBe(
+      '{"key":"test-key","name":"example.jpeg","src":"https://storage.ronin.co/test-key","meta":{"height":100,"width":100,"size":100,"type":"image/jpeg"},"placeholder":{"base64":""}}',
     );
   });
 
