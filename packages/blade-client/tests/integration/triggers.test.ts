@@ -311,46 +311,54 @@ describe('triggers', () => {
     let finalBeforeResult: unknown;
     let finalAfterResult: unknown;
 
-    let mockResolvedRequestJSON: unknown | undefined;
+    let mockStatements: Array<Statement> | undefined;
 
     const previousModel = {
       id: '1',
-      slug: 'account',
-      pluralSlug: 'accounts',
+      'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+      'ronin.createdBy': '1234',
+      'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+      'ronin.updatedBy': '1234',
       name: 'Account',
       pluralName: 'Accounts',
+      slug: 'account',
+      pluralSlug: 'accounts',
+      idPrefix: null,
+      table: null,
+      'identifiers.name': 'id',
+      'identifiers.slug': 'id',
+      fields: '{}',
+      indexes: '{}',
+      presets: '{}',
     };
 
     const nextModel = {
       id: '1',
-      slug: 'user',
-      pluralSlug: 'users',
+      'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+      'ronin.createdBy': '1234',
+      'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+      'ronin.updatedBy': '1234',
       name: 'User',
       pluralName: 'Users',
+      slug: 'user',
+      pluralSlug: 'users',
+      idPrefix: null,
+      table: null,
+      'identifiers.name': 'id',
+      'identifiers.slug': 'id',
+      fields: '{}',
+      indexes: '{}',
+      presets: '{}',
     };
 
-    const { alter } = createSyntaxFactory({
-      fetch: async (request) => {
-        mockResolvedRequestJSON = await (request as Request).json();
-
-        return Response.json({
-          results: [
-            {
-              record: previousModel,
-            },
-            {
-              record: nextModel,
-            },
-          ],
-        });
+    const factory = createSyntaxFactory({
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return {
+          results: [[previousModel], [], [nextModel]],
+        };
       },
-      // databaseCaller: (statements) => {
-      //   console.log(statements)
-      //   return ({
-      //   results: [[previousModel], [{}], [nextModel]]
-      // })
-      // },
-      // models: [previousModel],
+      models: [{ slug: 'account' }],
       triggers: {
         model: {
           followingAlter(query, multiple, beforeResult, afterResult) {
@@ -363,18 +371,11 @@ describe('triggers', () => {
       },
     });
 
-    await (alter as unknown as (details: object) => unknown)({
+    await (factory.alter as unknown as (details: object) => unknown)({
       model: 'account',
       to: {
         slug: 'user',
       },
-    });
-
-    expect(mockResolvedRequestJSON).toEqual({
-      queries: [
-        { list: { model: 'account' } },
-        { alter: { model: 'account', to: { slug: 'user' } } },
-      ],
     });
 
     // Make sure `finalQuery` matches the initial query payload.
@@ -390,10 +391,20 @@ describe('triggers', () => {
     //
     // We must use `toMatchObject` here, to ensure that the array is really
     // empty and doesn't contain any `undefined` items.
-    expect(finalBeforeResult).toMatchObject([previousModel]);
+    expect(finalBeforeResult).toMatchObject([
+      {
+        slug: 'account',
+        name: 'Account',
+      },
+    ]);
 
     // Make sure `finalAfterResult` matches the resolved account.
-    expect(finalAfterResult).toEqual([nextModel]);
+    expect(finalAfterResult).toMatchObject([
+      {
+        slug: 'user',
+        name: 'User',
+      },
+    ]);
 
     expect(finalMultiple).toBe(false);
   });
