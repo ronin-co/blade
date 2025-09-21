@@ -99,7 +99,7 @@ export const runQueries = async <T extends ResultRecord>(
   // we don't want to require a token.
   validateToken(options);
 
-  if (options.models) {
+  if (options.models || options.databaseCaller) {
     const rawQueries = queries
       .filter((item) => 'query' in item)
       .map((item) => item.query);

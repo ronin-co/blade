@@ -220,6 +220,17 @@ describe('triggers', () => {
           ],
         });
       },
+      // databaseCaller: () => ({
+      //   results: [
+      //     [{
+      //           id: '1',
+      //           slug: 'account',
+      //           pluralSlug: 'accounts',
+      //           name: 'Account',
+      //           pluralName: 'Accounts',
+      //         }]
+      //   ]
+      // }),
       triggers: {
         model: {
           followingCreate(query, multiple, beforeResult, afterResult) {
@@ -295,6 +306,13 @@ describe('triggers', () => {
           ],
         });
       },
+      // databaseCaller: (statements) => {
+      //   console.log(statements)
+      //   return ({
+      //   results: [[previousModel], [{}], [nextModel]]
+      // })
+      // },
+      // models: [previousModel],
       triggers: {
         model: {
           followingAlter(query, multiple, beforeResult, afterResult) {
@@ -966,10 +984,7 @@ describe('triggers', () => {
 
   test('run queries with triggers required for all queries', async () => {
     const { get, remove } = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: We need this to satisfy the types.
-      fetch: async () => {
-        return Response.json({ results: [] });
-      },
+      databaseCaller: () => ({ results: [] }),
       requireTriggers: 'all',
     });
 
@@ -984,10 +999,7 @@ describe('triggers', () => {
 
   test('run queries with triggers required for read queries', async () => {
     const { get } = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: We need this to satisfy the types.
-      fetch: async () => {
-        return Response.json({ results: [] });
-      },
+      databaseCaller: () => ({ results: [] }),
       requireTriggers: 'read',
       triggers: {
         team: {

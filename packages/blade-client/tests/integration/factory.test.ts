@@ -57,25 +57,26 @@ describe('factory', () => {
     expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"members":{}}}]}');
   });
 
-  test('can use the custom fetcher', async () => {
-    const mockFetchNew = mock((request) => {
-      mockRequestResolvedValue = request;
-
-      return Response.json({
-        results: [],
-      });
-    });
+  test('can use the custom database caller', async () => {
+    const mockDatabaseCaller = mock(() => ({ results: [[]] }));
 
     const factory = createSyntaxFactory({
-      fetch: async (request) => mockFetchNew(request),
+      databaseCaller: mockDatabaseCaller,
+      models: [{ slug: 'account' }],
       token: 'takashitoken',
     });
 
     await factory.get.accounts();
 
-    expect(mockFetchNew).toHaveBeenCalledTimes(1);
-    expect(mockRequestResolvedValue?.headers.get('Authorization')).toBe(
-      'Bearer takashitoken',
+    expect(mockDatabaseCaller).toHaveBeenCalledWith(
+      [
+        {
+          sql: `SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy" FROM "accounts"`,
+          params: [],
+          returning: true,
+        },
+      ],
+      'takashitoken',
     );
   });
 
