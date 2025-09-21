@@ -674,23 +674,6 @@ describe('triggers', () => {
   });
 
   test('receive options for sink trigger', async () => {
-    const mockFetchNew = mock(() => {
-      return Response.json({
-        default: {
-          results: [
-            {
-              record: {
-                handle: 'elaine',
-              },
-              modelFields: {
-                name: 'string',
-              },
-            },
-          ],
-        },
-      });
-    });
-
     const defaultQueries: Array<Query> = [
       {
         add: {
@@ -727,7 +710,20 @@ describe('triggers', () => {
         secondary: secondaryQueries,
       },
       {
-        fetch: async () => mockFetchNew(),
+        databaseCaller: () => ({
+          results: [
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                handle: 'elaine',
+              },
+            ],
+          ],
+        }),
         token: 'takashitoken',
         triggers: {
           sink: {
@@ -744,6 +740,7 @@ describe('triggers', () => {
             },
           },
         },
+        models: [{ slug: 'account', fields: { handle: { type: 'string' } } }],
       },
     );
 
