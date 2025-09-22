@@ -55,8 +55,8 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   }
 
   const hive = clients[token];
-  const parent = new Selector({ type: 'namespace', id: 'ronin' });
-  const db = new Selector({ type: 'database', id: 'main', parent });
+  const namespace = new Selector({ type: 'namespace', id: 'ronin' });
+  const db = new Selector({ type: 'database', id: 'main', parent: namespace });
 
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),

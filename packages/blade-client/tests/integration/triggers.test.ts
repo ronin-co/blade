@@ -533,8 +533,8 @@ describe('triggers', () => {
   test('run `set` query affecting multiple accounts through factory containing `after` trigger', async () => {
     let finalQuery: FilteredTriggerQuery<QueryType> | undefined;
     let finalMultiple: boolean | undefined;
-    let finalBeforeResult: unknown;
-    let finalAfterResult: unknown;
+    let finalBeforeResult: Array<Record<string, unknown>> | undefined;
+    let finalAfterResult: Array<Record<string, unknown>> | undefined;
 
     const previousAccounts = [
       {
@@ -575,8 +575,10 @@ describe('triggers', () => {
           followingSet(query, multiple, beforeResult, afterResult) {
             finalQuery = query;
             finalMultiple = multiple;
-            finalBeforeResult = beforeResult;
-            finalAfterResult = afterResult;
+            finalBeforeResult = beforeResult as
+              | Array<Record<string, unknown>>
+              | undefined;
+            finalAfterResult = afterResult as Array<Record<string, unknown>> | undefined;
           },
         },
       },
@@ -609,12 +611,12 @@ describe('triggers', () => {
     });
 
     // Make sure `finalBeforeResult` matches the previous accounts.
-    expect(finalBeforeResult[0].id).toEqual(previousAccounts[0].id);
-    expect(finalBeforeResult[0].email).toEqual(previousAccounts[0].email);
+    expect(finalBeforeResult?.[0].id).toEqual(previousAccounts[0].id);
+    expect(finalBeforeResult?.[0].email).toEqual(previousAccounts[0].email);
 
     // Make sure `finalAfterResult` matches the resolved accounts.
-    expect(finalAfterResult[0].id).toEqual(nextAccounts[0].id);
-    expect(finalAfterResult[0].email).toEqual(nextAccounts[0].email);
+    expect(finalAfterResult?.[0].id).toEqual(nextAccounts[0].id);
+    expect(finalAfterResult?.[0].email).toEqual(nextAccounts[0].email);
 
     expect(finalMultiple).toBe(true);
   });

@@ -1,7 +1,5 @@
-import { describe, expect, mock, spyOn, test } from 'bun:test';
-import type { Query } from 'blade-compiler';
+import { describe, expect, spyOn, test } from 'bun:test';
 
-import { runQueriesWithStorageAndTriggers } from '@/src/queries';
 import { queriesHandler } from '@/src/utils/handlers';
 
 describe('queries handler', () => {
