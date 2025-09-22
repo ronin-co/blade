@@ -97,9 +97,12 @@ export const createSyntaxFactory = (
     queryOptions?: Record<string, unknown>,
   ) => Promise<PromiseTuple<T>>;
 } => {
-  const callback = (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
+  const callback = async (defaultQuery: Query, queryOptions?: QueryHandlerOptions) => {
+    const endOptions = mergeOptions(options, queryOptions);
     const query = defaultQuery as Record<typeof QUERY_SYMBOLS.QUERY, Query>;
-    return queryHandler(query[QUERY_SYMBOLS.QUERY], mergeOptions(options, queryOptions));
+    const finalQuery = query[QUERY_SYMBOLS.QUERY];
+
+    return (await endOptions.syntaxCallback([finalQuery], endOptions))[0];
   };
 
   // Ensure that storable objects are retained as-is instead of being serialized.
@@ -162,9 +165,9 @@ export const createSyntaxFactory = (
     ): Promise<PromiseTuple<T>> => {
       const batchOperations = operations as unknown as () => Array<SyntaxItem<Query>>;
       const queries = getBatchProxy(batchOperations).map(({ structure }) => structure);
-      const finalOptions = mergeOptions(options, queryOptions);
+      const endOptions = mergeOptions(options, queryOptions);
 
-      return queriesHandler(queries, finalOptions) as Promise<PromiseTuple<T>>;
+      return endOptions.syntaxCallback(queries, endOptions) as Promise<PromiseTuple<T>>;
     },
 
     sql: getSyntaxProxySQL({
