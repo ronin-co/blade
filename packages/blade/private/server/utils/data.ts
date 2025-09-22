@@ -111,9 +111,6 @@ export const getClientConfig = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-
-    // TODO: Remove this once we're no longer relying on it.
-    flushSession: serverContext.flushSession,
   };
 
   const list = Object.entries(triggers || {}).map(
@@ -177,7 +174,7 @@ export const getClientConfig = (
   );
 
   const finalTriggers = Object.fromEntries(list);
-  const flush = options.flushSession;
+  const flush = serverContext.flushSession;
 
   let syntaxCallback: QueryHandlerOptions['syntaxCallback'];
 
