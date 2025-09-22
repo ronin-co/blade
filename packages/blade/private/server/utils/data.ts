@@ -111,7 +111,6 @@ export const getClientConfig = (
       languages: serverContext.languages,
     },
     location: new URL(serverContext.url),
-    flushSession: serverContext.flushSession,
   };
 
   const list = Object.entries(triggers || {}).map(
@@ -175,16 +174,17 @@ export const getClientConfig = (
   );
 
   const finalTriggers = Object.fromEntries(list);
+  const flush = options.flushSession;
 
   let syntaxCallback: QueryHandlerOptions['syntaxCallback'];
 
   // If a function for flushing the current UI session was provided, that means we should
   // capture all query executions, check if they have `flush: true` set, and if so, invoke
   // the function for flushing the UI for them.
-  if (options.flushSession) {
-    syntaxCallback = (queries, options) => {
-      if ('flush' in options && options.flush) return options.flushSession(queries);
-      return runQueries(queries, options);
+  if (flush) {
+    syntaxCallback = (queries, nestedOptions) => {
+      if ('flush' in options && options.flush) return flush(queries);
+      return runQueries(queries, nestedOptions);
     };
   }
 
