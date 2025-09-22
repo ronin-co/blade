@@ -408,7 +408,7 @@ export const flushSession = async (
     queries?: Array<QueryItemWrite>;
     repeat?: boolean;
   },
-): Promise<{ results?: Array<FormattedResults<ResultRecord>> }> => {
+): Promise<{ results?: FormattedResults<ResultRecord> }> => {
   // If the client is no longer connected, don't try to push an update. This therefore
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return {};
