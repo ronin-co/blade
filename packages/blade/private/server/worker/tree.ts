@@ -514,7 +514,7 @@ const renderReactTree = async (
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
-): Promise<{ response: Response }> => {
+): Promise<{ response: Response; writeResults: Array<QueryItemWrite['result']> }> => {
   const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
@@ -734,13 +734,13 @@ const renderReactTree = async (
     break;
   }
 
-  const writeQueryResults = serverContext.collected.queries
+  const writeResults = serverContext.collected.queries
     .filter(({ type }) => type === 'write')
     .map(({ result }) => result);
 
-  if (hasPatternInURL && writeQueryResults.length > 0) {
+  if (hasPatternInURL && writeResults.length > 0) {
     const newURL = decodedHref.replace(curlyBracesToReplace, (_, content) =>
-      getValue(writeQueryResults, content),
+      getValue(writeResults, content),
     );
 
     return renderReactTree(
@@ -769,6 +769,7 @@ const renderReactTree = async (
           headers,
           status: 307,
         }),
+        writeResults,
       };
     }
 
@@ -800,7 +801,7 @@ const renderReactTree = async (
     headers.set('Content-Location', url.pathname + url.search);
   }
 
-  return { response: new Response(body, { headers }) };
+  return { response: new Response(body, { headers }), writeResults };
 };
 
 export default renderReactTree;
