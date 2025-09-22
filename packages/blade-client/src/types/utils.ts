@@ -88,6 +88,9 @@ export interface QueryHandlerOptions {
    * Useful for environments in which memory is tightly constrained.
    */
   defaultRecordLimit?: number;
+
+  /** Log helpful debugging information. */
+  debug?: boolean;
 }
 
 /**

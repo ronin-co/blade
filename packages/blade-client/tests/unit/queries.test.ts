@@ -89,15 +89,11 @@ describe('queries handler', () => {
     // Make sure that no logs were printed without the verbose flag.
     expect(logSpy).not.toHaveBeenCalled();
 
-    const originalDebugLevel = import.meta.env.__BLADE_DEBUG_LEVEL;
-    import.meta.env.__BLADE_DEBUG_LEVEL = 'verbose';
-
     await queriesHandler([{ get: { accounts: null } }], {
       databaseCaller: () => ({ results: [[]] }),
       models: [{ slug: 'account' }],
+      debug: true,
     });
-
-    import.meta.env.__BLADE_DEBUG_LEVEL = originalDebugLevel;
 
     // Make sure that the logs were printed with the verbose flag.
     expect(logSpy).toHaveBeenCalled();

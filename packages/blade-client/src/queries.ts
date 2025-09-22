@@ -116,14 +116,7 @@ export const runQueries = async <T extends ResultRecord>(
 
   const endFormatting = performance.now();
 
-  const VERBOSE_LOGGING =
-    (typeof process !== 'undefined' &&
-      process?.env &&
-      process.env.__BLADE_DEBUG_LEVEL === 'verbose') ||
-    (typeof import.meta?.env !== 'undefined' &&
-      import.meta.env.__BLADE_DEBUG_LEVEL === 'verbose');
-
-  if (VERBOSE_LOGGING) {
+  if (options.debug) {
     console.log(`Formatting took ${endFormatting - startFormatting}ms`);
   }
 
