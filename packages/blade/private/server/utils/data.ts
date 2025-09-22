@@ -1,4 +1,5 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
+import { runQueries } from 'blade-client';
 import type {
   BeforeGetTrigger,
   TriggerOptions as ClientTriggerOptions,
@@ -175,6 +176,18 @@ export const getClientConfig = (
 
   const finalTriggers = Object.fromEntries(list);
 
+  let syntaxCallback: QueryHandlerOptions['syntaxCallback'];
+
+  // If a function for flushing the current UI session was provided, that means we should
+  // capture all query executions, check if they have `flush: true` set, and if so, invoke
+  // the function for flushing the UI for them.
+  if (options.flushSession) {
+    syntaxCallback = (queries, options) => {
+      if ('flush' in options && options.flush) return options.flushSession(queries);
+      return runQueries(queries, options);
+    };
+  }
+
   return {
     triggers: finalTriggers,
     requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
@@ -182,5 +195,6 @@ export const getClientConfig = (
     models,
     defaultRecordLimit: 20,
     debug: VERBOSE_LOGGING,
+    syntaxCallback,
   };
 };
