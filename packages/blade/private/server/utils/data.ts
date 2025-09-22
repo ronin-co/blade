@@ -183,7 +183,7 @@ export const getClientConfig = (
   // the function for flushing the UI for them.
   if (flush) {
     syntaxCallback = async (queries, nestedOptions) => {
-      if ('flush' in options && options.flush) {
+      if ('flush' in nestedOptions && nestedOptions.flush) {
         const { results } = await flush(queries);
         return results!;
       }
