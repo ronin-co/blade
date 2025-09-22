@@ -1,6 +1,7 @@
 import type {
   Model,
   ObjectRow,
+  Query,
   RawRow,
   ResultRecord,
   Statement,
@@ -57,6 +58,19 @@ export interface QueryHandlerOptions {
     object: StorableObject,
     token: string,
   ) => Promise<StoredObject> | StoredObject;
+
+  /**
+   * Invoked by the query syntax when queries are to be executed.
+   *
+   * @param queries - A list of queries that should be executed.
+   * @param options - Configuration options that were provided for the queries.
+   *
+   * @returns Formatted results for the provided queries.
+   */
+  syntaxCallback?: (
+    queries: Array<Query>,
+    options: QueryHandlerOptions,
+  ) => Promise<FormattedResults<ResultRecord>>;
 
   /**
    * Allows for extending the lifetime of the edge worker invocation until the

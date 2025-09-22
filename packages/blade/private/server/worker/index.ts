@@ -209,11 +209,18 @@ app.use('*', async (c, next) => {
 if (projectRouter) app.route('/', projectRouter);
 
 // Handle the initial render (first byte).
-app.get('*', (c) =>
-  renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
-    waitUntil: getWaitUntil(c),
-  }),
-);
+app.get('*', async (c) => {
+  const { response } = await renderReactTree(
+    new URL(c.req.url),
+    c.req.raw.headers,
+    true,
+    {
+      waitUntil: getWaitUntil(c),
+    },
+  );
+
+  return response;
+});
 
 type ClientTransition = {
   options?: string;
@@ -304,7 +311,7 @@ app.post('*', async (c) => {
 });
 
 // Handle errors that occurred during the request lifecycle.
-app.onError((err, c) => {
+app.onError(async (err, c) => {
   console.error(err);
 
   // This error might be thrown by the framework (above), or by the client.
@@ -335,10 +342,17 @@ app.onError((err, c) => {
   }
 
   try {
-    return renderReactTree(new URL(c.req.url), c.req.raw.headers, true, {
-      error: 500,
-      waitUntil: getWaitUntil(c),
-    });
+    const { response } = await renderReactTree(
+      new URL(c.req.url),
+      c.req.raw.headers,
+      true,
+      {
+        error: 500,
+        waitUntil: getWaitUntil(c),
+      },
+    );
+
+    return response;
   } catch (err) {
     console.error(err);
   }

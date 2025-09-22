@@ -1,4 +1,5 @@
-import type { Query } from 'blade-compiler';
+import type { FormattedResults } from 'blade-client/types';
+import type { Query, ResultRecord } from 'blade-compiler';
 import { createContext } from 'react';
 
 import type { WaitUntil } from '@/private/server/types';
@@ -16,7 +17,9 @@ export type ServerContext<
   collected: Collected;
   currentLeafIndex: number | null;
   waitUntil: WaitUntil;
-  flushSession?: (queries?: Array<Query>) => Promise<void>;
+  flushSession?: (
+    queries?: Array<Query>,
+  ) => Promise<{ results?: FormattedResults<ResultRecord> }>;
 };
 
 export const RootServerContext = createContext<ServerContext | null>(null);

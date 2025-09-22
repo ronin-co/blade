@@ -2,7 +2,7 @@ import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { runQueries } from 'blade-client';
 import type { FormattedResults } from 'blade-client/types';
 import { ClientError, TriggerError } from 'blade-client/utils';
-import type { Query } from 'blade-compiler';
+import type { Query, ResultRecord } from 'blade-compiler';
 import {
   type CookieSerializeOptions,
   parse as parseCookies,
@@ -408,10 +408,10 @@ export const flushSession = async (
     queries?: Array<QueryItemWrite>;
     repeat?: boolean;
   },
-): Promise<void> => {
+): Promise<{ results?: Array<FormattedResults<ResultRecord>> }> => {
   // If the client is no longer connected, don't try to push an update. This therefore
   // also stops the interval of continuous revalidation.
-  if (stream.aborted || stream.closed) return;
+  if (stream.aborted || stream.closed) return {};
 
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[2] = {
@@ -435,10 +435,10 @@ export const flushSession = async (
     // revalidation and wait for the next one, to avoid unnecessary pushes.
     if (options?.repeat && recentManualFlush) {
       // The `finally` block will still execute before this.
-      return;
+      return {};
     }
 
-    const response = await renderReactTree(
+    const { response, writeResults } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
       !correctBundle,
@@ -466,6 +466,9 @@ export const flushSession = async (
 
     // Afterward, flush the update over the stream.
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
+
+    // The `finally` block will still execute before this.
+    return { results: writeResults };
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
     // error, since that would also prevent the repeated update later on.
@@ -487,6 +490,8 @@ export const flushSession = async (
     // a flush that was caused by triggers, which should not close the stream.
     if (!options?.queries) stream.close();
   }
+
+  return {};
 };
 
 const renderReactTree = async (
@@ -514,7 +519,7 @@ const renderReactTree = async (
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
-): Promise<Response> => {
+): Promise<{ response: Response; writeResults: FormattedResults<ResultRecord> }> => {
   const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
@@ -734,13 +739,13 @@ const renderReactTree = async (
     break;
   }
 
-  const writeQueryResults = serverContext.collected.queries
+  const writeResults = serverContext.collected.queries
     .filter(({ type }) => type === 'write')
-    .map(({ result }) => result);
+    .map(({ result }) => result) as FormattedResults<ResultRecord>;
 
-  if (hasPatternInURL && writeQueryResults.length > 0) {
+  if (hasPatternInURL && writeResults.length > 0) {
     const newURL = decodedHref.replace(curlyBracesToReplace, (_, content) =>
-      getValue(writeQueryResults, content),
+      getValue(writeResults, content),
     );
 
     return renderReactTree(
@@ -764,10 +769,13 @@ const renderReactTree = async (
     if (initial) {
       headers.set('Location', serverContext.collected.redirect);
 
-      return new Response(null, {
-        headers,
-        status: 307,
-      });
+      return {
+        response: new Response(null, {
+          headers,
+          status: 307,
+        }),
+        writeResults,
+      };
     }
 
     return renderReactTree(
@@ -798,7 +806,7 @@ const renderReactTree = async (
     headers.set('Content-Location', url.pathname + url.search);
   }
 
-  return new Response(body, { headers });
+  return { response: new Response(body, { headers }), writeResults };
 };
 
 export default renderReactTree;
