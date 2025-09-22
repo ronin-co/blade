@@ -111,9 +111,7 @@ export const getFileList = (
   directories: Array<string>,
   routerExists?: boolean,
 ): string => {
-  const imports = directories.map((name) => {
-    return getImportList(name, files.get(name)!);
-  });
+  const imports = directories.map((name) => getImportList(name, files.get(name)!));
 
   if (routerExists) {
     // Normalize the path for use in import statements (convert backslashes to forward slashes on Windows).

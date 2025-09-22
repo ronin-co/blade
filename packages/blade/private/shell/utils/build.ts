@@ -145,6 +145,7 @@ export const composeBuildContext = async (
 
   return {
     async rebuild(): Promise<RolldownOutput> {
+      // Mark the build as active. This must happen as early as possible.
       active = true;
 
       const bundleId = generateUniqueId();
@@ -167,6 +168,8 @@ export const composeBuildContext = async (
           ? await bundle.generate(outputOptions)
           : await bundle.write(outputOptions);
       } finally {
+        // Mark the build as no longer active. This must happen regardless of whether the
+        // build failed or completed successfully.
         active = false;
       }
     },
