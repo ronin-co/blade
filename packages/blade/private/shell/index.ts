@@ -169,7 +169,7 @@ if (isBuilding || isDeveloping) {
         const eventMessage =
           event in events ? events[event as keyof typeof events] : null;
 
-        // If the event is not supported or the build is ongoing, don't start a rebuild.
+        // If the event is not supported or a build is ongoing, don't start a rebuild.
         if (!eventMessage || mainBuild.active) return;
 
         const relativePath = path.relative(process.cwd(), eventPath);
