@@ -461,8 +461,6 @@ export const flushSession = async (
         : undefined,
     );
 
-    console.log('GOT A RESULT', writeResults);
-
     // Track the time of the current manual update.
     if (options?.queries) stream.lastUpdate = new Date();
 
