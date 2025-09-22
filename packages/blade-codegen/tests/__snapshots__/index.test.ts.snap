@@ -32,6 +32,8 @@ declare namespace Utils {
     type RootQueryCallerPromise<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => Promise<T>;
     type SelectingQuery<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => T);
     type SelectingQueryPromise<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => Promise<T>);
+    type ToQuery<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => T);
+    type ToQueryPromise<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => Promise<T>);
     type WithQuery<U, S> = ReducedFunction & {
         <T = U>(instructions: Partial<S> | CombinedInstructions["with"], options?: Record<string, unknown>): T;
         id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
@@ -71,8 +73,8 @@ declare namespace Syntax {
             type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
             type SelectingQuery = Utils.SelectingQuery<Account | null, Account.FieldSlug>;
             type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, Account.FieldSlug>;
-            type ToQuery = any;
-            type ToQueryPromise = any;
+            type ToQuery = Utils.ToQuery<Account | null, Account>;
+            type ToQueryPromise = Utils.ToQueryPromise<Account | null, Account>;
             type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
             type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
             type WithQuery = Utils.WithQuery<Account | null, Account> & {
@@ -99,8 +101,8 @@ declare namespace Syntax {
             type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
             type SelectingQuery = Utils.SelectingQuery<Accounts, Account.FieldSlug>;
             type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, Account.FieldSlug>;
-            type ToQuery = any;
-            type ToQueryPromise = any;
+            type ToQuery = Utils.ToQuery<Accounts, Account>;
+            type ToQueryPromise = Utils.ToQueryPromise<Accounts, Account>;
             type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
             type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
             type WithQuery = Utils.WithQuery<Accounts, Account> & {
@@ -268,6 +270,8 @@ declare namespace Utils {
     type RootQueryCallerPromise<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => Promise<T>;
     type SelectingQuery<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => T);
     type SelectingQueryPromise<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => Promise<T>);
+    type ToQuery<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => T);
+    type ToQueryPromise<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => Promise<T>);
     type WithQuery<U, S> = ReducedFunction & {
         <T = U>(instructions: Partial<S> | CombinedInstructions["with"], options?: Record<string, unknown>): T;
         id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
@@ -307,8 +311,8 @@ declare namespace Syntax {
             type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
             type SelectingQuery = Utils.SelectingQuery<Account | null, Account.FieldSlug>;
             type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, Account.FieldSlug>;
-            type ToQuery = any;
-            type ToQueryPromise = any;
+            type ToQuery = Utils.ToQuery<Account | null, Account>;
+            type ToQueryPromise = Utils.ToQueryPromise<Account | null, Account>;
             type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
             type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
             type WithQuery = Utils.WithQuery<Account | null, Account> & {
@@ -337,8 +341,8 @@ declare namespace Syntax {
             type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
             type SelectingQuery = Utils.SelectingQuery<Accounts, Account.FieldSlug>;
             type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, Account.FieldSlug>;
-            type ToQuery = any;
-            type ToQueryPromise = any;
+            type ToQuery = Utils.ToQuery<Accounts, Account>;
+            type ToQueryPromise = Utils.ToQueryPromise<Accounts, Account>;
             type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
             type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
             type WithQuery = Utils.WithQuery<Accounts, Account> & {
@@ -508,6 +512,8 @@ declare namespace Utils {
     type RootQueryCallerPromise<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => Promise<T>;
     type SelectingQuery<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => T);
     type SelectingQueryPromise<U, F> = ReducedFunction & (<T = U>(instructions: Array<F>, options?: Record<string, unknown>) => Promise<T>);
+    type ToQuery<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => T);
+    type ToQueryPromise<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => Promise<T>);
     type WithQuery<U, S> = ReducedFunction & {
         <T = U>(instructions: Partial<S> | CombinedInstructions["with"], options?: Record<string, unknown>): T;
         id: <T = U>(value: ResultRecord["id"], options?: Record<string, unknown>) => T;
