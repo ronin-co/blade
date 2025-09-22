@@ -22,6 +22,8 @@ import {
   rootCallerQueryType,
   selectingQueryPromiseType,
   selectingQueryType,
+  toQueryPromiseType,
+  toQueryType,
   withQueryPromiseType,
   withQueryType,
 } from '@/src/declarations';
@@ -118,6 +120,8 @@ export const generate = (models: Array<Model>): string => {
     rootCallerQueryPromiseType,
     selectingQueryType,
     selectingQueryPromiseType,
+    toQueryType,
+    toQueryPromiseType,
     withQueryType,
     withQueryPromiseType,
   );

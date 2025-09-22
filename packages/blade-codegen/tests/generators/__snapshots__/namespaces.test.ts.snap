@@ -18,8 +18,8 @@ exports[`namespaces with a basic model 1`] = `
         type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
         type SelectingQuery = Utils.SelectingQuery<Account | null, Account.FieldSlug>;
         type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, Account.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
+        type ToQuery = Utils.ToQuery<Account | null, Account>;
+        type ToQueryPromise = Utils.ToQueryPromise<Account | null, Account>;
         type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Account | null, Account> & {
@@ -56,8 +56,8 @@ exports[`namespaces with a basic model 1`] = `
         type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
         type SelectingQuery = Utils.SelectingQuery<Accounts, Account.FieldSlug>;
         type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, Account.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
+        type ToQuery = Utils.ToQuery<Accounts, Account>;
+        type ToQueryPromise = Utils.ToQueryPromise<Accounts, Account>;
         type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Accounts, Account> & {
@@ -101,8 +101,8 @@ exports[`namespaces with a link field 1`] = `
         type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Account | null>;
         type SelectingQuery = Utils.SelectingQuery<Account | null, Account.FieldSlug>;
         type SelectingQueryPromise = Utils.SelectingQueryPromise<Account | null, Account.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
+        type ToQuery = Utils.ToQuery<Account | null, Account>;
+        type ToQueryPromise = Utils.ToQueryPromise<Account | null, Account>;
         type UsingQuery = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Account | null>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Account | null, Account> & {
@@ -129,8 +129,8 @@ exports[`namespaces with a link field 1`] = `
         type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Accounts>;
         type SelectingQuery = Utils.SelectingQuery<Accounts, Account.FieldSlug>;
         type SelectingQueryPromise = Utils.SelectingQueryPromise<Accounts, Account.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
+        type ToQuery = Utils.ToQuery<Accounts, Account>;
+        type ToQueryPromise = Utils.ToQueryPromise<Accounts, Account>;
         type UsingQuery = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => T);
         type UsingQueryPromise = ReducedFunction & (<T = Accounts>(value: CombinedInstructions["using"]) => Promise<T>);
         type WithQuery = Utils.WithQuery<Accounts, Account> & {
@@ -160,8 +160,8 @@ namespace Post {
         type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Post | null>;
         type SelectingQuery = Utils.SelectingQuery<Post | null, Post.FieldSlug>;
         type SelectingQueryPromise = Utils.SelectingQueryPromise<Post | null, Post.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
+        type ToQuery = Utils.ToQuery<Post | null, Post>;
+        type ToQueryPromise = Utils.ToQueryPromise<Post | null, Post>;
         type UsingQuery = ReducedFunction & {
             <U extends Array<"author"> | "all">(fields: U): Post<U> | null;
             <T = Post | null>(fields: Array<"author"> | "all"): T;
@@ -198,8 +198,8 @@ namespace Post {
         type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Posts>;
         type SelectingQuery = Utils.SelectingQuery<Posts, Post.FieldSlug>;
         type SelectingQueryPromise = Utils.SelectingQueryPromise<Posts, Post.FieldSlug>;
-        type ToQuery = any;
-        type ToQueryPromise = any;
+        type ToQuery = Utils.ToQuery<Posts, Post>;
+        type ToQueryPromise = Utils.ToQueryPromise<Posts, Post>;
         type UsingQuery = ReducedFunction & {
             <U extends Array<"author"> | "all">(fields: U): Post<U>;
             <T = Posts>(fields: Array<"author"> | "all"): T;
