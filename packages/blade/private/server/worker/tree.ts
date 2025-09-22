@@ -438,7 +438,7 @@ export const flushSession = async (
       return;
     }
 
-    const response = await renderReactTree(
+    const { response } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
       !correctBundle,
@@ -514,7 +514,7 @@ const renderReactTree = async (
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
-): Promise<Response> => {
+): Promise<{ response: Response }> => {
   const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
@@ -764,10 +764,12 @@ const renderReactTree = async (
     if (initial) {
       headers.set('Location', serverContext.collected.redirect);
 
-      return new Response(null, {
-        headers,
-        status: 307,
-      });
+      return {
+        response: new Response(null, {
+          headers,
+          status: 307,
+        }),
+      };
     }
 
     return renderReactTree(
@@ -798,7 +800,7 @@ const renderReactTree = async (
     headers.set('Content-Location', url.pathname + url.search);
   }
 
-  return new Response(body, { headers });
+  return { response: new Response(body, { headers }) };
 };
 
 export default renderReactTree;
