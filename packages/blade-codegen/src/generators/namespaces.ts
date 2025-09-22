@@ -1,4 +1,4 @@
-import { NodeFlags, SyntaxKind, factory } from 'typescript';
+import { NodeFlags, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
@@ -267,13 +267,25 @@ export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaratio
         undefined,
         identifiers.namespace.utils.toQuery,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.toQuery,
+          ),
+          [singularModelNode, factory.createTypeReferenceNode(syntaxNamespaceIdentifier)],
+        ),
       ),
       toPromise: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.toQueryPromise,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.toQueryPromise,
+          ),
+          [singularModelNode, factory.createTypeReferenceNode(syntaxNamespaceIdentifier)],
+        ),
       ),
       using: factory.createTypeAliasDeclaration(
         undefined,
@@ -499,13 +511,25 @@ export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaratio
         undefined,
         identifiers.namespace.utils.toQuery,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.toQuery,
+          ),
+          [pluralModelNode, factory.createTypeReferenceNode(syntaxNamespaceIdentifier)],
+        ),
       ),
       toPromise: factory.createTypeAliasDeclaration(
         undefined,
         identifiers.namespace.utils.toQueryPromise,
         undefined,
-        factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.toQueryPromise,
+          ),
+          [pluralModelNode, factory.createTypeReferenceNode(syntaxNamespaceIdentifier)],
+        ),
       ),
       using: factory.createTypeAliasDeclaration(
         undefined,

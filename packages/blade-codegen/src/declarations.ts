@@ -932,6 +932,96 @@ export const selectingQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @example
+ * ```ts
+ * type ToQuery<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => T);
+ * ```
+ */
+export const toQueryType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.namespace.utils.toQuery,
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.schema),
+  ],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'instructions',
+          undefined,
+          factory.createTypeReferenceNode(identifiers.primitive.partial, [
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
+          ]),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+    ),
+  ]),
+);
+
+/**
+ * @example
+ * ```ts
+ * type ToQueryPromise<U, S> = ReducedFunction & (<T = U>(instructions: Partial<S>, options?: Record<string, unknown>) => Promise<T>);
+ * ```
+ */
+export const toQueryPromiseType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.namespace.utils.toQueryPromise,
+  [
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.using),
+    factory.createTypeParameterDeclaration(undefined, typeArgumentIdentifiers.schema),
+  ],
+  factory.createIntersectionTypeNode([
+    factory.createExpressionWithTypeArguments(
+      identifiers.blade.reducedFunction,
+      undefined,
+    ),
+    factory.createFunctionTypeNode(
+      [
+        factory.createTypeParameterDeclaration(
+          undefined,
+          typeArgumentIdentifiers.default,
+          undefined,
+          factory.createTypeReferenceNode(typeArgumentIdentifiers.using),
+        ),
+      ],
+      [
+        factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          'instructions',
+          undefined,
+          factory.createTypeReferenceNode(identifiers.primitive.partial, [
+            factory.createTypeReferenceNode(typeArgumentIdentifiers.schema),
+          ]),
+        ),
+        sharedQueryOptionsParameter,
+      ],
+      factory.createTypeReferenceNode(identifiers.primitive.promise, [
+        factory.createTypeReferenceNode(typeArgumentIdentifiers.default),
+      ]),
+    ),
+  ]),
+);
+
+/**
  * @todo(@nurodev): Replace `Partial<S> | CombinedInstructions["with"]` with utility to map advanced assertions
  *
  * @example
