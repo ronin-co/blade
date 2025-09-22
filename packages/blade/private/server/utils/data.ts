@@ -182,8 +182,12 @@ export const getClientConfig = (
   // capture all query executions, check if they have `flush: true` set, and if so, invoke
   // the function for flushing the UI for them.
   if (flush) {
-    syntaxCallback = (queries, nestedOptions) => {
-      if ('flush' in options && options.flush) return flush(queries);
+    syntaxCallback = async (queries, nestedOptions) => {
+      if ('flush' in options && options.flush) {
+        const { results } = await flush(queries);
+        return results!;
+      }
+
       return runQueries(queries, nestedOptions);
     };
   }
