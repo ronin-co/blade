@@ -311,8 +311,6 @@ describe('triggers', () => {
     let finalBeforeResult: unknown;
     let finalAfterResult: unknown;
 
-    let mockStatements: Array<Statement> | undefined;
-
     const previousModel = {
       id: '1',
       'ronin.createdAt': '2024-04-16T15:02:12.710Z',
@@ -352,12 +350,9 @@ describe('triggers', () => {
     };
 
     const factory = createSyntaxFactory({
-      databaseCaller: (statements) => {
-        mockStatements = statements;
-        return {
-          results: [[previousModel], [], [nextModel]],
-        };
-      },
+      databaseCaller: () => ({
+        results: [[previousModel], [], [nextModel]],
+      }),
       models: [{ slug: 'account' }],
       triggers: {
         model: {
