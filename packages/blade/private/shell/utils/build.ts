@@ -65,6 +65,7 @@ export const composeBuildContext = async (
 ): Promise<{
   rebuild: () => Promise<RolldownOutput>;
   dispose: () => Promise<void>;
+  active: boolean;
 }> => {
   const provider = getProvider();
 
@@ -96,6 +97,9 @@ export const composeBuildContext = async (
   };
 
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
+
+  /** Whether the build is currently running. */
+  let running = false;
 
   const bundle = await rolldown({
     input,
@@ -140,7 +144,10 @@ export const composeBuildContext = async (
   });
 
   return {
-    rebuild(): Promise<RolldownOutput> {
+    async rebuild(): Promise<RolldownOutput> {
+      // Mark the build as running. This must happen as early as possible.
+      running = true;
+
       const bundleId = generateUniqueId();
 
       const outputOptions: OutputOptions = {
@@ -156,10 +163,21 @@ export const composeBuildContext = async (
         chunkFileNames: getOutputFile(bundleId, 'js', true),
       };
 
-      return options?.virtualFiles
-        ? bundle.generate(outputOptions)
-        : bundle.write(outputOptions);
+      try {
+        return options?.virtualFiles
+          ? await bundle.generate(outputOptions)
+          : await bundle.write(outputOptions);
+      } finally {
+        // Mark the build as no longer running. This must happen regardless of whether
+        // the build failed or completed successfully.
+        running = false;
+      }
     },
     dispose: () => bundle.close(),
+
+    // We're using a getter since the closure would otherwise cause an outdated value.
+    get active() {
+      return running;
+    },
   };
 };
