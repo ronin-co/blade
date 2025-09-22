@@ -99,7 +99,7 @@ export const composeBuildContext = async (
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
 
   /** Whether the build is currently running. */
-  let active = false;
+  let running = false;
 
   const bundle = await rolldown({
     input,
@@ -145,8 +145,8 @@ export const composeBuildContext = async (
 
   return {
     async rebuild(): Promise<RolldownOutput> {
-      // Mark the build as active. This must happen as early as possible.
-      active = true;
+      // Mark the build as running. This must happen as early as possible.
+      running = true;
 
       const bundleId = generateUniqueId();
 
@@ -168,12 +168,14 @@ export const composeBuildContext = async (
           ? await bundle.generate(outputOptions)
           : await bundle.write(outputOptions);
       } finally {
-        // Mark the build as no longer active. This must happen regardless of whether the
-        // build failed or completed successfully.
-        active = false;
+        // Mark the build as no longer running. This must happen regardless of whether
+        // the build failed or completed successfully.
+        running = false;
       }
     },
     dispose: () => bundle.close(),
-    active,
+    get active() {
+      return running;
+    },
   };
 };
