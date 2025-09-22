@@ -65,6 +65,7 @@ export const composeBuildContext = async (
 ): Promise<{
   rebuild: () => Promise<RolldownOutput>;
   dispose: () => Promise<void>;
+  active: boolean;
 }> => {
   const provider = getProvider();
 
@@ -96,6 +97,9 @@ export const composeBuildContext = async (
   };
 
   if (options?.enableServiceWorker) input['service_worker'] = swEntry;
+
+  /** Whether the build is currently running. */
+  let active = false;
 
   const bundle = await rolldown({
     input,
@@ -140,7 +144,9 @@ export const composeBuildContext = async (
   });
 
   return {
-    rebuild(): Promise<RolldownOutput> {
+    async rebuild(): Promise<RolldownOutput> {
+      active = true;
+
       const bundleId = generateUniqueId();
 
       const outputOptions: OutputOptions = {
@@ -156,10 +162,15 @@ export const composeBuildContext = async (
         chunkFileNames: getOutputFile(bundleId, 'js', true),
       };
 
-      return options?.virtualFiles
-        ? bundle.generate(outputOptions)
-        : bundle.write(outputOptions);
+      try {
+        return options?.virtualFiles
+          ? await bundle.generate(outputOptions)
+          : await bundle.write(outputOptions);
+      } finally {
+        active = false;
+      }
     },
     dispose: () => bundle.close(),
+    active,
   };
 };

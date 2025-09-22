@@ -168,7 +168,9 @@ if (isBuilding || isDeveloping) {
       .on('all', (event, eventPath) => {
         const eventMessage =
           event in events ? events[event as keyof typeof events] : null;
-        if (!eventMessage) return;
+
+        // If the event is not supported or the build is ongoing, ignore the event.
+        if (!eventMessage || mainBuild.active) return;
 
         const relativePath = path.relative(process.cwd(), eventPath);
 
