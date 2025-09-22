@@ -13,8 +13,8 @@ type ResponseError = Error & { body: string; statusCode: number };
 /**
  * Like `fetch`, except that failed requests are retried automatically.
  *
- * @param request — A URL or `Request` object.
- * @param requestInit — An optional `Request` or `RequestInit` object.
+ * @param request - A URL or `Request` object.
+ * @param requestInit - An optional `Request` or `RequestInit` object.
  *
  * @returns A native `fetch` response.
  */

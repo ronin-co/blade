@@ -596,6 +596,8 @@ export type {
   ExpandedResult,
   ResultRecord,
   ResultRecordBase,
+  RawRow,
+  ObjectRow,
 } from '@/src/types/result';
 
 // Strip any properties from the root model that are internal

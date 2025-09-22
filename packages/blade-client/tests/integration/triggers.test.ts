@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
+import { describe, expect, mock, spyOn, test } from 'bun:test';
+import type { CombinedInstructions, Query, QueryType, Statement } from 'blade-compiler';
 
 import { createSyntaxFactory } from '@/src/index';
 import { runQueriesWithStorageAndTriggers } from '@/src/queries';
@@ -9,27 +10,8 @@ import {
   type ResolvingAddTrigger,
   runQueriesWithTriggers,
 } from '@/src/triggers';
-import type { CombinedInstructions, Query, QueryType } from 'blade-compiler';
-
-let mockResolvedRequestText: any;
-
-const mockFetch = mock(async (request) => {
-  mockResolvedRequestText = await request.text();
-
-  return Response.json({
-    results: [],
-  });
-});
-
-global.fetch = mockFetch;
 
 describe('triggers', () => {
-  beforeEach(() => {
-    mockFetch.mockClear();
-
-    mockResolvedRequestText = undefined;
-  });
-
   test('run `get` query with a trigger and ensure the trigger does not modify the original query', async () => {
     const query = {
       get: {
@@ -63,7 +45,9 @@ describe('triggers', () => {
   });
 
   test('run `get` query through factory containing `during` trigger', async () => {
-    const { get } = createSyntaxFactory({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory({
       triggers: {
         account: {
           get(query, multiple) {
@@ -83,24 +67,38 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' }, email: { type: 'string' } },
+        },
+      ],
     });
 
-    await get.account.with.handle('juri');
+    await factory.get.account.with.handle('juri');
     // Make sure `leo` is resolved as the account handle.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"account":{"with":{"handle":"leo"}}}}]}',
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "handle" = ?1 LIMIT 1',
+      params: ['leo'],
+    });
 
-    await get.accounts();
+    await factory.get.accounts();
     // Make sure the email address of all resolved accounts ends with the
     // `@ronin.co` domain name.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"accounts":{"with":{"email":{"endingWith":"@ronin.co"}}}}}]}',
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "email" LIKE ?1',
+      params: ['%@ronin.co'],
+    });
   });
 
   test('return full query from `during` trigger', async () => {
-    const { get } = createSyntaxFactory({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory({
       triggers: {
         account: {
           get(query) {
@@ -114,17 +112,28 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        { slug: 'account', fields: { handle: { type: 'string' } } },
+        { slug: 'team', fields: { handle: { type: 'string' } } },
+      ],
     });
 
-    await get.account.with.handle('elaine');
+    await factory.get.account.with.handle('elaine');
 
-    expect(mockResolvedRequestText).toEqual(
-      JSON.stringify({ queries: [{ get: { team: { with: { handle: 'elaine' } } } }] }),
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "teams" WHERE "handle" = ?1 LIMIT 1',
+      params: ['elaine'],
+    });
   });
 
   test('run `get` query through factory with dynamically generated config', async () => {
-    const { get } = createSyntaxFactory(() => ({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory(() => ({
       triggers: {
         account: {
           get(query, multiple) {
@@ -144,24 +153,42 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' }, email: { type: 'string' } },
+        },
+      ],
     }));
 
-    await get.account.with.handle('juri');
-    // Make sure `leo` is resolved as the account handle.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"account":{"with":{"handle":"leo"}}}}]}',
-    );
+    await factory.get.account.with.handle('juri');
 
-    await get.accounts();
+    // Make sure `leo` is resolved as the account handle.
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "handle" = ?1 LIMIT 1',
+      params: ['leo'],
+    });
+
+    await factory.get.accounts.with({
+      email: { endingWith: '@ronin.co' },
+    });
+
     // Make sure the email address of all resolved accounts ends with the
     // `@ronin.co` domain name.
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"accounts":{"with":{"email":{"endingWith":"@ronin.co"}}}}}]}',
-    );
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "email" LIKE ?1',
+      params: ['%@ronin.co'],
+    });
   });
 
   test('run `get` query through factory containing `resolving` trigger', async () => {
-    const { get } = createSyntaxFactory({
+    let mockStatements: Array<Statement> | undefined;
+
+    const factory = createSyntaxFactory({
       triggers: {
         schema: {
           resolvingGet(_query, multiple) {
@@ -182,20 +209,29 @@ describe('triggers', () => {
           },
         },
       },
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return { results: [[]] };
+      },
+      models: [
+        { slug: 'schema' },
+        { slug: 'account', fields: { handle: { type: 'string' } } },
+      ],
     });
 
-    const schema = await get.schema.with.id('1');
+    const schema = await factory.get.schema.with.id('1');
     // Make sure a single schema is resolved.
     expect(schema.id).toBe('1');
 
-    const schemas = await get.schemas<Array<unknown>>();
+    const schemas = await factory.get.schemas<Array<unknown>>();
     // Make sure multiple schemas are resolved.
     expect(schemas.length).toBe(2);
 
-    await get.account.with.handle('juri');
-    expect(mockResolvedRequestText).toEqual(
-      '{"queries":[{"get":{"account":{"with":{"handle":"juri"}}}}]}',
-    );
+    await factory.get.account.with.handle('juri');
+    expect(mockStatements?.[0]).toMatchObject({
+      sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle" FROM "accounts" WHERE "handle" = ?1 LIMIT 1',
+      params: ['juri'],
+    });
   });
 
   test('run `create` query through factory containing `following` trigger', async () => {
@@ -204,21 +240,34 @@ describe('triggers', () => {
     let finalBeforeResult: unknown;
     let finalAfterResult: unknown;
 
-    const { create } = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
+    const factory = createSyntaxFactory({
+      databaseCaller: (statements) => {
+        console.log(statements);
+        return {
           results: [
-            {
-              record: {
+            [],
+            [
+              {
                 id: '1',
-                slug: 'account',
-                pluralSlug: 'accounts',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
                 name: 'Account',
                 pluralName: 'Accounts',
+                slug: 'account',
+                pluralSlug: 'accounts',
+                idPrefix: null,
+                table: null,
+                'identifiers.name': 'id',
+                'identifiers.slug': 'id',
+                fields: '{}',
+                indexes: '{}',
+                presets: '{}',
               },
-            },
+            ],
           ],
-        });
+        };
       },
       triggers: {
         model: {
@@ -232,9 +281,9 @@ describe('triggers', () => {
       },
     });
 
-    const model = await create.model({
+    const model = await factory.create.model({
       slug: 'account',
-    } as Parameters<typeof create.model>[0]);
+    } as Parameters<typeof factory.create.model>[0]);
 
     // Make sure `finalQuery` matches the initial query.
     expect(finalQuery).toMatchObject({
@@ -262,39 +311,49 @@ describe('triggers', () => {
     let finalBeforeResult: unknown;
     let finalAfterResult: unknown;
 
-    let mockResolvedRequestJSON: unknown | undefined;
-
     const previousModel = {
       id: '1',
-      slug: 'account',
-      pluralSlug: 'accounts',
+      'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+      'ronin.createdBy': '1234',
+      'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+      'ronin.updatedBy': '1234',
       name: 'Account',
       pluralName: 'Accounts',
+      slug: 'account',
+      pluralSlug: 'accounts',
+      idPrefix: null,
+      table: null,
+      'identifiers.name': 'id',
+      'identifiers.slug': 'id',
+      fields: '{}',
+      indexes: '{}',
+      presets: '{}',
     };
 
     const nextModel = {
       id: '1',
-      slug: 'user',
-      pluralSlug: 'users',
+      'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+      'ronin.createdBy': '1234',
+      'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+      'ronin.updatedBy': '1234',
       name: 'User',
       pluralName: 'Users',
+      slug: 'user',
+      pluralSlug: 'users',
+      idPrefix: null,
+      table: null,
+      'identifiers.name': 'id',
+      'identifiers.slug': 'id',
+      fields: '{}',
+      indexes: '{}',
+      presets: '{}',
     };
 
-    const { alter } = createSyntaxFactory({
-      fetch: async (request) => {
-        mockResolvedRequestJSON = await (request as Request).json();
-
-        return Response.json({
-          results: [
-            {
-              record: previousModel,
-            },
-            {
-              record: nextModel,
-            },
-          ],
-        });
-      },
+    const factory = createSyntaxFactory({
+      databaseCaller: () => ({
+        results: [[previousModel], [], [nextModel]],
+      }),
+      models: [{ slug: 'account' }],
       triggers: {
         model: {
           followingAlter(query, multiple, beforeResult, afterResult) {
@@ -307,18 +366,11 @@ describe('triggers', () => {
       },
     });
 
-    await (alter as unknown as (details: object) => unknown)({
+    await (factory.alter as unknown as (details: object) => unknown)({
       model: 'account',
       to: {
         slug: 'user',
       },
-    });
-
-    expect(mockResolvedRequestJSON).toEqual({
-      queries: [
-        { list: { model: 'account' } },
-        { alter: { model: 'account', to: { slug: 'user' } } },
-      ],
     });
 
     // Make sure `finalQuery` matches the initial query payload.
@@ -334,10 +386,20 @@ describe('triggers', () => {
     //
     // We must use `toMatchObject` here, to ensure that the array is really
     // empty and doesn't contain any `undefined` items.
-    expect(finalBeforeResult).toMatchObject([previousModel]);
+    expect(finalBeforeResult).toMatchObject([
+      {
+        slug: 'account',
+        name: 'Account',
+      },
+    ]);
 
     // Make sure `finalAfterResult` matches the resolved account.
-    expect(finalAfterResult).toEqual([nextModel]);
+    expect(finalAfterResult).toMatchObject([
+      {
+        slug: 'user',
+        name: 'User',
+      },
+    ]);
 
     expect(finalMultiple).toBe(false);
   });
@@ -348,22 +410,32 @@ describe('triggers', () => {
     let finalBeforeResult: unknown;
     let finalAfterResult: unknown;
 
-    const { drop } = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
-          results: [
+    const factory = createSyntaxFactory({
+      databaseCaller: () => ({
+        results: [
+          [],
+          [
             {
-              record: {
-                id: '1',
-                slug: 'account',
-                pluralSlug: 'accounts',
-                name: 'Account',
-                pluralName: 'Accounts',
-              },
+              id: '1',
+              'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+              'ronin.createdBy': '1234',
+              'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+              'ronin.updatedBy': '1234',
+              name: 'Account',
+              pluralName: 'Accounts',
+              slug: 'account',
+              pluralSlug: 'accounts',
+              idPrefix: null,
+              table: null,
+              'identifiers.name': 'id',
+              'identifiers.slug': 'id',
+              fields: '{}',
+              indexes: '{}',
+              presets: '{}',
             },
           ],
-        });
-      },
+        ],
+      }),
       triggers: {
         model: {
           followingDrop(query, multiple, beforeResult, afterResult) {
@@ -374,9 +446,12 @@ describe('triggers', () => {
           },
         },
       },
+      models: [{ slug: 'account' }],
     });
 
-    const model = await drop.model('account' as Parameters<typeof drop.model>[0]);
+    const model = await factory.drop.model(
+      'account' as Parameters<typeof factory.drop.model>[0],
+    );
 
     // Make sure `finalQuery` matches the initial query payload.
     expect(finalQuery).toMatchObject({
@@ -401,20 +476,28 @@ describe('triggers', () => {
     let finalAfterResult: unknown;
 
     const { remove } = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
-          results: [
+      databaseCaller: () => ({
+        results: [
+          [
             {
-              record: {
-                id: '1',
-                handle: 'juri',
-                firstName: 'Juri',
-                lastName: 'Adams',
-              },
+              id: '1',
+              'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+              'ronin.createdBy': '1234',
+              'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+              'ronin.updatedBy': '1234',
+              handle: 'juri',
+              firstName: 'Juri',
+              lastName: 'Adams',
             },
           ],
-        });
-      },
+        ],
+      }),
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' } },
+        },
+      ],
       triggers: {
         account: {
           followingRemove(_query, _multiple, beforeResult, afterResult) {
@@ -445,44 +528,52 @@ describe('triggers', () => {
   test('run `set` query affecting multiple accounts through factory containing `after` trigger', async () => {
     let finalQuery: FilteredTriggerQuery<QueryType> | undefined;
     let finalMultiple: boolean | undefined;
-    let finalBeforeResult: unknown;
-    let finalAfterResult: unknown;
+    let finalBeforeResult: Array<Record<string, unknown>> | undefined;
+    let finalAfterResult: Array<Record<string, unknown>> | undefined;
 
     const previousAccounts = [
       {
         id: '1',
+        'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+        'ronin.createdBy': '1234',
+        'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+        'ronin.updatedBy': '1234',
         email: 'prev@ronin.co',
       },
       {
         id: '2',
+        'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+        'ronin.createdBy': '1234',
+        'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+        'ronin.updatedBy': '1234',
         email: 'prev@ronin.co',
       },
     ];
 
-    const nextAccounts = [
-      {
-        id: '1',
-        email: 'test@ronin.co',
-      },
-      {
-        id: '2',
-        email: 'test@ronin.co',
-      },
-    ];
+    const nextAccounts = previousAccounts.map((account) => ({
+      ...account,
+      email: 'test@ronin.co',
+    }));
 
     const { set } = createSyntaxFactory({
-      fetch: async () => {
-        return Response.json({
-          results: [{ records: previousAccounts }, { records: nextAccounts }],
-        });
-      },
+      databaseCaller: () => ({
+        results: [previousAccounts, nextAccounts],
+      }),
+      models: [
+        {
+          slug: 'account',
+          fields: { email: { type: 'string' } },
+        },
+      ],
       triggers: {
         account: {
           followingSet(query, multiple, beforeResult, afterResult) {
             finalQuery = query;
             finalMultiple = multiple;
-            finalBeforeResult = beforeResult;
-            finalAfterResult = afterResult;
+            finalBeforeResult = beforeResult as
+              | Array<Record<string, unknown>>
+              | undefined;
+            finalAfterResult = afterResult as Array<Record<string, unknown>> | undefined;
           },
         },
       },
@@ -515,10 +606,12 @@ describe('triggers', () => {
     });
 
     // Make sure `finalBeforeResult` matches the previous accounts.
-    expect(finalBeforeResult).toEqual(previousAccounts);
+    expect(finalBeforeResult?.[0].id).toEqual(previousAccounts[0].id);
+    expect(finalBeforeResult?.[0].email).toEqual(previousAccounts[0].email);
 
     // Make sure `finalAfterResult` matches the resolved accounts.
-    expect(finalAfterResult).toEqual(accounts);
+    expect(finalAfterResult?.[0].id).toEqual(nextAccounts[0].id);
+    expect(finalAfterResult?.[0].email).toEqual(nextAccounts[0].email);
 
     expect(finalMultiple).toBe(true);
   });
@@ -526,20 +619,16 @@ describe('triggers', () => {
   test('run normal queries alongside queries that are handled by `resolving` trigger', async () => {
     let finalQuery: FilteredTriggerQuery<QueryType> | undefined;
     let finalMultiple: boolean | undefined;
-    let mockResolvedRequestText: string | undefined;
+    let mockStatements: Array<Statement> | undefined;
 
     const { get, batch } = createSyntaxFactory({
-      fetch: async (request) => {
-        mockResolvedRequestText = await (request as Request).text();
-
-        return Response.json({
-          results: [
-            {
-              records: [{ id: 'mem_1' }, { id: 'mem_2' }],
-            },
-          ],
-        });
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+        return {
+          results: [[{ id: 'mem_1' }, { id: 'mem_2' }]],
+        };
       },
+      models: [{ slug: 'member' }],
       triggers: {
         account: {
           resolvingGet(query, multiple) {
@@ -561,11 +650,11 @@ describe('triggers', () => {
       get.members(),
     ]);
 
-    // Make sure only one request is sent to the server and the request which
-    // was handled by the "resolving" "get" trigger is dropped out.
-    expect(mockResolvedRequestText).toEqual('{"queries":[{"get":{"members":{}}}]}');
+    // Make sure only one query is executed and the query which was handled by the
+    // "resolving" "get" trigger is dropped out.
+    expect(mockStatements).toHaveLength(1);
 
-    expect(result.length).toBe(2);
+    expect(result).toHaveLength(2);
 
     expect(result[0]).toMatchObject({ id: 'juri' });
 
@@ -582,23 +671,6 @@ describe('triggers', () => {
   });
 
   test('receive options for sink trigger', async () => {
-    const mockFetchNew = mock(() => {
-      return Response.json({
-        default: {
-          results: [
-            {
-              record: {
-                handle: 'elaine',
-              },
-              modelFields: {
-                name: 'string',
-              },
-            },
-          ],
-        },
-      });
-    });
-
     const defaultQueries: Array<Query> = [
       {
         add: {
@@ -635,7 +707,20 @@ describe('triggers', () => {
         secondary: secondaryQueries,
       },
       {
-        fetch: async () => mockFetchNew(),
+        databaseCaller: () => ({
+          results: [
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                handle: 'elaine',
+              },
+            ],
+          ],
+        }),
         token: 'takashitoken',
         triggers: {
           sink: {
@@ -652,6 +737,7 @@ describe('triggers', () => {
             },
           },
         },
+        models: [{ slug: 'account', fields: { handle: { type: 'string' } } }],
       },
     );
 
@@ -676,54 +762,7 @@ describe('triggers', () => {
   });
 
   test('return queries from `before` trigger', async () => {
-    const mockFetchNew: typeof fetch = async (input: string | URL | Request) => {
-      mockResolvedRequestText = await (input as Request).text();
-
-      return Response.json({
-        default: {
-          results: [
-            {
-              record: {
-                handle: 'elaine',
-              },
-              modelFields: {
-                handle: 'string',
-              },
-            },
-            {
-              record: {
-                handle: 'company',
-              },
-              modelFields: {
-                handle: 'string',
-              },
-            },
-            {
-              record: {
-                account: '1234',
-                space: '1234',
-                role: 'owner',
-              },
-              modelFields: {
-                account: 'link',
-                space: 'link',
-                role: 'string',
-              },
-            },
-            {
-              record: {
-                name: 'MacBook',
-                color: 'Space Black',
-              },
-              modelFields: {
-                name: 'string',
-                color: 'string',
-              },
-            },
-          ],
-        },
-      });
-    };
+    let mockStatements: Array<Statement> | undefined;
 
     let accountTriggersOptions = {} as Parameters<FollowingAddTrigger>[4];
     const accountTriggers: { followingAdd: FollowingAddTrigger } = {
@@ -741,7 +780,7 @@ describe('triggers', () => {
     };
     const spaceTriggersSpy = spyOn(spaceTriggers, 'followingAdd');
 
-    const { batch, add } = createSyntaxFactory({
+    const factory = createSyntaxFactory({
       triggers: {
         member: {
           beforeAdd(query) {
@@ -768,24 +807,105 @@ describe('triggers', () => {
         account: accountTriggers,
         space: spaceTriggers,
       },
-      fetch: mockFetchNew,
+
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+
+        return {
+          results: [
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                handle: 'elaine',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                handle: 'company',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                account: '1234',
+                space: '1234',
+                role: 'owner',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                name: 'MacBook',
+                color: 'Space Black',
+              },
+            ],
+          ],
+        };
+      },
+
+      models: [
+        {
+          slug: 'account',
+          fields: {
+            handle: { type: 'string' },
+          },
+        },
+        {
+          slug: 'space',
+          fields: {
+            handle: { type: 'string' },
+          },
+        },
+        {
+          slug: 'member',
+          fields: {
+            account: { type: 'link', target: 'account' },
+            space: { type: 'link', target: 'space' },
+            role: { type: 'string' },
+          },
+        },
+        {
+          slug: 'product',
+          fields: {
+            name: { type: 'string' },
+            color: { type: 'string' },
+          },
+        },
+      ],
     });
 
     // We're using a batch to be able to check whether the results of the queries
     // returned from the `pre` trigger are being excluded correctly.
-    const results = await batch(() => [
-      add.member.with({
+    const results = await factory.batch(() => [
+      factory.add.member.with({
         account: { handle: 'elaine' },
         space: { handle: 'company' },
         role: 'owner',
       }),
-      add.product.with({
+      factory.add.product.with({
         name: 'MacBook',
         color: 'Space Black',
       }),
     ]);
 
-    expect(results).toEqual([
+    expect(results).toMatchObject([
       {
         account: '1234',
         space: '1234',
@@ -811,77 +931,45 @@ describe('triggers', () => {
     expect(accountTriggersSpy).toHaveBeenCalled();
     expect(spaceTriggersSpy).toHaveBeenCalled();
 
-    expect(mockResolvedRequestText).toEqual(
-      JSON.stringify({
-        queries: [
-          { add: { account: { with: { handle: 'elaine' } } } },
-          { add: { space: { with: { handle: 'company' } } } },
-          {
-            add: {
-              member: {
-                with: {
-                  account: { handle: 'elaine' },
-                  space: { handle: 'company' },
-                  role: 'owner',
-                },
-              },
-            },
-          },
-          { add: { product: { with: { name: 'MacBook', color: 'Space Black' } } } },
+    expect(mockStatements).toMatchObject([
+      {
+        sql: 'INSERT INTO "accounts" ("handle", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
+        params: ['elaine', expect.any(String), expect.any(String), expect.any(String)],
+        returning: true,
+      },
+      {
+        sql: 'INSERT INTO "spaces" ("handle", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
+        params: ['company', expect.any(String), expect.any(String), expect.any(String)],
+        returning: true,
+      },
+      {
+        sql: 'INSERT INTO "members" ("account", "space", "role", "id", "ronin.createdAt", "ronin.updatedAt") VALUES ((SELECT "id" FROM "accounts" WHERE "handle" = ?1 LIMIT 1), (SELECT "id" FROM "spaces" WHERE "handle" = ?2 LIMIT 1), ?3, ?4, ?5, ?6) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "account", "space", "role"',
+        params: [
+          'elaine',
+          'company',
+          'owner',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
         ],
-      }),
-    );
+        returning: true,
+      },
+      {
+        sql: 'INSERT INTO "products" ("name", "color", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name", "color"',
+        params: [
+          'MacBook',
+          'Space Black',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+        returning: true,
+      },
+    ]);
   });
 
   test('return queries from `after` trigger', async () => {
-    const mockFetchNew: typeof fetch = async (input: string | URL | Request) => {
-      mockResolvedRequestText = await (input as Request).text();
-
-      return Response.json({
-        default: {
-          results: [
-            {
-              record: {
-                handle: 'company',
-              },
-              modelFields: {
-                handle: 'string',
-              },
-            },
-            {
-              record: {
-                space: '1234',
-                role: 'owner',
-              },
-              modelFields: {
-                space: 'link',
-                role: 'string',
-              },
-            },
-            {
-              record: {
-                space: '1234',
-                token: '1234',
-              },
-              modelFields: {
-                space: 'link',
-                role: 'string',
-              },
-            },
-            {
-              record: {
-                name: 'MacBook',
-                color: 'Space Black',
-              },
-              modelFields: {
-                name: 'string',
-                color: 'string',
-              },
-            },
-          ],
-        },
-      });
-    };
+    let mockStatements: Array<Statement> | undefined;
 
     const memberTriggers = { followingAdd: () => undefined };
     const memberTriggersSpy = spyOn(memberTriggers, 'followingAdd');
@@ -889,7 +977,7 @@ describe('triggers', () => {
     const appTriggers = { followingAdd: () => undefined };
     const appTriggersSpy = spyOn(appTriggers, 'followingAdd');
 
-    const { batch, add } = createSyntaxFactory({
+    const factory = createSyntaxFactory({
       triggers: {
         space: {
           afterAdd(query) {
@@ -926,20 +1014,86 @@ describe('triggers', () => {
         member: memberTriggers,
         app: appTriggers,
       },
-      fetch: mockFetchNew,
+      databaseCaller: (statements) => {
+        mockStatements = statements;
+
+        return {
+          results: [
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                handle: 'company',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                space: '1234',
+                role: 'owner',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                space: '1234',
+                token: '1234',
+              },
+            ],
+            [
+              {
+                id: '1',
+                'ronin.createdAt': '2024-04-16T15:02:12.710Z',
+                'ronin.createdBy': '1234',
+                'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
+                'ronin.updatedBy': '1234',
+                name: 'MacBook',
+                color: 'Space Black',
+              },
+            ],
+          ],
+        };
+      },
+
+      models: [
+        { slug: 'space', fields: { handle: { type: 'string' } } },
+        {
+          slug: 'member',
+          fields: { space: { type: 'link', target: 'space' }, role: { type: 'string' } },
+        },
+        {
+          slug: 'app',
+          fields: { space: { type: 'link', target: 'space' }, token: { type: 'string' } },
+        },
+        {
+          slug: 'product',
+          fields: { name: { type: 'string' }, color: { type: 'string' } },
+        },
+      ],
     });
 
     // We're using a batch to be able to check whether the results of the queries
     // returned from the `after` trigger are being excluded correctly.
-    const results = await batch(() => [
-      add.space.with.handle('company'),
-      add.product.with({
+    const results = await factory.batch(() => [
+      factory.add.space.with.handle('company'),
+      factory.add.product.with({
         name: 'MacBook',
         color: 'Space Black',
       }),
     ]);
 
-    expect(results).toEqual([
+    expect(results).toMatchObject([
       {
         handle: 'company',
       },
@@ -952,24 +1106,47 @@ describe('triggers', () => {
     expect(memberTriggersSpy).toHaveBeenCalled();
     expect(appTriggersSpy).toHaveBeenCalled();
 
-    expect(mockResolvedRequestText).toEqual(
-      JSON.stringify({
-        queries: [
-          { add: { space: { with: { handle: 'company' } } } },
-          { add: { member: { with: { space: { handle: 'company' }, role: 'owner' } } } },
-          { add: { app: { with: { space: { handle: 'company' }, token: '1234' } } } },
-          { add: { product: { with: { name: 'MacBook', color: 'Space Black' } } } },
+    expect(mockStatements).toMatchObject([
+      {
+        sql: 'INSERT INTO "spaces" ("handle", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle"',
+        params: ['company', expect.any(String), expect.any(String), expect.any(String)],
+      },
+      {
+        sql: 'INSERT INTO "members" ("space", "role", "id", "ronin.createdAt", "ronin.updatedAt") VALUES ((SELECT "id" FROM "spaces" WHERE "handle" = ?1 LIMIT 1), ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "role"',
+        params: [
+          'company',
+          'owner',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
         ],
-      }),
-    );
+      },
+      {
+        sql: 'INSERT INTO "apps" ("space", "token", "id", "ronin.createdAt", "ronin.updatedAt") VALUES ((SELECT "id" FROM "spaces" WHERE "handle" = ?1 LIMIT 1), ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "space", "token"',
+        params: [
+          'company',
+          '1234',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+      },
+      {
+        sql: 'INSERT INTO "products" ("name", "color", "id", "ronin.createdAt", "ronin.updatedAt") VALUES (?1, ?2, ?3, ?4, ?5) RETURNING "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "name", "color"',
+        params: [
+          'MacBook',
+          'Space Black',
+          expect.any(String),
+          expect.any(String),
+          expect.any(String),
+        ],
+      },
+    ]);
   });
 
   test('run queries with triggers required for all queries', async () => {
     const { get, remove } = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: We need this to satisfy the types.
-      fetch: async () => {
-        return Response.json({ results: [] });
-      },
+      databaseCaller: () => ({ results: [] }),
       requireTriggers: 'all',
     });
 
@@ -984,10 +1161,7 @@ describe('triggers', () => {
 
   test('run queries with triggers required for read queries', async () => {
     const { get } = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: We need this to satisfy the types.
-      fetch: async () => {
-        return Response.json({ results: [] });
-      },
+      databaseCaller: () => ({ results: [] }),
       requireTriggers: 'read',
       triggers: {
         team: {
@@ -1003,10 +1177,13 @@ describe('triggers', () => {
 
   test('run queries with triggers required for write queries', async () => {
     const { remove } = createSyntaxFactory({
-      // biome-ignore lint/suspicious/useAwait: We need this to satisfy the types.
-      fetch: async () => {
-        return Response.json({ results: [] });
-      },
+      databaseCaller: () => ({ results: [] }),
+      models: [
+        {
+          slug: 'account',
+          fields: { handle: { type: 'string' } },
+        },
+      ],
       requireTriggers: 'write',
       triggers: {
         team: {

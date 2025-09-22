@@ -89,3 +89,4 @@ export type { StorableObjectValue } from '@/src/types/storage';
 
 // Other
 export type { PromiseTuple, QueryHandlerOptions } from '@/src/types/utils';
+export type { TriggerOptions } from '@/src/triggers';
