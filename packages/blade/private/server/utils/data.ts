@@ -181,5 +181,6 @@ export const getClientConfig = (
     waitUntil: serverContext.waitUntil,
     models,
     defaultRecordLimit: 20,
+    debug: VERBOSE_LOGGING,
   };
 };

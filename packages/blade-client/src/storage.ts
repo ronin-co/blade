@@ -92,49 +92,53 @@ export const extractStorableObjects = (queries: Array<Query>): Array<StorableObj
     [] as Array<StorableObject>,
   );
 
+const defaultStorageCaller: QueryHandlerOptions['storageCaller'] = async (
+  object: StorableObject,
+  token: string,
+) => {
+  const { contentType, name, value } = object;
+
+  const headers = new Headers();
+  headers.set('Authorization', `Bearer ${token}`);
+
+  if (contentType) {
+    headers.set('Content-Type', contentType);
+  }
+
+  if (name) {
+    headers.set(
+      'Content-Disposition',
+      `form-data; filename="${encodeURIComponent(name)}"`,
+    );
+  }
+
+  const request = new Request('https://storage.ronin.co/', {
+    method: 'PUT',
+    body: value,
+    headers,
+  });
+
+  const response = await fetch(request);
+  return getResponseBody<StoredObject>(response, {
+    errorPrefix:
+      'An error occurred while uploading the binary objects included in the provided queries. Error:',
+  });
+};
+
 /**
  * Upload `StorableObjectValue`s contained in queries.
  *
- * @param storableObjects - Array of `StorableObject`s to upload.
+ * @param objects - Array of `StorableObject`s to upload.
  * @param options - Optional object containing options for the upload request.
  *
  * @returns Array of `StoredObject`s.
  */
 export const uploadStorableObjects = (
-  storableObjects: Array<StorableObject>,
+  objects: Array<StorableObject>,
   options: QueryHandlerOptions = {},
 ): Promise<Array<StoredObject>> => {
-  const fetcher = typeof options?.fetch === 'function' ? options.fetch : fetch;
-
-  const requests: Array<Promise<StoredObject>> = storableObjects.map(
-    async ({ name, value, contentType }) => {
-      const headers = new Headers();
-      headers.set('Authorization', `Bearer ${options.token}`);
-
-      if (contentType) {
-        headers.set('Content-Type', contentType);
-      }
-
-      if (name) {
-        headers.set(
-          'Content-Disposition',
-          `form-data; filename="${encodeURIComponent(name)}"`,
-        );
-      }
-
-      const request = new Request('https://storage.ronin.co/', {
-        method: 'PUT',
-        body: value,
-        headers,
-      });
-
-      const response = await fetcher(request);
-      return getResponseBody<StoredObject>(response, {
-        errorPrefix:
-          'An error occurred while uploading the binary objects included in the provided queries. Error:',
-      });
-    },
-  );
+  const callStorage = options.storageCaller || defaultStorageCaller;
+  const requests = objects.map((item) => callStorage(item, options.token as string));
 
   return Promise.all(requests);
 };
