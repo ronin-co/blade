@@ -174,6 +174,8 @@ export const composeBuildContext = async (
       }
     },
     dispose: () => bundle.close(),
+
+    // We're using a getter since the closure would otherwise cause an outdated value.
     get active() {
       return running;
     },
