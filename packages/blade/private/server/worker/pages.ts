@@ -11,11 +11,15 @@ const getParameter = (
 ) => {
   let type = '';
   let name = '';
-  const extension = item.endsWith('].tsx') ? 'tsx' : item.endsWith('].mdx') && 'mdx';
+  const extension = item.endsWith('].tsx')
+    ? 'tsx'
+    : item.endsWith('].mdx')
+      ? 'mdx'
+      : item.endsWith('].md') && 'md';
 
   let value: string | string[] = currentSegment;
 
-  if (extension === 'mdx' || extension === 'tsx') {
+  if (extension === 'tsx' || extension === 'mdx' || extension === 'md') {
     type = 'file';
     name = item.replace('[', '').replace(`].${extension}`, '');
   } else if (item.endsWith(']')) {
