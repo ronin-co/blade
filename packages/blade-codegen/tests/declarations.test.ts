@@ -29,7 +29,7 @@ describe('declarations', () => {
   test('import the utility types from `blade/types`', () => {
     const output = printNodes([importBladeUtilsType]);
     expect(output).toStrictEqual(
-      `import type { ReducedFunction, ResultRecord } from \"blade/types\";\n`,
+      `import type { ReducedFunction } from \"blade/types\";\n`,
     );
   });
 

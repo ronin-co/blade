@@ -2,7 +2,7 @@
 
 exports[`generate a basic model 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
-import type { ReducedFunction, ResultRecord } from "blade/types";
+import type { ReducedFunction } from "blade/types";
 import type { Account, Accounts } from "blade/types";
 export type { Account, Accounts };
 declare namespace Utils {
@@ -27,6 +27,20 @@ declare namespace Utils {
     }, options?: Record<string, unknown>) => Promise<T>) & {
         ascending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
         descending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
+    };
+    type ResultRecord = {
+        /* The unique identifier of the record. */
+        id: string;
+        ronin: {
+            /* The timestamp of when the record was created. */
+            createdAt: string;
+            /* The ID of the user who created the record. */
+            createdBy: string | null;
+            /* The timestamp of the last time the record was updated. */
+            updatedAt: string;
+            /* The ID of the user who last updated the record. */
+            updatedBy: string | null;
+        };
     };
     type RootQueryCaller<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => T;
     type RootQueryCallerPromise<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => Promise<T>;
@@ -117,7 +131,7 @@ declare namespace Syntax {
     }
 }
 declare module "blade/types" {
-    export type Account = ResultRecord & {
+    export type Account = Utils.ResultRecord & {
         email: string;
         name: string;
     };
@@ -239,7 +253,7 @@ declare module "blade/client/hooks" {
 
 exports[`generate a basic model with blob field 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
-import type { ReducedFunction, ResultRecord } from "blade/types";
+import type { ReducedFunction } from "blade/types";
 import type { StoredObject } from "blade-compiler";
 import type { Account, Accounts } from "blade/types";
 export type { Account, Accounts };
@@ -265,6 +279,20 @@ declare namespace Utils {
     }, options?: Record<string, unknown>) => Promise<T>) & {
         ascending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
         descending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
+    };
+    type ResultRecord = {
+        /* The unique identifier of the record. */
+        id: string;
+        ronin: {
+            /* The timestamp of when the record was created. */
+            createdAt: string;
+            /* The ID of the user who created the record. */
+            createdBy: string | null;
+            /* The timestamp of the last time the record was updated. */
+            updatedAt: string;
+            /* The ID of the user who last updated the record. */
+            updatedBy: string | null;
+        };
     };
     type RootQueryCaller<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => T;
     type RootQueryCallerPromise<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => Promise<T>;
@@ -359,7 +387,7 @@ declare namespace Syntax {
     }
 }
 declare module "blade/types" {
-    export type Account = ResultRecord & {
+    export type Account = Utils.ResultRecord & {
         email: string;
         image: StoredObject;
         name: string;
@@ -482,7 +510,7 @@ declare module "blade/client/hooks" {
 
 exports[`generate with no models 1`] = `
 "import type { CombinedInstructions, Expression } from "blade-compiler";
-import type { ReducedFunction, ResultRecord } from "blade/types";
+import type { ReducedFunction } from "blade/types";
 import type {} from "blade/types";
 export type {};
 declare namespace Utils {
@@ -507,6 +535,20 @@ declare namespace Utils {
     }, options?: Record<string, unknown>) => Promise<T>) & {
         ascending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
         descending: <T = U>(fields: Array<Expression | F>, options?: Record<string, unknown>) => Promise<T>;
+    };
+    type ResultRecord = {
+        /* The unique identifier of the record. */
+        id: string;
+        ronin: {
+            /* The timestamp of when the record was created. */
+            createdAt: string;
+            /* The ID of the user who created the record. */
+            createdBy: string | null;
+            /* The timestamp of the last time the record was updated. */
+            updatedAt: string;
+            /* The ID of the user who last updated the record. */
+            updatedBy: string | null;
+        };
     };
     type RootQueryCaller<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => T;
     type RootQueryCallerPromise<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => Promise<T>;
