@@ -1,6 +1,6 @@
 {
   "name": "blade-better-auth",
-  "version": "3.18.6",
+  "version": "3.18.7",
   "type": "module",
   "description": "A Better Auth adapter for RONIN",
   "publishConfig": {
