@@ -98,6 +98,21 @@ export const components = {
 };
 ```
 
+### Exports
+
+Every `.md` and `.mdx` file provides the following exports when it is imported:
+
+```tsx
+// The markdown elements as a renderable React component
+import file from './test.md';
+
+// An array containing the hierarchy of markdown elements
+import { tableOfContents } from './test.md';
+
+// The raw file contents — useful when instructing LLMs
+import { raw } from './test.md';
+```
+
 ### Table of Contents
 
 For documentation websites, a table of contents helps users navigate your content. Blade automatically generates a table of contents from your MDX headings and passes it to your layout component.

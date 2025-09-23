@@ -246,7 +246,9 @@ export const getMdxLoader = (
         rehypePlugins: [withToc, withTocExport],
       });
 
-      const tsx = String(mdx.value);
+      const prefix = `export const raw = ${JSON.stringify(contents)};\n\n`;
+      const tsx = prefix + String(mdx.value);
+
       return { code: tsx, map: null };
     },
   },
