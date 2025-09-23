@@ -8,5 +8,6 @@ export default defineConfig({
     schema: 'src/schema/index.ts',
     queries: 'src/queries/index.ts',
   },
+  external: ['blade-compiler'],
   format: 'esm',
 });
