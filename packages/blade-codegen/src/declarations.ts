@@ -1,4 +1,4 @@
-import { SyntaxKind, factory } from 'typescript';
+import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
@@ -34,14 +34,11 @@ export const importBladeCompilerStoredObjectType = createImportDeclaration({
 /**
  * @example
  * ```ts
- * import type { ReducedFunction, ResultRecord } from "blade/types";
+ * import type { ReducedFunction } from "blade/types";
  * ```
  */
 export const importBladeUtilsType = createImportDeclaration({
-  identifiers: [
-    { name: identifiers.blade.reducedFunction },
-    { name: identifiers.blade.resultRecord },
-  ],
+  identifiers: [{ name: identifiers.blade.reducedFunction }],
   module: identifiers.blade.module.types,
   type: true,
 });
@@ -772,6 +769,92 @@ export const orderedByQueryPromiseType = factory.createTypeAliasDeclaration(
 /**
  * @example
  * ```ts
+ * type ResultRecord = {
+ *  id: string;
+ *  ronin: { ... };
+ * }
+ * ```
+ */
+export const resultRecordType = factory.createTypeAliasDeclaration(
+  undefined,
+  identifiers.namespace.utils.resultRecord,
+  undefined,
+  factory.createTypeLiteralNode([
+    addSyntheticLeadingComment(
+      factory.createPropertySignature(
+        undefined,
+        'id',
+        undefined,
+        factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+      ),
+      SyntaxKind.MultiLineCommentTrivia,
+      ' The unique identifier of the record. ',
+      true,
+    ),
+
+    factory.createPropertySignature(
+      undefined,
+      'ronin',
+      undefined,
+      factory.createTypeLiteralNode([
+        addSyntheticLeadingComment(
+          factory.createPropertySignature(
+            undefined,
+            'createdAt',
+            undefined,
+            factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+          ),
+          SyntaxKind.MultiLineCommentTrivia,
+          ' The timestamp of when the record was created. ',
+          true,
+        ),
+        addSyntheticLeadingComment(
+          factory.createPropertySignature(
+            undefined,
+            'createdBy',
+            undefined,
+            factory.createUnionTypeNode([
+              factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+              factory.createLiteralTypeNode(factory.createNull()),
+            ]),
+          ),
+          SyntaxKind.MultiLineCommentTrivia,
+          ' The ID of the user who created the record. ',
+          true,
+        ),
+        addSyntheticLeadingComment(
+          factory.createPropertySignature(
+            undefined,
+            'updatedAt',
+            undefined,
+            factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+          ),
+          SyntaxKind.MultiLineCommentTrivia,
+          ' The timestamp of the last time the record was updated. ',
+          true,
+        ),
+        addSyntheticLeadingComment(
+          factory.createPropertySignature(
+            undefined,
+            'updatedBy',
+            undefined,
+            factory.createUnionTypeNode([
+              factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
+              factory.createLiteralTypeNode(factory.createNull()),
+            ]),
+          ),
+          SyntaxKind.MultiLineCommentTrivia,
+          ' The ID of the user who last updated the record. ',
+          true,
+        ),
+      ]),
+    ),
+  ]),
+);
+
+/**
+ * @example
+ * ```ts
  * type RootQueryCaller<U> = <T = U>(instructions?: Partial<CombinedInstructions>, options?: Record<string, unknown>) => T;
  * ```
  */
@@ -1106,7 +1189,9 @@ export const withQueryType = factory.createTypeAliasDeclaration(
                 'value',
                 undefined,
                 factory.createIndexedAccessTypeNode(
-                  factory.createTypeReferenceNode(identifiers.blade.resultRecord),
+                  factory.createTypeReferenceNode(
+                    identifiers.namespace.utils.resultRecord,
+                  ),
                   factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
                 ),
               ),
@@ -1153,7 +1238,7 @@ export const withQueryType = factory.createTypeAliasDeclaration(
                         factory.createIndexedAccessTypeNode(
                           factory.createIndexedAccessTypeNode(
                             factory.createTypeReferenceNode(
-                              identifiers.blade.resultRecord,
+                              identifiers.namespace.utils.resultRecord,
                             ),
                             factory.createLiteralTypeNode(
                               factory.createStringLiteral('ronin'),
@@ -1265,7 +1350,9 @@ export const withQueryPromiseType = factory.createTypeAliasDeclaration(
                 'value',
                 undefined,
                 factory.createIndexedAccessTypeNode(
-                  factory.createTypeReferenceNode(identifiers.blade.resultRecord),
+                  factory.createTypeReferenceNode(
+                    identifiers.namespace.utils.resultRecord,
+                  ),
                   factory.createLiteralTypeNode(factory.createStringLiteral(slug)),
                 ),
               ),
@@ -1314,7 +1401,7 @@ export const withQueryPromiseType = factory.createTypeAliasDeclaration(
                         factory.createIndexedAccessTypeNode(
                           factory.createIndexedAccessTypeNode(
                             factory.createTypeReferenceNode(
-                              identifiers.blade.resultRecord,
+                              identifiers.namespace.utils.resultRecord,
                             ),
                             factory.createLiteralTypeNode(
                               factory.createStringLiteral('ronin'),

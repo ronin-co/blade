@@ -1,7 +1,7 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`model a basic model 1`] = `
-"export type Account = ResultRecord & {
+"export type Account = Utils.ResultRecord & {
     avatar: StoredObject;
     email: string;
     isActive: boolean;
@@ -21,7 +21,7 @@ exports[`model a model with a summary 1`] = `
 "/**
  * A user account.
  */
-export type Account = ResultRecord & {
+export type Account = Utils.ResultRecord & {
     email: string;
     name: string;
 };
@@ -36,7 +36,7 @@ export type Accounts = Array<Account> & {
 `;
 
 exports[`model a model with an invalid field type 1`] = `
-"export type Account = ResultRecord & {
+"export type Account = Utils.ResultRecord & {
     name: unknown;
 };
 export type Accounts = Array<Account> & {
@@ -47,7 +47,7 @@ export type Accounts = Array<Account> & {
 `;
 
 exports[`model a model with a link field 1`] = `
-"export type Account = ResultRecord & {
+"export type Account = Utils.ResultRecord & {
     email: string;
     name: string;
 };
@@ -56,7 +56,7 @@ export type Accounts = Array<Account> & {
     moreAfter?: string;
 };
 export type Post<U extends Array<"author"> | "all" = [
-]> = ResultRecord & {
+]> = Utils.ResultRecord & {
     author: Utils.ResolveSchema<Account, U, "author">;
     title: string;
 };
@@ -69,7 +69,7 @@ export type Posts<U extends Array<"author"> | "all" = [
 `;
 
 exports[`model a model with a many-to-many link field 1`] = `
-"export type Account = ResultRecord & {
+"export type Account = Utils.ResultRecord & {
     email: string;
     name: string;
 };
@@ -78,7 +78,7 @@ export type Accounts = Array<Account> & {
     moreAfter?: string;
 };
 export type Space<U extends Array<"members"> | "all" = [
-]> = ResultRecord & {
+]> = Utils.ResultRecord & {
     members: Utils.ResolveSchema<Array<Account>, U, "members">;
     name: string;
 };
@@ -91,7 +91,7 @@ export type Spaces<U extends Array<"members"> | "all" = [
 `;
 
 exports[`model a model with a link field that does not exist 1`] = `
-"export type Account = ResultRecord & {
+"export type Account = Utils.ResultRecord & {
     email: string;
     latestPost: unknown;
     name: string;
@@ -107,7 +107,7 @@ exports[`model a model with nested fields 1`] = `
 "/**
  * A user account.
  */
-export type Account = ResultRecord & {
+export type Account = Utils.ResultRecord & {
     name: string;
     nested: {
         bar: number;

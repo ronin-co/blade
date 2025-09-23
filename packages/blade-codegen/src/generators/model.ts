@@ -87,9 +87,11 @@ export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclara
       modelIdentifier.singular,
       modelInterfaceTypeParameters,
       factory.createIntersectionTypeNode([
-        factory.createExpressionWithTypeArguments(
-          identifiers.blade.resultRecord,
-          undefined,
+        factory.createTypeReferenceNode(
+          factory.createQualifiedName(
+            identifiers.namespace.utils.name,
+            identifiers.namespace.utils.resultRecord,
+          ),
         ),
         factory.createTypeLiteralNode(
           remapNestedFields(fields)

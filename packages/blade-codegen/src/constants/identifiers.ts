@@ -22,7 +22,6 @@ export const identifiers = {
       types: factory.createIdentifier(JSON.stringify('blade/types')),
     },
     reducedFunction: factory.createIdentifier('ReducedFunction'),
-    resultRecord: factory.createIdentifier('ResultRecord'),
   },
   compiler: {
     combinedInstructions: factory.createIdentifier('CombinedInstructions'),
@@ -60,6 +59,7 @@ export const identifiers = {
       name: factory.createIdentifier('Utils'),
       orderedByQuery: factory.createIdentifier('OrderedByQuery'),
       orderedByQueryPromise: factory.createIdentifier('OrderedByQueryPromise'),
+      resultRecord: factory.createIdentifier('ResultRecord'),
       rootQueryCaller: factory.createIdentifier('RootQueryCaller'),
       rootQueryCallerPromise: factory.createIdentifier('RootQueryCallerPromise'),
       selectingQuery: factory.createIdentifier('SelectingQuery'),
