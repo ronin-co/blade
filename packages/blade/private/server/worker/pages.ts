@@ -64,7 +64,8 @@ const getEntryPath = (
   newSegments.shift();
 
   const filePrefix = currentSegment ? currentSegment : indexName;
-  let fileExtension: 'tsx' | 'mdx' = 'tsx';
+
+  let fileExtension: 'tsx' | 'mdx' | 'md' = 'tsx';
   let fileName = `${filePrefix}.${fileExtension}`;
   let filePath = joinPaths(parentDirectory, fileName);
 
@@ -76,6 +77,17 @@ const getEntryPath = (
   }
 
   fileExtension = 'mdx';
+  fileName = `${filePrefix}.${fileExtension}`;
+  filePath = joinPaths(parentDirectory, fileName);
+
+  if (typeof pages[filePath] === 'object') {
+    return {
+      path: filePath,
+      params,
+    };
+  }
+
+  fileExtension = 'md';
   fileName = `${filePrefix}.${fileExtension}`;
   filePath = joinPaths(parentDirectory, fileName);
 
