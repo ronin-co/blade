@@ -331,7 +331,12 @@ const getRenderingTree = (
 };
 
 const addPathSegmentsToURL = (requestURL: URL, entry: PageEntry): string => {
-  const extension = entry.path.includes('.mdx') ? 'mdx' : 'tsx';
+  const extension = entry.path.includes('.tsx')
+    ? 'tsx'
+    : entry.path.includes('.mdx')
+      ? 'mdx'
+      : 'md';
+
   let relativePath = entry.path
     .replace(`index.${extension}`, '')
     .replace(`.${extension}`, '');
