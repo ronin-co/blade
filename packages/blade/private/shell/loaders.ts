@@ -225,7 +225,8 @@ export const getMdxLoader = (
   name: 'MDX Loader',
   transform: {
     filter: {
-      id: /\.mdx$/,
+      // Match `.mdx` and `.md` files.
+      id: /\.mdx?$/,
     },
     async handler(contents) {
       const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
