@@ -6,6 +6,7 @@ import { parseArgs } from 'node:util';
 import cmdApply from 'blade-cli/commands/apply';
 import cmdDiff from 'blade-cli/commands/diff';
 import cmdTypes from 'blade-cli/commands/types';
+import { BASE_FLAGS, MIGRATION_FLAGS, TYPES_FLAGS } from 'blade-cli/flags';
 import chokidar, { type EmitArgsWithName } from 'chokidar';
 import dotenv from 'dotenv';
 import getPort, { portNumbers } from 'get-port';
@@ -21,10 +22,6 @@ dotenv.config();
 const { values, positionals } = parseArgs({
   args: process.argv,
   options: {
-    debug: {
-      type: 'boolean',
-      default: false,
-    },
     queries: {
       type: 'boolean',
       default: false,
@@ -42,6 +39,9 @@ const { values, positionals } = parseArgs({
       type: 'string',
       description: 'Used to prefix all static asset URLs',
     },
+    ...BASE_FLAGS,
+    ...MIGRATION_FLAGS,
+    ...TYPES_FLAGS,
   },
   strict: true,
   allowPositionals: true,
@@ -58,34 +58,16 @@ const appToken = process.env['RONIN_TOKEN'];
 
 // `blade diff` command.
 const isDiffing = normalizedPositionals.includes('diff');
-if (isDiffing)
-  await cmdDiff(
-    appToken,
-    {
-      help: false,
-      version: false,
-      ...values,
-    },
-    positionals,
-  );
+if (isDiffing) await cmdDiff(appToken, values, positionals);
 
 // `blade apply` command.
 const isApplying = normalizedPositionals.includes('apply');
-if (isApplying)
-  await cmdApply(appToken, {
-    help: false,
-    version: false,
-    ...values,
-  });
+if (isApplying) await cmdApply(appToken, values);
 
 // `blade types` command.
 const isGeneratingTypes = normalizedPositionals.includes('types');
 if (isGeneratingTypes) {
-  await cmdTypes(appToken, {
-    help: false,
-    version: false,
-    ...values,
-  });
+  await cmdTypes(appToken, values);
   process.exit(0);
 }
 

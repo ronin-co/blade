@@ -24,6 +24,10 @@
     "./commands/types": {
       "import": "./dist/commands/types.js",
       "types": "./dist/commands/types.d.ts"
+    },
+    "./flags": {
+      "import": "./dist/flags.js",
+      "types": "./dist/flags.d.ts"
     }
   },
   "typesVersions": {
@@ -39,6 +43,9 @@
       ],
       "commands/types": [
         "dist/commands/types.d.ts"
+      ],
+      "flags": [
+        "dist/flags.d.ts"
       ]
     }
   },
