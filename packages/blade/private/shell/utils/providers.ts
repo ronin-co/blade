@@ -30,7 +30,7 @@ export const getProvider = (): DeploymentProvider => {
  * Transform to Vercel build output API.
  *
  * @description This function is designed to run after a production build
- * has completed and transfer or transform any needed files from the `.blade/`
+ * has completed and transfer or transform any needed files from the `.blade/output/`
  * directory to match the necessary Vercel build output API structure.
  *
  * @see https://vercel.com/docs/build-output-api
@@ -163,11 +163,11 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
           {
             $schema: 'node_modules/wrangler/config-schema.json',
             name: currentDirectoryName,
-            main: '.blade/edge-worker.js',
+            main: '.blade/output/edge-worker.js',
             compatibility_date: '2025-06-02',
             assets: {
               binding: 'ASSETS',
-              directory: '.blade/',
+              directory: '.blade/output/',
             },
             observability: {
               enabled: true,

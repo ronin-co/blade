@@ -197,7 +197,7 @@ describe('CLI', () => {
 
         // Mock file operations
         spyOn(fs, 'existsSync').mockImplementation(
-          (path) => !path.toString().includes('.ronin/db.sqlite'),
+          (path) => !path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/db.sqlite`),
         );
         spyOn(path, 'resolve').mockReturnValue(
           path.join(__dirname, 'fixtures/migration-fixture.ts'),
@@ -264,7 +264,7 @@ describe('CLI', () => {
         ],
       );
       spyOn(fs, 'existsSync').mockImplementation(
-        (path) => !path.toString().includes('.ronin/db.sqlite'),
+        (path) => !path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/db.sqlite`),
       );
       spyOn(path, 'resolve').mockReturnValue(
         path.join(__dirname, 'fixtures/migration-fixture.ts'),
@@ -581,7 +581,7 @@ describe('CLI', () => {
         spyOn(fs, 'existsSync').mockImplementation(
           (path) =>
             path.toString().includes('migration-fixture.ts') ||
-            path.toString().includes('.ronin/migrations'),
+            path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/migrations`),
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
@@ -666,7 +666,7 @@ describe('CLI', () => {
         spyOn(fs, 'existsSync').mockImplementation(
           (path) =>
             path.toString().includes('migration-fixture.ts') ||
-            path.toString().includes('.ronin/migrations'),
+            path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/migrations`),
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
@@ -715,7 +715,7 @@ describe('CLI', () => {
         ]);
 
         spyOn(fs, 'existsSync').mockImplementation((path) =>
-          path.toString().includes('.ronin/migrations'),
+          path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/migrations`),
         );
 
         await run({ version: '1.0.0' });
