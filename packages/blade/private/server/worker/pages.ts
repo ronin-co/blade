@@ -11,11 +11,15 @@ const getParameter = (
 ) => {
   let type = '';
   let name = '';
-  const extension = item.endsWith('].tsx') ? 'tsx' : item.endsWith('].mdx') && 'mdx';
+  const extension = item.endsWith('].tsx')
+    ? 'tsx'
+    : item.endsWith('].mdx')
+      ? 'mdx'
+      : item.endsWith('].md') && 'md';
 
   let value: string | string[] = currentSegment;
 
-  if (extension === 'mdx' || extension === 'tsx') {
+  if (extension === 'tsx' || extension === 'mdx' || extension === 'md') {
     type = 'file';
     name = item.replace('[', '').replace(`].${extension}`, '');
   } else if (item.endsWith(']')) {
@@ -60,15 +64,13 @@ const getEntryPath = (
   newSegments.shift();
 
   const filePrefix = currentSegment ? currentSegment : indexName;
-  let fileExtension: 'tsx' | 'mdx' = 'tsx';
+
+  let fileExtension: 'tsx' | 'mdx' | 'md' = 'tsx';
   let fileName = `${filePrefix}.${fileExtension}`;
   let filePath = joinPaths(parentDirectory, fileName);
 
   if (typeof pages[filePath] === 'object') {
-    return {
-      path: filePath,
-      params,
-    };
+    return { path: filePath, params };
   }
 
   fileExtension = 'mdx';
@@ -76,10 +78,15 @@ const getEntryPath = (
   filePath = joinPaths(parentDirectory, fileName);
 
   if (typeof pages[filePath] === 'object') {
-    return {
-      path: filePath,
-      params,
-    };
+    return { path: filePath, params };
+  }
+
+  fileExtension = 'md';
+  fileName = `${filePrefix}.${fileExtension}`;
+  filePath = joinPaths(parentDirectory, fileName);
+
+  if (typeof pages[filePath] === 'object') {
+    return { path: filePath, params };
   }
 
   // If the current segment is empty, it's guaranteed that there won't be a named
