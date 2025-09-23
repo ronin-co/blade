@@ -113,6 +113,23 @@ import { tableOfContents } from './test.md';
 import { raw } from './test.md';
 ```
 
+Since TypeScript is not able to parse the contents of these files itself, the following
+module augmentation can be placed in a `.d.ts` file to help it understand the contents.
+
+For example, you could place the following in a `utils/global.d.ts` file. Note that, due
+to how TypeScript works, you could place this file anywhere in your project, as long as
+your `tsconfig.json` allows TypeScript to find it.
+
+```tsx
+declare module "*.md" {
+  const component: import('react').FunctionComponent;
+
+  export default component;
+  export const tableOfContents: Array<unknown>;
+  export const raw: string;
+}
+```
+
 ### Table of Contents
 
 For documentation websites, a table of contents helps users navigate your content. Blade automatically generates a table of contents from your MDX headings and passes it to your layout component.
