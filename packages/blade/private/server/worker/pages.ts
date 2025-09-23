@@ -70,10 +70,7 @@ const getEntryPath = (
   let filePath = joinPaths(parentDirectory, fileName);
 
   if (typeof pages[filePath] === 'object') {
-    return {
-      path: filePath,
-      params,
-    };
+    return { path: filePath, params };
   }
 
   fileExtension = 'mdx';
@@ -81,10 +78,7 @@ const getEntryPath = (
   filePath = joinPaths(parentDirectory, fileName);
 
   if (typeof pages[filePath] === 'object') {
-    return {
-      path: filePath,
-      params,
-    };
+    return { path: filePath, params };
   }
 
   fileExtension = 'md';
@@ -92,10 +86,7 @@ const getEntryPath = (
   filePath = joinPaths(parentDirectory, fileName);
 
   if (typeof pages[filePath] === 'object') {
-    return {
-      path: filePath,
-      params,
-    };
+    return { path: filePath, params };
   }
 
   // If the current segment is empty, it's guaranteed that there won't be a named
