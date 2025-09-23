@@ -27,14 +27,14 @@ describe('CLI', () => {
 
   let stdoutSpy: Mock<typeof console.log>;
   let stderrSpy: Mock<typeof process.stderr.write>;
-  let exitSpy: Mock<typeof process.exit>;
+  let _exitSpy: Mock<typeof process.exit>;
   let writeFileSyncSpy: Mock<typeof fs.writeFileSync>;
 
   beforeEach(() => {
     // Spy on stdout/stderr
     stdoutSpy = spyOn(console, 'log').mockImplementation(() => {});
     stderrSpy = spyOn(process.stderr, 'write').mockImplementation(() => true);
-    exitSpy = spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    _exitSpy = spyOn(process, 'exit').mockImplementation(() => undefined as never);
     spyOn(console, 'table').mockImplementation(() => {});
     spyOn(fs.promises, 'appendFile').mockImplementation(() => Promise.resolve());
 
@@ -236,7 +236,6 @@ describe('CLI', () => {
 
   describe('migration', () => {
     // Common migration test setup
-    // biome-ignore lint/nursery/useExplicitType: This is a mock.
     const setupMigrationTest = (options?: {
       modelDiff?: Array<ModelWithFieldsArray>;
       modelDefinitions?: Array<Model>;

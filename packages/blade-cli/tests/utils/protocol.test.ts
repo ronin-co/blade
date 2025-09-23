@@ -9,12 +9,12 @@ describe('protocol', () => {
     jest.clearAllMocks();
   });
 
-  test('should initialize with empty queries when none are provided', async () => {
+  test('should initialize with empty queries when none are provided', () => {
     const protocol = new Protocol();
     expect(protocol.queries).toEqual([]);
   });
 
-  test('should initialize with provided queries', async () => {
+  test('should initialize with provided queries', () => {
     const queries = ["create.model({slug: 'model', pluralSlug: 'models'})"];
     const protocol = new Protocol(queries);
     expect(protocol.queries).toEqual([]);
