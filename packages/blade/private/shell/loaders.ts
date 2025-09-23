@@ -228,8 +228,9 @@ export const getMdxLoader = (
       // Match `.mdx` and `.md` files.
       id: /\.mdx?$/,
     },
-    async handler(contents) {
+    async handler(contents, filePath) {
       const yamlPattern = /^\s*---\s*\n([\s\S]*?)\n\s*---\s*/;
+      const extension = path.extname(filePath).slice(1) as 'md' | 'mdx';
 
       const yaml = contents.match(yamlPattern);
       let mdxContents = contents;
@@ -243,6 +244,7 @@ export const getMdxLoader = (
 
       const mdx = await compile(mdxContents, {
         development: environment === 'development',
+        format: extension,
         rehypePlugins: [withToc, withTocExport],
       });
 
