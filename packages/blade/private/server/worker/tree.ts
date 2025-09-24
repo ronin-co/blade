@@ -437,12 +437,13 @@ export const flushSession = async (
 
   try {
     const recentFlush =
-      (stream.lastUpdate === null ? 0 : stream.lastUpdate) >
-      Date.now() - REVALIDATION_INTERVAL;
+      stream.lastUpdate !== null &&
+      stream.lastUpdate > performance.now() - REVALIDATION_INTERVAL;
 
     // If another flush was started since the last revalidation, we can skip the current
     // revalidation and wait for the next one, to avoid unnecessary pushes.
     if (options?.repeat && recentFlush) {
+      console.log('SKIPPED FLUSH');
       // The `finally` block will still execute before this.
       return {};
     }
