@@ -477,7 +477,9 @@ export const flushSession = async (
     //
     // It is essential to perform this check, since the page rendering performs `await`ed
     // actions, which might take a different time to run every time.
-    const superseded = stream.lastStart !== null && stream.lastStart > currentStart;
+    const superseded =
+      stream.lastStart !== null &&
+      (stream.lastStart > currentStart || stream.lastStart === currentStart);
 
     // Track the start time of the current update.
     stream.lastStart = currentStart;
