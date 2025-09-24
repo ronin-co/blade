@@ -163,11 +163,11 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
           {
             $schema: 'node_modules/wrangler/config-schema.json',
             name: currentDirectoryName,
-            main: '.blade/output/edge-worker.js',
+            main: '.blade/dist/edge-worker.js',
             compatibility_date: '2025-06-02',
             assets: {
               binding: 'ASSETS',
-              directory: '.blade/output/',
+              directory: '.blade/dist/',
             },
             observability: {
               enabled: true,
