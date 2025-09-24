@@ -93,10 +93,11 @@ export const extractStorableObjects = (queries: Array<Query>): Array<StorableObj
   );
 
 const defaultStorageCaller: QueryHandlerOptions['storageCaller'] = async (
-  object: StorableObject,
-  token: string,
+  object,
+  options,
 ) => {
   const { contentType, name, value } = object;
+  const { token } = options;
 
   const headers = new Headers();
   headers.set('Authorization', `Bearer ${token}`);
@@ -138,7 +139,10 @@ export const uploadStorableObjects = (
   options: QueryHandlerOptions = {},
 ): Promise<Array<StoredObject>> => {
   const callStorage = options.storageCaller || defaultStorageCaller;
-  const requests = objects.map((item) => callStorage(item, options.token as string));
+
+  const requests = objects.map((item) => {
+    return callStorage(item, { token: options.token as string });
+  });
 
   return Promise.all(requests);
 };

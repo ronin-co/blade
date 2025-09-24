@@ -93,7 +93,10 @@ export const runQueries = async <T extends ResultRecord>(
   });
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
-  const output = await callDatabase(transaction.statements, options.token as string);
+
+  const output = await callDatabase(transaction.statements, {
+    token: options.token as string,
+  });
 
   const startFormatting = performance.now();
 
