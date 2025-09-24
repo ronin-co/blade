@@ -471,7 +471,7 @@ export const flushSession = async (
     );
 
     // This will be `true` if a different flush finished while the current one was still
-    // ongoing, which ensures that the UI never gets reverted back to something old.
+    // ongoing, which allows us to prevent the UI from getting reverted to an old state.
     //
     // It is essential to perform this check, since the page rendering performs `await`ed
     // actions, which might take a different time to run every time.
