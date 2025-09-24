@@ -434,7 +434,7 @@ export const flushSession = async (
 
   try {
     const recentManualFlush =
-      (stream.lastUpdate?.getTime() || 0) > Date.now() - REVALIDATION_INTERVAL;
+      (stream.lastEnd?.getTime() || 0) > Date.now() - REVALIDATION_INTERVAL;
 
     // If a manual update was sent since the last revalidation, we can skip the current
     // revalidation and wait for the next one, to avoid unnecessary pushes.
@@ -467,7 +467,7 @@ export const flushSession = async (
     );
 
     // Track the time of the current manual update.
-    if (options?.queries) stream.lastUpdate = new Date();
+    if (options?.queries) stream.lastEnd = new Date();
 
     // Afterward, flush the update over the stream.
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);

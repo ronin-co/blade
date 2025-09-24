@@ -24,7 +24,7 @@ export class ResponseStream extends SSEStreamingApi {
    * The time at which the last update was sent by the server (excludes revalidation).
    * If the value is `null`, no update was sent yet.
    */
-  lastUpdate: Date | null = null;
+  lastEnd: Date | null = null;
   /** The first request object provided by the client. */
   request: Request;
   /** The first response object returned to the client. */
