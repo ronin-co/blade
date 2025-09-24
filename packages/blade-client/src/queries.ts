@@ -44,13 +44,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
 ) => {
   if (!clients[token]) {
     clients[token] = new Hive({
-      storage: ({ logger, events }) =>
-        new RemoteStorage({
-          logger,
-          events,
-          remote: 'https://db.ronin.co/api',
-          token,
-        }),
+      storage: new RemoteStorage({ remote: 'https://db.ronin.co/api', token }),
     });
   }
 

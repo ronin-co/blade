@@ -79,11 +79,8 @@ const prefillDatabase = async (
 };
 
 const hive = new Hive({
-  storage: ({ events }) =>
-    new MemoryStorage({
-      events,
-      driver: new BunDriver(),
-    }),
+  storage: new MemoryStorage(),
+  driver: new BunDriver(),
 });
 
 /**

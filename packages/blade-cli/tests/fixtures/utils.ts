@@ -13,11 +13,8 @@ import { Protocol } from '@/src/utils/protocol';
 import { type Model, ROOT_MODEL, type Statement, Transaction } from 'blade-compiler';
 
 const hive = new Hive({
-  storage: ({ events }) =>
-    new MemoryStorage({
-      events,
-      driver: new BunDriver(),
-    }),
+  storage: new MemoryStorage(),
+  driver: new BunDriver(),
 });
 
 /**

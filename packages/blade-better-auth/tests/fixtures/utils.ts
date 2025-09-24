@@ -12,11 +12,8 @@ import { Account, Session, User, Verification } from '@/fixtures/schema';
 import { ronin } from '@/index';
 
 const hive = new Hive({
-  storage: ({ events }) =>
-    new MemoryStorage({
-      events,
-      driver: new BunDriver(),
-    }),
+  storage: new MemoryStorage(),
+  driver: new BunDriver(),
 });
 
 export const DEFAULT_MODELS = [
