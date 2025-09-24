@@ -21,10 +21,10 @@ export const generateHashSync = (input: string): number => {
 
 export class ResponseStream extends SSEStreamingApi {
   /**
-   * The time at which the last update was sent by the server (excludes revalidation).
-   * If the value is `null`, no update was sent yet.
+   * The time at which the last update started processing. If the value is `null`, no
+   * update started processing yet.
    */
-  lastUpdate: Date | null = null;
+  lastUpdate: number | null = null;
   /** The first request object provided by the client. */
   request: Request;
   /** The first response object returned to the client. */

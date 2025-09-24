@@ -418,6 +418,9 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return {};
 
+  // Before any code whatsoever is executed, we must track the start time.
+  const currentStart = performance.now();
+
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[2] = {
       queries: nestedQueries
@@ -433,12 +436,13 @@ export const flushSession = async (
   };
 
   try {
-    const recentManualFlush =
-      (stream.lastUpdate?.getTime() || 0) > Date.now() - REVALIDATION_INTERVAL;
+    const recentFlush =
+      stream.lastUpdate !== null &&
+      stream.lastUpdate > performance.now() - REVALIDATION_INTERVAL;
 
-    // If a manual update was sent since the last revalidation, we can skip the current
+    // If another flush happened since the last revalidation, we can skip the current
     // revalidation and wait for the next one, to avoid unnecessary pushes.
-    if (options?.repeat && recentManualFlush) {
+    if (options?.repeat && recentFlush) {
       // The `finally` block will still execute before this.
       return {};
     }
@@ -466,11 +470,22 @@ export const flushSession = async (
         : undefined,
     );
 
-    // Track the time of the current manual update.
-    if (options?.queries) stream.lastUpdate = new Date();
+    // This will be `true` if a different flush finished while the current one was still
+    // ongoing, which allows us to prevent the UI from getting reverted to an old state.
+    //
+    // It is essential to perform this check, since the page rendering performs `await`ed
+    // actions, which might take a different time to run every time.
+    const superseded =
+      stream.lastUpdate !== null &&
+      (stream.lastUpdate > currentStart || stream.lastUpdate === currentStart);
 
-    // Afterward, flush the update over the stream.
-    await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
+    if (!superseded) {
+      // Track the start time of the current update.
+      stream.lastUpdate = currentStart;
+
+      // Afterward, flush the update over the stream.
+      await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
+    }
 
     // The `finally` block will still execute before this.
     return { results: writeResults };
