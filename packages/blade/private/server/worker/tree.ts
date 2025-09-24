@@ -418,8 +418,8 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return {};
 
-  // Track the start time of the current manual update.
-  if (options?.queries) stream.lastStart = performance.now();
+  // Before any code whatsoever is executed, we must track the start time.
+  const currentStart = performance.now();
 
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[2] = {
@@ -472,8 +472,20 @@ export const flushSession = async (
     // Track the end time of the current manual update.
     if (options?.queries) stream.lastEnd = performance.now();
 
+    // This will be `true` if a different flush finished while the current one was still
+    // ongoing, which ensures that the UI never gets reverted back to something old.
+    //
+    // It is essential to perform this check, since the page rendering performs `await`ed
+    // actions, which might take a different time to run every time.
+    const superseded = stream.lastStart !== null && stream.lastStart > currentStart;
+
+    // Track the start time of the current update.
+    stream.lastStart = currentStart;
+
     // Afterward, flush the update over the stream.
-    await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
+    if (!superseded) {
+      await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
+    }
 
     // The `finally` block will still execute before this.
     return { results: writeResults };
