@@ -437,7 +437,7 @@ export const flushSession = async (
 
   try {
     const recentFlush =
-      (stream.lastStart === null ? 0 : stream.lastStart) >
+      (stream.lastUpdate === null ? 0 : stream.lastUpdate) >
       Date.now() - REVALIDATION_INTERVAL;
 
     // If another flush was started since the last revalidation, we can skip the current
@@ -476,11 +476,11 @@ export const flushSession = async (
     // It is essential to perform this check, since the page rendering performs `await`ed
     // actions, which might take a different time to run every time.
     const superseded =
-      stream.lastStart !== null &&
-      (stream.lastStart > currentStart || stream.lastStart === currentStart);
+      stream.lastUpdate !== null &&
+      (stream.lastUpdate > currentStart || stream.lastUpdate === currentStart);
 
     // Track the start time of the current update.
-    stream.lastStart = currentStart;
+    stream.lastUpdate = currentStart;
 
     // Afterward, flush the update over the stream.
     if (!superseded) {
