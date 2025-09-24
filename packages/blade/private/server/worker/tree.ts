@@ -479,11 +479,11 @@ export const flushSession = async (
       stream.lastUpdate !== null &&
       (stream.lastUpdate > currentStart || stream.lastUpdate === currentStart);
 
-    // Track the start time of the current update.
-    stream.lastUpdate = currentStart;
-
-    // Afterward, flush the update over the stream.
     if (!superseded) {
+      // Track the start time of the current update.
+      stream.lastUpdate = currentStart;
+
+      // Afterward, flush the update over the stream.
       await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
     }
 
