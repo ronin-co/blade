@@ -262,7 +262,7 @@ Assuming that your application is located in a Git repository for which an autom
 with type-checking runs on a Git provider, we advice committing the `.blade` directory to your
 repository, such that your CI can validate the TypeScript types.
 
-In general, however, the `.blade/output/` directory is ephemeral, meaning it does not need to be
+In general, however, the `.blade` directory is ephemeral, meaning it does not need to be
 committed to your Git repository, since it is automatically re-generated every time you run
 a migration command (`blade diff` or `blade apply`) in your project.
 
