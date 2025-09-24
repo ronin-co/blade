@@ -2,20 +2,22 @@ import fs from 'node:fs/promises';
 
 import json5 from 'json5';
 
+import { BLADE_CONFIG_DIR } from '@/src/utils/misc';
+
 /**
- * The name of the TypeScript declaration file stored inside the `.ronin` directory.
+ * The name of the TypeScript declaration file stored inside the `.blade` directory.
  */
 export const TYPES_DTS_FILE_NAME = 'types.d.ts';
 
 /**
- * The name of the Zod schemas file stored inside the `.ronin` directory.
+ * The name of the Zod schemas file stored inside the `.blade` directory.
  */
 export const ZOD_SCHEMA_FILE_NAME = 'zod.ts';
 
 /**
- * The name of the TypeScript declaration file stored inside the `.ronin` directory.
+ * The name of the TypeScript declaration file stored inside the `.blade` directory.
  */
-const TYPES_INCLUDE_PATH = '.ronin/*.d.ts';
+const TYPES_INCLUDE_PATH = `${BLADE_CONFIG_DIR}/*.d.ts`;
 
 /**
  * Add the path to the generated TypeScript types to the `tsconfig.json` file.

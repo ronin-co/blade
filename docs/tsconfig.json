@@ -22,5 +22,5 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".ronin/*.d.ts"]
+  "include": ["**/*.ts", "**/*.tsx", ".blade/*.d.ts"]
 }
