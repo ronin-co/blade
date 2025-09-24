@@ -436,12 +436,13 @@ export const flushSession = async (
   };
 
   try {
-    const recentManualFlush =
-      (stream.lastEnd === null ? 0 : stream.lastEnd) > Date.now() - REVALIDATION_INTERVAL;
+    const recentFlush =
+      (stream.lastStart === null ? 0 : stream.lastStart) >
+      Date.now() - REVALIDATION_INTERVAL;
 
-    // If a manual update was sent since the last revalidation, we can skip the current
+    // If another flush was started since the last revalidation, we can skip the current
     // revalidation and wait for the next one, to avoid unnecessary pushes.
-    if (options?.repeat && recentManualFlush) {
+    if (options?.repeat && recentFlush) {
       // The `finally` block will still execute before this.
       return {};
     }
@@ -468,9 +469,6 @@ export const flushSession = async (
           }
         : undefined,
     );
-
-    // Track the end time of the current manual update.
-    if (options?.queries) stream.lastEnd = performance.now();
 
     // This will be `true` if a different flush finished while the current one was still
     // ongoing, which ensures that the UI never gets reverted back to something old.
