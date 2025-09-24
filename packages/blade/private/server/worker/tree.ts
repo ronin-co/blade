@@ -443,7 +443,6 @@ export const flushSession = async (
     // If another flush happened since the last revalidation, we can skip the current
     // revalidation and wait for the next one, to avoid unnecessary pushes.
     if (options?.repeat && recentFlush) {
-      console.log('SKIPPED FLUSH');
       // The `finally` block will still execute before this.
       return {};
     }
