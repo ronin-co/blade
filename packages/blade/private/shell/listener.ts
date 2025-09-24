@@ -66,7 +66,6 @@ export const serve = async (
     serveStatic({
       // It's extremely important for requests to be scoped to the client output.
       // directory, since server code could otherwise be read.
-      // root: path.join(path.basename(outputDirectory), CLIENT_ASSET_PREFIX),
       root: path.join(outputDirectory.replaceAll(process.cwd(), ''), CLIENT_ASSET_PREFIX),
       rewriteRequestPath: (path) => path.replace(clientPathPrefix, ''),
       onFound: (_path, c) => {
