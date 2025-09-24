@@ -40,8 +40,10 @@ const clients: Record<string, Hive> = {};
 
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
-  token,
+  options,
 ) => {
+  const { token } = options;
+
   if (!clients[token]) {
     clients[token] = new Hive({
       storage: new RemoteStorage({ remote: 'https://db.ronin.co/api', token }),
@@ -83,6 +85,7 @@ export const runQueries = async <T extends ResultRecord>(
   validateToken(options);
 
   const rawQueries = queries.filter((item) => 'query' in item).map((item) => item.query);
+  const database = queries[0].database;
 
   const transaction = new Transaction(rawQueries, {
     models: options.models,
@@ -96,6 +99,7 @@ export const runQueries = async <T extends ResultRecord>(
 
   const output = await callDatabase(transaction.statements, {
     token: options.token as string,
+    database: database as string,
   });
 
   const startFormatting = performance.now();
