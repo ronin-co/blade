@@ -8,7 +8,7 @@ import {
   type Statement,
   Transaction,
 } from 'blade-compiler';
-import { Database, Hive, Selector } from 'hive';
+import { Database, Hive } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
 
