@@ -419,7 +419,7 @@ export const flushSession = async (
   if (stream.aborted || stream.closed) return {};
 
   // Track the start time of the current manual update.
-  if (options?.queries) stream.lastStart = new Date();
+  if (options?.queries) stream.lastStart = performance.now();
 
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[2] = {
@@ -437,7 +437,7 @@ export const flushSession = async (
 
   try {
     const recentManualFlush =
-      (stream.lastEnd?.getTime() || 0) > Date.now() - REVALIDATION_INTERVAL;
+      (stream.lastEnd === null ? 0 : stream.lastEnd) > Date.now() - REVALIDATION_INTERVAL;
 
     // If a manual update was sent since the last revalidation, we can skip the current
     // revalidation and wait for the next one, to avoid unnecessary pushes.
@@ -470,7 +470,7 @@ export const flushSession = async (
     );
 
     // Track the end time of the current manual update.
-    if (options?.queries) stream.lastEnd = new Date();
+    if (options?.queries) stream.lastEnd = performance.now();
 
     // Afterward, flush the update over the stream.
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);

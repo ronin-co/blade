@@ -24,12 +24,12 @@ export class ResponseStream extends SSEStreamingApi {
    * The time at which the last update started processing on the server (excludes
    * revalidation). If the value is `null`, no update was processed yet.
    */
-  lastStart: Date | null = null;
+  lastStart: number | null = null;
   /**
    * The time at which the last update was sent by the server (excludes revalidation).
    * If the value is `null`, no update was sent yet.
    */
-  lastEnd: Date | null = null;
+  lastEnd: number | null = null;
   /** The first request object provided by the client. */
   request: Request;
   /** The first response object returned to the client. */
