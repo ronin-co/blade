@@ -418,6 +418,9 @@ export const flushSession = async (
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return {};
 
+  // Track the start time of the current manual update.
+  if (options?.queries) stream.lastStart = new Date();
+
   const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
     const newOptions: Parameters<typeof flushSession>[2] = {
       queries: nestedQueries
@@ -466,7 +469,7 @@ export const flushSession = async (
         : undefined,
     );
 
-    // Track the time of the current manual update.
+    // Track the end time of the current manual update.
     if (options?.queries) stream.lastEnd = new Date();
 
     // Afterward, flush the update over the stream.
