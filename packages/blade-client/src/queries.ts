@@ -12,7 +12,7 @@ import {
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
-import { Agent } from 'undici';
+import type { Agent as AgentClass } from 'undici';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import { runQueriesWithTriggers } from '@/src/triggers';
@@ -24,6 +24,12 @@ import type {
 } from '@/src/types/utils';
 import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
+
+let Agent: typeof AgentClass | undefined;
+
+// Skip it on workers for now.
+if (typeof process !== 'undefined') ({ Agent } = await import('undici'));
+
 export interface QueryPerDatabase {
   query: Query;
   database?: string;
@@ -41,7 +47,7 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
-const dispatcher = new Agent({ connections: 1 });
+const dispatcher = Agent ? new Agent({ connections: 1 }) : undefined;
 
 const fetchWithDispatcher: typeof fetch = (input, init) =>
   input instanceof Request

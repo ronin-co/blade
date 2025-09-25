@@ -9,5 +9,5 @@ export default defineConfig({
     'src/schema/index.ts',
     'src/utils/index.ts',
   ],
-  format: 'esm'
+  format: 'esm',
 });
