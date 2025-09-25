@@ -8,7 +8,7 @@ import {
   type Statement,
   Transaction,
 } from 'blade-compiler';
-import { Hive, Selector } from 'hive';
+import { Database, Hive } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
 
@@ -20,7 +20,7 @@ import type {
   QueryHandlerOptions,
   RegularFormattedResult,
 } from '@/src/types/utils';
-import { formatDateFields, validateToken } from '@/src/utils/helpers';
+import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 export interface QueryPerDatabase {
   query: Query;
   database?: string;
@@ -40,23 +40,18 @@ const clients: Record<string, Hive> = {};
 
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
-  token,
+  options,
 ) => {
+  const { token, database } = options;
+
   if (!clients[token]) {
     clients[token] = new Hive({
-      storage: ({ logger, events }) =>
-        new RemoteStorage({
-          logger,
-          events,
-          remote: 'https://db.ronin.co/api',
-          token,
-        }),
+      storage: new RemoteStorage({ remote: 'https://db.ronin.co/api', token }),
     });
   }
 
   const hive = clients[token];
-  const namespace = new Selector({ type: 'namespace', id: 'ronin' });
-  const db = new Selector({ type: 'database', id: 'main', parent: namespace });
+  const db = new Database(database);
 
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),
@@ -82,13 +77,14 @@ export const runQueries = async <T extends ResultRecord>(
   queries: Array<QueryPerDatabase> | Array<StatementPerDatabase>,
   options: QueryHandlerOptions = {},
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  // Ensure that a token is present. We must only perform this check if there is a
-  // guarantee that actual queries must be executed. For example, if the client is
-  // initialized with triggers that run all the queries using a different data source,
-  // we don't want to require a token.
-  validateToken(options);
+  // Ensure that essential options are present. We must only perform this check if there
+  // is a guarantee that actual queries must be executed. For example, if the client is
+  // initialized with triggers that run all the queries using a different data source, we
+  // don't want to require these options.
+  validateDefaults(options);
 
   const rawQueries = queries.filter((item) => 'query' in item).map((item) => item.query);
+  const database = queries[0].database || options.database;
 
   const transaction = new Transaction(rawQueries, {
     models: options.models,
@@ -99,7 +95,11 @@ export const runQueries = async <T extends ResultRecord>(
   });
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
-  const output = await callDatabase(transaction.statements, options.token as string);
+
+  const output = await callDatabase(transaction.statements, {
+    token: options.token as string,
+    database: database as string,
+  });
 
   const startFormatting = performance.now();
 

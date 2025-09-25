@@ -195,7 +195,7 @@ export const composeEnvironmentVariables = (options: {
     message += ` and cannot be overwritten. Using the \`blade\` command for "development"`;
     message += ` and \`blade build\` for "production" will automatically infer the value.`;
     console.error(message);
-    process.exit(0);
+    process.exit(1);
   }
 
   defined['__BLADE_PROVIDER'] = provider;
@@ -218,6 +218,7 @@ export const composeEnvironmentVariables = (options: {
   }
 
   defined['RONIN_TOKEN'] = process.env['RONIN_TOKEN'] ?? '';
+  defined['RONIN_ID'] = process.env['RONIN_ID'] ?? '';
 
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.

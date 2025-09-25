@@ -9,47 +9,70 @@ describe('queries handler', () => {
     import.meta.env.RONIN_TOKEN = undefined;
 
     expect(queriesHandler.bind({}, [], {})).toThrow(
-      'Please specify the `RONIN_TOKEN` environment variable or set the `token` option when invoking RONIN.',
+      'Please specify the `RONIN_TOKEN` environment variable.',
     );
 
     // Restore the original token.
     import.meta.env.RONIN_TOKEN = originalToken;
   });
 
-  test('derive the token from env if not expilicty passed down', async () => {
+  test('throw if called without database', () => {
+    const originalDatabase = import.meta.env.RONIN_ID;
+
+    import.meta.env.RONIN_ID = undefined;
+
+    expect(queriesHandler.bind({}, [], {})).toThrow(
+      'Please specify the `RONIN_ID` environment variable.',
+    );
+
+    // Restore the original database.
+    import.meta.env.RONIN_ID = originalDatabase;
+  });
+
+  test('derive the config from env if not expilicty passed down', async () => {
     const originalToken = import.meta.env.RONIN_TOKEN;
+    const originalDatabase = import.meta.env.RONIN_ID;
 
     import.meta.env.RONIN_TOKEN = 'supertoken';
+    import.meta.env.RONIN_ID = 'superdatabase';
 
     let mockToken: string | undefined;
+    let mockDatabase: string | undefined;
 
     await queriesHandler([{ get: { accounts: null } }], {
-      databaseCaller: (_statements, token) => {
+      databaseCaller: (_statements, { token, database }) => {
         mockToken = token;
+        mockDatabase = database;
         return { results: [[]] };
       },
       models: [{ slug: 'account' }],
     });
 
-    // Restore the original token.
+    // Restore the original config.
     import.meta.env.RONIN_TOKEN = originalToken;
+    import.meta.env.RONIN_ID = originalDatabase;
 
     expect(mockToken).toBe('supertoken');
+    expect(mockDatabase).toBe('superdatabase');
   });
 
   test('run in an "process"-less environment', async () => {
     const env = process.env;
     const originalToken = import.meta.env.RONIN_TOKEN;
+    const originalDatabase = import.meta.env.RONIN_ID;
 
     // @ts-expect-error We're intentionally modifying the runtime environment.
     process.env = undefined;
     import.meta.env.RONIN_TOKEN = 'mytoken';
+    import.meta.env.RONIN_ID = 'mydatabase';
 
     let mockToken: string | undefined;
+    let mockDatabase: string | undefined;
 
     await queriesHandler([{ get: { accounts: null } }], {
-      databaseCaller: (_statements, token) => {
+      databaseCaller: (_statements, { token, database }) => {
         mockToken = token;
+        mockDatabase = database;
         return { results: [[]] };
       },
       models: [{ slug: 'account' }],
@@ -58,23 +81,29 @@ describe('queries handler', () => {
     // Restore original values.
     process.env = env;
     import.meta.env.RONIN_TOKEN = originalToken;
+    import.meta.env.RONIN_ID = originalDatabase;
 
     expect(mockToken).toBe('mytoken');
+    expect(mockDatabase).toBe('mydatabase');
   });
 
-  test('correctly use the passed down token', async () => {
+  test('correctly use the passed down config', async () => {
     let mockToken: string | undefined;
+    let mockDatabase: string | undefined;
 
     await queriesHandler([{ get: { accounts: null } }], {
       token: 'takashitoken',
-      databaseCaller: (_statements, token) => {
+      database: 'takashidatabase',
+      databaseCaller: (_statements, { token, database }) => {
         mockToken = token;
+        mockDatabase = database;
         return { results: [[]] };
       },
       models: [{ slug: 'account' }],
     });
 
     expect(mockToken).toBe('takashitoken');
+    expect(mockDatabase).toBe('takashidatabase');
   });
 
   test('enable verbose logging', async () => {

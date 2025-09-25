@@ -721,7 +721,6 @@ describe('triggers', () => {
             ],
           ],
         }),
-        token: 'takashitoken',
         triggers: {
           sink: {
             add: (query, _multiple, options) => {

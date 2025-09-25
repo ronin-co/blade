@@ -13,6 +13,7 @@ describe('factory', () => {
       databaseCaller: mockDatabaseCaller,
       models: [{ slug: 'account' }],
       token: 'takashitoken',
+      database: 'takashidatabase',
     });
 
     await factory.get.accounts();
@@ -25,7 +26,7 @@ describe('factory', () => {
           returning: true,
         },
       ],
-      'takashitoken',
+      { token: 'takashitoken', database: 'takashidatabase' },
     );
   });
 
@@ -135,7 +136,6 @@ describe('factory', () => {
         { slug: 'member' },
         { slug: 'user' },
       ],
-      token: 'takashitoken',
     });
 
     // If `batch` does not extract queries synchronously, the following

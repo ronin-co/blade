@@ -72,27 +72,41 @@ export const mergeOptions = <
 };
 
 /**
- * Validates the presence of a token in the provided options.
+ * Validates the presence of essential properties in the provided options.
  *
- * @param options - Options for the query handler, which may include a token.
+ * @param options - Options for the query handler.
  *
- * @returns Nothing if the token is valid, otherwise throws an error.
+ * @returns Nothing if the essential properties are present, otherwise throws an error.
  */
-export const validateToken = (options: QueryHandlerOptions = {}) => {
+export const validateDefaults = (options: QueryHandlerOptions = {}) => {
   if (!options.token) {
     const token = import.meta?.env?.RONIN_TOKEN || process?.env?.RONIN_TOKEN;
 
     if (!token || token === 'undefined') {
       const message =
         typeof process === 'undefined'
-          ? 'When invoking RONIN from an edge runtime, the `token` option must be set.'
-          : 'Please specify the `RONIN_TOKEN` environment variable' +
-            ' or set the `token` option when invoking RONIN.';
+          ? 'When invoking Blade from an edge runtime, the `token` option must be set.'
+          : 'Please specify the `RONIN_TOKEN` environment variable.';
 
       throw new Error(message);
     }
 
     options.token = token;
+  }
+
+  if (!options.database) {
+    const database = import.meta?.env?.RONIN_ID || process?.env?.RONIN_ID;
+
+    if (!database || database === 'undefined') {
+      const message =
+        typeof process === 'undefined'
+          ? 'When invoking Blade from an edge runtime, the `database` option must be set.'
+          : 'Please specify the `RONIN_ID` environment variable.';
+
+      throw new Error(message);
+    }
+
+    options.database = database;
   }
 };
 

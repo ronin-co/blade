@@ -22,9 +22,7 @@ describe('adapter', () => {
         await auth.api.signUpEmail({ body: TEST_USER });
       };
 
-      expect(signUp).toThrow(
-        'Please specify the `RONIN_TOKEN` environment variable or set the `token` option when invoking RONIN.',
-      );
+      expect(signUp).toThrow('Please specify the `RONIN_TOKEN` environment variable.');
     });
 
     test.skip('with an invalid `RONIN_TOKEN`', async () => {
