@@ -28,7 +28,13 @@ import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 let Agent: typeof AgentClass | undefined;
 
 // Skip it on workers for now.
-if (typeof process !== 'undefined') ({ Agent } = await import('undici'));
+if (typeof process !== 'undefined') {
+  try {
+    ({ Agent } = await import('undici'));
+  } catch (_err) {
+    // It's fine if the package is not installed.
+  }
+}
 
 export interface QueryPerDatabase {
   query: Query;
