@@ -122,7 +122,7 @@ export const composeBuildContext = async (
       },
     },
 
-    external: packageMetaContent?.blade?.external,
+    external: [...(packageMetaContent?.blade?.external || []), 'undici'],
 
     plugins: [
       getFileListLoader(options?.virtualFiles),
