@@ -20,7 +20,7 @@ import type {
   QueryHandlerOptions,
   RegularFormattedResult,
 } from '@/src/types/utils';
-import { formatDateFields, validateToken } from '@/src/utils/helpers';
+import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 export interface QueryPerDatabase {
   query: Query;
   database?: string;
@@ -77,11 +77,11 @@ export const runQueries = async <T extends ResultRecord>(
   queries: Array<QueryPerDatabase> | Array<StatementPerDatabase>,
   options: QueryHandlerOptions = {},
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  // Ensure that a token is present. We must only perform this check if there is a
-  // guarantee that actual queries must be executed. For example, if the client is
-  // initialized with triggers that run all the queries using a different data source,
-  // we don't want to require a token.
-  validateToken(options);
+  // Ensure that essential options are present. We must only perform this check if there
+  // is a guarantee that actual queries must be executed. For example, if the client is
+  // initialized with triggers that run all the queries using a different data source, we
+  // don't want to require these options.
+  validateDefaults(options);
 
   const rawQueries = queries.filter((item) => 'query' in item).map((item) => item.query);
   const database = queries[0].database;
