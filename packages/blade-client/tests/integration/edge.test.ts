@@ -27,7 +27,7 @@ describe('edge runtime', () => {
     import.meta.env.RONIN_TOKEN = oldImportMeta;
 
     expect(error?.message).toMatch(
-      'When invoking RONIN from an edge runtime, the `token` option must be set.',
+      'When invoking Blade from an edge runtime, the `token` option must be set.',
     );
   });
 
