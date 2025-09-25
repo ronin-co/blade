@@ -53,7 +53,9 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
-const dispatcher = Agent ? new Agent({ connections: 1 }) : undefined;
+const dispatcher = Agent
+  ? new Agent({ connections: 1, allowH2: false, pipelining: 1 })
+  : undefined;
 
 const fetchWithDispatcher: typeof fetch = (input, init) =>
   input instanceof Request
