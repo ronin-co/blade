@@ -100,7 +100,7 @@ export const validateDefaults = (options: QueryHandlerOptions = {}) => {
     if (!database || database === 'undefined') {
       const message =
         typeof process === 'undefined'
-          ? 'When invoking Blade from an edge runtime, the `token` option must be set.'
+          ? 'When invoking Blade from an edge runtime, the `database` option must be set.'
           : 'Please specify the `RONIN_ID` environment variable.';
 
       throw new Error(message);
