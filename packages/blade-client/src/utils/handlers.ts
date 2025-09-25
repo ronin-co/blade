@@ -1,6 +1,7 @@
+import type { Query, Statement } from 'blade-compiler';
+
 import { runQueries, runQueriesWithStorageAndTriggers } from '@/src/queries';
 import type { QueryHandlerOptions } from '@/src/types/utils';
-import type { Query, Statement } from 'blade-compiler';
 
 /**
  * Executes an array of queries and handles their results. It is used to execute
@@ -32,13 +33,6 @@ export const queriesHandler = async (
       options,
     );
     return results.map(({ result }) => result);
-  }
-
-  if (options.database) {
-    const queryList = { [options.database]: queries };
-    const result = await runQueriesWithStorageAndTriggers(queryList, options);
-
-    return result[options.database];
   }
 
   return runQueriesWithStorageAndTriggers(queries, options);

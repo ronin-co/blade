@@ -84,7 +84,7 @@ export const runQueries = async <T extends ResultRecord>(
   validateDefaults(options);
 
   const rawQueries = queries.filter((item) => 'query' in item).map((item) => item.query);
-  const database = queries[0].database;
+  const database = queries[0].database || options.database;
 
   const transaction = new Transaction(rawQueries, {
     models: options.models,
