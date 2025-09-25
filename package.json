@@ -17,5 +17,8 @@
     "@biomejs/biome": "1.9.4",
     "@types/node": "24.0.4",
     "turbo": "2.5.6"
+  },
+  "overrides": {
+    "rollup-plugin-dts": "^0.16.8"
   }
 }
