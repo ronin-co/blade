@@ -40,10 +40,6 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
-const parseResource = (list: string): Record<string, string> => {
-  return Object.fromEntries(list.split('/').map((p) => p.split(':')));
-};
-
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
@@ -62,10 +58,8 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
     });
   }
 
-  const hive = clients[token];
-  const resource = parseResource(database);
-  const namespace = new Selector({ type: 'namespace', id: resource.ns });
-  const db = new Selector({ type: 'database', id: resource.db, parent: namespace });
+  const hive = clients[key];
+  const db = new Selector<'database'>(database);
 
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),
