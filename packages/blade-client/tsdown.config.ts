@@ -10,4 +10,5 @@ export default defineConfig({
     'src/utils/index.ts',
   ],
   format: 'esm',
+  external: ['undici'],
 });

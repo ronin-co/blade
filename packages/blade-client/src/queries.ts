@@ -1,6 +1,7 @@
 import {
   type ObjectRow,
   type Query,
+  type QueryType,
   type RawRow,
   type RegularResult,
   type Result,
@@ -8,9 +9,10 @@ import {
   type Statement,
   Transaction,
 } from 'blade-compiler';
-import { Database, Hive } from 'hive';
+import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
+import type { Agent as AgentClass } from 'undici';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import { runQueriesWithTriggers } from '@/src/triggers';
@@ -20,7 +22,20 @@ import type {
   QueryHandlerOptions,
   RegularFormattedResult,
 } from '@/src/types/utils';
+import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
+
+let Agent: typeof AgentClass | undefined;
+
+// Skip it on workers for now.
+if (typeof process !== 'undefined') {
+  try {
+    ({ Agent } = await import('undici'));
+  } catch (_err) {
+    // It's fine if the package is not installed.
+  }
+}
+
 export interface QueryPerDatabase {
   query: Query;
   database?: string;
@@ -38,20 +53,34 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
+const dispatcher = Agent ? new Agent({ connections: 1 }) : undefined;
+
+const fetchWithDispatcher: typeof fetch = (input, init) =>
+  input instanceof Request
+    ? fetch(new Request(input, { dispatcher, ...init }))
+    : fetch(input, { dispatcher, ...init });
+
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
 ) => {
-  const { token, database } = options;
+  const { token, database, writing } = options;
+  const key = `${token}-${writing}`;
 
-  if (!clients[token]) {
-    clients[token] = new Hive({
-      storage: new RemoteStorage({ remote: 'https://db.ronin.co/api', token }),
+  if (!clients[key]) {
+    const prefix = writing ? 'db' : 'db-leader';
+
+    clients[key] = new Hive({
+      storage: new RemoteStorage({
+        remote: `https://${prefix}.ronin.co/api`,
+        token,
+        fetch: writing ? fetchWithDispatcher : undefined,
+      }),
     });
   }
 
-  const hive = clients[token];
-  const db = new Database(database);
+  const hive = clients[key];
+  const db = new Selector<'database'>(database);
 
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),
@@ -96,9 +125,15 @@ export const runQueries = async <T extends ResultRecord>(
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
 
+  const writing = rawQueries.some((query) => {
+    const queryType = Object.keys(query)[0] as QueryType;
+    return (WRITE_QUERY_TYPES as Array<QueryType>).includes(queryType);
+  });
+
   const output = await callDatabase(transaction.statements, {
     token: options.token as string,
     database: database as string,
+    writing,
   });
 
   const startFormatting = performance.now();

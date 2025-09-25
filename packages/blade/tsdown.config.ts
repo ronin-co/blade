@@ -24,6 +24,7 @@ export default defineConfig({
     'react-dom/client',
     'react-dom/server.browser',
     'typescript',
+    'undici',
   ],
   treeshake: true,
   define: {
