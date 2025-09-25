@@ -136,7 +136,6 @@ describe('factory', () => {
         { slug: 'member' },
         { slug: 'user' },
       ],
-      token: 'takashitoken',
     });
 
     // If `batch` does not extract queries synchronously, the following
