@@ -220,13 +220,6 @@ export const composeEnvironmentVariables = (options: {
   defined['RONIN_TOKEN'] = process.env['RONIN_TOKEN'] ?? '';
   defined['RONIN_ID'] = process.env['RONIN_ID'] ?? '';
 
-  if (defined['RONIN_TOKEN'] && !defined['RONIN_ID']) {
-    let message = 'A `RONIN_TOKEN` environment variable was provided, but no `RONIN_ID`.';
-    message += ' Please provide it.';
-    console.error(message);
-    process.exit(1);
-  }
-
   // Used by dependencies and the application itself to understand which environment the
   // application is currently running in.
   defined['NODE_ENV'] = environment;

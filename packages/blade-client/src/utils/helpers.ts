@@ -85,14 +85,28 @@ export const validateToken = (options: QueryHandlerOptions = {}) => {
     if (!token || token === 'undefined') {
       const message =
         typeof process === 'undefined'
-          ? 'When invoking RONIN from an edge runtime, the `token` option must be set.'
-          : 'Please specify the `RONIN_TOKEN` environment variable' +
-            ' or set the `token` option when invoking RONIN.';
+          ? 'When invoking Blade from an edge runtime, the `token` option must be set.'
+          : 'Please specify the `RONIN_TOKEN` environment variable.';
 
       throw new Error(message);
     }
 
     options.token = token;
+  }
+
+  if (!options.database) {
+    const database = import.meta?.env?.RONIN_ID || process?.env?.RONIN_ID;
+
+    if (!database || database === 'undefined') {
+      const message =
+        typeof process === 'undefined'
+          ? 'When invoking Blade from an edge runtime, the `token` option must be set.'
+          : 'Please specify the `RONIN_ID` environment variable.';
+
+      throw new Error(message);
+    }
+
+    options.database = database;
   }
 };
 

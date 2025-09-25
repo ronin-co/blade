@@ -9,11 +9,24 @@ describe('queries handler', () => {
     import.meta.env.RONIN_TOKEN = undefined;
 
     expect(queriesHandler.bind({}, [], {})).toThrow(
-      'Please specify the `RONIN_TOKEN` environment variable or set the `token` option when invoking RONIN.',
+      'Please specify the `RONIN_TOKEN` environment variable.',
     );
 
     // Restore the original token.
     import.meta.env.RONIN_TOKEN = originalToken;
+  });
+
+  test('throw if called without database', () => {
+    const originalDatabase = import.meta.env.RONIN_ID;
+
+    import.meta.env.RONIN_ID = undefined;
+
+    expect(queriesHandler.bind({}, [], {})).toThrow(
+      'Please specify the `RONIN_ID` environment variable.',
+    );
+
+    // Restore the original token.
+    import.meta.env.RONIN_ID = originalDatabase;
   });
 
   test('derive the token from env if not expilicty passed down', async () => {
