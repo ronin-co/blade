@@ -37,7 +37,7 @@ describe('queries handler', () => {
     let mockToken: string | undefined;
 
     await queriesHandler([{ get: { accounts: null } }], {
-      databaseCaller: (_statements, token) => {
+      databaseCaller: (_statements, { token }) => {
         mockToken = token;
         return { results: [[]] };
       },
@@ -61,7 +61,7 @@ describe('queries handler', () => {
     let mockToken: string | undefined;
 
     await queriesHandler([{ get: { accounts: null } }], {
-      databaseCaller: (_statements, token) => {
+      databaseCaller: (_statements, { token }) => {
         mockToken = token;
         return { results: [[]] };
       },
@@ -80,7 +80,7 @@ describe('queries handler', () => {
 
     await queriesHandler([{ get: { accounts: null } }], {
       token: 'takashitoken',
-      databaseCaller: (_statements, token) => {
+      databaseCaller: (_statements, { token }) => {
         mockToken = token;
         return { results: [[]] };
       },
