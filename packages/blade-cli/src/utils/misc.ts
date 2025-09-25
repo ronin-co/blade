@@ -37,29 +37,29 @@ export const BASE_FLAGS = {
 /** Infers an object type from the list of base flags. */
 export type BaseFlags = Record<keyof typeof BASE_FLAGS, boolean | undefined>;
 
-/** Directory containing RONIN configuration files */
-export const RONIN_CONFIG_DIR = '.ronin';
+/** Directory containing Blade configuration files */
+export const BLADE_CONFIG_DIR = '.blade';
 
-/** Directory containing RONIN model definitions */
+/** Directory containing Blade model definitions */
 export const MODELS_IN_CODE_DIR = 'schema';
 
-/** Default relative path to the RONIN schema definitions file */
+/** Default relative path to the Blade schema definitions file */
 export const MODEL_IN_CODE_RELATIVE_PATH = path.join(MODELS_IN_CODE_DIR, 'index.ts');
 
-/** Path to the RONIN schema definitions file */
+/** Path to the Blade schema definitions file */
 export const MODEL_IN_CODE_PATH = path.resolve(
   process.cwd(),
   readConfig().modelsDir ?? MODEL_IN_CODE_RELATIVE_PATH,
 );
 
-/** Directory containing RONIN migrations */
+/** Directory containing Blade migrations */
 export const MIGRATIONS_PATH = path.resolve(
   process.cwd(),
-  RONIN_CONFIG_DIR,
+  BLADE_CONFIG_DIR,
   'migrations',
 );
 
-/** Suffix used for temporary RONIN schemas */
+/** Suffix used for temporary Blade schemas */
 export const RONIN_SCHEMA_TEMP_SUFFIX = 'RONIN_TEMP_';
 
 /**

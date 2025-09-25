@@ -107,7 +107,7 @@ async function main(): Promise<void> {
     await writeFile(
       path.join(directory.target, '.gitignore'),
       `# Build output
-.blade
+.blade/dist/
 
 # Dependencies
 node_modules`,

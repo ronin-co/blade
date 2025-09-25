@@ -7,7 +7,7 @@ const currentFilePath = fileURLToPath(import.meta.url);
 export const sourceDirPath = dirname(currentFilePath);
 
 export const publicDirectory = resolve(process.cwd(), 'public');
-export const outputDirectory = resolve(process.cwd(), '.blade');
+export const outputDirectory = resolve(process.cwd(), '.blade', 'dist');
 
 export const tsconfigFilename = resolve(process.cwd(), 'tsconfig.json');
 export const packageMetaFilename = resolve(process.cwd(), 'package.json');

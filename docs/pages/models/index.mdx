@@ -55,7 +55,7 @@ Once you've defined your models, you can compare them to the current state of yo
 blade diff
 ```
 
-Running the command above will produce a so-called "migration protocol" in the `.ronin` directory. This protocol contains all the steps required to update your database to match your local schema definition.
+Running the command above will produce a so-called "migration protocol" in the `.blade` directory. This protocol contains all the steps required to update your database to match your local schema definition.
 
 To apply the changes to your database, run the following command:
 
@@ -251,7 +251,7 @@ mentioned above. The second default preset (generated on the target model) will 
 ## TypeScript Types
 
 The queries defined across your application automatically receive TypeScript types that are
-based on your model definitions. Those types are stored in a file named `.ronin/types.d.ts` and
+based on your model definitions. Those types are stored in a file named `.blade/types.d.ts` and
 are updated every time your run `blade apply`.
 
 To prevent the types from getting updated automatically, you can pass a `--skip-types` flag to
@@ -259,10 +259,10 @@ the `blade apply` command. You could then use the separate `blade types` command
 fresh TypeScript types from your model definitions whenever you need them.
 
 Assuming that your application is located in a Git repository for which an automatic CI process
-with type-checking runs on a Git provider, we advice committing the `.ronin` directory to your
+with type-checking runs on a Git provider, we advice committing the `.blade` directory to your
 repository, such that your CI can validate the TypeScript types.
 
-In general, however, the `.ronin` directory is ephemeral, meaning it does not need to be
+In general, however, the `.blade` directory is ephemeral, meaning it does not need to be
 committed to your Git repository, since it is automatically re-generated every time you run
 a migration command (`blade diff` or `blade apply`) in your project.
 

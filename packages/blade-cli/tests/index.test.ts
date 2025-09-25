@@ -27,14 +27,14 @@ describe('CLI', () => {
 
   let stdoutSpy: Mock<typeof console.log>;
   let stderrSpy: Mock<typeof process.stderr.write>;
-  let exitSpy: Mock<typeof process.exit>;
+  let _exitSpy: Mock<typeof process.exit>;
   let writeFileSyncSpy: Mock<typeof fs.writeFileSync>;
 
   beforeEach(() => {
     // Spy on stdout/stderr
     stdoutSpy = spyOn(console, 'log').mockImplementation(() => {});
     stderrSpy = spyOn(process.stderr, 'write').mockImplementation(() => true);
-    exitSpy = spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    _exitSpy = spyOn(process, 'exit').mockImplementation(() => undefined as never);
     spyOn(console, 'table').mockImplementation(() => {});
     spyOn(fs.promises, 'appendFile').mockImplementation(() => Promise.resolve());
 
@@ -197,7 +197,7 @@ describe('CLI', () => {
 
         // Mock file operations
         spyOn(fs, 'existsSync').mockImplementation(
-          (path) => !path.toString().includes('.ronin/db.sqlite'),
+          (path) => !path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/db.sqlite`),
         );
         spyOn(path, 'resolve').mockReturnValue(
           path.join(__dirname, 'fixtures/migration-fixture.ts'),
@@ -236,7 +236,6 @@ describe('CLI', () => {
 
   describe('migration', () => {
     // Common migration test setup
-    // biome-ignore lint/nursery/useExplicitType: This is a mock.
     const setupMigrationTest = (options?: {
       modelDiff?: Array<ModelWithFieldsArray>;
       modelDefinitions?: Array<Model>;
@@ -264,7 +263,7 @@ describe('CLI', () => {
         ],
       );
       spyOn(fs, 'existsSync').mockImplementation(
-        (path) => !path.toString().includes('.ronin/db.sqlite'),
+        (path) => !path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/db.sqlite`),
       );
       spyOn(path, 'resolve').mockReturnValue(
         path.join(__dirname, 'fixtures/migration-fixture.ts'),
@@ -581,7 +580,7 @@ describe('CLI', () => {
         spyOn(fs, 'existsSync').mockImplementation(
           (path) =>
             path.toString().includes('migration-fixture.ts') ||
-            path.toString().includes('.ronin/migrations'),
+            path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/migrations`),
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
@@ -666,7 +665,7 @@ describe('CLI', () => {
         spyOn(fs, 'existsSync').mockImplementation(
           (path) =>
             path.toString().includes('migration-fixture.ts') ||
-            path.toString().includes('.ronin/migrations'),
+            path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/migrations`),
         );
         spyOn(selectModule, 'select').mockResolvedValue('migration-0001.ts');
         spyOn(path, 'resolve').mockReturnValue(
@@ -715,7 +714,7 @@ describe('CLI', () => {
         ]);
 
         spyOn(fs, 'existsSync').mockImplementation((path) =>
-          path.toString().includes('.ronin/migrations'),
+          path.toString().includes(`${miscModule.BLADE_CONFIG_DIR}/migrations`),
         );
 
         await run({ version: '1.0.0' });

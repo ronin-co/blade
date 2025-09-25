@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, jest, spyOn, test } from 'bun:test';
 
+import { BLADE_CONFIG_DIR } from '@/src/utils/misc';
 import * as typesModule from '@/src/utils/types';
 
 import type { Stats } from 'node:fs';
@@ -25,7 +26,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['**/*.ts', '**/*.tsx', '.ronin/*.d.ts'],
+        include: ['**/*.ts', '**/*.tsx', `${BLADE_CONFIG_DIR}/*.d.ts`],
       });
     });
 
@@ -43,7 +44,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['**/*.ts', '**/*.tsx', '.ronin/*.d.ts'],
+        include: ['**/*.ts', '**/*.tsx', `${BLADE_CONFIG_DIR}/*.d.ts`],
       });
     });
 
@@ -62,7 +63,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['src/**/*', '.ronin/*.d.ts'],
+        include: ['src/**/*', `${BLADE_CONFIG_DIR}/*.d.ts`],
       });
     });
 
@@ -81,7 +82,7 @@ describe('types utils', () => {
 
       expect(config).toMatchObject({
         compilerOptions: {},
-        include: ['**/*.ts', '**/*.tsx', '.ronin/*.d.ts'],
+        include: ['**/*.ts', '**/*.tsx', `${BLADE_CONFIG_DIR}/*.d.ts`],
       });
     });
   });
