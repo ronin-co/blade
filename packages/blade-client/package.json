@@ -68,8 +68,5 @@
     "hive": "2.1.2",
     "tsdown": "0.15.2",
     "typescript": "5.8.3"
-  },
-  "dependencies": {
-    "undici": "7.16.0"
   }
 }
