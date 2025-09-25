@@ -72,13 +72,13 @@ export const mergeOptions = <
 };
 
 /**
- * Validates the presence of a token in the provided options.
+ * Validates the presence of essential properties in the provided options.
  *
- * @param options - Options for the query handler, which may include a token.
+ * @param options - Options for the query handler.
  *
- * @returns Nothing if the token is valid, otherwise throws an error.
+ * @returns Nothing if the essential properties are present, otherwise throws an error.
  */
-export const validateToken = (options: QueryHandlerOptions = {}) => {
+export const validateDefaults = (options: QueryHandlerOptions = {}) => {
   if (!options.token) {
     const token = import.meta?.env?.RONIN_TOKEN || process?.env?.RONIN_TOKEN;
 
