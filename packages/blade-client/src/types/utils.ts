@@ -43,7 +43,7 @@ export interface QueryHandlerOptions {
    */
   databaseCaller?: (
     statements: Array<Statement>,
-    options: { token: string; database: string },
+    options: { token: string; database: string; writing: boolean },
   ) => Promise<DatabaseResult> | DatabaseResult;
 
   /**
