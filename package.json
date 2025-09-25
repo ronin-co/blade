@@ -19,6 +19,6 @@
     "turbo": "2.5.6"
   },
   "overrides": {
-    "rolldown-plugin-dts": "^0.16.8"
+    "rollup-plugin-dts": "^0.16.8"
   }
 }
