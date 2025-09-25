@@ -8,7 +8,7 @@ import {
   type Statement,
   Transaction,
 } from 'blade-compiler';
-import { Database, Hive } from 'hive';
+import { Database, Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
 
@@ -38,6 +38,10 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
+const parseResource = (list: string): Record<string, string> => {
+  return Object.fromEntries(list.split('/').map((p) => p.split(':')));
+};
+
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
@@ -51,7 +55,9 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   }
 
   const hive = clients[token];
-  const db = new Database(database);
+  const resource = parseResource(database);
+  const namespace = new Selector({ type: 'namespace', id: resource.ns });
+  const db = new Selector({ type: 'database', id: resource.db, parent: namespace });
 
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),
