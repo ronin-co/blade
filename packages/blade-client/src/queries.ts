@@ -9,9 +9,10 @@ import {
   type Statement,
   Transaction,
 } from 'blade-compiler';
-import { Database, Hive, Selector } from 'hive';
+import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
+import { Agent } from 'undici';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import { runQueriesWithTriggers } from '@/src/triggers';
@@ -40,6 +41,13 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
+const dispatcher = new Agent({ connections: 1 });
+
+const fetchWithDispatcher: typeof fetch = (input, init) =>
+  input instanceof Request
+    ? fetch(new Request(input, { dispatcher, ...init }))
+    : fetch(input, { dispatcher, ...init });
+
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
@@ -54,6 +62,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
       storage: new RemoteStorage({
         remote: `https://${prefix}.ronin.co/api`,
         token,
+        fetch: writing ? fetchWithDispatcher : undefined,
       }),
     });
   }
