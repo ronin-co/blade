@@ -470,6 +470,9 @@ export const flushSession = async (
         : undefined,
     );
 
+    // Track the start time of the current update.
+    stream.lastUpdate = currentStart;
+
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
     // The `finally` block will still execute before this.
