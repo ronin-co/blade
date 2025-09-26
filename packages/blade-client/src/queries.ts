@@ -17,6 +17,7 @@ import type { Agent as AgentClass } from 'undici';
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import { runQueriesWithTriggers } from '@/src/triggers';
 import type {
+  DatabaseResult,
   ExpandedFormattedResult,
   FormattedResults,
   QueryHandlerOptions,
@@ -126,7 +127,7 @@ export const runQueries = async <T extends ResultRecord>(
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
 
-  let output: ReturnType<NonNullable<QueryHandlerOptions['databaseCaller']>>;
+  let output: DatabaseResult | undefined;
 
   try {
     output = await callDatabase(transaction.statements, {
@@ -161,9 +162,9 @@ export const runQueries = async <T extends ResultRecord>(
   const startFormatting = performance.now();
 
   const formattedResults =
-    'raw' in output && output.raw
-      ? transaction.formatResults(output.results as Array<Array<RawRow>>, true)
-      : transaction.formatResults(output.results as Array<Array<ObjectRow>>, false);
+    'raw' in output! && output.raw
+      ? transaction.formatResults(output!.results as Array<Array<RawRow>>, true)
+      : transaction.formatResults(output!.results as Array<Array<ObjectRow>>, false);
 
   // The `transaction.formatResults` logic of the query compiler (which is invoked
   // above), purposefully only formats results in a network-serializable manner. The
