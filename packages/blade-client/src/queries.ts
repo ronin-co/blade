@@ -57,10 +57,9 @@ const dispatcher = Agent
   ? new Agent({ connections: 1, maxConcurrentStreams: 1, pipelining: 1 })
   : undefined;
 
-const fetchWithDispatcher: typeof fetch = (input, init) =>
-  input instanceof Request
-    ? fetch(new Request(input, { dispatcher, ...init }))
-    : fetch(input, { dispatcher, ...init });
+const fetchWithDispatcher: typeof fetch = (input, init) => {
+  return fetch(input, { dispatcher, ...init });
+};
 
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
@@ -70,7 +69,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   const key = `${token}-${writing}`;
 
   if (!clients[key]) {
-    const prefix = writing ? 'db' : 'db-leader';
+    const prefix = writing ? 'db-leader' : 'db';
 
     clients[key] = new Hive({
       storage: new RemoteStorage({

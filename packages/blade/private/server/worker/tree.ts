@@ -470,22 +470,7 @@ export const flushSession = async (
         : undefined,
     );
 
-    // This will be `true` if a different flush finished while the current one was still
-    // ongoing, which allows us to prevent the UI from getting reverted to an old state.
-    //
-    // It is essential to perform this check, since the page rendering performs `await`ed
-    // actions, which might take a different time to run every time.
-    const superseded =
-      stream.lastUpdate !== null &&
-      (stream.lastUpdate > currentStart || stream.lastUpdate === currentStart);
-
-    if (!superseded) {
-      // Track the start time of the current update.
-      stream.lastUpdate = currentStart;
-
-      // Afterward, flush the update over the stream.
-      await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
-    }
+    await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
     // The `finally` block will still execute before this.
     return { results: writeResults };
