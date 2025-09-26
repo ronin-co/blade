@@ -5,7 +5,7 @@ import type {
   TriggerOptions as ClientTriggerOptions,
   QueryHandlerOptions,
 } from 'blade-client/types';
-import type { Model } from 'blade-compiler';
+import type { Model, QueryType } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
 import { schema, triggers } from 'server-list';
 
@@ -183,7 +183,12 @@ export const getClientConfig = (
   // the function for flushing the UI for them.
   if (flush) {
     syntaxCallback = async (queries, nestedOptions) => {
-      if ('flush' in nestedOptions && nestedOptions.flush) {
+      const writing = queries.some((query) => {
+        const queryType = Object.keys(query)[0] as QueryType;
+        return (WRITE_QUERY_TYPES as Array<QueryType>).includes(queryType);
+      });
+
+      if (writing) {
         const { results } = await flush(queries);
         return results!;
       }
