@@ -73,11 +73,14 @@ const runQueriesWithTime = async (
   serverContext: ServerContext,
   path: string,
   queries: Record<string, Array<Query>>,
+  stream: boolean,
 ): Promise<Record<string, FormattedResults<unknown>>> => {
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
+
   const config = getClientConfig(serverContext, 'write');
+  if (stream) config.stream = true;
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
@@ -105,6 +108,7 @@ const obtainQueryResults = async (
   originalList: (QueryItemRead | QueryItemWrite)[],
   files: Map<string, Blob> | undefined,
   path: string,
+  stream: boolean,
 ) => {
   if (originalList.length === 0) return;
 
@@ -148,7 +152,7 @@ const obtainQueryResults = async (
   let results: Record<string, FormattedResults<unknown>> = {};
 
   try {
-    results = await runQueriesWithTime(serverContext, path, reducedQueries);
+    results = await runQueriesWithTime(serverContext, path, reducedQueries, stream);
   } catch (err) {
     if (
       err instanceof TriggerError ||
@@ -410,7 +414,9 @@ export const flushSession = async (
   stream: ResponseStream,
   correctBundle: boolean,
   options?: {
+    /** A list of write queries to execute. */
     queries?: Array<QueryItemWrite>;
+    /** Whether to repeat the flush at an interval. */
     repeat?: boolean;
   },
 ): Promise<{ results?: FormattedResults<ResultRecord> }> => {
@@ -454,6 +460,7 @@ export const flushSession = async (
       {
         waitUntil: getWaitUntil(),
         flushSession: options?.repeat ? nestedFlushSession : undefined,
+        streamQueries: Boolean(options?.queries),
       },
       options?.queries
         ? {
@@ -524,6 +531,8 @@ const renderReactTree = async (
     waitUntil: ServerContext['waitUntil'];
     /** A function for flushing an update for the current browser session. */
     flushSession?: ServerContext['flushSession'];
+    /** Whether to stream queries over a single connection instead of multiplexing. */
+    streamQueries?: boolean;
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -665,6 +674,7 @@ const renderReactTree = async (
           // is always present, because write queries can only be executed with an error
           // fallback page that can be rendered in the case that the queries fail.
           hasPatternInURL ? (options.errorFallback as string) : url.pathname,
+          options.streamQueries ?? false,
         );
       } catch (err) {
         // If one of the accessed databases or models does not exist, display a 404 page.

@@ -1,7 +1,6 @@
 import {
   type ObjectRow,
   type Query,
-  type QueryType,
   type RawRow,
   type RegularResult,
   type Result,
@@ -22,7 +21,6 @@ import type {
   QueryHandlerOptions,
   RegularFormattedResult,
 } from '@/src/types/utils';
-import { WRITE_QUERY_TYPES } from '@/src/utils/constants';
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 
 let Agent: typeof AgentClass | undefined;
@@ -65,17 +63,17 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
 ) => {
-  const { token, database, writing } = options;
-  const key = `${token}-${writing}`;
+  const { token, database, stream } = options;
+  const key = `${token}-${stream}`;
 
   if (!clients[key]) {
-    const prefix = writing ? 'db-leader' : 'db';
+    const prefix = stream ? 'db-leader' : 'db';
 
     clients[key] = new Hive({
       storage: new RemoteStorage({
         remote: `https://${prefix}.ronin.co/api`,
         token,
-        fetch: writing ? fetchWithDispatcher : undefined,
+        fetch: stream ? fetchWithDispatcher : undefined,
       }),
     });
   }
@@ -126,15 +124,10 @@ export const runQueries = async <T extends ResultRecord>(
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
 
-  const writing = rawQueries.some((query) => {
-    const queryType = Object.keys(query)[0] as QueryType;
-    return (WRITE_QUERY_TYPES as Array<QueryType>).includes(queryType);
-  });
-
   const output = await callDatabase(transaction.statements, {
     token: options.token as string,
     database: database as string,
-    writing,
+    stream: options.stream ?? false,
   });
 
   const startFormatting = performance.now();
