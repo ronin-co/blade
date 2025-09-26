@@ -674,7 +674,7 @@ const renderReactTree = async (
           // is always present, because write queries can only be executed with an error
           // fallback page that can be rendered in the case that the queries fail.
           hasPatternInURL ? (options.errorFallback as string) : url.pathname,
-          streamQueries,
+          options.streamQueries ?? false,
         );
       } catch (err) {
         // If one of the accessed databases or models does not exist, display a 404 page.
