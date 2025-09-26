@@ -433,31 +433,30 @@ class Transaction {
     return result;
   }
 
-  formatResults<RecordType>(
-    results: Array<Array<ObjectRow>>,
-    raw?: false,
-  ): Array<Result<RecordType>>;
-  formatResults<RecordType>(
-    results: Array<Array<RawRow>>,
-    raw?: true,
-  ): Array<Result<RecordType>>;
-
   /**
-   * Format the results returned from the database into RONIN records.
+   * Format the results returned from the database into Blade records.
    *
    * @param results - A list of results from the database, where each result is an array
    * of rows.
-   * @param raw - By default, rows are expected to be objects. If the driver being used
-   * returns rows as arrays of values (which is how SQL databases return rows directly),
-   * this option should be set to `true`.
+   * @param caller - A function that invokes a database and executes a provided list of
+   * SQL statements on it. The return signature contains a `results` property holding an
+   * array of results, where each result is an array of rows. Additionally, the `raw`
+   * property determines whether rows are objects (`false`) or arrays of values (`true`).
+   * The latter is preferred, since that is how SQL databases return rows by default.
    *
-   * @returns A list of formatted RONIN results, where each result is either a single
-   * RONIN record, an array of RONIN records, or a RONIN count result.
+   * @returns A list of formatted Blade results, where each result is either a single
+   * Blade record, an array of Blade records, or a Blade count result.
    */
-  formatResults<RecordType>(
-    results: Array<Array<RawRow>> | Array<Array<ObjectRow>>,
-    raw = false,
-  ): Array<Result<RecordType>> {
+  async formatResults<RecordType>(
+    caller: (
+      statements: Array<Statement>,
+    ) => Promise<
+      | { results: Array<Array<RawRow>>; raw: true }
+      | { results: Array<Array<ObjectRow>>; raw: false }
+    >,
+  ): Promise<Array<Result<RecordType>>> {
+    const { results, raw } = await caller(this.statements);
+
     // Only retain the results of SQL statements that are expected to return data.
     const cleanResults = results.filter((_, index) => this.statements[index].returning);
 
