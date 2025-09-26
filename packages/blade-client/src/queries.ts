@@ -58,7 +58,7 @@ const dispatcher = Agent
   : undefined;
 
 const fetchWithDispatcher: typeof fetch = (input, init) => {
-  return fetch(input, { dispatcher, ...init });
+  return fetch(input, { ...init, dispatcher });
 };
 
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
