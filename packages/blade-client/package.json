@@ -1,6 +1,6 @@
 {
   "name": "blade-client",
-  "version": "3.18.17",
+  "version": "3.18.18",
   "type": "module",
   "description": "Access your RONIN database via TypeScript.",
   "main": "./dist/index.js",
