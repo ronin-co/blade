@@ -26,7 +26,7 @@ describe('factory', () => {
           returning: true,
         },
       ],
-      { token: 'takashitoken', database: 'takashidatabase', writing: false },
+      { token: 'takashitoken', database: 'takashidatabase', stream: false },
     );
   });
 
