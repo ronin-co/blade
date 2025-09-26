@@ -137,7 +137,10 @@ export const runQueries = async <T extends ResultRecord>(
   } catch (err) {
     if (err instanceof StatementExecutionError) {
       const index = transaction.statements.findIndex((item) => {
-        return item.sql === err.statement?.sql && item.params === err.statement?.params;
+        return (
+          item.sql === err.statement?.sql &&
+          JSON.stringify(item.params) === JSON.stringify(err.statement?.params)
+        );
       });
 
       const query = rawQueries[index];
