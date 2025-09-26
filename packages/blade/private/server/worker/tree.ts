@@ -160,8 +160,7 @@ const obtainQueryResults = async (
       // higher level and handled accordingly. Also do the same for cases in which
       // triggers are required and missing (essential security measure).
       (err instanceof ClientError &&
-        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code)) ||
-      err instanceof StatementExecutionError
+        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code))
     ) {
       const serializedError = serializeError(err);
 

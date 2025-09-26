@@ -1,5 +1,4 @@
 import type { CompilerError, Query } from 'blade-compiler';
-import { StatementExecutionError } from 'hive/sdk/errors';
 
 interface ClientErrorDetails {
   message: string;
@@ -28,8 +27,6 @@ export class ClientError extends Error {
     this.query = details.query;
   }
 }
-
-export { StatementExecutionError };
 
 /**
  * Parses the response as JSON or, alternatively, throws an error containing

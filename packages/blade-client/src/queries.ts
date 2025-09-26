@@ -11,7 +11,7 @@ import {
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
 import { StatementExecutionError } from 'hive/sdk/errors';
-import type { RowValues, StatementResult } from 'hive/sdk/transaction';
+import type { RowValues } from 'hive/sdk/transaction';
 import type { Agent as AgentClass } from 'undici';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
@@ -126,7 +126,7 @@ export const runQueries = async <T extends ResultRecord>(
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
 
-  let output: DatabaseResult;
+  let output: ReturnType<NonNullable<QueryHandlerOptions['databaseCaller']>>;
 
   try {
     output = await callDatabase(transaction.statements, {
