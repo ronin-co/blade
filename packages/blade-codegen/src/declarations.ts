@@ -1105,6 +1105,62 @@ export const toQueryPromiseType = factory.createTypeAliasDeclaration(
 );
 
 /**
+ * @example
+ * ```ts
+ * export type TriggerOptions = {
+ *  client: { ... };
+ * };
+ * ```
+ */
+export const triggerOptionsType = factory.createTypeAliasDeclaration(
+  [factory.createModifier(SyntaxKind.ExportKeyword)],
+  identifiers.blade.triggerOptions,
+  undefined,
+  factory.createTypeLiteralNode([
+    factory.createPropertySignature(
+      undefined,
+      'client',
+      undefined,
+      factory.createTypeLiteralNode([
+        factory.createPropertySignature(
+          undefined,
+          'add',
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.addQuery,
+            ),
+          ),
+        ),
+        factory.createPropertySignature(
+          undefined,
+          'remove',
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.removeQuery,
+            ),
+          ),
+        ),
+        factory.createPropertySignature(
+          undefined,
+          'set',
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.setQuery,
+            ),
+          ),
+        ),
+      ]),
+    ),
+  ]),
+);
+
+/**
  * @todo(@nurodev): Replace `Partial<S> | CombinedInstructions["with"]` with utility to map advanced assertions
  *
  * @example

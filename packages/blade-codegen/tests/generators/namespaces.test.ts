@@ -33,7 +33,7 @@ describe('namespaces', () => {
 
     const typesResult = generateNamespaces([AccountModel]);
 
-    expect(typesResult).toHaveLength(1);
+    expect(typesResult).toHaveLength(5);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -61,7 +61,7 @@ describe('namespaces', () => {
 
     const typesResult = generateNamespaces([AccountModel, PostModel]);
 
-    expect(typesResult).toHaveLength(2);
+    expect(typesResult).toHaveLength(6);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -71,7 +71,7 @@ describe('namespaces', () => {
   test('with no models', () => {
     const typesResult = generateNamespaces([]);
 
-    expect(typesResult).toHaveLength(0);
+    expect(typesResult).toHaveLength(4);
 
     const typesResultStr = printNodes(typesResult);
 
