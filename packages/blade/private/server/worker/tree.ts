@@ -410,7 +410,9 @@ export const flushSession = async (
   stream: ResponseStream,
   correctBundle: boolean,
   options?: {
+    /** A list of write queries to execute. */
     queries?: Array<QueryItemWrite>;
+    /** Whether to repeat the flush at an interval. */
     repeat?: boolean;
   },
 ): Promise<{ results?: FormattedResults<ResultRecord> }> => {
