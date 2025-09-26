@@ -10,7 +10,8 @@ import {
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
-import type { RowValues } from 'hive/sdk/transaction';
+import { StatementExecutionError } from 'hive/sdk/errors';
+import type { RowValues, StatementResult } from 'hive/sdk/transaction';
 import type { Agent as AgentClass } from 'undici';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
@@ -21,6 +22,7 @@ import type {
   QueryHandlerOptions,
   RegularFormattedResult,
 } from '@/src/types/utils';
+import { ClientError } from '@/src/utils';
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 
 let Agent: typeof AgentClass | undefined;
@@ -124,11 +126,29 @@ export const runQueries = async <T extends ResultRecord>(
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
 
-  const output = await callDatabase(transaction.statements, {
-    token: options.token as string,
-    database: database as string,
-    stream: options.stream ?? false,
-  });
+  let output: DatabaseResult;
+
+  try {
+    output = await callDatabase(transaction.statements, {
+      token: options.token as string,
+      database: database as string,
+      stream: options.stream ?? false,
+    });
+  } catch (err) {
+    if (err instanceof StatementExecutionError) {
+      const index = transaction.statements.findIndex((item) => {
+        return item.sql === err.statement?.sql && item.params === err.statement?.params;
+      });
+
+      const query = rawQueries[index];
+
+      throw new ClientError({
+        message: err.message,
+        code: 'QUERY_EXECUTION_FAILED',
+        query,
+      });
+    }
+  }
 
   const startFormatting = performance.now();
 
