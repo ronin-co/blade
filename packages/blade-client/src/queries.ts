@@ -135,18 +135,23 @@ export const runQueries = async <T extends ResultRecord>(
       stream: options.stream ?? false,
     });
   } catch (err) {
-    if (err instanceof StatementExecutionError) {
+    // Match any error that contains a `statement` property to a query and expose it.
+    // This ensures that any arbitrary code in `databaseCaller` can trigger the error,
+    // since we don't rely on a specific error class.
+    if (err instanceof Error && 'statement' in err) {
+      const statement = err.statement as Pick<Statement, 'sql' | 'params'>;
+
       const index = transaction.statements.findIndex((item) => {
         return (
-          item.sql === err.statement?.sql &&
-          JSON.stringify(item.params) === JSON.stringify(err.statement?.params)
+          item.sql === statement.sql &&
+          JSON.stringify(item.params) === JSON.stringify(statement.params)
         );
       });
 
       const query = rawQueries[index];
 
       throw new ClientError({
-        message: err.message,
+        message: err.message as string,
         code: 'QUERY_EXECUTION_FAILED',
         query,
       });
