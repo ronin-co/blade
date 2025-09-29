@@ -452,7 +452,7 @@ class Transaction {
   async formatResults<RecordType>(
     caller: (statements: Array<Statement>) => Promise<DatabaseResult> | DatabaseResult,
   ): Promise<Array<Result<RecordType>>> {
-    let results: Array<Array<RawRow>> | Array<Array<ObjectRow>>;
+    let results: Array<Array<RawRow>> | Array<Array<ObjectRow>> | undefined;
     let raw: boolean;
 
     try {
@@ -485,7 +485,7 @@ class Transaction {
     }
 
     // Only retain the results of SQL statements that are expected to return data.
-    const cleanResults = results.filter((_, index) => this.statements[index].returning);
+    const cleanResults = results!.filter((_, index) => this.statements[index].returning);
 
     let resultIndex = 0;
 
