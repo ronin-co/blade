@@ -662,8 +662,12 @@ test('get all records of linked models between other queries', async () => {
     returning: true,
   });
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[1];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[1];
 
   expect(result).toMatchObject({
     models: {
