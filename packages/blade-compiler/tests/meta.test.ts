@@ -1,4 +1,10 @@
 import { expect, test } from 'bun:test';
+
+import {
+  RECORD_ID_REGEX,
+  RECORD_TIMESTAMP_REGEX,
+  queryEphemeralDatabase,
+} from '@/fixtures/utils';
 import {
   CompilerError,
   type Model,
@@ -10,12 +16,6 @@ import {
   ROOT_MODEL,
   Transaction,
 } from '@/src/index';
-
-import {
-  RECORD_ID_REGEX,
-  RECORD_TIMESTAMP_REGEX,
-  queryEphemeralDatabase,
-} from '@/fixtures/utils';
 import { getSystemFields } from '@/src/model';
 import { slugToName } from '@/src/model/defaults';
 import type { MultipleRecordResult, SingleRecordResult } from '@/src/types/result';
@@ -261,8 +261,12 @@ test('list existing models', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   // Assert that the `fields`, `indexes`, and `presets` properties are formatted
   // correctly, in order to match the `Model` type.
@@ -328,8 +332,12 @@ test('list existing model', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   // Assert that the `fields`, `indexes`, and `presets` properties are formatted
   // correctly, in order to match the `Model` type.
@@ -687,8 +695,12 @@ test('create new field', async () => {
   // Assert that the models within the transaction (in memory) were updated correctly.
   expect(transaction.models[1].fields).toHaveProperty(field.slug, finalField);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toHaveProperty('fields', {
     ...getSystemFields('acc'),
@@ -830,8 +842,12 @@ test('create new field with default value (json)', async () => {
   // Assert that the models within the transaction (in memory) were updated correctly.
   expect(transaction.models[1].fields).toHaveProperty(field.slug, finalField);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toHaveProperty('fields', {
     ...getSystemFields('acc'),
@@ -1189,8 +1205,12 @@ test('create new index', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toHaveProperty('indexes', {
     indexSlug: finalIndex,
@@ -1471,8 +1491,12 @@ test('create new preset', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toHaveProperty('presets', {
     companyEmployees: finalPreset,

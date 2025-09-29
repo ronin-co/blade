@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+
 import { PAGINATION_CURSOR_REGEX, queryEphemeralDatabase } from '@/fixtures/utils';
 import { type Model, type Query, Transaction } from '@/src/index';
 import type { MultipleRecordResult } from '@/src/types/result';
@@ -30,8 +31,12 @@ test('get multiple records limited to amount', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toHaveLength(2);
   expect(result.moreBefore).toBeUndefined();
@@ -77,8 +82,12 @@ test('get multiple records limited to amount ordered by link field', async () =>
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toHaveLength(2);
   expect(result.moreBefore).toBeUndefined();

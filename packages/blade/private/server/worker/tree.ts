@@ -1,7 +1,7 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { runQueries } from 'blade-client';
 import type { FormattedResults } from 'blade-client/types';
-import { ClientError, TriggerError } from 'blade-client/utils';
+import { ClientError, CompilerError, TriggerError } from 'blade-client/utils';
 import type { Query, ResultRecord } from 'blade-compiler';
 import {
   type CookieSerializeOptions,
@@ -156,6 +156,7 @@ const obtainQueryResults = async (
   } catch (err) {
     if (
       err instanceof TriggerError ||
+      err instanceof CompilerError ||
       // Raise up errors about databases not existing, because they will be caught at a
       // higher level and handled accordingly. Also do the same for cases in which
       // triggers are required and missing (essential security measure).
