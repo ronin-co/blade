@@ -23,6 +23,7 @@ import type {
   Statement,
 } from '@/src/types/query';
 import type {
+  DatabaseResult,
   ExpandedResult,
   MultipleRecordResult,
   ObjectRow,
@@ -449,18 +450,16 @@ class Transaction {
    * Blade record, an array of Blade records, or a Blade count result.
    */
   async formatResults<RecordType>(
-    caller: (
-      statements: Array<Statement>,
-    ) => Promise<
-      | { results: Array<Array<RawRow>>; raw: true }
-      | { results: Array<Array<ObjectRow>>; raw: false }
-    >,
+    caller: (statements: Array<Statement>) => Promise<DatabaseResult> | DatabaseResult,
   ): Promise<Array<Result<RecordType>>> {
     let results: Array<Array<RawRow>> | Array<Array<ObjectRow>>;
     let raw: boolean;
 
     try {
-      ({ results, raw } = await caller(this.statements));
+      const output = await caller(this.statements);
+
+      results = output.results;
+      raw = 'raw' in output ? output.raw : false;
     } catch (err) {
       // Match any error that contains a `statement` property to a query and expose it.
       // This ensures that any data source in `databaseCaller` can trigger the error,
@@ -625,6 +624,7 @@ export type {
   ResultRecordBase,
   RawRow,
   ObjectRow,
+  DatabaseResult,
 } from '@/src/types/result';
 
 // Strip any properties from the root model that are internal

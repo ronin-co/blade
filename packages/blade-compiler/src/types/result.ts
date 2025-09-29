@@ -61,3 +61,8 @@ export type ExpandedResult<T = ResultRecord> = {
 };
 
 export type Result<T = ResultRecord> = RegularResult<T> | ExpandedResult<T>;
+
+export type DatabaseResult =
+  | { results: Array<Array<RawRow>>; raw: true }
+  | { results: Array<Array<ObjectRow>>; raw: false }
+  | { results: Array<Array<ObjectRow>> };
