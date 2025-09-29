@@ -156,12 +156,12 @@ const obtainQueryResults = async (
   } catch (err) {
     if (
       err instanceof TriggerError ||
+      err instanceof CompilerError ||
       // Raise up errors about databases not existing, because they will be caught at a
       // higher level and handled accordingly. Also do the same for cases in which
       // triggers are required and missing (essential security measure).
       (err instanceof ClientError &&
-        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code)) ||
-      err instanceof CompilerError
+        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code))
     ) {
       const serializedError = serializeError(err);
 
