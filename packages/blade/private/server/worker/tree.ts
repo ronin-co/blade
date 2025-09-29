@@ -2,7 +2,7 @@ import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { runQueries } from 'blade-client';
 import type { FormattedResults } from 'blade-client/types';
 import { ClientError, TriggerError } from 'blade-client/utils';
-import type { Query, ResultRecord } from 'blade-compiler';
+import { CompilerError, type Query, type ResultRecord } from 'blade-compiler';
 import {
   type CookieSerializeOptions,
   parse as parseCookies,
@@ -160,7 +160,8 @@ const obtainQueryResults = async (
       // higher level and handled accordingly. Also do the same for cases in which
       // triggers are required and missing (essential security measure).
       (err instanceof ClientError &&
-        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code))
+        !['AUTH_INVALID_ACCESS', 'TRIGGER_REQUIRED'].includes(err.code)) ||
+      err instanceof CompilerError
     ) {
       const serializedError = serializeError(err);
 
