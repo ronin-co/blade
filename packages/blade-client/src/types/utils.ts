@@ -11,7 +11,7 @@ import type {
 import type { TriggerOptions, Triggers } from '@/src/triggers';
 import type { StorableObject } from '@/src/types/storage';
 
-export type DatabaseResult =
+type DatabaseResult =
   | { results: Array<Array<RawRow>>; raw: true }
   | { results: Array<Array<ObjectRow>>; raw: false }
   | { results: Array<Array<ObjectRow>> };
