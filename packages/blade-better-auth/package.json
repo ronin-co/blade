@@ -1,6 +1,6 @@
 {
   "name": "blade-better-auth",
-  "version": "3.18.17",
+  "version": "3.18.19",
   "type": "module",
   "description": "A Better Auth adapter for RONIN",
   "publishConfig": {
@@ -42,7 +42,7 @@
     "@types/bun": "1.2.8",
     "blade-client": "workspace:*",
     "blade-compiler": "workspace:*",
-    "hive": "2.1.2",
+    "hive": "2.1.4",
     "tsdown": "0.15.2",
     "typescript": "5.8.2"
   },
