@@ -179,10 +179,10 @@ test('pass multiple record queries at once', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const results = transaction.formatResults(rawResults) as Array<
-    Result<Partial<ResultRecord>>
-  >;
+  const results = (await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  })) as Array<Result<Partial<ResultRecord>>>;
 
   // Assert whether the results are provided in the same order as the original queries.
   expect(results).toEqual([
