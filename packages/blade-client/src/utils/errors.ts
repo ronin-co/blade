@@ -1,4 +1,4 @@
-import type { CompilerError, Query } from 'blade-compiler';
+import type { CompilerError } from 'blade-compiler';
 
 interface ClientErrorDetails {
   message: string;
@@ -8,15 +8,12 @@ interface ClientErrorDetails {
     | 'JSON_PARSE_ERROR'
     | 'TRIGGER_REQUIRED'
     | 'AUTH_INVALID_ACCESS'
-    | 'QUERY_EXECUTION_FAILED'
     | CompilerError['code'];
-  query?: Query;
 }
 
 export class ClientError extends Error {
   message: ClientErrorDetails['message'];
   code: ClientErrorDetails['code'];
-  query: ClientErrorDetails['query'];
 
   constructor(details: ClientErrorDetails) {
     super(details.message);
@@ -24,7 +21,6 @@ export class ClientError extends Error {
     this.name = 'ClientError';
     this.message = details.message;
     this.code = details.code;
-    this.query = details.query;
   }
 }
 

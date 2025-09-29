@@ -10,20 +10,17 @@ import {
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
-import { StatementExecutionError } from 'hive/sdk/errors';
 import type { RowValues } from 'hive/sdk/transaction';
 import type { Agent as AgentClass } from 'undici';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import { runQueriesWithTriggers } from '@/src/triggers';
 import type {
-  DatabaseResult,
   ExpandedFormattedResult,
   FormattedResults,
   QueryHandlerOptions,
   RegularFormattedResult,
 } from '@/src/types/utils';
-import { ClientError } from '@/src/utils';
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 
 let Agent: typeof AgentClass | undefined;
@@ -127,44 +124,18 @@ export const runQueries = async <T extends ResultRecord>(
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
 
-  let output: DatabaseResult | undefined;
-
-  try {
-    output = await callDatabase(transaction.statements, {
-      token: options.token as string,
-      database: database as string,
-      stream: options.stream ?? false,
-    });
-  } catch (err) {
-    // Match any error that contains a `statement` property to a query and expose it.
-    // This ensures that any data source in `databaseCaller` can trigger the error, since
-    // we don't rely on a specific error class.
-    if (err instanceof Error && 'statement' in err) {
-      const statement = err.statement as Pick<Statement, 'sql' | 'params'>;
-
-      const index = transaction.statements.findIndex((item) => {
-        return (
-          item.sql === statement.sql &&
-          JSON.stringify(item.params) === JSON.stringify(statement.params)
-        );
-      });
-
-      const query = rawQueries[index];
-
-      throw new ClientError({
-        message: err.message as string,
-        code: 'QUERY_EXECUTION_FAILED',
-        query,
-      });
-    }
-  }
+  const output = await callDatabase(transaction.statements, {
+    token: options.token as string,
+    database: database as string,
+    stream: options.stream ?? false,
+  });
 
   const startFormatting = performance.now();
 
   const formattedResults =
-    'raw' in output! && output.raw
-      ? transaction.formatResults(output!.results as Array<Array<RawRow>>, true)
-      : transaction.formatResults(output!.results as Array<Array<ObjectRow>>, false);
+    'raw' in output && output.raw
+      ? transaction.formatResults(output.results as Array<Array<RawRow>>, true)
+      : transaction.formatResults(output.results as Array<Array<ObjectRow>>, false);
 
   // The `transaction.formatResults` logic of the query compiler (which is invoked
   // above), purposefully only formats results in a network-serializable manner. The
