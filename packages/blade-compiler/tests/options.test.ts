@@ -56,8 +56,12 @@ test('inline statement parameters', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toMatchObject({
     handle: 'elaine',
@@ -107,8 +111,12 @@ test('inline statement parameters when creating model', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toHaveProperty('fields', {
     ...getSystemFields('acc'),
@@ -157,8 +165,12 @@ test('inline statement parameters when creating model entity', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toHaveProperty('fields', {
     ...getSystemFields('acc'),
@@ -203,8 +215,12 @@ test('inline statement parameters containing boolean', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toMatchObject({
     pending: false,
@@ -258,8 +274,12 @@ test('inline default values', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toMatchObject({
     handle: 'elaine',
@@ -306,8 +326,12 @@ test('provide models containing default fields', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toMatchObject({
     handle: 'elaine',
@@ -370,8 +394,12 @@ test('provide models containing default presets', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toMatchObject({
     account: 'acc_39h8fhe98hefah8j',
@@ -411,8 +439,12 @@ test('limit amount of records', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   // Assert the amount of records.
   expect(result.records).toHaveLength(3);

@@ -45,8 +45,12 @@ test('get multiple records before cursor', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordTime = new Date('2024-12-10T10:47:58.079Z');
   const lastRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -114,8 +118,12 @@ test('get multiple records before cursor while selecting fields', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordTime = new Date('2024-12-10T10:47:58.079Z');
   const lastRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -169,8 +177,12 @@ test('get multiple records before cursor ordered by string field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordName = 'Coogee';
   const firstRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -248,8 +260,12 @@ test('get multiple records before cursor ordered by string field, while selectin
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordName = 'Coogee';
   const firstRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -306,8 +322,12 @@ test('get multiple records before cursor ordered by boolean field', async () => 
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordPending = false;
   const firstRecordTime = new Date('2024-11-10T10:47:58.079Z');
@@ -381,8 +401,12 @@ test('get multiple records before cursor ordered by number field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordPosition = 3;
   const firstRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -458,8 +482,12 @@ test('get multiple records before cursor ordered by empty string field', async (
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordTime = new Date('2024-12-10T10:47:58.079Z');
   const lastRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -534,8 +562,12 @@ test('get multiple records before cursor ordered by empty boolean field', async 
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordSwimming: null = null;
   const firstRecordTime = new Date('2024-12-10T10:47:58.079Z');
@@ -611,8 +643,12 @@ test('get multiple records before cursor ordered by empty number field', async (
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordTime = new Date('2024-12-10T10:47:58.079Z');
   const lastRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -686,8 +722,12 @@ test('get multiple records before cursor while filtering', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   const firstRecordTime = new Date('2024-12-10T10:47:58.079Z');
   const lastRecordTime = new Date('2024-12-09T10:47:58.079Z');
@@ -752,8 +792,12 @@ test('get multiple records before undefined cursor', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual([
     {
@@ -812,8 +856,12 @@ test('get multiple records after undefined cursor', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual([
     {
@@ -899,8 +947,12 @@ test('count multiple records before cursor without limit', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as AmountResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as AmountResult;
 
   expect(result.amount).toBeNumber();
 });

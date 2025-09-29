@@ -38,8 +38,12 @@ test('get single record', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.id).toMatch(RECORD_ID_REGEX);
 });
@@ -78,8 +82,12 @@ test('remove single record', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.id).toMatch(RECORD_ID_REGEX);
 });
@@ -109,8 +117,12 @@ test('count multiple records', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as AmountResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as AmountResult;
 
   expect(result.amount).toBeNumber();
 });
@@ -241,8 +253,11 @@ test('get all records of all models', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+  const result = results[0];
 
   expect(result).toMatchObject({
     models: {
@@ -335,8 +350,11 @@ test('get all records of all models with instructions', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+  const result = results[0];
 
   expect(result).toMatchObject({
     models: {
@@ -421,8 +439,11 @@ test('get all records of all models with model-specific instructions', async () 
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+  const result = results[0];
 
   expect(result).toMatchObject({
     models: {
@@ -511,8 +532,11 @@ test('get all records of linked models', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+  const result = results[0];
 
   expect(result).toMatchObject({
     models: {
@@ -712,8 +736,11 @@ test('get all records of all models with no models available', async () => {
 
   expect(transaction.statements).toEqual([]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+  const result = results[0];
 
   expect(result).toMatchObject({
     models: {},
@@ -753,8 +780,11 @@ test('count all records of all models', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+  const result = results[0];
 
   expect(result).toMatchObject({
     models: {
@@ -783,8 +813,11 @@ test('count all records of all models with no models available', async () => {
 
   expect(transaction.statements).toEqual([]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0];
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+  const result = results[0];
 
   expect(result).toMatchObject({
     models: {},
