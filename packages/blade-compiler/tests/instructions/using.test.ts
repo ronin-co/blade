@@ -406,11 +406,15 @@ test('get single record using preset on existing array instruction', async () =>
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(
-    rawResults,
-    false,
-  )[0] as unknown as SingleRecordResult<{ account: string; team: string }>;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as unknown as SingleRecordResult<{
+    account: string;
+    team: string;
+  }>;
 
   expect(result.record).toEqual({
     account: 'acc_39h8fhe98hefah8j',
