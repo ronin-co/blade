@@ -463,8 +463,8 @@ class Transaction {
       ({ results, raw } = await caller(this.statements));
     } catch (err) {
       // Match any error that contains a `statement` property to a query and expose it.
-      // This ensures that any data source in `databaseCaller` can trigger the error, since
-      // we don't rely on a specific error class.
+      // This ensures that any data source in `databaseCaller` can trigger the error,
+      // since we don't rely on a specific error class.
       if (err instanceof Error && 'statement' in err) {
         const statement = err.statement as Pick<Statement, 'sql' | 'params'>;
 
