@@ -33,6 +33,7 @@ import type {
 } from '@/src/types/result';
 import { compileQueryInput } from '@/src/utils';
 import {
+  CompilerError,
   deleteProperty,
   getProperty,
   omit,
@@ -455,7 +456,34 @@ class Transaction {
       | { results: Array<Array<ObjectRow>>; raw: false }
     >,
   ): Promise<Array<Result<RecordType>>> {
-    const { results, raw } = await caller(this.statements);
+    let results: Array<Array<RawRow>> | Array<Array<ObjectRow>>;
+    let raw: boolean;
+
+    try {
+      ({ results, raw } = await caller(this.statements));
+    } catch (err) {
+      // Match any error that contains a `statement` property to a query and expose it.
+      // This ensures that any data source in `databaseCaller` can trigger the error, since
+      // we don't rely on a specific error class.
+      if (err instanceof Error && 'statement' in err) {
+        const statement = err.statement as Pick<Statement, 'sql' | 'params'>;
+
+        const index = this.statements.findIndex((item) => {
+          return (
+            item.sql === statement.sql &&
+            JSON.stringify(item.params) === JSON.stringify(statement.params)
+          );
+        });
+
+        const { query } = this.#internalQueries[index];
+
+        throw new CompilerError({
+          message: err.message as string,
+          code: 'QUERY_EXECUTION_FAILED',
+          queries: [query],
+        });
+      }
+    }
 
     // Only retain the results of SQL statements that are expected to return data.
     const cleanResults = results.filter((_, index) => this.statements[index].returning);
