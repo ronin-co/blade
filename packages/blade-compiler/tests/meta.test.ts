@@ -1,4 +1,10 @@
 import { expect, test } from 'bun:test';
+
+import {
+  RECORD_ID_REGEX,
+  RECORD_TIMESTAMP_REGEX,
+  queryEphemeralDatabase,
+} from '@/fixtures/utils';
 import {
   CompilerError,
   type Model,
@@ -10,12 +16,6 @@ import {
   ROOT_MODEL,
   Transaction,
 } from '@/src/index';
-
-import {
-  RECORD_ID_REGEX,
-  RECORD_TIMESTAMP_REGEX,
-  queryEphemeralDatabase,
-} from '@/fixtures/utils';
 import { getSystemFields } from '@/src/model';
 import { slugToName } from '@/src/model/defaults';
 import type { MultipleRecordResult, SingleRecordResult } from '@/src/types/result';

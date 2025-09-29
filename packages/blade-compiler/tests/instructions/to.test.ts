@@ -1,4 +1,6 @@
 import { expect, test } from 'bun:test';
+
+import { RECORD_TIMESTAMP_REGEX, queryEphemeralDatabase } from '@/fixtures/utils';
 import {
   CompilerError,
   type Model,
@@ -7,8 +9,6 @@ import {
   type StoredObject,
   Transaction,
 } from '@/src/index';
-
-import { RECORD_TIMESTAMP_REGEX, queryEphemeralDatabase } from '@/fixtures/utils';
 import type { MultipleRecordResult, SingleRecordResult } from '@/src/types/result';
 
 test('set single record to new string field', async () => {

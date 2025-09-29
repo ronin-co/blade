@@ -1,4 +1,10 @@
 import { expect, test } from 'bun:test';
+
+import {
+  RECORD_ID_REGEX,
+  RECORD_TIMESTAMP_REGEX,
+  queryEphemeralDatabase,
+} from '@/fixtures/utils';
 import {
   CompilerError,
   type Model,
@@ -6,12 +12,6 @@ import {
   type Query,
   Transaction,
 } from '@/src/index';
-
-import {
-  RECORD_ID_REGEX,
-  RECORD_TIMESTAMP_REGEX,
-  queryEphemeralDatabase,
-} from '@/fixtures/utils';
 import type { SingleRecordResult } from '@/src/types/result';
 
 test('get single record using preset', async () => {

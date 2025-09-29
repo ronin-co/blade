@@ -1,4 +1,6 @@
 import { expect, test } from 'bun:test';
+
+import { queryEphemeralDatabase } from '@/fixtures/utils';
 import { CompilerError, type Model, type Query, Transaction } from '@/src/index';
 
 test('get single record with non-existing field', () => {
@@ -307,4 +309,49 @@ test('get multiple records with empty `before` instruction', () => {
     'The `before` or `after` instruction must not be empty.',
   );
   expect(error).toHaveProperty('code', 'MISSING_INSTRUCTION');
+});
+
+test('add single record resulting in database error', async () => {
+  const queries: Array<Query> = [
+    {
+      add: {
+        account: {
+          with: { handle: 'test' },
+        },
+      },
+    },
+    {
+      add: {
+        account: {
+          with: { handle: 'test' },
+        },
+      },
+    },
+  ];
+
+  const models: Array<Model> = [
+    {
+      slug: 'account',
+      fields: {
+        handle: { type: 'string', unique: true },
+      },
+    },
+  ];
+
+  const transaction = new Transaction(queries, { models });
+
+  let error: Error | undefined;
+
+  try {
+    await transaction.formatResults(async (statements) => {
+      const results = await queryEphemeralDatabase(models, statements);
+      return { results, raw: false };
+    });
+  } catch (err) {
+    error = err as Error;
+  }
+
+  expect(error).toBeInstanceOf(CompilerError);
+  expect(error).toHaveProperty('message', 'UNIQUE constraint failed: accounts.handle');
+  expect(error).toHaveProperty('code', 'QUERY_EXECUTION_FAILED');
 });

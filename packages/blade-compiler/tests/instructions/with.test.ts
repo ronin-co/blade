@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+
 import { queryEphemeralDatabase } from '@/fixtures/utils';
 import { type Model, type Query, Transaction } from '@/src/index';
 import type { SingleRecordResult } from '@/src/types/result';

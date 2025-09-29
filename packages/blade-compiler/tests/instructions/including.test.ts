@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+
 import { type Model, QUERY_SYMBOLS, type Query, Transaction } from '@/src/index';
 
 import {

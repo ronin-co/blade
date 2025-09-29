@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+
 import { PAGINATION_CURSOR_REGEX, queryEphemeralDatabase } from '@/fixtures/utils';
 import { type Model, type Query, Transaction } from '@/src/index';
 import type { MultipleRecordResult } from '@/src/types/result';
