@@ -1,8 +1,8 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { runQueries } from 'blade-client';
 import type { FormattedResults } from 'blade-client/types';
-import { ClientError, TriggerError } from 'blade-client/utils';
-import { CompilerError, type Query, type ResultRecord } from 'blade-compiler';
+import { ClientError, CompilerError, TriggerError } from 'blade-client/utils';
+import type { Query, ResultRecord } from 'blade-compiler';
 import {
   type CookieSerializeOptions,
   parse as parseCookies,
