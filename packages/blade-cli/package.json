@@ -1,6 +1,6 @@
 {
   "name": "blade-cli",
-  "version": "3.18.18",
+  "version": "3.18.19",
   "type": "module",
   "description": "The command-line interface for RONIN.",
   "main": "./dist/index.js",
@@ -87,7 +87,7 @@
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
     "bun-bagel": "1.1.0",
-    "hive": "2.1.3",
+    "hive": "2.1.4",
     "tsdown": "0.15.2",
     "typescript": "5.8.3"
   }
