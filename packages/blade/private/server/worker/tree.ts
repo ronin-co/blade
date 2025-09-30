@@ -462,30 +462,27 @@ export const flushSession = async (
       return {};
     }
 
-    // Whether one of the previously executed read queries can be streamed.
-    const streamedReads = stream.lastResults.some((result) => Boolean(result.stream));
-
     // By default, all read queries on a page path will be refreshed whenever the
     // surrounding function is called, meaning when the UI should be updated.
     //
     // If one of the read queries on that page path is marked with a `stream` property,
     // however, only that particular query will be updated, and only if a write query
     // with the same `stream` is being executed.
-    const resumableReads: Array<QueryItemRead> = streamedReads
-      ? stream.lastResults.filter((result) => {
-          const matchingStream = options?.queries?.some((query) => {
-            return query.stream === result.stream;
-          });
+    const resumableReads: Array<QueryItemRead> = (stream.lastResults || []).filter(
+      (result) => {
+        const matchingStream = options?.queries?.some((query) => {
+          return query.stream === result.stream;
+        });
 
-          // If a write query is being executed for which the same query stream was
-          // provided, we cannot resume a read result for it, since the read result is
-          // expected to be changed by the write query.
-          //
-          // If that isn't the case, however, we can resume it to avoid executing
-          // unnecessary read queries for which we already obtained results in the past.
-          return !matchingStream;
-        })
-      : [];
+        // If a write query is being executed for which the same query stream was
+        // provided, we cannot resume a read result for it, since the read result is
+        // expected to be changed by the write query.
+        //
+        // If that isn't the case, however, we can resume it to avoid executing
+        // unnecessary read queries for which we already obtained results in the past.
+        return !matchingStream;
+      },
+    );
 
     const { response, results } = await renderReactTree(
       new URL(stream.request.url),
@@ -515,10 +512,12 @@ export const flushSession = async (
     // Track the start time of the current update.
     stream.lastUpdate = currentStart;
 
-    // Track the results of the read queries that were executed last.
-    stream.lastResults = results.filter(({ type }) => {
-      return type === 'read';
+    const streamableReads = results.filter((item) => {
+      return item.type === 'read' && item.stream;
     }) as Array<QueryItemRead>;
+
+    // Track the results of the read queries that were executed last.
+    stream.lastResults = streamableReads.length > 0 ? streamableReads : null;
 
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 

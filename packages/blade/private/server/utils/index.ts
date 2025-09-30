@@ -36,7 +36,7 @@ export class ResponseStream extends SSEStreamingApi {
    * The results of the read queries that were executed last. Allows for caching read
    * query results between flushes, to not run all read queries every time.
    */
-  lastResults: Array<QueryItemRead> = [];
+  lastResults: Array<QueryItemRead> | null = null;
 
   /** Allows for tracking whether the response is ready to be returned. */
   readonly headersReady: Promise<void>;
