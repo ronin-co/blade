@@ -1,13 +1,13 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`model a basic model 1`] = `
-"export type TriggerOptions = {
+"export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
     };
-};
+}
 export type Account = Utils.ResultRecord & {
     avatar: StoredObject;
     email: string;
@@ -25,13 +25,13 @@ export type Accounts = Array<Account> & {
 `;
 
 exports[`model a model with a summary 1`] = `
-"export type TriggerOptions = {
+"export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
     };
-};
+}
 /**
  * A user account.
  */
@@ -50,13 +50,13 @@ export type Accounts = Array<Account> & {
 `;
 
 exports[`model a model with an invalid field type 1`] = `
-"export type TriggerOptions = {
+"export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
     };
-};
+}
 export type Account = Utils.ResultRecord & {
     name: unknown;
 };
@@ -68,13 +68,13 @@ export type Accounts = Array<Account> & {
 `;
 
 exports[`model a model with a link field 1`] = `
-"export type TriggerOptions = {
+"export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
     };
-};
+}
 export type Account = Utils.ResultRecord & {
     email: string;
     name: string;
@@ -97,13 +97,13 @@ export type Posts<U extends Array<"author"> | "all" = [
 `;
 
 exports[`model a model with a many-to-many link field 1`] = `
-"export type TriggerOptions = {
+"export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
     };
-};
+}
 export type Account = Utils.ResultRecord & {
     email: string;
     name: string;
@@ -126,13 +126,13 @@ export type Spaces<U extends Array<"members"> | "all" = [
 `;
 
 exports[`model a model with a link field that does not exist 1`] = `
-"export type TriggerOptions = {
+"export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
     };
-};
+}
 export type Account = Utils.ResultRecord & {
     email: string;
     latestPost: unknown;
@@ -146,13 +146,13 @@ export type Accounts = Array<Account> & {
 `;
 
 exports[`model a model with nested fields 1`] = `
-"export type TriggerOptions = {
+"export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
     };
-};
+}
 /**
  * A user account.
  */

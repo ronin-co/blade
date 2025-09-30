@@ -233,13 +233,13 @@ declare namespace Syntax {
     }
 }
 declare module "blade/types" {
-    export type TriggerOptions = {
+    export interface TriggerOptions {
         client: {
             add: Syntax.AddQuery;
             remove: Syntax.RemoveQuery;
             set: Syntax.SetQuery;
         };
-    };
+    }
     export type Account = Utils.ResultRecord & {
         email: string;
         name: string;
@@ -500,13 +500,13 @@ declare namespace Syntax {
     }
 }
 declare module "blade/types" {
-    export type TriggerOptions = {
+    export interface TriggerOptions {
         client: {
             add: Syntax.AddQuery;
             remove: Syntax.RemoveQuery;
             set: Syntax.SetQuery;
         };
-    };
+    }
     export type Account = Utils.ResultRecord & {
         email: string;
         image: StoredObject;
@@ -606,13 +606,13 @@ declare namespace Syntax {
     type SetQuery = {};
 }
 declare module "blade/types" {
-    export type TriggerOptions = {
+    export interface TriggerOptions {
         client: {
             add: Syntax.AddQuery;
             remove: Syntax.RemoveQuery;
             set: Syntax.SetQuery;
         };
-    };
+    }
 }
 declare module "blade/server/hooks" {
     declare const use: Syntax.GetQuery;

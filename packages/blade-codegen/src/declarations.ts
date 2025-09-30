@@ -1107,16 +1107,17 @@ export const toQueryPromiseType = factory.createTypeAliasDeclaration(
 /**
  * @example
  * ```ts
- * export type TriggerOptions = {
+ * export interface TriggerOptions {
  *  client: { ... };
  * };
  * ```
  */
-export const triggerOptionsType = factory.createTypeAliasDeclaration(
+export const triggerOptionsInterface = factory.createInterfaceDeclaration(
   [factory.createModifier(SyntaxKind.ExportKeyword)],
   identifiers.blade.triggerOptions,
   undefined,
-  factory.createTypeLiteralNode([
+  undefined,
+  [
     factory.createPropertySignature(
       undefined,
       'client',
@@ -1157,7 +1158,7 @@ export const triggerOptionsType = factory.createTypeAliasDeclaration(
         ),
       ]),
     ),
-  ]),
+  ],
 );
 
 /**
