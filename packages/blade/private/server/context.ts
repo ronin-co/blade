@@ -16,7 +16,12 @@ export type ServerContext<
   collected: Collected;
   currentLeafIndex: number | null;
   waitUntil: WaitUntil;
-  flushSession?: (queries?: Array<Query>) => Promise<{ results?: Collected['queries'] }>;
+  flushSession?: (
+    /** A list of write queries that should be executed. */
+    queries: Array<Query>,
+    /** The ID of a particular database connection to stream the queries through. */
+    queryStream?: string,
+  ) => Promise<{ results?: Collected['queries'] }>;
 };
 
 export const RootServerContext = createContext<ServerContext | null>(null);
