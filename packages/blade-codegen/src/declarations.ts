@@ -1136,6 +1136,17 @@ export const triggerOptionsInterface = factory.createInterfaceDeclaration(
         ),
         factory.createPropertySignature(
           undefined,
+          'get',
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.getQuery,
+            ),
+          ),
+        ),
+        factory.createPropertySignature(
+          undefined,
           'remove',
           undefined,
           factory.createTypeReferenceNode(
