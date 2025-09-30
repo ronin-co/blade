@@ -108,7 +108,6 @@ const obtainQueryResults = async (
   originalList: (QueryItemRead | QueryItemWrite)[],
   files: Map<string, Blob> | undefined,
   path: string,
-  stream: boolean,
 ) => {
   if (originalList.length === 0) return;
 
@@ -148,6 +147,9 @@ const obtainQueryResults = async (
     },
     {} as Record<string, Array<Query>>,
   );
+
+  // If one of the provided queries must be streamed, then stream all of them.
+  const stream = sortedList.some((query) => Boolean(query.stream));
 
   let results: Record<string, FormattedResults<unknown>> = {};
 
@@ -465,7 +467,6 @@ export const flushSession = async (
       {
         waitUntil: getWaitUntil(),
         flushSession: options?.repeat ? nestedFlushSession : undefined,
-        streamQueries: Boolean(options?.queries),
       },
       options?.queries
         ? {
@@ -542,8 +543,6 @@ const renderReactTree = async (
     waitUntil: ServerContext['waitUntil'];
     /** A function for flushing an update for the current browser session. */
     flushSession?: ServerContext['flushSession'];
-    /** Whether to stream queries over a single connection instead of multiplexing. */
-    streamQueries?: boolean;
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -685,7 +684,6 @@ const renderReactTree = async (
           // is always present, because write queries can only be executed with an error
           // fallback page that can be rendered in the case that the queries fail.
           hasPatternInURL ? (options.errorFallback as string) : url.pathname,
-          options.streamQueries ?? false,
         );
       } catch (err) {
         // If one of the accessed databases or models does not exist, display a 404 page.
