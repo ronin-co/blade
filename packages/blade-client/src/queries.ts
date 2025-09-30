@@ -62,7 +62,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   options,
 ) => {
   const { token, database, stream } = options;
-  const key = `${token}-${stream}`;
+  const key = `${token}${stream ? `-${stream}` : ''}`;
 
   if (!clients[key]) {
     const prefix = stream ? 'db-leader' : 'db';
@@ -126,7 +126,7 @@ export const runQueries = async <T extends ResultRecord>(
     return callDatabase(statements, {
       token: options.token as string,
       database: database as string,
-      stream: options.stream ?? false,
+      stream: options.stream,
     });
   });
 
