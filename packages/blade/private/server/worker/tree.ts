@@ -428,13 +428,17 @@ export const flushSession = async (
   // Before any code whatsoever is executed, we must track the start time.
   const currentStart = performance.now();
 
-  const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
+  const nestedFlushSession: ServerContext['flushSession'] = async (
+    nestedQueries,
+    queryStream,
+  ) => {
     const newOptions: Parameters<typeof flushSession>[2] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
             hookHash: crypto.randomUUID(),
             query: JSON.stringify(query),
             type: 'write',
+            stream: queryStream,
           }))
         : undefined,
     };

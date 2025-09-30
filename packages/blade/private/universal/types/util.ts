@@ -16,6 +16,11 @@ interface QueryItemBase {
   database?: string;
   result?: FormattedResults<unknown>[number];
   error?: unknown;
+  /**
+   * The ID of a particular connection to the database, through which the query should be
+   * streamed. Allows for ensuring transport order between multiple writes.
+   */
+  stream?: string;
 }
 
 export interface QueryItemRead extends QueryItemBase {
