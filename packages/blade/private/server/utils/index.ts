@@ -1,5 +1,6 @@
 import { SSEStreamingApi } from 'hono/streaming';
 
+import type { QueryItemRead } from '@/private/universal/types/util';
 import { CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 
 /**
@@ -30,6 +31,12 @@ export class ResponseStream extends SSEStreamingApi {
    * update started processing yet.
    */
   lastUpdate: number | null = null;
+
+  /**
+   * The results of the read queries that were executed last. Allows for caching read
+   * query results between flushes, to not run all read queries every time.
+   */
+  lastResults: Array<QueryItemRead> = [];
 
   /** Allows for tracking whether the response is ready to be returned. */
   readonly headersReady: Promise<void>;

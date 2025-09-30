@@ -486,6 +486,11 @@ export const flushSession = async (
     // Track the start time of the current update.
     stream.lastUpdate = currentStart;
 
+    // Track the results of the read queries that were executed last.
+    stream.lastResults = results.filter(({ type }) => {
+      return type === 'read';
+    }) as Array<QueryItemRead>;
+
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
     // The `finally` block will still execute before this.
