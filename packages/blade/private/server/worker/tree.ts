@@ -73,14 +73,14 @@ const runQueriesWithTime = async (
   serverContext: ServerContext,
   path: string,
   queries: Record<string, Array<Query>>,
-  stream: boolean,
+  stream?: string,
 ): Promise<Record<string, FormattedResults<unknown>>> => {
   if (VERBOSE_LOGGING) console.log('-'.repeat(20));
 
   const start = Date.now();
 
   const config = getClientConfig(serverContext, 'write');
-  if (stream) config.stream = true;
+  if (stream) config.stream = stream;
 
   const databaseAmount = Object.keys(queries).length;
   const queryAmount = Object.values(queries).flat().length;
@@ -151,7 +151,9 @@ const obtainQueryResults = async (
   // If one of the provided queries is a write query and must be streamed, then stream
   // all of them. Read-only transactions are generally not streamed since they should hit
   // the edge replica of the database, if one exists.
-  const stream = sortedList.some((query) => query.type === 'write' && query.stream);
+  const stream = sortedList.find((query) => {
+    return query.type === 'write' && query.stream;
+  })?.stream;
 
   let results: Record<string, FormattedResults<unknown>> = {};
 
