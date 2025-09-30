@@ -43,7 +43,7 @@
     "blade-client": "workspace:*",
     "blade-compiler": "workspace:*",
     "hive": "2.1.4",
-    "tsdown": "0.15.2",
+    "tsdown": "0.15.5",
     "typescript": "5.8.2"
   },
   "peerDependencies": {
