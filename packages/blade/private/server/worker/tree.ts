@@ -471,11 +471,12 @@ export const flushSession = async (
         ? {
             // Do not pass `options.queries` directly here, since it will get modified
             // in place and we don't want to resume the results of queries.
-            queries: options.queries.map(({ query, database, hookHash }) => ({
+            queries: options.queries.map(({ query, database, hookHash, stream }) => ({
               type: 'write',
               query,
               database,
               hookHash,
+              stream,
             })),
             metadata: {},
           }
