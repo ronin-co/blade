@@ -4,6 +4,7 @@ exports[`model a basic model 1`] = `
 "export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
+        count: Syntax.CountQuery;
         get: Syntax.GetQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
@@ -29,6 +30,7 @@ exports[`model a model with a summary 1`] = `
 "export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
+        count: Syntax.CountQuery;
         get: Syntax.GetQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
@@ -55,6 +57,7 @@ exports[`model a model with an invalid field type 1`] = `
 "export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
+        count: Syntax.CountQuery;
         get: Syntax.GetQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
@@ -74,6 +77,7 @@ exports[`model a model with a link field 1`] = `
 "export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
+        count: Syntax.CountQuery;
         get: Syntax.GetQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
@@ -104,6 +108,7 @@ exports[`model a model with a many-to-many link field 1`] = `
 "export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
+        count: Syntax.CountQuery;
         get: Syntax.GetQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
@@ -134,6 +139,7 @@ exports[`model a model with a link field that does not exist 1`] = `
 "export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
+        count: Syntax.CountQuery;
         get: Syntax.GetQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;
@@ -155,6 +161,7 @@ exports[`model a model with nested fields 1`] = `
 "export interface TriggerOptions {
     client: {
         add: Syntax.AddQuery;
+        count: Syntax.CountQuery;
         get: Syntax.GetQuery;
         remove: Syntax.RemoveQuery;
         set: Syntax.SetQuery;

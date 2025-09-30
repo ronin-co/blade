@@ -1,3 +1,4 @@
+import { DML_QUERY_TYPES } from 'blade-compiler';
 import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
@@ -1122,52 +1123,21 @@ export const triggerOptionsInterface = factory.createInterfaceDeclaration(
       undefined,
       'client',
       undefined,
-      factory.createTypeLiteralNode([
-        factory.createPropertySignature(
-          undefined,
-          'add',
-          undefined,
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.syntax.name,
-              identifiers.namespace.syntax.addQuery,
+      factory.createTypeLiteralNode(
+        DML_QUERY_TYPES.toSorted().map((queryType) =>
+          factory.createPropertySignature(
+            undefined,
+            queryType,
+            undefined,
+            factory.createTypeReferenceNode(
+              factory.createQualifiedName(
+                identifiers.namespace.syntax.name,
+                identifiers.namespace.syntax[`${queryType}Query`],
+              ),
             ),
           ),
         ),
-        factory.createPropertySignature(
-          undefined,
-          'get',
-          undefined,
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.syntax.name,
-              identifiers.namespace.syntax.getQuery,
-            ),
-          ),
-        ),
-        factory.createPropertySignature(
-          undefined,
-          'remove',
-          undefined,
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.syntax.name,
-              identifiers.namespace.syntax.removeQuery,
-            ),
-          ),
-        ),
-        factory.createPropertySignature(
-          undefined,
-          'set',
-          undefined,
-          factory.createTypeReferenceNode(
-            factory.createQualifiedName(
-              identifiers.namespace.syntax.name,
-              identifiers.namespace.syntax.setQuery,
-            ),
-          ),
-        ),
-      ]),
+      ),
     ),
   ],
 );

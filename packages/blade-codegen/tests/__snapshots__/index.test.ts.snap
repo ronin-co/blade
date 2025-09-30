@@ -236,6 +236,7 @@ declare module "blade/types" {
     export interface TriggerOptions {
         client: {
             add: Syntax.AddQuery;
+            count: Syntax.CountQuery;
             get: Syntax.GetQuery;
             remove: Syntax.RemoveQuery;
             set: Syntax.SetQuery;
@@ -504,6 +505,7 @@ declare module "blade/types" {
     export interface TriggerOptions {
         client: {
             add: Syntax.AddQuery;
+            count: Syntax.CountQuery;
             get: Syntax.GetQuery;
             remove: Syntax.RemoveQuery;
             set: Syntax.SetQuery;
@@ -611,6 +613,7 @@ declare module "blade/types" {
     export interface TriggerOptions {
         client: {
             add: Syntax.AddQuery;
+            count: Syntax.CountQuery;
             get: Syntax.GetQuery;
             remove: Syntax.RemoveQuery;
             set: Syntax.SetQuery;

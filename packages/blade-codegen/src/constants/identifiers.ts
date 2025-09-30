@@ -44,6 +44,7 @@ export const identifiers = {
   namespace: {
     syntax: {
       addQuery: factory.createIdentifier('AddQuery'),
+      countQuery: factory.createIdentifier('CountQuery'),
       fieldSlug: factory.createIdentifier('FieldSlug'),
       getQuery: factory.createIdentifier('GetQuery'),
       name: factory.createIdentifier('Syntax'),
