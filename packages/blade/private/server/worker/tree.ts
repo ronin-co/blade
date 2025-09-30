@@ -454,7 +454,7 @@ export const flushSession = async (
       return {};
     }
 
-    const { response, writeResults } = await renderReactTree(
+    const { response, results } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
       !correctBundle,
@@ -484,7 +484,7 @@ export const flushSession = async (
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
     // The `finally` block will still execute before this.
-    return { results: writeResults };
+    return { results };
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
     // error, since that would also prevent the repeated update later on.
