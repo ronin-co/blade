@@ -1,5 +1,4 @@
-import type { FormattedResults } from 'blade-client/types';
-import type { Query, ResultRecord } from 'blade-compiler';
+import type { Query } from 'blade-compiler';
 import { createContext } from 'react';
 
 import type { WaitUntil } from '@/private/server/types';
