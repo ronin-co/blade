@@ -460,6 +460,31 @@ export const flushSession = async (
       return {};
     }
 
+    // Whether one of the previously executed read queries can be streamed.
+    const streamedReads = stream.lastResults.some((result) => Boolean(result.stream));
+
+    // By default, all read queries on a page path will be refreshed whenever the
+    // surrounding function is called, meaning when the UI should be updated.
+    //
+    // If one of the read queries on that page path is marked with a `stream` property,
+    // however, only that particular query will be updated, and only if a write query
+    // with the same `stream` is being executed.
+    const resumableReads: Array<QueryItemRead> = streamedReads
+      ? stream.lastResults.filter((result) => {
+          const matchingStream = options?.queries?.some((query) => {
+            return query.stream === result.stream;
+          });
+
+          // If a write query is being executed for which the same query stream was
+          // provided, we cannot resume a read result for it, since the read result is
+          // expected to be changed by the write query.
+          //
+          // If that isn't the case, however, we can resume it to avoid executing
+          // unnecessary read queries for which we already obtained results in the past.
+          return !matchingStream;
+        })
+      : [];
+
     const { response, results } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
@@ -470,15 +495,15 @@ export const flushSession = async (
       },
       options?.queries
         ? {
-            // Do not pass `options.queries` directly here, since it will get modified
-            // in place and we don't want to resume the results of write queries.
-            queries: options.queries.map(({ query, database, hookHash, stream }) => ({
-              type: 'write',
-              query,
-              database,
-              hookHash,
-              stream,
-            })),
+            queries: [
+              ...resumableReads,
+              // Do not pass `options.queries` directly here, since it will get modified
+              // in place and we don't want to resume the results of write queries.
+              ...options.queries.map((queryItem): QueryItemWrite => {
+                const { query, database, hookHash, stream } = queryItem;
+                return { type: 'write', query, database, hookHash, stream };
+              }),
+            ],
             metadata: {},
           }
         : undefined,
