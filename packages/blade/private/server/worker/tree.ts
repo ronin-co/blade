@@ -148,8 +148,10 @@ const obtainQueryResults = async (
     {} as Record<string, Array<Query>>,
   );
 
-  // If one of the provided queries must be streamed, then stream all of them.
-  const stream = sortedList.some((query) => Boolean(query.stream));
+  // If one of the provided queries is a write query and must be streamed, then stream
+  // all of them. Read-only transactions are generally not streamed since they should hit
+  // the edge replica of the database, if one exists.
+  const stream = sortedList.some((query) => query.type === 'write' && query.stream);
 
   let results: Record<string, FormattedResults<unknown>> = {};
 
