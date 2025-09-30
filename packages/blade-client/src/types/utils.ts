@@ -37,7 +37,7 @@ export interface QueryHandlerOptions {
    */
   databaseCaller?: (
     statements: Array<Statement>,
-    options: { token: string; database: string; stream: boolean },
+    options: { token: string; database: string; stream?: string },
   ) => Promise<DatabaseResult> | DatabaseResult;
 
   /**
@@ -66,8 +66,13 @@ export interface QueryHandlerOptions {
     options: QueryHandlerOptions,
   ) => Promise<FormattedResults<ResultRecord>>;
 
-  /** Whether to re-use a single connection to ensure ordered queries. */
-  stream?: boolean;
+  /**
+   * A particular connection identifier to re-use for the provided queries.
+   *
+   * Useful for ensuring that multiple transactions are sent through the same connection,
+   * which guarantees their order during transport.
+   */
+  stream?: string;
 
   /**
    * Allows for extending the lifetime of the edge worker invocation until the

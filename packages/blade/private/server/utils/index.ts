@@ -1,5 +1,6 @@
 import { SSEStreamingApi } from 'hono/streaming';
 
+import type { QueryItemRead } from '@/private/universal/types/util';
 import { CUSTOM_HEADERS } from '@/private/universal/utils/constants';
 
 /**
@@ -20,15 +21,22 @@ export const generateHashSync = (input: string): number => {
 };
 
 export class ResponseStream extends SSEStreamingApi {
+  /** The first request object provided by the client. */
+  request: Request;
+  /** The first response object returned to the client. */
+  readonly response: Response;
+
   /**
    * The time at which the last update started processing. If the value is `null`, no
    * update started processing yet.
    */
   lastUpdate: number | null = null;
-  /** The first request object provided by the client. */
-  request: Request;
-  /** The first response object returned to the client. */
-  readonly response: Response;
+
+  /**
+   * The results of the read queries that were executed last. Allows for caching read
+   * query results between flushes, to not run all read queries every time.
+   */
+  lastResults: Array<QueryItemRead> = [];
 
   /** Allows for tracking whether the response is ready to be returned. */
   readonly headersReady: Promise<void>;

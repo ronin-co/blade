@@ -108,7 +108,6 @@ const obtainQueryResults = async (
   originalList: (QueryItemRead | QueryItemWrite)[],
   files: Map<string, Blob> | undefined,
   path: string,
-  stream: boolean,
 ) => {
   if (originalList.length === 0) return;
 
@@ -148,6 +147,9 @@ const obtainQueryResults = async (
     },
     {} as Record<string, Array<Query>>,
   );
+
+  // If one of the provided queries must be streamed, then stream all of them.
+  const stream = sortedList.some((query) => Boolean(query.stream));
 
   let results: Record<string, FormattedResults<unknown>> = {};
 
@@ -428,13 +430,17 @@ export const flushSession = async (
   // Before any code whatsoever is executed, we must track the start time.
   const currentStart = performance.now();
 
-  const nestedFlushSession: ServerContext['flushSession'] = async (nestedQueries) => {
+  const nestedFlushSession: ServerContext['flushSession'] = async (
+    nestedQueries,
+    queryStream,
+  ) => {
     const newOptions: Parameters<typeof flushSession>[2] = {
       queries: nestedQueries
         ? nestedQueries.map((query) => ({
             hookHash: crypto.randomUUID(),
             query: JSON.stringify(query),
             type: 'write',
+            stream: queryStream,
           }))
         : undefined,
     };
@@ -454,6 +460,31 @@ export const flushSession = async (
       return {};
     }
 
+    // Whether one of the previously executed read queries can be streamed.
+    const streamedReads = stream.lastResults.some((result) => Boolean(result.stream));
+
+    // By default, all read queries on a page path will be refreshed whenever the
+    // surrounding function is called, meaning when the UI should be updated.
+    //
+    // If one of the read queries on that page path is marked with a `stream` property,
+    // however, only that particular query will be updated, and only if a write query
+    // with the same `stream` is being executed.
+    const resumableReads: Array<QueryItemRead> = streamedReads
+      ? stream.lastResults.filter((result) => {
+          const matchingStream = options?.queries?.some((query) => {
+            return query.stream === result.stream;
+          });
+
+          // If a write query is being executed for which the same query stream was
+          // provided, we cannot resume a read result for it, since the read result is
+          // expected to be changed by the write query.
+          //
+          // If that isn't the case, however, we can resume it to avoid executing
+          // unnecessary read queries for which we already obtained results in the past.
+          return !matchingStream;
+        })
+      : [];
+
     const { response, results } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
@@ -461,18 +492,19 @@ export const flushSession = async (
       {
         waitUntil: getWaitUntil(),
         flushSession: options?.repeat ? nestedFlushSession : undefined,
-        streamQueries: Boolean(options?.queries),
       },
       options?.queries
         ? {
-            // Do not pass `options.queries` directly here, since it will get modified
-            // in place and we don't want to resume the results of queries.
-            queries: options.queries.map(({ query, database, hookHash }) => ({
-              type: 'write',
-              query,
-              database,
-              hookHash,
-            })),
+            queries: [
+              // These queries already have results, so they won't be modified.
+              ...resumableReads,
+              // Do not pass `options.queries` directly here, since it will get modified
+              // in place and we don't want to resume the results of write queries.
+              ...options.queries.map((queryItem): QueryItemWrite => {
+                const { query, database, hookHash, stream } = queryItem;
+                return { type: 'write', query, database, hookHash, stream };
+              }),
+            ],
             metadata: {},
           }
         : undefined,
@@ -480,6 +512,11 @@ export const flushSession = async (
 
     // Track the start time of the current update.
     stream.lastUpdate = currentStart;
+
+    // Track the results of the read queries that were executed last.
+    stream.lastResults = results.filter(({ type }) => {
+      return type === 'read';
+    }) as Array<QueryItemRead>;
 
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
@@ -532,8 +569,6 @@ const renderReactTree = async (
     waitUntil: ServerContext['waitUntil'];
     /** A function for flushing an update for the current browser session. */
     flushSession?: ServerContext['flushSession'];
-    /** Whether to stream queries over a single connection instead of multiplexing. */
-    streamQueries?: boolean;
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
@@ -675,7 +710,6 @@ const renderReactTree = async (
           // is always present, because write queries can only be executed with an error
           // fallback page that can be rendered in the case that the queries fail.
           hasPatternInURL ? (options.errorFallback as string) : url.pathname,
-          options.streamQueries ?? false,
         );
       } catch (err) {
         // If one of the accessed databases or models does not exist, display a 404 page.

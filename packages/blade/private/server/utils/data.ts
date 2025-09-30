@@ -189,8 +189,10 @@ export const getClientConfig = (
         return (WRITE_QUERY_TYPES as Array<QueryType>).includes(queryType);
       });
 
-      if (writing) {
-        const { results } = await flush(queries);
+      // If a write is being performed, and a `stream` option was provided, we need to
+      // update the UI. Otherwise, we just need to execute the queries further below.
+      if (writing && 'stream' in nestedOptions) {
+        const { results } = await flush(queries, nestedOptions.stream);
 
         return results!
           .filter(({ type }) => type === 'write')
