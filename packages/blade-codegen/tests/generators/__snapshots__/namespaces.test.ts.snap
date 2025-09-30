@@ -29,26 +29,28 @@ exports[`namespaces with a basic model 1`] = `
 };
 type GetQuery = {
     /** Get a single account record */
-    account: ReducedFunction & Syntax.Account.Singular.RootQueryCaller & {
-        after: Syntax.Account.Singular.AfterQuery;
-        before: Syntax.Account.Singular.BeforeQuery;
-        including: Syntax.Account.Singular.IncludingQuery;
-        limitedTo: Syntax.Account.Singular.LimitedToQuery;
-        orderedBy: Syntax.Account.Singular.OrderedByQuery;
-        selecting: Syntax.Account.Singular.SelectingQuery;
-        using: Syntax.Account.Singular.UsingQuery;
-        with: Syntax.Account.Singular.WithQuery;
+    account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+        after: Syntax.Account.Singular.AfterQueryPromise;
+        before: Syntax.Account.Singular.BeforeQueryPromise;
+        including: Syntax.Account.Singular.IncludingQueryPromise;
+        limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+        orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+        selecting: Syntax.Account.Singular.SelectingQueryPromise;
+        to: Syntax.Account.Singular.ToQueryPromise;
+        using: Syntax.Account.Singular.UsingQueryPromise;
+        with: Syntax.Account.Singular.WithQueryPromise;
     };
     /** Get multiple account records */
-    accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCaller & {
-        after: Syntax.Account.Plural.AfterQuery;
-        before: Syntax.Account.Plural.BeforeQuery;
-        including: Syntax.Account.Plural.IncludingQuery;
-        limitedTo: Syntax.Account.Plural.LimitedToQuery;
-        orderedBy: Syntax.Account.Plural.OrderedByQuery;
-        selecting: Syntax.Account.Plural.SelectingQuery;
-        using: Syntax.Account.Plural.UsingQuery;
-        with: Syntax.Account.Plural.WithQuery;
+    accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+        after: Syntax.Account.Plural.AfterQueryPromise;
+        before: Syntax.Account.Plural.BeforeQueryPromise;
+        including: Syntax.Account.Plural.IncludingQueryPromise;
+        limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+        orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+        selecting: Syntax.Account.Plural.SelectingQueryPromise;
+        to: Syntax.Account.Plural.ToQueryPromise;
+        using: Syntax.Account.Plural.UsingQueryPromise;
+        with: Syntax.Account.Plural.WithQueryPromise;
     };
 };
 type RemoveQuery = {
@@ -238,48 +240,52 @@ exports[`namespaces with a link field 1`] = `
 };
 type GetQuery = {
     /** Get a single account record */
-    account: ReducedFunction & Syntax.Account.Singular.RootQueryCaller & {
-        after: Syntax.Account.Singular.AfterQuery;
-        before: Syntax.Account.Singular.BeforeQuery;
-        including: Syntax.Account.Singular.IncludingQuery;
-        limitedTo: Syntax.Account.Singular.LimitedToQuery;
-        orderedBy: Syntax.Account.Singular.OrderedByQuery;
-        selecting: Syntax.Account.Singular.SelectingQuery;
-        using: Syntax.Account.Singular.UsingQuery;
-        with: Syntax.Account.Singular.WithQuery;
+    account: ReducedFunction & Syntax.Account.Singular.RootQueryCallerPromise & {
+        after: Syntax.Account.Singular.AfterQueryPromise;
+        before: Syntax.Account.Singular.BeforeQueryPromise;
+        including: Syntax.Account.Singular.IncludingQueryPromise;
+        limitedTo: Syntax.Account.Singular.LimitedToQueryPromise;
+        orderedBy: Syntax.Account.Singular.OrderedByQueryPromise;
+        selecting: Syntax.Account.Singular.SelectingQueryPromise;
+        to: Syntax.Account.Singular.ToQueryPromise;
+        using: Syntax.Account.Singular.UsingQueryPromise;
+        with: Syntax.Account.Singular.WithQueryPromise;
     };
     /** Get multiple account records */
-    accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCaller & {
-        after: Syntax.Account.Plural.AfterQuery;
-        before: Syntax.Account.Plural.BeforeQuery;
-        including: Syntax.Account.Plural.IncludingQuery;
-        limitedTo: Syntax.Account.Plural.LimitedToQuery;
-        orderedBy: Syntax.Account.Plural.OrderedByQuery;
-        selecting: Syntax.Account.Plural.SelectingQuery;
-        using: Syntax.Account.Plural.UsingQuery;
-        with: Syntax.Account.Plural.WithQuery;
+    accounts: ReducedFunction & Syntax.Account.Plural.RootQueryCallerPromise & {
+        after: Syntax.Account.Plural.AfterQueryPromise;
+        before: Syntax.Account.Plural.BeforeQueryPromise;
+        including: Syntax.Account.Plural.IncludingQueryPromise;
+        limitedTo: Syntax.Account.Plural.LimitedToQueryPromise;
+        orderedBy: Syntax.Account.Plural.OrderedByQueryPromise;
+        selecting: Syntax.Account.Plural.SelectingQueryPromise;
+        to: Syntax.Account.Plural.ToQueryPromise;
+        using: Syntax.Account.Plural.UsingQueryPromise;
+        with: Syntax.Account.Plural.WithQueryPromise;
     };
     /** Get a single post record */
-    post: ReducedFunction & Syntax.Post.Singular.RootQueryCaller & {
-        after: Syntax.Post.Singular.AfterQuery;
-        before: Syntax.Post.Singular.BeforeQuery;
-        including: Syntax.Post.Singular.IncludingQuery;
-        limitedTo: Syntax.Post.Singular.LimitedToQuery;
-        orderedBy: Syntax.Post.Singular.OrderedByQuery;
-        selecting: Syntax.Post.Singular.SelectingQuery;
-        using: Syntax.Post.Singular.UsingQuery;
-        with: Syntax.Post.Singular.WithQuery;
+    post: ReducedFunction & Syntax.Post.Singular.RootQueryCallerPromise & {
+        after: Syntax.Post.Singular.AfterQueryPromise;
+        before: Syntax.Post.Singular.BeforeQueryPromise;
+        including: Syntax.Post.Singular.IncludingQueryPromise;
+        limitedTo: Syntax.Post.Singular.LimitedToQueryPromise;
+        orderedBy: Syntax.Post.Singular.OrderedByQueryPromise;
+        selecting: Syntax.Post.Singular.SelectingQueryPromise;
+        to: Syntax.Post.Singular.ToQueryPromise;
+        using: Syntax.Post.Singular.UsingQueryPromise;
+        with: Syntax.Post.Singular.WithQueryPromise;
     };
     /** Get multiple post records */
-    posts: ReducedFunction & Syntax.Post.Plural.RootQueryCaller & {
-        after: Syntax.Post.Plural.AfterQuery;
-        before: Syntax.Post.Plural.BeforeQuery;
-        including: Syntax.Post.Plural.IncludingQuery;
-        limitedTo: Syntax.Post.Plural.LimitedToQuery;
-        orderedBy: Syntax.Post.Plural.OrderedByQuery;
-        selecting: Syntax.Post.Plural.SelectingQuery;
-        using: Syntax.Post.Plural.UsingQuery;
-        with: Syntax.Post.Plural.WithQuery;
+    posts: ReducedFunction & Syntax.Post.Plural.RootQueryCallerPromise & {
+        after: Syntax.Post.Plural.AfterQueryPromise;
+        before: Syntax.Post.Plural.BeforeQueryPromise;
+        including: Syntax.Post.Plural.IncludingQueryPromise;
+        limitedTo: Syntax.Post.Plural.LimitedToQueryPromise;
+        orderedBy: Syntax.Post.Plural.OrderedByQueryPromise;
+        selecting: Syntax.Post.Plural.SelectingQueryPromise;
+        to: Syntax.Post.Plural.ToQueryPromise;
+        using: Syntax.Post.Plural.UsingQueryPromise;
+        with: Syntax.Post.Plural.WithQueryPromise;
     };
 };
 type RemoveQuery = {

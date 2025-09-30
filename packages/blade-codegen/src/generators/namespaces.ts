@@ -16,6 +16,11 @@ import type { Model } from '@/src/types/model';
  * @example
  * ```ts
  * declare namespace Syntax {
+ *  type AddQuery = { ... };
+ *  type GetQuery = { ... };
+ *  type RemoveQuery = { ... };
+ *  type SetQuery = { ... };
+ *
  *  namespace User {
  *    type FieldSlug = 'id' | '...';
  *
@@ -49,7 +54,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
        * ```
        */
       const singularProperty = factory.createPropertySignature(
@@ -110,7 +115,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
        * ```
        */
       const pluralProperty = factory.createPropertySignature(
@@ -201,7 +206,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
    */
   const getQueryTypeDeclaration = factory.createTypeLiteralNode(
     models.flatMap((model) => {
-      const comment = generateQueryTypeComment(model, 'use');
+      const comment = generateQueryTypeComment(model, 'get');
 
       const modelSyntaxIdentifier = factory.createIdentifier(
         convertToPascalCase(model.slug),
@@ -210,7 +215,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
        * ```
        */
       const singularProperty = factory.createPropertySignature(
@@ -231,19 +236,20 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
                 ),
                 identifiers.namespace.syntax.singular,
               ),
-              identifiers.namespace.utils.rootQueryCaller,
+              identifiers.namespace.utils.rootQueryCallerPromise,
             ),
           ),
           factory.createTypeLiteralNode(
             Object.entries({
-              after: identifiers.namespace.utils.afterQuery,
-              before: identifiers.namespace.utils.beforeQuery,
-              including: identifiers.namespace.utils.includingQuery,
-              limitedTo: identifiers.namespace.utils.limitedToQuery,
-              orderedBy: identifiers.namespace.utils.orderedByQuery,
-              selecting: identifiers.namespace.utils.selectingQuery,
-              using: identifiers.namespace.utils.usingQuery,
-              with: identifiers.namespace.utils.withQuery,
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
             }).map(([instruction, utilIdentifier]) =>
               factory.createPropertySignature(
                 undefined,
@@ -270,7 +276,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
        * ```
        */
       const pluralProperty = factory.createPropertySignature(
@@ -291,19 +297,20 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
                 ),
                 identifiers.namespace.syntax.plural,
               ),
-              identifiers.namespace.utils.rootQueryCaller,
+              identifiers.namespace.utils.rootQueryCallerPromise,
             ),
           ),
           factory.createTypeLiteralNode(
             Object.entries({
-              after: identifiers.namespace.utils.afterQuery,
-              before: identifiers.namespace.utils.beforeQuery,
-              including: identifiers.namespace.utils.includingQuery,
-              limitedTo: identifiers.namespace.utils.limitedToQuery,
-              orderedBy: identifiers.namespace.utils.orderedByQuery,
-              selecting: identifiers.namespace.utils.selectingQuery,
-              using: identifiers.namespace.utils.usingQuery,
-              with: identifiers.namespace.utils.withQuery,
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
             }).map(([instruction, utilIdentifier]) =>
               factory.createPropertySignature(
                 undefined,
@@ -369,7 +376,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
        * ```
        */
       const singularProperty = factory.createPropertySignature(
@@ -430,7 +437,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
        * ```
        */
       const pluralProperty = factory.createPropertySignature(
@@ -530,7 +537,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
        * ```
        */
       const singularProperty = factory.createPropertySignature(
@@ -591,7 +598,7 @@ export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
       /**
        * @example
        * ```ts
-       * users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
        * ```
        */
       const pluralProperty = factory.createPropertySignature(
