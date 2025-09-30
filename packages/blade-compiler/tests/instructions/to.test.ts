@@ -1,4 +1,6 @@
 import { expect, test } from 'bun:test';
+
+import { RECORD_TIMESTAMP_REGEX, queryEphemeralDatabase } from '@/fixtures/utils';
 import {
   CompilerError,
   type Model,
@@ -7,8 +9,6 @@ import {
   type StoredObject,
   Transaction,
 } from '@/src/index';
-
-import { RECORD_TIMESTAMP_REGEX, queryEphemeralDatabase } from '@/fixtures/utils';
 import type { MultipleRecordResult, SingleRecordResult } from '@/src/types/result';
 
 test('set single record to new string field', async () => {
@@ -48,8 +48,12 @@ test('set single record to new string field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.handle).toBe('mia');
 });
@@ -109,8 +113,12 @@ test('set single record to new blob field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.avatar).toMatchObject(storedObject);
 });
@@ -202,8 +210,12 @@ test('set single record to new blob field with empty value', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.avatar).toBeNull();
 });
@@ -253,8 +265,12 @@ test('set single record to new string field with expression referencing fields',
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.handle).toBe('elainejones');
 });
@@ -314,8 +330,12 @@ test('set single record to new one-cardinality link field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.account).toBe(targetRecord.id);
 });
@@ -364,8 +384,12 @@ test('add single record with many-cardinality link field (add)', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toMatchObject({
     handle: 'markus',
@@ -425,8 +449,12 @@ test('set single record to new many-cardinality link field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.followers).toBeUndefined();
   expect(result.record?.ronin.updatedAt).toMatch(RECORD_TIMESTAMP_REGEX);
@@ -480,8 +508,12 @@ test('set single record to new many-cardinality link field (add)', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.followers).toBeUndefined();
   expect(result.record?.ronin.updatedAt).toMatch(RECORD_TIMESTAMP_REGEX);
@@ -535,8 +567,12 @@ test('set single record to new many-cardinality link field (remove)', async () =
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.followers).toBeUndefined();
   expect(result.record?.ronin.updatedAt).toMatch(RECORD_TIMESTAMP_REGEX);
@@ -582,8 +618,12 @@ test('set single record to new json field with array', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.emails).toEqual(['elaine@site.co', 'elaine@company.co']);
 });
@@ -631,8 +671,12 @@ test('set single record to new json field with object', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.emails).toEqual({
     site: 'elaine@site.co',
@@ -727,8 +771,12 @@ test('set single record to new json field with empty value', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.emails).toBeNull();
 });
@@ -772,8 +820,12 @@ test('set single record to new nested string field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect((result.record?.billing as { currency: string })?.currency).toBe('USD');
 });
@@ -835,8 +887,12 @@ test('set single record to new nested link field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect((result.record?.billing as { manager: string })?.manager).toBe(targetRecord.id);
 });
@@ -880,8 +936,12 @@ test('set single record to new nested json field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(
     (result.record?.billing as { invoiceRecipients: Array<string> })?.invoiceRecipients,
@@ -952,8 +1012,12 @@ test('set single record to result of nested query', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.name).toBe(targetRecord.lastName);
 });
@@ -995,8 +1059,12 @@ test('set single record to empty field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record?.handle).toBe(null);
 });
@@ -1055,8 +1123,12 @@ test('add multiple records with nested sub query', async () => {
     ...transaction.statements,
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records.map(({ handle }) => ({ handle }))).toEqual(
     targetRecords.map(({ handle }) => ({ handle })),
@@ -1116,8 +1188,12 @@ test('add multiple records with nested sub query including additional fields', a
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toMatchObject([
     {
@@ -1184,8 +1260,12 @@ test('add multiple records with nested sub query and specific fields', async () 
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records.map(({ handle }) => ({ handle }))).toEqual(
     targetRecords.map(({ handle }) => ({ handle })),
@@ -1237,8 +1317,12 @@ test('add multiple records with nested sub query and specific meta fields', asyn
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(
     result.records.map(({ ronin: { updatedAt } }) => ({ ronin: { updatedAt } })),

@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+
 import { type Model, QUERY_SYMBOLS, type Query, Transaction } from '@/src/index';
 
 import {
@@ -46,8 +47,12 @@ test('get single record including unrelated record without filter', async () => 
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -118,8 +123,12 @@ test('get single record including unrelated record with filter', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -188,8 +197,12 @@ test('get single record including unrelated record that is not found', async () 
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -258,8 +271,12 @@ test('get single record including unrelated record with filter and specific fiel
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -323,8 +340,12 @@ test('get single record including unrelated records without filter', async () =>
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -399,8 +420,12 @@ test('get single record (with filter) including unrelated records without filter
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -473,8 +498,12 @@ test('get single record including unrelated records with filter', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -544,8 +573,12 @@ test('get single record including unrelated records that are not found', async (
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -608,8 +641,12 @@ test('get single record including count of unrelated records', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -672,8 +709,12 @@ test('get multiple records including unrelated records with filter', async () =>
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual([
     {
@@ -766,8 +807,12 @@ test('get multiple records including unrelated records that are not found', asyn
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual([
     {
@@ -851,8 +896,12 @@ test('get multiple records including unrelated records with filter (hoisted)', a
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual(
     new Array(3).fill({
@@ -956,9 +1005,12 @@ test('get multiple records including unrelated records with filter (nested)', as
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
 
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual([
     {
@@ -1140,9 +1192,12 @@ test('get multiple records including unrelated records with filter (nested, hois
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
 
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual([
     {
@@ -1269,8 +1324,12 @@ test('get multiple records including count of unrelated records', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toEqual([
     {
@@ -1348,8 +1407,12 @@ test('get single record including unrelated ordered record', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -1425,8 +1488,12 @@ test('get single record including unrelated ordered records', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -1511,8 +1578,12 @@ test('get single record including ephemeral field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -1569,8 +1640,12 @@ test('get single record including ephemeral field containing expression', async 
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -1621,8 +1696,12 @@ test('get single record including ephemeral field that overwrites stored field',
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -1673,8 +1752,12 @@ test('add single record including ephemeral field that overwrites stored field',
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),
@@ -1719,8 +1802,12 @@ test('get single record including deeply nested ephemeral field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as SingleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as SingleRecordResult;
 
   expect(result.record).toEqual({
     id: expect.stringMatching(RECORD_ID_REGEX),

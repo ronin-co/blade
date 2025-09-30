@@ -1,7 +1,5 @@
 import {
-  type ObjectRow,
   type Query,
-  type RawRow,
   type RegularResult,
   type Result,
   type ResultRecord,
@@ -124,18 +122,15 @@ export const runQueries = async <T extends ResultRecord>(
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
 
-  const output = await callDatabase(transaction.statements, {
-    token: options.token as string,
-    database: database as string,
-    stream: options.stream ?? false,
+  const formattedResults = await transaction.formatResults((statements) => {
+    return callDatabase(statements, {
+      token: options.token as string,
+      database: database as string,
+      stream: options.stream ?? false,
+    });
   });
 
   const startFormatting = performance.now();
-
-  const formattedResults =
-    'raw' in output && output.raw
-      ? transaction.formatResults(output.results as Array<Array<RawRow>>, true)
-      : transaction.formatResults(output.results as Array<Array<ObjectRow>>, false);
 
   // The `transaction.formatResults` logic of the query compiler (which is invoked
   // above), purposefully only formats results in a network-serializable manner. The
@@ -146,7 +141,7 @@ export const runQueries = async <T extends ResultRecord>(
   const endFormatting = performance.now();
 
   if (options.debug) {
-    console.log(`Formatting took ${endFormatting - startFormatting}ms`);
+    console.log(`Client formatting took ${endFormatting - startFormatting}ms`);
   }
 
   return finalResults.map((result) => ({ result }));

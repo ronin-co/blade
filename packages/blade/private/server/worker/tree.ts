@@ -1,7 +1,7 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import { runQueries } from 'blade-client';
 import type { FormattedResults } from 'blade-client/types';
-import { ClientError, TriggerError } from 'blade-client/utils';
+import { ClientError, CompilerError, TriggerError } from 'blade-client/utils';
 import type { Query, ResultRecord } from 'blade-compiler';
 import {
   type CookieSerializeOptions,
@@ -156,6 +156,7 @@ const obtainQueryResults = async (
   } catch (err) {
     if (
       err instanceof TriggerError ||
+      err instanceof CompilerError ||
       // Raise up errors about databases not existing, because they will be caught at a
       // higher level and handled accordingly. Also do the same for cases in which
       // triggers are required and missing (essential security measure).
@@ -419,7 +420,7 @@ export const flushSession = async (
     /** Whether to repeat the flush at an interval. */
     repeat?: boolean;
   },
-): Promise<{ results?: FormattedResults<ResultRecord> }> => {
+): Promise<{ results?: Collected['queries'] }> => {
   // If the client is no longer connected, don't try to push an update. This therefore
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return {};
@@ -453,7 +454,7 @@ export const flushSession = async (
       return {};
     }
 
-    const { response, writeResults } = await renderReactTree(
+    const { response, results } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
       !correctBundle,
@@ -483,7 +484,7 @@ export const flushSession = async (
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
     // The `finally` block will still execute before this.
-    return { results: writeResults };
+    return { results };
   } catch (err) {
     // If another update is being attempted later on anyways, we don't need to throw the
     // error, since that would also prevent the repeated update later on.
@@ -536,7 +537,7 @@ const renderReactTree = async (
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
-): Promise<{ response: Response; writeResults: FormattedResults<ResultRecord> }> => {
+): Promise<{ response: Response; results: Collected['queries'] }> => {
   const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
@@ -782,6 +783,7 @@ const renderReactTree = async (
   }
 
   const headers = getCookieHeaders(serverContext.collected.cookies || {});
+  const results = serverContext.collected.queries;
 
   if (serverContext.collected.redirect) {
     if (initial) {
@@ -792,7 +794,7 @@ const renderReactTree = async (
           headers,
           status: 307,
         }),
-        writeResults,
+        results,
       };
     }
 
@@ -808,7 +810,7 @@ const renderReactTree = async (
         // Do not carry the result of write queries over to the next page. The result of
         // read queries can be carried over, however, which might speed up the rendering
         // of the next page.
-        queries: serverContext.collected.queries.filter(({ type }) => type === 'read'),
+        queries: results.filter(({ type }) => type === 'read'),
       },
     );
   }
@@ -824,7 +826,7 @@ const renderReactTree = async (
     headers.set('Content-Location', url.pathname + url.search);
   }
 
-  return { response: new Response(body, { headers }), writeResults };
+  return { response: new Response(body, { headers }), results };
 };
 
 export default renderReactTree;

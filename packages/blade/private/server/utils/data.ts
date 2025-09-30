@@ -3,9 +3,10 @@ import { runQueries } from 'blade-client';
 import type {
   BeforeGetTrigger,
   TriggerOptions as ClientTriggerOptions,
+  FormattedResults,
   QueryHandlerOptions,
 } from 'blade-client/types';
-import type { Model, QueryType } from 'blade-compiler';
+import type { Model, QueryType, ResultRecord } from 'blade-compiler';
 import type { Context, ExecutionContext } from 'hono';
 import { schema, triggers } from 'server-list';
 
@@ -190,7 +191,10 @@ export const getClientConfig = (
 
       if (writing) {
         const { results } = await flush(queries);
-        return results!;
+
+        return results!
+          .filter(({ type }) => type === 'write')
+          .map(({ result }) => result) as FormattedResults<ResultRecord>;
       }
 
       return runQueries(queries, nestedOptions);

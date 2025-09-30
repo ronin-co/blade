@@ -1,6 +1,6 @@
 {
   "name": "blade-compiler",
-  "version": "3.18.19",
+  "version": "3.18.20",
   "type": "module",
   "description": "Compiles RONIN queries to SQL statements.",
   "main": "./dist/index.js",
@@ -29,7 +29,7 @@
     "@types/bun": "1.1.14",
     "hive": "2.1.4",
     "title": "4.0.1",
-    "tsdown": "0.15.2",
+    "tsdown": "0.15.5",
     "typescript": "5.7.2"
   }
 }

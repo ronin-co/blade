@@ -1,6 +1,6 @@
 {
   "name": "blade-codegen",
-  "version": "3.18.19",
+  "version": "3.18.20",
   "type": "module",
   "description": "Generates TypeScript code from RONIN models.",
   "publishConfig": {
@@ -59,6 +59,6 @@
     "@types/bun": "1.2.4",
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
-    "tsdown": "0.15.2"
+    "tsdown": "0.15.5"
   }
 }

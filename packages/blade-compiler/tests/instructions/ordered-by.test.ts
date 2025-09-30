@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+
 import { queryEphemeralDatabase } from '@/fixtures/utils';
 import { type Model, QUERY_SYMBOLS, type Query, Transaction } from '@/src/index';
 import type { MultipleRecordResult } from '@/src/types/result';
@@ -37,8 +38,12 @@ test('get multiple records ordered by field', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toMatchObject([
     {
@@ -91,8 +96,12 @@ test('get multiple records ordered by expression', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toMatchObject([
     {
@@ -143,8 +152,12 @@ test('get multiple records ordered by multiple fields', async () => {
     },
   ]);
 
-  const rawResults = await queryEphemeralDatabase(models, transaction.statements);
-  const result = transaction.formatResults(rawResults)[0] as MultipleRecordResult;
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  const result = results[0] as MultipleRecordResult;
 
   expect(result.records).toMatchObject([
     {
