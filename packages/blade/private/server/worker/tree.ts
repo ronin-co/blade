@@ -496,6 +496,7 @@ export const flushSession = async (
       options?.queries
         ? {
             queries: [
+              // These queries already have results, so they won't be modified.
               ...resumableReads,
               // Do not pass `options.queries` directly here, since it will get modified
               // in place and we don't want to resume the results of write queries.
