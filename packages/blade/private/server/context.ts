@@ -17,7 +17,9 @@ export type ServerContext<
   currentLeafIndex: number | null;
   waitUntil: WaitUntil;
   flushSession?: (
+    /** A list of write queries that should be executed. */
     queries: Array<Query>,
+    /** The ID of a particular database connection to stream the queries through. */
     queryStream?: string,
   ) => Promise<{ results?: Collected['queries'] }>;
 };
