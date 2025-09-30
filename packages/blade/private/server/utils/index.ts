@@ -20,15 +20,16 @@ export const generateHashSync = (input: string): number => {
 };
 
 export class ResponseStream extends SSEStreamingApi {
+  /** The first request object provided by the client. */
+  request: Request;
+  /** The first response object returned to the client. */
+  readonly response: Response;
+
   /**
    * The time at which the last update started processing. If the value is `null`, no
    * update started processing yet.
    */
   lastUpdate: number | null = null;
-  /** The first request object provided by the client. */
-  request: Request;
-  /** The first response object returned to the client. */
-  readonly response: Response;
 
   /** Allows for tracking whether the response is ready to be returned. */
   readonly headersReady: Promise<void>;
