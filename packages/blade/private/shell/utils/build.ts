@@ -105,11 +105,11 @@ export const composeBuildContext = async (
     input,
     platform: provider === 'vercel' ? 'node' : 'browser',
 
-    resolve: {
-      // If the provided files are virtual, we resolve the TS config paths using a
-      // separate plugin on the outside.
-      tsconfigFilename: tsconfigExists ? tsconfigFilename : undefined,
+    // If the provided files are virtual, we resolve the TS config paths using a
+    // separate plugin on the outside.
+    tsconfig: tsconfigExists ? tsconfigFilename : undefined,
 
+    resolve: {
       // If the provided files are virtual, Rolldown can't reliably resolve the modules,
       // so we provide the resolving logic ourselves as a plugin from the outside.
       modules: options?.virtualFiles ? undefined : [nodePath],
