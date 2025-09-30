@@ -420,7 +420,7 @@ export const flushSession = async (
     /** Whether to repeat the flush at an interval. */
     repeat?: boolean;
   },
-): Promise<{ results?: FormattedResults<ResultRecord> }> => {
+): Promise<{ results?: Collected['queries'] }> => {
   // If the client is no longer connected, don't try to push an update. This therefore
   // also stops the interval of continuous revalidation.
   if (stream.aborted || stream.closed) return {};
@@ -537,7 +537,7 @@ const renderReactTree = async (
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
-): Promise<{ response: Response; writeResults: FormattedResults<ResultRecord> }> => {
+): Promise<{ response: Response; results: Collected['queries'] }> => {
   const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
@@ -783,6 +783,7 @@ const renderReactTree = async (
   }
 
   const headers = getCookieHeaders(serverContext.collected.cookies || {});
+  const results = serverContext.collected.queries;
 
   if (serverContext.collected.redirect) {
     if (initial) {
@@ -793,7 +794,7 @@ const renderReactTree = async (
           headers,
           status: 307,
         }),
-        writeResults,
+        results,
       };
     }
 
@@ -809,7 +810,7 @@ const renderReactTree = async (
         // Do not carry the result of write queries over to the next page. The result of
         // read queries can be carried over, however, which might speed up the rendering
         // of the next page.
-        queries: serverContext.collected.queries.filter(({ type }) => type === 'read'),
+        queries: results.filter(({ type }) => type === 'read'),
       },
     );
   }
@@ -825,7 +826,7 @@ const renderReactTree = async (
     headers.set('Content-Location', url.pathname + url.search);
   }
 
-  return { response: new Response(body, { headers }), writeResults };
+  return { response: new Response(body, { headers }), results };
 };
 
 export default renderReactTree;
