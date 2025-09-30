@@ -59,6 +59,6 @@
     "@types/bun": "1.2.4",
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
-    "tsdown": "0.15.2"
+    "tsdown": "0.15.5"
   }
 }
