@@ -250,9 +250,7 @@ declare module "blade/types" {
     };
 }
 declare module "blade/server/hooks" {
-    declare const use: {
-        add: Syntax.GetQuery;
-    };
+    declare const use: Syntax.GetQuery;
 }
 declare module "blade/client/hooks" {
     declare const useMutation: () => {
@@ -520,9 +518,7 @@ declare module "blade/types" {
     };
 }
 declare module "blade/server/hooks" {
-    declare const use: {
-        add: Syntax.GetQuery;
-    };
+    declare const use: Syntax.GetQuery;
 }
 declare module "blade/client/hooks" {
     declare const useMutation: () => {
@@ -619,9 +615,7 @@ declare module "blade/types" {
     };
 }
 declare module "blade/server/hooks" {
-    declare const use: {
-        add: Syntax.GetQuery;
-    };
+    declare const use: Syntax.GetQuery;
 }
 declare module "blade/client/hooks" {
     declare const useMutation: () => {

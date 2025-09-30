@@ -193,12 +193,7 @@ export const generate = (models: Array<Model>): string => {
    * @example
    * ```ts
    * declare module "blade/server/hooks" {
-   *  declare const use: {
-   *    // Get a single user record
-   *    user: ReducedFunction & Syntax.User.Singular.RootQueryCaller & { ... };
-   *    // Get multiple user records
-   *    users: ReducedFunction & Syntax.User.Plural.RootQueryCaller & { ... };
-   *  };
+   *  declare const use: Syntax.GetQuery;
    * }
    * ```
    */
@@ -214,19 +209,12 @@ export const generate = (models: Array<Model>): string => {
               factory.createVariableDeclaration(
                 'use',
                 undefined,
-                factory.createTypeLiteralNode([
-                  factory.createPropertySignature(
-                    undefined,
-                    'add',
-                    undefined,
-                    factory.createTypeReferenceNode(
-                      factory.createQualifiedName(
-                        identifiers.namespace.syntax.name,
-                        identifiers.namespace.syntax.getQuery,
-                      ),
-                    ),
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    identifiers.namespace.syntax.name,
+                    identifiers.namespace.syntax.getQuery,
                   ),
-                ]),
+                ),
               ),
             ],
             NodeFlags.Const,
