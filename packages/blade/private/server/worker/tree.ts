@@ -518,9 +518,25 @@ export const flushSession = async (
     stream.lastUpdate = currentStart;
 
     // Track the results of the read queries that were executed last.
-    stream.lastResults = results.filter(({ type }) => {
-      return type === 'read';
-    }) as Array<QueryItemRead>;
+    for (const result of results) {
+      // Only read queries can be cached.
+      if (result.type !== 'read') continue;
+
+      const existing = stream.lastResults.find((oldItem) => {
+        return oldItem.query === result.query && oldItem.database === result.database;
+      });
+
+      // If the result wasn't cached before, cache it now.
+      if (!existing) {
+        stream.lastResults.push(result);
+        continue;
+      }
+
+      // If a write query was provided with the same stream, update the read query.
+      if (options?.queries?.some(({ stream }) => stream === result.stream)) {
+        existing.result = result.result;
+      }
+    }
 
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
