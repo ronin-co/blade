@@ -22,6 +22,7 @@ export const identifiers = {
       types: factory.createIdentifier(JSON.stringify('blade/types')),
     },
     reducedFunction: factory.createIdentifier('ReducedFunction'),
+    triggerOptions: factory.createIdentifier('TriggerOptions'),
   },
   compiler: {
     combinedInstructions: factory.createIdentifier('CombinedInstructions'),
@@ -42,10 +43,15 @@ export const identifiers = {
   },
   namespace: {
     syntax: {
+      addQuery: factory.createIdentifier('AddQuery'),
+      countQuery: factory.createIdentifier('CountQuery'),
       fieldSlug: factory.createIdentifier('FieldSlug'),
+      getQuery: factory.createIdentifier('GetQuery'),
       name: factory.createIdentifier('Syntax'),
-      singular: factory.createIdentifier('Singular'),
       plural: factory.createIdentifier('Plural'),
+      removeQuery: factory.createIdentifier('RemoveQuery'),
+      setQuery: factory.createIdentifier('SetQuery'),
+      singular: factory.createIdentifier('Singular'),
     },
     utils: {
       afterQuery: factory.createIdentifier('AfterQuery'),

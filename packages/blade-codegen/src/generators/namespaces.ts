@@ -1,11 +1,12 @@
-import { NodeFlags, factory } from 'typescript';
+import { NodeFlags, SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
+import { generateQueryTypeComment } from '@/src/generators/comment';
 import { generateUsingSyntax, generateWithSyntax } from '@/src/generators/syntax';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { ModuleDeclaration, TypeAliasDeclaration } from 'typescript';
+import type { Statement, TypeAliasDeclaration } from 'typescript';
 
 import type { Model } from '@/src/types/model';
 
@@ -15,6 +16,11 @@ import type { Model } from '@/src/types/model';
  * @example
  * ```ts
  * declare namespace Syntax {
+ *  type AddQuery = { ... };
+ *  type GetQuery = { ... };
+ *  type RemoveQuery = { ... };
+ *  type SetQuery = { ... };
+ *
  *  namespace User {
  *    type FieldSlug = 'id' | '...';
  *
@@ -28,8 +34,654 @@ import type { Model } from '@/src/types/model';
  *
  * @returns Array of module declarations representing the namespaces.
  */
-export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaration> =>
-  models.map((model) => {
+export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
+  const moduleDeclarations = new Array<Statement>();
+
+  /**
+   * @example
+   * ```ts
+   * type AddQuery = { ... };
+   * ```
+   */
+  const addQueryTypeDeclaration = factory.createTypeLiteralNode(
+    models.flatMap((model) => {
+      const comment = generateQueryTypeComment(model, 'add');
+
+      const modelSyntaxIdentifier = factory.createIdentifier(
+        convertToPascalCase(model.slug),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const singularProperty = factory.createPropertySignature(
+        undefined,
+        model.slug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.singular,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.singular,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const pluralProperty = factory.createPropertySignature(
+        undefined,
+        model.pluralSlug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.plural,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.plural,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      return [
+        addSyntheticLeadingComment(
+          singularProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.singular,
+          true,
+        ),
+        addSyntheticLeadingComment(
+          pluralProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.plural,
+          true,
+        ),
+      ];
+    }),
+  );
+  moduleDeclarations.push(
+    factory.createTypeAliasDeclaration(
+      undefined,
+      identifiers.namespace.syntax.addQuery,
+      undefined,
+      addQueryTypeDeclaration,
+    ),
+  );
+
+  /**
+   * @example
+   * ```ts
+   * type GetQuery = { ... };
+   * ```
+   */
+  const getQueryTypeDeclaration = factory.createTypeLiteralNode(
+    models.flatMap((model) => {
+      const comment = generateQueryTypeComment(model, 'get');
+
+      const modelSyntaxIdentifier = factory.createIdentifier(
+        convertToPascalCase(model.slug),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const singularProperty = factory.createPropertySignature(
+        undefined,
+        model.slug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.singular,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.singular,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const pluralProperty = factory.createPropertySignature(
+        undefined,
+        model.pluralSlug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.plural,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.plural,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      return [
+        addSyntheticLeadingComment(
+          singularProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.singular,
+          true,
+        ),
+        addSyntheticLeadingComment(
+          pluralProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.plural,
+          true,
+        ),
+      ];
+    }),
+  );
+  moduleDeclarations.push(
+    factory.createTypeAliasDeclaration(
+      undefined,
+      identifiers.namespace.syntax.getQuery,
+      undefined,
+      getQueryTypeDeclaration,
+    ),
+  );
+
+  /**
+   * @example
+   * ```ts
+   * type RemoveQuery = { ... };
+   * ```
+   */
+  const removeQueryTypeDeclaration = factory.createTypeLiteralNode(
+    models.flatMap((model) => {
+      const comment = generateQueryTypeComment(model, 'remove');
+
+      const modelSyntaxIdentifier = factory.createIdentifier(
+        convertToPascalCase(model.slug),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const singularProperty = factory.createPropertySignature(
+        undefined,
+        model.slug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.singular,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.singular,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const pluralProperty = factory.createPropertySignature(
+        undefined,
+        model.pluralSlug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.plural,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.plural,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      return [
+        addSyntheticLeadingComment(
+          singularProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.singular,
+          true,
+        ),
+        addSyntheticLeadingComment(
+          pluralProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.plural,
+          true,
+        ),
+      ];
+    }),
+  );
+  moduleDeclarations.push(
+    factory.createTypeAliasDeclaration(
+      undefined,
+      identifiers.namespace.syntax.removeQuery,
+      undefined,
+      removeQueryTypeDeclaration,
+    ),
+  );
+
+  /**
+   * @example
+   * ```ts
+   * type SetQuery = { ... };
+   * ```
+   */
+  const setQueryTypeDeclaration = factory.createTypeLiteralNode(
+    models.flatMap((model) => {
+      const comment = generateQueryTypeComment(model, 'set');
+
+      const modelSyntaxIdentifier = factory.createIdentifier(
+        convertToPascalCase(model.slug),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * user: ReducedFunction & Syntax.User.Singular.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const singularProperty = factory.createPropertySignature(
+        undefined,
+        model.slug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.singular,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.singular,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      /**
+       * @example
+       * ```ts
+       * users: ReducedFunction & Syntax.User.Plural.RootQueryCallerPromise & { ... };
+       * ```
+       */
+      const pluralProperty = factory.createPropertySignature(
+        undefined,
+        model.pluralSlug,
+        undefined,
+        factory.createIntersectionTypeNode([
+          factory.createExpressionWithTypeArguments(
+            identifiers.blade.reducedFunction,
+            undefined,
+          ),
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              factory.createQualifiedName(
+                factory.createQualifiedName(
+                  identifiers.namespace.syntax.name,
+                  modelSyntaxIdentifier,
+                ),
+                identifiers.namespace.syntax.plural,
+              ),
+              identifiers.namespace.utils.rootQueryCallerPromise,
+            ),
+          ),
+          factory.createTypeLiteralNode(
+            Object.entries({
+              after: identifiers.namespace.utils.afterQueryPromise,
+              before: identifiers.namespace.utils.beforeQueryPromise,
+              including: identifiers.namespace.utils.includingQueryPromise,
+              limitedTo: identifiers.namespace.utils.limitedToQueryPromise,
+              orderedBy: identifiers.namespace.utils.orderedByQueryPromise,
+              selecting: identifiers.namespace.utils.selectingQueryPromise,
+              to: identifiers.namespace.utils.toQueryPromise,
+              using: identifiers.namespace.utils.usingQueryPromise,
+              with: identifiers.namespace.utils.withQueryPromise,
+            }).map(([instruction, utilIdentifier]) =>
+              factory.createPropertySignature(
+                undefined,
+                instruction,
+                undefined,
+                factory.createTypeReferenceNode(
+                  factory.createQualifiedName(
+                    factory.createQualifiedName(
+                      factory.createQualifiedName(
+                        identifiers.namespace.syntax.name,
+                        modelSyntaxIdentifier,
+                      ),
+                      identifiers.namespace.syntax.plural,
+                    ),
+                    utilIdentifier,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      return [
+        addSyntheticLeadingComment(
+          singularProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.singular,
+          true,
+        ),
+        addSyntheticLeadingComment(
+          pluralProperty,
+          SyntaxKind.MultiLineCommentTrivia,
+          comment.plural,
+          true,
+        ),
+      ];
+    }),
+  );
+  moduleDeclarations.push(
+    factory.createTypeAliasDeclaration(
+      undefined,
+      identifiers.namespace.syntax.setQuery,
+      undefined,
+      setQueryTypeDeclaration,
+    ),
+  );
+
+  for (const model of models) {
     const syntaxNamespaceIdentifier = factory.createIdentifier(
       convertToPascalCase(model.slug),
     );
@@ -547,7 +1199,7 @@ export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaratio
       withPromise: generateWithSyntax(model, pluralModelNode, true),
     } satisfies Record<string, TypeAliasDeclaration>;
 
-    return factory.createModuleDeclaration(
+    const moduleDeclaration = factory.createModuleDeclaration(
       undefined,
       syntaxNamespaceIdentifier,
       factory.createModuleBlock([
@@ -609,4 +1261,9 @@ export const generateNamespaces = (models: Array<Model>): Array<ModuleDeclaratio
       ]),
       NodeFlags.Namespace,
     );
-  });
+
+    moduleDeclarations.push(moduleDeclaration);
+  }
+
+  return moduleDeclarations;
+};

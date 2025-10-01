@@ -33,7 +33,7 @@ describe('model', () => {
     // @ts-expect-error Codegen models types differ from the schema model types.
     const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-    expect(typesResult).toHaveLength(2);
+    expect(typesResult).toHaveLength(3);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -56,7 +56,7 @@ describe('model', () => {
     // @ts-expect-error Codegen models types differ from the schema model types.
     const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-    expect(typesResult).toHaveLength(2);
+    expect(typesResult).toHaveLength(3);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -81,7 +81,7 @@ describe('model', () => {
     // @ts-expect-error Codegen models types differ from the schema model types.
     const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-    expect(typesResult).toHaveLength(2);
+    expect(typesResult).toHaveLength(3);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -111,7 +111,7 @@ describe('model', () => {
     // @ts-expect-error Codegen models types differ from the schema model types.
     const typesResult = generateModelTypes([AccountModel, PostModel], PostModel);
 
-    expect(typesResult).toHaveLength(4);
+    expect(typesResult).toHaveLength(5);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -141,7 +141,7 @@ describe('model', () => {
     // @ts-expect-error Codegen models types differ from the schema model types.
     const typesResult = generateModelTypes([AccountModel, SpaceModel], SpaceModel);
 
-    expect(typesResult).toHaveLength(4);
+    expect(typesResult).toHaveLength(5);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -163,7 +163,7 @@ describe('model', () => {
     // @ts-expect-error Codegen models types differ from the schema model types.
     const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-    expect(typesResult).toHaveLength(2);
+    expect(typesResult).toHaveLength(3);
 
     const typesResultStr = printNodes(typesResult);
 
@@ -187,7 +187,7 @@ describe('model', () => {
     // @ts-expect-error Codegen models types differ from the schema model types.
     const typesResult = generateModelTypes([AccountModel], AccountModel);
 
-    expect(typesResult).toHaveLength(2);
+    expect(typesResult).toHaveLength(3);
 
     const typesResultStr = printNodes(typesResult);
 

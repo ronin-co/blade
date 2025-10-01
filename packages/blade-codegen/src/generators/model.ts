@@ -2,6 +2,7 @@ import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
+import { triggerOptionsInterface } from '@/src/declarations';
 import { convertToPascalCase } from '@/src/utils/slug';
 import { mapRoninFieldToTypeNode, remapNestedFields } from '@/src/utils/types';
 
@@ -20,7 +21,7 @@ import type { Model, ModelField } from '@/src/types/model';
  * @returns An array of type nodes to be added to the `index.d.ts` file.
  */
 export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclaration> => {
-  const nodes = new Array<TypeAliasDeclaration>();
+  const nodes = new Array<TypeAliasDeclaration>(triggerOptionsInterface);
 
   for (const model of models) {
     const fields: Array<ModelField> = Object.entries(model.fields)

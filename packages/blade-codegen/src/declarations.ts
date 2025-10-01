@@ -1,3 +1,4 @@
+import type { DML_QUERY_TYPES } from 'blade-compiler';
 import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
@@ -1102,6 +1103,88 @@ export const toQueryPromiseType = factory.createTypeAliasDeclaration(
       ]),
     ),
   ]),
+);
+
+/**
+ * @example
+ * ```ts
+ * export interface TriggerOptions {
+ *  client: { ... };
+ * };
+ * ```
+ */
+export const triggerOptionsInterface = factory.createInterfaceDeclaration(
+  [factory.createModifier(SyntaxKind.ExportKeyword)],
+  identifiers.blade.triggerOptions,
+  undefined,
+  undefined,
+  [
+    factory.createPropertySignature(
+      undefined,
+      'client',
+      undefined,
+      factory.createTypeLiteralNode([
+        factory.createPropertySignature(
+          undefined,
+          'add' satisfies (typeof DML_QUERY_TYPES)[number],
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.addQuery,
+            ),
+          ),
+        ),
+        // TODO(@nurodev): Add strict types for `batch` queries
+        factory.createPropertySignature(
+          undefined,
+          'batch',
+          undefined,
+          factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        ),
+        // TODO(@nurodev): Add strict types for `count` queries
+        factory.createPropertySignature(
+          undefined,
+          'count' satisfies (typeof DML_QUERY_TYPES)[number],
+          undefined,
+          factory.createKeywordTypeNode(SyntaxKind.AnyKeyword),
+        ),
+        factory.createPropertySignature(
+          undefined,
+          'get' satisfies (typeof DML_QUERY_TYPES)[number],
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.getQuery,
+            ),
+          ),
+        ),
+        factory.createPropertySignature(
+          undefined,
+          'remove' satisfies (typeof DML_QUERY_TYPES)[number],
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.removeQuery,
+            ),
+          ),
+        ),
+        factory.createPropertySignature(
+          undefined,
+          'set' satisfies (typeof DML_QUERY_TYPES)[number],
+          undefined,
+          factory.createTypeReferenceNode(
+            factory.createQualifiedName(
+              identifiers.namespace.syntax.name,
+              identifiers.namespace.syntax.setQuery,
+            ),
+          ),
+        ),
+      ]),
+    ),
+  ],
 );
 
 /**
