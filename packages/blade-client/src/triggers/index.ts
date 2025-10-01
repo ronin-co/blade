@@ -588,7 +588,10 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   return queries.flatMap((details, index) => {
     const { query, database } = details;
 
-    if (query.set || query.alter) {
+    // Only generate diff queries for queries of type `set` or `alter` and don't generate
+    // them if queries are currently being streamed, since developers expect fine-grained
+    // control over which queries are being sent in that case.
+    if ((query.set || query.alter) && !options.clientOptions.stream) {
       let newQuery: Query | undefined;
 
       if (query.set) {
