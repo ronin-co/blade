@@ -531,6 +531,9 @@ export const flushSession = async (
         continue;
       }
 
+      // If the result isn't for a particular stream, there is no chance of updating.
+      if (!result.stream) continue;
+
       // If a write query was provided with the same stream, update the read query.
       if (options?.queries?.some(({ stream }) => stream === result.stream)) {
         existing.result = result.result;
