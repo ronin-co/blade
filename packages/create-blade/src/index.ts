@@ -39,6 +39,8 @@ Options:
 `;
 
 async function main(): Promise<void> {
+  console.log('Input `process.argv`', process.argv);
+
   const { positionals, values } = parseArgs({
     allowPositionals: true,
     args: process.argv,
