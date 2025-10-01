@@ -50,7 +50,27 @@ export interface ResultPerDatabase<T> {
 const clients: Record<string, Hive> = {};
 
 const dispatcher = Agent
-  ? new Agent({ connections: 1, maxConcurrentStreams: 1, pipelining: 1 })
+  ? new Agent({
+      // Allow only a single TCP connection, which is the bare minimum requirement for
+      // being able to ensure transport order for statements.
+      connections: 1,
+      // Disable HTTP/2, since it allows multiple concurrent streams and TCP ensures
+      // transport order only within a single byte stream.
+      //
+      // If HTTP/2 were to be enabled, then `maxConcurrentStreams: 1` would have to be
+      // set to ensure only a stream. But in that case, the `databaseCaller` would have
+      // to explictly transmit all statements over a single stream, which requires custom
+      // stream handling instead of being able to rely on simple `Requests`s.
+      allowH2: false,
+      // By default, only a single request can be in flight over the connection. We are
+      // increasing this number to allow many requests to travel to their destination at
+      // the same time, over a single TCP byte stream, in order.
+      //
+      // It is important to pick a number that is not too large here, since, the more
+      // concurrent requests we allow, the larger the buffer of requests that will build
+      // on the side of the destination database, which might slow the database down.
+      pipelining: 100,
+    })
   : undefined;
 
 const fetchWithDispatcher: typeof fetch = (input, init) => {
@@ -79,10 +99,14 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   const hive = clients[key];
   const db = new Selector<'database'>(database);
 
+  // console.log('SENT REQUEST', performance.now())
+
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),
     mode: 'DEFERRED',
   });
+
+  console.log('GOT RESPONSE', performance.now());
 
   return {
     results: results.map((result) => result.rows as Array<RowValues>),
