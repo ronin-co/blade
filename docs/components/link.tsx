@@ -7,9 +7,7 @@ export const Link = ({ href, children }: ComponentProps<typeof NativeLink>) => {
     return (
       <a
         className="text-cyan-600 transition-colors duration-200 hover:text-cyan-800"
-        href={href}
-        rel="noopener noreferrer"
-        target="_blank">
+        href={href}>
         {children}
       </a>
     );
