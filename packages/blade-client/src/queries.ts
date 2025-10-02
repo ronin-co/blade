@@ -7,6 +7,8 @@ import {
   Transaction,
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
+import type { BunDriver as BunDriverClass } from 'hive/bun-driver';
+import { MemoryStorage } from 'hive/memory-storage';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
 import type { Agent as AgentClass } from 'undici';
@@ -22,11 +24,18 @@ import type {
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 
 let Agent: typeof AgentClass | undefined;
+let BunDriver: typeof BunDriverClass | undefined;
 
 // Skip it on workers for now.
 if (typeof process !== 'undefined') {
   try {
     ({ Agent } = await import('undici'));
+  } catch (_err) {
+    // It's fine if the package is not installed.
+  }
+
+  try {
+    ({ BunDriver } = await import('hive/bun-driver'));
   } catch (_err) {
     // It's fine if the package is not installed.
   }
@@ -82,7 +91,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   options,
 ) => {
   const { token, database, stream } = options;
-  const key = `${token}${stream ? `-${stream}` : ''}`;
+  const key = `${token}${stream ? '-streaming' : ''}`;
 
   if (!clients[key]) {
     const prefix = stream ? 'db-leader' : 'db';
@@ -91,8 +100,14 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
       storage: new RemoteStorage({
         remote: `https://${prefix}.ronin.co/api`,
         token,
-        fetch: stream ? fetchWithDispatcher : undefined,
+        // fetch: stream ? fetchWithDispatcher : undefined,
+        replication: BunDriver
+          ? {
+              storage: new MemoryStorage(),
+            }
+          : undefined,
       }),
+      driver: BunDriver ? new BunDriver() : undefined,
     });
   }
 
