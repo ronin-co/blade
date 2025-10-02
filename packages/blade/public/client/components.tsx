@@ -1,8 +1,7 @@
 import type { StoredObject } from 'blade-compiler';
 import {
   type AnchorHTMLAttributes,
-  type ReactElement,
-  cloneElement,
+  type ReactNode,
   forwardRef,
   useCallback,
   useRef,
@@ -81,7 +80,7 @@ const getPathFromURL = (url: LinkURL, currentURL: string) => {
 };
 
 interface LinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
-  children: ReactElement;
+  children: ReactNode;
   href: string | LinkURL;
   segments?: Record<string, string | Array<string>>;
   prefetch?: boolean;
@@ -113,7 +112,7 @@ const Link = ({
     ? linkEventHandlers
     : { onClick: linkEventHandlers.onClick };
 
-  return cloneElement(children, {
+  const anchorProps = {
     href: destination,
     ...eventHandlers,
     ...extraProps,
@@ -129,7 +128,9 @@ const Link = ({
     onClick: extraProps.onClick || linkEventHandlers.onClick,
     onMouseEnter: extraProps.onMouseEnter || linkEventHandlers.onMouseEnter,
     onTouchStart: extraProps.onTouchStart || linkEventHandlers.onTouchStart,
-  });
+  } satisfies AnchorHTMLAttributes<HTMLAnchorElement>;
+
+  return <a {...anchorProps}>{children}</a>;
 };
 
 const supportedFitValues = ['fill', 'contain', 'cover'];
