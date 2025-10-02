@@ -37,6 +37,7 @@ if (typeof process !== 'undefined') {
   try {
     ({ BunDriver } = await import('hive/bun-driver'));
   } catch (_err) {
+    console.log(_err);
     // It's fine if the package is not installed.
   }
 }
@@ -95,6 +96,8 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
 
   if (!clients[key]) {
     const prefix = stream ? 'db-leader' : 'db';
+
+    console.log(BunDriver);
 
     clients[key] = new Hive({
       storage: new RemoteStorage({
