@@ -76,7 +76,8 @@
     "json5": "2.2.3",
     "open": "10.1.0",
     "ora": "8.1.1",
-    "resolve-from": "5.0.0"
+    "resolve-from": "5.0.0",
+        "hive": "2.1.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -87,7 +88,6 @@
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
     "bun-bagel": "1.1.0",
-    "hive": "2.1.4",
     "tsdown": "0.15.5",
     "typescript": "5.8.3"
   }

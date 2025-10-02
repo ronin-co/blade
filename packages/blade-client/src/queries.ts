@@ -7,6 +7,8 @@ import {
   Transaction,
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
+import type { BunDriver as BunDriverClass } from 'hive/bun-driver';
+import { MemoryStorage } from 'hive/memory-storage';
 import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
 import type { Agent as AgentClass } from 'undici';
@@ -22,12 +24,20 @@ import type {
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
 
 let Agent: typeof AgentClass | undefined;
+let BunDriver: typeof BunDriverClass | undefined;
 
 // Skip it on workers for now.
 if (typeof process !== 'undefined') {
   try {
     ({ Agent } = await import('undici'));
   } catch (_err) {
+    // It's fine if the package is not installed.
+  }
+
+  try {
+    ({ BunDriver } = await import('hive/bun-driver'));
+  } catch (_err) {
+    console.log(_err);
     // It's fine if the package is not installed.
   }
 }
@@ -50,7 +60,27 @@ export interface ResultPerDatabase<T> {
 const clients: Record<string, Hive> = {};
 
 const dispatcher = Agent
-  ? new Agent({ connections: 1, maxConcurrentStreams: 1, pipelining: 1 })
+  ? new Agent({
+      // Allow only a single TCP connection, which is the bare minimum requirement for
+      // being able to ensure transport order for statements.
+      connections: 1,
+      // Disable HTTP/2, since it allows multiple concurrent streams and TCP ensures
+      // transport order only within a single byte stream.
+      //
+      // If HTTP/2 were to be enabled, then `maxConcurrentStreams: 1` would have to be
+      // set to ensure only a stream. But in that case, the `databaseCaller` would have
+      // to explictly transmit all statements over a single stream, which requires custom
+      // stream handling instead of being able to rely on simple `Requests`s.
+      allowH2: false,
+      // By default, only a single request can be in flight over the connection. We are
+      // increasing this number to allow many requests to travel to their destination at
+      // the same time, over a single TCP byte stream, in order.
+      //
+      // It is important to pick a number that is not too large here, since, the more
+      // concurrent requests we allow, the larger the buffer of requests that will build
+      // on the side of the destination database, which might slow the database down.
+      pipelining: 100,
+    })
   : undefined;
 
 const fetchWithDispatcher: typeof fetch = (input, init) => {
@@ -62,27 +92,39 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   options,
 ) => {
   const { token, database, stream } = options;
-  const key = `${token}${stream ? `-${stream}` : ''}`;
+  const key = `${token}${stream ? '-streaming' : ''}`;
 
   if (!clients[key]) {
     const prefix = stream ? 'db-leader' : 'db';
+
+    console.log(BunDriver);
 
     clients[key] = new Hive({
       storage: new RemoteStorage({
         remote: `https://${prefix}.ronin.co/api`,
         token,
-        fetch: stream ? fetchWithDispatcher : undefined,
+        // fetch: stream ? fetchWithDispatcher : undefined,
+        replication: BunDriver
+          ? {
+              storage: new MemoryStorage(),
+            }
+          : undefined,
       }),
+      driver: BunDriver ? new BunDriver() : undefined,
     });
   }
 
   const hive = clients[key];
   const db = new Selector<'database'>(database);
 
+  // console.log('SENT REQUEST', performance.now())
+
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),
     mode: 'DEFERRED',
   });
+
+  console.log('GOT RESPONSE', performance.now());
 
   return {
     results: results.map((result) => result.rows as Array<RowValues>),

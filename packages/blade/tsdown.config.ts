@@ -25,6 +25,7 @@ export default defineConfig({
     'react-dom/server.browser',
     'typescript',
     'undici',
+    'hive/bun-driver',
   ],
   treeshake: true,
   define: {

@@ -60,12 +60,14 @@
   "engines": {
     "node": ">=18.17.0"
   },
+  "dependencies": {
+    "hive": "2.1.4"
+  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.4",
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
-    "hive": "2.1.4",
     "tsdown": "0.15.5",
     "typescript": "5.8.3"
   }

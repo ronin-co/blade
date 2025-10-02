@@ -35,14 +35,14 @@
   "author": "ronin",
   "license": "Apache-2.0",
   "dependencies": {
-    "better-auth": "1.2.5"
+    "better-auth": "1.2.5",
+        "hive": "2.1.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.8",
     "blade-client": "workspace:*",
     "blade-compiler": "workspace:*",
-    "hive": "2.1.4",
     "tsdown": "0.15.5",
     "typescript": "5.8.2"
   },

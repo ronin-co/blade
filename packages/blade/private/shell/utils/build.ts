@@ -122,7 +122,11 @@ export const composeBuildContext = async (
       },
     },
 
-    external: [...(packageMetaContent?.blade?.external || []), 'undici'],
+    external: [
+      ...(packageMetaContent?.blade?.external || []),
+      'undici',
+      'hive/bun-driver',
+    ],
 
     plugins: [
       getFileListLoader(options?.virtualFiles),
