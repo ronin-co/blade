@@ -51,7 +51,7 @@ export const TableOfContentsSidebarItem = ({
             'text-primary': active === slug,
           },
         )}>
-        <span>{item.value}</span>
+        {item.value}
       </Link>
 
       {item.children && item.depth < 3 && (
