@@ -12,7 +12,7 @@ import getValue from 'get-value';
 import { sleep } from 'radash';
 import React, { type ReactNode } from 'react';
 // @ts-expect-error `@types/react-dom` is missing types for this file.
-import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.browser';
+import { renderToReadableStream as renderToReadableStreamInitial } from 'react-dom/server.edge';
 import { serializeError } from 'serialize-error';
 import { pages as pageList } from 'server-list';
 
