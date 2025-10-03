@@ -1,6 +1,6 @@
 {
   "name": "blade-codegen",
-  "version": "3.18.27",
+  "version": "3.18.28",
   "type": "module",
   "description": "Generates TypeScript code from RONIN models.",
   "publishConfig": {
