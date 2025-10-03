@@ -15,7 +15,7 @@ export const Link = ({ href, children }: LinkProps) => {
     children,
   };
 
-  if (isExternal)
+  if (isExternal) {
     return (
       <a
         {...props}
@@ -23,5 +23,7 @@ export const Link = ({ href, children }: LinkProps) => {
         rel="noreferrer"
       />
     );
+  }
+
   return <NativeLink {...props} />;
 };
