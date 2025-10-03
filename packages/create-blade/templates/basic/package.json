@@ -10,13 +10,13 @@
   },
   "author": "ronin",
   "dependencies": {
-    "blade": "3.18.26",
-    "react": "0.0.0-experimental-df12d7eac-20230510",
-    "react-dom": "0.0.0-experimental-df12d7eac-20230510"
+    "blade": "3.18.29",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "@types/react": "19.1.4",
-    "@types/react-dom": "19.1.5",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
     "typescript": "5.9.2"
   }
 }
