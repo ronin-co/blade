@@ -10,7 +10,8 @@ import React from 'react';
 
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 
-const ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+const ReactSharedInternals =
+  React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
 
 function error(format) {
   for (
