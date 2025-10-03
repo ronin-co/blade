@@ -250,9 +250,7 @@ app.post('*', async (c) => {
 
   const body = await c.req.parseBody<ClientTransition>({ all: true });
 
-  const options: PageFetchingOptions = body.options
-    ? JSON.parse(body.options)
-    : undefined;
+  const options: PageFetchingOptions = body.options ? JSON.parse(body.options) : {};
   const files = body.files
     ? Array.isArray(body.files)
       ? body.files
@@ -270,7 +268,7 @@ app.post('*', async (c) => {
 
   let queries: Array<QueryItemWrite> | undefined;
 
-  if (options?.queries) {
+  if (options.queries) {
     queries = options.queries;
 
     // Only accept DML write queries to be provided from the client.
@@ -288,7 +286,12 @@ app.post('*', async (c) => {
 
   const stream = new ResponseStream(c.req.raw);
 
-  flushSession(stream, correctBundle, { queries, repeat: subscribe });
+  flushSession(stream, correctBundle, {
+    queries,
+    repeat: subscribe,
+    updateAddressBar: options.updateAddressBar,
+    errorFallback: options.errorFallback,
+  });
 
   if (subscribe) {
     const id = crypto.randomUUID();

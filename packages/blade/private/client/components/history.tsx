@@ -28,7 +28,9 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       const newLocation = window.location;
       const pathname = newLocation.pathname + newLocation.search + newLocation.hash;
 
-      transitionPage(pathname);
+      // Don't update the address bar, since the browser already updated it. This also
+      // ensures that no additional state entry is pushed into the history.
+      transitionPage(pathname, { updateAddressBar: false });
     };
 
     window.addEventListener('popstate', pageChanged);
@@ -44,8 +46,9 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       return;
     }
 
-    if (universalContext.addressBarInSync)
+    if (universalContext.addressBarInSync) {
       history.pushState({}, '', populatedPathname + search);
+    }
   }, [populatedPathname + search]);
 
   // Ensure that the scroll position is reset whenever the page changes.
