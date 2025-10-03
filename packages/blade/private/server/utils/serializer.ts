@@ -896,8 +896,6 @@ function attemptResolveElement(request, type, key, ref, props) {
     }
   }
 
-  console.log(type, key, ref, props);
-
   throw new Error(
     `Unsupported Server Component type: ${describeValueForErrorMessage(type)}`,
   );
@@ -1326,7 +1324,6 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
       if (objectName(value) !== 'Object') {
         // error('Only plain objects can be passed to Client Components from Server Components. ' + '%s objects are not supported.%s', objectName(value), describeObjectForErrorMessage(parent, key));
       } else if (!isSimpleObject(value)) {
-        // console.log('PARENT', parent, key, defaultValue, value)
         error(
           'Only plain objects can be passed to Client Components from Server Components. ' +
             'Classes or other objects with methods are not supported.%s',
