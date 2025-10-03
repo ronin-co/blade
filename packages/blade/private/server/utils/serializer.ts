@@ -191,11 +191,12 @@ function resolveModuleMetaData(clientReference) {
 // When adding new symbols to this file,
 // Please consider also adding to 'react-devtools-shared/src/backend/ReactSymbols'
 // The Symbol used to tag the ReactElement-like types.
-const REACT_ELEMENT_TYPE = Symbol.for('react.element');
+const REACT_ELEMENT_TYPE = Symbol.for('react.transitional.element');
 const REACT_FRAGMENT_TYPE = Symbol.for('react.fragment');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
 const REACT_MEMO_TYPE = Symbol.for('react.memo');
 const REACT_PROVIDER_TYPE = Symbol.for('react.provider');
+const REACT_CONTEXT_TYPE = Symbol.for('react.context');
 
 // It is handled by React separately and shouldn't be written to the DOM.
 
@@ -885,8 +886,17 @@ function attemptResolveElement(request, type, key, ref, props) {
       case REACT_PROVIDER_TYPE: {
         return props.children;
       }
+
+      case REACT_CONTEXT_TYPE: {
+        // Treat a bare Context element like its Provider for server serialization purposes.
+        // We don't push/pop provider state here (this serializer ignores providers),
+        // matching REACT_PROVIDER_TYPE behavior above.
+        return props.children;
+      }
     }
   }
+
+  console.log(type, key, ref, props);
 
   throw new Error(
     `Unsupported Server Component type: ${describeValueForErrorMessage(type)}`,
@@ -1316,6 +1326,7 @@ function resolveModelToJSON(request, parent, key, defaultValue) {
       if (objectName(value) !== 'Object') {
         // error('Only plain objects can be passed to Client Components from Server Components. ' + '%s objects are not supported.%s', objectName(value), describeObjectForErrorMessage(parent, key));
       } else if (!isSimpleObject(value)) {
+        // console.log('PARENT', parent, key, defaultValue, value)
         error(
           'Only plain objects can be passed to Client Components from Server Components. ' +
             'Classes or other objects with methods are not supported.%s',
