@@ -30,10 +30,6 @@ Blade purposefully does not (and likely won't ever) comply with the official spe
 - **No Async Components** (I/O leads to slow code, so reads in Blade are always synchronous, but async behind the scenes)
 - **No Suspense** (Blade does not support reads on the client — server components can only read and client components can only write)
 
-## Temporary Limitation
-
-The experimental React version defined in the [templates](https://github.com/ronin-co/blade/tree/main/packages/create-blade/templates/basic) is currently required. Support for the "stable" release channel of React will follow very soon.
-
 ## Setup
 
 To get started with Blade, create a new app with this command:

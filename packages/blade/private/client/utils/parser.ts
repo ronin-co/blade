@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 
-const REACT_ELEMENT_TYPE = Symbol.for('react.element');
+const REACT_ELEMENT_TYPE = Symbol.for('react.transitional.element');
 
 /** The shape of a chunk's resolved value. */
 type ChunkValue =

@@ -10,14 +10,14 @@ import React from 'react';
 
 import { IS_SERVER_DEV } from '@/private/server/utils/constants';
 
-const ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+const ReactSharedInternals =
+  React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
 
 function error(format) {
-  for (
-    let _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1;
-    _key2 < _len2;
-    _key2++
-  ) {
+  const _len2 = arguments.length;
+  const args = new Array(_len2 > 1 ? _len2 - 1 : 0);
+
+  for (let _key2 = 1; _key2 < _len2; _key2++) {
     args[_key2 - 1] = arguments[_key2];
   }
 
@@ -28,8 +28,8 @@ function printWarning(level, defaultFormat, defaultArgs) {
   let format = defaultFormat;
   let args = defaultArgs;
 
-  const ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
-  const stack = ReactDebugCurrentFrame.getStackAddendum();
+  const ReactDebugCurrentFrame = ReactSharedInternals.A;
+  const stack = ReactDebugCurrentFrame?.getStackAddendum();
 
   if (stack !== '') {
     format += '%s';
@@ -191,11 +191,11 @@ function resolveModuleMetaData(clientReference) {
 // When adding new symbols to this file,
 // Please consider also adding to 'react-devtools-shared/src/backend/ReactSymbols'
 // The Symbol used to tag the ReactElement-like types.
-const REACT_ELEMENT_TYPE = Symbol.for('react.element');
+const REACT_ELEMENT_TYPE = Symbol.for('react.transitional.element');
 const REACT_FRAGMENT_TYPE = Symbol.for('react.fragment');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
 const REACT_MEMO_TYPE = Symbol.for('react.memo');
-const REACT_PROVIDER_TYPE = Symbol.for('react.provider');
+const REACT_CONTEXT_TYPE = Symbol.for('react.context');
 
 // It is handled by React separately and shouldn't be written to the DOM.
 
@@ -781,8 +781,6 @@ const PENDING = 0;
 const COMPLETED = 1;
 const ABORTED = 3;
 const ERRORED = 4;
-const ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
-const ReactCurrentCache = ReactSharedInternals.ReactCurrentCache;
 
 function defaultErrorHandler(error) {
   console['error'](error); // Don't transform to our wrapper
@@ -793,13 +791,13 @@ const CLOSING = 1;
 const CLOSED = 2;
 function createRequest(model, onError, identifierPrefix) {
   if (
-    ReactCurrentCache.current !== null &&
-    ReactCurrentCache.current !== DefaultCacheDispatcher
+    ReactSharedInternals.T !== null &&
+    ReactSharedInternals.T !== DefaultCacheDispatcher
   ) {
     throw new Error('Currently React only supports one RSC renderer at a time.');
   }
 
-  ReactCurrentCache.current = DefaultCacheDispatcher;
+  ReactSharedInternals.T = DefaultCacheDispatcher;
   const abortSet = new Set();
   const pingedTasks = [];
   const request = {
@@ -884,7 +882,7 @@ function attemptResolveElement(request, type, key, ref, props) {
         return attemptResolveElement(request, type.type, key, ref, props);
       }
 
-      case REACT_PROVIDER_TYPE: {
+      case REACT_CONTEXT_TYPE: {
         return props.children;
       }
     }
@@ -1527,15 +1525,15 @@ function retryTask(request, task) {
 }
 
 function mountReactDispatcher() {
-  ReactCurrentDispatcher.current = HooksDispatcher;
+  ReactSharedInternals.H = HooksDispatcher;
 }
 
 function performWork(request) {
-  const prevDispatcher = ReactCurrentDispatcher.current;
-  const prevCacheDispatcher = ReactCurrentCache.current;
+  const prevDispatcher = ReactSharedInternals.H;
+  const prevCacheDispatcher = ReactSharedInternals.T;
 
   mountReactDispatcher();
-  ReactCurrentCache.current = DefaultCacheDispatcher;
+  ReactSharedInternals.T = DefaultCacheDispatcher;
 
   prepareToUseHooksForRequest(request);
 
@@ -1555,8 +1553,8 @@ function performWork(request) {
     logRecoverableError(request, error);
     fatalError(request, error);
   } finally {
-    ReactCurrentDispatcher.current = prevDispatcher;
-    ReactCurrentCache.current = prevCacheDispatcher;
+    ReactSharedInternals.H = prevDispatcher;
+    ReactSharedInternals.T = prevCacheDispatcher;
 
     resetHooksForRequest();
   }
