@@ -28,6 +28,8 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       const newLocation = window.location;
       const pathname = newLocation.pathname + newLocation.search + newLocation.hash;
 
+      // Don't update the address bar, since the browser already updated it. This also
+      // ensures that no additional state entry is pushed into the history.
       transitionPage(pathname, { updateAddressBar: false });
     };
 
@@ -45,7 +47,6 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
     }
 
     if (universalContext.addressBarInSync) {
-      console.log('UPDATE URL', populatedPathname + search);
       history.pushState({}, '', populatedPathname + search);
     }
   }, [populatedPathname + search]);
