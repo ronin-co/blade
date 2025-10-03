@@ -195,7 +195,6 @@ const REACT_ELEMENT_TYPE = Symbol.for('react.transitional.element');
 const REACT_FRAGMENT_TYPE = Symbol.for('react.fragment');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
 const REACT_MEMO_TYPE = Symbol.for('react.memo');
-const REACT_PROVIDER_TYPE = Symbol.for('react.provider');
 const REACT_CONTEXT_TYPE = Symbol.for('react.context');
 
 // It is handled by React separately and shouldn't be written to the DOM.
@@ -883,14 +882,7 @@ function attemptResolveElement(request, type, key, ref, props) {
         return attemptResolveElement(request, type.type, key, ref, props);
       }
 
-      case REACT_PROVIDER_TYPE: {
-        return props.children;
-      }
-
       case REACT_CONTEXT_TYPE: {
-        // Treat a bare Context element like its Provider for server serialization purposes.
-        // We don't push/pop provider state here (this serializer ignores providers),
-        // matching REACT_PROVIDER_TYPE behavior above.
         return props.children;
       }
     }
