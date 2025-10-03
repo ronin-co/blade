@@ -781,8 +781,6 @@ const PENDING = 0;
 const COMPLETED = 1;
 const ABORTED = 3;
 const ERRORED = 4;
-const ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
-const ReactCurrentCache = ReactSharedInternals.ReactCurrentCache;
 
 function defaultErrorHandler(error) {
   console['error'](error); // Don't transform to our wrapper
@@ -793,13 +791,13 @@ const CLOSING = 1;
 const CLOSED = 2;
 function createRequest(model, onError, identifierPrefix) {
   if (
-    ReactCurrentCache.current !== null &&
-    ReactCurrentCache.current !== DefaultCacheDispatcher
+    ReactSharedInternals.T !== null &&
+    ReactSharedInternals.T !== DefaultCacheDispatcher
   ) {
     throw new Error('Currently React only supports one RSC renderer at a time.');
   }
 
-  ReactCurrentCache.current = DefaultCacheDispatcher;
+  ReactSharedInternals.T = DefaultCacheDispatcher;
   const abortSet = new Set();
   const pingedTasks = [];
   const request = {
@@ -1527,15 +1525,15 @@ function retryTask(request, task) {
 }
 
 function mountReactDispatcher() {
-  ReactCurrentDispatcher.current = HooksDispatcher;
+  ReactSharedInternals.H = HooksDispatcher;
 }
 
 function performWork(request) {
-  const prevDispatcher = ReactCurrentDispatcher.current;
-  const prevCacheDispatcher = ReactCurrentCache.current;
+  const prevDispatcher = ReactSharedInternals.H;
+  const prevCacheDispatcher = ReactSharedInternals.T;
 
   mountReactDispatcher();
-  ReactCurrentCache.current = DefaultCacheDispatcher;
+  ReactSharedInternals.T = DefaultCacheDispatcher;
 
   prepareToUseHooksForRequest(request);
 
@@ -1555,8 +1553,8 @@ function performWork(request) {
     logRecoverableError(request, error);
     fatalError(request, error);
   } finally {
-    ReactCurrentDispatcher.current = prevDispatcher;
-    ReactCurrentCache.current = prevCacheDispatcher;
+    ReactSharedInternals.H = prevDispatcher;
+    ReactSharedInternals.T = prevCacheDispatcher;
 
     resetHooksForRequest();
   }
