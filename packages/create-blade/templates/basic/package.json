@@ -10,7 +10,7 @@
   },
   "author": "ronin",
   "dependencies": {
-    "blade": "3.18.11",
+    "blade": "3.18.26",
     "react": "0.0.0-experimental-df12d7eac-20230510",
     "react-dom": "0.0.0-experimental-df12d7eac-20230510"
   },
