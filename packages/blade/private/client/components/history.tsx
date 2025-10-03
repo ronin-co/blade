@@ -28,7 +28,7 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       const newLocation = window.location;
       const pathname = newLocation.pathname + newLocation.search + newLocation.hash;
 
-      transitionPage(pathname);
+      transitionPage(pathname, { updateAddressBar: false });
     };
 
     window.addEventListener('popstate', pageChanged);
@@ -44,8 +44,10 @@ const HistoryContent = ({ children }: HistoryContentProps) => {
       return;
     }
 
-    if (universalContext.addressBarInSync)
+    if (universalContext.addressBarInSync) {
+      console.log('UPDATE URL', populatedPathname + search);
       history.pushState({}, '', populatedPathname + search);
+    }
   }, [populatedPathname + search]);
 
   // Ensure that the scroll position is reset whenever the page changes.

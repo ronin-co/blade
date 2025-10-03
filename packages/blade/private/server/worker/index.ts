@@ -288,7 +288,12 @@ app.post('*', async (c) => {
 
   const stream = new ResponseStream(c.req.raw);
 
-  flushSession(stream, correctBundle, { queries, repeat: subscribe });
+  flushSession(stream, correctBundle, {
+    queries,
+    repeat: subscribe,
+    updateAddressBar: options.updateAddressBar,
+    errorFallback: options.errorFallback,
+  });
 
   if (subscribe) {
     const id = crypto.randomUUID();

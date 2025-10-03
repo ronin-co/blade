@@ -425,6 +425,10 @@ export const flushSession = async (
     queries?: Array<QueryItemWrite>;
     /** Whether to repeat the flush at an interval. */
     repeat?: boolean;
+    /** Whether the flush should initially update the address bar. */
+    updateAddressBar?: PageFetchingOptions['updateAddressBar'];
+    /** The page that should be rendered if the write queries fail to execute. */
+    errorFallback?: PageFetchingOptions['errorFallback'];
   },
 ): Promise<{ results?: Collected['queries'] }> => {
   // If the client is no longer connected, don't try to push an update. This therefore
@@ -491,6 +495,8 @@ export const flushSession = async (
       {
         waitUntil: getWaitUntil(),
         flushSession: options?.repeat ? nestedFlushSession : undefined,
+        updateAddressBar: options?.updateAddressBar,
+        errorFallback: options?.errorFallback,
       },
       options?.queries
         ? {
