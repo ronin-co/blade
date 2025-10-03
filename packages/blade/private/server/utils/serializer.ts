@@ -14,11 +14,10 @@ const ReactSharedInternals =
   React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
 
 function error(format) {
-  for (
-    let _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1;
-    _key2 < _len2;
-    _key2++
-  ) {
+  const _len2 = arguments.length;
+  const args = new Array(_len2 > 1 ? _len2 - 1 : 0);
+
+  for (let _key2 = 1; _key2 < _len2; _key2++) {
     args[_key2 - 1] = arguments[_key2];
   }
 
@@ -29,8 +28,8 @@ function printWarning(level, defaultFormat, defaultArgs) {
   let format = defaultFormat;
   let args = defaultArgs;
 
-  const ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
-  const stack = ReactDebugCurrentFrame.getStackAddendum();
+  const ReactDebugCurrentFrame = ReactSharedInternals.A;
+  const stack = ReactDebugCurrentFrame?.getStackAddendum();
 
   if (stack !== '') {
     format += '%s';
