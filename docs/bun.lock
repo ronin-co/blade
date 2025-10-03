@@ -10,7 +10,7 @@
         "@radix-ui/react-slot": "1.2.3",
         "@radix-ui/react-tooltip": "1.2.7",
         "@tabler/icons-react": "3.34.0",
-        "blade": "3.18.25",
+        "blade": "3.18.26",
         "class-variance-authority": "0.7.1",
         "clsx": "2.1.1",
         "lucide-react": "0.513.0",
@@ -271,7 +271,7 @@
 
     "aria-hidden": ["aria-hidden@1.2.6", "", { "dependencies": { "tslib": "^2.0.0" } }, "sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA=="],
 
-    "blade": ["blade@3.18.25", "", { "dependencies": { "@dprint/typescript": "0.95.11", "@inquirer/prompts": "7.8.6", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "resolve-from": "5.0.0", "rolldown": "1.0.0-beta.41" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-5Stvhvd2vRYxyr9E0YJlQ1zbun32N47kzPxSnaBW2l7ZffbBeN8v7hBt5IVhVvquEkSlp2quN19kuXh7Xp9H2g=="],
+    "blade": ["blade@3.18.26", "", { "dependencies": { "@dprint/typescript": "0.95.11", "@inquirer/prompts": "7.8.6", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "resolve-from": "5.0.0", "rolldown": "1.0.0-beta.41" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-9pJS0ru5vC9KgSeB3WgtVlma7TAGRia7Xy4PT2H8NORCJF3bw7SvCI8P6ko9p5ysUN+rXOdlT4UkuXHXivI1Jw=="],
 
     "ccount": ["ccount@2.0.1", "", {}, "sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg=="],
 
