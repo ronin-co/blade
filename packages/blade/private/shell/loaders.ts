@@ -268,9 +268,7 @@ export const getProviderLoader = (
 
     // Copy hard-coded static assets into output directory.
     if (await exists(publicSource)) {
-      await cp(publicSource, publicOutputDirectory, {
-        recursive: true,
-      });
+      await cp(publicSource, publicOutputDirectory, { recursive: true });
     }
 
     switch (provider) {
