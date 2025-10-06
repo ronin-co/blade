@@ -20,5 +20,9 @@
   },
   "overrides": {
     "rollup-plugin-dts": "^0.16.8"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   }
 }
