@@ -64,13 +64,17 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
     }),
 
     // Copy chunk files that are shared between client and server into worker.
-    cp(path.join(publicOutputDirectory, 'client'), path.join(functionDir, 'client'), {
-      recursive: true,
-      filter: (source) => {
-        if (source === path.join(publicOutputDirectory, 'client')) return true;
-        return source.includes('/client/chunk.');
+    cp(
+      path.join(publicOutputDirectory, 'client'),
+      path.join(functionDir, 'public', 'client'),
+      {
+        recursive: true,
+        filter: (source) => {
+          if (source === path.join(publicOutputDirectory, 'client')) return true;
+          return source.includes('/client/chunk.');
+        },
       },
-    }),
+    ),
 
     cp(
       path.join(outputDirectory, `${defaultDeploymentProvider}.js`),
@@ -217,13 +221,17 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
     ),
 
     // Copy chunk files that are shared between client and server into worker.
-    cp(path.join(publicOutputDirectory, 'client'), path.join(edgeFunctionDir, 'client'), {
-      recursive: true,
-      filter: (source) => {
-        if (source === path.join(publicOutputDirectory, 'client')) return true;
-        return source.includes('/client/chunk.');
+    cp(
+      path.join(publicOutputDirectory, 'client'),
+      path.join(edgeFunctionDir, 'public', 'client'),
+      {
+        recursive: true,
+        filter: (source) => {
+          if (source === path.join(publicOutputDirectory, 'client')) return true;
+          return source.includes('/client/chunk.');
+        },
       },
-    }),
+    ),
 
     writeFile(
       path.join(edgeFunctionDir, 'package.json'),
