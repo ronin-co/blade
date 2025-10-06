@@ -1,4 +1,5 @@
 export const CLIENT_ASSET_PREFIX = 'client';
+export const PUBLIC_ASSET_PREFIX = 'public';
 
 export const DEFAULT_PAGE_PATH = 'blade-default-pages';
 

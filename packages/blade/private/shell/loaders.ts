@@ -13,8 +13,7 @@ import MagicString from 'magic-string';
 import type { Plugin as RolldownPlugin } from 'rolldown';
 
 import {
-  outputDirectory,
-  publicDirectory,
+  publicOutputDirectory,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
@@ -36,6 +35,7 @@ import {
 } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils';
+import { PUBLIC_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export const getClientReferenceLoader = (): RolldownPlugin => ({
   name: 'Client Reference Loader',
@@ -264,9 +264,11 @@ export const getProviderLoader = (
   async writeBundle() {
     if (environment !== 'production') return;
 
+    const publicSource = path.join(process.cwd(), PUBLIC_ASSET_PREFIX);
+
     // Copy hard-coded static assets into output directory.
-    if (await exists(publicDirectory)) {
-      await cp(publicDirectory, outputDirectory, { recursive: true });
+    if (await exists(publicSource)) {
+      await cp(publicSource, publicOutputDirectory, { recursive: true });
     }
 
     switch (provider) {
