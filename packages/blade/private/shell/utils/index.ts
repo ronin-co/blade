@@ -142,21 +142,15 @@ export const wrapClientExport = (
   return `
     if (typeof window === 'undefined' || isNetlify) {
       try {
-        let __blade_target = ${localName};
-
-        // Unwrap forwardRef(...) to its render function if present.
-        if (__blade_target && __blade_target.$$typeof === REACT_FORWARD_REF_TYPE) {
-          __blade_target = __blade_target.render;
-        }
-
-        if (typeof __blade_target === 'function') {
-          Object.defineProperties(__blade_target, {
+        Object.defineProperties(
+          ${localName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${localName}.render : ${localName},
+          {
             $$typeof: { value: CLIENT_REFERENCE },
             name: { value: '${externalName}' },
             chunk: { value: '${chunk.id}' },
             id: { value: '${chunk.path}' }
-          });
-        }
+          }
+        );
       } catch (err) {}
     } else {
       if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
