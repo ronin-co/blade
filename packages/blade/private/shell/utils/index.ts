@@ -140,28 +140,23 @@ export const wrapClientExport = (
   const { externalName, localName } = exportItem;
 
   return `
-    if (typeof window === 'undefined' || isNetlify) {
-      try {
-        let __blade_target = ${localName};
+    const ${localName}Inner = ${localName}.$$typeof === REACT_FORWARD_REF_TYPE ? ${localName}.render : ${localName};
 
-        // Unwrap forwardRef(...) to its render function if present.
-        if (__blade_target && __blade_target.$$typeof === REACT_FORWARD_REF_TYPE) {
-          __blade_target = __blade_target.render;
-        }
-
-        if (typeof __blade_target === 'function') {
-          Object.defineProperties(__blade_target, {
+    if (typeof ${localName}Inner === 'function') {
+      if (typeof window === 'undefined' || isNetlify) {
+        try {
+          Object.defineProperties(${localName}, {
             $$typeof: { value: CLIENT_REFERENCE },
             name: { value: '${externalName}' },
             chunk: { value: '${chunk.id}' },
             id: { value: '${chunk.path}' }
           });
-        }
-      } catch (err) {}
-    } else {
-      if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
-      if (!window.BLADE_CHUNKS["${chunk.id}"]) window.BLADE_CHUNKS["${chunk.id}"] = {};
-      window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${localName};
+        } catch (err) {}
+      } else {
+        if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
+        if (!window.BLADE_CHUNKS["${chunk.id}"]) window.BLADE_CHUNKS["${chunk.id}"] = {};
+        window.BLADE_CHUNKS["${chunk.id}"]["${externalName}"] = ${localName};
+      }
     }
   `;
 };
