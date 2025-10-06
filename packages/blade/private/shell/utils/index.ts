@@ -145,7 +145,7 @@ export const wrapClientExport = (
     if (typeof ${localName}Inner === 'function') {
       if (typeof window === 'undefined' || isNetlify) {
         try {
-          Object.defineProperties(${localName}, {
+          Object.defineProperties(${localName}Inner, {
             $$typeof: { value: CLIENT_REFERENCE },
             name: { value: '${externalName}' },
             chunk: { value: '${chunk.id}' },
