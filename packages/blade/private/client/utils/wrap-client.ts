@@ -16,20 +16,19 @@ type Component = ComponentType<any> &
  */
 export const wrapClientComponent = (component: Component, name: string) => {
   const chunkId = name.toLowerCase();
-  const inner =
-    component.$$typeof === REACT_FORWARD_REF_TYPE ? component.render : component;
-
-  if (typeof inner !== 'function') return;
 
   // @ts-expect-error The `Netlify` global only exists in the Netlify environment.
   const isNetlify = typeof Netlify !== 'undefined';
   if (typeof window === 'undefined' || isNetlify) {
-    Object.defineProperties(inner, {
-      $$typeof: { value: CLIENT_REFERENCE },
-      name: { value: name },
-      chunk: { value: chunkId },
-      id: { value: `native-${name}` },
-    });
+    Object.defineProperties(
+      component.$$typeof === REACT_FORWARD_REF_TYPE ? component.render : component,
+      {
+        $$typeof: { value: CLIENT_REFERENCE },
+        name: { value: name },
+        chunk: { value: chunkId },
+        id: { value: `native-${name}` },
+      },
+    );
   } else {
     if (!window['BLADE_CHUNKS']) window['BLADE_CHUNKS'] = {};
     window.BLADE_CHUNKS[chunkId] = { [name]: component };
