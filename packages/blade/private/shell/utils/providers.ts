@@ -199,10 +199,10 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   // Since edge functions do not offer a `preferStatic` option, we need to manually
   // provide a list of all static assets to not be routed to the edge function.
   const staticAssets = new Array<string>();
-  const files = await readdir(outputDirectory, { recursive: true });
+  const files = await readdir(publicOutputDirectory, { recursive: true });
 
   for (const file of files) {
-    if (!file.endsWith('.map')) staticAssets.push(`/${file}`);
+    if (!file.endsWith('.map')) staticAssets.push(`/public/${file}`);
   }
 
   await Promise.all([
