@@ -3,11 +3,15 @@ import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 
+import { PUBLIC_ASSET_PREFIX } from '@/private/universal/utils/constants';
+
 const currentFilePath = fileURLToPath(import.meta.url);
 export const sourceDirPath = dirname(currentFilePath);
 
 export const outputDirectoryName = join('.blade', 'dist');
 export const outputDirectory = resolve(process.cwd(), outputDirectoryName);
+
+export const publicOutputDirectory = join(outputDirectory, PUBLIC_ASSET_PREFIX);
 
 export const tsconfigFilename = resolve(process.cwd(), 'tsconfig.json');
 export const packageMetaFilename = resolve(process.cwd(), 'package.json');

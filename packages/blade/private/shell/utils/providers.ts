@@ -5,6 +5,7 @@ import {
   defaultCacheControl,
   defaultDeploymentProvider,
   outputDirectory,
+  publicOutputDirectory,
 } from '@/private/shell/constants';
 import { exists, logSpinner } from '@/private/shell/utils';
 
@@ -51,29 +52,22 @@ export const transformToVercelBuildOutput = async (): Promise<void> => {
 
   await mkdir(functionDir, { recursive: true });
 
-  const staticDirectories = ['client', 'public'];
-
   await Promise.all([
-    cp(outputDirectory, staticFilesDir, {
+    cp(publicOutputDirectory, staticFilesDir, {
       recursive: true,
       filter: (source) => {
-        if (source === outputDirectory) return true;
+        if (source === publicOutputDirectory) return true;
 
-        // Only copy static files and exclude source maps.
-        const relativeSource = path.relative(outputDirectory, source);
-        const staticFile = staticDirectories.some((item) => {
-          return relativeSource === item || relativeSource.startsWith(`${item}/`);
-        });
-
-        return staticFile && !source.endsWith('.map');
+        // Exclude source maps.
+        return !source.endsWith('.map');
       },
     }),
 
     // Copy chunk files that are shared between client and server into worker.
-    cp(path.join(outputDirectory, 'client'), path.join(functionDir, 'client'), {
+    cp(path.join(publicOutputDirectory, 'client'), path.join(functionDir, 'client'), {
       recursive: true,
       filter: (source) => {
-        if (source === path.join(outputDirectory, 'client')) return true;
+        if (source === path.join(publicOutputDirectory, 'client')) return true;
         return source.includes('/client/chunk.');
       },
     }),
@@ -167,7 +161,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
             compatibility_date: '2025-06-02',
             assets: {
               binding: 'ASSETS',
-              directory: '.blade/dist/',
+              directory: '.blade/dist/public/',
             },
             observability: {
               enabled: true,
@@ -208,8 +202,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const files = await readdir(outputDirectory, { recursive: true });
 
   for (const file of files) {
-    if (file.startsWith('_worker') || file.endsWith('.map')) continue;
-    staticAssets.push(`/${file}`);
+    if (!file.endsWith('.map')) staticAssets.push(`/${file}`);
   }
 
   await Promise.all([
@@ -224,10 +217,10 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
     ),
 
     // Copy chunk files that are shared between client and server into worker.
-    cp(path.join(outputDirectory, 'client'), path.join(edgeFunctionDir, 'client'), {
+    cp(path.join(publicOutputDirectory, 'client'), path.join(edgeFunctionDir, 'client'), {
       recursive: true,
       filter: (source) => {
-        if (source === path.join(outputDirectory, 'client')) return true;
+        if (source === path.join(publicOutputDirectory, 'client')) return true;
         return source.includes('/client/chunk.');
       },
     }),
