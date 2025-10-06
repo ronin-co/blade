@@ -14,8 +14,6 @@ import type { Plugin as RolldownPlugin } from 'rolldown';
 
 import {
   outputDirectory,
-  publicDirectory,
-  publicDirectoryName,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
@@ -37,6 +35,7 @@ import {
 } from '@/private/shell/utils/providers';
 import type { DeploymentProvider } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils';
+import { PUBLIC_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 export const getClientReferenceLoader = (): RolldownPlugin => ({
   name: 'Client Reference Loader',
@@ -265,9 +264,11 @@ export const getProviderLoader = (
   async writeBundle() {
     if (environment !== 'production') return;
 
+    const publicSource = path.join(process.cwd(), PUBLIC_ASSET_PREFIX);
+
     // Copy hard-coded static assets into output directory.
-    if (await exists(publicDirectory)) {
-      await cp(publicDirectory, path.join(outputDirectory, publicDirectoryName), {
+    if (await exists(publicSource)) {
+      await cp(publicSource, path.join(outputDirectory, PUBLIC_ASSET_PREFIX), {
         recursive: true,
       });
     }

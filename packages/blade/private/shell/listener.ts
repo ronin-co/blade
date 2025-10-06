@@ -5,13 +5,12 @@ import chalk from 'chalk';
 import { Hono } from 'hono';
 import { compress } from 'hono/compress';
 
-import {
-  loggingPrefixes,
-  outputDirectoryName,
-  publicDirectoryName,
-} from '@/private/shell/constants';
+import { loggingPrefixes, outputDirectoryName } from '@/private/shell/constants';
 import { polyfillCompressionStream } from '@/private/shell/utils/polyfills';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import {
+  CLIENT_ASSET_PREFIX,
+  PUBLIC_ASSET_PREFIX,
+} from '@/private/universal/utils/constants';
 
 export interface ServerState {
   module?: Promise<{ default: Hono }>;
@@ -52,7 +51,7 @@ export const serve = async (
 
   if (environment === 'development') {
     // Serve files located in the `public` directory.
-    app.use('*', serveStatic({ root: publicDirectoryName }));
+    app.use('*', serveStatic({ root: PUBLIC_ASSET_PREFIX }));
   } else {
     // Source maps should only be accessible during development.
     app.use(`/${CLIENT_ASSET_PREFIX}/:path{.+\\.map}`, async (c) => c.notFound());
@@ -64,7 +63,7 @@ export const serve = async (
     serveStatic({
       // It's extremely important for requests to be scoped to the public output
       // directory, since server code could otherwise be read.
-      root: path.join(outputDirectoryName, publicDirectoryName),
+      root: path.join(outputDirectoryName, PUBLIC_ASSET_PREFIX),
       onFound: (_path, c) => {
         c.header('Cache-Control', 'public, max-age=31536000, immutable');
       },

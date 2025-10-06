@@ -6,8 +6,6 @@ import gradient from 'gradient-string';
 const currentFilePath = fileURLToPath(import.meta.url);
 export const sourceDirPath = dirname(currentFilePath);
 
-export const publicDirectoryName = 'public';
-export const publicDirectory = resolve(process.cwd(), publicDirectoryName);
 export const outputDirectoryName = join('.blade', 'dist');
 export const outputDirectory = resolve(process.cwd(), outputDirectoryName);
 

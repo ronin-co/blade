@@ -1,5 +1,7 @@
-import { publicDirectoryName } from '@/private/shell/constants';
-import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
+import {
+  CLIENT_ASSET_PREFIX,
+  PUBLIC_ASSET_PREFIX,
+} from '@/private/universal/utils/constants';
 
 // This helper takes a link destination (such as `/[space]/settings`) and replaces all
 // the path segments that might already have a value in the current URL. For example, if
@@ -49,5 +51,5 @@ export const getOutputFile = (bundleId: string, ext: 'js' | 'css', chunk?: boole
 };
 
 export const getPublicFile: typeof getOutputFile = (...args) => {
-  return `${publicDirectoryName}/${getOutputFile(...args)}`;
+  return `${PUBLIC_ASSET_PREFIX}/${getOutputFile(...args)}`;
 };
