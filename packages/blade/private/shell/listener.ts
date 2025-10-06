@@ -50,30 +50,21 @@ export const serve = async (
     app.use(compress());
   }
 
-  // In production, the `public` directory is located in `.blade/dist`.
-  const publicRoot =
-    environment === 'production'
-      ? path.join(outputDirectoryName, publicDirectoryName)
-      : publicDirectoryName;
-
-  // Serve files located in the `public` directory.
-  app.use('*', serveStatic({ root: publicRoot }));
-
-  // Source maps should only be accessible during development.
-  if (environment !== 'development') {
+  if (environment === 'development') {
+    // Serve files located in the `public` directory.
+    app.use('*', serveStatic({ root: publicDirectoryName }));
+  } else {
+    // Source maps should only be accessible during development.
     app.use(`/${CLIENT_ASSET_PREFIX}/:path{.+\\.map}`, async (c) => c.notFound());
   }
 
-  const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
-
-  // Serve files located in the `.blade/client` output directory.
+  // Serve files located in the public output directory.
   app.use(
-    `/${CLIENT_ASSET_PREFIX}/*`,
+    '*',
     serveStatic({
-      // It's extremely important for requests to be scoped to the client output.
+      // It's extremely important for requests to be scoped to the public output
       // directory, since server code could otherwise be read.
-      root: path.join(outputDirectoryName, CLIENT_ASSET_PREFIX),
-      rewriteRequestPath: (path) => path.replace(clientPathPrefix, ''),
+      root: path.join(outputDirectoryName, publicDirectoryName),
       onFound: (_path, c) => {
         c.header('Cache-Control', 'public, max-age=31536000, immutable');
       },

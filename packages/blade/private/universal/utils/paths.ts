@@ -1,3 +1,4 @@
+import { publicDirectoryName } from '@/private/shell/constants';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
 
 // This helper takes a link destination (such as `/[space]/settings`) and replaces all
@@ -45,4 +46,8 @@ export const populatePathSegments = (
 
 export const getOutputFile = (bundleId: string, ext: 'js' | 'css', chunk?: boolean) => {
   return `${CLIENT_ASSET_PREFIX}/${chunk ? 'chunk' : 'main'}.${bundleId}.${ext}`;
+};
+
+export const getPublicFile: typeof getOutputFile = (...args) => {
+  return `${publicDirectoryName}/${getOutputFile(...args)}`;
 };

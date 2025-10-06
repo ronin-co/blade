@@ -15,6 +15,7 @@ import type { Plugin as RolldownPlugin } from 'rolldown';
 import {
   outputDirectory,
   publicDirectory,
+  publicDirectoryName,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
@@ -266,7 +267,9 @@ export const getProviderLoader = (
 
     // Copy hard-coded static assets into output directory.
     if (await exists(publicDirectory)) {
-      await cp(publicDirectory, outputDirectory, { recursive: true });
+      await cp(publicDirectory, path.join(outputDirectory, publicDirectoryName), {
+        recursive: true,
+      });
     }
 
     switch (provider) {

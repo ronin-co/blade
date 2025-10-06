@@ -26,7 +26,7 @@ import {
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { generateUniqueId } from '@/private/universal/utils';
-import { getOutputFile } from '@/private/universal/utils/paths';
+import { getOutputFile, getPublicFile } from '@/private/universal/utils/paths';
 
 export interface VirtualFileItem {
   /**
@@ -156,11 +156,11 @@ export const composeBuildContext = async (
         banner: `if(!import.meta.env){import.meta.env={}};import.meta.env.__BLADE_BUNDLE_ID='${bundleId}';`,
         minify: environment === 'production',
         entryFileNames: (chunk) => {
-          if (chunk.name === 'client') return getOutputFile(bundleId, 'js');
+          if (chunk.name === 'client') return getPublicFile(bundleId, 'js');
           return '[name].js';
         },
-        assetFileNames: getOutputFile(bundleId, 'css'),
-        chunkFileNames: getOutputFile(bundleId, 'js', true),
+        assetFileNames: getPublicFile(bundleId, 'css'),
+        chunkFileNames: getPublicFile(bundleId, 'js', true),
       };
 
       try {
