@@ -143,14 +143,12 @@ export const wrapClientExport = (
     if (typeof window === 'undefined' || isNetlify) {
       try {
         let __blade_target = ${localName};
-        // Unwrap memo(...) to its inner type if present
-        if (__blade_target && __blade_target.$$typeof === REACT_MEMO_TYPE) {
-          __blade_target = __blade_target.type;
-        }
-        // Unwrap forwardRef(...) to its render function if present
+
+        // Unwrap forwardRef(...) to its render function if present.
         if (__blade_target && __blade_target.$$typeof === REACT_FORWARD_REF_TYPE) {
           __blade_target = __blade_target.render;
         }
+
         if (typeof __blade_target === 'function') {
           Object.defineProperties(__blade_target, {
             $$typeof: { value: CLIENT_REFERENCE },

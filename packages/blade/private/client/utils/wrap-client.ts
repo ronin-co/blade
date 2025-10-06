@@ -23,12 +23,12 @@ export const wrapClientComponent = (component: Component, name: string) => {
   if (typeof window === 'undefined' || isNetlify) {
     let target: Component | ForwardRefRenderFunction<unknown, unknown> | undefined =
       component;
-    if (target && (target as any).$$typeof === REACT_MEMO_TYPE) {
-      target = (target as any).type as Component;
-    }
+
+    // Unwrap forwardRef(...) to its render function if present.
     if (target && (target as any).$$typeof === REACT_FORWARD_REF_TYPE) {
       target = (target as any).render as unknown as Component;
     }
+
     if (typeof target === 'function') {
       Object.defineProperties(target as object, {
         $$typeof: { value: CLIENT_REFERENCE },
