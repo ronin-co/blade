@@ -6,8 +6,10 @@ import gradient from 'gradient-string';
 const currentFilePath = fileURLToPath(import.meta.url);
 export const sourceDirPath = dirname(currentFilePath);
 
-export const publicDirectory = resolve(process.cwd(), 'public');
-export const outputDirectory = resolve(process.cwd(), '.blade', 'dist');
+export const publicDirectoryName = 'public';
+export const publicDirectory = resolve(process.cwd(), publicDirectoryName);
+export const outputDirectoryName = join('.blade', 'dist');
+export const outputDirectory = resolve(process.cwd(), outputDirectoryName);
 
 export const tsconfigFilename = resolve(process.cwd(), 'tsconfig.json');
 export const packageMetaFilename = resolve(process.cwd(), 'package.json');

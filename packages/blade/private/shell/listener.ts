@@ -7,8 +7,8 @@ import { compress } from 'hono/compress';
 
 import {
   loggingPrefixes,
-  outputDirectory,
-  publicDirectory,
+  outputDirectoryName,
+  publicDirectoryName,
 } from '@/private/shell/constants';
 import { polyfillCompressionStream } from '@/private/shell/utils/polyfills';
 import { CLIENT_ASSET_PREFIX } from '@/private/universal/utils/constants';
@@ -50,15 +50,21 @@ export const serve = async (
     app.use(compress());
   }
 
-  const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
+  // In production, the `public` directory is located in `.blade/dist`.
+  const publicRoot =
+    environment === 'production'
+      ? path.join(outputDirectoryName, publicDirectoryName)
+      : publicDirectoryName;
 
   // Serve files located in the `public` directory.
-  app.use('*', serveStatic({ root: path.basename(publicDirectory) }));
+  app.use('*', serveStatic({ root: publicRoot }));
 
   // Source maps should only be accessible during development.
   if (environment !== 'development') {
     app.use(`/${CLIENT_ASSET_PREFIX}/:path{.+\\.map}`, async (c) => c.notFound());
   }
+
+  const clientPathPrefix = new RegExp(`^\/${CLIENT_ASSET_PREFIX}`);
 
   // Serve files located in the `.blade/client` output directory.
   app.use(
@@ -66,7 +72,7 @@ export const serve = async (
     serveStatic({
       // It's extremely important for requests to be scoped to the client output.
       // directory, since server code could otherwise be read.
-      root: path.join(outputDirectory.replace(process.cwd(), ''), CLIENT_ASSET_PREFIX),
+      root: path.join(outputDirectoryName, CLIENT_ASSET_PREFIX),
       rewriteRequestPath: (path) => path.replace(clientPathPrefix, ''),
       onFound: (_path, c) => {
         c.header('Cache-Control', 'public, max-age=31536000, immutable');
