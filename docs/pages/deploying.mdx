@@ -2,6 +2,16 @@
 title: Deploying
 ---
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 # Deploying
 
 Blade was designed from the ground up to be easy to deploy anywhere. Its build
@@ -16,9 +26,33 @@ blade build
 ```
 
 This command will generate a directory named `.blade/dist/` in the current directory,
-which contains the compiled application. Specifically, the compilation process
-includes bundling dependencies, tree-shaking, eliminating dead code, and
-minfiying it.
+which contains the compiled application. Specifically, the compilation process includes
+bundling dependencies, tree-shaking, eliminating dead code, and minfiying it.
+
+These are the contents of the directory:
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+      <TableHead>Purpose</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>`.blade/dist`</TableCell>
+      <TableCell>All build output</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>`.blade/dist/public`</TableCell>
+      <TableCell>Build output that can be served to visitors</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>`.blade/dist/edge-worker.js`</TableCell>
+      <TableCell>A [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) that can be run on the server</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
 
 ## Providers
 
