@@ -202,7 +202,7 @@ export const transformToNetlifyOutput = async (): Promise<void> => {
   const files = await readdir(publicOutputDirectory, { recursive: true });
 
   for (const file of files) {
-    if (!file.endsWith('.map')) staticAssets.push(`/public/${file}`);
+    if (!file.endsWith('.map')) staticAssets.push(`/${file}`);
   }
 
   await Promise.all([
