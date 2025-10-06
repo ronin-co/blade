@@ -53,7 +53,7 @@ export const serve = async (
     // Serve files located in the `public` directory.
     app.use('*', serveStatic({ root: PUBLIC_ASSET_PREFIX }));
   } else {
-    // Source maps should only be accessible during development.
+    // Source maps should not be accessible in production.
     app.use(`/${CLIENT_ASSET_PREFIX}/:path{.+\\.map}`, async (c) => c.notFound());
   }
 
