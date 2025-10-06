@@ -4,7 +4,7 @@
     "": {
       "name": "advanced-example",
       "dependencies": {
-        "blade": "https://pkg.pr.new/ronin-co/blade@543",
+        "blade": "https://pkg.pr.new/ronin-co/blade@544",
         "react": "19.2.0",
         "react-dom": "19.2.0",
       },
@@ -154,7 +154,7 @@
 
     "ansis": ["ansis@4.2.0", "", {}, "sha512-HqZ5rWlFjGiV0tDm3UxxgNRqsOTniqoKZu0pIAfh7TZQMGuZK+hH0drySty0si0QXj1ieop4+SkSfPZBPPkHig=="],
 
-    "blade": ["blade@https://pkg.pr.new/ronin-co/blade@543", { "dependencies": { "@dprint/typescript": "0.95.11", "@inquirer/prompts": "7.8.6", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "resolve-from": "5.0.0", "rolldown": "1.0.0-beta.41" }, "bin": { "blade": "./dist/private/shell/index.js" } }],
+    "blade": ["blade@https://pkg.pr.new/ronin-co/blade@544", { "dependencies": { "@dprint/typescript": "0.95.11", "@inquirer/prompts": "7.8.6", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "resolve-from": "5.0.0", "rolldown": "1.0.0-beta.41" }, "bin": { "blade": "./dist/private/shell/index.js" } }],
 
     "chalk": ["chalk@5.5.0", "", {}, "sha512-1tm8DTaJhPBG3bIkVeZt1iZM9GfSX2lzOeDVZH9R9ffRHpmHvxZ/QhgQH/aDTkswQVt+YHdXAdS/In/30OjCbg=="],
 
