@@ -54,7 +54,6 @@ export const getClientReferenceLoader = (): RolldownPlugin => ({
       const contents = [
         "const CLIENT_REFERENCE = Symbol.for('react.client.reference');",
         "const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');",
-        "const REACT_MEMO_TYPE = Symbol.for('react.memo');",
         "const isNetlify = typeof Netlify !== 'undefined';",
         '', // Empty line
         rawContents,

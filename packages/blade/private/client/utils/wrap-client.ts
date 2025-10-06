@@ -2,7 +2,6 @@ import type { ComponentType, ExoticComponent, ForwardRefRenderFunction } from 'r
 
 const CLIENT_REFERENCE = Symbol.for('react.client.reference');
 const REACT_FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
-const REACT_MEMO_TYPE = Symbol.for('react.memo');
 
 type Component = ComponentType<any> &
   Partial<ExoticComponent & { render: ForwardRefRenderFunction<unknown, unknown> }>;
