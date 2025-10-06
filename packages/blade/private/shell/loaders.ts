@@ -13,7 +13,7 @@ import MagicString from 'magic-string';
 import type { Plugin as RolldownPlugin } from 'rolldown';
 
 import {
-  outputDirectory,
+  publicOutputDirectory,
   routerInputFile,
   styleInputFile,
 } from '@/private/shell/constants';
@@ -268,7 +268,7 @@ export const getProviderLoader = (
 
     // Copy hard-coded static assets into output directory.
     if (await exists(publicSource)) {
-      await cp(publicSource, path.join(outputDirectory, PUBLIC_ASSET_PREFIX), {
+      await cp(publicSource, publicOutputDirectory, {
         recursive: true,
       });
     }
