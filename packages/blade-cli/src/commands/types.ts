@@ -6,7 +6,6 @@ import { generateZodSchema } from 'blade-codegen/zod';
 import { CompilerError } from 'blade-compiler';
 
 import { BLADE_CONFIG_DIR, type BaseFlags, getModelDefinitions } from '@/src/utils/misc';
-import { getModels } from '@/src/utils/model';
 import { spinner as ora } from '@/src/utils/spinner';
 import {
   TYPES_DTS_FILE_NAME,
@@ -35,8 +34,8 @@ export default async (flags: TypesFlags, positionals: Array<string>): Promise<vo
     if (!configDirExists) await fs.mkdir(configDir);
 
     const modelsInCodePath =
-      positionals[positionals.indexOf('diff') + 1] &&
-      path.join(process.cwd(), positionals[positionals.indexOf('diff') + 1]);
+      positionals[positionals.indexOf('types') + 1] &&
+      path.join(process.cwd(), positionals[positionals.indexOf('types') + 1]);
 
     const models = (await getModelDefinitions(modelsInCodePath)) as Parameters<
       typeof generateZodSchema
