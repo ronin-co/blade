@@ -572,6 +572,7 @@ class Transaction {
 // Expose model types
 export type {
   PublicModel as Model,
+  Model as PopulatedModel,
   ModelField,
   ModelIndex,
   ModelPreset,

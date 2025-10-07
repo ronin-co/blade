@@ -756,7 +756,7 @@ describe('CLI', () => {
     test('generate zod schema', async () => {
       process.argv = ['bun', 'blade', 'types', '--zod'];
 
-      spyOn(modelModule, 'getModels').mockResolvedValue([
+      spyOn(miscModule, 'getModelDefinitions').mockResolvedValue([
         {
           slug: 'test',
           fields: {

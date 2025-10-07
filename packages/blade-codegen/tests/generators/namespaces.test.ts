@@ -13,7 +13,7 @@ import {
 import { generateNamespaces } from '@/src/generators/namespaces';
 import { printNodes } from '@/src/utils/print';
 
-import type { Model } from '@/src/types/model';
+import type { PopulatedModel as Model } from 'blade-compiler';
 
 describe('namespaces', () => {
   test('with a basic model', () => {

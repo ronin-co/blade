@@ -85,7 +85,7 @@ export const run = async (config: { version: string }): Promise<void> => {
   }
 
   // `types` sub command.
-  if (normalizedPositionals.includes('types')) return generateTypes(appToken, flags);
+  if (normalizedPositionals.includes('types')) return generateTypes(flags, positionals);
 
   // `pull` sub command
   if (normalizedPositionals.includes('pull')) {

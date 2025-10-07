@@ -27,34 +27,6 @@ export type Accounts = Array<Account> & {
 "
 `;
 
-exports[`model a model with a summary 1`] = `
-"export interface TriggerOptions {
-    client: {
-        add: Syntax.AddQuery;
-        batch: any;
-        count: any;
-        get: Syntax.GetQuery;
-        remove: Syntax.RemoveQuery;
-        set: Syntax.SetQuery;
-    };
-}
-/**
- * A user account.
- */
-export type Account = Utils.ResultRecord & {
-    email: string;
-    name: string;
-};
-/**
- * A user account.
- */
-export type Accounts = Array<Account> & {
-    moreBefore?: string;
-    moreAfter?: string;
-};
-"
-`;
-
 exports[`model a model with an invalid field type 1`] = `
 "export interface TriggerOptions {
     client: {
@@ -174,9 +146,6 @@ exports[`model a model with nested fields 1`] = `
         set: Syntax.SetQuery;
     };
 }
-/**
- * A user account.
- */
 export type Account = Utils.ResultRecord & {
     name: string;
     nested: {
@@ -184,9 +153,6 @@ export type Account = Utils.ResultRecord & {
         foo: string;
     };
 };
-/**
- * A user account.
- */
 export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;

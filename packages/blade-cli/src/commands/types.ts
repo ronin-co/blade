@@ -3,10 +3,9 @@ import path from 'node:path';
 import type { parseArgs } from 'node:util';
 import { generate } from 'blade-codegen';
 import { generateZodSchema } from 'blade-codegen/zod';
-import { CompilerError } from 'blade-compiler';
+import { CompilerError, Transaction } from 'blade-compiler';
 
-import { BLADE_CONFIG_DIR, type BaseFlags } from '@/src/utils/misc';
-import { getModels } from '@/src/utils/model';
+import { BLADE_CONFIG_DIR, type BaseFlags, getModelDefinitions } from '@/src/utils/misc';
 import { spinner as ora } from '@/src/utils/spinner';
 import {
   TYPES_DTS_FILE_NAME,
@@ -23,10 +22,7 @@ export const TYPES_FLAGS = {
 
 export type TypesFlags = BaseFlags & Partial<Record<keyof typeof TYPES_FLAGS, boolean>>;
 
-export default async (
-  appToken: string | undefined,
-  flags?: TypesFlags,
-): Promise<void> => {
+export default async (flags: TypesFlags, positionals: Array<string>): Promise<void> => {
   const spinner = ora.info(flags?.zod ? 'Generating Zod schemas' : 'Generating types');
 
   try {
@@ -37,10 +33,13 @@ export default async (
       .catch(() => false);
     if (!configDirExists) await fs.mkdir(configDir);
 
-    const models = (await getModels({
-      token: appToken,
-      fieldArray: false,
-    })) as Parameters<typeof generateZodSchema>[0];
+    const modelsInCodePath =
+      positionals[positionals.indexOf('types') + 1] &&
+      path.join(process.cwd(), positionals[positionals.indexOf('types') + 1]);
+
+    const rawModels = await getModelDefinitions(modelsInCodePath);
+    const { models: modelsWithDefaults } = new Transaction([], { models: rawModels });
+    const models = modelsWithDefaults.filter((item) => !item.system);
 
     if (flags?.zod) {
       const zodSchemas = generateZodSchema(models);

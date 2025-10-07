@@ -1,3 +1,3 @@
-import type { DML_QUERY_TYPES } from 'blade-compiler';
+import type { QueryType as BaseQueryType } from 'blade-compiler';
 
-export type QueryType = (typeof DML_QUERY_TYPES)[number] | 'use';
+export type QueryType = BaseQueryType | 'use';

@@ -2,9 +2,9 @@ import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers } from '@/src/constants/identifiers';
 
+import type { ModelField } from 'blade-compiler';
 import type { TypeNode } from 'typescript';
 
-import type { ModelField } from '@/src/types/model';
 import type { QueryType } from '@/src/types/query';
 
 /**
@@ -21,7 +21,7 @@ export const MODEL_TYPE_TO_SYNTAX_KIND_KEYWORD = {
   link: factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
   number: factory.createKeywordTypeNode(SyntaxKind.NumberKeyword),
   string: factory.createKeywordTypeNode(SyntaxKind.StringKeyword),
-} satisfies Record<ModelField['type'], TypeNode>;
+} satisfies Record<NonNullable<ModelField['type']>, TypeNode>;
 
 /**
  * A simple object mapping all DML query types to their human readable string.

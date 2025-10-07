@@ -67,7 +67,7 @@ if (isApplying) await cmdApply(appToken, values);
 // `blade types` command.
 const isGeneratingTypes = normalizedPositionals.includes('types');
 if (isGeneratingTypes) {
-  await cmdTypes(appToken, values);
+  await cmdTypes(values, positionals);
   process.exit(0);
 }
 

@@ -4,10 +4,8 @@ import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifier
 import { MODEL_TYPE_TO_SYNTAX_KIND_KEYWORD } from '@/src/constants/schema';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { ModelField } from 'blade-compiler';
+import type { ModelField, PopulatedModel } from 'blade-compiler';
 import type { TypeNode } from 'typescript';
-
-import type { Model } from '@/src/types/model';
 
 /**
  * Map a RONIN model field to a TypeScript type node.
@@ -19,7 +17,7 @@ import type { Model } from '@/src/types/model';
  */
 export const mapRoninFieldToTypeNode = (
   field: ModelField,
-  models: Array<Model>,
+  models: Array<PopulatedModel>,
 ): Array<TypeNode> => {
   const propertyUnionTypes = new Array<TypeNode>();
 

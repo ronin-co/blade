@@ -1,7 +1,7 @@
 import { READABLE_DML_QUERY_TYPES } from '@/src/constants/schema';
 
-import type { Model } from '@/src/types/model';
 import type { QueryType } from '@/src/types/query';
+import type { PopulatedModel } from 'blade-compiler';
 
 interface GenerateQueryTypeCommentResult {
   singular: string;
@@ -17,7 +17,7 @@ interface GenerateQueryTypeCommentResult {
  * @returns An object containing both the singular and plural comment strings.
  */
 export const generateQueryTypeComment = (
-  model: Model,
+  model: PopulatedModel,
   queryType: QueryType,
 ): GenerateQueryTypeCommentResult => ({
   singular: `* ${READABLE_DML_QUERY_TYPES[queryType]} a single ${model.name ?? model.slug} record `,

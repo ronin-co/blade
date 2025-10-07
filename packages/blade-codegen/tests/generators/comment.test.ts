@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { generateQueryTypeComment } from '@/src/generators/comment';
-
-import type { Model } from '@/src/types/model';
+import type { PopulatedModel as Model } from 'blade-compiler';
 
 describe('comment', () => {
   describe('add', () => {
