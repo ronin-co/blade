@@ -7,7 +7,7 @@ import {
   SetNotAllowedError,
   TooManyRequestsError,
 } from 'blade/server/errors';
-import type { Account, AddTrigger, RemoveTrigger, SetTrigger } from 'blade/types';
+import type { Account, AddTrigger, SetTrigger } from 'blade/types';
 
 import {
   EMAIL_VERIFICATION_COOLDOWN,
@@ -30,8 +30,6 @@ export const add: AddTrigger = async (query) => {
 
   return query;
 };
-
-export const remove: RemoveTrigger = (query) => query;
 
 export const set: WithAuthOptions<SetTrigger> = async (
   query,
