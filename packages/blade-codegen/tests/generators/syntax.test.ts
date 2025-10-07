@@ -6,7 +6,7 @@ import { generateUsingSyntax, generateWithSyntax } from '@/src/generators/syntax
 import { printNodes } from '@/src/utils/print';
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { Model } from '@/src/types/model';
+import type { PopulatedModel as Model } from 'blade-compiler';
 
 describe('syntax', () => {
   describe('using', () => {

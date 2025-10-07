@@ -40,29 +40,6 @@ describe('model', () => {
     expect(typesResultStr).toMatchSnapshot();
   });
 
-  test('a model with a summary', () => {
-    const AccountModel = model({
-      slug: 'account',
-      pluralSlug: 'accounts',
-      fields: {
-        name: string(),
-        email: string({ required: true }),
-      },
-      // @ts-expect-error This property is not native to RONIN models.
-      summary: 'A user account.',
-    });
-
-    // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.
-    // @ts-expect-error Codegen models types differ from the schema model types.
-    const typesResult = generateModelTypes([AccountModel], AccountModel);
-
-    expect(typesResult).toHaveLength(3);
-
-    const typesResultStr = printNodes(typesResult);
-
-    expect(typesResultStr).toMatchSnapshot();
-  });
-
   test('a model with an invalid field type', () => {
     const field = string();
 
@@ -179,8 +156,6 @@ describe('model', () => {
         'nested.foo': string(),
         'nested.bar': number(),
       },
-      // @ts-expect-error This property is not native to RONIN models.
-      summary: 'A user account.',
     });
 
     // TODO(@nurodev): Refactor the `Model` type to be more based on current schema models.

@@ -76,7 +76,7 @@ export default async (
     spinner.succeed('Successfully applied migration');
 
     // If desired, generate new TypeScript types.
-    if (!flags['skip-types']) await types(appToken);
+    if (!flags['skip-types']) await types(flags, []);
 
     process.exit(0);
   } catch (err) {
