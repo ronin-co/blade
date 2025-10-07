@@ -6,9 +6,8 @@ import { generateQueryTypeComment } from '@/src/generators/comment';
 import { generateUsingSyntax, generateWithSyntax } from '@/src/generators/syntax';
 import { convertToPascalCase } from '@/src/utils/slug';
 
+import type { PopulatedModel } from 'blade-compiler';
 import type { Statement, TypeAliasDeclaration } from 'typescript';
-
-import type { Model } from '@/src/types/model';
 
 /**
  * Generate syntax namespaces for each model.
@@ -34,7 +33,7 @@ import type { Model } from '@/src/types/model';
  *
  * @returns Array of module declarations representing the namespaces.
  */
-export const generateNamespaces = (models: Array<Model>): Array<Statement> => {
+export const generateNamespaces = (models: Array<PopulatedModel>): Array<Statement> => {
   const moduleDeclarations = new Array<Statement>();
 
   /**

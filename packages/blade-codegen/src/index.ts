@@ -36,9 +36,8 @@ import { generateNamespaces } from '@/src/generators/namespaces';
 import { printNodes } from '@/src/utils/print';
 import { convertToPascalCase } from '@/src/utils/slug';
 
+import type { PopulatedModel } from 'blade-compiler';
 import type { Node, TypeAliasDeclaration } from 'typescript';
-
-import type { Model } from '@/src/types/model';
 
 /**
  * Generates the complete `index.d.ts` file for a list of RONIN models.
@@ -47,7 +46,7 @@ import type { Model } from '@/src/types/model';
  *
  * @returns A string of the complete `index.d.ts` file.
  */
-export const generate = (models: Array<Model>): string => {
+export const generate = (models: Array<PopulatedModel>): string => {
   // Each node represents any kind of "block" like
   // an import statement, interface, namespace, etc.
   const nodes = new Array<Node>(importBladeCompilerQueryTypesType, importBladeUtilsType);

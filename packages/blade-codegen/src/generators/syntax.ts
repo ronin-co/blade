@@ -7,7 +7,7 @@ import { convertToPascalCase } from '@/src/utils/slug';
 
 import type { IntersectionTypeNode, TypeAliasDeclaration, TypeNode } from 'typescript';
 
-import type { Model } from '@/src/types/model';
+import type { PopulatedModel } from 'blade-compiler';
 
 /**
  * Generate the syntax for a `using` query.
@@ -20,7 +20,7 @@ import type { Model } from '@/src/types/model';
  * @returns An IntersectionTypeNode representing the `using` syntax.
  */
 export const generateUsingSyntax = (
-  model: Model,
+  model: PopulatedModel,
   modelNode: TypeNode,
   promise: boolean,
   plural: boolean,
@@ -179,7 +179,7 @@ export const generateUsingSyntax = (
  * @returns A TypeAliasDeclaration representing the `with` syntax.
  */
 export const generateWithSyntax = (
-  model: Model,
+  model: PopulatedModel,
   modelNode: TypeNode,
   promise: boolean,
 ): TypeAliasDeclaration => {

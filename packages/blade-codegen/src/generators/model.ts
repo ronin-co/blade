@@ -1,4 +1,4 @@
-import { SyntaxKind, addSyntheticLeadingComment, factory } from 'typescript';
+import { SyntaxKind, factory } from 'typescript';
 
 import { identifiers, typeArgumentIdentifiers } from '@/src/constants/identifiers';
 import { DEFAULT_FIELD_SLUGS } from '@/src/constants/schema';
@@ -8,7 +8,8 @@ import { mapRoninFieldToTypeNode, remapNestedFields } from '@/src/utils/types';
 
 import type { TypeAliasDeclaration, TypeParameterDeclaration } from 'typescript';
 
-import type { Model, ModelField } from '@/src/types/model';
+import type { ModelField } from '@/src/types/model';
+import type { PopulatedModel } from 'blade-compiler';
 
 /**
  * Generate all required type definitions for a provided schema model.
@@ -20,7 +21,9 @@ import type { Model, ModelField } from '@/src/types/model';
  *
  * @returns An array of type nodes to be added to the `index.d.ts` file.
  */
-export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclaration> => {
+export const generateModelTypes = (
+  models: Array<PopulatedModel>,
+): Array<TypeAliasDeclaration> => {
   const nodes = new Array<TypeAliasDeclaration>(triggerOptionsInterface);
 
   for (const model of models) {
@@ -181,27 +184,7 @@ export const generateModelTypes = (models: Array<Model>): Array<TypeAliasDeclara
       ]),
     );
 
-    // If the model does not have a summary / description
-    // then we can continue to the next iteration & not add any comments.
-    if (!model.summary) {
-      nodes.push(singularModelTypeDec, pluralModelTypeDec);
-      continue;
-    }
-
-    nodes.push(
-      addSyntheticLeadingComment(
-        singularModelTypeDec,
-        SyntaxKind.MultiLineCommentTrivia,
-        `*\n * ${model.summary}\n `,
-        true,
-      ),
-      addSyntheticLeadingComment(
-        pluralModelTypeDec,
-        SyntaxKind.MultiLineCommentTrivia,
-        `*\n * ${model.summary}\n `,
-        true,
-      ),
-    );
+    nodes.push(singularModelTypeDec, pluralModelTypeDec);
   }
 
   return nodes;
