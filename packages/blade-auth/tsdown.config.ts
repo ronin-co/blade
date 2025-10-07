@@ -1,12 +1,9 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
+  entry: ['./src/triggers/*.ts', './src/schema.ts'],
   dts: {
     resolve: true,
   },
-  entry: {
-    index: './src/index.ts',
-  },
-  external: ['blade-client'],
   format: 'esm',
 });

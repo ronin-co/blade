@@ -1,6 +1,0 @@
-[test]
-coverage = true
-coverageReporter = ["text", "lcov"]
-
-[install]
-exact = true
