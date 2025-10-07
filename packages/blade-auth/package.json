@@ -3,9 +3,6 @@
   "version": "3.18.34",
   "type": "module",
   "description": "Easily set up auth for Blade apps",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "repository": {
     "directory": "packages/blade-auth",
     "url": "ronin-co/blade",
@@ -17,6 +14,20 @@
   "files": [
     "dist"
   ],
+  "exports": {
+    "./triggers/*": "./dist/triggers/*.js",
+    "./schema": "./dist/schema.js"
+  },
+  "typesVersions": {
+    "*": {
+      "triggers/*": [
+        "./dist/triggers/*"
+      ],
+      "schema": [
+        "./dist/schema"
+      ]
+    }
+  },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
