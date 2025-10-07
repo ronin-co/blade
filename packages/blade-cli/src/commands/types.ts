@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { parseArgs } from 'node:util';
 import { generate } from 'blade-codegen';
 import { generateZodSchema } from 'blade-codegen/zod';
-import { CompilerError } from 'blade-compiler';
+import { CompilerError, Transaction } from 'blade-compiler';
 
 import { BLADE_CONFIG_DIR, type BaseFlags, getModelDefinitions } from '@/src/utils/misc';
 import { spinner as ora } from '@/src/utils/spinner';
@@ -37,9 +37,9 @@ export default async (flags: TypesFlags, positionals: Array<string>): Promise<vo
       positionals[positionals.indexOf('types') + 1] &&
       path.join(process.cwd(), positionals[positionals.indexOf('types') + 1]);
 
-    const models = (await getModelDefinitions(modelsInCodePath)) as Parameters<
-      typeof generateZodSchema
-    >[0];
+    const rawModels = await getModelDefinitions(modelsInCodePath);
+    const { models: modelsWithDefaults } = new Transaction([], { models: rawModels });
+    const models = modelsWithDefaults.filter((item) => !item.system);
 
     if (flags?.zod) {
       const zodSchemas = generateZodSchema(models);
