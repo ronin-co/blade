@@ -7,5 +7,8 @@ export {
   RecordNotFoundError,
   TooManyRequestsError,
   InvalidPermissionsError,
+  AddNotAllowedError,
+  SetNotAllowedError,
+  RemoveNotAllowedError,
   MultipleWithInstructionsError,
 } from 'blade-client/utils';
