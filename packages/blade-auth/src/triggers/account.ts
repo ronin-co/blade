@@ -15,6 +15,7 @@ import {
   avoidEmptyFields,
   generateUniqueId,
 } from '@/utils/index';
+import type { WithAuthOptions } from '@/utils/types';
 
 export const add: AddTrigger = async (query) => {
   // @ts-expect-error - Types need to be improved.
@@ -32,9 +33,13 @@ export const add: AddTrigger = async (query) => {
 
 export const remove: RemoveTrigger = (query) => query;
 
-export const set: SetTrigger = async (query, _multiple, options) => {
+export const set: WithAuthOptions<SetTrigger> = async (
+  query,
+  _multiple,
+  options,
+  auth,
+) => {
   const { get } = options.client;
-  const { origin } = options.location;
 
   if (!query.with) throw new Error('A `with` instruction must be given.');
   if (!query.to) throw new Error('A `to` instruction must be given.');
@@ -175,32 +180,14 @@ export const set: SetTrigger = async (query, _multiple, options) => {
     const verificationToken = generateUniqueId(24);
 
     if (operation === 'PASSWORD_RESET') {
-      const { city, region, country, latitude, longitude, timeZone } =
-        options.navigator.geoLocation;
-
-      await sendMail({
-        from: RONIN_SYSTEM,
-        reply_to: [RONIN_CARE],
-        to: [account.email],
-        subject: 'Your Password Reset Request',
-        html: renderMail(PasswordResetEmail, {
-          firstName: account.firstName,
-          resetUrl: `${origin}/login/reset-password?token=${verificationToken}`,
-          location: { city, region, country, latitude, longitude, timeZone },
-        }),
-      });
+      await auth.sendEmail({ account, type: 'PASSWORD_RESET', token: verificationToken });
     }
 
     if (operation === 'EMAIL_VERIFICATION_RESEND') {
-      await sendMail({
-        from: RONIN_SYSTEM,
-        reply_to: [RONIN_CARE],
-        to: [account.email],
-        subject: 'Please Verify Your Email Address',
-        html: renderMail(AccountVerificationEmail, {
-          firstName: account.firstName,
-          confirmationUrl: `${origin}/new?token=${verificationToken}`,
-        }),
+      await auth.sendEmail({
+        account,
+        type: 'EMAIL_VERIFICATION',
+        token: verificationToken,
       });
     }
 
