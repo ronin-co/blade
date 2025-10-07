@@ -47,6 +47,7 @@ type EventCallback = ({ data, id }: { data: string; id: string }) => void;
 interface EventStream {
   addEventListener: (type: string, callback: EventCallback) => void;
   subscribed: boolean;
+  startReading: () => void;
 }
 
 let SUBSCRIPTIONS = new Array<ReadableStreamDefaultReader>();
@@ -108,8 +109,7 @@ export const createStreamSource = async (
     return (listeners.get(type) || []).forEach((cb) => cb({ data, id }));
   };
 
-  // Start reading the stream, but don't block the execution of the current scope.
-  (async () => {
+  const startReading = async () => {
     try {
       while (true) {
         const { value, done } = await reader.read();
@@ -140,7 +140,7 @@ export const createStreamSource = async (
     } finally {
       reader.releaseLock();
     }
-  })();
+  };
 
   return {
     addEventListener: (type: string, callback: EventCallback) => {
@@ -148,6 +148,7 @@ export const createStreamSource = async (
       listeners.get(type)!.push(callback);
     },
     subscribed: subscribe,
+    startReading,
   };
 };
 
@@ -220,6 +221,9 @@ export const fetchPage = async (
       const serverBundleId = event.id.split('-').pop() as string;
       mountNewBundle(serverBundleId, event.data);
     });
+
+    // Once the event listeners are assigned, start reading the stream.
+    stream.startReading();
   });
 };
 
