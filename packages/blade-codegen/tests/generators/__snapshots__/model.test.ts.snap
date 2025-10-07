@@ -146,9 +146,6 @@ exports[`model a model with nested fields 1`] = `
         set: Syntax.SetQuery;
     };
 }
-/**
- * A user account.
- */
 export type Account = Utils.ResultRecord & {
     name: string;
     nested: {
@@ -156,9 +153,6 @@ export type Account = Utils.ResultRecord & {
         foo: string;
     };
 };
-/**
- * A user account.
- */
 export type Accounts = Array<Account> & {
     moreBefore?: string;
     moreAfter?: string;
