@@ -180,11 +180,15 @@ export const set: WithAuthOptions<SetTrigger> = async (
     const verificationToken = generateUniqueId(24);
 
     if (operation === 'PASSWORD_RESET') {
-      await auth.sendEmail({ account, type: 'PASSWORD_RESET', token: verificationToken });
+      await auth.sendEmail?.({
+        account,
+        type: 'PASSWORD_RESET',
+        token: verificationToken,
+      });
     }
 
     if (operation === 'EMAIL_VERIFICATION_RESEND') {
-      await auth.sendEmail({
+      await auth.sendEmail?.({
         account,
         type: 'EMAIL_VERIFICATION',
         token: verificationToken,

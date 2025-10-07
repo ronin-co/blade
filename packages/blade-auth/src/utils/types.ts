@@ -8,7 +8,7 @@ type EmailType = 'PASSWORD_RESET' | 'EMAIL_VERIFICATION';
 type EmailOptions = { account: Account; type: EmailType; token: string };
 
 interface AuthOptions {
-  sendEmail: (options: EmailOptions) => Promise<void>;
+  sendEmail?: (options: EmailOptions) => Promise<void>;
 }
 
 export type WithAuthOptions<Trigger> = AppendArg<Trigger, AuthOptions>;
