@@ -144,13 +144,11 @@ export const set: SetTrigger = async (query, _multiple, options) => {
       throw new RecordNotFoundError({ fields: ['email'] });
     }
 
-    if (operation === 'EMAIL_VERIFICATION_RESEND') {
-      // Abort if the account already has a verified email address.
-      if (account.emailVerified) {
-        throw new SetNotAllowedError({
-          message: 'This account already has a verified email address.',
-        });
-      }
+    // Abort if the account already has a verified email address.
+    if (operation === 'EMAIL_VERIFICATION_RESEND' && account.emailVerified) {
+      throw new SetNotAllowedError({
+        message: 'This account already has a verified email address.',
+      });
     }
 
     const newDate = query.to.emailVerificationSentAt

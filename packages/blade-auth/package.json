@@ -44,6 +44,7 @@
     "typescript": "5.8.3"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "2.2.2",
     "bcryptjs": "3.0.2"
   }
 }
