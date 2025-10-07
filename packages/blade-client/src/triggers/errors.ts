@@ -127,6 +127,42 @@ class InvalidPermissionsError extends TriggerError {
   }
 }
 
+class AddNotAllowedError extends TriggerError {
+  constructor(details?: ErrorDetails) {
+    super({
+      name: 'AddNotAllowedError',
+      message:
+        details?.message ||
+        'Queries of type "add" are not supported for the provided schema.',
+      code: 'INVALID_QUERY_TYPE',
+    });
+  }
+}
+
+class SetNotAllowedError extends TriggerError {
+  constructor(details?: ErrorDetails) {
+    super({
+      name: 'SetNotAllowedError',
+      message:
+        details?.message ||
+        'Queries of type "set" are not supported for the provided schema.',
+      code: 'INVALID_QUERY_TYPE',
+    });
+  }
+}
+
+class RemoveNotAllowedError extends TriggerError {
+  constructor(details?: ErrorDetails) {
+    super({
+      name: 'RemoveNotAllowedError',
+      message:
+        details?.message ||
+        'Queries of type "remove" are not supported for the provided schema.',
+      code: 'INVALID_QUERY_TYPE',
+    });
+  }
+}
+
 class MultipleWithInstructionsError extends TriggerError {
   constructor() {
     super({
@@ -147,5 +183,8 @@ export {
   RecordNotFoundError,
   TooManyRequestsError,
   InvalidPermissionsError,
+  AddNotAllowedError,
+  SetNotAllowedError,
+  RemoveNotAllowedError,
   MultipleWithInstructionsError,
 };
