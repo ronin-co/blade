@@ -6,10 +6,8 @@ import { triggerOptionsInterface } from '@/src/declarations';
 import { convertToPascalCase } from '@/src/utils/slug';
 import { mapRoninFieldToTypeNode, remapNestedFields } from '@/src/utils/types';
 
-import type { PopulatedModel } from 'blade-compiler';
+import type { ModelField, PopulatedModel } from 'blade-compiler';
 import type { TypeAliasDeclaration, TypeParameterDeclaration } from 'typescript';
-
-import type { ModelField } from '@/src/types/model';
 
 /**
  * Generate all required type definitions for a provided schema model.
