@@ -1,8 +1,6 @@
 import { convertToPascalCase } from '@/src/utils/slug';
 
-import type { ModelField } from 'blade-compiler';
-
-import type { Model } from '@/src/types/model';
+import type { ModelField, PopulatedModel } from 'blade-compiler';
 
 type ModelFieldType = Required<ModelField>['type'];
 
@@ -41,7 +39,7 @@ const ${ZOD_FIELD_TYPES.json}: z.ZodType<Json> = z.lazy(() =>
  *
  * @returns A string of the complete `index.ts` file.
  */
-export const generateZodSchema = (models: Array<Model>): string => {
+export const generateZodSchema = (models: Array<PopulatedModel>): string => {
   const lines = new Array<string | null>('import { z } from "zod";\n');
 
   // If no models are provided, an empty export is needed to avoid errors.
