@@ -31,5 +31,8 @@
   "devDependencies": {
     "tsdown": "0.15.5",
     "typescript": "5.8.3"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.2"
   }
 }
