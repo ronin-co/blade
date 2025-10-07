@@ -16,7 +16,6 @@ interface BaseModel {
     createdAt: Date;
     updatedAt: Date;
   };
-  summary?: string;
 }
 
 export type Model = Omit<RecursiveRequired<PartialModel>, 'identifiers'> & BaseModel;
