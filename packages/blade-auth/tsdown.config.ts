@@ -5,8 +5,7 @@ export default defineConfig({
     resolve: true,
   },
   entry: {
-    index: './src/index.ts',
+    index: 'src/index.ts',
   },
-  external: ['blade-client'],
   format: 'esm',
 });

@@ -1,0 +1,35 @@
+{
+  "name": "blade-auth",
+  "version": "3.18.34",
+  "type": "module",
+  "description": "Easily set up auth for Blade apps",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "directory": "packages/blade-auth",
+    "url": "ronin-co/blade",
+    "type": "git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --pretty"
+  },
+  "keywords": [
+    "blade",
+    "auth"
+  ],
+  "author": "ronin",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "tsdown": "0.15.5",
+    "typescript": "5.8.3"
+  }
+}
