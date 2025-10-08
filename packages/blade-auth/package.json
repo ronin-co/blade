@@ -45,6 +45,6 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "bcryptjs": "3.0.2"
+    "better-auth": "1.3.27"
   }
 }

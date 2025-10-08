@@ -36,5 +36,4 @@ export const avoidEmptyFields = (
  */
 export const generateUniqueId = (length = 24): string => init({ length })();
 
-export const PASSWORD_HASH_LENGTH = 10;
 export const EMAIL_VERIFICATION_COOLDOWN = 20_000; // 20s

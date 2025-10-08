@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import { hashPassword, verifyPassword } from 'better-auth/crypto';
 import {
   EmptyFieldsError,
   InvalidFieldsError,
@@ -11,17 +11,18 @@ import type { Account, AddTrigger, SetTrigger } from 'blade/types';
 
 import {
   EMAIL_VERIFICATION_COOLDOWN,
-  PASSWORD_HASH_LENGTH,
   avoidEmptyFields,
   generateUniqueId,
 } from '@/utils/index';
 import type { WithAuthOptions } from '@/utils/types';
 
 export const add: AddTrigger = async (query) => {
-  // @ts-expect-error - Types need to be improved.
+  if (!query.with) throw new Error('A `with` instruction must be given.');
+
+  if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
+
   Object.assign(query.with, {
-    // @ts-expect-error - Types need to be improved.
-    password: await bcrypt.hash(query.with.password, PASSWORD_HASH_LENGTH),
+    password: await hashPassword(query.with.password as string),
 
     emailVerified: false,
     emailVerificationToken: generateUniqueId(24),
@@ -222,7 +223,10 @@ export const set: WithAuthOptions<SetTrigger> = async (
             // to compare the passwords, because in that case the password is being reset
             // (the old password is not known in such a case).
             (query.with?.emailVerificationToken ||
-              (await bcrypt.compare(match.password || '', currentPassword as string)))
+              (await verifyPassword({
+                hash: match.password || '',
+                password: currentPassword as string,
+              })))
           )
         )
       ) {
@@ -230,9 +234,8 @@ export const set: WithAuthOptions<SetTrigger> = async (
       }
     }
 
-    query.to.password = await bcrypt.hash(
-      query.to.password as string,
-      PASSWORD_HASH_LENGTH,
+    query.to.password = await hashPassword(
+      query.to.password as string
     );
   } else {
     // Don't allow writing `password` unless a password change was requested.
