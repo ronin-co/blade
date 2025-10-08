@@ -82,13 +82,10 @@ export const validateDefaults = (options: QueryHandlerOptions = {}) => {
   if (!options.token) {
     const token = import.meta?.env?.RONIN_TOKEN || process?.env?.RONIN_TOKEN;
 
-    if (!token || token === 'undefined') {
-      const message =
-        typeof process === 'undefined'
-          ? 'When invoking Blade from an edge runtime, the `token` option must be set.'
-          : 'Please specify the `RONIN_TOKEN` environment variable.';
-
-      throw new Error(message);
+    if ((!token || token === 'undefined') && typeof process === 'undefined') {
+      throw new Error(
+        'When invoking Blade from an edge runtime, the `token` option must be set.',
+      );
     }
 
     options.token = token;
@@ -97,13 +94,10 @@ export const validateDefaults = (options: QueryHandlerOptions = {}) => {
   if (!options.database) {
     const database = import.meta?.env?.RONIN_ID || process?.env?.RONIN_ID;
 
-    if (!database || database === 'undefined') {
-      const message =
-        typeof process === 'undefined'
-          ? 'When invoking Blade from an edge runtime, the `database` option must be set.'
-          : 'Please specify the `RONIN_ID` environment variable.';
-
-      throw new Error(message);
+    if ((!database || database === 'undefined') && typeof process === 'undefined') {
+      throw new Error(
+        'When invoking Blade from an edge runtime, the `database` option must be set.',
+      );
     }
 
     options.database = database;

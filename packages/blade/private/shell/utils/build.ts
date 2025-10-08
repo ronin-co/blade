@@ -122,7 +122,7 @@ export const composeBuildContext = async (
       },
     },
 
-    external: [...(packageMetaContent?.blade?.external || []), 'undici'],
+    external: [...(packageMetaContent?.blade?.external || []), 'hive/disk-storage'],
 
     plugins: [
       getFileListLoader(options?.virtualFiles),

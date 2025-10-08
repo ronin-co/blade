@@ -7,10 +7,8 @@ import {
   Transaction,
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
-// import { RemoteStorage } from 'hive/remote-storage';
-import { DiskStorage } from 'hive/disk-storage';
+import { RemoteStorage } from 'hive/remote-storage';
 import type { RowValues } from 'hive/sdk/transaction';
-import type { Agent as AgentClass } from 'undici';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
 import { runQueriesWithTriggers } from '@/src/triggers';
@@ -21,17 +19,6 @@ import type {
   RegularFormattedResult,
 } from '@/src/types/utils';
 import { formatDateFields, validateDefaults } from '@/src/utils/helpers';
-
-let Agent: typeof AgentClass | undefined;
-
-// Skip it on workers for now.
-if (typeof process !== 'undefined') {
-  try {
-    ({ Agent } = await import('undici'));
-  } catch (_err) {
-    // It's fine if the package is not installed.
-  }
-}
 
 export interface QueryPerDatabase {
   query: Query;
@@ -50,36 +37,46 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
-// const dispatcher = Agent
-//   ? new Agent({ connections: 1, maxConcurrentStreams: 1, pipelining: 1 })
-//   : undefined;
-
-// const fetchWithDispatcher: typeof fetch = (input, init) => {
-//   return fetch(input, { ...init, dispatcher });
-// };
-
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
 ) => {
   const { token, database, stream } = options;
-  const key = `${token}${stream ? `-${stream}` : ''}`;
+  const key = `${token || 'local'}${stream ? `-${stream}` : ''}`;
 
   if (!clients[key]) {
-    const prefix = stream ? 'db-leader' : 'db';
+    // If a token is available, initiate a connection to the remote storage.
+    if (token) {
+      const prefix = stream ? 'db-leader' : 'db';
 
-    clients[key] = new Hive({
-      // storage: new RemoteStorage({
-      //   remote: `https://${prefix}.ronin.co/api`,
-      //   token,
-      //   fetch: stream ? fetchWithDispatcher : undefined,
-      // }),
-      storage: new DiskStorage({ dir: './test' }),
-    });
+      clients[key] = new Hive({
+        storage: new RemoteStorage({ remote: `https://${prefix}.ronin.co/api`, token }),
+      });
+    }
+    // If no token is available, we must try to initialize disk storage.
+    else {
+      const { join } = await import('node:path');
+      const { BunDriver } = await import('hive/bun-driver');
+      const { DiskStorage } = await import('hive/disk-storage');
+
+      const dir = join(process.cwd(), '.blade', 'state');
+
+      clients[key] = new Hive({
+        driver: new BunDriver(),
+        storage: new DiskStorage({ dir }),
+      });
+    }
   }
 
   const hive = clients[key];
   const db = new Selector<'database'>(database);
+
+  // If no token for accessing a remote storage is available, we should auto-create a
+  // local database.
+  if (!token && !(await hive.has(db))) {
+    console.log(`Created new database ${db}`);
+    await hive.create(db);
+  }
 
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),
@@ -112,7 +109,8 @@ export const runQueries = async <T extends ResultRecord>(
   validateDefaults(options);
 
   const rawQueries = queries.filter((item) => 'query' in item).map((item) => item.query);
-  const database = queries[0].database || options.database;
+
+  const database = queries[0].database || options.database || 'db:main';
 
   const transaction = new Transaction(rawQueries, {
     models: options.models,
@@ -126,8 +124,8 @@ export const runQueries = async <T extends ResultRecord>(
 
   const formattedResults = await transaction.formatResults((statements) => {
     return callDatabase(statements, {
-      token: options.token as string,
-      database: database as string,
+      token: options.token,
+      database,
       stream: options.stream,
     });
   });
