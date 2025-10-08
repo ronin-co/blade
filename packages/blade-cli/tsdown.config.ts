@@ -9,6 +9,6 @@ export default defineConfig({
     'commands/types': './src/commands/types.ts',
     flags: './src/flags.ts',
   },
-  external: ['typescript', 'undici'],
+  external: ['typescript'],
   format: 'esm',
 });

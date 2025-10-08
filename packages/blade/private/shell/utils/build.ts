@@ -122,7 +122,13 @@ export const composeBuildContext = async (
       },
     },
 
-    external: [...(packageMetaContent?.blade?.external || []), 'undici'],
+    external: [
+      ...(packageMetaContent?.blade?.external || []),
+
+      // These dependencies cannot be inlined, since they make use of native modules.
+      'hive/bun-driver',
+      'hive/disk-storage',
+    ],
 
     plugins: [
       getFileListLoader(options?.virtualFiles),

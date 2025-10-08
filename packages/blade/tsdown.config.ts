@@ -24,7 +24,6 @@ export default defineConfig({
     'react-dom/client',
     'react-dom/server.edge',
     'typescript',
-    'undici',
   ],
   treeshake: true,
   define: {

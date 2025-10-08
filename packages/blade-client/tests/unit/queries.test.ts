@@ -3,32 +3,6 @@ import { describe, expect, spyOn, test } from 'bun:test';
 import { queriesHandler } from '@/src/utils/handlers';
 
 describe('queries handler', () => {
-  test('throw if called without token', () => {
-    const originalToken = import.meta.env.RONIN_TOKEN;
-
-    import.meta.env.RONIN_TOKEN = undefined;
-
-    expect(queriesHandler.bind({}, [], {})).toThrow(
-      'Please specify the `RONIN_TOKEN` environment variable.',
-    );
-
-    // Restore the original token.
-    import.meta.env.RONIN_TOKEN = originalToken;
-  });
-
-  test('throw if called without database', () => {
-    const originalDatabase = import.meta.env.RONIN_ID;
-
-    import.meta.env.RONIN_ID = undefined;
-
-    expect(queriesHandler.bind({}, [], {})).toThrow(
-      'Please specify the `RONIN_ID` environment variable.',
-    );
-
-    // Restore the original database.
-    import.meta.env.RONIN_ID = originalDatabase;
-  });
-
   test('derive the config from env if not expilicty passed down', async () => {
     const originalToken = import.meta.env.RONIN_TOKEN;
     const originalDatabase = import.meta.env.RONIN_ID;

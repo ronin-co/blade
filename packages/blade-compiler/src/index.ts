@@ -483,6 +483,8 @@ class Transaction {
           queries: [query],
         });
       }
+
+      throw err;
     }
 
     // Only retain the results of SQL statements that are expected to return data.
