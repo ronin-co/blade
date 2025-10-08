@@ -25,7 +25,7 @@ export const add: AddTrigger = async (query) => {
     password: await hashPassword(query.with.password as string),
 
     emailVerified: false,
-    emailVerificationToken: generateUniqueId(24),
+    emailVerificationToken: generateUniqueId(),
     emailVerificationSentAt: new Date().toISOString(),
   });
 
@@ -176,7 +176,7 @@ export const set: WithAuthOptions<SetTrigger> = async (
       throw new TooManyRequestsError({ fields: ['emailVerificationSentAt'] });
     }
 
-    const verificationToken = generateUniqueId(24);
+    const verificationToken = generateUniqueId();
 
     if (operation === 'PASSWORD_RESET') {
       await auth.sendEmail?.({
@@ -234,9 +234,7 @@ export const set: WithAuthOptions<SetTrigger> = async (
       }
     }
 
-    query.to.password = await hashPassword(
-      query.to.password as string
-    );
+    query.to.password = await hashPassword(query.to.password as string);
   } else {
     // Don't allow writing `password` unless a password change was requested.
     delete query.to.password;

@@ -1,4 +1,3 @@
-import { init } from '@paralleldrive/cuid2';
 import { EmptyFieldsError } from 'blade/server/errors';
 import type { SetQueryInstructions } from 'blade/types';
 
@@ -28,12 +27,12 @@ export const avoidEmptyFields = (
 };
 
 /**
- * Generate a cryptographically strong unique identifier.
+ * Generate pseudo-random unique identifiers.
  *
- * @param length Length of the identifier to generate, defaults to 24.
- *
- * @returns Cryptographically unique identifier with the specified length.
+ * @returns A unique identifier.
  */
-export const generateUniqueId = (length = 24): string => init({ length })();
+export const generateUniqueId = (): string => {
+  return crypto.getRandomValues(new Uint32Array(1))[0].toString();
+};
 
 export const EMAIL_VERIFICATION_COOLDOWN = 20_000; // 20s
