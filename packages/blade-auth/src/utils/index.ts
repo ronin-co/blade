@@ -1,5 +1,6 @@
-import { EmptyFieldsError } from 'blade/server/errors';
-import type { SetQueryInstructions } from 'blade/types';
+import { EmptyFieldsError, InvalidPermissionsError } from 'blade/server/errors';
+import { type JWTPayload, verifyJWT } from 'blade/server/utils';
+import type { SetQueryInstructions, TriggerOptions } from 'blade/types';
 
 /**
  * Check given object for empty values. Throws an error if the object contains
@@ -24,6 +25,44 @@ export const avoidEmptyFields = (
   if (emptyFields.length > 0) {
     throw new EmptyFieldsError({ fields: emptyFields });
   }
+};
+
+/**
+ * Retrieve the account that authored the incoming query.
+ *
+ * @param triggerOptions - The options object passed to the surrounding effect.
+ *
+ * @returns The ID of the account that authored the incoming query.
+ */
+export const parseSessionCookie = async (
+  triggerOptions: TriggerOptions,
+): Promise<JWTPayload> => {
+  const token = triggerOptions.cookies.token;
+
+  let sessionId: string | null = null;
+  let accountId: string | null = null;
+
+  if (token) {
+    try {
+      const tokenPayload = await verifyJWT(
+        token,
+        import.meta.env.BLADE_SESSION_JWT_SECRET as string,
+      );
+
+      sessionId = (tokenPayload?.sub as string) || null;
+      accountId = (tokenPayload?.aud as string) || null;
+    } catch (err) {
+      console.warn(`Failed to decode token: \`${(err as Error).message}\``);
+    }
+  }
+
+  if (!(sessionId && accountId)) {
+    throw new InvalidPermissionsError({
+      message: 'No session provided for authentication.',
+    });
+  }
+
+  return { sessionId, accountId };
 };
 
 /**

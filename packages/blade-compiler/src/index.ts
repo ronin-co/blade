@@ -8,6 +8,7 @@ import {
   addDefaultModelAttributes,
   addDefaultModelFields,
   addDefaultModelPresets,
+  getRecordIdentifier,
 } from '@/src/model/defaults';
 import type {
   InternalModelField,
@@ -636,6 +637,7 @@ export { Transaction, CLEAN_ROOT_MODEL as ROOT_MODEL };
 
 // Expose the main error class and helper functions
 export { CompilerError, getQuerySymbol } from '@/src/utils/helpers';
+export { getRecordIdentifier };
 
 // Expose constants
 export {

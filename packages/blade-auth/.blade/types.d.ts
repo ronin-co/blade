@@ -1,7 +1,7 @@
 import type { CombinedInstructions, Expression } from 'blade-compiler';
 import type { ReducedFunction } from 'blade/types';
-import type { Account, Accounts } from 'blade/types';
-export type { Account, Accounts };
+import type { Account, Accounts, Session, Sessions } from 'blade/types';
+export type { Account, Accounts, Session, Sessions };
 declare namespace Utils {
   type AfterQuery<U> = ReducedFunction &
     (<T = U>(
@@ -160,6 +160,17 @@ declare namespace Utils {
       ) => Promise<T>;
     };
   };
+  type ResolveSchema<
+    S,
+    U extends Array<string> | 'all',
+    K extends string,
+  > = U extends 'all'
+    ? S
+    : K extends U[number]
+      ? S
+      : S extends Array<unknown>
+        ? Array<string>
+        : string;
 }
 declare namespace Syntax {
   type AddQuery = {
@@ -189,6 +200,32 @@ declare namespace Syntax {
         using: Syntax.Account.Plural.UsingQueryPromise;
         with: Syntax.Account.Plural.WithQueryPromise;
       };
+    /** Add a single Session record */
+    session: ReducedFunction &
+      Syntax.Session.Singular.RootQueryCallerPromise & {
+        after: Syntax.Session.Singular.AfterQueryPromise;
+        before: Syntax.Session.Singular.BeforeQueryPromise;
+        including: Syntax.Session.Singular.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Singular.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Singular.OrderedByQueryPromise;
+        selecting: Syntax.Session.Singular.SelectingQueryPromise;
+        to: Syntax.Session.Singular.ToQueryPromise;
+        using: Syntax.Session.Singular.UsingQueryPromise;
+        with: Syntax.Session.Singular.WithQueryPromise;
+      };
+    /** Add multiple Session records */
+    sessions: ReducedFunction &
+      Syntax.Session.Plural.RootQueryCallerPromise & {
+        after: Syntax.Session.Plural.AfterQueryPromise;
+        before: Syntax.Session.Plural.BeforeQueryPromise;
+        including: Syntax.Session.Plural.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Plural.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Plural.OrderedByQueryPromise;
+        selecting: Syntax.Session.Plural.SelectingQueryPromise;
+        to: Syntax.Session.Plural.ToQueryPromise;
+        using: Syntax.Session.Plural.UsingQueryPromise;
+        with: Syntax.Session.Plural.WithQueryPromise;
+      };
   };
   type GetQuery = {
     /** Get a single Account record */
@@ -216,6 +253,32 @@ declare namespace Syntax {
         to: Syntax.Account.Plural.ToQueryPromise;
         using: Syntax.Account.Plural.UsingQueryPromise;
         with: Syntax.Account.Plural.WithQueryPromise;
+      };
+    /** Get a single Session record */
+    session: ReducedFunction &
+      Syntax.Session.Singular.RootQueryCallerPromise & {
+        after: Syntax.Session.Singular.AfterQueryPromise;
+        before: Syntax.Session.Singular.BeforeQueryPromise;
+        including: Syntax.Session.Singular.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Singular.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Singular.OrderedByQueryPromise;
+        selecting: Syntax.Session.Singular.SelectingQueryPromise;
+        to: Syntax.Session.Singular.ToQueryPromise;
+        using: Syntax.Session.Singular.UsingQueryPromise;
+        with: Syntax.Session.Singular.WithQueryPromise;
+      };
+    /** Get multiple Session records */
+    sessions: ReducedFunction &
+      Syntax.Session.Plural.RootQueryCallerPromise & {
+        after: Syntax.Session.Plural.AfterQueryPromise;
+        before: Syntax.Session.Plural.BeforeQueryPromise;
+        including: Syntax.Session.Plural.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Plural.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Plural.OrderedByQueryPromise;
+        selecting: Syntax.Session.Plural.SelectingQueryPromise;
+        to: Syntax.Session.Plural.ToQueryPromise;
+        using: Syntax.Session.Plural.UsingQueryPromise;
+        with: Syntax.Session.Plural.WithQueryPromise;
       };
   };
   type RemoveQuery = {
@@ -245,6 +308,32 @@ declare namespace Syntax {
         using: Syntax.Account.Plural.UsingQueryPromise;
         with: Syntax.Account.Plural.WithQueryPromise;
       };
+    /** Remove a single Session record */
+    session: ReducedFunction &
+      Syntax.Session.Singular.RootQueryCallerPromise & {
+        after: Syntax.Session.Singular.AfterQueryPromise;
+        before: Syntax.Session.Singular.BeforeQueryPromise;
+        including: Syntax.Session.Singular.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Singular.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Singular.OrderedByQueryPromise;
+        selecting: Syntax.Session.Singular.SelectingQueryPromise;
+        to: Syntax.Session.Singular.ToQueryPromise;
+        using: Syntax.Session.Singular.UsingQueryPromise;
+        with: Syntax.Session.Singular.WithQueryPromise;
+      };
+    /** Remove multiple Session records */
+    sessions: ReducedFunction &
+      Syntax.Session.Plural.RootQueryCallerPromise & {
+        after: Syntax.Session.Plural.AfterQueryPromise;
+        before: Syntax.Session.Plural.BeforeQueryPromise;
+        including: Syntax.Session.Plural.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Plural.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Plural.OrderedByQueryPromise;
+        selecting: Syntax.Session.Plural.SelectingQueryPromise;
+        to: Syntax.Session.Plural.ToQueryPromise;
+        using: Syntax.Session.Plural.UsingQueryPromise;
+        with: Syntax.Session.Plural.WithQueryPromise;
+      };
   };
   type SetQuery = {
     /** Set a single Account record */
@@ -272,6 +361,32 @@ declare namespace Syntax {
         to: Syntax.Account.Plural.ToQueryPromise;
         using: Syntax.Account.Plural.UsingQueryPromise;
         with: Syntax.Account.Plural.WithQueryPromise;
+      };
+    /** Set a single Session record */
+    session: ReducedFunction &
+      Syntax.Session.Singular.RootQueryCallerPromise & {
+        after: Syntax.Session.Singular.AfterQueryPromise;
+        before: Syntax.Session.Singular.BeforeQueryPromise;
+        including: Syntax.Session.Singular.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Singular.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Singular.OrderedByQueryPromise;
+        selecting: Syntax.Session.Singular.SelectingQueryPromise;
+        to: Syntax.Session.Singular.ToQueryPromise;
+        using: Syntax.Session.Singular.UsingQueryPromise;
+        with: Syntax.Session.Singular.WithQueryPromise;
+      };
+    /** Set multiple Session records */
+    sessions: ReducedFunction &
+      Syntax.Session.Plural.RootQueryCallerPromise & {
+        after: Syntax.Session.Plural.AfterQueryPromise;
+        before: Syntax.Session.Plural.BeforeQueryPromise;
+        including: Syntax.Session.Plural.IncludingQueryPromise;
+        limitedTo: Syntax.Session.Plural.LimitedToQueryPromise;
+        orderedBy: Syntax.Session.Plural.OrderedByQueryPromise;
+        selecting: Syntax.Session.Plural.SelectingQueryPromise;
+        to: Syntax.Session.Plural.ToQueryPromise;
+        using: Syntax.Session.Plural.UsingQueryPromise;
+        with: Syntax.Session.Plural.WithQueryPromise;
       };
   };
   namespace Account {
@@ -436,6 +551,190 @@ declare namespace Syntax {
       };
     }
   }
+  namespace Session {
+    type FieldSlug =
+      | 'id'
+      | 'ronin.createdAt'
+      | 'ronin.createdBy'
+      | 'ronin.updatedAt'
+      | 'ronin.updatedBy'
+      | 'id'
+      | 'ronin.createdAt'
+      | 'ronin.createdBy'
+      | 'ronin.updatedAt'
+      | 'ronin.updatedBy'
+      | 'account'
+      | 'browser'
+      | 'browserVersion'
+      | 'os'
+      | 'osVersion'
+      | 'deviceType';
+    namespace Singular {
+      type AfterQuery = Utils.AfterQuery<Session | null>;
+      type AfterQueryPromise = Utils.AfterQueryPromise<Session | null>;
+      type BeforeQuery = Utils.BeforeQuery<Session | null>;
+      type BeforeQueryPromise = Utils.BeforeQueryPromise<Session | null>;
+      type IncludingQuery = Utils.IncludingQuery<Session | null>;
+      type IncludingQueryPromise = Utils.IncludingQueryPromise<Session | null>;
+      type LimitedToQuery = Utils.LimitedToQuery<Session | null>;
+      type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Session | null>;
+      type OrderedByQuery = Utils.OrderedByQuery<Session | null, Session.FieldSlug>;
+      type OrderedByQueryPromise = Utils.OrderedByQueryPromise<
+        Session | null,
+        Session.FieldSlug
+      >;
+      type RootQueryCaller = Utils.RootQueryCaller<Session | null>;
+      type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Session | null>;
+      type SelectingQuery = Utils.SelectingQuery<Session | null, Session.FieldSlug>;
+      type SelectingQueryPromise = Utils.SelectingQueryPromise<
+        Session | null,
+        Session.FieldSlug
+      >;
+      type ToQuery = Utils.ToQuery<Session | null, Session>;
+      type ToQueryPromise = Utils.ToQueryPromise<Session | null, Session>;
+      type UsingQuery = ReducedFunction & {
+        <U extends Array<'account'> | 'all'>(fields: U): Session<U> | null;
+        <T = Session | null>(fields: Array<'account'> | 'all'): T;
+      };
+      type UsingQueryPromise = ReducedFunction & {
+        <U extends Array<'account'> | 'all'>(fields: U): Promise<Session<U>> | null;
+        <T = Session | null>(fields: Array<'account'> | 'all'): Promise<T>;
+      };
+      type WithQuery = Utils.WithQuery<Session | null, Session> & {
+        account: <T = Session | null>(
+          account: Session['account'] | Partial<Session<['account']>['account']>,
+          options?: Record<string, unknown>,
+        ) => T;
+        browser: <T = Session | null>(
+          browser: Session['browser'],
+          options?: Record<string, unknown>,
+        ) => T;
+        browserVersion: <T = Session | null>(
+          browserVersion: Session['browserVersion'],
+          options?: Record<string, unknown>,
+        ) => T;
+        os: <T = Session | null>(
+          os: Session['os'],
+          options?: Record<string, unknown>,
+        ) => T;
+        osVersion: <T = Session | null>(
+          osVersion: Session['osVersion'],
+          options?: Record<string, unknown>,
+        ) => T;
+        deviceType: <T = Session | null>(
+          deviceType: Session['deviceType'],
+          options?: Record<string, unknown>,
+        ) => T;
+      };
+      type WithQueryPromise = Utils.WithQueryPromise<Session | null, Session> & {
+        account: <T = Session | null>(
+          account: Session['account'] | Partial<Session<['account']>['account']>,
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        browser: <T = Session | null>(
+          browser: Session['browser'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        browserVersion: <T = Session | null>(
+          browserVersion: Session['browserVersion'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        os: <T = Session | null>(
+          os: Session['os'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        osVersion: <T = Session | null>(
+          osVersion: Session['osVersion'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        deviceType: <T = Session | null>(
+          deviceType: Session['deviceType'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+      };
+    }
+    namespace Plural {
+      type AfterQuery = Utils.AfterQuery<Sessions>;
+      type AfterQueryPromise = Utils.AfterQueryPromise<Sessions>;
+      type BeforeQuery = Utils.BeforeQuery<Sessions>;
+      type BeforeQueryPromise = Utils.BeforeQueryPromise<Sessions>;
+      type IncludingQuery = Utils.IncludingQuery<Sessions>;
+      type IncludingQueryPromise = Utils.IncludingQueryPromise<Sessions>;
+      type LimitedToQuery = Utils.LimitedToQuery<Sessions>;
+      type LimitedToQueryPromise = Utils.LimitedToQueryPromise<Sessions>;
+      type OrderedByQuery = Utils.OrderedByQuery<Sessions, Session.FieldSlug>;
+      type OrderedByQueryPromise = Utils.OrderedByQueryPromise<
+        Sessions,
+        Session.FieldSlug
+      >;
+      type RootQueryCaller = Utils.RootQueryCaller<Sessions>;
+      type RootQueryCallerPromise = Utils.RootQueryCallerPromise<Sessions>;
+      type SelectingQuery = Utils.SelectingQuery<Sessions, Session.FieldSlug>;
+      type SelectingQueryPromise = Utils.SelectingQueryPromise<
+        Sessions,
+        Session.FieldSlug
+      >;
+      type ToQuery = Utils.ToQuery<Sessions, Session>;
+      type ToQueryPromise = Utils.ToQueryPromise<Sessions, Session>;
+      type UsingQuery = ReducedFunction & {
+        <U extends Array<'account'> | 'all'>(fields: U): Session<U>;
+        <T = Sessions>(fields: Array<'account'> | 'all'): T;
+      };
+      type UsingQueryPromise = ReducedFunction & {
+        <U extends Array<'account'> | 'all'>(fields: U): Promise<Session<U>>;
+        <T = Sessions>(fields: Array<'account'> | 'all'): Promise<T>;
+      };
+      type WithQuery = Utils.WithQuery<Sessions, Session> & {
+        account: <T = Sessions>(
+          account: Session['account'] | Partial<Session<['account']>['account']>,
+          options?: Record<string, unknown>,
+        ) => T;
+        browser: <T = Sessions>(
+          browser: Session['browser'],
+          options?: Record<string, unknown>,
+        ) => T;
+        browserVersion: <T = Sessions>(
+          browserVersion: Session['browserVersion'],
+          options?: Record<string, unknown>,
+        ) => T;
+        os: <T = Sessions>(os: Session['os'], options?: Record<string, unknown>) => T;
+        osVersion: <T = Sessions>(
+          osVersion: Session['osVersion'],
+          options?: Record<string, unknown>,
+        ) => T;
+        deviceType: <T = Sessions>(
+          deviceType: Session['deviceType'],
+          options?: Record<string, unknown>,
+        ) => T;
+      };
+      type WithQueryPromise = Utils.WithQueryPromise<Sessions, Session> & {
+        account: <T = Sessions>(
+          account: Session['account'] | Partial<Session<['account']>['account']>,
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        browser: <T = Sessions>(
+          browser: Session['browser'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        browserVersion: <T = Sessions>(
+          browserVersion: Session['browserVersion'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        os: <T = Sessions>(
+          os: Session['os'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        osVersion: <T = Sessions>(
+          osVersion: Session['osVersion'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+        deviceType: <T = Sessions>(
+          deviceType: Session['deviceType'],
+          options?: Record<string, unknown>,
+        ) => Promise<T>;
+      };
+    }
+  }
 }
 declare module 'blade/types' {
   export interface TriggerOptions {
@@ -456,6 +755,18 @@ declare module 'blade/types' {
     password: string;
   };
   export type Accounts = Array<Account> & {
+    moreBefore?: string;
+    moreAfter?: string;
+  };
+  export type Session<U extends Array<'account'> | 'all' = []> = Utils.ResultRecord & {
+    account: Utils.ResolveSchema<Account, U, 'account'>;
+    browser: string;
+    browserVersion: string;
+    deviceType: string;
+    os: string;
+    osVersion: string;
+  };
+  export type Sessions<U extends Array<'account'> | 'all' = []> = Array<Session<U>> & {
     moreBefore?: string;
     moreAfter?: string;
   };
@@ -485,6 +796,30 @@ declare module 'blade/server/hooks' {
         selecting: Syntax.Account.Plural.SelectingQuery;
         using: Syntax.Account.Plural.UsingQuery;
         with: Syntax.Account.Plural.WithQuery;
+      };
+    /** Get a single Session record */
+    session: ReducedFunction &
+      Syntax.Session.Singular.RootQueryCaller & {
+        after: Syntax.Session.Singular.AfterQuery;
+        before: Syntax.Session.Singular.BeforeQuery;
+        including: Syntax.Session.Singular.IncludingQuery;
+        limitedTo: Syntax.Session.Singular.LimitedToQuery;
+        orderedBy: Syntax.Session.Singular.OrderedByQuery;
+        selecting: Syntax.Session.Singular.SelectingQuery;
+        using: Syntax.Session.Singular.UsingQuery;
+        with: Syntax.Session.Singular.WithQuery;
+      };
+    /** Get multiple Session records */
+    sessions: ReducedFunction &
+      Syntax.Session.Plural.RootQueryCaller & {
+        after: Syntax.Session.Plural.AfterQuery;
+        before: Syntax.Session.Plural.BeforeQuery;
+        including: Syntax.Session.Plural.IncludingQuery;
+        limitedTo: Syntax.Session.Plural.LimitedToQuery;
+        orderedBy: Syntax.Session.Plural.OrderedByQuery;
+        selecting: Syntax.Session.Plural.SelectingQuery;
+        using: Syntax.Session.Plural.UsingQuery;
+        with: Syntax.Session.Plural.WithQuery;
       };
   };
 }
