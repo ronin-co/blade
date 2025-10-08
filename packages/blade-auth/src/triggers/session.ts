@@ -12,7 +12,7 @@ const primeId: GetTrigger = async (query, multiple, options) => {
 
   if (multiple) {
     // @ts-expect-error Query types will be fixed in the future.
-    query.with.accountId = accountId;
+    query.with.account = accountId;
   } else {
     // @ts-expect-error Query types will be fixed in the future.
     query.with.id = sessionId;
