@@ -6,4 +6,5 @@ export default defineConfig({
     resolve: true,
   },
   format: 'esm',
+  external: [/^blade\//],
 });
