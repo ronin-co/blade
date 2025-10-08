@@ -38,3 +38,56 @@ Additionally, place the following in your [Schema Definition](/models) located i
 ```ts
 export { Account, Session } from 'blade/server/auth';
 ```
+
+## Status
+
+To obtain the current status of a session, you run the following query in a page:
+
+```ts
+const session = use.session();
+```
+
+To also include the current account, you can run the following:
+
+```ts
+const session = use.session.using(['account']);
+```
+
+## Actions
+
+To trigger specific actions, you can then run one of the following queries with the [useMutation](/hooks#usemutation-client) hook on the client-side, depending on what actions the user performs.
+
+In addition to the actions documented below, you can, of course, also run any other query for the models that `blade-auth` provides, such as `Account` and `Session`. For example, you might choose to count records or filter them in a specific way.
+
+### Creating Account
+
+```ts
+await add.account.with({
+    email: 'elaine@thorne.co',
+    password: '1234'
+});
+```
+
+### Reset Account Password
+
+```ts
+await set.account({
+    with: { email: 'elaine@thorne.co' },
+    to: { password: null }
+});
+```
+
+### Resend Verification Email
+
+```ts
+await set.account({
+    with: { id: 'xxxx' },
+    to: { emailVerificationSentAt: new Date() }
+});
+```
+
+### Logging Out
+
+```ts
+await remove.session();
+```
