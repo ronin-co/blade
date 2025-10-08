@@ -89,40 +89,78 @@ That's it! 🎉 You can now start working on your application.
 
 ## Data Storage
 
-While Blade supports any fast edge database (zero config support for third-party databases is being worked on), the fastest way to get started is to sign up to [RONIN](https://ronin.co) — an SQLite-powered edge database.
+By default, when you run Blade the first time, it will generate an [SQLite](https://sqlite.org) database
+for you and place it in the `.blade` directory of your project. All of your data will then be
+persisted in that directory.
 
-After signing up, you will be provided with a `RONIN_TOKEN` environment variable, which contains the token that can be used to access your SQLite database.
+Now that your database exists, you can start [defining its schema](/models). As an example, we could
+add the following model (which is similar to a table in SQL):
 
-Next, add this environment variable to your Blade application, using a `.env` file:
+```ts
+export const Account = model({
+  slug: 'account',
+
+  fields: {
+    name: string(),
+  }
+});
+```
+
+Next, you can run apply the model to your database by running this command:
+
+```bash
+blade diff --apply
+```
+
+Once your database schema has been updated, your can begin inserting data. For example, you
+could execute write queries with the [`useMutation`](/hooks#usemutation-client) hook like this:
+
+```tsx
+import { useMutation } from 'blade/client/hooks';
+
+const MyComponent = () => {
+  const { add } = useMutation();
+
+  const buttonClicked = () => {
+    await add.account.with({ name: 'Elaine' });
+  }
+
+  return (
+    <button onClick={buttonClicked}>Insert data</button>
+  );
+};
+```
+
+That's it! 🚀
+
+You've successfully inserted data. As you can see when running this code (you can just run it
+multiple times), the `add.account` query returns the new record you just created.
+
+To read the data across different pages, you could then write read queries with
+the [`use`](/hooks#use-server) hook. In other words, `useMutation` handles write queries, while
+read queries are handled by `use`.
+
+If you need any help, just let us know on our [Discord server](https://discord.gg/ronin) and the
+team will be with you immediately.
+
+### Production
+
+While this works well during the development of your application and also for small single-region
+applications in production, larger applications require much more sophisticated database features.
+
+For that purpose, you may choose to use a full data infrastructure offered by RONIN, the
+team behind Blade. At the moment, this infrastructure is available in its alpha release phase, which
+means that access tokens are currently only handed out via our [Discord server](https://discord.gg/ronin).
+If you are interested, please feel free to join our Discord server and a RONIN team member will send you
+a free token with no additional obligations immediately. A interface for generating tokens will follow soon.
+
+You will then be able to use the following two environment variables to access your production database,
+which is replicated to 18 regions across the globe and offers a strong consistency model.
 
 ```txt
 RONIN_TOKEN=xxxxxx
+RONIN_ID=xxxxxx
 ```
 
-Once you've placed this file in the root directory of your project, Blade will automatically read it and use it to access your origin SQLite database, from which it will then automatically retrieve data as needed.
-
-Since every newly created database on RONIN already contains example data, you can now open the `pages/index.tsx` file of your Blade application and start querying the data:
-
-```tsx
-import { use } from 'blade/server/hooks';
-
-const Page = () => {
-  const posts = use.posts();
-
-  return (
-    <div>
-      {posts.map(post => <h1>{post.title}</h1>)}
-    </div>
-  );
-};
-
-export default Page;
-```
-
-Since the hook for reading data is reactive, it will automatically update if you write an update somewhere else in your application with the [`useMutation`](/hooks#usemetadata-server) hook. Similarily, it is automatically revalidated in the background as well, to ensure that the data is always fresh.
-
-To add more kinds of data to your database, you can continue with defining a [model](/models), which is essentially how tables are defined when using Blade. Whenever you apply a model, it immediately becomes available for querying, as shown with the `post` model above.
-
-Now you can also start adding data to your application! 🚀
-
-Feel free to join our [Discord community](https://discord.gg/ronin) if you have questions or need help getting started. The team would be happy to help you out in realtime.
+Once you've placed this file in the root directory of your project, Blade will automatically read it and
+use it to access your origin SQLite database, from which it will then automatically retrieve data as needed.
