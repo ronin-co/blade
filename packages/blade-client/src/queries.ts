@@ -64,11 +64,12 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
         throw new Error(message);
       }
 
-      const { join } = await import('node:path');
       const { BunDriver } = await import('hive/bun-driver');
       const { DiskStorage } = await import('hive/disk-storage');
 
-      const dir = join(process.cwd(), '.blade', 'state');
+      // We purposefully don't use extra native modules here, to avoid having to declare
+      // them as external.
+      const dir = [process.cwd(), '.blade', 'state'].join('/');
 
       clients[key] = new Hive({
         driver: new BunDriver(),
