@@ -1,0 +1,93 @@
+---
+title: Auth
+---
+
+# Auth
+
+Blade natively offers the [blade-auth](https://github.com/ronin-co/blade/tree/main/packages/blade-auth) package, which provides utility functions for easily adding different authentication methods to your application, without having to maintain them.
+
+The functionality of the package is built around [Triggers](/models/triggers), which make it possible to capture Blade queries and run custom logic.
+
+## Setup
+
+To enable all default authentication features, create the following files in a directory named `triggers` at the root of your application:
+
+```ts
+// triggers/account.ts
+
+import type { AddTrigger, GetTrigger, RemoveTrigger } from "blade/types";
+import { addAccount, setAccount } from "blade/server/auth";
+
+export const add: AddTrigger = addAccount;
+export const set: SetTrigger = setAccount;
+```
+
+```ts
+// triggers/session.ts
+
+import type { AddTrigger, GetTrigger, RemoveTrigger } from "blade/types";
+import { addSession, getSession, removeSession } from "blade/server/auth";
+
+export const get: GetTrigger = getSession;
+export const add: AddTrigger = addSession;
+export const remove: RemoveTrigger = removeSession;
+```
+
+Additionally, place the following in your [Schema Definition](/models) located in a `schema/index.ts` file at the root of your project:
+
+```ts
+export { Account, Session } from 'blade/server/auth';
+```
+
+## Status
+
+To obtain the current status of a session, run the following query in a page:
+
+```ts
+const session = use.session();
+```
+
+To also include the current account, you can run the following:
+
+```ts
+const session = use.session.using(['account']);
+```
+
+## Actions
+
+To trigger specific actions, you can then run one of the following queries with the [useMutation](/hooks#usemutation-client) hook on the client-side, depending on what actions the user performs.
+
+In addition to the actions documented below, you can, of course, also run any other [Query](/queries) for the models that `blade-auth` provides, such as `Account` and `Session`. For example, you might choose to count records or filter them in a specific way.
+
+### Signing Up
+
+```ts
+await add.account.with({
+    email: 'elaine@thorne.co',
+    password: '1234'
+});
+```
+
+### Resend Verification Email
+
+```ts
+await set.account({
+    with: { id: 'xxxx' },
+    to: { emailVerificationSentAt: new Date() }
+});
+```
+
+### Logging Out
+
+```ts
+await remove.session();
+```
+
+### Reset Account Password
+
+```ts
+await set.account({
+    with: { email: 'elaine@thorne.co' },
+    to: { password: null }
+});
+```

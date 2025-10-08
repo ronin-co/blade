@@ -1,7 +1,7 @@
 import { verifyPassword } from 'better-auth/crypto';
 import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/server/errors';
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
-import type { AddTrigger, GetTrigger, RemoveTrigger, SetTrigger } from 'blade/types';
+import type { AddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
 
 import { parseSessionCookie } from '@/utils/index';
 
@@ -97,5 +97,3 @@ export const add: AddTrigger = async (query, _multiple, options) => {
 export const remove: RemoveTrigger = (query, multiple, options) => {
   return primeId(query, multiple, options);
 };
-
-export const set: SetTrigger = async (query) => query;
