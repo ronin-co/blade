@@ -41,7 +41,7 @@ export { Account, Session } from 'blade/server/auth';
 
 ## Status
 
-To obtain the current status of a session, you run the following query in a page:
+To obtain the current status of a session, run the following query in a page:
 
 ```ts
 const session = use.session();
@@ -57,23 +57,14 @@ const session = use.session.using(['account']);
 
 To trigger specific actions, you can then run one of the following queries with the [useMutation](/hooks#usemutation-client) hook on the client-side, depending on what actions the user performs.
 
-In addition to the actions documented below, you can, of course, also run any other query for the models that `blade-auth` provides, such as `Account` and `Session`. For example, you might choose to count records or filter them in a specific way.
+In addition to the actions documented below, you can, of course, also run any other [Query](/queries) for the models that `blade-auth` provides, such as `Account` and `Session`. For example, you might choose to count records or filter them in a specific way.
 
-### Creating Account
+### Signing Up
 
 ```ts
 await add.account.with({
     email: 'elaine@thorne.co',
     password: '1234'
-});
-```
-
-### Reset Account Password
-
-```ts
-await set.account({
-    with: { email: 'elaine@thorne.co' },
-    to: { password: null }
 });
 ```
 
@@ -90,4 +81,13 @@ await set.account({
 
 ```ts
 await remove.session();
+```
+
+### Reset Account Password
+
+```ts
+await set.account({
+    with: { email: 'elaine@thorne.co' },
+    to: { password: null }
+});
 ```
