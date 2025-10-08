@@ -25,6 +25,7 @@ export default defineConfig({
     'react-dom/server.edge',
     'typescript',
     'undici',
+    'hive/disk-storage',
   ],
   treeshake: true,
   define: {

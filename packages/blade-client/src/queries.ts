@@ -7,7 +7,8 @@ import {
   Transaction,
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
-import { RemoteStorage } from 'hive/remote-storage';
+// import { RemoteStorage } from 'hive/remote-storage';
+import { DiskStorage } from 'hive/disk-storage';
 import type { RowValues } from 'hive/sdk/transaction';
 import type { Agent as AgentClass } from 'undici';
 
@@ -49,13 +50,13 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
-const dispatcher = Agent
-  ? new Agent({ connections: 1, maxConcurrentStreams: 1, pipelining: 1 })
-  : undefined;
+// const dispatcher = Agent
+//   ? new Agent({ connections: 1, maxConcurrentStreams: 1, pipelining: 1 })
+//   : undefined;
 
-const fetchWithDispatcher: typeof fetch = (input, init) => {
-  return fetch(input, { ...init, dispatcher });
-};
+// const fetchWithDispatcher: typeof fetch = (input, init) => {
+//   return fetch(input, { ...init, dispatcher });
+// };
 
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
@@ -68,11 +69,12 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
     const prefix = stream ? 'db-leader' : 'db';
 
     clients[key] = new Hive({
-      storage: new RemoteStorage({
-        remote: `https://${prefix}.ronin.co/api`,
-        token,
-        fetch: stream ? fetchWithDispatcher : undefined,
-      }),
+      // storage: new RemoteStorage({
+      //   remote: `https://${prefix}.ronin.co/api`,
+      //   token,
+      //   fetch: stream ? fetchWithDispatcher : undefined,
+      // }),
+      storage: new DiskStorage({ dir: './test' }),
     });
   }
 
