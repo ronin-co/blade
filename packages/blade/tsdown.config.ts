@@ -24,7 +24,6 @@ export default defineConfig({
     'react-dom/client',
     'react-dom/server.edge',
     'typescript',
-    'hive/disk-storage',
   ],
   treeshake: true,
   define: {
