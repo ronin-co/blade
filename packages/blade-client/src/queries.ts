@@ -55,6 +55,15 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
     }
     // If no token is available, we must try to initialize disk storage.
     else {
+      if (typeof Bun === 'undefined') {
+        let message = 'You must either provide `RONIN_TOKEN` and `RONIN_ID` as';
+        message += ' environment variables, or run Blade with Bun, such that it can';
+        message += ' create a local database for you. To use Bun, prefix every command';
+        message += ' with `bun --bun`, like this: `bun --bun blade`.';
+
+        throw new Error(message);
+      }
+
       const { join } = await import('node:path');
       const { BunDriver } = await import('hive/bun-driver');
       const { DiskStorage } = await import('hive/disk-storage');
