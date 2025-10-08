@@ -13,7 +13,7 @@ The functionality of the package is built around [Triggers](/models/triggers), w
 To enable all default authentication features, create the following files in a directory named `triggers` at the root of your application:
 
 ```ts
-// account.ts
+// triggers/account.ts
 
 import type { AddTrigger, GetTrigger, RemoveTrigger } from "blade/types";
 import { addAccount, setAccount } from "blade/server/auth";
@@ -23,7 +23,7 @@ export const set: SetTrigger = setAccount;
 ```
 
 ```ts
-// session.ts
+// triggers/session.ts
 
 import type { AddTrigger, GetTrigger, RemoveTrigger } from "blade/types";
 import { addSession, getSession, removeSession } from "blade/server/auth";
