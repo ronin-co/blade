@@ -4,7 +4,7 @@
     "": {
       "name": "basic-example",
       "dependencies": {
-        "blade": "3.21.1",
+        "blade": "3.21.2",
         "react": "19.2.0",
         "react-dom": "19.2.0",
       },
@@ -156,7 +156,7 @@
 
     "ansis": ["ansis@4.2.0", "", {}, "sha512-HqZ5rWlFjGiV0tDm3UxxgNRqsOTniqoKZu0pIAfh7TZQMGuZK+hH0drySty0si0QXj1ieop4+SkSfPZBPPkHig=="],
 
-    "blade": ["blade@3.21.1", "", { "dependencies": { "@dprint/typescript": "0.95.11", "@inquirer/prompts": "7.8.6", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "hive": "2.1.4", "resolve-from": "5.0.0", "rolldown": "1.0.0-beta.41" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-30Aa/bzqCt+8SmIw7TA40kanoRTbgjHcmLEhT8MR5UyiHACQ/38pZnmoHx+lEgJXGH+SJJwapbGpZTBFn9DLUQ=="],
+    "blade": ["blade@3.21.2", "", { "dependencies": { "@dprint/typescript": "0.95.11", "@inquirer/prompts": "7.8.6", "@stefanprobst/rehype-extract-toc": "3.0.0", "@tailwindcss/node": "4.1.6", "@tailwindcss/oxide": "4.1.6", "dotenv": "16.5.0", "gradient-string": "3.0.0", "hive": "2.1.4", "resolve-from": "5.0.0", "rolldown": "1.0.0-beta.41" }, "bin": { "blade": "dist/private/shell/index.js" } }, "sha512-Ga6efp0X4o0QDwsBjcryeR7aWgW8PCwYRxXRKKx+3pPzgXHlHN31aHMvGT4IkTPjn4Cg54CEJvy0+yXDkMM7og=="],
 
     "bun-types": ["bun-types@1.2.23", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-R9f0hKAZXgFU3mlrA0YpE/fiDvwV0FT9rORApt2aQVWSuJDzZOyB5QLc0N/4HF57CS8IXJ6+L5E4W1bW6NS2Aw=="],
 
