@@ -25,6 +25,7 @@ export default defineConfig({
     'react-dom/server.edge',
     'typescript',
   ],
+  noExternal: ['hive', 'hive/remote-storage'],
   treeshake: true,
   define: {
     // Deno does not support `global` and certain dependencies that Blade uses are
