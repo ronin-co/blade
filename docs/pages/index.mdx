@@ -93,6 +93,14 @@ By default, when you run Blade the first time, it will generate an [SQLite](http
 for you and place it in the `.blade` directory of your project. All of your data will then be
 persisted in that directory.
 
+However, this only works if you have [Bun](https://bun.sh) installed and you are running Blade with
+Bun, by prefixing every command with `bun --bun`. For example, you would use this command to
+start the dev server:
+
+```bash
+bun --bun blade
+```
+
 Now that your database exists, you can start [defining its schema](/models). As an example, we could
 add the following model (which is similar to a table in SQL):
 
