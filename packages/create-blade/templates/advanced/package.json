@@ -10,7 +10,7 @@
   },
   "author": "ronin",
   "dependencies": {
-    "blade": "3.21.2",
+    "blade": "3.21.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
