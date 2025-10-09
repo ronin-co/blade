@@ -174,6 +174,13 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
               },
             },
             no_bundle: true,
+            rules: [
+              {
+                type: 'ESModule',
+                globs: ['public/client/chunk.*.js'],
+                fallthrough: true,
+              },
+            ],
           },
           null,
           4,
