@@ -173,6 +173,7 @@ export const transformToCloudflareOutput = async (): Promise<void> => {
                 enabled: true,
               },
             },
+            no_bundle: true,
           },
           null,
           4,

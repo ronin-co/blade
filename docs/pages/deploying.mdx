@@ -98,9 +98,11 @@ easily reproducible across environments and team members. You can also use this 
 customize your deployment as needed.
 
 To test the build output locally, you can set the environment variable yourself:
+
 ```bash
 WORKERS_CI=1 blade build
 ```
+
 Or you can create the `wrangler.jsonc` file by hand that looks similar to the following:
 
 ```json
@@ -111,11 +113,12 @@ Or you can create the `wrangler.jsonc` file by hand that looks similar to the fo
 	"compatibility_date": "2025-06-30",
 	"assets": {
 		"binding": "ASSETS",
-		"directory": ".blade/dist/",
+		"directory": ".blade/dist/public/",
 	},
 	"build": {
 		"command": "npm run build"
-	}
+	},
+	"no_bundle": true
 }
 ```
 
