@@ -494,6 +494,28 @@ type FieldType =
   | 'SUBQUERY'
   | 'READABLE';
 
+type InputValue = string | number | boolean | object | null;
+
+const serializeFormValue = (value: InputValue): string | number => {
+  let newValue: string | number;
+
+  // Serialize boolean values.
+  if (typeof value === 'boolean') {
+    newValue = value.toString();
+  }
+
+  // Serialize `null` values.
+  else if (value === null) {
+    newValue = 'null';
+  } else if (typeof value === 'object') {
+    newValue = JSON.stringify(value);
+  } else {
+    newValue = value || '';
+  }
+
+  return newValue;
+};
+
 const normalizeValue = (
   value: string | boolean | number | Date,
   type: FieldType,
@@ -971,25 +993,11 @@ interface HiddenFieldProps {
   /** The type of the field in the Blade model. */
   type: FieldType;
   /** The value to be stored for the field in the Blade model. */
-  value?: string | number | boolean | object | null;
+  value: InputValue;
 }
 
 const HiddenField = ({ name, type, value }: HiddenFieldProps) => {
-  let content: string | number;
-
-  // Serialize boolean values.
-  if (typeof value === 'boolean') {
-    content = value.toString();
-  }
-
-  // Serialize `null` values.
-  else if (value === null) {
-    content = 'null';
-  } else if (typeof value === 'object') {
-    content = JSON.stringify(value);
-  } else {
-    content = value || '';
-  }
+  const content = serializeFormValue(value);
 
   // We neither want the input to be visible to the eye, nor usable by accessibility
   // tools. We only want to make it possible for us to serialize the form data when
