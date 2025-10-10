@@ -455,7 +455,7 @@ const FormControlsContext = createContext<FormControls | null>(null);
 
 interface FormControlsProps<T> extends PropsWithChildren {
   /** Properties for matching the target record that should be modified. */
-  targetRecord?: Record<string, unknown>;
+  targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
   modelSlug: string;
   /** Called once the queries of the form have been executed successfully. */
@@ -552,8 +552,8 @@ const FormControls = <T,>({
   const [waiting, setWaiting] = useState<boolean>(false);
   const [result, setResult] = useState<Result<T> | null>(null);
 
-  // We're using `useRef` here in order to allow for updating certain
-  // registered details without causing a re-render.
+  // We're using `useRef` here in order to allow for updating certain registered details
+  // without causing a re-render.
   const registeredProperties = useRef<Record<string, RegisteredProperty>>({});
   const registeredRedirect = useRef<string | null>(redirect || null);
 
@@ -588,13 +588,13 @@ const FormControls = <T,>({
           // Strip the `[]` suffix from the key.
           const strippedKey = key.replace('[]', '');
 
-          // Here, we are deliberately checking for the string `null` as the
-          // field value has not been parsed yet.
+          // Here, we are deliberately checking for the string `null` as the field value
+          // has not been parsed yet.
           if (values[strippedKey] && value !== 'null') values[strippedKey].push(value);
 
-          // When the first field of the array has its value set to `null`, we
-          // want to initialize an empty array. This allows us to submit empty
-          // arrays through forms.
+          // When the first field of the array has its value set to `null`, we want to
+          // initialize an empty array. This allows us to submit empty arrays through the
+          // provided forms.
           if (!values[strippedKey]) values[strippedKey] = value === 'null' ? [] : [value];
         }
       });
@@ -604,23 +604,23 @@ const FormControls = <T,>({
 
     const currentTime = new Date();
 
-    // In certain cases values have to be computed when the form is submitted,
-    // and not before that. For example, this is necessary when computing the
-    // value involves invoking a third-party service and that third-party
-    // service shouldn't be called on every render, but instead only if a new
-    // value is submitted. A specific example for this would be that, whenever
-    // a new payment method is provided for a space, Stripe first has to consume
-    // the information of the credit/debit card through a request to their API
-    // from our client-side, before we can associate the payment method with
-    // a space.
+    // In certain cases values have to be computed when the form is submitted, and not
+    // before that. For example, this is necessary when computing the value involves
+    // invoking a third-party service and that third-party service shouldn't be called on
+    // every render, but instead only if a new value is submitted.
+    //
+    // A specific example for this would be that, whenever a new payment method is
+    // provided on a web app, Stripe first has to consume the information of the
+    // credit/debit card through a request to their API from our client-side, before we
+    // can use the resulting information as part of a query. Because Stripe does not
+    // let web apps access credit card information provided by users.
     for (const prop in registeredProperties.current) {
       try {
         values[prop] = await registeredProperties.current[prop]?.getValue();
       } catch (err: unknown) {
         const error = err as TriggerError;
-        // If one of the registered properties fails to compute, we want to put
-        // the form into a failed state and prevent any further code from
-        // being executed.
+        // If one of the registered properties fails to compute, we want to put the form
+        // into a failed state and prevent any further code from being executed.
         setWaiting(false);
         setResult({ error, updatedAt: currentTime });
 
@@ -635,14 +635,13 @@ const FormControls = <T,>({
       string | number | boolean | null | ResultRecord['ronin']
     > = {};
 
-    // In order to be able to correctly store the field values we've retrieved,
-    // we have to know their type. Because RONIN reads field values directly
-    // from HTML elements, however, those types aren't persisted in memory, as
-    // HTML input elements convert every value to a string, regardless of its
-    // original type. To be able to still retrieve the original type of a value,
-    // we've added the type information as an extra HTML property, and that's
-    // where we'll retrieve it from in the loop below. Using the type, the
-    // values are then normalized back to their original type.
+    // In order to be able to correctly store the field values we've retrieved, we have
+    // to know their type. Because Blade reads field values directly from HTML elements,
+    // however, those types aren't persisted in memory, as HTML input elements convert
+    // every value to a string, regardless of its original type. To be able to still
+    // retrieve the original type of a value, we've added the type information as an
+    // extra HTML property, and that's where we'll retrieve it from in the loop below.
+    // Using the type, the values are then normalized back to their original type.
     for (const key in values) {
       let type: FieldType;
 
@@ -674,18 +673,18 @@ const FormControls = <T,>({
       const value = values[key];
       const normalizedValue = normalizeValue(value, type) as string | number | boolean;
 
-      // If a field should be excluded from the final query if it's empty, we
-      // need to prevent it from getting added to the final list of values.
+      // If a field should be excluded from the final query if it's empty, we need to
+      // prevent it from getting added to the final list of values.
       if (excludeEmptyFields?.includes(key) && normalizedValue === null) continue;
 
       if (isChildOfJSON) {
-        // If the name of the field contains a dot, we know for a fact that
-        // it wants to be nested into a JSON object.
+        // If the name of the field contains a dot, we know for a fact that it wants to
+        // be nested into a JSON object.
         const expandable: Record<keyof typeof valuesNormalized, unknown> = {};
         expandable[key] = normalizedValue;
 
-        // A basic `Object.assign` doesn't help here, because we need to deeply
-        // merge both objects.
+        // A basic `Object.assign` doesn't help here, because we need to deeply merge
+        // both objects.
         valuesNormalized = assign(
           valuesNormalized,
           construct(expandable),
@@ -695,25 +694,24 @@ const FormControls = <T,>({
           (value: string | number | boolean | Date) => normalizeValue(value, type),
         );
       } else {
-        // If the name of the field does not contain a dot, however, we know
-        // for a fact that it wants to be a top-level property.
+        // If the name of the field does not contain a dot, however, we know for a fact
+        // that it wants to be a top-level property.
         valuesNormalized[key] = normalizedValue;
       }
     }
 
-    // If a `recordSlug` prop was provided to `FormControls` and the field
-    // within the record that is used for the slug does not match the slug in
-    // the URL, this variable will contain the new URL to which we want to
-    // redirect, so that the slug in the URL matches the field that is used
-    // for the slug. For example, if the URL is `/[space]/settings` and the
-    // field associated with `[space]` is called "handle", the new URL will be
-    // `/{0.handle}/settings`, and BLADE will replace `{0.handle}` with the
-    // value of the "handle" field on the edge. We cannot construct this URL
-    // locally because certain fields (like "id") are generated on the edge.
+    // If a `recordSlug` prop was provided to `FormControls` and the field within the
+    // record that is used for the slug does not match the slug in the URL, this variable
+    // will contain the new URL to which we want to redirect, so that the slug in the URL
+    // matches the field that is used for the slug. For example, if the URL
+    // is `/[team]/settings` and the field associated with `[team]` is called "handle",
+    // the new URL will be `/{0.handle}/settings`, and Blade will replace `{0.handle}`
+    // with the value of the "handle" field on the edge. We cannot construct this URL
+    // on the client because certain fields (like "id") are generated on the edge.
     let slugRedirect: string | null = null;
     if (recordSlug) {
-      // In the case of a catch-all page (like `[...record]`), the current
-      // param will be an array.
+      // In the case of a catch-all page (like `[...record]`), the current param will
+      // be an array.
       const currentParam = Array.isArray(params[recordSlug.param])
         ? params[recordSlug.param]?.[0]
         : params[recordSlug.param];
@@ -725,13 +723,13 @@ const FormControls = <T,>({
 
       if (currentParam !== desiredParam) {
         const newParam: string | null =
-          // If the desired value of the selected param is available in the
-          // list of fields, we can use the desired value.
+          // If the desired value of the selected param is available in the list of
+          // fields, we can use the desired value.
           desiredParam ||
-          // If the desired value of the selected param is not available in the
-          // list of fields (because the page doesn't contain a field with that
-          // name), we want to let RONIN infer it after the record is created.
-          // However, we only want to do so if a record is being created.
+          // If the desired value of the selected param is not available in the list of
+          // fields (because the page doesn't contain a field with that name), we want to
+          // let Bkade infer it after the record is created. However, we only want to do
+          // so if a record is being created.
           (currentParam === newRecordSlug ? `{0.${recordSlug.field}}` : null);
 
         if (newParam) {
@@ -773,10 +771,9 @@ const FormControls = <T,>({
     } catch (err: unknown) {
       error = err as Error;
 
-      // Unless the error was explicitly intentionally thrown by manually
-      // written code inside a trigger, we want to log it here, to avoid cases
-      // where errors aren't seen because a page might not yet handle form
-      // submission errors correctly.
+      // Unless the error was explicitly intentionally thrown by manually written code
+      // inside a trigger, we want to log it here, to avoid cases where errors aren't
+      // seen because a page might not yet handle form submission errors correctly.
       if (!(error instanceof TriggerError)) console.error(error);
     }
 
