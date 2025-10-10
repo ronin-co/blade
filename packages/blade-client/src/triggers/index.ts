@@ -775,8 +775,8 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
     result: EMPTY,
   }));
 
-  const queryList = await applySyncTriggers<T>(initialList, execOptions);
-  const queryResults = await applyAsyncTriggers<T>(queryList, execOptions);
+  await applySyncTriggers<T>(initialList, execOptions);
+  const queryResults = await applyAsyncTriggers<T>(initialList, execOptions);
 
   return queryResults;
 };
