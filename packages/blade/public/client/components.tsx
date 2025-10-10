@@ -742,8 +742,8 @@ const FormControls = ({
       }
     }
 
-    let result;
-    let error: Error | null = null;
+    let result: ResultRecord | undefined;
+    let error: Error | undefined;
 
     try {
       const queryOptions = {
@@ -752,23 +752,23 @@ const FormControls = ({
       };
 
       if (targetRecord) {
-        result = (await set[modelSlug](
+        result = await set[modelSlug](
           {
             with: targetRecord,
             to: valuesNormalized,
             using: including,
           },
           queryOptions,
-        )) as T;
+        );
       } else {
-        result = (await add[modelSlug](
+        result = await add[modelSlug](
           {
             with: valuesNormalized,
             // @ts-expect-error The types will be improved shortly.
             using: including,
           },
           queryOptions,
-        )) as T;
+        );
       }
     } catch (err: unknown) {
       error = err as Error;
@@ -894,7 +894,7 @@ const useSave = ({ disabled = false }: useSaveOptions) => {
   }, [disabled, form]);
 };
 
-interface FormProps extends PropsWithChildren {
+interface FormFieldsProps extends PropsWithChildren {
   allowGlobalSave?: boolean;
 }
 
@@ -903,7 +903,7 @@ interface FormProps extends PropsWithChildren {
 // automatically read all its children fields like that. Please therefore refrain from
 // adding any styling to it. As you can see in the places where the component is already
 // used, it automatically adapts to its parent, especially when the parent is using flex.
-const Form = ({ children, allowGlobalSave }: FormProps) => {
+const FormFields = ({ children, allowGlobalSave }: FormFieldsProps) => {
   const form = useContext(FormControlsContext);
   if (!form) throw new Error('`Form` can only be used within `FormControls`.');
 
@@ -1007,9 +1007,9 @@ const HiddenValue = ({ name, type, value }: HiddenValueProps) => {
 wrapClientComponent(Link, 'Link');
 wrapClientComponent(Image, 'Image');
 wrapClientComponent(FormControls, 'FormControls');
-wrapClientComponent(Form, 'Form');
+wrapClientComponent(FormFields, 'FormFields');
 
 // `HiddenValue` is not a client component.
 // Neither is `FormControlsContext`.
 
-export { Link, Image, FormControls, Form, HiddenValue, FormControlsContext };
+export { Link, Image, FormControls, FormFields, HiddenValue, FormControlsContext };
