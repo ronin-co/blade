@@ -2,6 +2,7 @@ import type { ModelField, StoredObject } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
   type AnchorHTMLAttributes,
+  type InputHTMLAttributes,
   type MutableRefObject,
   type PropsWithChildren,
   type ReactNode,
@@ -987,30 +988,48 @@ const Form = ({
   );
 };
 
-interface HiddenFieldProps {
-  /** The name of the field in the Blade model. */
-  name: string;
-  /** The type of the field in the Blade model. */
-  type: FieldType;
+interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'> {
   /** The value to be stored for the field in the Blade model. */
   value: InputValue;
+  /** The type of the field in the Blade model. */
+  fieldType?: FieldType;
+  /** Whether the field should be hidden. */
+  hidden?: boolean;
 }
 
-const HiddenField = ({ name, type, value }: HiddenFieldProps) => {
-  const content = stringifyFormValue(value);
+const Input = ({ value, fieldType, hidden, ...rest }: InputProps) => {
+  const stringValue = stringifyFormValue(value);
 
-  // We neither want the input to be visible to the eye, nor usable by accessibility
-  // tools. We only want to make it possible for us to serialize the form data when
-  // submitting it.
+  if (!fieldType) {
+    switch (rest.type) {
+      case 'text':
+        fieldType = 'STRING';
+        break;
+
+      case 'number':
+        fieldType = 'INT64';
+        break;
+
+      case 'checkbox':
+        fieldType = 'BOOL';
+        break;
+
+      default:
+        fieldType = 'STRING';
+    }
+  }
+
   return (
     <input
-      aria-hidden
-      // The type used when storing the value in SQLite.
-      data-type={type}
-      name={name}
-      readOnly
-      type="hidden"
-      value={content}
+      // The type used when storing the value in the database.
+      data-type={fieldType}
+      value={stringValue}
+      // If the input is marked as hidden, we neither want the input to be visible to the
+      // eye, nor usable by accessibility tools.
+      aria-hidden={hidden}
+      readOnly={hidden}
+      type={hidden ? 'hidden' : undefined}
+      {...rest}
     />
   );
 };
@@ -1020,7 +1039,7 @@ wrapClientComponent(Image, 'Image');
 wrapClientComponent(Form, 'Form');
 wrapClientComponent(FormElement, 'FormElement');
 
-// `HiddenField` is not a client component.
+// `Input` is not a client component.
 // Neither is `FormContext`.
 
-export { Link, Image, Form, FormElement, HiddenField, FormContext };
+export { Link, Image, Form, FormElement, Input, FormContext };
