@@ -496,7 +496,7 @@ type FieldType =
 
 type InputValue = string | number | boolean | object | null;
 
-const serializeFormValue = (value: InputValue): string | number => {
+const stringifyFormValue = (value: InputValue): string | number => {
   let newValue: string | number;
 
   // Serialize boolean values.
@@ -516,7 +516,7 @@ const serializeFormValue = (value: InputValue): string | number => {
   return newValue;
 };
 
-const normalizeValue = (
+const parseFormValue = (
   value: string | boolean | number | Date,
   type: FieldType,
 ): string | number | boolean | Date | unknown => {
@@ -803,7 +803,7 @@ const Form = ({
       const isChildOfJSON = key.includes('.');
       const isArray = Array.isArray(values[key]);
       const value = values[key];
-      const normalizedValue = normalizeValue(value, type) as string | number | boolean;
+      const normalizedValue = parseFormValue(value, type) as string | number | boolean;
 
       // If a field should be excluded from the final query if it's empty, we need to
       // prevent it from getting added to the final list of values.
@@ -823,7 +823,7 @@ const Form = ({
         ) as typeof valuesNormalized;
       } else if (isArray) {
         valuesNormalized[key] = values[key].map(
-          (value: string | number | boolean | Date) => normalizeValue(value, type),
+          (value: string | number | boolean | Date) => parseFormValue(value, type),
         );
       } else {
         // If the name of the field does not contain a dot, however, we know for a fact
@@ -997,7 +997,7 @@ interface HiddenFieldProps {
 }
 
 const HiddenField = ({ name, type, value }: HiddenFieldProps) => {
-  const content = serializeFormValue(value);
+  const content = stringifyFormValue(value);
 
   // We neither want the input to be visible to the eye, nor usable by accessibility
   // tools. We only want to make it possible for us to serialize the form data when
