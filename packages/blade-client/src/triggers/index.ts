@@ -642,12 +642,12 @@ export const applySyncTriggers = async <T extends ResultRecord>(
  * @param queries - A list of queries to execute triggers for.
  * @param options - A list of options to change how the triggers are executed.
  *
- * @returns The results provided by the triggers.
+ * @returns Nothing. The original list of queries is modified in place.
  */
 export const applyAsyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger<T>>,
   options: TriggerExecutionOptions,
-): Promise<Array<ResultPerDatabase<T>>> => {
+): Promise<void> => {
   // Invoke `resolvingGet`, `resolvingSet`, `resolvingAdd`, `resolvingRemove`,
   // and `resolvingCount`.
   await Promise.all(
@@ -720,20 +720,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     // (non-awaited promises) have been resolved.
     options.clientOptions.waitUntil?.(clearPromise);
   }
-
-  // Filter the list of queries to remove any potential queries used for "diffing"
-  // (retrieving the previous value of a record) and any potential queries resulting from
-  // "before" or "after" triggers. Then return only the results of the queries.
-  return queries
-    .filter(
-      (query) =>
-        typeof query.diffForIndex === 'undefined' &&
-        typeof query.parentTrigger === 'undefined',
-    )
-    .map(({ result, database }) => ({
-      result: result as FormattedResults<T>[number],
-      database,
-    }));
 };
 
 /**
@@ -785,7 +771,19 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   }));
 
   await applySyncTriggers<T>(initialList, execOptions);
-  const queryResults = await applyAsyncTriggers<T>(initialList, execOptions);
+  await applyAsyncTriggers<T>(initialList, execOptions);
 
-  return queryResults;
+  // Filter the list of queries to remove any potential queries used for "diffing"
+  // (retrieving the previous value of a record) and any potential queries resulting from
+  // "before" or "after" triggers. Then return only the results of the queries.
+  return initialList
+    .filter(
+      (query) =>
+        typeof query.diffForIndex === 'undefined' &&
+        typeof query.parentTrigger === 'undefined',
+    )
+    .map(({ result, database }) => ({
+      result: result as FormattedResults<T>[number],
+      database,
+    }));
 };
