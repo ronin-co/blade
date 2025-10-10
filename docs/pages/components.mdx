@@ -55,6 +55,46 @@ In the future, links will also be prefetched when the page that contains them is
 
 ## `Form`
 
+Storing data in Blade is done by executing write queries with
+the [useMutation](/hooks#usemutation-client) hook. It makes it possible to construct any
+kind of logic for writing records, including building forms.
+
+If you are specifically implementing a form, Blade also offers a native `Form` component,
+which makes building forms even easier. The component invokes `useMutation` internally.
+
+For example, it could look like this:
+
+```tsx
+import { Form } from 'blade/client/components';
+
+<Form model="account" redirect="/dashboard">
+  <input type="text" name="email" placeholder="Email" />
+  <input type="text" name="password" placeholder="Password" />
+
+  <button type="submit">Submit</button>
+</Form>
+```
+
+If the button at the end of the form is pressed, the following query will be executed,
+with `xxx` being the values that were provided in the inputs.
+
+```ts
+add.account.with({
+  email: 'xxx',
+  password: 'xxx'
+});
+```
+
+As a result, a new record for the `account` model will be added with the provided values,
+and the page will change to `/dashboard` afterward.
+
+Due to how [useMutation](/hooks#usemutation-client) is designed, the form submission will
+be executed with maximum efficiency: The write query will be executed in the same
+database transaction as the read queries of the `/dashboard` page, and only the
+`/dashboard` page will be rendered — not the current page.
+
+To avoid changing the page after the form submission, simply leave out the `redirect` property.
+
 ## `Image`
 
 Building a fast web application that instantly provides joy to its users whenever it is
