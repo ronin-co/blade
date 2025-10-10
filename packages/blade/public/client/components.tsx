@@ -521,6 +521,8 @@ interface FormProps extends PropsWithChildren {
    * @default "new"
    */
   newRecordSlug?: 'new';
+  /** Disable the automatic creation of a `<form>` element. */
+  noElement?: boolean;
 }
 
 interface Result {
@@ -544,6 +546,7 @@ const Form = ({
   including,
   excludeEmptyFields,
   newRecordSlug,
+  noElement,
 }: FormProps) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add } = useMutation();
@@ -852,7 +855,7 @@ const Form = ({
         registerForm,
         unregisterForm,
       }}>
-      {children}
+      {noElement ? children : <FormElement>{children}</FormElement>}
     </FormContext.Provider>
   );
 };
