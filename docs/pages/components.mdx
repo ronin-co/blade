@@ -53,17 +53,227 @@ the finger is lifted), the transition begins.
 
 In the future, links will also be prefetched when the page that contains them is loaded.
 
+## `Form`
+
+Storing data in Blade is done by executing write queries with
+the [useMutation](/hooks#usemutation-client) hook. It makes it possible to construct any
+kind of logic for writing records, including building forms.
+
+If you are specifically implementing a form, Blade also offers a native `Form` component,
+which makes building forms even easier. The component invokes `useMutation` internally.
+
+For example, it could look like this:
+
+```tsx
+import { Form } from 'blade/client/components';
+
+<Form model="account" redirect="/dashboard">
+  <input type="text" name="email" placeholder="Email" />
+  <input type="text" name="password" placeholder="Password" />
+
+  <button type="submit">Submit</button>
+</Form>
+```
+
+If the button at the end of the form is pressed, the following query will be executed,
+with `xxx` being the values that were provided in the inputs.
+
+```ts
+add.account.with({
+  email: 'xxx',
+  password: 'xxx'
+});
+```
+
+As a result, a new record for the `account` model will be added with the provided values,
+and the page will change to `/dashboard` afterward.
+
+Due to how [useMutation](/hooks#usemutation-client) is designed, the form submission will
+be executed with maximum efficiency: The write query will be executed in the same
+database transaction as the read queries of the `/dashboard` page, and only the
+`/dashboard` page will be rendered — not the current page.
+
+To avoid changing the page after the form submission, simply leave out the `redirect` property.
+
+### Updating Records
+
+To address an existing record using the `Form` component instead of creating a new one,
+you can pass a `targetRecord` prop with field values that should be used to resolve the
+existing record, before that record will then be updated automatically.
+
+```tsx
+const { account } = use.session.using(['account']);
+const { email } = account;
+// ^ elaine@site.co
+
+<Form model="account" targetRecord={{ email: account.email }}>
+  <input type="text" name="password" placeholder="Password" />
+  <button type="submit">Submit</button>
+</Form>
+```
+
+When submitted, the form above would then cause the following query to be executed,
+with `xxx` being the values that were provided in the inputs:
+
+```ts
+set.account({
+  with: { email: 'elaine@site.co' },
+  to: { password: 'xxx' }
+});
+```
+
+As you can see, all that the `targetRecord` prop does is switch the write query from
+type "add" to type "set" and update
+its [query instructions](/queries/instructions) accordingly. That's it.
+
+### Sophisticated Layouts
+
+By default, the `Form` component automatically generates
+a [`form`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/form) element
+in the DOM. That means both the input elements and the submit button must be present within
+that element, since that's how the `form` element works in HTML.
+
+If your layout is significantly more complex, however, you might want the `form` element and
+the submit button to exist in two entirely different places. For example, you might want the
+`form` to exist in the content area of your layout, whereas the submit button might sit in
+the sidebar of your layout.
+
+In such cases, you can set a `noElement` prop on the `Form` component, which will prevent the
+`Form` component from generatign the `form` element on its own. You then need to import a
+separate component, which will act as the `form` element.
+
+Additionally, you then also need to handle the submission of the form yourself. In the example
+below, we are adding a custom `SubmitButton` that handles the form submission.
+
+```tsx
+import { useContext } from 'react';
+import { Form, FormElement, FormContext } from 'blade/client/components';
+
+const SubmitButton = () => {
+  const form = useContext(FormContext);
+  return <button onClick={() => form.submit()}>Submit</button>;
+};
+
+<Form model="account" noElement>
+  <FormElement>
+    <input type="text" name="email" placeholder="Email" />
+    <input type="text" name="password" placeholder="Password" />
+  </FormElement>
+
+  <SubmitButton />
+</Form>
+```
+
+Note that, if you choose to place the submit button outside `FormElement`, Blade will not be
+able to apply [progressive enhancement](https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement) for
+your form, meaning that the form will only be possible to submit once the JavaScript bundles
+have been downloaded.
+
+### Props
+
+<ParamField path="model" type="string" isRequired>
+  The slug (singular) of the [Blade model](/models) that should be addressed.
+</ParamField>
+
+<ParamField path="targetRecord" type="object">
+  An object containing fields and values that should be used to resolve an existing
+  record, which will result in that record being updated. If the prop is omitted, a new
+  record will be created instead.
+</ParamField>
+
+<ParamField path="redirect" type="string">
+  The path of a page that should be rendered after the form has been submitted. Just like
+  the `redirect` option available for write queries in the [useMutation](https://blade.im/hooks#usemutation-client)
+  hook, this prop can contain segments that should be replaced with the values of fields
+  from the resulting record. For example, `/accounts/{0.handle}` would redirect to
+  `/accounts/elaine` if the `handle` field contains the value `elaine`. Since this relies
+  on the fields of the resulting record, you don't need to use the fields that are part
+  of the form. Just use any field of the record.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  Whether the form can be used, or not.
+</ParamField>
+
+<ParamField path="disabledWhileWaiting" type="boolean" defaultValue="true">
+  Whether the `disabled` prop should automatically be set to `true` while the form is
+  being submitted.
+</ParamField>
+
+<ParamField path="clearOnSuccess" type="boolean">
+  If your form is designed to be submitted several times in a row, setting this prop to
+  `true` will cause the values of all inputs to be cleared after the form has been
+  submitted successfully.
+</ParamField>
+
+<ParamField path="onSuccess" type="function">
+  A function that will be called once the form has been submitted successfully, with the
+  first argument being the resulting record.
+</ParamField>
+
+<ParamField path="onError" type="function">
+  A function that will be called once the form has failed to be submitted, with the first
+  argument being the resulting error that prevented the record from being saved successfully.
+</ParamField>
+
+<ParamField path="excludeEmptyFields" type="string[]">
+  An array of field slugs that should be excluded from the final query, unless their
+  value is [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy). This is
+  useful for cases where the default value of an input inside the form is, for
+  example, `null`, and the field should only be stored if it receives a string value.
+</ParamField>
+
+<ParamField path="database" type="string">
+  The name of a specific database for which the query should be executed.
+</ParamField>
+
+<ParamField path="recordSlug" type="object">
+  If one of the fields submitted with the form is used in the URL, this prop will ensure
+  that the URL of the page automatically gets updated every time the value of the field
+  changes. Specifically, an object containing `param` (the param in the URL, accessible
+  via `useParams`) and `field` (the matching field on the record) must be provided. The
+  URL will automatically be changed if the value of `field` changes. You can also provide
+  `formatAs: 'dash-case'` to auto-format the value as dash-case.
+</ParamField>
+
+<ParamField path="newRecordSlug" type="string">
+  When using the `recordSlug` prop, the `Form` component will consider `new` as a record
+  slug in the URL to be a new (non-existing record). For example, the URL of the page for
+  creating a new "team" record (if you have such a model defined) could then
+  be `/teams/new` with the page name being `/teams/[handle]`. If you would like to use a
+  value other than `new` for this purpose, set it in the prop right here.
+</ParamField>
+
+<ParamField path="including" type="string[]">
+  An array of slugs of [Link](/fields#link) fields, which whose records should be
+  resolved and provided to as part of the resulting record in `onSuccess`. This makes it
+  possible to avoid having to run additional read queries after submitting a form. For
+  example, if a Link field with the slug `test` is resolved, the record provided as the
+  first argument of `onSuccess` will have a `test` property containing the linked record.
+</ParamField>
+
+<ParamField path="noElement" type="boolean">
+  By default, a `form` element will be added for you in the DOM. To avoid this and
+  ensure that the `Form` component thereby does not add any DOM elements whatsoever, you
+  can set this prop to `true`.
+</ParamField>
+
 ## `Image`
 
-Building a fast web application that instantly provides joy to its users whenever it is accessed (rather than introducing delays) typically requires paying attention to a number of different components.
+Building a fast web application that instantly provides joy to its users whenever it is
+accessed (rather than introducing delays) typically requires paying attention to a number
+of different components.
 
-Blade aims to automatically provide you with the optimizations you need to guarantee the fastest experience possible, additionally letting you fine-tune those improvements where necessary.
+Blade aims to automatically provide you with the optimizations you need to guarantee the
+fastest experience possible, additionally letting you fine-tune those improvements where necessary.
 
-One of those optimizations is that images are **displayed instantaneously**, which Blade ensures via a number of different features available for images (`image` [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) data) stored in the **Blob** field type.
+One of those optimizations is that images are **displayed instantaneously**, which Blade
+ensures via a number of different features available for images (`image` [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) data) stored in the **Blob** field type.
 
 ### Image Metadata
 
-When retrieving records that contain fields of type “Blob”, you will be provided with a value that looks similar to the following for each of those fields:
+When retrieving records that contain fields of type “Blob”, you will be provided with a
+value that looks similar to the following for each of those fields:
 
 ```ts
 export interface Blob {
@@ -89,44 +299,16 @@ export interface Blob {
 
 ### Image Placeholders
 
-If you are building a web application, in order to ensure the smoothest possible experience for the people making use of your application, we strongly advice displaying a low-quality blurred version of every image, until the full image has finished loading.
+If you are building a web application, in order to ensure the smoothest possible experience
+for the people making use of your application, we strongly advice displaying a low-quality
+blurred version of every image, until the full image has finished loading.
 
-Like this, you can avoid empty white gaps in your page, and instead always display something that at least remotely resembles what the image will look like, until the image is available in its entirety. At this point the image can overlay the blurred low-quality version.
+Like this, you can avoid empty white gaps in your page, and instead always display something
+that at least remotely resembles what the image will look like, until the image is available
+in its entirety. At this point the image can overlay the blurred low-quality version.
 
-When [using Next.js](https://nextjs.org/docs/app/building-your-application/optimizing/images), for example, you can easily display the placeholder like so:
-
-```tsx
-<Image
-  src={field.src}
-  placeholder={field.placeholder.base64}
-  alt="A description of the image"
-  width={500}
-  height={500}
-/>
-```
-
-In order to allow the remote image to be loaded securely (when deploying to [Vercel](https://vercel.com/)), you will need to add the following config to your `next.config.js` file:
-
-```ts
-module.exports = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'storage.ronin.co',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-  },
-};
-```
-
-If you aren’t using Next.js, you may render the placeholder like so:
-
-```tsx
-<img src={field.placeholder.base64} />
-```
+The `Image` component does this automatically, if you provide it with a `placeholder`
+property, which you can obtain directly from the respective Blob field.
 
 ### Image Performance
 
@@ -161,30 +343,3 @@ Other additional options can be used as well, in order to guarantee the most ide
 ### Download
 
 By default, all images are opened inside the browser when accessing them. If you wish to download them when accessing the image URL, add `?download=true` or `download=desired-filename.png` to the URL. This will instruct browsers (set the `Content-Disposition` header to `attachment`) to download the image.
-
-### Framework Example
-
-Since all of the options mentioned above can be provided to the `src` URL of the image as query string parameters, the optimization method is agnostic of any framework, meaning it works regardless of the framework, and even with vanilla HTML:
-
-```tsx
-<img src={`${src}?w=200&h=400&blur=40`} />
-```
-
-If you’re using [Next.js](https://nextjs.org/), you can use a [custom image loader](https://nextjs.org/docs/app/api-reference/components/image#loader) to accomplish the same:
-
-```tsx
-const imageLoader = ({ src, width, quality }: { src: string; width: number; quality: number }) => {
-  return `${src}?w=${width}&q=${quality || 75}`;
-};
-
-<Image
-  src={field.src}
-  placeholder={field.placeholder.base64}
-  loader={imageLoader}
-  alt="A description of the image"
-  width={500}
-  height={500}
-/>;
-```
-
-As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from Blade when the record is retrieved. This field (as mentioned in the “Image Placeholder” section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.
