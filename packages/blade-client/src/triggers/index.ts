@@ -507,12 +507,12 @@ interface TriggerExecutionOptions {
  * @param queries - A list of queries to execute triggers for.
  * @param options - A list of options to change how the triggers are executed.
  *
- * @returns The list of queries after they were transformed by triggers.
+ * @returns Nothing. The original list of queries is modified in place.
  */
 export const applySyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger<T>>,
   options: TriggerExecutionOptions,
-): Promise<Array<QueryFromTrigger<T>>> => {
+): Promise<void> => {
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
     queries.map(async (queryItem, index) => {
