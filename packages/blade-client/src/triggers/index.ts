@@ -427,7 +427,13 @@ const invokeTriggers = async <T extends ResultRecord>(
             result: definition.result,
           };
 
-          return applyTriggers ? await applySyncTriggers([newQuery], options) : newQuery;
+          if (applyTriggers) {
+            const tempList: Array<QueryFromTrigger<T>> = [newQuery];
+            await applySyncTriggers(tempList, options);
+            return tempList;
+          }
+
+          return newQuery;
         },
       );
 
@@ -585,7 +591,8 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   // extra `get` query, since `set` queries return the modified record afterward, but in
   // order to get the version of the record *before* the modification, we need a separate
   // query of type `get`.
-  return queries.flatMap((details, index) => {
+  for (let index = 0; index < queries.length; index++) {
+    const details = queries[index];
     const { query, database } = details;
 
     // Only generate diff queries for queries of type `set` or `alter` and don't generate
@@ -619,11 +626,13 @@ export const applySyncTriggers = async <T extends ResultRecord>(
         result: EMPTY,
       };
 
-      return [diffQuery, details];
-    }
+      // Insert the diff query directly before the original query.
+      queries.splice(index, 0, diffQuery);
 
-    return [details];
-  });
+      // Skip over the original query which shifted to the next index.
+      index++;
+    }
+  }
 };
 
 /**
