@@ -26,7 +26,7 @@ import {
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
 import { generateUniqueId } from '@/private/universal/utils';
-import { getOutputFile, getPublicFile } from '@/private/universal/utils/paths';
+import { getPublicFile } from '@/private/universal/utils/paths';
 
 export interface VirtualFileItem {
   /**

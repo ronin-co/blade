@@ -459,7 +459,7 @@ interface FormProps extends PropsWithChildren {
   /** Properties for matching the target record that should be modified. */
   targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
-  modelSlug: string;
+  model: string;
   /** Called once the queries of the form have been executed successfully. */
   onSuccess?: (result: NonNullable<Result['value']>) => void;
   /** Called if one of the queries of the form fails to execute. */
@@ -531,7 +531,7 @@ interface Result {
 
 const Form = ({
   targetRecord,
-  modelSlug,
+  model,
   clearOnSuccess = false,
   children,
   onSuccess,
@@ -752,7 +752,7 @@ const Form = ({
       };
 
       if (targetRecord) {
-        result = await set[modelSlug](
+        result = await set[model](
           {
             with: targetRecord,
             to: valuesNormalized,
@@ -761,7 +761,7 @@ const Form = ({
           queryOptions,
         );
       } else {
-        result = await add[modelSlug](
+        result = await add[model](
           {
             with: valuesNormalized,
             // @ts-expect-error The types will be improved shortly.
@@ -832,7 +832,7 @@ const Form = ({
   return (
     <FormContext.Provider
       value={{
-        key: `${modelSlug}${targetRecord?.id ? `_${targetRecord.id}` : ''}`,
+        key: `${model}${targetRecord?.id ? `_${targetRecord.id}` : ''}`,
 
         waiting,
         disabled,
