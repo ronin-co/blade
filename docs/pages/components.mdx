@@ -65,11 +65,11 @@ which makes building forms even easier. The component invokes `useMutation` inte
 For example, it could look like this:
 
 ```tsx
-import { Form } from 'blade/client/components';
+import { Form, Input } from 'blade/client/components';
 
 <Form model="account" redirect="/dashboard">
-  <input type="text" name="email" placeholder="Email" />
-  <input type="text" name="password" placeholder="Password" />
+  <Input type="text" name="email" placeholder="Email" />
+  <Input type="text" name="password" placeholder="Password" />
 
   <button type="submit">Submit</button>
 </Form>
@@ -107,7 +107,7 @@ const { email } = account;
 // ^ elaine@site.co
 
 <Form model="account" targetRecord={{ email: account.email }}>
-  <input type="text" name="password" placeholder="Password" />
+  <Input type="text" name="password" placeholder="Password" />
   <button type="submit">Submit</button>
 </Form>
 ```
@@ -147,7 +147,7 @@ below, we are adding a custom `SubmitButton` that handles the form submission.
 
 ```tsx
 import { useContext } from 'react';
-import { Form, FormElement, FormContext } from 'blade/client/components';
+import { Form, FormElement, FormContext, Input } from 'blade/client/components';
 
 const SubmitButton = () => {
   const form = useContext(FormContext);
@@ -156,8 +156,8 @@ const SubmitButton = () => {
 
 <Form model="account" noElement>
   <FormElement>
-    <input type="text" name="email" placeholder="Email" />
-    <input type="text" name="password" placeholder="Password" />
+    <Input type="text" name="email" placeholder="Email" />
+    <Input type="text" name="password" placeholder="Password" />
   </FormElement>
 
   <SubmitButton />

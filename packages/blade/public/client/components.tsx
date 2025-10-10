@@ -2,6 +2,7 @@ import type { ModelField, StoredObject } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
   type AnchorHTMLAttributes,
+  type InputHTMLAttributes,
   type MutableRefObject,
   type PropsWithChildren,
   type ReactNode,
@@ -494,7 +495,29 @@ type FieldType =
   | 'SUBQUERY'
   | 'READABLE';
 
-const normalizeValue = (
+type InputValue = string | number | boolean | object | null;
+
+const stringifyFormValue = (value: InputValue): string | number => {
+  let newValue: string | number;
+
+  // Serialize boolean values.
+  if (typeof value === 'boolean') {
+    newValue = value.toString();
+  }
+
+  // Serialize `null` values.
+  else if (value === null) {
+    newValue = 'null';
+  } else if (typeof value === 'object') {
+    newValue = JSON.stringify(value);
+  } else {
+    newValue = value || '';
+  }
+
+  return newValue;
+};
+
+const parseFormValue = (
   value: string | boolean | number | Date,
   type: FieldType,
 ): string | number | boolean | Date | unknown => {
@@ -781,7 +804,7 @@ const Form = ({
       const isChildOfJSON = key.includes('.');
       const isArray = Array.isArray(values[key]);
       const value = values[key];
-      const normalizedValue = normalizeValue(value, type) as string | number | boolean;
+      const normalizedValue = parseFormValue(value, type) as string | number | boolean;
 
       // If a field should be excluded from the final query if it's empty, we need to
       // prevent it from getting added to the final list of values.
@@ -801,7 +824,7 @@ const Form = ({
         ) as typeof valuesNormalized;
       } else if (isArray) {
         valuesNormalized[key] = values[key].map(
-          (value: string | number | boolean | Date) => normalizeValue(value, type),
+          (value: string | number | boolean | Date) => parseFormValue(value, type),
         );
       } else {
         // If the name of the field does not contain a dot, however, we know for a fact
@@ -965,44 +988,48 @@ const Form = ({
   );
 };
 
-interface HiddenFieldProps {
-  /** The name of the field in the Blade model. */
-  name: string;
-  /** The type of the field in the Blade model. */
-  type: FieldType;
+interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'> {
   /** The value to be stored for the field in the Blade model. */
-  value?: string | number | boolean | object | null;
+  value: InputValue;
+  /** The type of the field in the Blade model. */
+  fieldType?: FieldType;
+  /** Whether the field should be hidden. */
+  hidden?: boolean;
 }
 
-const HiddenField = ({ name, type, value }: HiddenFieldProps) => {
-  let content: string | number;
+const Input = ({ value, fieldType, hidden, ...rest }: InputProps) => {
+  const stringValue = stringifyFormValue(value);
 
-  // Serialize boolean values.
-  if (typeof value === 'boolean') {
-    content = value.toString();
+  if (!fieldType) {
+    switch (rest.type) {
+      case 'text':
+        fieldType = 'STRING';
+        break;
+
+      case 'number':
+        fieldType = 'INT64';
+        break;
+
+      case 'checkbox':
+        fieldType = 'BOOL';
+        break;
+
+      default:
+        fieldType = 'STRING';
+    }
   }
 
-  // Serialize `null` values.
-  else if (value === null) {
-    content = 'null';
-  } else if (typeof value === 'object') {
-    content = JSON.stringify(value);
-  } else {
-    content = value || '';
-  }
-
-  // We neither want the input to be visible to the eye, nor usable by accessibility
-  // tools. We only want to make it possible for us to serialize the form data when
-  // submitting it.
   return (
     <input
-      aria-hidden
-      // The type used when storing the value in SQLite.
-      data-type={type}
-      name={name}
-      readOnly
-      type="hidden"
-      value={content}
+      // The type used when storing the value in the database.
+      data-type={fieldType}
+      value={stringValue}
+      // If the input is marked as hidden, we neither want the input to be visible to the
+      // eye, nor usable by accessibility tools.
+      aria-hidden={hidden}
+      readOnly={hidden}
+      type={hidden ? 'hidden' : undefined}
+      {...rest}
     />
   );
 };
@@ -1012,7 +1039,7 @@ wrapClientComponent(Image, 'Image');
 wrapClientComponent(Form, 'Form');
 wrapClientComponent(FormElement, 'FormElement');
 
-// `HiddenField` is not a client component.
+// `Input` is not a client component.
 // Neither is `FormContext`.
 
-export { Link, Image, Form, FormElement, HiddenField, FormContext };
+export { Link, Image, Form, FormElement, Input, FormContext };
