@@ -894,7 +894,7 @@ const useSave = ({ disabled = false }: useSaveOptions) => {
   }, [disabled, form]);
 };
 
-interface FormFieldsProps extends PropsWithChildren {
+interface FormElementProps extends PropsWithChildren {
   allowGlobalSave?: boolean;
 }
 
@@ -903,9 +903,9 @@ interface FormFieldsProps extends PropsWithChildren {
 // automatically read all its children fields like that. Please therefore refrain from
 // adding any styling to it. As you can see in the places where the component is already
 // used, it automatically adapts to its parent, especially when the parent is using flex.
-const FormFields = ({ children, allowGlobalSave }: FormFieldsProps) => {
+const FormElement = ({ children, allowGlobalSave }: FormElementProps) => {
   const form = useContext(FormContext);
-  if (!form) throw new Error('`FormFields` can only be used within `Form`.');
+  if (!form) throw new Error('`FormElement` can only be used within `Form`.');
 
   const formId = useRef<string>('');
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -1007,9 +1007,9 @@ const HiddenField = ({ name, type, value }: HiddenFieldProps) => {
 wrapClientComponent(Link, 'Link');
 wrapClientComponent(Image, 'Image');
 wrapClientComponent(Form, 'Form');
-wrapClientComponent(FormFields, 'FormFields');
+wrapClientComponent(FormElement, 'FormElement');
 
 // `HiddenField` is not a client component.
 // Neither is `FormContext`.
 
-export { Link, Image, Form, FormFields, HiddenField, FormContext };
+export { Link, Image, Form, FormElement, HiddenField, FormContext };

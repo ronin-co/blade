@@ -147,7 +147,7 @@ below, we are adding a custom `SubmitButton` that handles the form submission.
 
 ```tsx
 import { useContext } from 'react';
-import { Form, FormFields, FormContext } from 'blade/client/components';
+import { Form, FormElement, FormContext } from 'blade/client/components';
 
 const SubmitButton = () => {
   const form = useContext(FormContext);
@@ -155,16 +155,16 @@ const SubmitButton = () => {
 };
 
 <Form model="account" noElement>
-  <FormFields>
+  <FormElement>
     <input type="text" name="email" placeholder="Email" />
     <input type="text" name="password" placeholder="Password" />
-  </FormFields>
+  </FormElement>
 
   <SubmitButton />
 </Form>
 ```
 
-Note that, if you choose to place the submit button outside `FormFields`, Blade will not be
+Note that, if you choose to place the submit button outside `FormElement`, Blade will not be
 able to apply [progressive enhancement](https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement) for
 your form, meaning that the form will only be possible to submit once the JavaScript bundles
 have been downloaded.
