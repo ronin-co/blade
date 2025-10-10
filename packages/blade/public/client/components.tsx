@@ -2,7 +2,6 @@ import type { ModelField, StoredObject } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
   type AnchorHTMLAttributes,
-  type InputHTMLAttributes,
   type MutableRefObject,
   type PropsWithChildren,
   type ReactNode,
@@ -1011,5 +1010,6 @@ wrapClientComponent(FormControls, 'FormControls');
 wrapClientComponent(Form, 'Form');
 
 // `HiddenValue` is not a client component.
+// Neither is `FormControlsContext`.
 
-export { Link, Image, FormControls, Form, HiddenValue };
+export { Link, Image, FormControls, Form, HiddenValue, FormControlsContext };
