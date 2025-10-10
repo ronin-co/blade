@@ -2,6 +2,7 @@ import type { ModelField, StoredObject } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
   type AnchorHTMLAttributes,
+  type InputHTMLAttributes,
   type MutableRefObject,
   type PropsWithChildren,
   type ReactNode,
@@ -962,9 +963,53 @@ const Form = ({ children, allowGlobalSave }: FormProps) => {
   );
 };
 
+interface HiddenValueProps {
+  /** The name of the field in the Blade model. */
+  name: string;
+  /** The type of the field in the Blade model. */
+  type: FieldType;
+  /** The value to be stored for the field in the Blade model. */
+  value?: string | number | boolean | object | null;
+}
+
+const HiddenValue = ({ name, type, value }: HiddenValueProps) => {
+  let content: string | number;
+
+  // Serialize boolean values.
+  if (typeof value === 'boolean') {
+    content = value.toString();
+  }
+
+  // Serialize `null` values.
+  else if (value === null) {
+    content = 'null';
+  } else if (typeof value === 'object') {
+    content = JSON.stringify(value);
+  } else {
+    content = value || '';
+  }
+
+  // We neither want the input to be visible to the eye, nor usable by accessibility
+  // tools. We only want to make it possible for us to serialize the form data when
+  // submitting it.
+  return (
+    <input
+      aria-hidden
+      // The type used when storing the value in SQLite.
+      data-type={type}
+      name={name}
+      readOnly
+      type="hidden"
+      value={content}
+    />
+  );
+};
+
 wrapClientComponent(Link, 'Link');
 wrapClientComponent(Image, 'Image');
 wrapClientComponent(FormControls, 'FormControls');
 wrapClientComponent(Form, 'Form');
 
-export { Link, Image, FormControls, Form };
+// `HiddenValue` is not a client component.
+
+export { Link, Image, FormControls, Form, HiddenValue };
