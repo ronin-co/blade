@@ -426,7 +426,7 @@ interface RegisterFormProps {
   current: HTMLFormElement;
 }
 
-type FormControlsContextValue = {
+type FormContextValue = {
   key: string;
   submit: () => Promise<void>;
   waiting: boolean;
@@ -453,9 +453,9 @@ type RegisteredProperty = {
   getValue: () => void;
 };
 
-const FormControlsContext = createContext<FormControlsContextValue | null>(null);
+const FormContext = createContext<FormContextValue | null>(null);
 
-interface FormControlsProps extends PropsWithChildren {
+interface FormProps extends PropsWithChildren {
   /** Properties for matching the target record that should be modified. */
   targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
@@ -529,7 +529,7 @@ interface Result {
   updatedAt: Date;
 }
 
-const FormControls = ({
+const Form = ({
   targetRecord,
   modelSlug,
   clearOnSuccess = false,
@@ -544,7 +544,7 @@ const FormControls = ({
   including,
   excludeEmptyFields,
   newRecordSlug,
-}: FormControlsProps) => {
+}: FormProps) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add } = useMutation();
   const { pathname } = useLocation();
@@ -702,14 +702,14 @@ const FormControls = ({
       }
     }
 
-    // If a `recordSlug` prop was provided to `FormControls` and the field within the
-    // record that is used for the slug does not match the slug in the URL, this variable
-    // will contain the new URL to which we want to redirect, so that the slug in the URL
-    // matches the field that is used for the slug. For example, if the URL
-    // is `/[team]/settings` and the field associated with `[team]` is called "handle",
-    // the new URL will be `/{0.handle}/settings`, and Blade will replace `{0.handle}`
-    // with the value of the "handle" field on the edge. We cannot construct this URL
-    // on the client because certain fields (like "id") are generated on the edge.
+    // If a `recordSlug` prop was provided to `Form` and the field within the record that
+    // is used for the slug does not match the slug in the URL, this variable will
+    // contain the new URL to which we want to redirect, so that the slug in the URL
+    // matches the field that is used for the slug. For example, if the URL is
+    // `/[team]/settings` and the field associated with `[team]` is called "handle", the
+    // new URL will be `/{0.handle}/settings`, and Blade will replace `{0.handle}` with
+    // the value of the "handle" field on the edge. We cannot construct this URL on the
+    // client because certain fields (like "id") are generated on the edge.
     let slugRedirect: string | null = null;
     if (recordSlug) {
       // In the case of a catch-all page (like `[...record]`), the current param will
@@ -830,7 +830,7 @@ const FormControls = ({
   }, [redirect]);
 
   return (
-    <FormControlsContext.Provider
+    <FormContext.Provider
       value={{
         key: `${modelSlug}${targetRecord?.id ? `_${targetRecord.id}` : ''}`,
 
@@ -853,7 +853,7 @@ const FormControls = ({
         unregisterForm,
       }}>
       {children}
-    </FormControlsContext.Provider>
+    </FormContext.Provider>
   );
 };
 
@@ -863,7 +863,7 @@ interface useSaveOptions {
 }
 
 const useSave = ({ disabled = false }: useSaveOptions) => {
-  const form = useContext(FormControlsContext);
+  const form = useContext(FormContext);
 
   // Listen to global ⌘+S events.
   useEffect(() => {
@@ -904,8 +904,8 @@ interface FormFieldsProps extends PropsWithChildren {
 // adding any styling to it. As you can see in the places where the component is already
 // used, it automatically adapts to its parent, especially when the parent is using flex.
 const FormFields = ({ children, allowGlobalSave }: FormFieldsProps) => {
-  const form = useContext(FormControlsContext);
-  if (!form) throw new Error('`Form` can only be used within `FormControls`.');
+  const form = useContext(FormContext);
+  if (!form) throw new Error('`Form` can only be used within `Form`.');
 
   const formId = useRef<string>('');
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -1006,10 +1006,10 @@ const HiddenValue = ({ name, type, value }: HiddenValueProps) => {
 
 wrapClientComponent(Link, 'Link');
 wrapClientComponent(Image, 'Image');
-wrapClientComponent(FormControls, 'FormControls');
+wrapClientComponent(Form, 'Form');
 wrapClientComponent(FormFields, 'FormFields');
 
 // `HiddenValue` is not a client component.
-// Neither is `FormControlsContext`.
+// Neither is `FormContext`.
 
-export { Link, Image, FormControls, FormFields, HiddenValue, FormControlsContext };
+export { Link, Image, Form, FormFields, HiddenValue, FormContext };
