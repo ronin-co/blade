@@ -95,6 +95,120 @@ database transaction as the read queries of the `/dashboard` page, and only the
 
 To avoid changing the page after the form submission, simply leave out the `redirect` property.
 
+### Updating Records
+
+To address an existing record using the `Form` component instead of creating a new one,
+you can pass a `targetRecord` prop with field values that should be used to resolve the
+existing record, before that record will then be updated automatically.
+
+```tsx
+const { account } = use.session.using(['account']);
+const { email } = account;
+// ^ elaine@site.co
+
+<Form model="account" targetRecord={{ email: account.email }}>
+  <input type="text" name="password" placeholder="Password" />
+  <button type="submit">Submit</button>
+</Form>
+```
+
+When submitted, the form above would then cause the following query to be executed,
+with `xxx` being the values that were provided in the inputs:
+
+```ts
+set.account({
+  with: { email: 'elaine@site.co' },
+  to: { password: 'xxx' }
+});
+```
+
+As you can see, all that the `targetRecord` prop does is switch the write query from
+type "add" to type "set" and update
+its [query instructions](/queries/instructions) accordingly. That's it.
+
+### Props
+
+<ParamField path="model" type="string" isRequired>
+  The slug (singular) of the [Blade model](/models) that should be addressed.
+</ParamField>
+
+<ParamField path="targetRecord" type="object">
+  An object containing fields and values that should be used to resolve an existing
+  record, which will result in that record being updated. If the prop is omitted, a new
+  record will be created instead.
+</ParamField>
+
+<ParamField path="redirect" type="string">
+  The path of a page that should be rendered after the form has been submitted. Just like
+  the `redirect` option available for write queries in the [useMutation](https://blade.im/hooks#usemutation-client)
+  hook, this prop can contain segments that should be replaced with the values of fields
+  from the resulting record. For example, `/accounts/{0.handle}` would redirect to
+  `/accounts/elaine` if the `handle` field contains the value `elaine`. Since this relies
+  on the fields of the resulting record, you don't need to use the fields that are part
+  of the form. Just use any field of the record.
+</ParamField>
+
+<ParamField path="disabled" type="boolean">
+  Whether the form can be used, or not.
+</ParamField>
+
+<ParamField path="disabledWhileWaiting" type="boolean" defaultValue="true">
+  Whether the `disabled` prop should automatically be set to `true` while the form is
+  being submitted.
+</ParamField>
+
+<ParamField path="clearOnSuccess" type="boolean">
+  If your form is designed to be submitted several times in a row, setting this prop to
+  `true` will cause the values of all inputs to be cleared after the form has been
+  submitted successfully.
+</ParamField>
+
+<ParamField path="onSuccess" type="function">
+  A function that will be called once the form has been submitted successfully, with the
+  first argument being the resulting record.
+</ParamField>
+
+<ParamField path="onError" type="function">
+  A function that will be called once the form has failed to be submitted, with the first
+  argument being the resulting error that prevented the record from being saved successfully.
+</ParamField>
+
+<ParamField path="excludeEmptyFields" type="string[]">
+  An array of field slugs that should be excluded from the final query, unless their
+  value is [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy). This is
+  useful for cases where the default value of an input inside the form is, for
+  example, `null`, and the field should only be stored if it receives a string value.
+</ParamField>
+
+<ParamField path="database" type="string">
+  The name of a specific database for which the query should be executed.
+</ParamField>
+
+<ParamField path="recordSlug" type="object">
+  If one of the fields submitted with the form is used in the URL, this prop will ensure
+  that the URL of the page automatically gets updated every time the value of the field
+  changes. Specifically, an object containing `param` (the param in the URL, accessible
+  via `useParams`) and `field` (the matching field on the record) must be provided. The
+  URL will automatically be changed if the value of `field` changes. You can also provide
+  `formatAs: 'dash-case'` to auto-format the value as dash-case.
+</ParamField>
+
+<ParamField path="newRecordSlug" type="string">
+  When using the `recordSlug` prop, the `Form` component will consider `new` as a record
+  slug in the URL to be a new (non-existing record). For example, the URL of the page for
+  creating a new "team" record (if you have such a model defined) could then
+  be `/teams/new` with the page name being `/teams/[handle]`. If you would like to use a
+  value other than `new` for this purpose, set it in the prop right here.
+</ParamField>
+
+<ParamField path="including" type="string[]">
+  An array of slugs of [Link](/fields#link#link) fields, which whose records should be
+  resolved and provided to as part of the resulting record in `onSuccess`. This makes it
+  possible to avoid having to run additional read queries after submitting a form. For
+  example, if a Link field with the slug `test` is resolved, the record provided as the
+  first argument of `onSuccess` will have a `test` property containing the linked record.
+</ParamField>
+
 ## `Image`
 
 Building a fast web application that instantly provides joy to its users whenever it is
