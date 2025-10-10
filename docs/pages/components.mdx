@@ -53,17 +53,24 @@ the finger is lifted), the transition begins.
 
 In the future, links will also be prefetched when the page that contains them is loaded.
 
+## `Form`
+
 ## `Image`
 
-Building a fast web application that instantly provides joy to its users whenever it is accessed (rather than introducing delays) typically requires paying attention to a number of different components.
+Building a fast web application that instantly provides joy to its users whenever it is
+accessed (rather than introducing delays) typically requires paying attention to a number
+of different components.
 
-Blade aims to automatically provide you with the optimizations you need to guarantee the fastest experience possible, additionally letting you fine-tune those improvements where necessary.
+Blade aims to automatically provide you with the optimizations you need to guarantee the
+fastest experience possible, additionally letting you fine-tune those improvements where necessary.
 
-One of those optimizations is that images are **displayed instantaneously**, which Blade ensures via a number of different features available for images (`image` [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) data) stored in the **Blob** field type.
+One of those optimizations is that images are **displayed instantaneously**, which Blade
+ensures via a number of different features available for images (`image` [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) data) stored in the **Blob** field type.
 
 ### Image Metadata
 
-When retrieving records that contain fields of type “Blob”, you will be provided with a value that looks similar to the following for each of those fields:
+When retrieving records that contain fields of type “Blob”, you will be provided with a
+value that looks similar to the following for each of those fields:
 
 ```ts
 export interface Blob {
@@ -89,44 +96,16 @@ export interface Blob {
 
 ### Image Placeholders
 
-If you are building a web application, in order to ensure the smoothest possible experience for the people making use of your application, we strongly advice displaying a low-quality blurred version of every image, until the full image has finished loading.
+If you are building a web application, in order to ensure the smoothest possible experience
+for the people making use of your application, we strongly advice displaying a low-quality
+blurred version of every image, until the full image has finished loading.
 
-Like this, you can avoid empty white gaps in your page, and instead always display something that at least remotely resembles what the image will look like, until the image is available in its entirety. At this point the image can overlay the blurred low-quality version.
+Like this, you can avoid empty white gaps in your page, and instead always display something
+that at least remotely resembles what the image will look like, until the image is available
+in its entirety. At this point the image can overlay the blurred low-quality version.
 
-When [using Next.js](https://nextjs.org/docs/app/building-your-application/optimizing/images), for example, you can easily display the placeholder like so:
-
-```tsx
-<Image
-  src={field.src}
-  placeholder={field.placeholder.base64}
-  alt="A description of the image"
-  width={500}
-  height={500}
-/>
-```
-
-In order to allow the remote image to be loaded securely (when deploying to [Vercel](https://vercel.com/)), you will need to add the following config to your `next.config.js` file:
-
-```ts
-module.exports = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'storage.ronin.co',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-  },
-};
-```
-
-If you aren’t using Next.js, you may render the placeholder like so:
-
-```tsx
-<img src={field.placeholder.base64} />
-```
+The `Image` component does this automatically, if you provide it with a `placeholder`
+property, which you can obtain directly from the respective Blob field.
 
 ### Image Performance
 
@@ -161,30 +140,3 @@ Other additional options can be used as well, in order to guarantee the most ide
 ### Download
 
 By default, all images are opened inside the browser when accessing them. If you wish to download them when accessing the image URL, add `?download=true` or `download=desired-filename.png` to the URL. This will instruct browsers (set the `Content-Disposition` header to `attachment`) to download the image.
-
-### Framework Example
-
-Since all of the options mentioned above can be provided to the `src` URL of the image as query string parameters, the optimization method is agnostic of any framework, meaning it works regardless of the framework, and even with vanilla HTML:
-
-```tsx
-<img src={`${src}?w=200&h=400&blur=40`} />
-```
-
-If you’re using [Next.js](https://nextjs.org/), you can use a [custom image loader](https://nextjs.org/docs/app/api-reference/components/image#loader) to accomplish the same:
-
-```tsx
-const imageLoader = ({ src, width, quality }: { src: string; width: number; quality: number }) => {
-  return `${src}?w=${width}&q=${quality || 75}`;
-};
-
-<Image
-  src={field.src}
-  placeholder={field.placeholder.base64}
-  loader={imageLoader}
-  alt="A description of the image"
-  width={500}
-  height={500}
-/>;
-```
-
-As shown above, a `placeholder` prop is provided to the `Image` component, which contains the value of the `placeholder.base64` field that is returned from Blade when the record is retrieved. This field (as mentioned in the “Image Placeholder” section above), ensures that a blurred version of the image is loaded ahead of time, before the final image finishes loading.
