@@ -24,6 +24,7 @@
     "./client/*": "./dist/public/client/*.js",
     "./server/*": "./dist/public/server/*.js",
     "./hooks": "./dist/public/universal/hooks.js",
+    "./components": "./dist/public/universal/components.js",
     "./schema": "./dist/public/universal/schema.js",
     "./types": "./dist/public/universal/types.js"
   },
@@ -37,6 +38,9 @@
       ],
       "hooks": [
         "./dist/public/universal/hooks"
+      ],
+      "components": [
+        "./dist/public/universal/components"
       ],
       "schema": [
         "./dist/public/universal/schema"
