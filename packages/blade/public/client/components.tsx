@@ -905,7 +905,7 @@ interface FormFieldsProps extends PropsWithChildren {
 // used, it automatically adapts to its parent, especially when the parent is using flex.
 const FormFields = ({ children, allowGlobalSave }: FormFieldsProps) => {
   const form = useContext(FormContext);
-  if (!form) throw new Error('`Form` can only be used within `Form`.');
+  if (!form) throw new Error('`FormFields` can only be used within `Form`.');
 
   const formId = useRef<string>('');
   const formRef = useRef<HTMLFormElement | null>(null);
