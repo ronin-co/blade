@@ -426,7 +426,7 @@ interface RegisterFormProps {
   current: HTMLFormElement;
 }
 
-type FormControlsContext = {
+type FormControlsContextValue = {
   key: string;
   submit: () => Promise<void>;
   waiting: boolean;
@@ -453,7 +453,7 @@ type RegisteredProperty = {
   getValue: () => void;
 };
 
-const FormControlsContext = createContext<FormControlsContext | null>(null);
+const FormControlsContext = createContext<FormControlsContextValue | null>(null);
 
 interface FormControlsProps extends PropsWithChildren {
   /** Properties for matching the target record that should be modified. */
