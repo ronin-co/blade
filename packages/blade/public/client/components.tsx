@@ -424,7 +424,7 @@ interface RegisterFormProps {
   current: HTMLFormElement;
 }
 
-export type FormControls = {
+type FormControlsContext = {
   key: string;
   submit: () => Promise<void>;
   waiting: boolean;
@@ -451,17 +451,17 @@ type RegisteredProperty = {
   getValue: () => void;
 };
 
-const FormControlsContext = createContext<FormControls | null>(null);
+const FormControlsContext = createContext<FormControlsContext | null>(null);
 
-interface FormControlsProps<T> extends PropsWithChildren {
+interface FormControlsProps extends PropsWithChildren {
   /** Properties for matching the target record that should be modified. */
   targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
   modelSlug: string;
   /** Called once the queries of the form have been executed successfully. */
-  onSuccess?: (result: NonNullable<Result<T>['value']>) => void;
+  onSuccess?: (result: NonNullable<Result['value']>) => void;
   /** Called if one of the queries of the form fails to execute. */
-  onError?: (error: Required<Result<T>>['error']) => void;
+  onError?: (error: Required<Result>['error']) => void;
   /**
    * Allows for redirecting to a page once the queries of the form have been
    * executed successfully. Redirects can also be registered by invoking the
@@ -521,13 +521,13 @@ interface FormControlsProps<T> extends PropsWithChildren {
   newRecordSlug?: 'new';
 }
 
-interface Result<T> {
-  value?: T;
+interface Result {
+  value?: ResultRecord;
   error?: TriggerError;
   updatedAt: Date;
 }
 
-const FormControls = <T,>({
+const FormControls = ({
   targetRecord,
   modelSlug,
   clearOnSuccess = false,
@@ -542,7 +542,7 @@ const FormControls = <T,>({
   including,
   excludeEmptyFields,
   newRecordSlug,
-}: FormControlsProps<T>) => {
+}: FormControlsProps) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add } = useMutation();
   const { pathname } = useLocation();
@@ -550,7 +550,7 @@ const FormControls = <T,>({
   const populatePathname = usePopulatePathname();
 
   const [waiting, setWaiting] = useState<boolean>(false);
-  const [result, setResult] = useState<Result<T> | null>(null);
+  const [result, setResult] = useState<Result | null>(null);
 
   // We're using `useRef` here in order to allow for updating certain registered details
   // without causing a re-render.
@@ -859,4 +859,4 @@ wrapClientComponent(Link, 'Link');
 wrapClientComponent(Image, 'Image');
 wrapClientComponent(FormControls, 'FormControls');
 
-export { Link, Image };
+export { Link, Image, FormControls };
