@@ -126,6 +126,49 @@ As you can see, all that the `targetRecord` prop does is switch the write query 
 type "add" to type "set" and update
 its [query instructions](/queries/instructions) accordingly. That's it.
 
+### Sophisticated Layouts
+
+By default, the `Form` component automatically generates
+a [`form`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/form) element
+in the DOM. That means both the input elements and the submit button must be present within
+that element, since that's how the `form` element works in HTML.
+
+If your layout is significantly more complex, however, you might want the `form` element and
+the submit button to exist in two entirely different places. For example, you might want the
+`form` to exist in the content area of your layout, whereas the submit button might sit in
+the sidebar of your layout.
+
+In such cases, you can set a `noElement` prop on the `Form` component, which will prevent the
+`Form` component from generatign the `form` element on its own. You then need to import a
+separate component, which will act as the `form` element.
+
+Additionally, you then also need to handle the submission of the form yourself. In the example
+below, we are adding a custom `SubmitButton` that handles the form submission.
+
+```tsx
+import { useContext } from 'react';
+import { Form, FormFields, FormContext } from 'blade/client/components';
+
+const SubmitButton = () => {
+  const form = useContext(FormContext);
+  return <button onClick={() => form.submit()}>Submit</button>;
+};
+
+<Form model="account" noElement>
+  <FormFields>
+    <input type="text" name="email" placeholder="Email" />
+    <input type="text" name="password" placeholder="Password" />
+  </FormFields>
+
+  <SubmitButton />
+</Form>
+```
+
+Note that, if you choose to place the submit button outside `FormFields`, Blade will not be
+able to apply [progressive enhancement](https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement) for
+your form, meaning that the form will only be possible to submit once the JavaScript bundles
+have been downloaded.
+
 ### Props
 
 <ParamField path="model" type="string" isRequired>
@@ -202,11 +245,17 @@ its [query instructions](/queries/instructions) accordingly. That's it.
 </ParamField>
 
 <ParamField path="including" type="string[]">
-  An array of slugs of [Link](/fields#link#link) fields, which whose records should be
+  An array of slugs of [Link](/fields#link) fields, which whose records should be
   resolved and provided to as part of the resulting record in `onSuccess`. This makes it
   possible to avoid having to run additional read queries after submitting a form. For
   example, if a Link field with the slug `test` is resolved, the record provided as the
   first argument of `onSuccess` will have a `test` property containing the linked record.
+</ParamField>
+
+<ParamField path="noElement" type="boolean">
+  By default, a `form` element will be added for you in the DOM. To avoid this and
+  ensure that the `Form` component thereby does not add any DOM elements whatsoever, you
+  can set this prop to `true`.
 </ParamField>
 
 ## `Image`
