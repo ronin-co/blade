@@ -962,7 +962,7 @@ const FormFields = ({ children, allowGlobalSave }: FormFieldsProps) => {
   );
 };
 
-interface HiddenValueProps {
+interface HiddenFieldProps {
   /** The name of the field in the Blade model. */
   name: string;
   /** The type of the field in the Blade model. */
@@ -971,7 +971,7 @@ interface HiddenValueProps {
   value?: string | number | boolean | object | null;
 }
 
-const HiddenValue = ({ name, type, value }: HiddenValueProps) => {
+const HiddenField = ({ name, type, value }: HiddenFieldProps) => {
   let content: string | number;
 
   // Serialize boolean values.
@@ -1009,7 +1009,7 @@ wrapClientComponent(Image, 'Image');
 wrapClientComponent(Form, 'Form');
 wrapClientComponent(FormFields, 'FormFields');
 
-// `HiddenValue` is not a client component.
+// `HiddenField` is not a client component.
 // Neither is `FormContext`.
 
-export { Link, Image, Form, FormFields, HiddenValue, FormContext };
+export { Link, Image, Form, FormFields, HiddenField, FormContext };
