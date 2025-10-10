@@ -24,6 +24,11 @@ export default defineConfig({
     'react-dom/client',
     'react-dom/server.edge',
     'typescript',
+
+    // Blade re-exports `blade-auth`, which relies on public Blade exports.
+    // We must explicitly define them as external here, otherwise Rolldown will
+    // automatically treat them as external, which prints a warning.
+    /^blade\//,
   ],
   noExternal: ['hive', 'hive/remote-storage'],
   treeshake: true,

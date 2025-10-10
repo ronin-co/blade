@@ -13,7 +13,7 @@ When writing Blade apps, [anchor elements](https://developer.mozilla.org/en-US/d
 For linking to URLs within the same application, use the native `Link` component instead:
 
 ```tsx
-import { Link } from 'blade/client/components';
+import { Link } from 'blade/components';
 
 <Link href="/another-page">click me</Link>
 ```
@@ -65,7 +65,7 @@ which makes building forms even easier. The component invokes `useMutation` inte
 For example, it could look like this:
 
 ```tsx
-import { Form, Input } from 'blade/client/components';
+import { Form, Input } from 'blade/components';
 
 <Form model="account" redirect="/dashboard">
   <Input type="text" name="email" placeholder="Email" />
@@ -147,7 +147,7 @@ below, we are adding a custom `SubmitButton` that handles the form submission.
 
 ```tsx
 import { useContext } from 'react';
-import { Form, FormElement, FormContext, Input } from 'blade/client/components';
+import { Form, FormElement, FormContext, Input } from 'blade/components';
 
 const SubmitButton = () => {
   const form = useContext(FormContext);

@@ -1,7 +1,7 @@
 import 'client-list';
 
 import '@/private/client/components/history';
-import '@/public/client/components';
+import '@/public/universal/components';
 import { fetchPage } from '@/private/client/utils/page';
 
 const path = location.pathname + location.search + location.hash;
