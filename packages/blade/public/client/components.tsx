@@ -2,7 +2,6 @@ import type { ModelField, StoredObject } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
   type AnchorHTMLAttributes,
-  type InputHTMLAttributes,
   type MutableRefObject,
   type PropsWithChildren,
   type ReactNode,
@@ -427,7 +426,7 @@ interface RegisterFormProps {
   current: HTMLFormElement;
 }
 
-type FormControlsContext = {
+type FormContextValue = {
   key: string;
   submit: () => Promise<void>;
   waiting: boolean;
@@ -454,9 +453,9 @@ type RegisteredProperty = {
   getValue: () => void;
 };
 
-const FormControlsContext = createContext<FormControlsContext | null>(null);
+const FormContext = createContext<FormContextValue | null>(null);
 
-interface FormControlsProps extends PropsWithChildren {
+interface FormProps extends PropsWithChildren {
   /** Properties for matching the target record that should be modified. */
   targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
@@ -530,7 +529,7 @@ interface Result {
   updatedAt: Date;
 }
 
-const FormControls = ({
+const Form = ({
   targetRecord,
   modelSlug,
   clearOnSuccess = false,
@@ -545,7 +544,7 @@ const FormControls = ({
   including,
   excludeEmptyFields,
   newRecordSlug,
-}: FormControlsProps) => {
+}: FormProps) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add } = useMutation();
   const { pathname } = useLocation();
@@ -703,14 +702,14 @@ const FormControls = ({
       }
     }
 
-    // If a `recordSlug` prop was provided to `FormControls` and the field within the
-    // record that is used for the slug does not match the slug in the URL, this variable
-    // will contain the new URL to which we want to redirect, so that the slug in the URL
-    // matches the field that is used for the slug. For example, if the URL
-    // is `/[team]/settings` and the field associated with `[team]` is called "handle",
-    // the new URL will be `/{0.handle}/settings`, and Blade will replace `{0.handle}`
-    // with the value of the "handle" field on the edge. We cannot construct this URL
-    // on the client because certain fields (like "id") are generated on the edge.
+    // If a `recordSlug` prop was provided to `Form` and the field within the record that
+    // is used for the slug does not match the slug in the URL, this variable will
+    // contain the new URL to which we want to redirect, so that the slug in the URL
+    // matches the field that is used for the slug. For example, if the URL is
+    // `/[team]/settings` and the field associated with `[team]` is called "handle", the
+    // new URL will be `/{0.handle}/settings`, and Blade will replace `{0.handle}` with
+    // the value of the "handle" field on the edge. We cannot construct this URL on the
+    // client because certain fields (like "id") are generated on the edge.
     let slugRedirect: string | null = null;
     if (recordSlug) {
       // In the case of a catch-all page (like `[...record]`), the current param will
@@ -743,8 +742,8 @@ const FormControls = ({
       }
     }
 
-    let result;
-    let error: Error | null = null;
+    let result: ResultRecord | undefined;
+    let error: Error | undefined;
 
     try {
       const queryOptions = {
@@ -753,23 +752,23 @@ const FormControls = ({
       };
 
       if (targetRecord) {
-        result = (await set[modelSlug](
+        result = await set[modelSlug](
           {
             with: targetRecord,
             to: valuesNormalized,
             using: including,
           },
           queryOptions,
-        )) as T;
+        );
       } else {
-        result = (await add[modelSlug](
+        result = await add[modelSlug](
           {
             with: valuesNormalized,
             // @ts-expect-error The types will be improved shortly.
             using: including,
           },
           queryOptions,
-        )) as T;
+        );
       }
     } catch (err: unknown) {
       error = err as Error;
@@ -831,7 +830,7 @@ const FormControls = ({
   }, [redirect]);
 
   return (
-    <FormControlsContext.Provider
+    <FormContext.Provider
       value={{
         key: `${modelSlug}${targetRecord?.id ? `_${targetRecord.id}` : ''}`,
 
@@ -854,7 +853,7 @@ const FormControls = ({
         unregisterForm,
       }}>
       {children}
-    </FormControlsContext.Provider>
+    </FormContext.Provider>
   );
 };
 
@@ -864,7 +863,7 @@ interface useSaveOptions {
 }
 
 const useSave = ({ disabled = false }: useSaveOptions) => {
-  const form = useContext(FormControlsContext);
+  const form = useContext(FormContext);
 
   // Listen to global ⌘+S events.
   useEffect(() => {
@@ -895,7 +894,7 @@ const useSave = ({ disabled = false }: useSaveOptions) => {
   }, [disabled, form]);
 };
 
-interface FormProps extends PropsWithChildren {
+interface FormFieldsProps extends PropsWithChildren {
   allowGlobalSave?: boolean;
 }
 
@@ -904,9 +903,9 @@ interface FormProps extends PropsWithChildren {
 // automatically read all its children fields like that. Please therefore refrain from
 // adding any styling to it. As you can see in the places where the component is already
 // used, it automatically adapts to its parent, especially when the parent is using flex.
-const Form = ({ children, allowGlobalSave }: FormProps) => {
-  const form = useContext(FormControlsContext);
-  if (!form) throw new Error('`Form` can only be used within `FormControls`.');
+const FormFields = ({ children, allowGlobalSave }: FormFieldsProps) => {
+  const form = useContext(FormContext);
+  if (!form) throw new Error('`FormFields` can only be used within `Form`.');
 
   const formId = useRef<string>('');
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -963,7 +962,7 @@ const Form = ({ children, allowGlobalSave }: FormProps) => {
   );
 };
 
-interface HiddenValueProps {
+interface HiddenFieldProps {
   /** The name of the field in the Blade model. */
   name: string;
   /** The type of the field in the Blade model. */
@@ -972,7 +971,7 @@ interface HiddenValueProps {
   value?: string | number | boolean | object | null;
 }
 
-const HiddenValue = ({ name, type, value }: HiddenValueProps) => {
+const HiddenField = ({ name, type, value }: HiddenFieldProps) => {
   let content: string | number;
 
   // Serialize boolean values.
@@ -1007,9 +1006,10 @@ const HiddenValue = ({ name, type, value }: HiddenValueProps) => {
 
 wrapClientComponent(Link, 'Link');
 wrapClientComponent(Image, 'Image');
-wrapClientComponent(FormControls, 'FormControls');
 wrapClientComponent(Form, 'Form');
+wrapClientComponent(FormFields, 'FormFields');
 
-// `HiddenValue` is not a client component.
+// `HiddenField` is not a client component.
+// Neither is `FormContext`.
 
-export { Link, Image, FormControls, Form, HiddenValue };
+export { Link, Image, Form, FormFields, HiddenField, FormContext };
