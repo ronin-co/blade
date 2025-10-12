@@ -68,26 +68,21 @@ await add.account.with({
 });
 ```
 
-### Resend Verification Email
+### Logging In
+
+This query will automatically set a `token` cookie.
 
 ```ts
-await set.account({
-    with: { id: 'xxxx' },
-    to: { emailVerificationSentAt: new Date() }
+await add.session.with.account({
+    email: 'elaine@thorne.co',
+    password: '1234'
 });
 ```
 
 ### Logging Out
 
+This query will automatically revoke the `token` cookie.
+
 ```ts
 await remove.session();
-```
-
-### Reset Account Password
-
-```ts
-await set.account({
-    with: { email: 'elaine@thorne.co' },
-    to: { password: null }
-});
 ```
