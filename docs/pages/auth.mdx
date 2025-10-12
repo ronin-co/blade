@@ -15,7 +15,7 @@ To enable all default authentication features, create the following files in a d
 ```ts
 // triggers/account.ts
 
-import type { AddTrigger, GetTrigger, RemoveTrigger } from "blade/types";
+import type { AddTrigger, SetTrigger } from "blade/types";
 import { addAccount, setAccount } from "blade/server/auth";
 
 export const add: AddTrigger = addAccount;
@@ -25,7 +25,7 @@ export const set: SetTrigger = setAccount;
 ```ts
 // triggers/session.ts
 
-import type { AddTrigger, GetTrigger, RemoveTrigger } from "blade/types";
+import type { GetTrigger, AddTrigger, RemoveTrigger } from "blade/types";
 import { addSession, getSession, removeSession } from "blade/server/auth";
 
 export const get: GetTrigger = getSession;
