@@ -427,7 +427,13 @@ const invokeTriggers = async <T extends ResultRecord>(
             result: definition.result,
           };
 
-          return applyTriggers ? await applySyncTriggers([newQuery], options) : newQuery;
+          if (applyTriggers) {
+            const tempList: Array<QueryFromTrigger<T>> = [newQuery];
+            await applySyncTriggers(tempList, options);
+            return tempList;
+          }
+
+          return newQuery;
         },
       );
 
@@ -492,6 +498,8 @@ interface QueryFromTrigger<T> extends QueryPerDatabase {
   parentTrigger?: TriggerOptions['parentTrigger'];
   /** A pre-populated query result provided by the trigger. */
   result: FormattedResults<T>[number] | typeof EMPTY;
+  /** Whether the query is a read or write query. */
+  actionType: 'read' | 'write';
 }
 
 interface TriggerExecutionOptions {
@@ -507,12 +515,12 @@ interface TriggerExecutionOptions {
  * @param queries - A list of queries to execute triggers for.
  * @param options - A list of options to change how the triggers are executed.
  *
- * @returns The list of queries after they were transformed by triggers.
+ * @returns Nothing. The original list of queries is modified in place.
  */
 export const applySyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger<T>>,
   options: TriggerExecutionOptions,
-): Promise<Array<QueryFromTrigger<T>>> => {
+): Promise<void> => {
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
     queries.map(async (queryItem, index) => {
@@ -585,7 +593,8 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   // extra `get` query, since `set` queries return the modified record afterward, but in
   // order to get the version of the record *before* the modification, we need a separate
   // query of type `get`.
-  return queries.flatMap((details, index) => {
+  for (let index = 0; index < queries.length; index++) {
+    const details = queries[index];
     const { query, database } = details;
 
     // Only generate diff queries for queries of type `set` or `alter` and don't generate
@@ -619,11 +628,13 @@ export const applySyncTriggers = async <T extends ResultRecord>(
         result: EMPTY,
       };
 
-      return [diffQuery, details];
-    }
+      // Insert the diff query directly before the original query.
+      queries.splice(index, 0, diffQuery);
 
-    return [details];
-  });
+      // Skip over the original query which shifted to the next index.
+      index++;
+    }
+  }
 };
 
 /**
@@ -633,12 +644,12 @@ export const applySyncTriggers = async <T extends ResultRecord>(
  * @param queries - A list of queries to execute triggers for.
  * @param options - A list of options to change how the triggers are executed.
  *
- * @returns The results provided by the triggers.
+ * @returns Nothing. The original list of queries is modified in place.
  */
 export const applyAsyncTriggers = async <T extends ResultRecord>(
   queries: Array<QueryFromTrigger<T>>,
   options: TriggerExecutionOptions,
-): Promise<Array<ResultPerDatabase<T>>> => {
+): Promise<void> => {
   // Invoke `resolvingGet`, `resolvingSet`, `resolvingAdd`, `resolvingRemove`,
   // and `resolvingCount`.
   await Promise.all(
@@ -711,20 +722,6 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
     // (non-awaited promises) have been resolved.
     options.clientOptions.waitUntil?.(clearPromise);
   }
-
-  // Filter the list of queries to remove any potential queries used for "diffing"
-  // (retrieving the previous value of a record) and any potential queries resulting from
-  // "before" or "after" triggers. Then return only the results of the queries.
-  return queries
-    .filter(
-      (query) =>
-        typeof query.diffForIndex === 'undefined' &&
-        typeof query.parentTrigger === 'undefined',
-    )
-    .map(({ result, database }) => ({
-      result: result as FormattedResults<T>[number],
-      database,
-    }));
 };
 
 /**
@@ -770,13 +767,39 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   const execOptions = { context, triggerError, clientOptions: options };
 
-  const initialList: Array<QueryFromTrigger<T>> = queries.map((item) => ({
-    ...item,
-    result: EMPTY,
-  }));
+  const queryList: Array<QueryFromTrigger<T>> = queries.map((item) => {
+    const queryType = Object.keys(item.query)[0] as QueryType;
+    const isRead = (QUERY_TYPES_READ as ReadonlyArray<QueryType>).includes(queryType);
+    const actionType = isRead ? 'read' : 'write';
 
-  const queryList = await applySyncTriggers<T>(initialList, execOptions);
-  const queryResults = await applyAsyncTriggers<T>(queryList, execOptions);
+    return { ...item, result: EMPTY, actionType };
+  });
 
-  return queryResults;
+  // First, run the triggers for all write queries.
+  const writeQueryList = queryList.filter(({ actionType }) => actionType === 'write');
+
+  await applySyncTriggers<T>(writeQueryList, execOptions);
+  await applyAsyncTriggers<T>(writeQueryList, execOptions);
+
+  // Then, run the triggers for all read queries.
+  const readQueryList = queryList.filter(({ actionType }) => actionType === 'read');
+
+  await applySyncTriggers<T>(readQueryList, execOptions);
+  await applyAsyncTriggers<T>(readQueryList, execOptions);
+
+  const finalList = [...writeQueryList, ...readQueryList];
+
+  // Filter the list of queries to remove any potential queries used for "diffing"
+  // (retrieving the previous value of a record) and any potential queries resulting from
+  // "before" or "after" triggers. Then return only the results of the queries.
+  return finalList
+    .filter(
+      (query) =>
+        typeof query.diffForIndex === 'undefined' &&
+        typeof query.parentTrigger === 'undefined',
+    )
+    .map(({ result, database }) => ({
+      result: result as FormattedResults<T>[number],
+      database,
+    }));
 };
