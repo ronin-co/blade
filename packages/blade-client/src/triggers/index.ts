@@ -626,6 +626,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
         diffForIndex: index + 1,
         database,
         result: EMPTY,
+        actionType: 'read',
       };
 
       // Insert the diff query directly before the original query.
