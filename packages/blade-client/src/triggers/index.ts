@@ -498,8 +498,6 @@ interface QueryFromTrigger<T> extends QueryPerDatabase {
   parentTrigger?: TriggerOptions['parentTrigger'];
   /** A pre-populated query result provided by the trigger. */
   result: FormattedResults<T>[number] | typeof EMPTY;
-  /** Whether the query is a read or write query. */
-  actionType: 'read' | 'write';
 }
 
 interface TriggerExecutionOptions {
@@ -626,7 +624,6 @@ export const applySyncTriggers = async <T extends ResultRecord>(
         diffForIndex: index + 1,
         database,
         result: EMPTY,
-        actionType: 'read',
       };
 
       // Insert the diff query directly before the original query.
@@ -768,7 +765,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   const execOptions = { context, triggerError, clientOptions: options };
 
-  const queryList: Array<QueryFromTrigger<T>> = queries.map((item) => {
+  const queryList: Array<QueryFromTrigger<T> & { actionType: 'read' | 'write' }> = queries.map((item) => {
     const queryType = Object.keys(item.query)[0] as QueryType;
     const isRead = (QUERY_TYPES_READ as ReadonlyArray<QueryType>).includes(queryType);
     const actionType = isRead ? 'read' : 'write';
