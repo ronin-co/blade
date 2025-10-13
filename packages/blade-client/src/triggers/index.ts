@@ -498,6 +498,8 @@ interface QueryFromTrigger<T> extends QueryPerDatabase {
   parentTrigger?: TriggerOptions['parentTrigger'];
   /** A pre-populated query result provided by the trigger. */
   result: FormattedResults<T>[number] | typeof EMPTY;
+  /** Whether the query is a read or write query. */
+  actionType: 'read' | 'write';
 }
 
 interface TriggerExecutionOptions {
@@ -765,18 +767,30 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   const execOptions = { context, triggerError, clientOptions: options };
 
-  const initialList: Array<QueryFromTrigger<T>> = queries.map((item) => ({
-    ...item,
-    result: EMPTY,
-  }));
+  const queryList: Array<QueryFromTrigger<T>> = queries.map((item) => {
+    const queryType = Object.keys(item.query)[0] as QueryType;
+    const isRead = (QUERY_TYPES_READ as ReadonlyArray<QueryType>).includes(queryType);
+    const actionType = isRead ? 'read' : 'write';
 
-  await applySyncTriggers<T>(initialList, execOptions);
-  await applyAsyncTriggers<T>(initialList, execOptions);
+    return { ...item, result: EMPTY, actionType };
+  });
+
+  const writeQueryList = queryList.filter(({ actionType }) => actionType === 'write');
+
+  await applySyncTriggers<T>(writeQueryList, execOptions);
+  await applyAsyncTriggers<T>(writeQueryList, execOptions);
+
+  const readQueryList = queryList.filter(({ actionType }) => actionType === 'read');
+
+  await applySyncTriggers<T>(readQueryList, execOptions);
+  await applyAsyncTriggers<T>(readQueryList, execOptions);
+
+  const finalList = [...writeQueryList, ...readQueryList];
 
   // Filter the list of queries to remove any potential queries used for "diffing"
   // (retrieving the previous value of a record) and any potential queries resulting from
   // "before" or "after" triggers. Then return only the results of the queries.
-  return initialList
+  return finalList
     .filter(
       (query) =>
         typeof query.diffForIndex === 'undefined' &&
