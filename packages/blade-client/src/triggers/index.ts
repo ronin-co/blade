@@ -775,11 +775,13 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
     return { ...item, result: EMPTY, actionType };
   });
 
+  // First, run the triggers for all write queries.
   const writeQueryList = queryList.filter(({ actionType }) => actionType === 'write');
 
   await applySyncTriggers<T>(writeQueryList, execOptions);
   await applyAsyncTriggers<T>(writeQueryList, execOptions);
 
+  // Then, run the triggers for all read queries.
   const readQueryList = queryList.filter(({ actionType }) => actionType === 'read');
 
   await applySyncTriggers<T>(readQueryList, execOptions);
