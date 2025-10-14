@@ -87,13 +87,6 @@ export class ResponseStream extends SSEStreamingApi {
     // Migrate the headers to the final response.
     response.headers.forEach((value, key) => this.response.headers.set(key, value));
 
-    const currentCookies = this.request.headers.get('cookie')?.split('; ') || [];
-    const newCookies = response.headers.getSetCookie().map((item) => item.split('; ')[0]);
-    const cookies = [...currentCookies, ...newCookies];
-
-    // If new cookies were added, update the original request.
-    if (newCookies.length > 0) this.request.headers.set('Cookie', cookies.join('; '));
-
     // Inform any outside watchers that the response now has headers and can be returned,
     // such that the response is returned to the client even before the first body chunk
     // is being flushed further below.

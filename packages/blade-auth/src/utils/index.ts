@@ -37,7 +37,7 @@ export const avoidEmptyFields = (
 export const parseSessionCookie = async (
   triggerOptions: TriggerOptions,
 ): Promise<JWTPayload> => {
-  const token = triggerOptions.cookies.token;
+  const token = triggerOptions.cookies.session;
 
   let sessionId: string | null = null;
   let accountId: string | null = null;
