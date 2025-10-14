@@ -1,4 +1,11 @@
-import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  type FunctionComponent,
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { RootClientContext } from '@/private/client/context';
 import { usePageTransition } from '@/private/client/hooks';
@@ -12,7 +19,7 @@ interface HistoryContentProps {
   children: ReactNode;
 }
 
-const HistoryContent = ({ children }: HistoryContentProps) => {
+const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) => {
   const universalContext = useUniversalContext();
   const { transitionPage } = usePageTransition();
 

@@ -1,6 +1,7 @@
 import type { ModelField } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
+  type FunctionComponent,
   type PropsWithChildren,
   createContext,
   useEffect,
@@ -65,24 +66,61 @@ interface RegisterFormProps {
 }
 
 type FormContextValue = {
+  /**
+   * A key that lets React clear the inputs when the props of `Form` change. This is
+   * needed when rendering a `Form` on different pages that have the same layout, since
+   * React re-uses the exact same DOM elements between different pages if their hierarchy
+   * is the same (React doesn't even have a concept of pages, just DOM updates).
+   */
   key: string;
+
+  /** Method for submitting the form. */
   submit: () => Promise<void>;
+
+  /** Whether the form is currently being submitted. */
   waiting: boolean;
+
+  /** Whether the form should be cleared after its successful submission. */
   clearOnSuccess: boolean;
+
+  /** Allows for registering a virtual field. */
   registerProperty: (
     name: string,
     type: RegisteredProperty['type'],
     getValue: RegisteredProperty['getValue'],
   ) => void;
+
+  /** Allows for unregistering a virtual field. */
   unregisterProperty: (name: string) => void;
+
+  /** Allows for setting the `redirect` prop via context. */
   registerRedirect: (destination: string) => void;
+
+  /** Allows for unsetting the `redirect` prop via context. */
   unregisterRedirect: () => void;
+
+  /** The resulting record of the form submission. */
   result: unknown | null;
+
+  /** An error that occurred while submitting the form. */
   error: TriggerError | null;
+
+  /**
+   * The time when the form was last submitted. Allows for understanding whether the form
+   * was even ever submitted, and if so, when.
+   */
   updatedAt: Date | null;
+
+  /** Allows for clearing all form fields. */
   reset: (clearFields?: true) => void;
+
+  /** Allows for registering a new `form` element. */
   registerForm: ({ current }: RegisterFormProps) => string;
+
+  /** Allows for unregistering a new `form` element. */
   unregisterForm: (id: string) => void;
+
+  /** Whether the form should be interactive, or not. */
   disabled?: boolean;
 };
 
@@ -91,10 +129,16 @@ type RegisteredProperty = {
   getValue: () => void;
 };
 
-export const FormContext = createContext<FormContextValue | null>(null);
+// Needed to match `@types/react` and thereby ensure green types when importing the
+// context from an application.
+type CtxArg = FormContextValue | null;
+export const FormContext: React.Context<CtxArg> = createContext<CtxArg>(null);
 
 interface FormProps extends PropsWithChildren {
-  /** Properties for matching the target record that should be modified. */
+  /**
+   * Fields for matching a target record that should be modified. If not provided, a new
+   * record will be created.
+   */
   targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
   model: string;
@@ -103,12 +147,30 @@ interface FormProps extends PropsWithChildren {
   /** Called if one of the queries of the form fails to execute. */
   onError?: (error: Required<Result>['error']) => void;
   /**
-   * Allows for redirecting to a page once the queries of the form have been
-   * executed successfully. Redirects can also be registered by invoking the
-   * `registerRedirect` method exposed by the context.
+   * Redirect to the given URL after the form was submitted successfully.
+   *
+   * Supports template syntax like "/{0.slug}" where {0} refers to the first object
+   * in the array of returned results.
+   *
+   * @example ```
+   * // Redirects to `/home` on success.
+   * <FormControls model="team" redirect="/home" />
+   * ```
+   *
+   * @example ```
+   * // Redirects to `/teams/<slug>` on success.
+   * <FormControls model="team" redirect="/teams/{0.slug}" />
+   * ```
+   *
+   * Redirects can also be registered by invoking the `registerRedirect` method exposed
+   * by the form context.
    */
   redirect?: string;
-  /** Whether the form should be interactive, or not. */
+  /**
+   * Whether the form should be interactive, or not.
+   *
+   * @default false
+   */
   disabled?: boolean;
   /**
    * Whether the form should be disabled while waiting for the submission
@@ -169,7 +231,7 @@ interface Result {
   updatedAt: Date;
 }
 
-const Form = ({
+const Form: FunctionComponent<FormProps> = ({
   targetRecord,
   model,
   clearOnSuccess = false,
@@ -185,7 +247,7 @@ const Form = ({
   excludeEmptyFields,
   newRecordSlug,
   noElement,
-}: FormProps) => {
+}) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add } = useMutation();
   const { pathname } = useLocation();
