@@ -1,6 +1,6 @@
 {
   "name": "blade-auth",
-  "version": "3.22.0",
+  "version": "3.23.0",
   "type": "module",
   "description": "Easily set up auth for Blade apps",
   "repository": {
@@ -16,7 +16,8 @@
   ],
   "exports": {
     "./triggers/*": "./dist/triggers/*.js",
-    "./schema": "./dist/schema.js"
+    "./schema": "./dist/schema.js",
+    "./utils": "./dist/utils/index.js"
   },
   "typesVersions": {
     "*": {
@@ -25,6 +26,9 @@
       ],
       "schema": [
         "./dist/schema"
+      ],
+      "utils": [
+        "./dist/utils/index"
       ]
     }
   },

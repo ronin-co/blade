@@ -78,9 +78,9 @@ export interface TriggerOptions extends ClientTriggerOptions {
   cookies: ServerContext['cookies'];
   /**
    * Used for setting new cookies that should be stored on the client, updating existing
-   * ones or deleting existing ones.
+   * ones, or deleting existing ones.
    */
-  setCookie: SetCookie<string>;
+  setCookie: SetCookie<string | null>;
   /**
    * Details about the client that is accessing the application.
    */

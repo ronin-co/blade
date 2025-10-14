@@ -3,10 +3,10 @@ import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/server/
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
 import type { AddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
 
-import { parseSessionCookie } from '@/utils/index';
+import { getSessionCookie } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, multiple, options) => {
-  const { sessionId, accountId } = await parseSessionCookie(options);
+  const { sessionId, accountId } = await getSessionCookie(options);
 
   if (!query.with) query.with = {};
 
@@ -88,12 +88,17 @@ export const add: AddTrigger = async (query, _multiple, options) => {
     import.meta.env.BLADE_SESSION_JWT_SECRET as string,
   );
 
-  // Persist the Token in a cookie.
-  options.setCookie('token', token);
+  // Add a new `session` cookie containing the session token.
+  options.setCookie('session', token);
 
   return query;
 };
 
-export const remove: RemoveTrigger = (query, multiple, options) => {
-  return primeId(query, multiple, options);
+export const remove: RemoveTrigger = async (query, multiple, options) => {
+  await primeId(query, multiple, options);
+
+  // Remove the `session` cookie that contains the session token.
+  options.setCookie('session', null);
+
+  return query;
 };

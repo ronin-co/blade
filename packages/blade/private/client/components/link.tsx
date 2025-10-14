@@ -1,4 +1,4 @@
-import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import type { AnchorHTMLAttributes, FunctionComponent, ReactNode } from 'react';
 
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import { useUniversalContext } from '@/private/universal/hooks';
@@ -79,13 +79,13 @@ interface LinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'
   prefetch?: boolean;
 }
 
-const Link = ({
+const Link: FunctionComponent<LinkProps> = ({
   href: hrefDefault,
   segments,
   children,
   prefetch = true,
   ...extraProps
-}: LinkProps) => {
+}) => {
   const universalContext = useUniversalContext();
 
   const href =

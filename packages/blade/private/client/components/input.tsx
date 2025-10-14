@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes } from 'react';
+import type { FunctionComponent, InputHTMLAttributes } from 'react';
 
 import type { FieldType } from '@/private/client/components/form';
 
@@ -26,15 +26,15 @@ const stringifyFormValue = (value: InputValue): string | number => {
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'> {
   /** The value to be stored for the field in the Blade model. */
-  value: InputValue;
+  value?: InputValue;
   /** The type of the field in the Blade model. */
   fieldType?: FieldType;
   /** Whether the field should be hidden. */
   hidden?: boolean;
 }
 
-const Input = ({ value, fieldType, hidden, ...rest }: InputProps) => {
-  const stringValue = stringifyFormValue(value);
+const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...rest }) => {
+  const initialValue = typeof value === 'undefined' ? value : stringifyFormValue(value);
 
   if (!fieldType) {
     switch (rest.type) {
@@ -59,7 +59,7 @@ const Input = ({ value, fieldType, hidden, ...rest }: InputProps) => {
     <input
       // The type used when storing the value in the database.
       data-type={fieldType}
-      value={stringValue}
+      value={initialValue}
       // If the input is marked as hidden, we neither want the input to be visible to the
       // eye, nor usable by accessibility tools.
       aria-hidden={hidden}
