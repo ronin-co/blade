@@ -104,7 +104,10 @@ type FormContextValue = {
   /** An error that occurred while submitting the form. */
   error: TriggerError | null;
 
-  /** When the last form submission occurred. */
+  /**
+   * The time when the form was last submitted occurred. Allows for understanding whether
+   * the form was even ever submitted, and if so, when.
+   */
   updatedAt: Date | null;
 
   /** Allows for clearing all form fields. */
