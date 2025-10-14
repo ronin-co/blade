@@ -1,9 +1,39 @@
 import path from 'node:path';
-import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
+
+const dependencyCache = new Map<string, string>();
+
+/**
+ * Fetches a dependency from unpkg.com.
+ *
+ * @param packageName - The name of the package to fetch (e.g., 'react@18.2.0' or 'lodash').
+ *
+ * @returns The content of the package's main file.
+ */
+const fetchFromUnpkg = async (packageName: string): Promise<string | null> => {
+  try {
+    if (dependencyCache.has(packageName)) return dependencyCache.get(packageName)!;
+
+    const url = new URL(`/${packageName}`, 'https://unpkg.com/');
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.warn(`Failed to fetch ${packageName} from unpkg.com: ${response.status}`);
+      return null;
+    }
+
+    const content = await response.text();
+
+    dependencyCache.set(packageName, content);
+
+    return content;
+  } catch (error) {
+    console.warn(`Error fetching ${packageName} from unpkg.com:`, error);
+    return null;
+  }
+};
 
 const makePathAbsolute = (input: string) => {
   if (input.startsWith('./')) return input.slice(1);
@@ -112,10 +142,43 @@ export const build = async (
         name: 'Memory Dependency Loader',
         resolveId: {
           filter: {
-            id: [/^[\w@][\w./-]*$/],
+            id: [/^[\w@][\w./-]*$/, /^\.\.?\//],
           },
-          handler(id) {
-            return resolveFrom(nodePath, id);
+          handler(id, importer) {
+            // Handle relative imports from unpkg modules
+            if (importer?.startsWith('unpkg:') && id.startsWith('.')) {
+              const importerPath = importer.replace('unpkg:', '');
+
+              // Get the directory of the importer (remove the last segment if it's a file)
+              const importerDir = importerPath.includes('/')
+                ? importerPath.substring(0, importerPath.lastIndexOf('/') + 1)
+                : `${importerPath}/`;
+
+              const baseUrl = `https://unpkg.com/${importerDir}`;
+              const resolvedPath = new URL(id, baseUrl).pathname.slice(1);
+              return `unpkg:${resolvedPath}`;
+            }
+
+            // If it's a relative import not from unpkg, let other plugins handle it
+            if (id.startsWith('.')) return undefined;
+
+            return `unpkg:${id}`;
+          },
+        },
+        load: {
+          filter: {
+            id: /^unpkg:/,
+          },
+          async handler(id) {
+            const packageName = id.replace('unpkg:', '');
+
+            const content = await fetchFromUnpkg(packageName);
+            if (!content) throw new Error(`Failed to fetch dependency: ${packageName}`);
+
+            return {
+              code: content,
+              moduleType: 'js',
+            };
           },
         },
       },
