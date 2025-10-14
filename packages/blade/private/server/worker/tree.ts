@@ -204,6 +204,15 @@ const obtainQueryResults = async (
   }
 };
 
+/**
+ * Applies a list of cookies collected during rendering to the list of incoming cookies,
+ * with the result being a single list of cookies.
+ *
+ * @param base - The incoming cookies.
+ * @param collected - The cookies collected during rendering.
+ *
+ * @returns A new object containing the merged list of cookies.
+ */
 const applyCollectedCookies = (
   base: Record<string, string>,
   collected: Collected['cookies'] = {},
