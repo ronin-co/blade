@@ -143,9 +143,25 @@ export const build = async (
         name: 'Memory Dependency Loader',
         resolveId: {
           filter: {
-            id: [/^[\w@][\w./-]*$/],
+            id: [/^[\w@][\w./-]*$/, /^\.\.?\//],
           },
-          handler(id) {
+          handler(id, importer) {
+            // Handle relative imports from unpkg modules
+            if (importer?.startsWith('unpkg:') && id.startsWith('.')) {
+              const importerPath = importer.replace('unpkg:', '');
+
+              // Get the directory of the importer (remove the last segment if it's a file)
+              const importerDir = importerPath.includes('/')
+                ? importerPath.substring(0, importerPath.lastIndexOf('/') + 1)
+                : `${importerPath}/`;
+
+              const baseUrl = `https://unpkg.com/${importerDir}`;
+              const resolvedPath = new URL(id, baseUrl).pathname.slice(1);
+              return `unpkg:${resolvedPath}`;
+            }
+
+            if (id.startsWith('.')) return undefined;
+
             try {
               const resolved = resolveFrom(nodePath, id);
               if (resolved) return resolved;
