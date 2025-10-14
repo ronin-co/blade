@@ -129,7 +129,10 @@ type RegisteredProperty = {
   getValue: () => void;
 };
 
-export const FormContext = createContext<FormContextValue | null>(null);
+// Needed to match `@types/react` and thereby ensure green types when importing the
+// context from an application.
+type FormContextArg = FormContextValue | null;
+export const FormContext: React.Context<FormContextArg> = createContext<FormContextArg>(null);
 
 interface FormProps extends PropsWithChildren {
   /**
