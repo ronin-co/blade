@@ -5,3 +5,4 @@ export {
   add as addSession,
   remove as removeSession,
 } from 'blade-auth/triggers/session';
+export { parseSessionCookie } from 'blade-auth/utils';
