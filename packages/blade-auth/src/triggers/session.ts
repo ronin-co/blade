@@ -88,12 +88,15 @@ export const add: AddTrigger = async (query, _multiple, options) => {
     import.meta.env.BLADE_SESSION_JWT_SECRET as string,
   );
 
-  // Persist the Token in a cookie.
+  // Add a new `token` cookie containing the session token.
   options.setCookie('token', token);
 
   return query;
 };
 
 export const remove: RemoveTrigger = (query, multiple, options) => {
+  // Remove the `token` cookie that contains the session token.
+  options.setCookie('token', null);
+
   return primeId(query, multiple, options);
 };
