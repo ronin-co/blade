@@ -5,6 +5,37 @@ import { aliasPlugin } from 'rolldown/experimental';
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
+const dependencyCache = new Map<string, string>();
+
+/**
+ * Fetches a dependency from unpkg.com.
+ *
+ * @param packageName - The name of the package to fetch (e.g., 'react@18.2.0' or 'lodash').
+ *
+ * @returns The content of the package's main file.
+ */
+const fetchFromUnpkg = async (packageName: string): Promise<string | null> => {
+  try {
+    if (dependencyCache.has(packageName)) return dependencyCache.get(packageName)!;
+
+    const url = new URL(`/${packageName}`, 'https://unpkg.com/');
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.warn(`Failed to fetch ${packageName} from unpkg.com: ${response.status}`);
+      return null;
+    }
+
+    const content = await response.text();
+
+    dependencyCache.set(packageName, content);
+
+    return content;
+  } catch (error) {
+    console.warn(`Error fetching ${packageName} from unpkg.com:`, error);
+    return null;
+  }
+};
+
 const makePathAbsolute = (input: string) => {
   if (input.startsWith('./')) return input.slice(1);
   if (input.startsWith('/')) return input;
@@ -115,7 +146,28 @@ export const build = async (
             id: [/^[\w@][\w./-]*$/],
           },
           handler(id) {
-            return resolveFrom(nodePath, id);
+            try {
+              const resolved = resolveFrom(nodePath, id);
+              if (resolved) return resolved;
+            } catch {
+              return `unpkg:${id}`;
+            }
+          },
+        },
+        load: {
+          filter: {
+            id: /^unpkg:/,
+          },
+          async handler(id) {
+            const packageName = id.replace('unpkg:', '');
+
+            const content = await fetchFromUnpkg(packageName);
+            if (!content) throw new Error(`Failed to fetch dependency: ${packageName}`);
+
+            return {
+              code: content,
+              moduleType: 'js',
+            };
           },
         },
       },
