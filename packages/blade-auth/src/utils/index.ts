@@ -34,7 +34,7 @@ export const avoidEmptyFields = (
  *
  * @returns The ID of the account that authored the incoming query.
  */
-export const parseSessionCookie = async (
+export const getSessionCookie = async (
   triggerOptions: TriggerOptions,
 ): Promise<JWTPayload> => {
   const token = triggerOptions.cookies.session;

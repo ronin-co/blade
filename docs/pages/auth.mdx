@@ -86,3 +86,24 @@ This query will automatically revoke the `session` cookie.
 ```ts
 await remove.session();
 ```
+
+## Utility functions
+
+Blade also re-exports a few helpful utility functions for authentication:
+
+### `getSessionCookie`
+
+This function can be used to parse the current `session` cookie inside a trigger.
+
+For example, you could place the trigger below inside the trigger file of a model for
+which you would like to log a message every time a record is added.
+
+```ts
+import type { FollowingAddTrigger } from "blade/types";
+import { getSessionCookie } from 'blade/server/utils';
+
+export const followingAdd: FollowingAddTrigger = async (_, _, options) => {
+  const { accountId } = await getSessionCookie(options);
+  console.log(`A new record was added by ${accountId}`);
+};
+```

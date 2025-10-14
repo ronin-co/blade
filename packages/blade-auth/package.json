@@ -16,7 +16,8 @@
   ],
   "exports": {
     "./triggers/*": "./dist/triggers/*.js",
-    "./schema": "./dist/schema.js"
+    "./schema": "./dist/schema.js",
+    "./utils": "./dist/utils/index.js"
   },
   "typesVersions": {
     "*": {
@@ -25,6 +26,9 @@
       ],
       "schema": [
         "./dist/schema"
+      ],
+      "utils": [
+        "./dist/utils/index"
       ]
     }
   },
