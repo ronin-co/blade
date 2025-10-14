@@ -1,5 +1,4 @@
 import path from 'node:path';
-import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
@@ -160,14 +159,10 @@ export const build = async (
               return `unpkg:${resolvedPath}`;
             }
 
+            // If it's a relative import not from unpkg, let other plugins handle it
             if (id.startsWith('.')) return undefined;
 
-            try {
-              const resolved = resolveFrom(nodePath, id);
-              if (resolved) return resolved;
-            } catch {
-              return `unpkg:${id}`;
-            }
+            return `unpkg:${id}`;
           },
         },
         load: {
