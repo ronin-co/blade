@@ -498,8 +498,6 @@ interface QueryFromTrigger<T> extends QueryPerDatabase {
   parentTrigger?: TriggerOptions['parentTrigger'];
   /** A pre-populated query result provided by the trigger. */
   result: FormattedResults<T>[number] | typeof EMPTY;
-  /** Whether the query is a read or write query. */
-  actionType: 'read' | 'write';
 }
 
 interface TriggerExecutionOptions {
@@ -767,13 +765,14 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
 
   const execOptions = { context, triggerError, clientOptions: options };
 
-  const queryList: Array<QueryFromTrigger<T>> = queries.map((item) => {
-    const queryType = Object.keys(item.query)[0] as QueryType;
-    const isRead = (QUERY_TYPES_READ as ReadonlyArray<QueryType>).includes(queryType);
-    const actionType = isRead ? 'read' : 'write';
+  const queryList: Array<QueryFromTrigger<T> & { actionType: 'read' | 'write' }> =
+    queries.map((item) => {
+      const queryType = Object.keys(item.query)[0] as QueryType;
+      const isRead = (QUERY_TYPES_READ as ReadonlyArray<QueryType>).includes(queryType);
+      const actionType = isRead ? 'read' : 'write';
 
-    return { ...item, result: EMPTY, actionType };
-  });
+      return { ...item, result: EMPTY, actionType };
+    });
 
   // First, run the triggers for all write queries.
   const writeQueryList = queryList.filter(({ actionType }) => actionType === 'write');
