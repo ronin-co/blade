@@ -70,7 +70,7 @@ await add.account.with({
 
 ### Logging In
 
-This query will automatically set a `token` cookie.
+This query will automatically set a `session` cookie.
 
 ```ts
 await add.session.with.account({
@@ -81,7 +81,7 @@ await add.session.with.account({
 
 ### Logging Out
 
-This query will automatically revoke the `token` cookie.
+This query will automatically revoke the `session` cookie.
 
 ```ts
 await remove.session();

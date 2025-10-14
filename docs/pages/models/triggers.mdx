@@ -258,7 +258,9 @@ The following arguments are available for all triggers:
 - `options.waitUntil`: A function to which a promise can be passed. Blade will keep the
   worker alive until the promise has either been resolved or rejected.
 - `options.cookies`: An object containing all cookies of the request that ran the query.
-- `options.setCookie`: A function that can be used to add, update, or remove a cookie.
+- `options.setCookie`: A function that can be used to add, update, or remove a cookie. It
+  takes the same arguments as the cookie setting function offered by
+  the [useCookie](/hooks#usecookie) hook.
 - `options.context`: A `Map` used for sharing arbitrary values between triggers.
 
 Additional options are available for [Sink](#Trigger%20Sink) triggers.
