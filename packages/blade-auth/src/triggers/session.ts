@@ -3,10 +3,10 @@ import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/server/
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
 import type { AddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
 
-import { parseSessionCookie } from '@/utils/index';
+import { getSessionCookie } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, multiple, options) => {
-  const { sessionId, accountId } = await parseSessionCookie(options);
+  const { sessionId, accountId } = await getSessionCookie(options);
 
   if (!query.with) query.with = {};
 
