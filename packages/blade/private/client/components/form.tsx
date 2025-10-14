@@ -105,8 +105,8 @@ type FormContextValue = {
   error: TriggerError | null;
 
   /**
-   * The time when the form was last submitted occurred. Allows for understanding whether
-   * the form was even ever submitted, and if so, when.
+   * The time when the form was last submitted. Allows for understanding whether the form
+   * was even ever submitted, and if so, when.
    */
   updatedAt: Date | null;
 
@@ -143,7 +143,7 @@ interface FormProps extends PropsWithChildren {
   /** Called if one of the queries of the form fails to execute. */
   onError?: (error: Required<Result>['error']) => void;
   /**
-   * Redirect to the given URL after the Form was submitted successfully.
+   * Redirect to the given URL after the form was submitted successfully.
    *
    * Supports template syntax like "/{0.slug}" where {0} refers to the first object
    * in the array of returned results.
