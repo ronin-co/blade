@@ -94,9 +94,11 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   return query;
 };
 
-export const remove: RemoveTrigger = (query, multiple, options) => {
+export const remove: RemoveTrigger = async (query, multiple, options) => {
+  await primeId(query, multiple, options);
+
   // Remove the `session` cookie that contains the session token.
   options.setCookie('session', null);
 
-  return primeId(query, multiple, options);
+  return query;
 };
