@@ -576,7 +576,7 @@ export const flushSession = async (
 
     // Keep the cached `Cookie` header of the incoming request up-to-date.
     const cookieList = Object.entries(cookies).map(([key, value]) => `${key}=${value}`);
-    if (cookieList.length > 1) {
+    if (cookieList.length > 0) {
       stream.request.headers.set('Cookie', cookieList.join('; '));
     }
 
