@@ -34,7 +34,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'
 }
 
 const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...rest }) => {
-  const initialValue = value ? stringifyFormValue(value) : undefined;
+  const initialValue = typeof value === 'undefined' ? value : stringifyFormValue(value);
 
   if (!fieldType) {
     switch (rest.type) {
