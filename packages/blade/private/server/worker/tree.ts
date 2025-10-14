@@ -488,8 +488,6 @@ export const flushSession = async (
       return !matchingStream;
     });
 
-    console.log('stream.request.headers', stream.request.headers);
-
     const { response, results } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
