@@ -874,6 +874,10 @@ const renderReactTree = async (
   const results = serverContext.collected.queries;
 
   // A list of all cookies (incoming and outgoing) that were used to render the page.
+  //
+  // This differs from the `applyCollectedCookies` function call further above, since
+  // that call applies the collected cookies before rendering (of a previous render),
+  // whereas the one right here applies the collected cookies after the current render.
   const cookies = applyCollectedCookies(incomingCookies, serverContext.collected.cookies);
 
   if (serverContext.collected.redirect) {
