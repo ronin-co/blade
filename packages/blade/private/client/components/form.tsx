@@ -1,6 +1,7 @@
 import type { ModelField } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
+  type FunctionComponent,
   type PropsWithChildren,
   createContext,
   useEffect,
@@ -227,7 +228,7 @@ interface Result {
   updatedAt: Date;
 }
 
-const Form = ({
+const Form: FunctionComponent<FormProps> = ({
   targetRecord,
   model,
   clearOnSuccess = false,
@@ -243,7 +244,7 @@ const Form = ({
   excludeEmptyFields,
   newRecordSlug,
   noElement,
-}: FormProps) => {
+}) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add } = useMutation();
   const { pathname } = useLocation();

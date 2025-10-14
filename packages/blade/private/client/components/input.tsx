@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes } from 'react';
+import type { FunctionComponent, InputHTMLAttributes } from 'react';
 
 import type { FieldType } from '@/private/client/components/form';
 
@@ -33,7 +33,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'
   hidden?: boolean;
 }
 
-const Input = ({ value, fieldType, hidden, ...rest }: InputProps) => {
+const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...rest }) => {
   const initialValue = value ? stringifyFormValue(value) : undefined;
 
   if (!fieldType) {

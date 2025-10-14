@@ -1,4 +1,5 @@
 import {
+  type FunctionComponent,
   type MutableRefObject,
   type PropsWithChildren,
   useContext,
@@ -18,7 +19,10 @@ interface FormElementProps extends PropsWithChildren {
 // automatically read all its children fields like that. Please therefore refrain from
 // adding any styling to it. As you can see in the places where the component is already
 // used, it automatically adapts to its parent, especially when the parent is using flex.
-const FormElement = ({ children, allowGlobalSave }: FormElementProps) => {
+const FormElement: FunctionComponent<FormElementProps> = ({
+  children,
+  allowGlobalSave,
+}) => {
   const form = useContext(FormContext);
   if (!form) throw new Error('`FormElement` can only be used within `Form`.');
 
