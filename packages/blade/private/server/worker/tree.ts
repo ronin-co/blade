@@ -204,6 +204,25 @@ const obtainQueryResults = async (
   }
 };
 
+const applyCollectedCookies = (
+  base: Record<string, string>,
+  collected: Collected['cookies'] = {},
+) => {
+  const newBase = { ...base };
+
+  for (const key in collected) {
+    const settings = collected[key];
+
+    if (settings.value === null) {
+      delete newBase[key];
+    } else {
+      newBase[key] = settings.value;
+    }
+  }
+
+  return newBase;
+};
+
 export interface Collected {
   queries: (QueryItemRead | QueryItemWrite)[];
   redirect?: string;
@@ -488,7 +507,7 @@ export const flushSession = async (
       return !matchingStream;
     });
 
-    const { response, results } = await renderReactTree(
+    const { response, results, cookies } = await renderReactTree(
       new URL(stream.request.url),
       stream.request.headers,
       !correctBundle,
@@ -546,6 +565,12 @@ export const flushSession = async (
       }
     }
 
+    // Keep the cached `Cookie` header of the incoming request up-to-date.
+    const cookieList = Object.entries(cookies).map(([key, value]) => `${key}=${value}`);
+    if (cookieList.length > 1) {
+      stream.request.headers.set('Cookie', cookieList.join('; '));
+    }
+
     await stream.writeChunk(correctBundle ? 'update' : 'update-bundle', response);
 
     // The `finally` block will still execute before this.
@@ -600,7 +625,11 @@ const renderReactTree = async (
   },
   /** Existing properties that the server context should be primed with. */
   existingCollected?: Collected,
-): Promise<{ response: Response; results: Collected['queries'] }> => {
+): Promise<{
+  response: Response;
+  results: Collected['queries'];
+  cookies: Record<string, string>;
+}> => {
   const url = new URL(requestURL);
 
   // See https://github.com/ronin-co/blade/pull/31 for more details.
@@ -637,7 +666,7 @@ const renderReactTree = async (
 
     // Only available to server components. Cannot be serialized and made available on
     // the client-side (to client components).
-    cookies: incomingCookies,
+    cookies: applyCollectedCookies(incomingCookies, existingCollected?.cookies),
     collected: existingCollected || {
       queries: [],
       metadata: {},
@@ -646,18 +675,6 @@ const renderReactTree = async (
     waitUntil: options.waitUntil,
     flushSession: options.flushSession,
   };
-
-  const collectedCookies = serverContext.collected.cookies || {};
-
-  for (const key in collectedCookies) {
-    const settings = collectedCookies[key];
-
-    if (settings.value === null) {
-      delete incomingCookies[key];
-    } else {
-      incomingCookies[key] = settings.value;
-    }
-  }
 
   const renderingLeaves = getRenderingLeaves(entry.path);
 
@@ -847,6 +864,9 @@ const renderReactTree = async (
   const headers = getCookieHeaders(serverContext.collected.cookies || {});
   const results = serverContext.collected.queries;
 
+  // A list of all cookies (incoming and outgoing) that were used to render the page.
+  const cookies = applyCollectedCookies(incomingCookies, serverContext.collected.cookies);
+
   if (serverContext.collected.redirect) {
     if (initial) {
       headers.set('Location', serverContext.collected.redirect);
@@ -857,6 +877,7 @@ const renderReactTree = async (
           status: 307,
         }),
         results,
+        cookies,
       };
     }
 
@@ -888,7 +909,7 @@ const renderReactTree = async (
     headers.set('Content-Location', url.pathname + url.search);
   }
 
-  return { response: new Response(body, { headers }), results };
+  return { response: new Response(body, { headers }), results, cookies };
 };
 
 export default renderReactTree;
