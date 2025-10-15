@@ -45,7 +45,8 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   }, [transitionPage]);
 
   // Ensure that the address bar is updated whenever the page changes, but only if this
-  // is desired by the trigger of the page change.
+  // is desired by the trigger of the page change. This is a layout effect because we
+  // want it to happen as soon as possible, before the browser paints.
   useLayoutEffect(() => {
     // Don't fire for the first mount.
     if (!mounted.current) {
@@ -57,6 +58,16 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
       history.pushState({}, '', populatedPathname + search + hash);
     }
   }, [populatedPathname + search + hash]);
+
+  // Whenever the page changes and the hash changes with it, scroll the respective
+  // element into the view. This is a regular effect because we want it to happen after
+  // the browser has painted the new page, since the element otherwise can't be scrolled
+  // to, since it's not visible.
+  useEffect(() => {
+    if (universalContext.addressBarInSync && hash) {
+      document.querySelector(hash)?.scrollIntoView();
+    }
+  }, [hash]);
 
   // Ensure that the scroll position is reset whenever the page changes.
   //
