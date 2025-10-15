@@ -1,4 +1,4 @@
-import { Link } from 'blade/client/components';
+import { Link } from 'blade/components';
 import { useLocation } from 'blade/hooks';
 
 import { cn } from '@/lib/utils';
