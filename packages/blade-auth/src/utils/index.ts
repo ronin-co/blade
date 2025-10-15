@@ -27,24 +27,12 @@ export const avoidEmptyFields = (
   }
 };
 
-/**
- * Obtains the secret used to sign authentication tokens.
- *
- * @returns The secret.
- */
-export const getAuthSecret = (): string => {
-  let secret = import.meta.env.BLADE_AUTH_SECRET;
+export const AUTH_SECRET =
+  import.meta.env.BLADE_AUTH_SECRET ||
+  (import.meta.env.BLADE_ENV === 'development' ? 'default-secret-1234' : '');
 
-  if (!secret) {
-    if (import.meta.env.BLADE_ENV === 'development') {
-      secret = 'default-secret-1234';
-    } else {
-      throw new Error('Please add a `BLADE_AUTH_SECRET` environment variable.');
-    }
-  }
-
-  return secret;
-};
+if (!AUTH_SECRET)
+  throw new Error('Please add a `BLADE_AUTH_SECRET` environment variable.');
 
 /**
  * Retrieve the account that authored the incoming query.
@@ -63,7 +51,7 @@ export const getSessionCookie = async (
 
   if (token) {
     try {
-      const tokenPayload = await verifyJWT(token, getAuthSecret());
+      const tokenPayload = await verifyJWT(token, AUTH_SECRET);
 
       sessionId = (tokenPayload?.sub as string) || null;
       accountId = (tokenPayload?.aud as string) || null;

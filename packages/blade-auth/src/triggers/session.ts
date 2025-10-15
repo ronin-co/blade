@@ -3,7 +3,7 @@ import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/server/
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
 import type { AddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
 
-import { getAuthSecret, getSessionCookie } from '@/utils/index';
+import { AUTH_SECRET, getSessionCookie } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, multiple, options) => {
   const { sessionId, accountId } = await getSessionCookie(options);
@@ -85,7 +85,7 @@ export const add: AddTrigger = async (query, _multiple, options) => {
       aud: query.with.account,
       iat: Math.floor(Date.now() / 1000),
     },
-    getAuthSecret(),
+    AUTH_SECRET,
   );
 
   // Add a new `session` cookie containing the session token.
