@@ -28,6 +28,25 @@ export const avoidEmptyFields = (
 };
 
 /**
+ * Obtains the secret used to sign authentication tokens.
+ *
+ * @returns The secret.
+ */
+export const getAuthSecret = (): string => {
+  let secret = import.meta.env.BLADE_AUTH_SECRET;
+
+  if (!secret) {
+    if (import.meta.env.BLADE_ENV === 'development') {
+      secret = 'default-secret-1234';
+    } else {
+      throw new Error('Please add a `BLADE_AUTH_SECRET` environment variable.');
+    }
+  }
+
+  return secret;
+};
+
+/**
  * Retrieve the account that authored the incoming query.
  *
  * @param triggerOptions - The options object passed to the surrounding effect.
@@ -44,10 +63,7 @@ export const getSessionCookie = async (
 
   if (token) {
     try {
-      const tokenPayload = await verifyJWT(
-        token,
-        import.meta.env.BLADE_AUTH_SECRET as string,
-      );
+      const tokenPayload = await verifyJWT(token, getAuthSecret());
 
       sessionId = (tokenPayload?.sub as string) || null;
       accountId = (tokenPayload?.aud as string) || null;
