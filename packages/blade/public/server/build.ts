@@ -162,10 +162,6 @@ export const build = async (
             // If it's a relative import not from unpkg, let other plugins handle it
             if (id.startsWith('.')) return undefined;
 
-            // Use default Rolldown resolution for `blade/` imports
-            if (id.startsWith('blade/')) return undefined;
-
-            // All other npm packages are fetched from unpkg.com
             return `unpkg:${id}`;
           },
         },
