@@ -206,13 +206,11 @@ export const fetchPage = async (
 
   const url = new URL(path, location.origin);
 
-  // Append the URL hash as a separate field, because we don't want it to be visible as
-  // part of the `location` exposed to the application on the server, since `location`
-  // has to be the same on the initial load and on client-side transitions, and the
-  // browser generally never sends hashes to the server.
+  // Append the URL hash as a separate field, since the browser would strip it from the
+  // URL of the outgoing network request, but Blade relies on it internally.
   if (url.hash) body.append('hash', url.hash);
 
-  // Open a new stream. Do not pass the hash due to the reason mentioned above.
+  // Open a new stream. Do not pass the URL hash due to the reason mentioned above.
   const stream = await createStreamSource(url.pathname + url.search, body, subscribe);
 
   return new Promise((resolve) => {
