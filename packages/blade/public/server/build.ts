@@ -7,20 +7,20 @@ import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils
 const dependencyCache = new Map<string, string>();
 
 /**
- * Fetches a dependency from unpkg.com.
+ * Fetches a dependency from a CDN.
  *
  * @param packageName - The name of the package to fetch (e.g., 'react@18.2.0' or 'lodash').
  *
  * @returns The content of the package's main file.
  */
-const fetchFromUnpkg = async (packageName: string): Promise<string | null> => {
+const fetchFromCDN = async (packageName: string): Promise<string | null> => {
   try {
     if (dependencyCache.has(packageName)) return dependencyCache.get(packageName)!;
 
     const url = new URL(`/${packageName}`, 'https://unpkg.com/');
     const response = await fetch(url);
     if (!response.ok) {
-      console.warn(`Failed to fetch ${packageName} from unpkg.com: ${response.status}`);
+      console.warn(`Failed to fetch ${packageName} from CDN: ${response.status}`);
       return null;
     }
 
@@ -30,7 +30,7 @@ const fetchFromUnpkg = async (packageName: string): Promise<string | null> => {
 
     return content;
   } catch (error) {
-    console.warn(`Error fetching ${packageName} from unpkg.com:`, error);
+    console.warn(`Error fetching ${packageName} from CDN:`, error);
     return null;
   }
 };
@@ -145,9 +145,9 @@ export const build = async (
             id: [/^[\w@][\w./-]*$/, /^\.\.?\//],
           },
           handler(id, importer) {
-            // Handle relative imports from unpkg modules
-            if (importer?.startsWith('unpkg:') && id.startsWith('.')) {
-              const importerPath = importer.replace('unpkg:', '');
+            // Handle relative imports from CDN modules
+            if (importer?.startsWith('cdn:') && id.startsWith('.')) {
+              const importerPath = importer.replace('cdn:', '');
 
               // Get the directory of the importer (remove the last segment if it's a file)
               const importerDir = importerPath.includes('/')
@@ -156,23 +156,23 @@ export const build = async (
 
               const baseUrl = `https://unpkg.com/${importerDir}`;
               const resolvedPath = new URL(id, baseUrl).pathname.slice(1);
-              return `unpkg:${resolvedPath}`;
+              return `cdn:${resolvedPath}`;
             }
 
-            // If it's a relative import not from unpkg, let other plugins handle it
+            // If it's a relative import not from CDN, let other plugins handle it
             if (id.startsWith('.')) return undefined;
 
-            return `unpkg:${id}`;
+            return `cdn:${id}`;
           },
         },
         load: {
           filter: {
-            id: /^unpkg:/,
+            id: /^cdn:/,
           },
           async handler(id) {
-            const packageName = id.replace('unpkg:', '');
+            const packageName = id.replace('cdn:', '');
 
-            const content = await fetchFromUnpkg(packageName);
+            const content = await fetchFromCDN(packageName);
             if (!content) throw new Error(`Failed to fetch dependency: ${packageName}`);
 
             return {
