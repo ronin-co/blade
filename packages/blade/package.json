@@ -25,18 +25,6 @@
       "default": "./dist/public/client/hooks.js",
       "types": "./dist/public/client/hooks.d.ts" 
     },
-    "./components": {
-      "default": "./dist/public/universal/components.js",
-      "types": "./dist/public/universal/components.d.ts" 
-    },
-    "./hooks": {
-      "default": "./dist/public/universal/hooks.js",
-      "types": "./dist/public/universal/hooks.d.ts" 
-    },
-    "./schema": {
-      "default": "./dist/public/universal/schema.js",
-      "types": "./dist/public/universal/schema.d.ts" 
-    },
     "./server/auth": {
       "default": "./dist/public/server/auth.js",
       "types": "./dist/public/server/auth.d.ts" 
@@ -57,6 +45,18 @@
       "default": "./dist/public/server/utils.js",
       "types": "./dist/public/server/utils.d.ts" 
     },
+    "./components": {
+      "default": "./dist/public/universal/components.js",
+      "types": "./dist/public/universal/components.d.ts" 
+    },
+    "./hooks": {
+      "default": "./dist/public/universal/hooks.js",
+      "types": "./dist/public/universal/hooks.d.ts" 
+    },
+    "./schema": {
+      "default": "./dist/public/universal/schema.js",
+      "types": "./dist/public/universal/schema.d.ts" 
+    },
     "./types": {
       "default": "./dist/public/universal/types.js",
       "types": "./dist/public/universal/types.d.ts" 
@@ -65,14 +65,14 @@
   "typesVersions": {
     "*": {
       "client/hooks": ["./dist/public/client/hooks"],
-      "components": ["./dist/public/universal/components"],
-      "hooks": ["./dist/public/universal/hooks"],
-      "schema": ["./dist/public/universal/schema"],
       "server/auth": ["./dist/public/server/auth"],
       "server/build": ["./dist/public/server/build"],
       "server/errors": ["./dist/public/server/errors"],
       "server/hooks": ["./dist/public/server/hooks"],
       "server/utils": ["./dist/public/server/utils"],
+      "components": ["./dist/public/universal/components"],
+      "hooks": ["./dist/public/universal/hooks"],
+      "schema": ["./dist/public/universal/schema"],
       "types": ["./dist/public/universal/types"]
     }
   },
