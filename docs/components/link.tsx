@@ -1,4 +1,4 @@
-import { Link as NativeLink } from 'blade/components';
+import { Link as NativeLink } from 'blade/client/components';
 import type { AnchorHTMLAttributes, ReactElement } from 'react';
 
 interface LinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {

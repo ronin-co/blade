@@ -1,5 +1,5 @@
 import { cn, slugify } from '@/lib/utils';
-import { Link } from 'blade/components';
+import { Link } from 'blade/client/components';
 import type { TableOfContents } from 'blade/types';
 import { useEffect, useState } from 'react';
 
