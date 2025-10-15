@@ -204,8 +204,16 @@ export const fetchPage = async (
     }
   }
 
-  // Open a new stream.
-  const stream = await createStreamSource(path, body, subscribe);
+  const url = new URL(path, location.origin);
+
+  // Append the URL hash as a separate field, because we don't want it to be visible as
+  // part of the `location` exposed to the application on the server, since `location`
+  // has to be the same on the initial load and on client-side transitions, and the
+  // browser generally never sends hashes to the server.
+  if (url.hash) body.append('hash', url.hash);
+
+  // Open a new stream. Do not pass the hash due to the reason mentioned above.
+  const stream = await createStreamSource(url.pathname + url.search, body, subscribe);
 
   return new Promise((resolve) => {
     stream.addEventListener('update', async (event) => {

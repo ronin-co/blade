@@ -23,7 +23,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   const universalContext = useUniversalContext();
   const { transitionPage } = usePageTransition();
 
-  const { pathname, search } = usePrivateLocation();
+  const { pathname, search, hash } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
   const populatedPathname = populatePathname(pathname);
   const mounted = useRef(false);
@@ -55,6 +55,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
 
     if (universalContext.addressBarInSync) {
       history.pushState({}, '', populatedPathname + search);
+      console.log(populatedPathname + search + hash)
     }
   }, [populatedPathname + search]);
 
