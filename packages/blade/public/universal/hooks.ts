@@ -32,6 +32,12 @@ const useLocation = (): URL => {
   // automatically be removed.
   newLocation.searchParams.delete('page');
 
+  // Browsers don't send URL hashes over the network for the initial page load, but for
+  // client-side page transitions, Blade sends the URL hash separately in order to use it
+  // internally, so we have to strip it here in order to ensure consistency between the
+  // first load and client-side page transitions.
+  newLocation.hash = '';
+
   return newLocation;
 };
 

@@ -204,8 +204,14 @@ export const fetchPage = async (
     }
   }
 
-  // Open a new stream.
-  const stream = await createStreamSource(path, body, subscribe);
+  const url = new URL(path, location.origin);
+
+  // Append the URL hash as a separate field, since the browser would strip it from the
+  // URL of the outgoing network request, but Blade relies on it internally.
+  if (url.hash) body.append('hash', url.hash);
+
+  // Open a new stream. Do not pass the URL hash due to the reason mentioned above.
+  const stream = await createStreamSource(url.pathname + url.search, body, subscribe);
 
   return new Promise((resolve) => {
     stream.addEventListener('update', async (event) => {

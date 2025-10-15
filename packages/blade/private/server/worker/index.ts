@@ -223,9 +223,9 @@ app.get('*', async (c) => {
 });
 
 type ClientTransition = {
+  hash?: string;
   options?: string;
   files?: File;
-  subscribe?: string;
 };
 
 // Handle client side navigation.
@@ -284,7 +284,19 @@ app.post('*', async (c) => {
     }
   }
 
-  const stream = new ResponseStream(c.req.raw);
+  // Browsers don't send URL hashes over the network, so we're sending them in a separate
+  // field, which we then apply back onto the request URL here.
+  const newRequestURL = new URL(c.req.raw.url);
+  if (body.hash) newRequestURL.hash = body.hash;
+
+  // Create a fresh request with only the URL and headers, since we will modify the
+  // headers and runtimes like `workerd` don't allow that on the incoming request.
+  const newRequest = new Request(newRequestURL, { headers: c.req.raw.headers });
+
+  // Remove meta headers from the incoming headers.
+  Object.values(CUSTOM_HEADERS).forEach((header) => newRequest.headers.delete(header));
+
+  const stream = new ResponseStream(newRequest);
 
   flushSession(stream, correctBundle, {
     queries,

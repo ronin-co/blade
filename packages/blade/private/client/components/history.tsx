@@ -23,10 +23,12 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   const universalContext = useUniversalContext();
   const { transitionPage } = usePageTransition();
 
-  const { pathname, search } = usePrivateLocation();
+  const { pathname, search, hash } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
   const populatedPathname = populatePathname(pathname);
-  const mounted = useRef(false);
+
+  const mountedURL = useRef(false);
+  const mountedHash = useRef(false);
 
   // Navigate to different pages whenever the "Previous" and "Next" history actions in
   // the browser are used.
@@ -45,18 +47,35 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   }, [transitionPage]);
 
   // Ensure that the address bar is updated whenever the page changes, but only if this
-  // is desired by the trigger of the page change.
+  // is desired by the trigger of the page change. This is a layout effect because we
+  // want it to happen as soon as possible, before the browser paints.
   useLayoutEffect(() => {
-    // Don't fire for the first mount.
-    if (!mounted.current) {
-      mounted.current = true;
+    // Don't fire when the page is loaded fresh.
+    if (!mountedURL.current) {
+      mountedURL.current = true;
       return;
     }
 
     if (universalContext.addressBarInSync) {
-      history.pushState({}, '', populatedPathname + search);
+      history.pushState({}, '', populatedPathname + search + hash);
     }
-  }, [populatedPathname + search]);
+  }, [populatedPathname + search + hash]);
+
+  // Whenever the page changes and the hash changes with it, scroll the respective
+  // element into the view. This is a regular effect because we want it to happen after
+  // the browser has painted the new page, since the element otherwise can't be scrolled
+  // to, since it's not visible.
+  useEffect(() => {
+    // Don't fire when the page is loaded fresh.
+    if (!mountedHash.current) {
+      mountedHash.current = true;
+      return;
+    }
+
+    if (universalContext.addressBarInSync && hash) {
+      document.querySelector(hash)?.scrollIntoView();
+    }
+  }, [hash]);
 
   // Ensure that the scroll position is reset whenever the page changes.
   //

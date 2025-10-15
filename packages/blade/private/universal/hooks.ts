@@ -34,10 +34,6 @@ const usePrivateLocation = (): URL => {
   const isNetlify = typeof Netlify !== 'undefined';
   if (typeof window === 'undefined' || isNetlify) return url;
 
-  // In the browser, we need to read the URL hash from the `window` object, since
-  // browsers don't send the URL hash to the server.
-  url.hash = window.location.hash;
-
   return url;
 };
 
