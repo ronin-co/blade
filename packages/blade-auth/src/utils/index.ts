@@ -46,7 +46,7 @@ export const getSessionCookie = async (
     try {
       const tokenPayload = await verifyJWT(
         token,
-        import.meta.env.BLADE_SESSION_JWT_SECRET as string,
+        import.meta.env.BLADE_AUTH_SECRET as string,
       );
 
       sessionId = (tokenPayload?.sub as string) || null;

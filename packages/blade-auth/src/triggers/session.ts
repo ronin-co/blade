@@ -85,7 +85,7 @@ export const add: AddTrigger = async (query, _multiple, options) => {
       aud: query.with.account,
       iat: Math.floor(Date.now() / 1000),
     },
-    import.meta.env.BLADE_SESSION_JWT_SECRET as string,
+    import.meta.env.BLADE_AUTH_SECRET as string,
   );
 
   // Add a new `session` cookie containing the session token.
