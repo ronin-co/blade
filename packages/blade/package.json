@@ -64,7 +64,7 @@
     "@tailwindcss/oxide": "4.1.6",
     "dotenv": "16.5.0",
     "gradient-string": "3.0.0",
-    "hive": "2.1.4",
+    "hive": "2.1.5",
     "rolldown": "1.0.0-beta.41"
   },
   "devDependencies": {
