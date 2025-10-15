@@ -1,0 +1,3 @@
+# Ensure these .ts entrypoints count as TypeScript (override shebang heuristic)
+packages/create-blade/src/index.ts linguist-language=TypeScript
+packages/blade/private/shell/index.ts linguist-language=TypeScript
