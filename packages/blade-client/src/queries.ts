@@ -83,10 +83,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
 
   // If no token for accessing a remote storage is available, we should auto-create a
   // local database.
-  if (!token && !(await hive.has(db))) {
-    console.log(`Created new database ${db}`);
-    await hive.create(db);
-  }
+  if (!token && !(await hive.has(db))) await hive.create(db);
 
   const results = await hive.storage.query(db, {
     statements: statements.map((item) => ({ ...item, method: 'values' })),

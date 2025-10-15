@@ -23,7 +23,7 @@
         "@tailwindcss/oxide": "4.1.6",
         "dotenv": "16.5.0",
         "gradient-string": "3.0.0",
-        "hive": "2.1.4",
+        "hive": "2.1.5",
         "rolldown": "1.0.0-beta.41",
       },
       "devDependencies": {
@@ -84,7 +84,7 @@
         "@inquirer/prompts": "7.2.3",
         "chalk-template": "1.1.0",
         "get-port": "7.1.0",
-        "hive": "2.1.4",
+        "hive": "2.1.5",
         "ini": "5.0.0",
         "json5": "2.2.3",
         "open": "10.1.0",
@@ -108,7 +108,7 @@
       "name": "blade-client",
       "version": "3.23.0",
       "dependencies": {
-        "hive": "2.1.4",
+        "hive": "2.1.5",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -139,7 +139,7 @@
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
-        "hive": "2.1.4",
+        "hive": "2.1.5",
         "title": "4.0.1",
         "tsdown": "0.15.5",
         "typescript": "5.7.2",
@@ -753,7 +753,7 @@
 
     "hast-util-whitespace": ["hast-util-whitespace@3.0.0", "", { "dependencies": { "@types/hast": "^3.0.0" } }, "sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw=="],
 
-    "hive": ["hive@2.1.4", "", { "dependencies": { "hono": "4.9.7", "zod": "4.1.8" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-KAlVErCjvBfWQS2lb02ZxQLHMc778MHHw4r0oWsXkW+AlIca9u9A9NiAt+I54wDhJrano4w023Y94ndmv6bbeQ=="],
+    "hive": ["hive@2.1.5", "", { "dependencies": { "hono": "4.9.7", "zod": "4.1.8" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-blYTGEGu8MSAj1jByn4IZs0P3yUhoY8uKQChArYssoDTiNQsN4i+u+dXDDrKNUlIquYhxxcOpBGUQ8+52b8SCw=="],
 
     "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
 
@@ -1237,7 +1237,7 @@
 
     "gradient-string/chalk": ["chalk@5.4.1", "", {}, "sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w=="],
 
-    "hive/@types/bun": ["@types/bun@1.2.23", "", { "dependencies": { "bun-types": "1.2.23" } }, "sha512-le8ueOY5b6VKYf19xT3McVbXqLqmxzPXHsQT/q9JHgikJ2X22wyTW3g3ohz2ZMnp7dod6aduIiq8A14Xyimm0A=="],
+    "hive/@types/bun": ["@types/bun@1.3.0", "", { "dependencies": { "bun-types": "1.3.0" } }, "sha512-+lAGCYjXjip2qY375xX/scJeVRmZ5cY0wyHYyCYxNcdEXrQ4AOe3gACgd4iQ8ksOslJtW4VNxBJ8llUwc3a6AA=="],
 
     "hive/hono": ["hono@4.9.7", "", {}, "sha512-t4Te6ERzIaC48W3x4hJmBwgNlLhmiEdEE5ViYb02ffw4ignHNHa5IBtPjmbKstmtKa8X6C35iWwK4HaqvrzG9w=="],
 
@@ -1299,7 +1299,7 @@
 
     "blade-syntax/@types/bun/bun-types": ["bun-types@1.2.4", "", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-nDPymR207ZZEoWD4AavvEaa/KZe/qlrbMSchqpQwovPZCKc7pwMoENjEtHgMKaAjJhy+x6vfqSBA1QU3bJgs0Q=="],
 
-    "hive/@types/bun/bun-types": ["bun-types@1.2.23", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-R9f0hKAZXgFU3mlrA0YpE/fiDvwV0FT9rORApt2aQVWSuJDzZOyB5QLc0N/4HF57CS8IXJ6+L5E4W1bW6NS2Aw=="],
+    "hive/@types/bun/bun-types": ["bun-types@1.3.0", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-u8X0thhx+yJ0KmkxuEo9HAtdfgCBaM/aI9K90VQcQioAmkVp3SG3FkwWGibUFz3WdXAdcsqOcbU40lK7tbHdkQ=="],
 
     "string-width-cjs/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
 
