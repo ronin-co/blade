@@ -27,6 +27,13 @@ export const avoidEmptyFields = (
   }
 };
 
+export const AUTH_SECRET =
+  import.meta.env.BLADE_AUTH_SECRET ||
+  (import.meta.env.BLADE_ENV === 'development' ? 'default-secret-1234' : '');
+
+if (!AUTH_SECRET)
+  throw new Error('Please add a `BLADE_AUTH_SECRET` environment variable.');
+
 /**
  * Retrieve the account that authored the incoming query.
  *
@@ -44,10 +51,7 @@ export const getSessionCookie = async (
 
   if (token) {
     try {
-      const tokenPayload = await verifyJWT(
-        token,
-        import.meta.env.BLADE_SESSION_JWT_SECRET as string,
-      );
+      const tokenPayload = await verifyJWT(token, AUTH_SECRET);
 
       sessionId = (tokenPayload?.sub as string) || null;
       accountId = (tokenPayload?.aud as string) || null;

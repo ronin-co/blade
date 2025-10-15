@@ -4,13 +4,22 @@ title: Auth
 
 # Auth
 
-Blade natively offers the [blade-auth](https://github.com/ronin-co/blade/tree/main/packages/blade-auth) package, which provides utility functions for easily adding different authentication methods to your application, without having to maintain them.
+Blade natively offers the [blade-auth](https://github.com/ronin-co/blade/tree/main/packages/blade-auth) package,
+which provides utility functions for easily adding different authentication methods to your application,
+without having to maintain them.
 
-The functionality of the package is built around [Triggers](/models/triggers), which make it possible to capture Blade queries and run custom logic.
+The functionality of the package is built around [Triggers](/models/triggers), which make
+it possible to capture Blade queries and run custom logic.
 
 ## Setup
 
-To enable all default authentication features, create the following files in a directory named `triggers` at the root of your application:
+To enable all default authentication features, create the following files in a directory
+named `triggers` at the root of your application.
+
+Additionally, a `BLADE_AUTH_SECRET` environment variable should be present in production
+(not necessary during development because a default value is provided there), which must
+contain the secret used to sign authentication tokens. You can run `openssl rand -base64 30` to
+generate a new secret that you can store in the environment variable.
 
 ```ts
 // triggers/account.ts
@@ -33,7 +42,8 @@ export const add: AddTrigger = addSession;
 export const remove: RemoveTrigger = removeSession;
 ```
 
-Additionally, place the following in your [Schema Definition](/models) located in a `schema/index.ts` file at the root of your project:
+Additionally, place the following in your [Schema Definition](/models) located in
+a `schema/index.ts` file at the root of your project:
 
 ```ts
 export { Account, Session } from 'blade/server/auth';
@@ -55,9 +65,13 @@ const session = use.session.using(['account']);
 
 ## Actions
 
-To trigger specific actions, you can then run one of the following queries with the [useMutation](/hooks#usemutation-client) hook on the client-side, depending on what actions the user performs.
+To trigger specific actions, you can then run one of the following queries with
+the [useMutation](/hooks#usemutation-client) hook on the client-side, depending on what
+actions the user performs.
 
-In addition to the actions documented below, you can, of course, also run any other [Query](/queries) for the models that `blade-auth` provides, such as `Account` and `Session`. For example, you might choose to count records or filter them in a specific way.
+In addition to the actions documented below, you can, of course, also run any
+other [Query](/queries) for the models that `blade-auth` provides, such as `Account` and `Session`. For
+example, you might choose to count records or filter them in a specific way.
 
 ### Signing Up
 
