@@ -26,7 +26,9 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   const { pathname, search, hash } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
   const populatedPathname = populatePathname(pathname);
-  const mounted = useRef(false);
+
+  const mountedURL = useRef(false);
+  const mountedHash = useRef(false);
 
   // Navigate to different pages whenever the "Previous" and "Next" history actions in
   // the browser are used.
@@ -49,8 +51,8 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // want it to happen as soon as possible, before the browser paints.
   useLayoutEffect(() => {
     // Don't fire for the first mount.
-    if (!mounted.current) {
-      mounted.current = true;
+    if (!mountedURL.current) {
+      mountedURL.current = true;
       return;
     }
 
@@ -64,6 +66,12 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // the browser has painted the new page, since the element otherwise can't be scrolled
   // to, since it's not visible.
   useEffect(() => {
+    // Don't fire for the first mount.
+    if (!mountedHash.current) {
+      mountedHash.current = true;
+      return;
+    }
+
     if (universalContext.addressBarInSync && hash) {
       document.querySelector(hash)?.scrollIntoView();
     }
