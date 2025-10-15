@@ -488,6 +488,9 @@ class Transaction {
     }
 
     // Only retain the results of SQL statements that are expected to return data.
+    //
+    // This is important because a single Blade query might compile down to multiple SQL
+    // statements, some of which should not produce results.
     const cleanResults = results!.filter((_, index) => this.statements[index].returning);
 
     let resultIndex = 0;
@@ -496,6 +499,12 @@ class Transaction {
       (finalResults: Array<Result<RecordType>>, internalQuery) => {
         const { query, selectedFields, models: affectedModels } = internalQuery;
         const { queryType, queryModel, queryInstructions } = splitQuery(query);
+
+        // If the root model is being created or dropped, handle it in a special way.
+        if (queryModel === 'model') {
+          finalResults.push({ record: null, modelFields: {} });
+          return finalResults;
+        }
 
         // If the provided results are raw (rows being arrays of values, which is the most
         // ideal format in terms of performance, since the driver doesn't need to format

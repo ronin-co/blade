@@ -1589,7 +1589,7 @@ test('drop existing preset', () => {
 });
 
 // Assert that no entry in `ronin_schema` is created when the root model is created.
-test('create the root model', () => {
+test('create the root model', async () => {
   const queries: Array<Query> = [
     {
       create: {
@@ -1608,9 +1608,21 @@ test('create the root model', () => {
       params: [],
     },
   ]);
+
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements, { prefill: false });
+    return { results, raw: false };
+  });
+
+  expect(results).toMatchObject([
+    {
+      record: null,
+      modelFields: {},
+    },
+  ]);
 });
 
-test('drop the root model', () => {
+test('drop the root model', async () => {
   const queries: Array<Query> = [
     {
       drop: {
@@ -1627,6 +1639,18 @@ test('drop the root model', () => {
     {
       sql: 'DROP TABLE "ronin_schema"',
       params: [],
+    },
+  ]);
+
+  const results = await transaction.formatResults(async (statements) => {
+    const results = await queryEphemeralDatabase(models, statements);
+    return { results, raw: false };
+  });
+
+  expect(results).toMatchObject([
+    {
+      record: null,
+      modelFields: {},
     },
   ]);
 });

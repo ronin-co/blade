@@ -135,6 +135,7 @@ const diff = async (
       } catch (err) {
         spinner.fail('Failed to initialize database');
         console.error(err);
+        process.exit(1);
       }
 
       spinner.succeed();
