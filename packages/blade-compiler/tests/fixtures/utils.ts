@@ -88,17 +88,21 @@ const hive = new Hive({
  *
  * @param models - The models that should be inserted into the database.
  * @param statements - The statements that should be executed.
+ * @param options - Allows for customizing how the database should be created.
  *
  * @returns A list of rows resulting from the executed statements.
  */
 export const queryEphemeralDatabase = async (
   models: Array<Model>,
   statements: Array<Statement>,
+  options?: { prefill: boolean },
 ): Promise<Array<Array<RowObject>>> => {
   const databaseId = Math.random().toString(36).substring(7);
   const database = await hive.create({ type: 'database', id: databaseId });
 
-  await prefillDatabase(database.resource, models);
+  if (options?.prefill !== false) {
+    await prefillDatabase(database.resource, models);
+  }
 
   const results = await database.resource.query(statements);
   const formattedResults = results.map((result) => result.rows as Array<RowObject>);
