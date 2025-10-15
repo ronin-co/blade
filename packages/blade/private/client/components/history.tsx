@@ -50,7 +50,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // is desired by the trigger of the page change. This is a layout effect because we
   // want it to happen as soon as possible, before the browser paints.
   useLayoutEffect(() => {
-    // Don't fire for the first mount.
+    // Don't fire when the page is loaded fresh.
     if (!mountedURL.current) {
       mountedURL.current = true;
       return;
@@ -66,7 +66,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // the browser has painted the new page, since the element otherwise can't be scrolled
   // to, since it's not visible.
   useEffect(() => {
-    // Don't fire for the first mount.
+    // Don't fire when the page is loaded fresh.
     if (!mountedHash.current) {
       mountedHash.current = true;
       return;
