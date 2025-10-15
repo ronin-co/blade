@@ -55,7 +55,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
 
     if (universalContext.addressBarInSync) {
       history.pushState({}, '', populatedPathname + search);
-      console.log(populatedPathname + search + hash)
+      console.log(populatedPathname + search + hash);
     }
   }, [populatedPathname + search]);
 
