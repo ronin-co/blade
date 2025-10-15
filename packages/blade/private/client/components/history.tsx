@@ -26,9 +26,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   const { pathname, search, hash } = usePrivateLocation();
   const populatePathname = usePopulatePathname();
   const populatedPathname = populatePathname(pathname);
-
-  const mountedURL = useRef(false);
-  const mountedHash = useRef(false);
+  const mounted = useRef(false);
 
   // Navigate to different pages whenever the "Previous" and "Next" history actions in
   // the browser are used.
@@ -51,10 +49,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // want it to happen as soon as possible, before the browser paints.
   useLayoutEffect(() => {
     // Don't fire when the page is loaded fresh.
-    if (!mountedURL.current) {
-      mountedURL.current = true;
-      return;
-    }
+    if (!mounted.current) return;
 
     if (universalContext.addressBarInSync) {
       history.pushState({}, '', populatedPathname + search + hash);
@@ -67,10 +62,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // to, since it's not visible.
   useEffect(() => {
     // Don't fire when the page is loaded fresh.
-    if (!mountedHash.current) {
-      mountedHash.current = true;
-      return;
-    }
+    if (!mounted.current) return;
 
     if (universalContext.addressBarInSync && hash) {
       document.querySelector(hash)?.scrollIntoView();
@@ -90,11 +82,17 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // Since BLADE controls `<html>` and `<body>`, it's BLADE's job to handle this,
   // instead of requiring the app to add this code.
   useLayoutEffect(() => {
-    if (document.documentElement.scrollTop === 0 && document.body.scrollTop === 0) return;
+    // Don't fire when the page is loaded fresh.
+    if (!mounted.current) return;
 
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   }, [populatedPathname]);
+
+  // Track that the initial page load has been completed.
+  useEffect(() => {
+    mounted.current = true;
+  }, []);
 
   return <>{children}</>;
 };
