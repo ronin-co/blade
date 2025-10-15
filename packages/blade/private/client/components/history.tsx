@@ -54,10 +54,9 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
     }
 
     if (universalContext.addressBarInSync) {
-      history.pushState({}, '', populatedPathname + search);
-      console.log(populatedPathname + search + hash);
+      history.pushState({}, '', populatedPathname + search + hash);
     }
-  }, [populatedPathname + search]);
+  }, [populatedPathname + search + hash]);
 
   // Ensure that the scroll position is reset whenever the page changes.
   //
