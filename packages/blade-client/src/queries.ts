@@ -42,6 +42,7 @@ const clients: Record<string, Hive> = {};
 // all Hive instances before the process exits.
 if (typeof process !== 'undefined') {
   process.on('SIGINT', async () => {
+    // TODO: Block `process.exit` done in the Blade CLI on this promise.
     await Promise.all(Object.entries(clients).map(([, client]) => client.stop()));
   });
 }
