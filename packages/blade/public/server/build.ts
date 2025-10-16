@@ -5,32 +5,51 @@ import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
 const dependencyCache = new Map<string, string>();
+const packageVersionCache = new Map<string, string>();
+const resolvedPathCache = new Map<string, string>();
 
 /**
  * Fetches a dependency from a CDN.
  *
- * @param packageName - The name of the package to fetch (e.g., 'react@18.2.0' or 'lodash').
+ * @param packagePath - The full path to fetch (e.g., 'react' or 'blade/server/utils').
  *
- * @returns The content of the package's main file.
+ * @returns The content of the file as a string, or `null` if the fetch fails.
  */
-const fetchFromCDN = async (packageName: string): Promise<string | null> => {
+const fetchFromCDN = async (packagePath: string): Promise<string | null> => {
   try {
-    if (dependencyCache.has(packageName)) return dependencyCache.get(packageName)!;
+    if (dependencyCache.has(packagePath)) return dependencyCache.get(packagePath)!;
 
-    const url = new URL(`/${packageName}`, 'https://unpkg.com/');
+    const url = new URL(`/${packagePath}`, 'https://unpkg.com/');
     const response = await fetch(url);
     if (!response.ok) {
-      console.warn(`Failed to fetch ${packageName} from CDN: ${response.status}`);
+      console.warn(`Failed to fetch ${packagePath} from CDN: ${response.status}`);
       return null;
     }
 
-    const content = await response.text();
+    // Extract the versioned package name and full resolved path from the final URL after unpkg redirects
+    // The final URL will be something like https://unpkg.com/blade@3.23.4/dist/public/server/hooks.js
+    const finalUrl = response.url;
+    const urlMatch = finalUrl.match(/unpkg\.com\/(.+)/);
+    if (urlMatch) {
+      const resolvedPath = urlMatch[1];
+      // Store the mapping from the requested path to the actual resolved path
+      resolvedPathCache.set(packagePath, resolvedPath);
 
-    dependencyCache.set(packageName, content);
+      // Also extract and cache the versioned package name
+      const versionMatch = resolvedPath.match(/^(@[^/@]+\/[^/@]+@[^/]+|[^/@]+@[^/]+)/);
+      if (versionMatch) {
+        const versionedPackage = versionMatch[1];
+        const basePackage = packagePath.split('/')[0].replace(/@[^/]+$/, '');
+        packageVersionCache.set(basePackage, versionedPackage);
+      }
+    }
+
+    const content = await response.text();
+    dependencyCache.set(packagePath, content);
 
     return content;
   } catch (error) {
-    console.warn(`Error fetching ${packageName} from CDN:`, error);
+    console.warn(`Error fetching ${packagePath} from CDN:`, error);
     return null;
   }
 };
@@ -149,10 +168,11 @@ export const build = async (
             if (importer?.startsWith('cdn:') && id.startsWith('.')) {
               const importerPath = importer.replace('cdn:', '');
 
-              // Get the directory of the importer (remove the last segment if it's a file)
-              const importerDir = importerPath.includes('/')
-                ? importerPath.substring(0, importerPath.lastIndexOf('/') + 1)
-                : `${importerPath}/`;
+              const actualPath = resolvedPathCache.get(importerPath) || importerPath;
+
+              const importerDir = actualPath.includes('/')
+                ? actualPath.substring(0, actualPath.lastIndexOf('/') + 1)
+                : `${actualPath}/`;
 
               const baseUrl = `https://unpkg.com/${importerDir}`;
               const resolvedPath = new URL(id, baseUrl).pathname.slice(1);
@@ -171,7 +191,6 @@ export const build = async (
           },
           async handler(id) {
             const packageName = id.replace('cdn:', '');
-
             const content = await fetchFromCDN(packageName);
             if (!content) throw new Error(`Failed to fetch dependency: ${packageName}`);
 
