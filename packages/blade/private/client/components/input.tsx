@@ -38,10 +38,6 @@ const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...res
 
   if (!fieldType) {
     switch (rest.type) {
-      case 'text':
-        fieldType = 'STRING';
-        break;
-
       case 'number':
         fieldType = 'INT64';
         break;
