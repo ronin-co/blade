@@ -61,7 +61,7 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
-    "hive": "2.1.5"
+    "hive": "2.1.6"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
