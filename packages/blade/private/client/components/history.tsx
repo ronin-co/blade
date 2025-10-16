@@ -47,7 +47,8 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   }, [transitionPage]);
 
   // This is a layout effect because we want the updates within it to apply as soon as
-  // possible, before the browser paints.
+  // possible, before the browser paints. We are using a single effect instead of
+  // multiple because the updates within it are mutually exclusive.
   useLayoutEffect(() => {
     // Don't proceed if the page is loaded fresh.
     if (!lastPopulatedPathname || !lastHash) {
