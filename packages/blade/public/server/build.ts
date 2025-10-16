@@ -32,10 +32,8 @@ const fetchFromCDN = async (packagePath: string): Promise<string | null> => {
     const urlMatch = finalUrl.match(/unpkg\.com\/(.+)/);
     if (urlMatch) {
       const resolvedPath = urlMatch[1];
-      // Store the mapping from the requested path to the actual resolved path
       resolvedPathCache.set(packagePath, resolvedPath);
 
-      // Also extract and cache the versioned package name
       const versionMatch = resolvedPath.match(/^(@[^/@]+\/[^/@]+@[^/]+|[^/@]+@[^/]+)/);
       if (versionMatch) {
         const versionedPackage = versionMatch[1];
