@@ -73,7 +73,11 @@ In addition to the actions documented below, you can, of course, also run any
 other [Query](/queries) for the models that `blade-auth` provides, such as `Account` and `Session`. For
 example, you might choose to count records or filter them in a specific way.
 
+You can choose between either running a **[Query](/hooks#usemutation-client)** or using Blade's **[Form](/components#form)** component.
+
 ### Signing Up
+
+#### Query
 
 ```ts
 await add.account.with({
@@ -82,15 +86,39 @@ await add.account.with({
 });
 ```
 
+#### Form
+
+```tsx
+<Form model="account">
+  <Input type="text" name="email" placeholder="Email" />
+  <Input type="text" name="password" placeholder="Password" />
+
+  <button type="submit">Sign Up</button>
+</Form>
+```
+
 ### Logging In
 
 This query will automatically set a `session` cookie.
+
+#### Query
 
 ```ts
 await add.session.with.account({
     email: 'elaine@thorne.co',
     password: '1234'
 });
+```
+
+#### Form
+
+```tsx
+<Form model="session">
+  <Input type="text" name="account.email" placeholder="Email" />
+  <Input type="text" name="account.password" placeholder="Password" />
+
+  <button type="submit">Log In</button>
+</Form>
 ```
 
 ### Logging Out
