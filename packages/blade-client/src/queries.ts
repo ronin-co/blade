@@ -8,6 +8,7 @@ import {
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
+import type { Driver } from 'hive/sdk/driver';
 import type { RowValues } from 'hive/sdk/transaction';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
@@ -55,15 +56,24 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
     }
     // If no token is available, we must try to initialize disk storage.
     else {
-      const { NodeDriver } = await import('hive/node-driver');
       const { DiskStorage } = await import('hive/disk-storage');
+
+      let driver: Driver | null = null;
+
+      if (typeof Bun === 'undefined') {
+        const { NodeDriver } = await import('hive/node-driver');
+        driver = new NodeDriver();
+      } else {
+        const { BunDriver } = await import('hive/bun-driver');
+        driver = new BunDriver();
+      }
 
       // We purposefully don't use extra native modules here, to avoid having to declare
       // them as external.
       const dir = [process.cwd(), '.blade', 'state'].join('/');
 
       clients[key] = new Hive({
-        driver: new NodeDriver(),
+        driver,
         storage: new DiskStorage({ dir }),
       });
     }
