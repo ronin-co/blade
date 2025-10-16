@@ -26,8 +26,9 @@ const fetchFromCDN = async (packagePath: string): Promise<string | null> => {
       return null;
     }
 
-    // Extract the versioned package name and full resolved path from the final URL after unpkg redirects
-    // The final URL will be something like https://unpkg.com/blade@3.23.4/dist/public/server/hooks.js
+    // Extract the versioned package name and full resolved path from the final URL after
+    // unpkg redirects. The final URL will be something like:
+    // https://unpkg.com/blade@3.23.4/dist/public/server/hooks.js
     const finalUrl = response.url;
     const urlMatch = finalUrl.match(/unpkg\.com\/(.+)/);
     if (urlMatch) {
