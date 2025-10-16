@@ -90,8 +90,8 @@ await add.account.with({
 
 ```tsx
 <Form model="account">
-  <Input type="text" name="email" placeholder="Email" />
-  <Input type="text" name="password" placeholder="Password" />
+  <Input type="email" name="email" placeholder="Email" />
+  <Input type="password" name="password" placeholder="Password" />
 
   <button type="submit">Sign Up</button>
 </Form>
@@ -114,8 +114,8 @@ await add.session.with.account({
 
 ```tsx
 <Form model="session">
-  <Input type="text" name="account.email" placeholder="Email" />
-  <Input type="text" name="account.password" placeholder="Password" />
+  <Input type="email" name="account.email" placeholder="Email" />
+  <Input type="password" name="account.password" placeholder="Password" />
 
   <button type="submit">Log In</button>
 </Form>
