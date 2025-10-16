@@ -51,12 +51,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // multiple because the updates within it are mutually exclusive.
   useLayoutEffect(() => {
     // Don't proceed if the page is loaded fresh.
-    if (!lastPopulatedPathname || !lastHash) {
-      lastPopulatedPathname.current = populatedPathname;
-      lastHash.current = hash;
-
-      return;
-    }
+    if (!lastPopulatedPathname || !lastHash) return;
 
     // Don't proceed if the address bar should not be updated.
     if (!universalContext.addressBarInSync) return;
@@ -87,6 +82,15 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
     }
+  }, [populatedPathname + search + hash]);
+
+  // Track the last populated pathname and last hash. This is done in a separate effect
+  // (which runs serially after the effect above), to avoid having to define this code in
+  // every `return` condition of the effect above. The dependencies defined for the
+  // effect right here must match the effects of the effect above.
+  useLayoutEffect(() => {
+    lastPopulatedPathname.current = populatedPathname;
+    lastHash.current = hash;
   }, [populatedPathname + search + hash]);
 
   return <>{children}</>;
