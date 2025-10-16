@@ -8,6 +8,7 @@ import {
 } from 'blade-compiler';
 import { Hive, Selector } from 'hive';
 import { RemoteStorage } from 'hive/remote-storage';
+import type { Driver } from 'hive/sdk/driver';
 import type { RowValues } from 'hive/sdk/transaction';
 
 import { processStorableObjects, uploadStorableObjects } from '@/src/storage';
@@ -37,6 +38,15 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
+// When running in a stateful process (not in a worker environment), gracefully shut down
+// all Hive instances before the process exits.
+if (typeof process !== 'undefined') {
+  process.on('SIGINT', async () => {
+    // TODO: Block `process.exit` done in the Blade CLI on this promise.
+    await Promise.all(Object.entries(clients).map(([, client]) => client.stop()));
+  });
+}
+
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
@@ -55,24 +65,24 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
     }
     // If no token is available, we must try to initialize disk storage.
     else {
-      if (typeof Bun === 'undefined') {
-        let message = 'You must either provide `RONIN_TOKEN` and `RONIN_ID` as';
-        message += ' environment variables, or run Blade with Bun, such that it can';
-        message += ' create a local database for you. To use Bun, prefix every command';
-        message += ' with `bun --bun`, like this: `bun --bun blade`.';
-
-        throw new Error(message);
-      }
-
-      const { BunDriver } = await import('hive/bun-driver');
       const { DiskStorage } = await import('hive/disk-storage');
+
+      let driver: Driver | null = null;
+
+      if (typeof Bun === 'undefined') {
+        const { NodeDriver } = await import('hive/node-driver');
+        driver = new NodeDriver();
+      } else {
+        const { BunDriver } = await import('hive/bun-driver');
+        driver = new BunDriver();
+      }
 
       // We purposefully don't use extra native modules here, to avoid having to declare
       // them as external.
       const dir = [process.cwd(), '.blade', 'state'].join('/');
 
       clients[key] = new Hive({
-        driver: new BunDriver(),
+        driver,
         storage: new DiskStorage({ dir }),
       });
     }
