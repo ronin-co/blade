@@ -1,6 +1,7 @@
 import type { FunctionComponent, InputHTMLAttributes } from 'react';
 
 import type { FieldType } from '@/private/client/components/form';
+import { FORM_TARGET_PREFIX } from '@/private/client/utils/constants';
 
 type InputValue = string | number | boolean | object | null;
 
@@ -29,9 +30,11 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'
   value?: InputValue;
   /** The type of the field in the Blade model. */
   fieldType?: FieldType;
+  /** Whether the input should be used to resolve the target record. */
+  target?: boolean;
 }
 
-const Input: FunctionComponent<InputProps> = ({ value, fieldType, ...rest }) => {
+const Input: FunctionComponent<InputProps> = ({ value, fieldType, target, ...rest }) => {
   const initialValue = typeof value === 'undefined' ? value : stringifyFormValue(value);
 
   if (!fieldType) {
@@ -55,6 +58,7 @@ const Input: FunctionComponent<InputProps> = ({ value, fieldType, ...rest }) => 
       data-type={fieldType}
       value={initialValue}
       {...rest}
+      name={target ? FORM_TARGET_PREFIX + rest.name : rest.name}
     />
   );
 };

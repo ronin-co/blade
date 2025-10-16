@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import { FormElement } from '@/private/client/components/form-element';
+import { FORM_TARGET_PREFIX } from '@/private/client/utils/constants';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import { useMutation } from '@/public/client/hooks';
 import { TriggerError } from '@/public/server/errors';
@@ -287,8 +288,6 @@ const Form: FunctionComponent<FormProps> = ({
       data.forEach((value, key) => {
         const isArrayField = key.endsWith('[]');
 
-        if (!isArrayField) values[key] = value;
-
         if (isArrayField) {
           // Strip the `[]` suffix from the key.
           const strippedKey = key.replace('[]', '');
@@ -301,6 +300,20 @@ const Form: FunctionComponent<FormProps> = ({
           // initialize an empty array. This allows us to submit empty arrays through the
           // provided forms.
           if (!values[strippedKey]) values[strippedKey] = value === 'null' ? [] : [value];
+        }
+        // If an input is marked with this prefix, that means we have to use its value
+        // to resolve the target record, instead of storing the value in the record.
+        else if (key.startsWith(FORM_TARGET_PREFIX)) {
+          const newKey = key.replace(FORM_TARGET_PREFIX, '');
+          const expandable = { [newKey]: value };
+
+          // Deeply merge both objects.
+          targetRecord = assign(
+            targetRecord || {},
+            construct(expandable),
+          ) as typeof targetRecord;
+        } else {
+          values[key] = value;
         }
       });
 
@@ -388,8 +401,7 @@ const Form: FunctionComponent<FormProps> = ({
         const expandable: Record<keyof typeof valuesNormalized, unknown> = {};
         expandable[key] = normalizedValue;
 
-        // A basic `Object.assign` doesn't help here, because we need to deeply merge
-        // both objects.
+        // Deeply merge both objects.
         valuesNormalized = assign(
           valuesNormalized,
           construct(expandable),
