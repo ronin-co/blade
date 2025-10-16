@@ -38,6 +38,14 @@ export interface ResultPerDatabase<T> {
 
 const clients: Record<string, Hive> = {};
 
+// When running in a stateful process (not in a worker environment), gracefully shut down
+// all Hive instances before the process exits.
+if (typeof process !== 'undefined') {
+  process.on('SIGINT', async () => {
+    await Promise.all(Object.entries(clients).map(([, client]) => client.stop()));
+  });
+}
+
 const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   statements,
   options,
