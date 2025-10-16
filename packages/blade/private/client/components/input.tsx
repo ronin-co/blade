@@ -29,11 +29,9 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'
   value?: InputValue;
   /** The type of the field in the Blade model. */
   fieldType?: FieldType;
-  /** Whether the field should be hidden. */
-  hidden?: boolean;
 }
 
-const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...rest }) => {
+const Input: FunctionComponent<InputProps> = ({ value, fieldType, ...rest }) => {
   const initialValue = typeof value === 'undefined' ? value : stringifyFormValue(value);
 
   if (!fieldType) {
@@ -56,11 +54,6 @@ const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...res
       // The type used when storing the value in the database.
       data-type={fieldType}
       value={initialValue}
-      // If the input is marked as hidden, we neither want the input to be visible to the
-      // eye, nor usable by accessibility tools.
-      aria-hidden={hidden}
-      readOnly={hidden}
-      type={hidden ? 'hidden' : undefined}
       {...rest}
     />
   );
