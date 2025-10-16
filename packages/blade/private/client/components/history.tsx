@@ -51,7 +51,7 @@ const HistoryContent: FunctionComponent<HistoryContentProps> = ({ children }) =>
   // multiple because the updates within it are mutually exclusive.
   useLayoutEffect(() => {
     // Don't proceed if the page is loaded fresh.
-    if (!lastPopulatedPathname) return;
+    if (!lastPopulatedPathname.current) return;
 
     // Don't proceed if the address bar should not be updated.
     if (!universalContext.addressBarInSync) return;
