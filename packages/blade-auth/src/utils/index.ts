@@ -28,8 +28,8 @@ export const avoidEmptyFields = (
 };
 
 export const AUTH_SECRET =
-  import.meta.env.BLADE_AUTH_SECRET ||
-  (import.meta.env.BLADE_ENV === 'development' ? 'default-secret-1234' : '');
+  import.meta.env?.BLADE_AUTH_SECRET ||
+  (import.meta.env?.BLADE_ENV === 'development' ? 'default-secret-1234' : '');
 
 if (!AUTH_SECRET)
   throw new Error('Please add a `BLADE_AUTH_SECRET` environment variable.');
