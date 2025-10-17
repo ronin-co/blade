@@ -93,13 +93,6 @@ export const serve = async (
     });
   });
 
-  process.removeAllListeners('warning');
-  process.on('warning', (warning) => {
-    // Ignore this warning.
-    if (warning.message.includes('SQLite is an experimental feature')) return;
-    console.warn(warning);
-  });
-
   console.log(
     `${loggingPrefixes.info} Serving app on ${chalk.underline(`http://localhost:${port}`)}\n`,
   );

@@ -11,6 +11,14 @@ import { getModels } from '@/src/utils/model';
 import { Protocol } from '@/src/utils/protocol';
 import { type Status, spinner } from '@/src/utils/spinner';
 
+// This applies to all commands, since the file is always evaluated.
+process.removeAllListeners('warning');
+process.on('warning', (warning) => {
+  // Ignore this warning.
+  if (warning.message.includes('SQLite is an experimental feature')) return;
+  console.warn(warning);
+});
+
 /**
  * Creates a new migration based on model differences.
  */
