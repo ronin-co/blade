@@ -163,6 +163,7 @@ describe('syntax proxy', () => {
 
     setProxy.member({
       with: { id: '1234' },
+      // The date must be passed directly here, without conversion.
       to: { activeAt: date },
     });
 
@@ -171,7 +172,7 @@ describe('syntax proxy', () => {
         set: {
           member: {
             with: { id: '1234' },
-            to: { activeAt: date },
+            to: { activeAt: date.toISOString() },
           },
         },
       },
