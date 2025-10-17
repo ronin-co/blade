@@ -26,7 +26,7 @@ export const add: AddTrigger = async (query) => {
 
     emailVerified: false,
     emailVerificationToken: generateUniqueId(),
-    emailVerificationSentAt: new Date().toISOString(),
+    emailVerificationSentAt: new Date(),
   });
 
   return query;
