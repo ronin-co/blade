@@ -258,6 +258,28 @@ have been downloaded.
   can set this prop to `true`.
 </ParamField>
 
+## `Input`
+
+Provides the same functionality as the [HTML Input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input), but
+with a few additional props for ease of use in combination with the [`Form`](#form) component.
+
+```tsx
+import { Input } from 'blade/components';
+
+<Input type="email" name="email" placeholder="Email" />
+```
+
+### Props
+
+Any default [HTML prop](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input) is supported. Additionally the following:
+
+<ParamField path="target" type="boolean">
+  If the prop is set, the value of the input will not be stored in the target record. Instead,
+  the value will then be used to resolve the target record. For example, if the input has the
+  name `email` and the `target` prop is defined, Blade will try to resolve a record with the
+  matching value of the `email` field, and then store all other input values in that record.
+</ParamField>
+
 ## `Image`
 
 Building a fast web application that instantly provides joy to its users whenever it is
