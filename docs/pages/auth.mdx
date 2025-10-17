@@ -129,6 +129,28 @@ This query will automatically revoke the `session` cookie.
 await remove.session();
 ```
 
+### Reset Password
+
+#### Query
+
+```ts
+await set.account({
+  with: { email: 'elaine@thorne.co' },
+  to: { password: null }
+});
+```
+
+#### Form
+
+```tsx
+<Form model="account">
+  <Input type="email" name="email" placeholder="Email" target />
+  <Input type="hidden" name="password" value={null} />
+
+  <button type="submit">Send Confirmation</button>
+</Form>
+```
+
 ## Utility functions
 
 Blade also re-exports a few helpful utility functions for authentication:
