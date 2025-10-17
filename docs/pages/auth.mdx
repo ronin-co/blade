@@ -28,7 +28,19 @@ import type { AddTrigger, SetTrigger } from "blade/types";
 import { addAccount, setAccount } from "blade/server/auth";
 
 export const add: AddTrigger = addAccount;
-export const set: SetTrigger = setAccount;
+
+export const set: SetTrigger = async (query, multiple, options) => {
+  await setAccount(query, multiple, options, {
+    sendEmail: async ({ type, account, token }) => {
+
+      // Send emails using a service like Resend or similar.
+      if (type === "PASSWORD_RESET") {}
+      if (type === "EMAIL_VERIFICATION") {}
+    },
+  });
+
+  return query;
+};
 ```
 
 ```ts
