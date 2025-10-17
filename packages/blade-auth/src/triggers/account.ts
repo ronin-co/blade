@@ -88,6 +88,7 @@ export const set: WithAuthOptions<SetTrigger> = async (
         throw new InvalidFieldsError({ fields: ['id', 'currentPassword'] });
       }
 
+      if (!query.to.ronin) query.to.ronin = {};
       (query.to.ronin as Record<string, string>).updatedBy = account.id as string;
     }
   } else {
