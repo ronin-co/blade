@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import { FormElement } from '@/private/client/components/form-element';
+import { FORM_TARGET_PREFIX } from '@/private/client/utils/constants';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import { useMutation } from '@/public/client/hooks';
 import { TriggerError } from '@/public/server/errors';
@@ -139,7 +140,7 @@ interface FormProps extends PropsWithChildren {
    * Fields for matching a target record that should be modified. If not provided, a new
    * record will be created.
    */
-  targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
+  target?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
   model: string;
   /** Called once the queries of the form have been executed successfully. */
@@ -232,7 +233,7 @@ interface Result {
 }
 
 const Form: FunctionComponent<FormProps> = ({
-  targetRecord,
+  target,
   model,
   clearOnSuccess = false,
   children,
@@ -287,8 +288,6 @@ const Form: FunctionComponent<FormProps> = ({
       data.forEach((value, key) => {
         const isArrayField = key.endsWith('[]');
 
-        if (!isArrayField) values[key] = value;
-
         if (isArrayField) {
           // Strip the `[]` suffix from the key.
           const strippedKey = key.replace('[]', '');
@@ -301,6 +300,17 @@ const Form: FunctionComponent<FormProps> = ({
           // initialize an empty array. This allows us to submit empty arrays through the
           // provided forms.
           if (!values[strippedKey]) values[strippedKey] = value === 'null' ? [] : [value];
+        }
+        // If an input is marked with this prefix, that means we have to use its value
+        // to resolve the target record, instead of storing the value in the record.
+        else if (key.startsWith(FORM_TARGET_PREFIX)) {
+          const newKey = key.replace(FORM_TARGET_PREFIX, '');
+          const expandable = { [newKey]: value };
+
+          // Deeply merge both objects.
+          target = assign(target || {}, construct(expandable)) as typeof target;
+        } else {
+          values[key] = value;
         }
       });
 
@@ -388,8 +398,7 @@ const Form: FunctionComponent<FormProps> = ({
         const expandable: Record<keyof typeof valuesNormalized, unknown> = {};
         expandable[key] = normalizedValue;
 
-        // A basic `Object.assign` doesn't help here, because we need to deeply merge
-        // both objects.
+        // Deeply merge both objects.
         valuesNormalized = assign(
           valuesNormalized,
           construct(expandable),
@@ -454,10 +463,10 @@ const Form: FunctionComponent<FormProps> = ({
         database,
       };
 
-      if (targetRecord) {
+      if (target) {
         result = await set[model](
           {
-            with: targetRecord,
+            with: target,
             to: valuesNormalized,
             using: including,
           },
@@ -535,7 +544,7 @@ const Form: FunctionComponent<FormProps> = ({
   return (
     <FormContext.Provider
       value={{
-        key: `${model}${targetRecord?.id ? `_${targetRecord.id}` : ''}`,
+        key: `${model}${target?.id ? `_${target.id}` : ''}`,
 
         waiting,
         disabled,

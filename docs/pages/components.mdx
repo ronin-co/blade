@@ -175,7 +175,7 @@ have been downloaded.
   The slug (singular) of the [Blade model](/models) that should be addressed.
 </ParamField>
 
-<ParamField path="targetRecord" type="object">
+<ParamField path="target" type="object">
   An object containing fields and values that should be used to resolve an existing
   record, which will result in that record being updated. If the prop is omitted, a new
   record will be created instead.
@@ -256,6 +256,28 @@ have been downloaded.
   By default, a `form` element will be added for you in the DOM. To avoid this and
   ensure that the `Form` component thereby does not add any DOM elements whatsoever, you
   can set this prop to `true`.
+</ParamField>
+
+## `Input`
+
+Provides the same functionality as the [HTML Input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input), but
+with a few additional props for ease of use in combination with the [`Form`](#form) component.
+
+```tsx
+import { Input } from 'blade/components';
+
+<Input type="email" name="email" placeholder="Email" />
+```
+
+### Props
+
+Any default [HTML prop](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input) is supported. Additionally the following:
+
+<ParamField path="target" type="boolean">
+  If the prop is set, the value of the input will not be stored in the target record. Instead,
+  the value will be used to resolve the target record. For example, if the input has the
+  name `email` and the `target` prop is defined, Blade will try to resolve a record with the
+  matching value of the `email` field, and then store all other input values in that record.
 </ParamField>
 
 ## `Image`

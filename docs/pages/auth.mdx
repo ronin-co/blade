@@ -28,7 +28,19 @@ import type { AddTrigger, SetTrigger } from "blade/types";
 import { addAccount, setAccount } from "blade/server/auth";
 
 export const add: AddTrigger = addAccount;
-export const set: SetTrigger = setAccount;
+
+export const set: SetTrigger = async (query, multiple, options) => {
+  await setAccount(query, multiple, options, {
+    sendEmail: async ({ type, account, token }) => {
+
+      // Send emails using a service like Resend or similar.
+      if (type === "PASSWORD_RESET") {}
+      if (type === "EMAIL_VERIFICATION") {}
+    },
+  });
+
+  return query;
+};
 ```
 
 ```ts
@@ -127,6 +139,67 @@ This query will automatically revoke the `session` cookie.
 
 ```ts
 await remove.session();
+```
+
+### Forgot Password
+
+Used when the user forgot their password and therefore cannot log in.
+
+#### Query
+
+```ts
+await set.account({
+  with: { email: 'elaine@thorne.co' },
+  to: { password: null }
+});
+```
+
+#### Form
+
+```tsx
+<Form model="account">
+  <Input type="email" name="email" placeholder="Email" target />
+  <Input type="hidden" name="password" value={null} />
+
+  <button type="submit">Send Confirmation</button>
+</Form>
+```
+
+### Reset Password
+
+Can be shown after the user clicked the link in the email that was sent by [Forgot Password](#forgot-password).
+
+#### Query
+
+```ts
+const { searchParams } = useLocation();
+const emailVerificationToken = searchParams.get('token');
+
+await set.account({
+  with: { emailVerificationToken },
+  to: { password: 'my-new-password' }
+});
+```
+
+#### Form
+
+```tsx
+const { searchParams } = useLocation();
+const emailVerificationToken = searchParams.get('token');
+const account = use.account.with({ emailVerificationToken });
+
+{account ? (
+  <Form model="account" target={{ emailVerificationToken }}>
+
+    {/* Tells password managers which account to update. */}
+    <Input type="hidden" name="email" value={account.email} />
+    <Input type="password" name="password" placeholder="New Password" />
+
+    <button type="submit">Change Password</button>
+  </Form>
+) : (
+  <span>Your link has expired</span>
+)}
 ```
 
 ## Utility functions

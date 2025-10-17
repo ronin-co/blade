@@ -126,6 +126,7 @@ export const composeBuildContext = async (
       ...(packageMetaContent?.blade?.external || []),
 
       // These dependencies cannot be inlined, since they make use of native modules.
+      'hive/node-driver',
       'hive/bun-driver',
       'hive/disk-storage',
     ],
