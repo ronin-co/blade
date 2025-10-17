@@ -46,7 +46,7 @@ export const handleTo = (
 ): string => {
   const { with: withInstruction, to: toInstruction } = instructions;
   const defaultFields: Record<string, unknown> = {};
-  const currentTime = new Date().toISOString();
+  const currentTime = new Date();
 
   // If records are being created, assign a default ID to them, unless a custom ID was
   // already provided in the query.
