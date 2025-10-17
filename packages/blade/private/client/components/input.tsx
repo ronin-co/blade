@@ -1,6 +1,7 @@
 import type { FunctionComponent, InputHTMLAttributes } from 'react';
 
 import type { FieldType } from '@/private/client/components/form';
+import { FORM_TARGET_PREFIX } from '@/private/client/utils/constants';
 
 type InputValue = string | number | boolean | object | null;
 
@@ -29,11 +30,11 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value'
   value?: InputValue;
   /** The type of the field in the Blade model. */
   fieldType?: FieldType;
-  /** Whether the field should be hidden. */
-  hidden?: boolean;
+  /** Whether the input should be used to resolve the target record. */
+  target?: boolean;
 }
 
-const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...rest }) => {
+const Input: FunctionComponent<InputProps> = ({ value, fieldType, target, ...rest }) => {
   const initialValue = typeof value === 'undefined' ? value : stringifyFormValue(value);
 
   if (!fieldType) {
@@ -56,12 +57,8 @@ const Input: FunctionComponent<InputProps> = ({ value, fieldType, hidden, ...res
       // The type used when storing the value in the database.
       data-type={fieldType}
       value={initialValue}
-      // If the input is marked as hidden, we neither want the input to be visible to the
-      // eye, nor usable by accessibility tools.
-      aria-hidden={hidden}
-      readOnly={hidden}
-      type={hidden ? 'hidden' : undefined}
       {...rest}
+      name={(target && rest.name) ? (FORM_TARGET_PREFIX + rest.name) : rest.name}
     />
   );
 };
