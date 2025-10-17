@@ -1,6 +1,6 @@
 {
   "name": "blade-compiler",
-  "version": "3.24.2",
+  "version": "3.24.3",
   "type": "module",
   "description": "Compiles RONIN queries to SQL statements.",
   "main": "./dist/index.js",
