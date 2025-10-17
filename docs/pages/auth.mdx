@@ -177,9 +177,10 @@ const emailVerificationToken = searchParams.get('token');
 const account = use.account.with({ emailVerificationToken });
 
 {account ? (
-  <Form model="account">
+  <Form model="account" target={{ emailVerificationToken }}>
+
     {/* Tells password managers which account to update. */}
-    <Input type="hidden" name="email" value={account.email} target />
+    <Input type="hidden" name="email" value={account.email} />
     <Input type="password" name="password" placeholder="New Password" />
 
     <button type="submit">Change Password</button>
