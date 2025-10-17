@@ -135,6 +135,9 @@ export const runQueries = async <T extends ResultRecord>(
 
     // Hive doesn't support non-deterministic default values at the moment.
     inlineDefaults: true,
+
+    // We provide queries as JavaScript objects, so we must serialize them into JSON.
+    normalizeQueries: true,
   });
 
   const callDatabase = options.databaseCaller || defaultDatabaseCaller;
