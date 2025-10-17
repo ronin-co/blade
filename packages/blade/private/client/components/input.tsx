@@ -58,7 +58,7 @@ const Input: FunctionComponent<InputProps> = ({ value, fieldType, target, ...res
       data-type={fieldType}
       value={initialValue}
       {...rest}
-      name={target ? FORM_TARGET_PREFIX + rest.name : rest.name}
+      name={(target && rest.name) ? (FORM_TARGET_PREFIX + rest.name) : rest.name}
     />
   );
 };
