@@ -134,6 +134,8 @@ export const prepareStatementValue = (
   } else if (typeof value === 'boolean') {
     // When binding statement values, SQLite requires booleans as integers.
     formattedValue = value ? 1 : 0;
+  } else if (value instanceof Date) {
+    formattedValue = value.toISOString();
   }
 
   if (!statementParams) {
