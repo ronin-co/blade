@@ -61,16 +61,6 @@ interface TransactionOptions {
    * Useful for environments in which memory is tightly constrained.
    */
   defaultRecordLimit?: number;
-  /**
-   * The compiler expects queries to be provided as JSON objects. Any type that is not
-   * supported by the JSON spec (such as `Date`) is not supported by the compiler either.
-   * This allows the compiler to run remotely, as the target of a network request, since
-   * it supports any data type that can be serialized over the network using JSON.
-   *
-   * If you are providing queries as JavaScript objects instead of JSON objects, you need
-   * to enable the option right here, which will transform them into JSON before use.
-   */
-  normalizeQueries?: boolean;
 }
 
 class Transaction {
@@ -82,14 +72,7 @@ class Transaction {
   constructor(queries: Array<Query>, options?: TransactionOptions) {
     const models = options?.models || [];
 
-    // By normalizing the queries, we ensure that the logic within the compiler never
-    // incorrectly relies on a type that only exists in JavaScript, but not in JSON,
-    // since doing the former would make it break when run on JSON queries.
-    const normalizedQueries = options?.normalizeQueries
-      ? (JSON.parse(JSON.stringify(queries)) as Array<Query>)
-      : queries;
-
-    this.#internalQueries = normalizedQueries.map((query) => ({
+    this.#internalQueries = queries.map((query) => ({
       query,
       selectedFields: [],
       models: [],

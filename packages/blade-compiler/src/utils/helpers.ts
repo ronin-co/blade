@@ -174,13 +174,38 @@ export const convertToCamelCase = (str: string): string => {
     .join('');
 };
 
+function isObjectObject(value: unknown) {
+  return Object.prototype.toString.call(value) === '[object Object]';
+}
+
 /**
  * Utility function to check if the given value is an object.
  *
  * @param value - Object-like value to check.
+ *
+ * @returns `true` if the provided value is a plain object, otherwise `false`.
  */
-export const isObject = (value: unknown): boolean =>
-  value != null && typeof value === 'object' && Array.isArray(value) === false;
+export const isObject = (value: unknown): boolean => {
+  // This logic was created from:
+  // is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+
+  if (isObjectObject(value) === false) return false;
+
+  // If has modified constructor.
+  const ctor = (value as object).constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype.
+  const prot = ctor.prototype;
+  if (isObjectObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method.
+  // biome-ignore lint/suspicious/noPrototypeBuiltins: This is needed.
+  if (prot.hasOwnProperty('isPrototypeOf') === false) return false;
+
+  // Most likely a plain object.
+  return true;
+};
 
 /**
  * Checks if the provided value contains a RONIN model symbol (a represenation of a
