@@ -31,7 +31,8 @@ export const add: AddTrigger = addAccount;
 
 export const set: SetTrigger = async (query, multiple, options) => {
   await setAccount(query, multiple, options, {
-    sendEmail: async ({ type, account, token }) => {
+    sendEmail: async (details: any) => {
+      const { type, account, token } = details;
 
       // Send emails using a service like Resend or similar.
       if (type === "PASSWORD_RESET") {}
