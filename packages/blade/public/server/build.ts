@@ -1,5 +1,4 @@
 import path from 'node:path';
-import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
@@ -105,17 +104,6 @@ export const build = async (
               code: sourceFile.content,
               moduleType: path.extname(sourceFile.path).slice(1),
             };
-          },
-        },
-      },
-      {
-        name: 'Memory Dependency Loader',
-        resolveId: {
-          filter: {
-            id: [/^[\w@][\w./-]*$/],
-          },
-          handler(id) {
-            return resolveFrom(nodePath, id);
           },
         },
       },
