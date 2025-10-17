@@ -140,7 +140,7 @@ interface FormProps extends PropsWithChildren {
    * Fields for matching a target record that should be modified. If not provided, a new
    * record will be created.
    */
-  targetRecord?: Record<string, unknown> & Partial<ResultRecord>;
+  target?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
   model: string;
   /** Called once the queries of the form have been executed successfully. */
@@ -233,7 +233,7 @@ interface Result {
 }
 
 const Form: FunctionComponent<FormProps> = ({
-  targetRecord,
+  target,
   model,
   clearOnSuccess = false,
   children,
@@ -308,10 +308,7 @@ const Form: FunctionComponent<FormProps> = ({
           const expandable = { [newKey]: value };
 
           // Deeply merge both objects.
-          targetRecord = assign(
-            targetRecord || {},
-            construct(expandable),
-          ) as typeof targetRecord;
+          target = assign(target || {}, construct(expandable)) as typeof target;
         } else {
           values[key] = value;
         }
@@ -466,10 +463,10 @@ const Form: FunctionComponent<FormProps> = ({
         database,
       };
 
-      if (targetRecord) {
+      if (target) {
         result = await set[model](
           {
-            with: targetRecord,
+            with: target,
             to: valuesNormalized,
             using: including,
           },
@@ -547,7 +544,7 @@ const Form: FunctionComponent<FormProps> = ({
   return (
     <FormContext.Provider
       value={{
-        key: `${model}${targetRecord?.id ? `_${targetRecord.id}` : ''}`,
+        key: `${model}${target?.id ? `_${target.id}` : ''}`,
 
         waiting,
         disabled,

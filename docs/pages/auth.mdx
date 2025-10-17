@@ -129,7 +129,7 @@ This query will automatically revoke the `session` cookie.
 await remove.session();
 ```
 
-### Reset Password
+### Forgot Password
 
 Used when the user forgot their password and therefore cannot log in.
 
@@ -151,6 +151,42 @@ await set.account({
 
   <button type="submit">Send Confirmation</button>
 </Form>
+```
+
+### Reset Password
+
+Can be shown after the user clicked the link in the email that was sent by Forgot Password.
+
+#### Query
+
+```ts
+const { searchParams } = useLocation();
+const emailVerificationToken = searchParams.get('token');
+
+await set.account({
+  with: { emailVerificationToken },
+  to: { password: 'my-new-password' }
+});
+```
+
+#### Form
+
+```tsx
+const { searchParams } = useLocation();
+const emailVerificationToken = searchParams.get('token');
+const account = use.account.with({ emailVerificationToken });
+
+{account ? (
+  <Form model="account">
+    {/* Tells password managers which account to update. */}
+    <Input type="hidden" name="email" value={account.email} target />
+    <Input type="password" name="password" placeholder="New Password" />
+
+    <button type="submit">Update Password</button>
+  </Form>
+) : (
+  <span>Your link has expired</span>
+)}
 ```
 
 ## Utility functions
