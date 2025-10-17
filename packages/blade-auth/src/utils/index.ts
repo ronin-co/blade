@@ -28,10 +28,13 @@ export const avoidEmptyFields = (
 };
 
 export const AUTH_SECRET =
-  import.meta.env.BLADE_AUTH_SECRET ||
-  (import.meta.env.BLADE_ENV === 'development' ? 'default-secret-1234' : '');
+  import.meta.env?.BLADE_AUTH_SECRET ||
+  (import.meta.env?.BLADE_ENV === 'development' ? 'default-secret-1234' : '');
 
-if (!AUTH_SECRET)
+// The `import` check here prevents the error from showing when commands like
+// `blade diff` load the models, which might contain models exposed by `blade-auth` and
+// therefore also the current file.
+if (!AUTH_SECRET && typeof import.meta.env !== 'undefined')
   throw new Error('Please add a `BLADE_AUTH_SECRET` environment variable.');
 
 /**
