@@ -1,7 +1,6 @@
 import path from 'node:path';
 import { aliasPlugin } from 'rolldown/experimental';
 
-import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
 const makePathAbsolute = (input: string) => {
@@ -40,11 +39,6 @@ const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
 
 // Tiny helpers for safe, cross-platform matching.
 const reEscape = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const toPosix = (input: string) => input.replace(/\\/g, '/');
-
-const ignoreStart = new RegExp(
-  `^(?:${[nodePath, sourceDirPath].map((p) => reEscape(toPosix(p))).join('|')})`,
-);
 
 interface BuildConfig {
   sourceFiles: Array<VirtualFileItem>;
@@ -78,9 +72,6 @@ export const build = async (
       {
         name: 'Memory File Loader',
         resolveId: {
-          filter: {
-            id: { include: [/^\//], exclude: [ignoreStart] },
-          },
           handler(id) {
             const rx = new RegExp(`^${reEscape(id)}(?:\\.(?:ts|tsx|js|jsx))?$`);
             const sourceFile = virtualFiles.find(({ path }) => rx.test(path));
