@@ -13,7 +13,7 @@ import { FormElement } from '@/private/client/components/form-element';
 import { FORM_TARGET_PREFIX } from '@/private/client/utils/constants';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 import { useMutation } from '@/public/client/hooks';
-import { TriggerError } from '@/public/server/errors';
+import { TriggerError } from '@/public/universal/errors';
 import { useLocation, useParams, usePopulatePathname } from '@/public/universal/hooks';
 import type { ResultRecord } from '@/public/universal/types';
 

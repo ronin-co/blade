@@ -1,6 +1,6 @@
 import { deserializeError as deserialize } from 'serialize-error';
 
-import * as errors from '@/public/server/errors';
+import * as errors from '@/public/universal/errors';
 
 const errorClasses = Object.values(errors);
 
