@@ -362,3 +362,35 @@ Additionally, sink queries receive additional properties within the `options` ob
 allow for identifying the original query more easily. A `model` property contains the
 slug of the model that was targeted, and a `database` property contains the slug of the
 database that was targeted.
+
+## Trigger Errors
+
+To make creating triggers as easy as possible, Blade provides a list of default errors
+that can be thrown from triggers and used on the client-side to assert specific behavior.
+
+```ts
+import {
+  TriggerError,
+  InvalidFieldsError,
+  EmptyFieldsError,
+  ExtraneousFieldsError,
+  RecordExistsError,
+  RecordNotFoundError,
+  TooManyRequestsError,
+  InvalidPermissionsError,
+  AddNotAllowedError,
+  SetNotAllowedError,
+  RemoveNotAllowedError,
+  MultipleWithInstructionsError,
+} from 'blade/server';
+```
+
+On the client, you can then use the following pattern to match against those errors:
+
+```ts
+import { InvalidFieldsError } from 'blade/server';
+
+if (err instanceof InvalidFieldsError) {
+  // Run logic
+}
+```
