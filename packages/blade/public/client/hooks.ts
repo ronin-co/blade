@@ -23,7 +23,6 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import { deserializeError } from 'serialize-error';
 
 import { RootClientContext } from '@/private/client/context';
 import {
@@ -31,6 +30,7 @@ import {
   usePrivateLocationRef,
   useReduce,
 } from '@/private/client/hooks';
+import { deserializeError } from '@/private/client/utils/errors';
 import type { PageFetchingOptions } from '@/private/universal/types/util';
 import { generateUniqueId } from '@/private/universal/utils';
 import { useLocation, usePopulatePathname, useRedirect } from '@/public/universal/hooks';

@@ -13,8 +13,8 @@ import {
   getSyntaxProxy,
 } from 'blade-syntax/queries';
 import { useContext } from 'react';
-import { deserializeError } from 'serialize-error';
 
+import { deserializeError } from '@/private/client/utils/errors';
 import { RootServerContext } from '@/private/server/context';
 import type { PageMetadata } from '@/private/server/types';
 import { generateHashSync } from '@/private/server/utils';

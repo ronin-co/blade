@@ -1,5 +1,5 @@
 import { verifyPassword } from 'better-auth/crypto';
-import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/server/errors';
+import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/errors';
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
 import type { AddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
 

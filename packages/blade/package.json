@@ -33,10 +33,6 @@
       "default": "./dist/public/server/build.js",
       "types": "./dist/public/server/build.d.ts"
     },
-    "./server/errors": {
-      "default": "./dist/public/server/errors.js",
-      "types": "./dist/public/server/errors.d.ts"
-    },
     "./server/hooks": {
       "default": "./dist/public/server/hooks.js",
       "types": "./dist/public/server/hooks.d.ts"
@@ -48,6 +44,10 @@
     "./components": {
       "default": "./dist/public/universal/components.js",
       "types": "./dist/public/universal/components.d.ts"
+    },
+    "./errors": {
+      "default": "./dist/public/universal/errors.js",
+      "types": "./dist/public/universal/errors.d.ts"
     },
     "./hooks": {
       "default": "./dist/public/universal/hooks.js",
@@ -84,6 +84,9 @@
       ],
       "components": [
         "./dist/public/universal/components"
+      ],
+      "errors": [
+        "./dist/public/universal/errors"
       ],
       "hooks": [
         "./dist/public/universal/hooks"
