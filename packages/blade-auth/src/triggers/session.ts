@@ -1,7 +1,7 @@
 import { verifyPassword } from 'better-auth/crypto';
 import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/errors';
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
-import type { AddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
+import type { AddTrigger, AfterAddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
 
 import { AUTH_SECRET, getSessionCookie } from '@/utils/index';
 
@@ -82,13 +82,13 @@ export const add: AddTrigger = async (query, _multiple, options) => {
 
     // If an email verification token was provided, check if it matches the email
     // verification token that was stored for the account. If not, throw an error.
-    if (
-      'emailVerificationToken' in providedAccount &&
-      account.emailVerificationToken !== providedAccount.emailVerificationToken
-    ) {
-      throw error;
+    if ('emailVerificationToken' in providedAccount) {
+      if (account.emailVerificationToken === providedAccount.emailVerificationToken) {
+        options.context.set('accountToVerify', account.id);
+      } else {
+        throw error;
+      }
     }
-
     // Set the ID of the account.
     query.with.account = account.id;
   }
@@ -108,6 +108,23 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   options.setCookie('session', token);
 
   return query;
+};
+
+// @ts-expect-error This is needed.
+export const afterAdd: AfterAddTrigger = (_query, _multiple, options) => {
+  const { set } = options.client;
+  const accountToVerify = options.context.get('accountToVerify');
+
+  if (accountToVerify) {
+    return [
+      set.account({
+        with: { id: accountToVerify },
+        to: { emailVerified: true },
+      }),
+    ];
+  }
+
+  return [];
 };
 
 export const remove: RemoveTrigger = async (query, multiple, options) => {

@@ -35,11 +35,13 @@ export const set: SetTrigger = setAccount;
 // triggers/session.ts
 
 import type { GetTrigger, AddTrigger, RemoveTrigger } from "blade/types";
-import { addSession, getSession, removeSession } from "blade/server/auth";
+import { addSession, getSession, removeSession, afterAddSession } from "blade/server/auth";
 
 export const get: GetTrigger = getSession;
 export const add: AddTrigger = addSession;
 export const remove: RemoveTrigger = removeSession;
+
+export const afterAdd: AfterAddTrigger = afterAddSession;
 ```
 
 Additionally, place the following in your [Schema Definition](/models) located in
