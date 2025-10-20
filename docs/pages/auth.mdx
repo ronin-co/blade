@@ -35,8 +35,11 @@ export const set: SetTrigger = async (query, multiple, options) => {
       const { type, account, token } = details;
 
       // Send emails using a service like Resend or similar.
+
+      // A new account was created and the email must be verified.
+      if (type === "ACCOUNT_CREATION") {}
+      // The password of an account is being reset.
       if (type === "PASSWORD_RESET") {}
-      if (type === "EMAIL_VERIFICATION") {}
     },
   });
 

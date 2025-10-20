@@ -12,6 +12,7 @@ import type {
   Accounts,
   AddTrigger,
   FollowingAddTrigger,
+  FollowingSetTrigger,
   SetTrigger,
 } from 'blade/types';
 
@@ -66,6 +67,8 @@ export const set: WithAuthOptions<SetTrigger> = async (
           : query.to.password
             ? 'PASSWORD_CHANGE'
             : null;
+
+  options.context.set('operation', operation);
 
   if (
     // These operations should work without an active session.
@@ -183,27 +186,9 @@ export const set: WithAuthOptions<SetTrigger> = async (
       throw new TooManyRequestsError({ fields: ['emailVerificationSentAt'] });
     }
 
-    const verificationToken = generateUniqueId();
-
-    if (operation === 'PASSWORD_RESET') {
-      await auth.sendEmail?.({
-        account,
-        type: 'PASSWORD_RESET',
-        token: verificationToken,
-      });
-    }
-
-    if (operation === 'EMAIL_VERIFICATION_RESEND') {
-      await auth.sendEmail?.({
-        account,
-        type: 'EMAIL_VERIFICATION',
-        token: verificationToken,
-      });
-    }
-
     query.to = {
       ...query.to,
-      emailVerificationToken: verificationToken,
+      emailVerificationToken: generateUniqueId(),
       emailVerificationSentAt: newDate,
     };
   }
@@ -261,8 +246,33 @@ export const followingAdd: WithAuthOptions<FollowingAddTrigger<Accounts>> = asyn
   for (const account of accounts) {
     await auth.sendEmail?.({
       account,
-      type: 'EMAIL_VERIFICATION',
+      type: 'ACCOUNT_CREATION',
       token: account.emailVerificationToken,
+    });
+  }
+};
+
+export const followingSet: WithAuthOptions<FollowingSetTrigger<Accounts>> = async (
+  query,
+  _multipleRecords,
+  _previousAccounts,
+  accounts,
+  options,
+  auth,
+) => {
+  const operation = options.context.get('operation');
+
+  if (!(operation === 'PASSWORD_RESET' || operation === 'EMAIL_VERIFICATION_RESEND')) {
+    return;
+  }
+
+  const { emailVerificationToken } = query.to as { emailVerificationToken: string };
+
+  for (const account of accounts) {
+    await auth.sendEmail?.({
+      account,
+      type: operation,
+      token: emailVerificationToken,
     });
   }
 };
