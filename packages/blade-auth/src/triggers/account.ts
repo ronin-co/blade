@@ -7,7 +7,13 @@ import {
   SetNotAllowedError,
   TooManyRequestsError,
 } from 'blade/errors';
-import type { Account, AddTrigger, SetTrigger } from 'blade/types';
+import type {
+  Account,
+  Accounts,
+  AddTrigger,
+  FollowingAddTrigger,
+  SetTrigger,
+} from 'blade/types';
 
 import {
   EMAIL_VERIFICATION_COOLDOWN,
@@ -242,4 +248,21 @@ export const set: WithAuthOptions<SetTrigger> = async (
   }
 
   return query;
+};
+
+export const followingAdd: WithAuthOptions<FollowingAddTrigger<Accounts>> = async (
+  _query,
+  _multipleRecords,
+  _previousAccounts,
+  accounts,
+  _options,
+  auth,
+) => {
+  for (const account of accounts) {
+    await auth.sendEmail?.({
+      account,
+      type: 'EMAIL_VERIFICATION',
+      token: account.emailVerificationToken,
+    });
+  }
 };
