@@ -77,6 +77,9 @@ You can choose between either running a **[Query](/hooks#usemutation-client)** o
 
 ### Signing Up
 
+This will send the user an email using the `sendEmail` function you've defined. That
+email should link them to a page for the [Verifying Email](#verifying-email) step.
+
 #### Query
 
 ```ts
@@ -97,7 +100,30 @@ await add.account.with({
 </Form>
 ```
 
+### Verifying Email
+
+After clicking the link in the signup email, the user should be taken to a page that can
+show some kind of a "Contratulation" message, with a button for continuing to the
+logged-in area of the app.
+
+This button should trigger the following query, which validates the email verification
+token and logs the user in by creating a session.
+
+No form is available for this action, because there are no visible inputs to fill.
+
+#### Query
+
+```ts
+const { searchParams } = useLocation();
+const emailVerificationToken = searchParams.get('token');
+
+await add.session.with.account({ emailVerificationToken });
+```
+
 ### Logging In
+
+If the user would like to manually log in using their email address and password, you can
+make that possible using the query below.
 
 This query will automatically set a `session` cookie.
 
@@ -124,6 +150,8 @@ await add.session.with.account({
 ### Logging Out
 
 This query will automatically revoke the `session` cookie.
+
+No form is available for this action, because there are no visible inputs to fill.
 
 ```ts
 await remove.session();
