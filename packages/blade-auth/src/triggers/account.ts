@@ -6,7 +6,7 @@ import {
   RecordNotFoundError,
   SetNotAllowedError,
   TooManyRequestsError,
-} from 'blade/server/errors';
+} from 'blade/errors';
 import type { Account, AddTrigger, SetTrigger } from 'blade/types';
 
 import {
