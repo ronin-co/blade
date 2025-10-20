@@ -11,4 +11,6 @@ export {
   SetNotAllowedError,
   RemoveNotAllowedError,
   MultipleWithInstructionsError,
+  ClientError,
+  CompilerError,
 } from 'blade-client/utils';
