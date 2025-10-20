@@ -39,12 +39,7 @@ export const add: AddTrigger = async (query) => {
   return query;
 };
 
-export const set: WithAuthOptions<SetTrigger> = async (
-  query,
-  _multiple,
-  options,
-  auth,
-) => {
+export const set: SetTrigger = async (query, _multiple, options) => {
   const { get } = options.client;
 
   if (!query.with) throw new Error('A `with` instruction must be given.');
