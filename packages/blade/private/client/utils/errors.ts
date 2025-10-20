@@ -10,7 +10,7 @@ export const deserializeError = (errorObject: unknown) => {
   for (const ErrorClass of errorClasses) {
     const errorInstance = new ErrorClass(errorObject as any);
 
-    if (errorInstance.name === (errorObject as { name: string }).name) {
+    if (errorInstance.name === (errorObject as { name: string })?.name) {
       return errorInstance;
     }
   }
