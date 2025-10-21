@@ -243,13 +243,14 @@ export const followingAdd: FollowingAddTrigger<Accounts> = async (
   _multipleRecords,
   _previousAccounts,
   accounts,
-  _options,
+  options,
 ) => {
   for (const account of accounts) {
     await AUTH_CONFIG?.sendEmail?.({
       account,
       type: 'ACCOUNT_CREATION',
       token: account.emailVerificationToken,
+      options,
     });
   }
 };
@@ -274,6 +275,7 @@ export const followingSet: FollowingSetTrigger<Accounts> = async (
       account,
       type: operation,
       token: emailVerificationToken,
+      options,
     });
   }
 };

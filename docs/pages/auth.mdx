@@ -52,7 +52,7 @@ emails, you can provide the following function call in the respective trigger fi
 import { setAuthConfig } from 'blade/auth/utils';
 
 setAuthConfig({
-  sendEmail: async ({ type, account, token }) => {
+  sendEmail: async ({ type, account, token, options }) => {
     if (type === "ACCOUNT_CREATION") {}
     if (type === "PASSWORD_RESET") {}
   }
