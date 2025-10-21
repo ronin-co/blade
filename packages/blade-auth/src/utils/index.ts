@@ -1,7 +1,8 @@
-import type { AuthConfig } from '@/utils/types';
 import { EmptyFieldsError, InvalidPermissionsError } from 'blade/errors';
 import { type JWTPayload, verifyJWT } from 'blade/server/utils';
 import type { SetQueryInstructions, TriggerOptions } from 'blade/types';
+
+import type { AuthConfig } from '@/utils/types';
 
 /**
  * Check given object for empty values. Throws an error if the object contains
