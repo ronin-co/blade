@@ -7,6 +7,7 @@ import {
   SetNotAllowedError,
   TooManyRequestsError,
 } from 'blade/errors';
+import { getRecordIdentifier } from 'blade/server/utils';
 import type {
   Account,
   Accounts,
@@ -23,18 +24,25 @@ import {
 } from '@/utils/index';
 import type { WithAuthOptions } from '@/utils/types';
 
-export const add: AddTrigger = async (query) => {
+export const add: AddTrigger = async (query, _multiple, options) => {
   if (!query.with) throw new Error('A `with` instruction must be given.');
 
   if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
 
+  const id = getRecordIdentifier('acc');
+
   Object.assign(query.with, {
+    id,
     password: await hashPassword(query.with.password as string),
 
     emailVerified: false,
     emailVerificationToken: generateUniqueId(),
     emailVerificationSentAt: new Date(),
   });
+
+  // Store the ID of the newly created account in a cookie, to let the UI know that there
+  // is a pending account for which the email hasn't yet been verified.
+  if (!options.parentTrigger) options.setCookie('account', id);
 
   return query;
 };
