@@ -107,6 +107,9 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   // Add a new `session` cookie containing the session token.
   options.setCookie('session', token);
 
+  // If an `account` cookie is available from the signup, remove it now.
+  if (options.cookies.account) options.setCookie('account', null);
+
   return query;
 };
 
