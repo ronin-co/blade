@@ -41,6 +41,24 @@ The following [models](/models) must be added as well:
 export { Account, Session } from 'blade/auth/models';
 ```
 
+## Config
+
+To customize the behavior of the authentication logic and handle actions such as sending
+emails, you can provide the following function call in the respective trigger file:
+
+```ts
+// triggers/account.ts
+
+import { setAuthConfig } from 'blade/auth/utils';
+
+setAuthConfig({
+  sendEmail: async ({ type, account, token }) => {
+    if (type === "ACCOUNT_CREATION") {}
+    if (type === "PASSWORD_RESET") {}
+  }
+});
+```
+
 ## Status
 
 To obtain the current status of a session, run the following query in a page:
