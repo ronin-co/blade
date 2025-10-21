@@ -4,11 +4,9 @@ title: Auth
 
 # Auth
 
-Blade natively offers the [blade-auth](https://github.com/ronin-co/blade/tree/main/packages/blade-auth) package,
+Blade natively offers the [blade/auth](https://github.com/ronin-co/blade/tree/main/packages/blade-auth) package,
 which provides utility functions for easily adding different authentication methods to your application,
 without having to maintain them.
-
-The package is available by default. You don't need to install it.
 
 The functionality of the package is built around [Triggers](/models/triggers), which make
 it possible to capture Blade queries and run custom logic.
@@ -26,13 +24,13 @@ generate a new secret that you can store in the environment variable.
 ```ts
 // triggers/account.ts
 
-export * from 'blade-auth/triggers/account';
+export * from 'blade/auth/triggers/account';
 ```
 
 ```ts
 // triggers/session.ts
 
-export * from 'blade-auth/triggers/session';
+export * from 'blade/auth/triggers/session';
 ```
 
 The following [models](/models) must be added as well:
@@ -40,7 +38,7 @@ The following [models](/models) must be added as well:
 ```ts
 // schema/index.ts
 
-export { Account, Session } from 'blade-auth/models';
+export { Account, Session } from 'blade/auth/models';
 ```
 
 ## Status
@@ -64,7 +62,7 @@ the [useMutation](/hooks#usemutation-client) hook on the client-side, depending 
 actions the user performs.
 
 In addition to the actions documented below, you can, of course, also run any
-other [Query](/queries) for the models that `blade-auth` provides, such as `Account` and `Session`. For
+other [Query](/queries) for the models that `blade/auth` provides, such as `Account` and `Session`. For
 example, you might choose to count records or filter them in a specific way.
 
 You can choose between either running a **[Query](/hooks#usemutation-client)** or using Blade's **[Form](/components#form)** component.
@@ -229,7 +227,7 @@ which you would like to log a message every time a record is added.
 
 ```ts
 import type { FollowingAddTrigger } from "blade/types";
-import { getSessionCookie } from 'blade-auth/utils';
+import { getSessionCookie } from 'blade/auth/utils';
 
 export const followingAdd: FollowingAddTrigger = async (_, _, options) => {
   const { accountId } = await getSessionCookie(options);
