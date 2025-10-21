@@ -105,6 +105,10 @@ You can choose between either running a **[Query](/hooks#usemutation-client)** o
 This will send the user an email using the `sendEmail` function you've defined. That
 email should link them to a page for the [Verifying Email](#verifying-email) step.
 
+This query will automatically set a `account` cookie with the ID of the newly created
+account. The login performed in [Verifying Email](#verifying-email) automatically
+removes this cookie.
+
 #### Query
 
 ```ts
