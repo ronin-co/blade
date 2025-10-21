@@ -25,10 +25,6 @@
       "default": "./dist/public/client/hooks.js",
       "types": "./dist/public/client/hooks.d.ts"
     },
-    "./server/auth": {
-      "default": "./dist/public/server/auth.js",
-      "types": "./dist/public/server/auth.d.ts"
-    },
     "./server/build": {
       "default": "./dist/public/server/build.js",
       "types": "./dist/public/server/build.d.ts"
@@ -40,6 +36,22 @@
     "./server/utils": {
       "default": "./dist/public/server/utils.js",
       "types": "./dist/public/server/utils.d.ts"
+    },
+    "./auth/triggers/account": {
+      "default": "./dist/public/universal/auth/triggers/account.js",
+      "types": "./dist/public/universal/auth/triggers/account.d.ts"
+    },
+    "./auth/triggers/session": {
+      "default": "./dist/public/universal/auth/triggers/session.js",
+      "types": "./dist/public/universal/auth/triggers/session.d.ts"
+    },
+    "./auth/schema": {
+      "default": "./dist/public/universal/auth/schema.js",
+      "types": "./dist/public/universal/auth/schema.d.ts"
+    },
+    "./auth/utils": {
+      "default": "./dist/public/universal/auth/utils.js",
+      "types": "./dist/public/universal/auth/utils.d.ts"
     },
     "./components": {
       "default": "./dist/public/universal/components.js",
@@ -67,9 +79,6 @@
       "client/hooks": [
         "./dist/public/client/hooks"
       ],
-      "server/auth": [
-        "./dist/public/server/auth"
-      ],
       "server/build": [
         "./dist/public/server/build"
       ],
@@ -81,6 +90,18 @@
       ],
       "server/utils": [
         "./dist/public/server/utils"
+      ],
+      "auth/triggers/account": [
+        "./dist/public/universal/auth/triggers/account"
+      ],
+      "auth/triggers/session": [
+        "./dist/public/universal/auth/triggers/session"
+      ],
+      "auth/schema": [
+        "./dist/public/universal/auth/schema"
+      ],
+      "auth/utils": [
+        "./dist/public/universal/auth/utils"
       ],
       "components": [
         "./dist/public/universal/components"
