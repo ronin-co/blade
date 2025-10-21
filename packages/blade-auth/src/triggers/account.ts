@@ -27,14 +27,11 @@ import {
 } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, _multiple, options) => {
-  // @ts-expect-error Query types will be fixed in the future.
-  if (query.with?.id) return query;
+  if (query.with) return query;
+  query.with = {};
 
-  const { accountId } = await getSessionCookie(options);
-
-  if (!query.with) query.with = {};
-
-  // @ts-expect-error Query types will be fixed in the future.
+  const accountId =
+    options.cookies.account || (await getSessionCookie(options)).accountId;
   query.with.id = accountId;
 
   return query;
