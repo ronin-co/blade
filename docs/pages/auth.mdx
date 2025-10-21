@@ -24,35 +24,47 @@ generate a new secret that you can store in the environment variable.
 ```ts
 // triggers/account.ts
 
-import type { AddTrigger, SetTrigger } from "blade/types";
-import { addAccount, setAccount } from "blade/server/auth";
+import type {
+  AddTrigger,
+  SetTrigger,
+  FollowingAddTrigger,
+  FollowingSetTrigger
+} from "blade/types";
+import {
+  addAccount,
+  setAccount,
+  followingAddAccount,
+  followingSetAccount
+} from "blade/server/auth";
 
 export const add: AddTrigger = addAccount;
+export const set: SetTrigger = setAccount;
 
-export const set: SetTrigger = async (query, multiple, options) => {
-  await setAccount(query, multiple, options, {
-    sendEmail: async (details: any) => {
-      const { type, account, token } = details;
-
-      // Send emails using a service like Resend or similar.
-      if (type === "PASSWORD_RESET") {}
-      if (type === "EMAIL_VERIFICATION") {}
-    },
-  });
-
-  return query;
-};
+export const followingAdd: FollowingAddTrigger = followingAddAccount;
+export const followingSet: FollowingSetTrigger = followingSetAccount;
 ```
 
 ```ts
 // triggers/session.ts
 
-import type { GetTrigger, AddTrigger, RemoveTrigger } from "blade/types";
-import { addSession, getSession, removeSession } from "blade/server/auth";
+import type {
+  GetTrigger,
+  AddTrigger,
+  RemoveTrigger,
+  AfterAddTrigger
+} from "blade/types";
+import {
+  addSession,
+  getSession,
+  removeSession,
+  afterAddSession
+} from "blade/server/auth";
 
 export const get: GetTrigger = getSession;
 export const add: AddTrigger = addSession;
 export const remove: RemoveTrigger = removeSession;
+
+export const afterAdd: AfterAddTrigger = afterAddSession;
 ```
 
 Additionally, place the following in your [Schema Definition](/models) located in
@@ -90,6 +102,9 @@ You can choose between either running a **[Query](/hooks#usemutation-client)** o
 
 ### Signing Up
 
+This will send the user an email using the `sendEmail` function you've defined. That
+email should link them to a page for the [Verifying Email](#verifying-email) step.
+
 #### Query
 
 ```ts
@@ -110,7 +125,30 @@ await add.account.with({
 </Form>
 ```
 
+### Verifying Email
+
+After clicking the link in the signup email, the user should be taken to a page that can
+show some kind of a "Congratulations" message, with a button for continuing to the
+logged-in area of the app.
+
+This button should trigger the following query, which validates the email verification
+token and logs the user in by creating a session.
+
+No form is available for this action, because there are no visible inputs to fill.
+
+#### Query
+
+```ts
+const { searchParams } = useLocation();
+const emailVerificationToken = searchParams.get('token');
+
+await add.session.with.account({ emailVerificationToken });
+```
+
 ### Logging In
+
+If the user would like to manually log in using their email address and password, you can
+make that possible using the query below.
 
 This query will automatically set a `session` cookie.
 
@@ -137,6 +175,8 @@ await add.session.with.account({
 ### Logging Out
 
 This query will automatically revoke the `session` cookie.
+
+No form is available for this action, because there are no visible inputs to fill.
 
 ```ts
 await remove.session();

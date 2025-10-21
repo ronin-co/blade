@@ -7,7 +7,14 @@ import {
   SetNotAllowedError,
   TooManyRequestsError,
 } from 'blade/errors';
-import type { Account, AddTrigger, SetTrigger } from 'blade/types';
+import type {
+  Account,
+  Accounts,
+  AddTrigger,
+  FollowingAddTrigger,
+  FollowingSetTrigger,
+  SetTrigger,
+} from 'blade/types';
 
 import {
   EMAIL_VERIFICATION_COOLDOWN,
@@ -32,12 +39,7 @@ export const add: AddTrigger = async (query) => {
   return query;
 };
 
-export const set: WithAuthOptions<SetTrigger> = async (
-  query,
-  _multiple,
-  options,
-  auth,
-) => {
+export const set: SetTrigger = async (query, _multiple, options) => {
   const { get } = options.client;
 
   if (!query.with) throw new Error('A `with` instruction must be given.');
@@ -60,6 +62,8 @@ export const set: WithAuthOptions<SetTrigger> = async (
           : query.to.password
             ? 'PASSWORD_CHANGE'
             : null;
+
+  options.context.set('operation', operation);
 
   if (
     // These operations should work without an active session.
@@ -177,27 +181,9 @@ export const set: WithAuthOptions<SetTrigger> = async (
       throw new TooManyRequestsError({ fields: ['emailVerificationSentAt'] });
     }
 
-    const verificationToken = generateUniqueId();
-
-    if (operation === 'PASSWORD_RESET') {
-      await auth.sendEmail?.({
-        account,
-        type: 'PASSWORD_RESET',
-        token: verificationToken,
-      });
-    }
-
-    if (operation === 'EMAIL_VERIFICATION_RESEND') {
-      await auth.sendEmail?.({
-        account,
-        type: 'EMAIL_VERIFICATION',
-        token: verificationToken,
-      });
-    }
-
     query.to = {
       ...query.to,
-      emailVerificationToken: verificationToken,
+      emailVerificationToken: generateUniqueId(),
       emailVerificationSentAt: newDate,
     };
   }
@@ -242,4 +228,46 @@ export const set: WithAuthOptions<SetTrigger> = async (
   }
 
   return query;
+};
+
+export const followingAdd: WithAuthOptions<FollowingAddTrigger<Accounts>> = async (
+  _query,
+  _multipleRecords,
+  _previousAccounts,
+  accounts,
+  _options,
+  auth,
+) => {
+  for (const account of accounts) {
+    await auth.sendEmail?.({
+      account,
+      type: 'ACCOUNT_CREATION',
+      token: account.emailVerificationToken,
+    });
+  }
+};
+
+export const followingSet: WithAuthOptions<FollowingSetTrigger<Accounts>> = async (
+  query,
+  _multipleRecords,
+  _previousAccounts,
+  accounts,
+  options,
+  auth,
+) => {
+  const operation = options.context.get('operation');
+
+  if (!(operation === 'PASSWORD_RESET' || operation === 'EMAIL_VERIFICATION_RESEND')) {
+    return;
+  }
+
+  const { emailVerificationToken } = query.to as { emailVerificationToken: string };
+
+  for (const account of accounts) {
+    await auth.sendEmail?.({
+      account,
+      type: operation,
+      token: emailVerificationToken,
+    });
+  }
 };

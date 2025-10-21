@@ -1,7 +1,7 @@
 import { verifyPassword } from 'better-auth/crypto';
 import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/errors';
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
-import type { AddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
+import type { AddTrigger, AfterAddTrigger, GetTrigger, RemoveTrigger } from 'blade/types';
 
 import { AUTH_SECRET, getSessionCookie } from '@/utils/index';
 
@@ -50,29 +50,45 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   // creating a new session for a fresh account, look up the account and compare the
   // provided password against the stored hash.
   if (!options.parentTrigger) {
-    const providedAccount = query.with.account as { email: string; password: string };
+    const providedAccount = query.with.account as
+      | { email: string; password: string }
+      | { emailVerificationToken: string };
 
     // Resolve the account.
-    const account = await get.account.with({ email: providedAccount.email });
+    const account = await get.account.with(
+      'password' in providedAccount
+        ? { email: providedAccount.email }
+        : { emailVerificationToken: providedAccount.emailVerificationToken },
+    );
 
-    // If no account was found or its password doesn't match, throw an error.
-    //
-    // For security reasons, we mark both fields as invalid to avoid disclosing the
-    // existance of certain email addresses.
+    const error = new InvalidFieldsError({
+      fields: Object.keys(providedAccount).map((field) => `account.${field}`),
+    });
+
+    // If no matching account was found, throw an error.
+    if (!account) throw error;
+
+    // If a password was provided, check if it matches the password that was stored for
+    // the account. If not, throw an error.
     if (
-      !(
-        account &&
-        (await verifyPassword({
-          hash: account.password,
-          password: providedAccount.password,
-        }))
-      )
+      'password' in providedAccount &&
+      !(await verifyPassword({
+        hash: account.password,
+        password: providedAccount.password,
+      }))
     ) {
-      throw new InvalidFieldsError({
-        fields: ['account.email', 'account.password'],
-      });
+      throw error;
     }
 
+    // If an email verification token was provided, check if it matches the email
+    // verification token that was stored for the account. If not, throw an error.
+    if ('emailVerificationToken' in providedAccount) {
+      if (account.emailVerificationToken === providedAccount.emailVerificationToken) {
+        options.context.set('accountToVerify', account.id);
+      } else {
+        throw error;
+      }
+    }
     // Set the ID of the account.
     query.with.account = account.id;
   }
@@ -92,6 +108,23 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   options.setCookie('session', token);
 
   return query;
+};
+
+// @ts-expect-error This is needed.
+export const afterAdd: AfterAddTrigger = (_query, _multiple, options) => {
+  const { set } = options.client;
+  const accountToVerify = options.context.get('accountToVerify');
+
+  if (accountToVerify) {
+    return [
+      set.account({
+        with: { id: accountToVerify },
+        to: { emailVerified: true },
+      }),
+    ];
+  }
+
+  return [];
 };
 
 export const remove: RemoveTrigger = async (query, multiple, options) => {
