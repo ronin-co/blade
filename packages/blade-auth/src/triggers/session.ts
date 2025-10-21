@@ -6,6 +6,9 @@ import type { AddTrigger, AfterAddTrigger, GetTrigger, RemoveTrigger } from 'bla
 import { AUTH_SECRET, getSessionCookie } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, multiple, options) => {
+  // @ts-expect-error Query types will be fixed in the future.
+  if (query.with?.id || query.with?.account) return query;
+
   const { sessionId, accountId } = await getSessionCookie(options);
 
   if (!query.with) query.with = {};
