@@ -6,15 +6,14 @@ import type { AddTrigger, AfterAddTrigger, GetTrigger, RemoveTrigger } from 'bla
 import { AUTH_SECRET, getSessionCookie } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, multiple, options) => {
+  if (query.with) return query;
+  query.with = {};
+
   const { sessionId, accountId } = await getSessionCookie(options);
 
-  if (!query.with) query.with = {};
-
   if (multiple) {
-    // @ts-expect-error Query types will be fixed in the future.
     query.with.account = accountId;
   } else {
-    // @ts-expect-error Query types will be fixed in the future.
     query.with.id = sessionId;
   }
 
@@ -85,6 +84,10 @@ export const add: AddTrigger = async (query, _multiple, options) => {
     if ('emailVerificationToken' in providedAccount) {
       if (account.emailVerificationToken === providedAccount.emailVerificationToken) {
         options.context.set('accountToVerify', account.id);
+        options.context.set(
+          'emailVerificationToken',
+          providedAccount.emailVerificationToken,
+        );
       } else {
         throw error;
       }
@@ -113,16 +116,27 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   return query;
 };
 
-// @ts-expect-error This is needed.
-export const afterAdd: AfterAddTrigger = (_query, _multiple, options) => {
+export const afterAdd: AfterAddTrigger = (query, _multiple, options) => {
+  if (!query.with) throw new Error('A `with` instruction must be given.');
+
+  if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
+
   const { set } = options.client;
   const accountToVerify = options.context.get('accountToVerify');
 
   if (accountToVerify) {
-    return [
+    const emailVerificationToken = options.context.get('emailVerificationToken');
+
+    return () => [
       set.account({
-        with: { id: accountToVerify },
-        to: { emailVerified: true },
+        with: {
+          id: accountToVerify,
+          emailVerified: false,
+          emailVerificationToken,
+        },
+        to: {
+          emailVerified: true,
+        },
       }),
     ];
   }

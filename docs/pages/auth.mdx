@@ -61,16 +61,32 @@ setAuthConfig({
 
 ## Status
 
-To obtain the current status of a session, run the following query in a page:
+You can access the currently active account using the query below.
+
+This is possible during signup (based on the `account` cookie that gets set during
+signup) and while the account is logged in (based on the `session` cookie that gets set
+during login).
+
+```ts
+const account = use.account();
+```
+
+To access the current session instead (which includes details such as the device that
+was used to log in), you can use the query below. Note that a session only exists after
+logging in.
 
 ```ts
 const session = use.session();
 ```
 
-To also include the current account, you can run the following:
+If the user is logged in and you want to access both the session and the account, you can
+do so by resolving the `account` [link field](/models/fields#link) of the session as
+shown below.
 
 ```ts
 const session = use.session.using(['account']);
+
+// ^ { browser: 'chrome', account: { email: '...' } }
 ```
 
 ## Actions

@@ -14,6 +14,7 @@ import type {
   AddTrigger,
   FollowingAddTrigger,
   FollowingSetTrigger,
+  GetTrigger,
   SetTrigger,
 } from 'blade/types';
 
@@ -22,7 +23,23 @@ import {
   EMAIL_VERIFICATION_COOLDOWN,
   avoidEmptyFields,
   generateUniqueId,
+  getSessionCookie,
 } from '@/utils/index';
+
+const primeId: GetTrigger = async (query, _multiple, options) => {
+  if (query.with) return query;
+  query.with = {};
+
+  const accountId =
+    options.cookies.account || (await getSessionCookie(options)).accountId;
+  query.with.id = accountId;
+
+  return query;
+};
+
+export const get: GetTrigger = (query, multiple, options) => {
+  return primeId(query, multiple, options);
+};
 
 export const add: AddTrigger = async (query, _multiple, options) => {
   if (!query.with) throw new Error('A `with` instruction must be given.');
