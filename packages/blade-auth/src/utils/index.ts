@@ -1,3 +1,4 @@
+import type { AuthConfig } from '@/utils/types';
 import { EmptyFieldsError, InvalidPermissionsError } from 'blade/errors';
 import { type JWTPayload, verifyJWT } from 'blade/server/utils';
 import type { SetQueryInstructions, TriggerOptions } from 'blade/types';
@@ -71,6 +72,14 @@ export const getSessionCookie = async (
 
   return { sessionId, accountId };
 };
+
+let AUTH_CONFIG: AuthConfig | undefined;
+
+export const setAuthConfig = (config: AuthConfig): void => {
+  AUTH_CONFIG = config;
+};
+
+export { AUTH_CONFIG };
 
 /**
  * Generate pseudo-random unique identifiers.

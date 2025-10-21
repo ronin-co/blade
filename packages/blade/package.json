@@ -49,6 +49,10 @@
       "default": "./dist/public/universal/auth/schema.js",
       "types": "./dist/public/universal/auth/schema.d.ts"
     },
+    "./auth/utils": {
+      "default": "./dist/public/universal/auth/utils.js",
+      "types": "./dist/public/universal/auth/utils.d.ts"
+    },
     "./components": {
       "default": "./dist/public/universal/components.js",
       "types": "./dist/public/universal/components.d.ts"
@@ -95,6 +99,9 @@
       ],
       "auth/schema": [
         "./dist/public/universal/auth/schema"
+      ],
+      "auth/utils": [
+        "./dist/public/universal/auth/utils"
       ],
       "components": [
         "./dist/public/universal/components"
