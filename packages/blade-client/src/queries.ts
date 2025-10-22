@@ -57,9 +57,11 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   if (!clients[key]) {
     // If a token is available, initiate a connection to the remote storage.
     if (token) {
+      const prefix = stream ? 'db-leader' : 'db';
+
       clients[key] = new Hive({
         storage: new RemoteStorage({
-          remote: 'https://db.ronin.co/api',
+          remote: `https://${prefix}.ronin.co/api`,
           token,
           transport: 'ws',
         }),
