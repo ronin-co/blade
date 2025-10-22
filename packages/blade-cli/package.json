@@ -1,6 +1,6 @@
 {
   "name": "blade-cli",
-  "version": "3.26.0",
+  "version": "3.26.1",
   "type": "module",
   "description": "The command-line interface for RONIN.",
   "main": "./dist/index.js",
