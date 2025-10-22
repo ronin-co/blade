@@ -116,8 +116,8 @@ const Link: FunctionComponent<LinkProps> = ({
   // Of course there is no reason to use the `Link` component in the first place in those
   // cases (apps can just use the anchor element directly), but we still want to support
   // it for ease of use, such that apps don't need to themselves switch between different
-  // behaviors based on what the `href` looks like. This is especially useful with MDX,
-  // since all links can then just use the `Link` component.
+  // behaviors based on what `href` looks like. This is especially useful with MDX, since
+  // all links can then just use the `Link` component.
   if (href.startsWith('#') || isExternal) {
     eventHandlers = undefined;
   }

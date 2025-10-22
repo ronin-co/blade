@@ -8,9 +8,12 @@ import { ParamField } from '@/components/param-field.client';
 
 ## `Link`
 
-When writing Blade apps, [anchor elements](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a) should only be used for linking to external URLs.
+Used to render a clickable link that forwards the user to a different page.
 
-For linking to URLs within the same application, use the native `Link` component instead:
+For maximum ease of use, the component also supports hash links (such as `#test`) and
+external links (starting with a protocol such as `https://` or `http://`), however, in
+those cases, a simple [anchor element](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a)
+with no event handlers will be rendered.
 
 ```tsx
 import { Link } from 'blade/components';
