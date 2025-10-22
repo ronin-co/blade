@@ -1,3 +1,4 @@
+import { Link } from 'blade/components';
 import { useCookie } from 'blade/hooks';
 import { useMetadata } from 'blade/server/hooks';
 import type { TableOfContents } from 'blade/types';
@@ -7,7 +8,6 @@ import { Code, InlineCode } from '@/components/code.client';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header.client';
 import { Heading } from '@/components/heading.client';
-import { Link } from '@/components/link';
 import { Nav, type NavGroup } from '@/components/nav';
 import { TableOfContentsSidebar } from '@/components/table-of-contents.client';
 import type { Theme } from '@/components/theme-toggle.client';
@@ -187,7 +187,12 @@ const DocsLayout = ({
 export const components = {
   pre: (props: ComponentProps<typeof Code>) => <Code {...props} />,
   code: (props: ComponentProps<typeof InlineCode>) => <InlineCode {...props} />,
-  a: (props: ComponentProps<typeof Link>) => <Link {...props} />,
+  a: (props: ComponentProps<typeof Link>) => (
+    <Link
+      {...props}
+      className="text-cyan-600 transition-colors duration-200 hover:text-cyan-800"
+    />
+  ),
   h1: (props: HeadingProps) => (
     <Heading
       level={1}

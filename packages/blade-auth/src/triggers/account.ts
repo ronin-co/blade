@@ -14,15 +14,32 @@ import type {
   AddTrigger,
   FollowingAddTrigger,
   FollowingSetTrigger,
+  GetTrigger,
   SetTrigger,
 } from 'blade/types';
 
 import {
+  AUTH_CONFIG,
   EMAIL_VERIFICATION_COOLDOWN,
   avoidEmptyFields,
   generateUniqueId,
+  getSessionCookie,
 } from '@/utils/index';
-import type { WithAuthOptions } from '@/utils/types';
+
+const primeId: GetTrigger = async (query, _multiple, options) => {
+  if (query.with) return query;
+  query.with = {};
+
+  const accountId =
+    options.cookies.account || (await getSessionCookie(options)).accountId;
+  query.with.id = accountId;
+
+  return query;
+};
+
+export const get: GetTrigger = (query, multiple, options) => {
+  return primeId(query, multiple, options);
+};
 
 export const add: AddTrigger = async (query, _multiple, options) => {
   if (!query.with) throw new Error('A `with` instruction must be given.');
@@ -238,30 +255,29 @@ export const set: SetTrigger = async (query, _multiple, options) => {
   return query;
 };
 
-export const followingAdd: WithAuthOptions<FollowingAddTrigger<Accounts>> = async (
+export const followingAdd: FollowingAddTrigger<Accounts> = async (
   _query,
   _multipleRecords,
   _previousAccounts,
   accounts,
-  _options,
-  auth,
+  options,
 ) => {
   for (const account of accounts) {
-    await auth.sendEmail?.({
+    await AUTH_CONFIG?.sendEmail?.({
       account,
       type: 'ACCOUNT_CREATION',
       token: account.emailVerificationToken,
+      options,
     });
   }
 };
 
-export const followingSet: WithAuthOptions<FollowingSetTrigger<Accounts>> = async (
+export const followingSet: FollowingSetTrigger<Accounts> = async (
   query,
   _multipleRecords,
   _previousAccounts,
   accounts,
   options,
-  auth,
 ) => {
   const operation = options.context.get('operation');
 
@@ -272,10 +288,11 @@ export const followingSet: WithAuthOptions<FollowingSetTrigger<Accounts>> = asyn
   const { emailVerificationToken } = query.to as { emailVerificationToken: string };
 
   for (const account of accounts) {
-    await auth.sendEmail?.({
+    await AUTH_CONFIG?.sendEmail?.({
       account,
       type: operation,
       token: emailVerificationToken,
+      options,
     });
   }
 };

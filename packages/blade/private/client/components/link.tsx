@@ -69,7 +69,7 @@ const normalizeURL = (url: LinkURL, currentURL: string) => {
  */
 const getPathFromURL = (url: LinkURL, currentURL: string) => {
   const normalized = normalizeURL(url, currentURL);
-  return normalized.pathname + normalized.search;
+  return normalized.pathname + normalized.search + normalized.hash;
 };
 
 interface LinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
@@ -97,30 +97,46 @@ const Link: FunctionComponent<LinkProps> = ({
   const destination = populatePathname(href, segments);
   const linkEventHandlers = useLinkEvents(destination);
 
-  const shouldPrefetch =
-    prefetch &&
-    !(destination.startsWith('https://') || destination.startsWith('http://'));
+  const isExternal = href.startsWith('https://') || href.startsWith('http://');
 
-  const eventHandlers = shouldPrefetch
+  let eventHandlers: typeof linkEventHandlers | undefined = prefetch
     ? linkEventHandlers
-    : { onClick: linkEventHandlers.onClick };
+    : {
+        onClick: linkEventHandlers.onClick,
+        onMouseEnter: undefined,
+        onTouchStart: undefined,
+      };
+
+  // If the provided `href` does not require a page to be retrieved by Blade, we want to
+  // let the browser handle the link events for maximum efficiency.
+  //
+  // Specifically, this is necesary if the provided `href` is only a hash (like `#test`)
+  // or contains an external URL, meaning a value that starts with a protocol.
+  //
+  // Of course there is no reason to use the `Link` component in the first place in those
+  // cases (apps can just use the anchor element directly), but we still want to support
+  // it for ease of use, such that apps don't need to themselves switch between different
+  // behaviors based on what `href` looks like. This is especially useful with MDX, since
+  // all links can then just use the `Link` component.
+  if (href.startsWith('#') || isExternal) {
+    eventHandlers = undefined;
+  }
 
   const anchorProps = {
     href: destination,
-    ...eventHandlers,
+    ...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {}),
     ...extraProps,
 
-    // We must pass `extraProps` after `linkEventHandlers`, to allow for overwriting the
+    // We must pass `extraProps` after `eventHandlers`, to allow for overwriting the
     // default event handlers.
     //
-    // However, simply deconstructing `extraProps` after deconstructing
-    // `linkEventHandlers` would cause props within `extraProps` to overwrite the props
-    // in `linkEventHandlers`, even if the props in `extraProps` contain the value
-    // `undefined`. To protect against this, we are explicitly checking whether the value
-    // is falsy before using it.
-    onClick: extraProps.onClick || linkEventHandlers.onClick,
-    onMouseEnter: extraProps.onMouseEnter || linkEventHandlers.onMouseEnter,
-    onTouchStart: extraProps.onTouchStart || linkEventHandlers.onTouchStart,
+    // However, simply deconstructing `extraProps` after deconstructing `eventHandlers`
+    // would cause props within `extraProps` to overwrite the props in `eventHandlers`,
+    // even if the props in `extraProps` contain the value `undefined`. To avoid this,
+    // we are explicitly checking whether the value is falsy before using it.
+    onClick: extraProps.onClick || eventHandlers?.onClick,
+    onMouseEnter: extraProps.onMouseEnter || eventHandlers?.onMouseEnter,
+    onTouchStart: extraProps.onTouchStart || eventHandlers?.onTouchStart,
   } satisfies AnchorHTMLAttributes<HTMLAnchorElement>;
 
   return <a {...anchorProps}>{children}</a>;

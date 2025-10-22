@@ -4,7 +4,7 @@ title: Auth
 
 # Auth
 
-Blade natively offers the [blade-auth](https://github.com/ronin-co/blade/tree/main/packages/blade-auth) package,
+Blade natively offers the [blade/auth](https://github.com/ronin-co/blade/tree/main/packages/blade-auth) package,
 which provides utility functions for easily adding different authentication methods to your application,
 without having to maintain them.
 
@@ -24,68 +24,69 @@ generate a new secret that you can store in the environment variable.
 ```ts
 // triggers/account.ts
 
-import type {
-  AddTrigger,
-  SetTrigger,
-  FollowingAddTrigger,
-  FollowingSetTrigger
-} from "blade/types";
-import {
-  addAccount,
-  setAccount,
-  followingAddAccount,
-  followingSetAccount
-} from "blade/server/auth";
-
-export const add: AddTrigger = addAccount;
-export const set: SetTrigger = setAccount;
-
-export const followingAdd: FollowingAddTrigger = followingAddAccount;
-export const followingSet: FollowingSetTrigger = followingSetAccount;
+export * from 'blade/auth/triggers/account';
 ```
 
 ```ts
 // triggers/session.ts
 
-import type {
-  GetTrigger,
-  AddTrigger,
-  RemoveTrigger,
-  AfterAddTrigger
-} from "blade/types";
-import {
-  addSession,
-  getSession,
-  removeSession,
-  afterAddSession
-} from "blade/server/auth";
-
-export const get: GetTrigger = getSession;
-export const add: AddTrigger = addSession;
-export const remove: RemoveTrigger = removeSession;
-
-export const afterAdd: AfterAddTrigger = afterAddSession;
+export * from 'blade/auth/triggers/session';
 ```
 
-Additionally, place the following in your [Schema Definition](/models) located in
-a `schema/index.ts` file at the root of your project:
+The following [models](/models) must be added as well:
 
 ```ts
-export { Account, Session } from 'blade/server/auth';
+// schema/index.ts
+
+export { Account, Session } from 'blade/auth/models';
+```
+
+## Config
+
+To customize the behavior of the authentication logic and handle actions such as sending
+emails, you can provide the following function call in the respective trigger file:
+
+```ts
+// triggers/account.ts
+
+import { setAuthConfig } from 'blade/auth/utils';
+
+setAuthConfig({
+  sendEmail: async ({ type, account, token, options }) => {
+    if (type === "ACCOUNT_CREATION") {}
+    if (type === "PASSWORD_RESET") {}
+  }
+});
 ```
 
 ## Status
 
-To obtain the current status of a session, run the following query in a page:
+You can access the currently active account using the query below.
+
+This is possible during signup (based on the `account` cookie that gets set during
+signup) and while the account is logged in (based on the `session` cookie that gets set
+during login).
+
+```ts
+const account = use.account();
+```
+
+To access the current session instead (which includes details such as the device that
+was used to log in), you can use the query below. Note that a session only exists after
+logging in.
 
 ```ts
 const session = use.session();
 ```
 
-To also include the current account, you can run the following:
+If the user is logged in and you want to access both the session and the account, you can
+do so by resolving the `account` [link field](/models/fields#link) of the session as
+shown below.
 
 ```ts
 const session = use.session.using(['account']);
+
+// ^ { browser: 'chrome', account: { email: '...' } }
 ```
 
 ## Actions
@@ -95,7 +96,7 @@ the [useMutation](/hooks#usemutation-client) hook on the client-side, depending 
 actions the user performs.
 
 In addition to the actions documented below, you can, of course, also run any
-other [Query](/queries) for the models that `blade-auth` provides, such as `Account` and `Session`. For
+other [Query](/queries) for the models that `blade/auth` provides, such as `Account` and `Session`. For
 example, you might choose to count records or filter them in a specific way.
 
 You can choose between either running a **[Query](/hooks#usemutation-client)** or using Blade's **[Form](/components#form)** component.
@@ -260,7 +261,7 @@ which you would like to log a message every time a record is added.
 
 ```ts
 import type { FollowingAddTrigger } from "blade/types";
-import { getSessionCookie } from 'blade/server/utils';
+import { getSessionCookie } from 'blade/auth/utils';
 
 export const followingAdd: FollowingAddTrigger = async (_, _, options) => {
   const { accountId } = await getSessionCookie(options);
