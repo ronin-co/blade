@@ -77,7 +77,7 @@ export class ResponseStream extends SSEStreamingApi {
    */
   writeChunk(type: 'update' | 'update-bundle', response: Response) {
     // Migrate the headers to the final response.
-    response.headers.forEach((value, key) => this.response.headers.set(key, value));
+    response.headers.forEach((value, key) => this.response.headers.append(key, value));
 
     // Inform any outside watchers that the response now has headers and can be returned,
     // such that the response is returned to the client even before the first body chunk

@@ -111,7 +111,7 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   options.setCookie('session', token);
 
   // If an `account` cookie is available from the signup, remove it now.
-  // if (options.cookies.account) options.setCookie('account', null);
+  if (options.cookies.account) options.setCookie('account', null);
 
   return query;
 };
