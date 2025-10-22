@@ -23,7 +23,7 @@
         "@tailwindcss/oxide": "4.1.6",
         "dotenv": "16.5.0",
         "gradient-string": "3.0.0",
-        "hive": "2.1.9",
+        "hive": "2.1.10",
         "resolve-from": "5.0.0",
         "rolldown": "1.0.0-beta.41",
       },
@@ -83,7 +83,7 @@
         "@dprint/typescript": "0.93.3",
         "@inquirer/prompts": "7.2.3",
         "chalk-template": "1.1.0",
-        "hive": "2.1.9",
+        "hive": "2.1.10",
         "json5": "2.2.3",
         "ora": "8.1.1",
       },
@@ -103,7 +103,7 @@
       "name": "blade-client",
       "version": "3.25.1",
       "dependencies": {
-        "hive": "2.1.9",
+        "hive": "2.1.10",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -134,7 +134,7 @@
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
-        "hive": "2.1.9",
+        "hive": "2.1.10",
         "title": "4.0.1",
         "tsdown": "0.15.5",
         "typescript": "5.7.2",
@@ -736,7 +736,7 @@
 
     "hast-util-whitespace": ["hast-util-whitespace@3.0.0", "", { "dependencies": { "@types/hast": "^3.0.0" } }, "sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw=="],
 
-    "hive": ["hive@2.1.9", "", { "dependencies": { "hono": "4.10.2", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-LvB3CqARoBlbC+IbJmvaVENRItM2CsWXszhMplZMWYFRCnTmFqlp414t6KWnBRcXnkhh4RVZgqtU4bd3HZioog=="],
+    "hive": ["hive@2.1.10", "", { "dependencies": { "hono": "4.10.2", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-9Bwag0/LGEkc9tEqQU3lujHQ/ckrLBG7hZ+E7I8ogaQ6h238HECqwPnI6dXlsusjjV0HKgDp+DjeYvY5WRT5Yw=="],
 
     "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
 
