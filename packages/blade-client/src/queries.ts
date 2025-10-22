@@ -60,7 +60,11 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
       const prefix = stream ? 'db-leader' : 'db';
 
       clients[key] = new Hive({
-        storage: new RemoteStorage({ remote: `https://${prefix}.ronin.co/api`, token }),
+        storage: new RemoteStorage({
+          remote: `https://${prefix}.ronin.co/api`,
+          token,
+          transport: 'ws',
+        }),
       });
     }
     // If no token is available, we must try to initialize disk storage.
