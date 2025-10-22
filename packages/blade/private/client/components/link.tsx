@@ -69,7 +69,7 @@ const normalizeURL = (url: LinkURL, currentURL: string) => {
  */
 const getPathFromURL = (url: LinkURL, currentURL: string) => {
   const normalized = normalizeURL(url, currentURL);
-  return normalized.pathname + normalized.search;
+  return normalized.pathname + normalized.search + normalized.hash;
 };
 
 interface LinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
@@ -101,26 +101,32 @@ const Link: FunctionComponent<LinkProps> = ({
     prefetch &&
     !(destination.startsWith('https://') || destination.startsWith('http://'));
 
-  const eventHandlers = shouldPrefetch
+  let eventHandlers: typeof linkEventHandlers | undefined = shouldPrefetch
     ? linkEventHandlers
-    : { onClick: linkEventHandlers.onClick };
+    : {
+        onClick: linkEventHandlers.onClick,
+        onMouseEnter: undefined,
+        onTouchStart: undefined,
+      };
+
+  // If the provided `href` is only a hash, let the browser handle the link events, since
+  // we don't need to retrieve a different page in that case.
+  if (href.startsWith('#')) eventHandlers = undefined;
 
   const anchorProps = {
     href: destination,
-    ...eventHandlers,
     ...extraProps,
 
-    // We must pass `extraProps` after `linkEventHandlers`, to allow for overwriting the
+    // We must pass `extraProps` after `eventHandlers`, to allow for overwriting the
     // default event handlers.
     //
-    // However, simply deconstructing `extraProps` after deconstructing
-    // `linkEventHandlers` would cause props within `extraProps` to overwrite the props
-    // in `linkEventHandlers`, even if the props in `extraProps` contain the value
-    // `undefined`. To protect against this, we are explicitly checking whether the value
-    // is falsy before using it.
-    onClick: extraProps.onClick || linkEventHandlers.onClick,
-    onMouseEnter: extraProps.onMouseEnter || linkEventHandlers.onMouseEnter,
-    onTouchStart: extraProps.onTouchStart || linkEventHandlers.onTouchStart,
+    // However, simply deconstructing `extraProps` after deconstructing `eventHandlers`
+    // would cause props within `extraProps` to overwrite the props in `eventHandlers`,
+    // even if the props in `extraProps` contain the value `undefined`. To avoid this,
+    // we are explicitly checking whether the value is falsy before using it.
+    onClick: extraProps.onClick || eventHandlers?.onClick,
+    onMouseEnter: extraProps.onMouseEnter || eventHandlers?.onMouseEnter,
+    onTouchStart: extraProps.onTouchStart || eventHandlers?.onTouchStart,
   } satisfies AnchorHTMLAttributes<HTMLAnchorElement>;
 
   return <a {...anchorProps}>{children}</a>;
