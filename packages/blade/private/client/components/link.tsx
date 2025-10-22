@@ -97,11 +97,9 @@ const Link: FunctionComponent<LinkProps> = ({
   const destination = populatePathname(href, segments);
   const linkEventHandlers = useLinkEvents(destination);
 
-  const shouldPrefetch =
-    prefetch &&
-    !(destination.startsWith('https://') || destination.startsWith('http://'));
+  const isExternal = href.startsWith('https://') || href.startsWith('http://');
 
-  let eventHandlers: typeof linkEventHandlers | undefined = shouldPrefetch
+  let eventHandlers: typeof linkEventHandlers | undefined = prefetch
     ? linkEventHandlers
     : {
         onClick: linkEventHandlers.onClick,
@@ -109,12 +107,24 @@ const Link: FunctionComponent<LinkProps> = ({
         onTouchStart: undefined,
       };
 
-  // If the provided `href` is only a hash, let the browser handle the link events, since
-  // we don't need to retrieve a different page in that case.
-  if (href.startsWith('#')) eventHandlers = undefined;
+  // If the provided `href` does not require a page to be retrieved by Blade, we want to
+  // let the browser handle the link events for maximum efficiency.
+  //
+  // Specifically, this is necesary if the provided `href` is only a hash (like `#test`)
+  // or contains an external URL, meaning a value that starts with a protocol.
+  //
+  // Of course there is no reason to use the `Link` component in the first place in those
+  // cases (apps can just use the anchor element directly), but we still want to support
+  // it for ease of use, such that apps don't need to themselves switch between different
+  // behaviors based on what `href` looks like. This is especially useful with MDX, since
+  // all links can then just use the `Link` component.
+  if (href.startsWith('#') || isExternal) {
+    eventHandlers = undefined;
+  }
 
   const anchorProps = {
     href: destination,
+    ...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {}),
     ...extraProps,
 
     // We must pass `extraProps` after `eventHandlers`, to allow for overwriting the
