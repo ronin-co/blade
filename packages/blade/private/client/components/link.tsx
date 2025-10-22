@@ -97,6 +97,8 @@ const Link: FunctionComponent<LinkProps> = ({
   const destination = populatePathname(href, segments);
   const linkEventHandlers = useLinkEvents(destination);
 
+  const isExternal = href.startsWith('https://') || href.startsWith('http://');
+
   let eventHandlers: typeof linkEventHandlers | undefined = prefetch
     ? linkEventHandlers
     : {
@@ -116,12 +118,13 @@ const Link: FunctionComponent<LinkProps> = ({
   // it for ease of use, such that apps don't need to themselves switch between different
   // behaviors based on what the `href` looks like. This is especially useful with MDX,
   // since all links can then just use the `Link` component.
-  if (href.startsWith('#') || href.startsWith('https://') || href.startsWith('http://')) {
+  if (href.startsWith('#') || isExternal) {
     eventHandlers = undefined;
   }
 
   const anchorProps = {
     href: destination,
+    ...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {}),
     ...extraProps,
 
     // We must pass `extraProps` after `eventHandlers`, to allow for overwriting the
