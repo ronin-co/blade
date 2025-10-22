@@ -11,7 +11,7 @@
     },
     "packages/blade": {
       "name": "blade",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "bin": {
         "blade": "./dist/private/shell/index.js",
       },
@@ -23,7 +23,7 @@
         "@tailwindcss/oxide": "4.1.6",
         "dotenv": "16.5.0",
         "gradient-string": "3.0.0",
-        "hive": "2.1.8",
+        "hive": "2.1.9",
         "resolve-from": "5.0.0",
         "rolldown": "1.0.0-beta.41",
       },
@@ -68,7 +68,7 @@
     },
     "packages/blade-auth": {
       "name": "blade-auth",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "devDependencies": {
         "better-auth": "1.3.27",
         "tsdown": "0.15.5",
@@ -77,13 +77,13 @@
     },
     "packages/blade-cli": {
       "name": "blade-cli",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "dependencies": {
         "@dprint/formatter": "0.4.1",
         "@dprint/typescript": "0.93.3",
         "@inquirer/prompts": "7.2.3",
         "chalk-template": "1.1.0",
-        "hive": "2.1.8",
+        "hive": "2.1.9",
         "json5": "2.2.3",
         "ora": "8.1.1",
       },
@@ -101,9 +101,9 @@
     },
     "packages/blade-client": {
       "name": "blade-client",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "dependencies": {
-        "hive": "2.1.8",
+        "hive": "2.1.9",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -116,7 +116,7 @@
     },
     "packages/blade-codegen": {
       "name": "blade-codegen",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "dependencies": {
         "typescript": "5.7.3",
       },
@@ -130,11 +130,11 @@
     },
     "packages/blade-compiler": {
       "name": "blade-compiler",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
-        "hive": "2.1.8",
+        "hive": "2.1.9",
         "title": "4.0.1",
         "tsdown": "0.15.5",
         "typescript": "5.7.2",
@@ -142,7 +142,7 @@
     },
     "packages/blade-syntax": {
       "name": "blade-syntax",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
@@ -154,7 +154,7 @@
     },
     "packages/create-blade": {
       "name": "create-blade",
-      "version": "3.24.2",
+      "version": "3.25.1",
       "bin": {
         "create-blade": "./dist/index.js",
       },
@@ -736,7 +736,7 @@
 
     "hast-util-whitespace": ["hast-util-whitespace@3.0.0", "", { "dependencies": { "@types/hast": "^3.0.0" } }, "sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw=="],
 
-    "hive": ["hive@2.1.8", "", { "dependencies": { "hono": "4.9.12", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-K9ERFxUp4OwbRj3cNL9hoVQ4/ISOxlXjkAorMd4fZ+P4plo1KxCgfy2wPcW3y+IHIjxy7u1NAEnA7tkFBVcCLg=="],
+    "hive": ["hive@2.1.9", "", { "dependencies": { "hono": "4.10.2", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-LvB3CqARoBlbC+IbJmvaVENRItM2CsWXszhMplZMWYFRCnTmFqlp414t6KWnBRcXnkhh4RVZgqtU4bd3HZioog=="],
 
     "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
 
@@ -1216,7 +1216,7 @@
 
     "hive/@types/bun": ["@types/bun@1.3.0", "", { "dependencies": { "bun-types": "1.3.0" } }, "sha512-+lAGCYjXjip2qY375xX/scJeVRmZ5cY0wyHYyCYxNcdEXrQ4AOe3gACgd4iQ8ksOslJtW4VNxBJ8llUwc3a6AA=="],
 
-    "hive/hono": ["hono@4.9.12", "", {}, "sha512-SrTC0YxqPwnN7yKa8gg/giLyQ2pILCKoideIHbYbFQlWZjYt68D2A4Ae1hehO/aDQ6RmTcpqOV/O2yBtMzx/VQ=="],
+    "hive/hono": ["hono@4.10.2", "", {}, "sha512-p6fyzl+mQo6uhESLxbF5WlBOAJMDh36PljwlKtP5V1v09NxlqGru3ShK+4wKhSuhuYf8qxMmrivHOa/M7q0sMg=="],
 
     "hive/typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
