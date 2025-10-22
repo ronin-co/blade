@@ -63,7 +63,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
         storage: new RemoteStorage({
           remote: `https://${prefix}.ronin.co/api`,
           token,
-          transport: 'ws',
+          transport: stream ? 'ws' : 'http',
         }),
       });
     }
