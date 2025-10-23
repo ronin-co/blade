@@ -126,7 +126,7 @@ await add.account.with({
   <Input type="email" name="email" placeholder="Email" />
   <Input type="password" name="password" placeholder="Password" />
 
-  <button type="submit">Sign Up</button>
+  <button>Sign Up</button>
 </Form>
 ```
 
@@ -156,7 +156,7 @@ const token = searchParams.get('token');
 
 <Form model="session">
   <Input type="hidden" name="account.emailVerificationToken" value={token} />
-  <button type="submit">Get Started</button>
+  <button>Get Started</button>
 </Form>
 ```
 
@@ -177,7 +177,7 @@ await set.account.to({ emailVerificationSentAt: new Date() });
 ```tsx
 <Form model="account" set>
   <Input type="hidden" name="emailVerificationSentAt" value={new Date()} />
-  <button type="submit">Resend Email</button>
+  <button>Resend Email</button>
 </Form>
 ```
 
@@ -204,7 +204,7 @@ await add.session.with.account({
   <Input type="email" name="account.email" placeholder="Email" />
   <Input type="password" name="account.password" placeholder="Password" />
 
-  <button type="submit">Log In</button>
+  <button>Log In</button>
 </Form>
 ```
 
@@ -222,7 +222,7 @@ await remove.session();
 
 ```tsx
 <Form model="session" remove>
-  <button type="submit">Log Out</button>
+  <button>Log Out</button>
 </Form>
 ```
 
@@ -246,7 +246,7 @@ await set.account({
   <Input type="email" name="email" placeholder="Email" target />
   <Input type="hidden" name="password" value={null} />
 
-  <button type="submit">Send Confirmation</button>
+  <button>Send Confirmation</button>
 </Form>
 ```
 
@@ -280,7 +280,7 @@ const account = use.account.with({ emailVerificationToken });
     <Input type="hidden" name="email" value={account.email} />
     <Input type="password" name="password" placeholder="New Password" />
 
-    <button type="submit">Change Password</button>
+    <button>Change Password</button>
   </Form>
 ) : (
   <span>Your link has expired</span>
@@ -306,7 +306,7 @@ await remove.account();
 
 ```tsx
 <Form model="account" remove>
-  <button type="submit">Delete Account</button>
+  <button>Delete Account</button>
 </Form>
 ```
 
