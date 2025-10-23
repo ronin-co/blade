@@ -28,7 +28,7 @@ import {
 } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, _multiple, options) => {
-  if (query.with) return query;
+  if (Object.keys(query.with || {}).length > 0) return query;
   query.with = {};
 
   const accountId =
@@ -65,8 +65,10 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   return query;
 };
 
-export const set: SetTrigger = async (query, _multiple, options) => {
+export const set: SetTrigger = async (query, multiple, options) => {
   const { get } = options.client;
+
+  await primeId(query, multiple, options);
 
   if (!query.with) throw new Error('A `with` instruction must be given.');
   if (!query.to) throw new Error('A `to` instruction must be given.');
