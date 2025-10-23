@@ -570,7 +570,7 @@ const Form: FunctionComponent<FormProps> = ({
   return (
     <FormContext.Provider
       value={{
-        key: `${model}${set ? set['id'] : ''}${remove ? remove['id'] : ''}`,
+        key: `${model}${JSON.stringify(shouldSet)}${JSON.stringify(shouldRemove)}`,
 
         waiting,
         disabled,
