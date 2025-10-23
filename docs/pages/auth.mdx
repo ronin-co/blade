@@ -176,7 +176,7 @@ await set.account.to({ emailVerificationSentAt: new Date() });
 
 ```tsx
 <Form model="account" set>
-  <Input type="date" name="emailVerificationSentAt" value={new Date()} />
+  <Input type="hidden" name="emailVerificationSentAt" value={new Date()} />
   <button type="submit">Resend Email</button>
 </Form>
 ```
