@@ -28,8 +28,6 @@
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.1.14",
     "hive": "2.1.10",
-    "title": "4.0.1",
-    "tsdown": "0.15.5",
-    "typescript": "5.7.2"
+    "title": "4.0.1"
   }
 }

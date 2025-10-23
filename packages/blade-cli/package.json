@@ -81,8 +81,6 @@
     "blade-codegen": "workspace:*",
     "blade-compiler": "workspace:*",
     "blade-syntax": "workspace:*",
-    "bun-bagel": "1.1.0",
-    "tsdown": "0.15.5",
-    "typescript": "5.8.3"
+    "bun-bagel": "1.1.0"
   }
 }
