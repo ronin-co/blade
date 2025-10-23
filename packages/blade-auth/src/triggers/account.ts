@@ -264,6 +264,9 @@ export const remove: RemoveTrigger = async (query, multiple, options) => {
   // @ts-expect-error The function above guarantees the higher props to exist.
   query.with.emailVerified = false;
 
+  // If an `account` cookie is available from the signup, remove it now.
+  if (options.cookies.account) options.setCookie('account', null);
+
   return query;
 };
 
