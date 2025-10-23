@@ -567,10 +567,16 @@ const Form: FunctionComponent<FormProps> = ({
     registeredRedirect.current = redirect || null;
   }, [redirect]);
 
+  const key = [
+    model,
+    typeof shouldSet === 'object' ? JSON.stringify(shouldSet) : '',
+    typeof shouldRemove === 'object' ? JSON.stringify(shouldRemove) : '',
+  ].join('');
+
   return (
     <FormContext.Provider
       value={{
-        key: `${model}${JSON.stringify(shouldSet)}${JSON.stringify(shouldRemove)}`,
+        key,
 
         waiting,
         disabled,
