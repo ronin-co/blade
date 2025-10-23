@@ -480,8 +480,7 @@ const Form: FunctionComponent<FormProps> = ({
           },
           queryOptions,
         );
-      }
-      if (shouldRemove) {
+      } else if (shouldRemove) {
         result = await remove[model](
           {
             with: typeof shouldRemove === 'object' ? shouldRemove : {},
