@@ -160,6 +160,27 @@ const token = searchParams.get('token');
 </Form>
 ```
 
+### Resending Verification
+
+If a user lost the verification email that you sent them during signup and is therefore
+stuck, you can send another verification email to make sure they can complete their
+signup and join your application.
+
+#### Query
+
+```ts
+await set.account.to({ emailVerificationSentAt: new Date() });
+```
+
+#### Form
+
+```tsx
+<Form model="account" set>
+  <Input type="date" name="emailVerificationSentAt" value={new Date()} />
+  <button type="submit">Resend Email</button>
+</Form>
+```
+
 ### Logging In
 
 If the user would like to manually log in using their email address and password, you can
