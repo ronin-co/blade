@@ -305,7 +305,7 @@ export const followingSet: FollowingSetTrigger<Accounts> = async (
   for (const account of accounts) {
     await AUTH_CONFIG?.sendEmail?.({
       account,
-      type: operation,
+      type: operation === 'EMAIL_VERIFICATION_RESEND' ? 'ACCOUNT_CREATION' : operation,
       token: emailVerificationToken,
       options,
     });
