@@ -250,10 +250,10 @@ const Form: FunctionComponent<FormProps> = ({
   excludeEmptyFields,
   newRecordSlug,
   noElement,
-  remove,
+  remove: shouldRemove,
 }) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
-  const { set, add } = useMutation();
+  const { set, add, remove } = useMutation();
   const { pathname } = useLocation();
   const params = useParams();
   const populatePathname = usePopulatePathname();
@@ -466,8 +466,8 @@ const Form: FunctionComponent<FormProps> = ({
         database,
       };
 
-      if (remove) {
-        result = await remove[model](target ? { with: target } : null, queryOptions);
+      if (shouldRemove) {
+        result = await remove[model](target ? { with: target } : {}, queryOptions);
       } else if (target) {
         result = await set[model](
           {
