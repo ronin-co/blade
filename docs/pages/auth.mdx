@@ -181,10 +181,18 @@ await add.session.with.account({
 
 This query will automatically revoke the `session` cookie.
 
-No form is available for this action, because there are no visible inputs to fill.
+#### Query
 
 ```ts
 await remove.session();
+```
+
+#### Form
+
+```tsx
+<Form model="session" remove>
+  <button type="submit">Log Out</button>
+</Form>
 ```
 
 ### Forgot Password
@@ -257,12 +265,18 @@ their unverified account.
 
 The same query can be used to delete the currently logged-in account.
 
-No form is available for this action, because there are no visible inputs to fill.
-
 #### Query
 
 ```ts
 await remove.account();
+```
+
+#### Form
+
+```tsx
+<Form model="account" remove>
+  <button type="submit">Cancel</button>
+</Form>
 ```
 
 ## Utility Functions
