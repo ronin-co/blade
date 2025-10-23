@@ -1,8 +1,8 @@
 import type { ModelField } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
+  type FormHTMLAttributes,
   type FunctionComponent,
-  type PropsWithChildren,
   createContext,
   useEffect,
   useRef,
@@ -137,7 +137,7 @@ export const FormContext: React.Context<CtxArg> = createContext<CtxArg>(null);
 
 type TargetRecord = Record<string, unknown> & Partial<ResultRecord>;
 
-interface FormProps extends PropsWithChildren {
+interface FormProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onError'> {
   /** The slug (singular) of the affected Blade model. */
   model: string;
   /** Called once the queries of the form have been executed successfully. */
@@ -256,6 +256,7 @@ const Form: FunctionComponent<FormProps> = ({
   noElement,
   set: shouldSet,
   remove: shouldRemove,
+  ...rest
 }) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add, remove } = useMutation();
@@ -596,7 +597,7 @@ const Form: FunctionComponent<FormProps> = ({
         registerForm,
         unregisterForm,
       }}>
-      {noElement ? children : <FormElement>{children}</FormElement>}
+      {noElement ? children : <FormElement {...rest}>{children}</FormElement>}
     </FormContext.Provider>
   );
 };

@@ -1,7 +1,7 @@
 import {
+  type FormHTMLAttributes,
   type FunctionComponent,
   type MutableRefObject,
-  type PropsWithChildren,
   useContext,
   useEffect,
   useRef,
@@ -10,7 +10,7 @@ import {
 import { FormContext } from '@/private/client/components/form';
 import { wrapClientComponent } from '@/private/client/utils/wrap-client';
 
-interface FormElementProps extends PropsWithChildren {
+interface FormElementProps extends FormHTMLAttributes<HTMLFormElement> {
   allowGlobalSave?: boolean;
 }
 
@@ -22,6 +22,7 @@ interface FormElementProps extends PropsWithChildren {
 const FormElement: FunctionComponent<FormElementProps> = ({
   children,
   allowGlobalSave,
+  ...rest
 }) => {
   const form = useContext(FormContext);
   if (!form) throw new Error('`FormElement` can only be used within `Form`.');
@@ -92,7 +93,8 @@ const FormElement: FunctionComponent<FormElementProps> = ({
         // Only execute `submit` if the form is not already submitting.
         if (form?.submit && !form?.waiting) form.submit();
       }}
-      ref={formRef}>
+      ref={formRef}
+      {...rest}>
       {children}
 
       {/* Submit form when ENTER is pressed. */}
