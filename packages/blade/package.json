@@ -130,13 +130,13 @@
     "@dprint/typescript": "0.95.11",
     "@inquirer/prompts": "7.8.6",
     "@stefanprobst/rehype-extract-toc": "3.0.0",
-    "@tailwindcss/node": "4.1.6",
-    "@tailwindcss/oxide": "4.1.6",
+    "@tailwindcss/node": "4.1.16",
+    "@tailwindcss/oxide": "4.1.16",
     "dotenv": "16.5.0",
     "gradient-string": "3.0.0",
     "hive": "2.1.10",
     "resolve-from": "5.0.0",
-    "rolldown": "1.0.0-beta.41"
+    "rolldown": "1.0.0-beta.44"
   },
   "devDependencies": {
     "@hono/node-server": "1.14.4",
