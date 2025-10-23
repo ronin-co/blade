@@ -224,7 +224,7 @@ interface FormProps extends PropsWithChildren {
   newRecordSlug?: 'new';
   /** Disable the automatic creation of a `<form>` element. */
   noElement?: boolean;
-  /** Whether the form should cause the destination record to be removed. */
+  /** Whether the form should cause the target record to be removed. */
   remove?: boolean;
 }
 
