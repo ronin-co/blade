@@ -3,19 +3,17 @@ import type { FunctionComponent, InputHTMLAttributes } from 'react';
 import type { FieldType } from '@/private/client/components/form';
 import { FORM_TARGET_PREFIX } from '@/private/client/utils/constants';
 
-type InputValue = string | number | boolean | object | null;
+type InputValue = string | number | boolean | object | null | Date;
 
 const stringifyFormValue = (value: InputValue): string | number => {
   let newValue: string | number;
 
-  // Serialize boolean values.
-  if (typeof value === 'boolean') {
-    newValue = value.toString();
-  }
-
-  // Serialize `null` values.
-  else if (value === null) {
+  if (value === null) {
     newValue = 'null';
+  } else if (typeof value === 'boolean') {
+    newValue = value.toString();
+  } else if (value instanceof Date) {
+    newValue = value.toISOString();
   } else if (typeof value === 'object') {
     newValue = JSON.stringify(value);
   } else {
