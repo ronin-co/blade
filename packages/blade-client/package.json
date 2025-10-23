@@ -67,8 +67,6 @@
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.4",
     "blade-compiler": "workspace:*",
-    "blade-syntax": "workspace:*",
-    "tsdown": "0.15.5",
-    "typescript": "5.8.3"
+    "blade-syntax": "workspace:*"
   }
 }
