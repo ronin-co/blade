@@ -135,12 +135,9 @@ type RegisteredProperty = {
 type CtxArg = FormContextValue | null;
 export const FormContext: React.Context<CtxArg> = createContext<CtxArg>(null);
 
+type TargetRecord = Record<string, unknown> & Partial<ResultRecord>;
+
 interface FormProps extends PropsWithChildren {
-  /**
-   * Fields for matching a target record that should be modified. If not provided, a new
-   * record will be created.
-   */
-  target?: Record<string, unknown> & Partial<ResultRecord>;
   /** The slug (singular) of the affected Blade model. */
   model: string;
   /** Called once the queries of the form have been executed successfully. */
@@ -224,8 +221,16 @@ interface FormProps extends PropsWithChildren {
   newRecordSlug?: 'new';
   /** Disable the automatic creation of a `<form>` element. */
   noElement?: boolean;
-  /** Whether the form should cause the target record to be removed. */
-  remove?: boolean;
+  /**
+   * Fields for matching a target record that should be modified. If not provided, a new
+   * record will be created.
+   */
+  set?: TargetRecord | boolean;
+  /**
+   * Fields for matching a target record that should be removed. If not provided, a new
+   * record will be created.
+   */
+  remove?: TargetRecord | boolean;
 }
 
 interface Result {
@@ -235,7 +240,6 @@ interface Result {
 }
 
 const Form: FunctionComponent<FormProps> = ({
-  target,
   model,
   clearOnSuccess = false,
   children,
@@ -250,6 +254,7 @@ const Form: FunctionComponent<FormProps> = ({
   excludeEmptyFields,
   newRecordSlug,
   noElement,
+  set: shouldSet,
   remove: shouldRemove,
 }) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
@@ -466,13 +471,20 @@ const Form: FunctionComponent<FormProps> = ({
         database,
       };
 
-      if (shouldRemove) {
-        result = await remove[model](target ? { with: target } : {}, queryOptions);
-      } else if (target) {
+      if (shouldSet) {
         result = await set[model](
           {
-            with: target,
+            with: typeof shouldSet === 'object' ? shouldSet : {},
             to: valuesNormalized,
+            using: including,
+          },
+          queryOptions,
+        );
+      }
+      if (shouldRemove) {
+        result = await remove[model](
+          {
+            with: typeof shouldRemove === 'object' ? shouldRemove : {},
             using: including,
           },
           queryOptions,
