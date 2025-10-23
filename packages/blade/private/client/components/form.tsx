@@ -224,6 +224,8 @@ interface FormProps extends PropsWithChildren {
   newRecordSlug?: 'new';
   /** Disable the automatic creation of a `<form>` element. */
   noElement?: boolean;
+  /** Whether the form should cause the destination record to be removed. */
+  remove?: boolean;
 }
 
 interface Result {
@@ -248,6 +250,7 @@ const Form: FunctionComponent<FormProps> = ({
   excludeEmptyFields,
   newRecordSlug,
   noElement,
+  remove,
 }) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
   const { set, add } = useMutation();
@@ -463,7 +466,9 @@ const Form: FunctionComponent<FormProps> = ({
         database,
       };
 
-      if (target) {
+      if (remove) {
+        result = await remove[model](target ? { with: target } : null, queryOptions);
+      } else if (target) {
         result = await set[model](
           {
             with: target,
