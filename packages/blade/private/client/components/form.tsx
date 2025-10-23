@@ -313,10 +313,20 @@ const Form: FunctionComponent<FormProps> = ({
         // to resolve the target record, instead of storing the value in the record.
         else if (key.startsWith(FORM_TARGET_PREFIX)) {
           const newKey = key.replace(FORM_TARGET_PREFIX, '');
-          const expandable = { [newKey]: value };
+          const expanded = construct({ [newKey]: value });
 
           // Deeply merge both objects.
-          target = assign(target || {}, construct(expandable)) as typeof target;
+          if (shouldRemove) {
+            shouldRemove = assign(
+              typeof shouldRemove === 'object' ? shouldRemove : {},
+              expanded,
+            ) as typeof shouldRemove;
+          } else {
+            shouldSet = assign(
+              typeof shouldSet === 'object' ? shouldSet : {},
+              expanded,
+            ) as typeof shouldSet;
+          }
         } else {
           values[key] = value;
         }
@@ -560,7 +570,7 @@ const Form: FunctionComponent<FormProps> = ({
   return (
     <FormContext.Provider
       value={{
-        key: `${model}${target?.id ? `_${target.id}` : ''}`,
+        key: `${model}${set ? set['id'] : ''}${remove ? remove['id'] : ''}`,
 
         waiting,
         disabled,
