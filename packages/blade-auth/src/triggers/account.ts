@@ -15,6 +15,7 @@ import type {
   FollowingAddTrigger,
   FollowingSetTrigger,
   GetTrigger,
+  RemoveTrigger,
   SetTrigger,
 } from 'blade/types';
 
@@ -251,6 +252,17 @@ export const set: SetTrigger = async (query, _multiple, options) => {
     // Don't allow writing `password` unless a password change was requested.
     delete query.to.password;
   }
+
+  return query;
+};
+
+export const remove: RemoveTrigger = async (query, multiple, options) => {
+  await primeId(query, multiple, options);
+
+  // Only allow for deleting accounts whose email isn't verified.
+  //
+  // @ts-expect-error The function above guarantees the higher props to exist.
+  query.with.emailVerified = false;
 
   return query;
 };
