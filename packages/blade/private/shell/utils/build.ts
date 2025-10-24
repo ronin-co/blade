@@ -61,7 +61,6 @@ export const composeBuildContext = async (
 
     plugins?: Array<RolldownPlugin>;
     virtualFiles?: Array<VirtualFileItem>;
-    external?: Array<string | RegExp>;
   },
 ): Promise<{
   rebuild: () => Promise<RolldownOutput>;
@@ -125,7 +124,6 @@ export const composeBuildContext = async (
 
     external: [
       ...(packageMetaContent?.blade?.external || []),
-      ...(options?.external || []),
 
       // These dependencies cannot be inlined, since they make use of native modules.
       'hive/node-driver',
