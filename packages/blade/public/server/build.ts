@@ -1,9 +1,85 @@
 import path from 'node:path';
-import resolveFrom from 'resolve-from';
+// import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
+import resolveFrom from 'resolve-from';
+
+const dependencyCache = new Map<string, string>();
+
+/**
+ * Resolves a relative or absolute import path relative to a CDN URL.
+ *
+ * @param importPath - The import path (e.g., './utils', '../foo', or 'lodash').
+ * @param baseUrl - The base URL to resolve against (e.g., 'https://unpkg.com/react@18.2.0/index.js').
+ *
+ * @returns The resolved absolute URL.
+ */
+const resolveImportPath = (importPath: string, baseUrl: string): string => {
+  // If it's already a full URL, return as-is
+  if (importPath.startsWith('http://') || importPath.startsWith('https://')) {
+    return importPath;
+  }
+
+  // For relative imports, resolve against the base URL
+  if (importPath.startsWith('./') || importPath.startsWith('../')) {
+    return new URL(importPath, baseUrl).href;
+  }
+
+  // For bare imports (package names), resolve from unpkg
+  return `https://unpkg.com/${importPath}`;
+};
+
+/**
+ * Detects the module type from the URL or content.
+ *
+ * @param url - The URL of the module.
+ *
+ * @returns The module type ('js', 'jsx', 'ts', or 'tsx').
+ */
+const detectModuleType = (url: string): 'js' | 'jsx' | 'ts' | 'tsx' => {
+  const urlPath = new URL(url).pathname;
+  if (urlPath.endsWith('.tsx')) return 'tsx';
+  if (urlPath.endsWith('.ts')) return 'ts';
+  if (urlPath.endsWith('.jsx')) return 'jsx';
+  return 'js';
+};
+
+/**
+ * Fetches a dependency from a CDN.
+ *
+ * @param url - The full URL to fetch (e.g., 'https://unpkg.com/react@18.2.0').
+ *
+ * @returns An object containing the content and the final resolved URL (after redirects).
+ */
+const fetchFromCDN = async (
+  url: string,
+): Promise<{ content: string; finalUrl: string } | null> => {
+  try {
+    if (dependencyCache.has(url)) {
+      return { content: dependencyCache.get(url)!, finalUrl: url };
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.warn(`Failed to fetch ${url} from CDN: ${response.status}`);
+      return null;
+    }
+
+    // Get the final URL after redirects (unpkg redirects to versioned URLs)
+    const finalUrl = response.url;
+    const content = await response.text();
+
+    dependencyCache.set(url, content);
+    dependencyCache.set(finalUrl, content);
+
+    return { content, finalUrl };
+  } catch (error) {
+    console.warn(`Error fetching ${url} from CDN:`, error);
+    return null;
+  }
+};
 
 const makePathAbsolute = (input: string) => {
   if (input.startsWith('./')) return input.slice(1);
@@ -71,6 +147,8 @@ export const build = async (
 
   const tsconfig = virtualFiles.find((file) => file.path === '/tsconfig.json');
 
+  const dependencyCache = new Map<string, string>();
+
   return composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
     virtualFiles,
@@ -112,10 +190,61 @@ export const build = async (
         name: 'Memory Dependency Loader',
         resolveId: {
           filter: {
-            id: [/^[\w@][\w./-]*$/],
+            id: [/^[\w@][\w./-]*$/, /^\.\.?\//],
           },
-          handler(id) {
-            return resolveFrom(nodePath, id);
+          handler(id, importer) {
+            // Skip blade/* imports - these are framework internals, not external CDN deps
+            if (id.startsWith('blade/')) {
+              try {
+                return resolveFrom(nodePath, id);
+              } catch (error) {
+                console.warn(
+                  `Failed to resolve ${id} from node_modules, falling back to default resolution`,
+                  error,
+                );
+                return null;
+              }
+            }
+
+            // Skip imports that look like rolldown-generated chunk files (contain hash patterns like -BYv80wED)
+            // These are internal framework chunks, not npm packages
+            if (/-[A-Za-z0-9_-]{8,}\.js$/.test(id)) return null;
+
+            // If the importer is a CDN module, resolve relative to it
+            if (importer?.startsWith('cdn:')) {
+              const importerUrl =
+                dependencyCache.get(importer) || importer.replace('cdn:', '');
+              const resolvedUrl = resolveImportPath(id, importerUrl);
+              return `cdn:${resolvedUrl}`;
+            }
+
+            // Only resolve bare imports that look like actual npm packages
+            // npm package names: can start with @ (scoped), or letter, contain letters/numbers/-/_
+            // Reject if it looks like an internal chunk (has .js extension without /node_modules/)
+            if (id.endsWith('.js') && !id.includes('/')) return null;
+
+            // For bare imports from virtual files that look like npm packages, resolve from unpkg
+            const resolvedUrl = resolveImportPath(id, 'https://unpkg.com/');
+            return `cdn:${resolvedUrl}`;
+          },
+        },
+        load: {
+          filter: {
+            id: /^cdn:/,
+          },
+          async handler(id) {
+            const url = id.replace('cdn:', '');
+
+            const result = await fetchFromCDN(url);
+            if (!result) throw new Error(`Failed to fetch dependency: ${url}`);
+
+            // Store the final URL (after redirects) for future relative imports
+            dependencyCache.set(id, result.finalUrl);
+
+            return {
+              code: result.content,
+              moduleType: detectModuleType(result.finalUrl),
+            };
           },
         },
       },

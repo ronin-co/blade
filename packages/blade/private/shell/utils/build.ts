@@ -61,6 +61,7 @@ export const composeBuildContext = async (
 
     plugins?: Array<RolldownPlugin>;
     virtualFiles?: Array<VirtualFileItem>;
+    external?: Array<string | RegExp>;
   },
 ): Promise<{
   rebuild: () => Promise<RolldownOutput>;
@@ -114,16 +115,20 @@ export const composeBuildContext = async (
       // so we provide the resolving logic ourselves as a plugin from the outside.
       modules: options?.virtualFiles ? undefined : [nodePath],
 
-      // When linking the framework package, Rolldown doesn't recognize these dependencies
-      // correctly, so we have to alias them explicitly.
+      // Always alias React to ensure single instance, even with virtual files
       alias: {
         react: path.join(nodePath, 'react'),
         'react-dom': path.join(nodePath, 'react-dom'),
+        'react/jsx-runtime': path.join(nodePath, 'react', 'jsx-runtime'),
+        'react-dom/client': path.join(nodePath, 'react-dom', 'client'),
+        'react-dom/server': path.join(nodePath, 'react-dom', 'server'),
+        'react-dom/server.edge': path.join(nodePath, 'react-dom', 'server.edge'),
       },
     },
 
     external: [
       ...(packageMetaContent?.blade?.external || []),
+      ...(options?.external || []),
 
       // These dependencies cannot be inlined, since they make use of native modules.
       'hive/node-driver',
