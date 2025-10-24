@@ -81,6 +81,39 @@ const fetchFromCDN = async (
   }
 };
 
+/**
+ * Set of dependencies that should not be fetched from CDN.
+ * These are resolved from local node_modules via aliases.
+ */
+const EXCLUDED_DEPENDENCIES = new Set([
+  'react',
+  'react-dom',
+  'react-dom/client',
+  'react-dom/server.edge',
+  'react-dom/server',
+  'react/jsx-dev-runtime',
+  'react/jsx-runtime',
+]);
+
+/**
+ * Checks if an import ID or importer path is from an excluded dependency.
+ *
+ * @param id - The import ID or importer path to check.
+ *
+ * @returns True if the ID is from an excluded dependency.
+ */
+const isExcludedDependency = (id: string): boolean => {
+  if (EXCLUDED_DEPENDENCIES.has(id)) return true;
+
+  for (const excluded of EXCLUDED_DEPENDENCIES) {
+    if (id.startsWith(`${excluded}/`)) return true;
+    // Check if path contains the excluded dependency (handles node_modules paths)
+    if (id.includes(`/${excluded}/`) || id.includes(`\\${excluded}\\`)) return true;
+  }
+
+  return false;
+};
+
 const makePathAbsolute = (input: string) => {
   if (input.startsWith('./')) return input.slice(1);
   if (input.startsWith('/')) return input;
@@ -206,9 +239,21 @@ export const build = async (
               }
             }
 
+            // Skip excluded dependencies (React, etc.) - these are resolved via aliases from node_modules
+            if (isExcludedDependency(id)) return null;
+
             // Skip imports that look like rolldown-generated chunk files (contain hash patterns like -BYv80wED)
             // These are internal framework chunks, not npm packages
             if (/-[A-Za-z0-9_-]{8,}\.js$/.test(id)) return null;
+
+            // Skip relative imports from excluded dependencies (e.g., React's internal ./cjs/... imports)
+            // These should be resolved normally by Rolldown from node_modules
+            if (
+              importer &&
+              (id.startsWith('./') || id.startsWith('../')) &&
+              isExcludedDependency(importer)
+            )
+              return null;
 
             // If the importer is a CDN module, resolve relative to it
             if (importer?.startsWith('cdn:')) {
