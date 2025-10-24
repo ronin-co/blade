@@ -5,7 +5,7 @@ import { aliasPlugin } from 'rolldown/experimental';
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
 
-const dependencyCache = new Map<string, string>();
+const DEPENDENCY_CACHE = new Map<string, string>();
 
 /**
  * Resolves a relative or absolute import path relative to a CDN URL.
@@ -54,8 +54,8 @@ const fetchFromCDN = async (
   finalUrl: string;
 } | null> => {
   try {
-    if (dependencyCache.has(url))
-      return { content: dependencyCache.get(url)!, finalUrl: url };
+    if (DEPENDENCY_CACHE.has(url))
+      return { content: DEPENDENCY_CACHE.get(url)!, finalUrl: url };
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -67,8 +67,8 @@ const fetchFromCDN = async (
     const finalUrl = response.url;
     const content = await response.text();
 
-    dependencyCache.set(url, content);
-    dependencyCache.set(finalUrl, content);
+    DEPENDENCY_CACHE.set(url, content);
+    DEPENDENCY_CACHE.set(finalUrl, content);
 
     return {
       content,
@@ -248,7 +248,7 @@ export const build = async (
             // If the importer is a CDN module, resolve relative to it
             if (importer?.startsWith('cdn:')) {
               const importerUrl =
-                dependencyCache.get(importer) || importer.replace('cdn:', '');
+                DEPENDENCY_CACHE.get(importer) || importer.replace('cdn:', '');
               const resolvedUrl = resolveImportPath(id, importerUrl);
               return `cdn:${resolvedUrl}`;
             }
@@ -272,7 +272,7 @@ export const build = async (
             const result = await fetchFromCDN(url);
             if (!result) throw new Error(`Failed to fetch dependency: ${url}`);
 
-            dependencyCache.set(id, result.finalUrl);
+            DEPENDENCY_CACHE.set(id, result.finalUrl);
 
             return {
               code: result.content,
