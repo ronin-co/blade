@@ -126,7 +126,7 @@ await add.account.with({
   <Input type="email" name="email" placeholder="Email" />
   <Input type="password" name="password" placeholder="Password" />
 
-  <button type="submit">Sign Up</button>
+  <button>Sign Up</button>
 </Form>
 ```
 
@@ -139,15 +139,46 @@ logged-in area of the app.
 This button should trigger the following query, which validates the email verification
 token and logs the user in by creating a session.
 
-No form is available for this action, because there are no visible inputs to fill.
-
 #### Query
 
 ```ts
 const { searchParams } = useLocation();
-const emailVerificationToken = searchParams.get('token');
+const token = searchParams.get('token');
 
-await add.session.with.account({ emailVerificationToken });
+await add.session.with.account({ emailVerificationToken: token });
+```
+
+#### Form
+
+```tsx
+const { searchParams } = useLocation();
+const token = searchParams.get('token');
+
+<Form model="session">
+  <Input type="hidden" name="account.emailVerificationToken" value={token} />
+  <button>Get Started</button>
+</Form>
+```
+
+### Resending Verification
+
+If a user lost the verification email that you sent them during signup and is therefore
+stuck, you can send another verification email to make sure they can complete their
+signup and join your application.
+
+#### Query
+
+```ts
+await set.account.to({ emailVerificationSentAt: new Date() });
+```
+
+#### Form
+
+```tsx
+<Form model="account" set>
+  <Input type="hidden" name="emailVerificationSentAt" value={new Date()} />
+  <button>Resend Email</button>
+</Form>
 ```
 
 ### Logging In
@@ -173,7 +204,7 @@ await add.session.with.account({
   <Input type="email" name="account.email" placeholder="Email" />
   <Input type="password" name="account.password" placeholder="Password" />
 
-  <button type="submit">Log In</button>
+  <button>Log In</button>
 </Form>
 ```
 
@@ -181,10 +212,18 @@ await add.session.with.account({
 
 This query will automatically revoke the `session` cookie.
 
-No form is available for this action, because there are no visible inputs to fill.
+#### Query
 
 ```ts
 await remove.session();
+```
+
+#### Form
+
+```tsx
+<Form model="session" remove>
+  <button>Log Out</button>
+</Form>
 ```
 
 ### Forgot Password
@@ -207,7 +246,7 @@ await set.account({
   <Input type="email" name="email" placeholder="Email" target />
   <Input type="hidden" name="password" value={null} />
 
-  <button type="submit">Send Confirmation</button>
+  <button>Send Confirmation</button>
 </Form>
 ```
 
@@ -241,11 +280,34 @@ const account = use.account.with({ emailVerificationToken });
     <Input type="hidden" name="email" value={account.email} />
     <Input type="password" name="password" placeholder="New Password" />
 
-    <button type="submit">Change Password</button>
+    <button>Change Password</button>
   </Form>
 ) : (
   <span>Your link has expired</span>
 )}
+```
+
+### Canceling Signup
+
+If a user changes their mind and wants to reverse their account creation before verifying
+their email address (which might happen because they realized that the email address they
+entered was wrong, for example), you can let them cancel the signup and thereby clean up
+their unverified account.
+
+The same query can be used to delete the currently logged-in account.
+
+#### Query
+
+```ts
+await remove.account();
+```
+
+#### Form
+
+```tsx
+<Form model="account" remove>
+  <button>Delete Account</button>
+</Form>
 ```
 
 ## Utility Functions

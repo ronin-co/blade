@@ -15,6 +15,7 @@ import type {
   FollowingAddTrigger,
   FollowingSetTrigger,
   GetTrigger,
+  RemoveTrigger,
   SetTrigger,
 } from 'blade/types';
 
@@ -27,7 +28,7 @@ import {
 } from '@/utils/index';
 
 const primeId: GetTrigger = async (query, _multiple, options) => {
-  if (query.with) return query;
+  if (Object.keys(query.with || {}).length > 0) return query;
   query.with = {};
 
   const accountId =
@@ -64,8 +65,10 @@ export const add: AddTrigger = async (query, _multiple, options) => {
   return query;
 };
 
-export const set: SetTrigger = async (query, _multiple, options) => {
+export const set: SetTrigger = async (query, multiple, options) => {
   const { get } = options.client;
+
+  await primeId(query, multiple, options);
 
   if (!query.with) throw new Error('A `with` instruction must be given.');
   if (!query.to) throw new Error('A `to` instruction must be given.');
@@ -255,6 +258,20 @@ export const set: SetTrigger = async (query, _multiple, options) => {
   return query;
 };
 
+export const remove: RemoveTrigger = async (query, multiple, options) => {
+  await primeId(query, multiple, options);
+
+  // Only allow for deleting accounts whose email isn't verified.
+  //
+  // @ts-expect-error The function above guarantees the higher props to exist.
+  query.with.emailVerified = false;
+
+  // If an `account` cookie is available from the signup, remove it now.
+  if (options.cookies.account) options.setCookie('account', null);
+
+  return query;
+};
+
 export const followingAdd: FollowingAddTrigger<Accounts> = async (
   _query,
   _multipleRecords,
@@ -290,7 +307,7 @@ export const followingSet: FollowingSetTrigger<Accounts> = async (
   for (const account of accounts) {
     await AUTH_CONFIG?.sendEmail?.({
       account,
-      type: operation,
+      type: operation === 'EMAIL_VERIFICATION_RESEND' ? 'ACCOUNT_CREATION' : operation,
       token: emailVerificationToken,
       options,
     });

@@ -52,7 +52,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   options,
 ) => {
   const { token, database, stream } = options;
-  const key = `${token || 'local'}${stream ? `-${stream}` : ''}`;
+  const key = `${token || 'local'}${stream ? '-stream' : ''}`;
 
   if (!clients[key]) {
     // If a token is available, initiate a connection to the remote storage.
@@ -60,7 +60,11 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
       const prefix = stream ? 'db-leader' : 'db';
 
       clients[key] = new Hive({
-        storage: new RemoteStorage({ remote: `https://${prefix}.ronin.co/api`, token }),
+        storage: new RemoteStorage({
+          remote: `https://${prefix}.ronin.co/api`,
+          token,
+          transport: stream ? 'ws' : 'http',
+        }),
       });
     }
     // If no token is available, we must try to initialize disk storage.

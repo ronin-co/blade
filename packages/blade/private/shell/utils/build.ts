@@ -146,13 +146,15 @@ export const composeBuildContext = async (
       ...(options?.plugins || []),
     ],
 
-    define: composeEnvironmentVariables({
-      isLoggingQueries: options?.logQueries || false,
-      enableServiceWorker: options?.enableServiceWorker || false,
-      assetPrefix: options?.assetPrefix || null,
-      provider,
-      environment,
-    }),
+    transform: {
+      define: composeEnvironmentVariables({
+        isLoggingQueries: options?.logQueries || false,
+        enableServiceWorker: options?.enableServiceWorker || false,
+        assetPrefix: options?.assetPrefix || null,
+        provider,
+        environment,
+      }),
+    },
   });
 
   return {

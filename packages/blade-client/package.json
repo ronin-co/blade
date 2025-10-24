@@ -1,6 +1,6 @@
 {
   "name": "blade-client",
-  "version": "3.25.1",
+  "version": "3.27.2",
   "type": "module",
   "description": "Access your RONIN database via TypeScript.",
   "main": "./dist/index.js",
@@ -61,14 +61,12 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
-    "hive": "2.1.8"
+    "hive": "2.1.10"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.4",
     "blade-compiler": "workspace:*",
-    "blade-syntax": "workspace:*",
-    "tsdown": "0.15.5",
-    "typescript": "5.8.3"
+    "blade-syntax": "workspace:*"
   }
 }

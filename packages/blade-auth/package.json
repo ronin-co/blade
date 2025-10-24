@@ -1,6 +1,6 @@
 {
   "name": "blade-auth",
-  "version": "3.25.1",
+  "version": "3.27.2",
   "type": "module",
   "description": "Easily set up auth for Blade apps",
   "repository": {
@@ -44,8 +44,6 @@
   "author": "ronin",
   "license": "Apache-2.0",
   "devDependencies": {
-    "better-auth": "1.3.27",
-    "tsdown": "0.15.5",
-    "typescript": "5.8.3"
+    "better-auth": "1.3.27"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.25.1",
+  "version": "3.27.2",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -130,13 +130,13 @@
     "@dprint/typescript": "0.95.11",
     "@inquirer/prompts": "7.8.6",
     "@stefanprobst/rehype-extract-toc": "3.0.0",
-    "@tailwindcss/node": "4.1.6",
-    "@tailwindcss/oxide": "4.1.6",
+    "@tailwindcss/node": "4.1.16",
+    "@tailwindcss/oxide": "4.1.16",
     "dotenv": "16.5.0",
     "gradient-string": "3.0.0",
-    "hive": "2.1.8",
+    "hive": "2.1.10",
     "resolve-from": "5.0.0",
-    "rolldown": "1.0.0-beta.41"
+    "rolldown": "1.0.0-beta.44"
   },
   "devDependencies": {
     "@hono/node-server": "1.14.4",
@@ -171,8 +171,6 @@
     "ora": "8.1.0",
     "radash": "12.1.0",
     "serialize-error": "11.0.3",
-    "tsdown": "0.15.5",
-    "typescript": "5.6.2",
     "ua-parser-js": "1.0.39",
     "vitest": "3.1.2"
   }

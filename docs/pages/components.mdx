@@ -74,7 +74,7 @@ import { Form, Input } from 'blade/components';
   <Input type="text" name="email" placeholder="Email" />
   <Input type="text" name="password" placeholder="Password" />
 
-  <button type="submit">Submit</button>
+  <button>Submit</button>
 </Form>
 ```
 
@@ -101,7 +101,7 @@ To avoid changing the page after the form submission, simply leave out the `redi
 ### Updating Records
 
 To address an existing record using the `Form` component instead of creating a new one,
-you can pass a `targetRecord` prop with field values that should be used to resolve the
+you can pass a `set` prop with field values that should be used to resolve the
 existing record, before that record will then be updated automatically.
 
 ```tsx
@@ -109,9 +109,9 @@ const { account } = use.session.using(['account']);
 const { email } = account;
 // ^ elaine@site.co
 
-<Form model="account" targetRecord={{ email: account.email }}>
+<Form model="account" set={{ email: account.email }}>
   <Input type="text" name="password" placeholder="Password" />
-  <button type="submit">Submit</button>
+  <button>Submit</button>
 </Form>
 ```
 
@@ -125,9 +125,19 @@ set.account({
 });
 ```
 
-As you can see, all that the `targetRecord` prop does is switch the write query from
+As you can see, all that the `set` prop does is switch the write query from
 type "add" to type "set" and update
 its [query instructions](/queries/instructions) accordingly. That's it.
+
+### Deleting Records
+
+If you would like to remove the target record instead of [updating it](#updating-records),
+you can do so with the same syntax as shown above, except that you can then use a prop
+called `remove` instead of `set`.
+
+```tsx
+<Form model="account" remove={{ email: '...' }}>...</Form>
+```
 
 ### Sophisticated Layouts
 
@@ -178,9 +188,15 @@ have been downloaded.
   The slug (singular) of the [Blade model](/models) that should be addressed.
 </ParamField>
 
-<ParamField path="target" type="object">
+<ParamField path="set" type="object">
   An object containing fields and values that should be used to resolve an existing
   record, which will result in that record being updated. If the prop is omitted, a new
+  record will be created instead.
+</ParamField>
+
+<ParamField path="remove" type="object">
+  An object containing fields and values that should be used to resolve an existing
+  record, which will result in that record being removed. If the prop is omitted, a new
   record will be created instead.
 </ParamField>
 

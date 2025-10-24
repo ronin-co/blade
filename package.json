@@ -16,9 +16,8 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/node": "24.0.4",
-    "turbo": "2.5.8"
-  },
-  "overrides": {
-    "rollup-plugin-dts": "^0.16.8"
+    "tsdown": "0.15.9",
+    "turbo": "2.5.8",
+    "typescript": "5.9.3"
   }
 }

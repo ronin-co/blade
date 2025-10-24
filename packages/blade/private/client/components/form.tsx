@@ -1,8 +1,8 @@
 import type { ModelField } from 'blade-compiler';
 import { assign, construct, dash } from 'radash';
 import {
+  type FormHTMLAttributes,
   type FunctionComponent,
-  type PropsWithChildren,
   createContext,
   useEffect,
   useRef,
@@ -135,12 +135,9 @@ type RegisteredProperty = {
 type CtxArg = FormContextValue | null;
 export const FormContext: React.Context<CtxArg> = createContext<CtxArg>(null);
 
-interface FormProps extends PropsWithChildren {
-  /**
-   * Fields for matching a target record that should be modified. If not provided, a new
-   * record will be created.
-   */
-  target?: Record<string, unknown> & Partial<ResultRecord>;
+type TargetRecord = Record<string, unknown> & Partial<ResultRecord>;
+
+interface FormProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onError'> {
   /** The slug (singular) of the affected Blade model. */
   model: string;
   /** Called once the queries of the form have been executed successfully. */
@@ -224,6 +221,16 @@ interface FormProps extends PropsWithChildren {
   newRecordSlug?: 'new';
   /** Disable the automatic creation of a `<form>` element. */
   noElement?: boolean;
+  /**
+   * Fields for matching a target record that should be modified. If not provided, a new
+   * record will be created.
+   */
+  set?: TargetRecord | boolean;
+  /**
+   * Fields for matching a target record that should be removed. If not provided, a new
+   * record will be created.
+   */
+  remove?: TargetRecord | boolean;
 }
 
 interface Result {
@@ -233,7 +240,6 @@ interface Result {
 }
 
 const Form: FunctionComponent<FormProps> = ({
-  target,
   model,
   clearOnSuccess = false,
   children,
@@ -248,9 +254,12 @@ const Form: FunctionComponent<FormProps> = ({
   excludeEmptyFields,
   newRecordSlug,
   noElement,
+  set: shouldSet,
+  remove: shouldRemove,
+  ...rest
 }) => {
   const forms = useRef<Record<string, HTMLFormElement>>({});
-  const { set, add } = useMutation();
+  const { set, add, remove } = useMutation();
   const { pathname } = useLocation();
   const params = useParams();
   const populatePathname = usePopulatePathname();
@@ -305,10 +314,20 @@ const Form: FunctionComponent<FormProps> = ({
         // to resolve the target record, instead of storing the value in the record.
         else if (key.startsWith(FORM_TARGET_PREFIX)) {
           const newKey = key.replace(FORM_TARGET_PREFIX, '');
-          const expandable = { [newKey]: value };
+          const expanded = construct({ [newKey]: value });
 
           // Deeply merge both objects.
-          target = assign(target || {}, construct(expandable)) as typeof target;
+          if (shouldRemove) {
+            shouldRemove = assign(
+              typeof shouldRemove === 'object' ? shouldRemove : {},
+              expanded,
+            ) as typeof shouldRemove;
+          } else {
+            shouldSet = assign(
+              typeof shouldSet === 'object' ? shouldSet : {},
+              expanded,
+            ) as typeof shouldSet;
+          }
         } else {
           values[key] = value;
         }
@@ -463,11 +482,19 @@ const Form: FunctionComponent<FormProps> = ({
         database,
       };
 
-      if (target) {
+      if (shouldSet) {
         result = await set[model](
           {
-            with: target,
+            with: typeof shouldSet === 'object' ? shouldSet : {},
             to: valuesNormalized,
+            using: including,
+          },
+          queryOptions,
+        );
+      } else if (shouldRemove) {
+        result = await remove[model](
+          {
+            with: typeof shouldRemove === 'object' ? shouldRemove : {},
             using: including,
           },
           queryOptions,
@@ -541,10 +568,16 @@ const Form: FunctionComponent<FormProps> = ({
     registeredRedirect.current = redirect || null;
   }, [redirect]);
 
+  const key = [
+    model,
+    typeof shouldSet === 'object' ? JSON.stringify(shouldSet) : '',
+    typeof shouldRemove === 'object' ? JSON.stringify(shouldRemove) : '',
+  ].join('');
+
   return (
     <FormContext.Provider
       value={{
-        key: `${model}${target?.id ? `_${target.id}` : ''}`,
+        key,
 
         waiting,
         disabled,
@@ -564,7 +597,7 @@ const Form: FunctionComponent<FormProps> = ({
         registerForm,
         unregisterForm,
       }}>
-      {noElement ? children : <FormElement>{children}</FormElement>}
+      {noElement ? children : <FormElement {...rest}>{children}</FormElement>}
     </FormContext.Provider>
   );
 };

@@ -1,6 +1,6 @@
 {
   "name": "blade-syntax",
-  "version": "3.25.1",
+  "version": "3.27.2",
   "type": "module",
   "description": "Allows for defining RONIN queries and schemas in code.",
   "files": [
@@ -40,8 +40,6 @@
     "@biomejs/biome": "1.9.4",
     "@types/bun": "1.2.4",
     "blade-compiler": "workspace:*",
-    "expect-type": "1.2.0",
-    "tsdown": "0.15.5",
-    "typescript": "5.8.2"
+    "expect-type": "1.2.0"
   }
 }
