@@ -115,14 +115,11 @@ export const composeBuildContext = async (
       // so we provide the resolving logic ourselves as a plugin from the outside.
       modules: options?.virtualFiles ? undefined : [nodePath],
 
-      // Always alias React to ensure single instance, even with virtual files
+      // When linking the framework package, Rolldown doesn't recognize these dependencies
+      // correctly, so we have to alias them explicitly.
       alias: {
         react: path.join(nodePath, 'react'),
         'react-dom': path.join(nodePath, 'react-dom'),
-        'react/jsx-runtime': path.join(nodePath, 'react', 'jsx-runtime'),
-        'react-dom/client': path.join(nodePath, 'react-dom', 'client'),
-        'react-dom/server': path.join(nodePath, 'react-dom', 'server'),
-        'react-dom/server.edge': path.join(nodePath, 'react-dom', 'server.edge'),
       },
     },
 

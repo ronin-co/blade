@@ -1,10 +1,9 @@
 import path from 'node:path';
-// import resolveFrom from 'resolve-from';
+import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
 import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils/build';
-import resolveFrom from 'resolve-from';
 
 const dependencyCache = new Map<string, string>();
 
@@ -17,17 +16,12 @@ const dependencyCache = new Map<string, string>();
  * @returns The resolved absolute URL.
  */
 const resolveImportPath = (importPath: string, baseUrl: string): string => {
-  // If it's already a full URL, return as-is
-  if (importPath.startsWith('http://') || importPath.startsWith('https://')) {
+  if (importPath.startsWith('http://') || importPath.startsWith('https://'))
     return importPath;
-  }
 
-  // For relative imports, resolve against the base URL
-  if (importPath.startsWith('./') || importPath.startsWith('../')) {
+  if (importPath.startsWith('./') || importPath.startsWith('../'))
     return new URL(importPath, baseUrl).href;
-  }
 
-  // For bare imports (package names), resolve from unpkg
   return `https://unpkg.com/${importPath}`;
 };
 
@@ -55,11 +49,13 @@ const detectModuleType = (url: string): 'js' | 'jsx' | 'ts' | 'tsx' => {
  */
 const fetchFromCDN = async (
   url: string,
-): Promise<{ content: string; finalUrl: string } | null> => {
+): Promise<{
+  content: string;
+  finalUrl: string;
+} | null> => {
   try {
-    if (dependencyCache.has(url)) {
+    if (dependencyCache.has(url))
       return { content: dependencyCache.get(url)!, finalUrl: url };
-    }
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -74,7 +70,10 @@ const fetchFromCDN = async (
     dependencyCache.set(url, content);
     dependencyCache.set(finalUrl, content);
 
-    return { content, finalUrl };
+    return {
+      content,
+      finalUrl,
+    };
   } catch (error) {
     console.warn(`Error fetching ${url} from CDN:`, error);
     return null;
@@ -85,15 +84,7 @@ const fetchFromCDN = async (
  * Set of dependencies that should not be fetched from CDN.
  * These are resolved from local node_modules via aliases.
  */
-const EXCLUDED_DEPENDENCIES = new Set([
-  'react',
-  'react-dom',
-  'react-dom/client',
-  'react-dom/server.edge',
-  'react-dom/server',
-  'react/jsx-dev-runtime',
-  'react/jsx-runtime',
-]);
+const EXCLUDED_DEPENDENCIES = new Set(['react', 'react-dom']);
 
 /**
  * Checks if an import ID or importer path is from an excluded dependency.
@@ -107,6 +98,7 @@ const isExcludedDependency = (id: string): boolean => {
 
   for (const excluded of EXCLUDED_DEPENDENCIES) {
     if (id.startsWith(`${excluded}/`)) return true;
+
     // Check if path contains the excluded dependency (handles node_modules paths)
     if (id.includes(`/${excluded}/`) || id.includes(`\\${excluded}\\`)) return true;
   }
@@ -179,8 +171,6 @@ export const build = async (
   });
 
   const tsconfig = virtualFiles.find((file) => file.path === '/tsconfig.json');
-
-  const dependencyCache = new Map<string, string>();
 
   return composeBuildContext(environment, {
     // Normalize file paths, so that all of them are absolute.
@@ -268,7 +258,6 @@ export const build = async (
             // Reject if it looks like an internal chunk (has .js extension without /node_modules/)
             if (id.endsWith('.js') && !id.includes('/')) return null;
 
-            // For bare imports from virtual files that look like npm packages, resolve from unpkg
             const resolvedUrl = resolveImportPath(id, 'https://unpkg.com/');
             return `cdn:${resolvedUrl}`;
           },
@@ -283,7 +272,6 @@ export const build = async (
             const result = await fetchFromCDN(url);
             if (!result) throw new Error(`Failed to fetch dependency: ${url}`);
 
-            // Store the final URL (after redirects) for future relative imports
             dependencyCache.set(id, result.finalUrl);
 
             return {
