@@ -100,7 +100,7 @@ const Root = ({ children, serverContext }: RootProps) => {
                 <link
                   key="shared"
                   // High priority fetching.
-                  rel="preload"
+                  rel="modulepreload"
                   href={source}
                   as="script"
                 />
