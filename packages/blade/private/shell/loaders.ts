@@ -1,22 +1,13 @@
-import { cp, readFile } from 'node:fs/promises';
+import { cp } from 'node:fs/promises';
 import path from 'node:path';
 import { compile } from '@mdx-js/mdx';
 import withToc from '@stefanprobst/rehype-extract-toc';
 import withTocExport from '@stefanprobst/rehype-extract-toc/mdx';
-import {
-  compile as compileTailwind,
-  optimize as optimizeTailwind,
-} from '@tailwindcss/node';
-import { Scanner as TailwindScanner } from '@tailwindcss/oxide';
 import YAML from 'js-yaml';
 import MagicString from 'magic-string';
 import type { Plugin as RolldownPlugin } from 'rolldown';
 
-import {
-  publicOutputDirectory,
-  routerInputFile,
-  styleInputFile,
-} from '@/private/shell/constants';
+import { publicOutputDirectory, routerInputFile } from '@/private/shell/constants';
 import {
   type ExportItem,
   type TotalFileList,
@@ -285,76 +276,5 @@ export const getProviderLoader = (
         break;
       }
     }
-  },
-});
-
-export const getTailwindLoader = (
-  environment: 'development' | 'production',
-): RolldownPlugin => {
-  let compiler: Awaited<ReturnType<typeof compileTailwind>>;
-  let candidates: Array<string> = [];
-
-  const scanner = new TailwindScanner({});
-
-  return {
-    name: 'Tailwind CSS Loader',
-    async buildStart() {
-      let input = `@import 'tailwindcss';`;
-
-      // Always reading the file and handling the error if the file doesn't exist is
-      // faster than first checking if the file exists.
-      try {
-        input = await readFile(styleInputFile, 'utf8');
-      } catch (err) {
-        if ((err as { code: string }).code !== 'ENOENT') throw err;
-      }
-
-      compiler = await compileTailwind(input, {
-        onDependency(_path) {},
-        base: process.cwd(),
-      });
-
-      candidates = [];
-    },
-    transform: {
-      filter: {
-        id: /\.(tsx|jsx)$/,
-      },
-      async handler(content, filePath) {
-        const extension = path.extname(filePath).slice(1); // "tsx" | "jsx"
-        const newCandidates = scanner.getCandidatesWithPositions({ content, extension });
-
-        candidates.push(...newCandidates.map((item) => item.candidate));
-      },
-    },
-    generateBundle() {
-      let source = compiler.build(candidates);
-
-      if (environment === 'production') {
-        source = optimizeTailwind(source, { minify: true }).code;
-      }
-
-      this.emitFile({ type: 'asset', source });
-    },
-  };
-};
-
-// TODO: Move this into a config file or plugin.
-//
-// This ensures that no unnecessary localizations are included in the client bundle,
-// which would otherwise increase the bundle size.
-//
-// https://github.com/adobe/react-spectrum/blob/1dcc8705115364a2c2ead2ececae8883dd6e9d07/packages/dev/optimize-locales-plugin/LocalesPlugin.js
-export const getReactAriaLoader = (): RolldownPlugin => ({
-  name: 'React Aria Loader',
-  load: {
-    filter: {
-      id: /(?:^|\/)(@react-stately|@react-aria|@react-spectrum|react-aria-components)\/[^/]+\/[A-Za-z]{2}-[A-Za-z]{2}\.m?js$/,
-    },
-    handler(id) {
-      const { name } = path.parse(id);
-      if (name === 'en-US') return readFile(id, 'utf8');
-      return 'const removedLocale = undefined;\nexport default removedLocale;';
-    },
   },
 });

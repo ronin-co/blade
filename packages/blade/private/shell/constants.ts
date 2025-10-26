@@ -19,7 +19,6 @@ export const packageMetaFilename = resolve(process.cwd(), 'package.json');
 // The path at which people can define a custom Hono app that Blade will mount.
 export const routerInputFile = join(process.cwd(), 'router.ts');
 
-export const styleInputFile = join(process.cwd(), 'styles.css');
 export const clientInputFile = join(sourceDirPath, 'private/client/index.js');
 
 export const serverInputFolder = join(sourceDirPath, 'private/server/worker/providers');

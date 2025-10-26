@@ -20,8 +20,6 @@ import {
   getFileListLoader,
   getMdxLoader,
   getProviderLoader,
-  getReactAriaLoader,
-  getTailwindLoader,
 } from '@/private/shell/loaders';
 import { composeEnvironmentVariables, exists } from '@/private/shell/utils';
 import { getProvider } from '@/private/shell/utils/providers';
@@ -134,9 +132,7 @@ export const composeBuildContext = async (
     plugins: [
       getFileListLoader(options?.virtualFiles),
       getMdxLoader(environment),
-      getReactAriaLoader(),
       getClientReferenceLoader(),
-      getTailwindLoader(environment),
       getProviderLoader(environment, provider),
       ...(options?.plugins || []),
     ],
