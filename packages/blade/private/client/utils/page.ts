@@ -275,5 +275,5 @@ export const mountNewBundle = async (bundleId: string, newMarkup: string) => {
   }
 
   // Print debugging information.
-  console.debug('Mounted new client bundles');
+  console.debug('Updated client bundles');
 };
