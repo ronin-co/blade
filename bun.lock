@@ -13,7 +13,7 @@
     },
     "packages/blade": {
       "name": "blade",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "bin": {
         "blade": "./dist/private/shell/index.js",
       },
@@ -25,7 +25,7 @@
         "@tailwindcss/oxide": "4.1.16",
         "dotenv": "16.5.0",
         "gradient-string": "3.0.0",
-        "hive": "2.1.10",
+        "hive": "2.1.12",
         "resolve-from": "5.0.0",
         "rolldown": "1.0.0-beta.44",
       },
@@ -68,20 +68,20 @@
     },
     "packages/blade-auth": {
       "name": "blade-auth",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "devDependencies": {
         "better-auth": "1.3.27",
       },
     },
     "packages/blade-cli": {
       "name": "blade-cli",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "dependencies": {
         "@dprint/formatter": "0.4.1",
         "@dprint/typescript": "0.93.3",
         "@inquirer/prompts": "7.2.3",
         "chalk-template": "1.1.0",
-        "hive": "2.1.10",
+        "hive": "2.1.12",
         "json5": "2.2.3",
         "ora": "8.1.1",
       },
@@ -97,9 +97,9 @@
     },
     "packages/blade-client": {
       "name": "blade-client",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "dependencies": {
-        "hive": "2.1.10",
+        "hive": "2.1.12",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -110,7 +110,7 @@
     },
     "packages/blade-codegen": {
       "name": "blade-codegen",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "dependencies": {
         "typescript": "5.7.3",
       },
@@ -123,17 +123,17 @@
     },
     "packages/blade-compiler": {
       "name": "blade-compiler",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
-        "hive": "2.1.10",
+        "hive": "2.1.12",
         "title": "4.0.1",
       },
     },
     "packages/blade-syntax": {
       "name": "blade-syntax",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
@@ -143,7 +143,7 @@
     },
     "packages/create-blade": {
       "name": "create-blade",
-      "version": "3.27.0",
+      "version": "3.27.4",
       "bin": {
         "create-blade": "./dist/index.js",
       },
@@ -718,7 +718,7 @@
 
     "hast-util-whitespace": ["hast-util-whitespace@3.0.0", "", { "dependencies": { "@types/hast": "^3.0.0" } }, "sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw=="],
 
-    "hive": ["hive@2.1.10", "", { "dependencies": { "hono": "4.10.2", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-9Bwag0/LGEkc9tEqQU3lujHQ/ckrLBG7hZ+E7I8ogaQ6h238HECqwPnI6dXlsusjjV0HKgDp+DjeYvY5WRT5Yw=="],
+    "hive": ["hive@2.1.12", "", { "dependencies": { "hono": "4.10.2", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-94PqyqYb5m07RC3j1C5KfvQu+eBeqxgSGsOdOh4sCDWnDxhyKChZh9u0CuG3hiq8tlwVpwfZ+czJ7/3uoI0wSg=="],
 
     "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
 
@@ -1186,7 +1186,7 @@
 
     "gradient-string/chalk": ["chalk@5.4.1", "", {}, "sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w=="],
 
-    "hive/@types/bun": ["@types/bun@1.3.0", "", { "dependencies": { "bun-types": "1.3.0" } }, "sha512-+lAGCYjXjip2qY375xX/scJeVRmZ5cY0wyHYyCYxNcdEXrQ4AOe3gACgd4iQ8ksOslJtW4VNxBJ8llUwc3a6AA=="],
+    "hive/@types/bun": ["@types/bun@1.3.1", "", { "dependencies": { "bun-types": "1.3.1" } }, "sha512-4jNMk2/K9YJtfqwoAa28c8wK+T7nvJFOjxI4h/7sORWcypRNxBpr+TPNaCfVWq70tLCJsqoFwcf0oI0JU/fvMQ=="],
 
     "hive/hono": ["hono@4.10.2", "", {}, "sha512-p6fyzl+mQo6uhESLxbF5WlBOAJMDh36PljwlKtP5V1v09NxlqGru3ShK+4wKhSuhuYf8qxMmrivHOa/M7q0sMg=="],
 
@@ -1242,7 +1242,7 @@
 
     "blade-syntax/@types/bun/bun-types": ["bun-types@1.2.4", "", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-nDPymR207ZZEoWD4AavvEaa/KZe/qlrbMSchqpQwovPZCKc7pwMoENjEtHgMKaAjJhy+x6vfqSBA1QU3bJgs0Q=="],
 
-    "hive/@types/bun/bun-types": ["bun-types@1.3.0", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-u8X0thhx+yJ0KmkxuEo9HAtdfgCBaM/aI9K90VQcQioAmkVp3SG3FkwWGibUFz3WdXAdcsqOcbU40lK7tbHdkQ=="],
+    "hive/@types/bun/bun-types": ["bun-types@1.3.1", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-NMrcy7smratanWJ2mMXdpatalovtxVggkj11bScuWuiOoXTiKIu2eVS1/7qbyI/4yHedtsn175n4Sm4JcdHLXw=="],
 
     "string-width-cjs/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
 
