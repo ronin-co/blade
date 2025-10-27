@@ -84,7 +84,7 @@ const fetchFromCDN = async (
  * Set of dependencies that should not be fetched from CDN.
  * These are resolved from local node_modules via aliases.
  */
-const EXCLUDED_DEPENDENCIES = new Set(['react', 'react-dom']);
+const EXCLUDED_DEPENDENCIES = new Set(['react', 'react-dom', 'scheduler']);
 
 /**
  * Checks if an import ID or importer path is from an excluded dependency.
