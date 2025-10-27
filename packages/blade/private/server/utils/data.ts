@@ -95,13 +95,13 @@ const models: Array<Model> = Object.values(schema['index.ts'] || {});
  * Generate the options passed to the query client.
  *
  * @param serverContext - A server context object.
- * @param requireTriggers - Determines which triggers are required to be present.
+ * @param headless - Whether the request came in from outside Blade.
  *
  * @returns Options that can be passed to the query client.
  */
 export const getClientConfig = (
   serverContext: ServerContext,
-  requireTriggers: 'all' | 'write' | 'none',
+  headless?: boolean,
 ): QueryHandlerOptions => {
   const options: Partial<NewTriggerOptions> = {
     cookies: serverContext.cookies,
@@ -132,9 +132,7 @@ export const getClientConfig = (
             // function, in order to avoid modifying the global object.
             const newOptions: Partial<NewTriggerOptions> = { ...options };
 
-            if (requireTriggers === 'all') {
-              // If all queries provided to the triggers stem from the same data source,
-              // we can explicitly set the headless property to `true` or `false`.
+            if (headless) {
               newOptions.headless = true;
             } else {
               const triggerNameSlug = triggerName.toLowerCase();
@@ -205,7 +203,6 @@ export const getClientConfig = (
 
   return {
     triggers: finalTriggers,
-    requireTriggers: requireTriggers === 'none' ? undefined : requireTriggers,
     waitUntil: serverContext.waitUntil,
     models,
     defaultRecordLimit: 20,
