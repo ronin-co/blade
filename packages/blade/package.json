@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.27.2",
+  "version": "3.27.5",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -134,7 +134,7 @@
     "@tailwindcss/oxide": "4.1.16",
     "dotenv": "16.5.0",
     "gradient-string": "3.0.0",
-    "hive": "2.1.10",
+    "hive": "2.1.12",
     "resolve-from": "5.0.0",
     "rolldown": "1.0.0-beta.44"
   },

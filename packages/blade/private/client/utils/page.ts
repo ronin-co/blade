@@ -32,7 +32,7 @@ const loadResource = async (bundleId: string, type: PreloadableAsset) => {
   return new Promise((resolve, reject) => {
     const link = document.createElement('link') as HTMLLinkElement;
 
-    link.rel = 'preload';
+    link.rel = extension === 'css' ? 'preload' : 'modulepreload';
     link.as = extension === 'css' ? 'style' : 'script';
     link.onload = resolve;
     link.onerror = reject;
@@ -275,5 +275,5 @@ export const mountNewBundle = async (bundleId: string, newMarkup: string) => {
   }
 
   // Print debugging information.
-  console.debug('Mounted new client bundles');
+  console.debug('Updated client bundles');
 };
