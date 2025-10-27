@@ -13,7 +13,7 @@
     },
     "packages/blade": {
       "name": "blade",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "bin": {
         "blade": "./dist/private/shell/index.js",
       },
@@ -25,7 +25,7 @@
         "@tailwindcss/oxide": "4.1.16",
         "dotenv": "16.5.0",
         "gradient-string": "3.0.0",
-        "hive": "2.1.12",
+        "hive": "2.1.13",
         "resolve-from": "5.0.0",
         "rolldown": "1.0.0-beta.44",
       },
@@ -68,20 +68,20 @@
     },
     "packages/blade-auth": {
       "name": "blade-auth",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "devDependencies": {
         "better-auth": "1.3.27",
       },
     },
     "packages/blade-cli": {
       "name": "blade-cli",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "dependencies": {
         "@dprint/formatter": "0.4.1",
         "@dprint/typescript": "0.93.3",
         "@inquirer/prompts": "7.2.3",
         "chalk-template": "1.1.0",
-        "hive": "2.1.12",
+        "hive": "2.1.13",
         "json5": "2.2.3",
         "ora": "8.1.1",
       },
@@ -97,9 +97,9 @@
     },
     "packages/blade-client": {
       "name": "blade-client",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "dependencies": {
-        "hive": "2.1.12",
+        "hive": "2.1.13",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -110,7 +110,7 @@
     },
     "packages/blade-codegen": {
       "name": "blade-codegen",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "dependencies": {
         "typescript": "5.7.3",
       },
@@ -123,17 +123,17 @@
     },
     "packages/blade-compiler": {
       "name": "blade-compiler",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.1.14",
-        "hive": "2.1.12",
+        "hive": "2.1.13",
         "title": "4.0.1",
       },
     },
     "packages/blade-syntax": {
       "name": "blade-syntax",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
         "@types/bun": "1.2.4",
@@ -143,7 +143,7 @@
     },
     "packages/create-blade": {
       "name": "create-blade",
-      "version": "3.27.4",
+      "version": "3.27.5",
       "bin": {
         "create-blade": "./dist/index.js",
       },
@@ -718,7 +718,7 @@
 
     "hast-util-whitespace": ["hast-util-whitespace@3.0.0", "", { "dependencies": { "@types/hast": "^3.0.0" } }, "sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw=="],
 
-    "hive": ["hive@2.1.12", "", { "dependencies": { "hono": "4.10.2", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-94PqyqYb5m07RC3j1C5KfvQu+eBeqxgSGsOdOh4sCDWnDxhyKChZh9u0CuG3hiq8tlwVpwfZ+czJ7/3uoI0wSg=="],
+    "hive": ["hive@2.1.13", "", { "dependencies": { "hono": "4.10.2", "zod": "4.1.12" }, "peerDependencies": { "@types/bun": "latest", "drizzle-orm": "0.44.5", "typescript": "5.9.2" } }, "sha512-/Q9I02E0QpLIZa7Cpy9zPMsoNGNugnFQ3jy5ODLN/n8Bf1L67HUB9MpKQ636/dimQfiljv6qQZ5NBM+xR8V0Lg=="],
 
     "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
 
