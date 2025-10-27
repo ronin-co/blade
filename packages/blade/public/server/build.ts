@@ -55,7 +55,10 @@ const fetchFromCDN = async (
 } | null> => {
   try {
     if (DEPENDENCY_CACHE.has(url))
-      return { content: DEPENDENCY_CACHE.get(url)!, finalUrl: url };
+      return {
+        content: DEPENDENCY_CACHE.get(url)!,
+        finalUrl: url,
+      };
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -63,7 +66,6 @@ const fetchFromCDN = async (
       return null;
     }
 
-    // Get the final URL after redirects (unpkg redirects to versioned URLs)
     const finalUrl = response.url;
     const content = await response.text();
 
@@ -84,7 +86,12 @@ const fetchFromCDN = async (
  * Set of dependencies that should not be fetched from CDN.
  * These are resolved from local node_modules via aliases.
  */
-const EXCLUDED_DEPENDENCIES = new Set(['react', 'react-dom', 'scheduler']);
+const EXCLUDED_DEPENDENCIES = new Set([
+  // React server context's can conflict if multiple versions are loaded
+  'react',
+  'react-dom',
+  // 'scheduler',
+]);
 
 /**
  * Checks if an import ID or importer path is from an excluded dependency.
