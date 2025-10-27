@@ -146,7 +146,7 @@ app.post('/api', async (c) => {
   }
 
   const serverContext = simulateServerContext(c);
-  const config = getClientConfig(serverContext, 'all');
+  const config = getClientConfig(serverContext, true);
 
   // For every query, check whether an trigger exists that is being publicly exposed.
   // If none exists, prevent the query from being executed.
@@ -197,7 +197,7 @@ app.post('/api', async (c) => {
 app.use('*', async (c, next) => {
   const serverContext = simulateServerContext(c);
 
-  const config = getClientConfig(serverContext, 'none');
+  const config = getClientConfig(serverContext);
   const client = createSyntaxFactory(config);
 
   c.set('client', client);

@@ -79,7 +79,7 @@ const runQueriesWithTime = async (
 
   const start = Date.now();
 
-  const config = getClientConfig(serverContext, 'write');
+  const config = getClientConfig(serverContext);
   if (stream) config.stream = stream;
 
   const databaseAmount = Object.keys(queries).length;

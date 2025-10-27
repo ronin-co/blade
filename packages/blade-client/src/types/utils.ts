@@ -17,11 +17,6 @@ export interface QueryHandlerOptions {
   triggers?: Triggers;
 
   /**
-   * Specific query types for which "during" triggers should be required.
-   */
-  requireTriggers?: 'all' | 'write' | 'read';
-
-  /**
    * Token used to authenticate against RONIN. By default,
    * `process.env.RONIN_TOKEN` will be used.
    */

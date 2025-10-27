@@ -360,11 +360,8 @@ const invokeTriggers = async <T extends ResultRecord>(
 
   // If triggers were provided, intialize a new client instance that can be used for
   // nested queries within triggers.
-  //
-  // We are stripping the `requireTriggers` option, because no triggers should be
-  // required for queries that are nested into triggers.
   const client = createSyntaxFactory({
-    ...omit(options.clientOptions, ['requireTriggers']),
+    ...options.clientOptions,
     parentTrigger: currentTrigger,
   });
 
@@ -502,7 +499,6 @@ interface QueryFromTrigger<T> extends QueryPerDatabase {
 
 interface TriggerExecutionOptions {
   context: Map<string, any>;
-  triggerError: ClientError;
   clientOptions: QueryHandlerOptions;
 }
 
@@ -551,22 +547,6 @@ export const applySyncTriggers = async <T extends ResultRecord>(
       if (triggerResults.queries && triggerResults.queries.length > 0) {
         queries[index].query = triggerResults.queries[0].query;
         return;
-      }
-
-      const { requireTriggers } = options.clientOptions;
-
-      // If "during" triggers are required for the query type of the current query,
-      // we want to throw an error to prevent the query from being executed.
-      if (requireTriggers && !queryItem.parentTrigger) {
-        const queryType = Object.keys(queryItem.query)[0] as QueryType;
-        const requiredTypes: ReadonlyArray<QueryType> =
-          requireTriggers === 'read'
-            ? QUERY_TYPES_READ
-            : requireTriggers === 'write'
-              ? QUERY_TYPES_WRITE
-              : QUERY_TYPES;
-
-        if (requiredTypes.includes(queryType)) throw options.triggerError;
       }
     }),
   );
@@ -736,19 +716,10 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   queries: Array<QueryPerDatabase>,
   options: QueryHandlerOptions = {},
 ): Promise<Array<ResultPerDatabase<T>>> => {
-  const { triggers, waitUntil, requireTriggers } = options;
-
-  const triggerErrorType = requireTriggers !== 'all' ? ` ${requireTriggers}` : '';
-  const triggerError = new ClientError({
-    message: `Please define "during" triggers for the provided${triggerErrorType} queries.`,
-    code: 'TRIGGER_REQUIRED',
-  });
+  const { triggers, waitUntil } = options;
 
   // If no triggers were provided, we can just run all the queries and return the results.
-  if (!triggers) {
-    if (requireTriggers && !options.parentTrigger) throw triggerError;
-    return runQueries<T>(queries, options);
-  }
+  if (!triggers) return runQueries<T>(queries, options);
 
   if (typeof process === 'undefined' && !waitUntil) {
     let message = 'In the case that the "blade-client" package receives a value for';
@@ -763,7 +734,7 @@ export const runQueriesWithTriggers = async <T extends ResultRecord>(
   // Lets people share arbitrary values between the triggers of a model.
   const context = new Map<string, any>();
 
-  const execOptions = { context, triggerError, clientOptions: options };
+  const execOptions = { context, clientOptions: options };
 
   const queryList: Array<QueryFromTrigger<T> & { actionType: 'read' | 'write' }> =
     queries.map((item) => {
