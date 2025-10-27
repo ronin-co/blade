@@ -90,7 +90,7 @@ const EXCLUDED_DEPENDENCIES = new Set([
   // React server context's can conflict if multiple versions are loaded
   'react',
   'react-dom',
-  // 'scheduler',
+  'scheduler',
 ]);
 
 /**
