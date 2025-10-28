@@ -26,7 +26,7 @@ const EMPTY = Symbol('empty');
 export type ParentTrigger = { model: string; type: TriggerType };
 
 export interface TriggerOptions<
-  TType extends QueryType,
+  TType extends QueryType = QueryType,
   TSchema = unknown,
   TQuery = FilteredTriggerQuery<TType>,
 > {

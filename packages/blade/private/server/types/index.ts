@@ -49,7 +49,7 @@ export interface PageMetadata {
   bodyClassName?: string;
 }
 
-export interface TriggerOptions<TType extends QueryType, TSchema = unknown>
+export interface TriggerOptions<TType extends QueryType = QueryType, TSchema = unknown>
   extends ClientTriggerOptions<TType, TSchema> {
   /**
    * A list of cookies that are stored on the client.
@@ -92,7 +92,7 @@ export type Trigger<
 > = ClientTrigger<TStage, TType, TSchema, TOptions>;
 
 export type Triggers<
-  TType extends QueryType,
+  TType extends QueryType = QueryType,
   TSchema = unknown,
   TOptions extends object = TriggerOptions<TType, TSchema>,
 > = ClientTriggers<TType, TSchema, TOptions>;
