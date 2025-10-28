@@ -103,28 +103,3 @@ export const validateDefaults = (options: QueryHandlerOptions = {}) => {
     options.database = database;
   }
 };
-
-/**
- * Omit a list of properties from an object returning a new object with the properties
- * that remain.
- *
- * @param obj - The object to omit properties from.
- * @param keys - The keys of the properties that should be omitted.
- *
- * @returns The updated object.
- */
-export const omit = <T, TKeys extends keyof T>(
-  obj: T,
-  keys: Array<TKeys>,
-): Omit<T, TKeys> => {
-  if (!obj) return {} as Omit<T, TKeys>;
-  if (!keys || keys.length === 0) return obj as Omit<T, TKeys>;
-
-  return keys.reduce(
-    (acc, key) => {
-      delete acc[key];
-      return acc;
-    },
-    { ...obj },
-  );
-};

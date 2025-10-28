@@ -1,58 +1,9 @@
 export type {
-  // Add Triggers
-  BeforeAddTrigger,
-  ResolvingAddTrigger,
-  AddTrigger,
-  AfterAddTrigger,
-  FollowingAddTrigger,
-  // Get Triggers
-  BeforeGetTrigger,
-  ResolvingGetTrigger,
-  GetTrigger,
-  AfterGetTrigger,
-  FollowingGetTrigger,
-  // Set Triggers
-  BeforeSetTrigger,
-  ResolvingSetTrigger,
-  SetTrigger,
-  AfterSetTrigger,
-  FollowingSetTrigger,
-  // Remove Triggers
-  BeforeRemoveTrigger,
-  ResolvingRemoveTrigger,
-  RemoveTrigger,
-  AfterRemoveTrigger,
-  FollowingRemoveTrigger,
-  // Count Triggers
-  BeforeCountTrigger,
-  ResolvingCountTrigger,
-  CountTrigger,
-  AfterCountTrigger,
-  FollowingCountTrigger,
-  // Create Triggers
-  BeforeCreateTrigger,
-  ResolvingCreateTrigger,
-  CreateTrigger,
-  AfterCreateTrigger,
-  FollowingCreateTrigger,
-  // Alter Triggers
-  BeforeAlterTrigger,
-  ResolvingAlterTrigger,
-  AlterTrigger,
-  AfterAlterTrigger,
-  FollowingAlterTrigger,
-  // Drop Triggers
-  BeforeDropTrigger,
-  ResolvingDropTrigger,
-  DropTrigger,
-  AfterDropTrigger,
-  FollowingDropTrigger,
-  // Trigger Handlers
-  BeforeTriggerHandler,
-  DuringTriggerHandler,
-  FollowingTriggerHandler,
-  AfterTriggerHandler,
-  ResolvingTriggerHandler,
+  AfterTrigger,
+  BeforeTrigger,
+  DuringTrigger,
+  FollowingTrigger,
+  ResolvingTrigger,
 } from '@/src/triggers';
 
 export type {

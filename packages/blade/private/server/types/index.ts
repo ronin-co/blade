@@ -1,33 +1,13 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
 import type {
+  AfterTrigger as ClientAfterTrigger,
+  BeforeTrigger as ClientBeforeTrigger,
+  DuringTrigger as ClientDuringTrigger,
+  FollowingTrigger as ClientFollowingTrigger,
+  ResolvingTrigger as ClientResolvingTrigger,
   TriggerOptions as ClientTriggerOptions,
-  AddTrigger as OriginalAddTrigger,
-  AfterAddTrigger as OriginalAfterAddTrigger,
-  AfterCountTrigger as OriginalAfterCountTrigger,
-  AfterGetTrigger as OriginalAfterGetTrigger,
-  AfterRemoveTrigger as OriginalAfterRemoveTrigger,
-  AfterSetTrigger as OriginalAfterSetTrigger,
-  BeforeAddTrigger as OriginalBeforeAddTrigger,
-  BeforeCountTrigger as OriginalBeforeCountTrigger,
-  BeforeGetTrigger as OriginalBeforeGetTrigger,
-  BeforeRemoveTrigger as OriginalBeforeRemoveTrigger,
-  BeforeSetTrigger as OriginalBeforeSetTrigger,
-  CountTrigger as OriginalCountTrigger,
-  FollowingAddTrigger as OriginalFollowingAddTrigger,
-  FollowingCountTrigger as OriginalFollowingCountTrigger,
-  FollowingGetTrigger as OriginalFollowingGetTrigger,
-  FollowingRemoveTrigger as OriginalFollowingRemoveTrigger,
-  FollowingSetTrigger as OriginalFollowingSetTrigger,
-  GetTrigger as OriginalGetTrigger,
-  RemoveTrigger as OriginalRemoveTrigger,
-  ResolvingAddTrigger as OriginalResolvingAddTrigger,
-  ResolvingCountTrigger as OriginalResolvingCountTrigger,
-  ResolvingGetTrigger as OriginalResolvingGetTrigger,
-  ResolvingRemoveTrigger as OriginalResolvingRemoveTrigger,
-  ResolvingSetTrigger as OriginalResolvingSetTrigger,
-  SetTrigger as OriginalSetTrigger,
 } from 'blade-client/types';
-import type { Model } from 'blade-compiler';
+import type { Model, QueryType } from 'blade-compiler';
 import type { ComponentType, FunctionComponent } from 'react';
 
 import type { ServerContext } from '@/private/server/context';
@@ -71,7 +51,8 @@ export interface PageMetadata {
   bodyClassName?: string;
 }
 
-export interface TriggerOptions extends ClientTriggerOptions {
+export interface TriggerOptions<TType extends QueryType>
+  extends ClientTriggerOptions<TType> {
   /**
    * A list of cookies that are stored on the client.
    */
@@ -105,98 +86,70 @@ export type RecursiveRequired<T> = {
 
 export type ValueOf<T> = T[keyof T];
 
-type AddOptionsArgument<T> = T extends (...args: [...infer Rest, infer Last]) => infer R
-  ? (...args: [...Rest, Last & TriggerOptions]) => R
-  : never;
-
-export type BeforeCountTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeCountTrigger>>
-) => ReturnType<OriginalBeforeCountTrigger>;
-export type BeforeAddTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeAddTrigger>>
-) => ReturnType<OriginalBeforeAddTrigger>;
-export type BeforeRemoveTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeRemoveTrigger>>
-) => ReturnType<OriginalBeforeRemoveTrigger>;
-export type BeforeGetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeGetTrigger>>
-) => ReturnType<OriginalBeforeGetTrigger>;
-export type BeforeSetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalBeforeSetTrigger>>
-) => ReturnType<OriginalBeforeSetTrigger>;
-
-export type CountTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalCountTrigger>>
-) => ReturnType<OriginalCountTrigger>;
-export type AddTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAddTrigger>>
-) => ReturnType<OriginalAddTrigger>;
-export type RemoveTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalRemoveTrigger>>
-) => ReturnType<OriginalRemoveTrigger>;
-export type GetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalGetTrigger>>
-) => ReturnType<OriginalGetTrigger>;
-export type SetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalSetTrigger>>
-) => ReturnType<OriginalSetTrigger>;
-
-export type AfterCountTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterCountTrigger>>
-) => ReturnType<OriginalAfterCountTrigger>;
-export type AfterAddTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterAddTrigger>>
-) => ReturnType<OriginalAfterAddTrigger>;
-export type AfterRemoveTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterRemoveTrigger>>
-) => ReturnType<OriginalAfterRemoveTrigger>;
-export type AfterGetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterGetTrigger>>
-) => ReturnType<OriginalAfterGetTrigger>;
-export type AfterSetTrigger = (
-  ...args: Parameters<AddOptionsArgument<OriginalAfterSetTrigger>>
-) => ReturnType<OriginalAfterSetTrigger>;
-
-export type ResolvingCountTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingCountTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingCountTrigger<TSchema>>;
-export type ResolvingAddTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingAddTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingAddTrigger<TSchema>>;
-export type ResolvingRemoveTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingRemoveTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingRemoveTrigger<TSchema>>;
-export type ResolvingGetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingGetTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingGetTrigger<TSchema>>;
-export type ResolvingSetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalResolvingSetTrigger<TSchema>>>
-) => ReturnType<OriginalResolvingSetTrigger<TSchema>>;
-
-export type FollowingCountTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingCountTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingCountTrigger<TSchema>>;
-export type FollowingAddTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingAddTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingAddTrigger<TSchema>>;
-export type FollowingRemoveTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingRemoveTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingRemoveTrigger<TSchema>>;
-export type FollowingGetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingGetTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingGetTrigger<TSchema>>;
-export type FollowingSetTrigger<TSchema = unknown> = (
-  ...args: Parameters<AddOptionsArgument<OriginalFollowingSetTrigger<TSchema>>>
-) => ReturnType<OriginalFollowingSetTrigger<TSchema>>;
-
-export type Triggers<TSchema = unknown> = Record<
-  string,
-  | BeforeGetTrigger
-  | GetTrigger
-  | AfterGetTrigger
-  | ResolvingGetTrigger<TSchema>
-  | FollowingGetTrigger<TSchema>
+export type BeforeTrigger<TType extends QueryType> = AddOptionsArgument<
+  ClientBeforeTrigger<TType>
 >;
+export type DuringTrigger<TType extends QueryType> = AddOptionsArgument<
+  ClientDuringTrigger<TType>
+>;
+export type AfterTrigger<TType extends QueryType> = AddOptionsArgument<
+  ClientAfterTrigger<TType>
+>;
+export type ResolvingTrigger<
+  TType extends QueryType,
+  TSchema = unknown,
+> = AddOptionsArgument<ClientResolvingTrigger<TType, TSchema>>;
+export type FollowingTrigger<
+  TType extends QueryType,
+  TSchema = unknown,
+> = AddOptionsArgument<ClientFollowingTrigger<TType, TSchema>>;
+
+export type Triggers<TSchema = unknown> = {
+  beforeGet?: BeforeTrigger<'get'>;
+  beforeSet?: BeforeTrigger<'set'>;
+  beforeAdd?: BeforeTrigger<'add'>;
+  beforeRemove?: BeforeTrigger<'remove'>;
+  beforeCount?: BeforeTrigger<'count'>;
+  beforeCreate?: BeforeTrigger<'create'>;
+  beforeAlter?: BeforeTrigger<'alter'>;
+  beforeDrop?: BeforeTrigger<'drop'>;
+
+  duringGet?: DuringTrigger<'get'>;
+  duringSet?: DuringTrigger<'set'>;
+  duringAdd?: DuringTrigger<'add'>;
+  duringRemove?: DuringTrigger<'remove'>;
+  duringCount?: DuringTrigger<'count'>;
+  duringCreate?: DuringTrigger<'create'>;
+  duringAlter?: DuringTrigger<'alter'>;
+  duringDrop?: DuringTrigger<'drop'>;
+
+  afterGet?: AfterTrigger<'get'>;
+  afterSet?: AfterTrigger<'set'>;
+  afterAdd?: AfterTrigger<'add'>;
+  afterRemove?: AfterTrigger<'remove'>;
+  afterCount?: AfterTrigger<'count'>;
+  afterCreate?: AfterTrigger<'create'>;
+  afterAlter?: AfterTrigger<'alter'>;
+  afterDrop?: AfterTrigger<'drop'>;
+
+  resolvingGet?: ResolvingTrigger<'get', TSchema>;
+  resolvingSet?: ResolvingTrigger<'set', TSchema>;
+  resolvingAdd?: ResolvingTrigger<'add', TSchema>;
+  resolvingRemove?: ResolvingTrigger<'remove', TSchema>;
+  resolvingCount?: ResolvingTrigger<'count', TSchema>;
+  resolvingCreate?: ResolvingTrigger<'create', TSchema>;
+  resolvingAlter?: ResolvingTrigger<'alter', TSchema>;
+  resolvingDrop?: ResolvingTrigger<'drop', TSchema>;
+
+  followingGet?: FollowingTrigger<'get', TSchema>;
+  followingSet?: FollowingTrigger<'set', TSchema>;
+  followingAdd?: FollowingTrigger<'add', TSchema>;
+  followingRemove?: FollowingTrigger<'remove', TSchema>;
+  followingCount?: FollowingTrigger<'count', TSchema>;
+  followingCreate?: FollowingTrigger<'create', TSchema>;
+  followingAlter?: FollowingTrigger<'alter', TSchema>;
+  followingDrop?: FollowingTrigger<'drop', TSchema>;
+};
 
 export type TriggersList<TSchema = unknown> = Record<string, Triggers<TSchema>>;
 export type PageList = Record<string, TreeItem | 'DIRECTORY'>;
