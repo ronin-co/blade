@@ -138,14 +138,14 @@ export type Trigger<
 
 export type Triggers<TSchema = unknown> = {
   [K in TriggerKeys]?: K extends 'before' | `before${string}`
-    ? BeforeTriggerHandler<QueryType>
+    ? Trigger<'before', QueryType>
     : K extends 'after' | `after${string}`
-      ? AfterTriggerHandler<QueryType>
+      ? Trigger<'after', QueryType>
       : K extends 'resolving' | `resolving${string}`
-        ? ResolvingTriggerHandler<QueryType, TSchema>
+        ? Trigger<'resolving', QueryType, TSchema>
         : K extends 'following' | `following${string}`
-          ? FollowingTriggerHandler<QueryType, TSchema>
-          : DuringTriggerHandler<QueryType>;
+          ? Trigger<'following', QueryType, TSchema>
+          : Trigger<'during', QueryType>;
 };
 
 export type TriggersPerModel<TSchema = unknown> = Record<string, Triggers<TSchema>>;
