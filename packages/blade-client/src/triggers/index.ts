@@ -23,7 +23,7 @@ import { toDashCase } from '@/src/utils/helpers';
 
 const EMPTY = Symbol('empty');
 
-type ParentTrigger = { model: string; type: TriggerType };
+export type ParentTrigger = { model: string; type: TriggerType };
 
 export interface TriggerOptions<
   TType extends QueryType,
@@ -57,7 +57,10 @@ export interface TriggerOptions<
   /** A function for keeping the worker alive as long as a promise is not resolved. */
   waitUntil?: QueryHandlerOptions['waitUntil'];
 
+  /** The list of records, before the query was executed. */
   previousRecords?: TSchema;
+
+  /** The list of records, after the query was executed. */
   records?: TSchema;
 }
 
@@ -117,7 +120,7 @@ type TriggerKeys = (
   | { [K in QueryType]: `following${Capitalize<K>}` }
 )[QueryType];
 
-type Trigger<
+export type Trigger<
   TStage extends TriggerType,
   TType extends QueryType,
   TSchema extends TStage extends 'before' | 'during' | 'after' ? never : unknown = never,
@@ -133,7 +136,7 @@ type Trigger<
           ? FollowingTriggerHandler<TType, TSchema>
           : never;
 
-type TriggerList<TSchema = unknown> = {
+export type Triggers<TSchema = unknown> = {
   [K in TriggerKeys]?: K extends 'before' | `before${string}`
     ? BeforeTriggerHandler<QueryType>
     : K extends 'after' | `after${string}`
@@ -145,22 +148,7 @@ type TriggerList<TSchema = unknown> = {
           : DuringTriggerHandler<QueryType>;
 };
 
-export type Triggers<TSchema = unknown> = Record<string, TriggerList<TSchema>>;
-
-export type BeforeTrigger<TType extends QueryType> = Trigger<'before', TType>;
-export type DuringTrigger<TType extends QueryType> = Trigger<'during', TType>;
-export type AfterTrigger<TType extends QueryType> = Trigger<'after', TType>;
-
-export type ResolvingTrigger<TType extends QueryType, TSchema = unknown> = Trigger<
-  'resolving',
-  TType,
-  TSchema
->;
-export type FollowingTrigger<TType extends QueryType, TSchema = unknown> = Trigger<
-  'following',
-  TType,
-  TSchema
->;
+export type TriggersPerModel<TSchema = unknown> = Record<string, Triggers<TSchema>>;
 
 const getModel = (
   instruction: QuerySchemaType,
@@ -336,14 +324,16 @@ const invokeTriggers = async <T extends ResultRecord>(
     // special function arguments that contain the value of the affected records
     // before and after the query was executed.
     const triggerResult = await (triggerType === 'following'
-      ? (trigger as FollowingTrigger<QueryType, unknown>)({
+      ? (trigger as Trigger<'following', QueryType, unknown>)({
           ...triggerOptions,
           previousRecords: normalizeResults(definition.resultBefore),
           records: normalizeResults(definition.resultAfter),
         })
-      : (trigger as DuringTrigger<QueryType> | ResolvingTrigger<QueryType>)(
-          triggerOptions,
-        ));
+      : (
+          trigger as
+            | Trigger<'during', QueryType>
+            | Trigger<'resolving', QueryType, unknown>
+        )(triggerOptions));
 
     const prepareQueries = async (result: unknown, applyTriggers?: boolean) => {
       const queries: Array<Query> =

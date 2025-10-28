@@ -1,12 +1,5 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
-import type {
-  AfterTrigger as ClientAfterTrigger,
-  BeforeTrigger as ClientBeforeTrigger,
-  DuringTrigger as ClientDuringTrigger,
-  FollowingTrigger as ClientFollowingTrigger,
-  ResolvingTrigger as ClientResolvingTrigger,
-  TriggerOptions as ClientTriggerOptions,
-} from 'blade-client/types';
+import type { TriggerOptions as ClientTriggerOptions } from 'blade-client/types';
 import type { Model, QueryType } from 'blade-compiler';
 import type { ComponentType, FunctionComponent } from 'react';
 
