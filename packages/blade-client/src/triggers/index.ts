@@ -319,7 +319,7 @@ const invokeTriggers = async <T extends ResultRecord>(
   if (triggersForModel && triggerName in triggersForModel) {
     const trigger = triggersForModel[triggerName as keyof typeof triggersForModel];
 
-    const triggerOptions: TriggerOptions<typeof queryType> = {
+    const triggerOptions: TriggerOptions<typeof queryType, never> = {
       query: queryInstruction,
       multipleRecords,
       parentTrigger,
@@ -338,11 +338,9 @@ const invokeTriggers = async <T extends ResultRecord>(
           previousRecords: normalizeResults(definition.resultBefore),
           records: normalizeResults(definition.resultAfter),
         })
-      : (
-          trigger as
-            | Trigger<'during', QueryType>
-            | Trigger<'resolving', QueryType, unknown>
-        )(triggerOptions));
+      : (trigger as Trigger<'during', QueryType> | Trigger<'resolving', QueryType>)(
+          triggerOptions,
+        ));
 
     const prepareQueries = async (result: unknown, applyTriggers?: boolean) => {
       const queries: Array<Query> =
