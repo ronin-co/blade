@@ -30,12 +30,10 @@ would look like this:
 touch ./triggers/account.ts
 ```
 
-For example, if the slug of your model is `account`, you could create the following file:
+Afterward, you can export a trigger from the file:
 
 ```ts
-// triggers/account.ts
-
-import { triggers } from 'blade/'
+import type { AddTrigger } from 'blade/types';
 
 export const add: AddTrigger = (query) => {
   query.with.handle = query.with.name.toLowerCase();
