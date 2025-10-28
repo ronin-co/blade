@@ -1,9 +1,5 @@
 export type {
-  AfterTrigger,
-  BeforeTrigger,
-  DuringTrigger,
-  FollowingTrigger,
-  ResolvingTrigger,
+  Trigger,
   Triggers,
   TriggerOptions,
   TableOfContents,

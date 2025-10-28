@@ -85,32 +85,33 @@ export type FilteredTriggerQuery<
               : never
   >;
 
-export type BeforeTriggerHandler<TType extends QueryType> = (
-  options: TriggerOptions<TType>,
+type BeforeTriggerHandler<TOptions extends object> = (
+  options: TOptions,
 ) => Array<Query> | Promise<Array<Query>> | ReturnedQueries | Promise<ReturnedQueries>;
 
-export type DuringTriggerHandler<
+type DuringTriggerHandler<
+  TOptions extends object,
   TType extends QueryType,
   TQuery extends FilteredTriggerQuery<TType> = FilteredTriggerQuery<TType>,
-> = (options: TriggerOptions<TType>) => TQuery | Promise<TQuery> | Query | Promise<Query>;
+> = (options: TOptions) => TQuery | Promise<TQuery> | Query | Promise<Query>;
 
-export type AfterTriggerHandler<TType extends QueryType> = (
-  options: TriggerOptions<TType>,
+type AfterTriggerHandler<TOptions extends object> = (
+  options: TOptions,
 ) => Array<Query> | Promise<Array<Query>> | ReturnedQueries | Promise<ReturnedQueries>;
 
-export type ResolvingTriggerHandler<TType extends QueryType, TSchema = unknown> = (
-  options: TriggerOptions<TType, TSchema>,
+type ResolvingTriggerHandler<TOptions extends object, TSchema = unknown> = (
+  options: TOptions,
 ) => TSchema | Promise<TSchema>;
 
-export type FollowingTriggerHandler<TType extends QueryType, TSchema = unknown> = (
-  options: TriggerOptions<TType, TSchema>,
+type FollowingTriggerHandler<TOptions extends object> = (
+  options: TOptions,
 ) => void | Promise<void>;
 
 // The order of these types is important, as they determine the order in which
 // triggers are run (the "trigger lifecycle").
 const TRIGGER_TYPES = ['before', 'during', 'after', 'resolving', 'following'] as const;
 
-type TriggerType = (typeof TRIGGER_TYPES)[number];
+export type TriggerType = (typeof TRIGGER_TYPES)[number];
 
 type TriggerKeys = (
   | { [K in QueryType]: `before${Capitalize<K>}` }
@@ -124,31 +125,39 @@ export type Trigger<
   TStage extends TriggerType,
   TType extends QueryType,
   TSchema extends TStage extends 'before' | 'during' | 'after' ? never : unknown = never,
+  TOptions extends object = TriggerOptions<TType, TSchema>,
 > = TStage extends 'before'
-  ? BeforeTriggerHandler<TType>
+  ? BeforeTriggerHandler<TOptions>
   : TStage extends 'during'
-    ? DuringTriggerHandler<TType>
+    ? DuringTriggerHandler<TOptions, TType>
     : TStage extends 'after'
-      ? AfterTriggerHandler<TType>
+      ? AfterTriggerHandler<TOptions>
       : TStage extends 'resolving'
-        ? ResolvingTriggerHandler<TType, TSchema>
+        ? ResolvingTriggerHandler<TOptions, TSchema>
         : TStage extends 'following'
-          ? FollowingTriggerHandler<TType, TSchema>
+          ? FollowingTriggerHandler<TOptions>
           : never;
 
-export type Triggers<TSchema = unknown> = {
+export type Triggers<
+  TType extends QueryType,
+  TSchema = unknown,
+  TOptions extends object = TriggerOptions<TType, TSchema>,
+> = {
   [K in TriggerKeys]?: K extends 'before' | `before${string}`
-    ? Trigger<'before', QueryType>
+    ? Trigger<'before', TType, never, TOptions>
     : K extends 'after' | `after${string}`
-      ? Trigger<'after', QueryType>
+      ? Trigger<'after', TType, never, TOptions>
       : K extends 'resolving' | `resolving${string}`
-        ? Trigger<'resolving', QueryType, TSchema>
+        ? Trigger<'resolving', TType, TSchema, TOptions>
         : K extends 'following' | `following${string}`
-          ? Trigger<'following', QueryType, TSchema>
-          : Trigger<'during', QueryType>;
+          ? Trigger<'following', TType, TSchema, TOptions>
+          : Trigger<'during', TType>;
 };
 
-export type TriggersPerModel<TSchema = unknown> = Record<string, Triggers<TSchema>>;
+export type TriggersPerModel<TSchema = unknown> = Record<
+  string,
+  Triggers<QueryType, TSchema>
+>;
 
 const getModel = (
   instruction: QuerySchemaType,

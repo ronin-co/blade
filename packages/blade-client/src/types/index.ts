@@ -1,9 +1,7 @@
 export type {
-  AfterTrigger,
-  BeforeTrigger,
-  DuringTrigger,
-  FollowingTrigger,
-  ResolvingTrigger,
+  Trigger,
+  Triggers,
+  TriggerType,
 } from '@/src/triggers';
 
 export type {

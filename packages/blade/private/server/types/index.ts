@@ -1,5 +1,10 @@
 import type { Toc } from '@stefanprobst/rehype-extract-toc';
-import type { TriggerOptions as ClientTriggerOptions } from 'blade-client/types';
+import type {
+  Trigger as ClientTrigger,
+  TriggerOptions as ClientTriggerOptions,
+  TriggerType as ClientTriggerType,
+  Triggers as ClientTriggers,
+} from 'blade-client/types';
 import type { Model, QueryType } from 'blade-compiler';
 import type { ComponentType, FunctionComponent } from 'react';
 
@@ -44,8 +49,8 @@ export interface PageMetadata {
   bodyClassName?: string;
 }
 
-export interface TriggerOptions<TType extends QueryType>
-  extends ClientTriggerOptions<TType> {
+export interface TriggerOptions<TType extends QueryType, TSchema = unknown>
+  extends ClientTriggerOptions<TType, TSchema> {
   /**
    * A list of cookies that are stored on the client.
    */
@@ -79,71 +84,22 @@ export type RecursiveRequired<T> = {
 
 export type ValueOf<T> = T[keyof T];
 
-export type BeforeTrigger<TType extends QueryType> = AddOptionsArgument<
-  ClientBeforeTrigger<TType>
->;
-export type DuringTrigger<TType extends QueryType> = AddOptionsArgument<
-  ClientDuringTrigger<TType>
->;
-export type AfterTrigger<TType extends QueryType> = AddOptionsArgument<
-  ClientAfterTrigger<TType>
->;
-export type ResolvingTrigger<
+export type Trigger<
+  TStage extends ClientTriggerType,
+  TType extends QueryType,
+  TSchema extends TStage extends 'before' | 'during' | 'after' ? never : unknown = never,
+  TOptions extends object = TriggerOptions<TType>,
+> = ClientTrigger<TStage, TType, TSchema, TOptions>;
+
+export type Triggers<
   TType extends QueryType,
   TSchema = unknown,
-> = AddOptionsArgument<ClientResolvingTrigger<TType, TSchema>>;
-export type FollowingTrigger<
-  TType extends QueryType,
-  TSchema = unknown,
-> = AddOptionsArgument<ClientFollowingTrigger<TType, TSchema>>;
+  TOptions extends object = TriggerOptions<TType, TSchema>,
+> = ClientTriggers<TType, TSchema, TOptions>;
 
-export type Triggers<TSchema = unknown> = {
-  beforeGet?: BeforeTrigger<'get'>;
-  beforeSet?: BeforeTrigger<'set'>;
-  beforeAdd?: BeforeTrigger<'add'>;
-  beforeRemove?: BeforeTrigger<'remove'>;
-  beforeCount?: BeforeTrigger<'count'>;
-  beforeCreate?: BeforeTrigger<'create'>;
-  beforeAlter?: BeforeTrigger<'alter'>;
-  beforeDrop?: BeforeTrigger<'drop'>;
-
-  duringGet?: DuringTrigger<'get'>;
-  duringSet?: DuringTrigger<'set'>;
-  duringAdd?: DuringTrigger<'add'>;
-  duringRemove?: DuringTrigger<'remove'>;
-  duringCount?: DuringTrigger<'count'>;
-  duringCreate?: DuringTrigger<'create'>;
-  duringAlter?: DuringTrigger<'alter'>;
-  duringDrop?: DuringTrigger<'drop'>;
-
-  afterGet?: AfterTrigger<'get'>;
-  afterSet?: AfterTrigger<'set'>;
-  afterAdd?: AfterTrigger<'add'>;
-  afterRemove?: AfterTrigger<'remove'>;
-  afterCount?: AfterTrigger<'count'>;
-  afterCreate?: AfterTrigger<'create'>;
-  afterAlter?: AfterTrigger<'alter'>;
-  afterDrop?: AfterTrigger<'drop'>;
-
-  resolvingGet?: ResolvingTrigger<'get', TSchema>;
-  resolvingSet?: ResolvingTrigger<'set', TSchema>;
-  resolvingAdd?: ResolvingTrigger<'add', TSchema>;
-  resolvingRemove?: ResolvingTrigger<'remove', TSchema>;
-  resolvingCount?: ResolvingTrigger<'count', TSchema>;
-  resolvingCreate?: ResolvingTrigger<'create', TSchema>;
-  resolvingAlter?: ResolvingTrigger<'alter', TSchema>;
-  resolvingDrop?: ResolvingTrigger<'drop', TSchema>;
-
-  followingGet?: FollowingTrigger<'get', TSchema>;
-  followingSet?: FollowingTrigger<'set', TSchema>;
-  followingAdd?: FollowingTrigger<'add', TSchema>;
-  followingRemove?: FollowingTrigger<'remove', TSchema>;
-  followingCount?: FollowingTrigger<'count', TSchema>;
-  followingCreate?: FollowingTrigger<'create', TSchema>;
-  followingAlter?: FollowingTrigger<'alter', TSchema>;
-  followingDrop?: FollowingTrigger<'drop', TSchema>;
-};
-
-export type TriggersList<TSchema = unknown> = Record<string, Triggers<TSchema>>;
+export type TriggersList<TSchema = unknown> = Record<
+  string,
+  Triggers<QueryType, TSchema>
+>;
 export type PageList = Record<string, TreeItem | 'DIRECTORY'>;
 export type ModelList = { 'index.ts'?: Record<string, Model> };
