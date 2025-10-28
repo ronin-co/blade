@@ -87,7 +87,7 @@ const fetchFromCDN = async (
  * These are resolved from local node_modules via aliases.
  */
 const EXCLUDED_DEPENDENCIES = new Set([
-  // React server context's can conflict if multiple versions are loaded
+  // React server contexts can conflict if multiple versions are loaded
   'react',
   'react-dom',
   'scheduler',
