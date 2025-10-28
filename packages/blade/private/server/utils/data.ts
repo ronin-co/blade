@@ -125,7 +125,7 @@ export const getClientConfig = (
           // the arguments of the original trigger type, we're using only the type of
           // `before*` triggers.
           (...args: Parameters<ClientTrigger<'before', 'get'>>) => {
-            const clientOptions = args.at(-1) as ClientTriggerOptions;
+            const clientOptions = args[0] as ClientTriggerOptions;
 
             // Create an object of options that are specific to the current trigger
             // function, in order to avoid modifying the global object.
