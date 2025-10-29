@@ -1,10 +1,15 @@
 import { TRIGGER_TYPES, getTriggerName } from 'blade-client/utils';
-import { QUERY_TYPES } from 'blade-compiler';
+import { QUERY_TYPES, type QueryType } from 'blade-compiler';
 
 import type { Triggers } from '@/private/server/types';
 
-export const triggers = (...list: Array<Triggers>): Triggers => {
-  const final: Triggers = {};
+export const triggers = <
+  TSchema = unknown,
+  TList extends Triggers<QueryType, TSchema> = Triggers<QueryType, TSchema>,
+>(
+  ...list: Array<TList>
+): TList => {
+  const final = {} as TList;
 
   for (const triggerType of TRIGGER_TYPES) {
     for (const queryType of QUERY_TYPES) {
@@ -30,7 +35,9 @@ export const triggers = (...list: Array<Triggers>): Triggers => {
             const added = await addedFunction(options);
 
             return [
+              // @ts-expect-error - This is a valid assignment.
               ...(typeof existing === 'function' ? existing() : existing),
+              // @ts-expect-error - This is a valid assignment.
               ...(typeof added === 'function' ? added() : added),
             ];
           };
