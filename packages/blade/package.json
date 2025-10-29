@@ -135,6 +135,7 @@
     "dotenv": "16.5.0",
     "gradient-string": "3.0.0",
     "hive": "2.1.13",
+    "resolve-from": "5.0.0",
     "rolldown": "1.0.0-beta.44"
   },
   "devDependencies": {
