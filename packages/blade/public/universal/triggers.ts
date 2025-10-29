@@ -23,9 +23,9 @@ export const triggers = (...list: Array<Triggers>): Triggers => {
         }
 
         if (triggerType === 'before' || triggerType === 'after') {
-          final[method] = (options) => {
-            const existing = existingFunction(options);
-            const added = addedFunction(options);
+          final[method] = async (options) => {
+            const existing = await existingFunction(options);
+            const added = await addedFunction(options);
 
             return [
               ...(typeof existing === 'function' ? existing() : existing),
@@ -37,9 +37,18 @@ export const triggers = (...list: Array<Triggers>): Triggers => {
         }
 
         if (triggerType === 'during') {
-          final[method] = (options) => {
-            const existing = existingFunction(options);
+          final[method] = async (options) => {
+            const existing = await existingFunction(options);
             return addedFunction({ ...options, query: existing });
+          };
+        }
+
+        // Triggers of type "resolving" cannot be chained, since a second function cannot
+        // be executed once the first function already provided the result.
+
+        if (triggerType === 'following') {
+          final[method] = async (options) => {
+            await Promise.all([existingFunction(options), addedFunction(options)]);
           };
         }
       }
