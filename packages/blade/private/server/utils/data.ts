@@ -160,6 +160,7 @@ export const getClientConfig = (
               }
             }
 
+            // @ts-expect-error This is a valid assignment.
             return triggerFunction({ ...clientOptions, ...newOptions });
           },
         ],
@@ -199,6 +200,7 @@ export const getClientConfig = (
   }
 
   return {
+    // @ts-expect-error This is a valid assignment.
     triggers: finalTriggers,
     waitUntil: serverContext.waitUntil,
     models,

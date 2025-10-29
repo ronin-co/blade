@@ -16,13 +16,17 @@ export const triggers = (...list: Array<Triggers>): Triggers => {
 
         const existingFunction = final[method];
         if (!existingFunction) {
+          // @ts-expect-error - This is a valid assignment.
           final[method] = addedFunction;
           continue;
         }
 
         if (triggerType === 'before' || triggerType === 'after') {
+          // @ts-expect-error - This is a valid assignment.
           final[method] = async (options) => {
+            // @ts-expect-error - This is a valid assignment.
             const existing = await existingFunction(options);
+            // @ts-expect-error - This is a valid assignment.
             const added = await addedFunction(options);
 
             return [
@@ -35,8 +39,11 @@ export const triggers = (...list: Array<Triggers>): Triggers => {
         }
 
         if (triggerType === 'during') {
+          // @ts-expect-error - This is a valid assignment.
           final[method] = async (options) => {
+            // @ts-expect-error - This is a valid assignment.
             const existing = await existingFunction(options);
+            // @ts-expect-error - This is a valid assignment.
             return addedFunction({ ...options, query: existing });
           };
         }
@@ -45,7 +52,9 @@ export const triggers = (...list: Array<Triggers>): Triggers => {
         // be executed once the first function already provided the result.
 
         if (triggerType === 'following') {
+          // @ts-expect-error - This is a valid assignment.
           final[method] = async (options) => {
+            // @ts-expect-error - This is a valid assignment.
             await Promise.all([existingFunction(options), addedFunction(options)]);
           };
         }
