@@ -17,6 +17,7 @@ import {
 } from 'blade-compiler';
 import { type DeepCallable, getSyntaxProxy } from 'blade-syntax/queries';
 
+export * from '@/private/universal/triggers';
 export * from 'blade-syntax/schema';
 
 const value = (queryType: QueryType) => ({ root: `${QUERY_SYMBOLS.QUERY}.${queryType}` });

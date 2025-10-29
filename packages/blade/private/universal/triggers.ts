@@ -1,16 +1,14 @@
-import { TRIGGER_TYPES, getMethodName } from 'blade-client/utils';
+import { TRIGGER_TYPES, getTriggerName } from 'blade-client/utils';
 import { QUERY_TYPES } from 'blade-compiler';
 
 import type { Triggers } from '@/private/server/types';
-
-//// SYNTAX PACKAGE
 
 export const triggers = (...list: Array<Triggers>): Triggers => {
   const final: Triggers = {};
 
   for (const triggerType of TRIGGER_TYPES) {
     for (const queryType of QUERY_TYPES) {
-      const method = getMethodName(triggerType, queryType);
+      const method = getTriggerName(triggerType, queryType);
 
       for (const group of list) {
         const addedFunction = group[method];

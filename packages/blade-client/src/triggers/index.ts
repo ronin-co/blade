@@ -201,7 +201,7 @@ const getModel = (
  *
  * @returns The method name constructed from the trigger and query types.
  */
-export const getMethodName = (
+export const getTriggerName = (
   triggerType: TriggerType,
   queryType: QueryType,
 ): TriggerName => {
@@ -303,7 +303,7 @@ const applyTrigger = async <T extends ResultRecord>(
   // matches the model that is being addressed by the query.
   const triggerFile = database ? 'sink' : queryModelDashed;
   const triggersForModel = options.clientOptions.triggers?.[triggerFile];
-  const triggerName = getMethodName(triggerType, queryType);
+  const triggerName = getTriggerName(triggerType, queryType);
 
   // If triggers were provided, intialize a new client instance that can be used for
   // nested queries within triggers.
