@@ -342,7 +342,7 @@ const applyTrigger = async <T extends ResultRecord>(
           triggerOptions,
         ));
 
-    const prepareQueries = async (result: unknown, applyTriggers?: boolean) => {
+    const prepareQueries = async (result: unknown, runTriggers?: boolean) => {
       const queries: Array<Query> =
         typeof result === 'function'
           ? getBatchProxy(result as () => Array<Promise<unknown>>).map((item) => {
@@ -359,7 +359,7 @@ const applyTrigger = async <T extends ResultRecord>(
             result: definition.result,
           };
 
-          if (applyTriggers) {
+          if (runTriggers) {
             const tempList: Array<QueryFromTrigger<T>> = [newQuery];
             await applySyncTriggers(tempList, options);
             return tempList;
