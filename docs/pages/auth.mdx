@@ -51,18 +51,29 @@ emails, you can provide configuration options to the function call in the respec
 ```ts
 // triggers/account.ts
 
-import { triggers } from 'blade/schema';
 import { getAccountTriggers } from 'blade/auth/triggers';
 
-const authTriggers = getAccountTriggers({
+export default getAccountTriggers({
   sendEmail: async ({ type, account, token, options }) => {
     if (type === "ACCOUNT_CREATION") {}
     if (type === "PASSWORD_RESET") {}
   }
 });
+```
 
-export default triggers(authTriggers, {
-  // If needed, provide additional triggers that should be run.
+If needed, you can also define additional triggers that would be run after the auth triggers:
+
+```ts
+// triggers/account.ts
+
+import { triggers } from 'blade/schema';
+import { getAccountTriggers } from 'blade/auth/triggers';
+import type { Account } from 'blade/types';
+
+const authTriggers = getAccountTriggers(...);
+
+export default triggers<Account>(authTriggers, {
+  // Define additional triggers for the Account model here.
   add: () => {}
 });
 ```
