@@ -9,10 +9,9 @@ import {
 } from 'blade/errors';
 import { triggers } from 'blade/schema';
 import { getRecordIdentifier } from 'blade/server/utils';
-import type { Account, QueryType, Trigger } from 'blade/types';
+import type { Account, QueryType, Trigger, TriggerType } from 'blade/types';
 
 import {
-  AUTH_CONFIG,
   EMAIL_VERIFICATION_COOLDOWN,
   avoidEmptyFields,
   generateUniqueId,
@@ -20,7 +19,7 @@ import {
 } from '@/utils/index';
 import type { AuthConfig } from '@/utils/types';
 
-const primeId: Trigger<'during', QueryType> = async ({ query, cookies }) => {
+const primeId: Trigger<TriggerType, QueryType> = async ({ query, cookies }) => {
   if (Object.keys(query.with || {}).length > 0) return query;
   query.with = {};
 
@@ -30,7 +29,7 @@ const primeId: Trigger<'during', QueryType> = async ({ query, cookies }) => {
   return query;
 };
 
-export default (authConfig: AuthConfig) => {
+export default (authConfig?: AuthConfig) => {
   return triggers<Account>({
     get: primeId,
 
@@ -272,7 +271,7 @@ export default (authConfig: AuthConfig) => {
       const { records } = options;
 
       for (const account of records) {
-        await AUTH_CONFIG?.sendEmail?.({
+        await authConfig?.sendEmail?.({
           account,
           type: 'ACCOUNT_CREATION',
           token: account.emailVerificationToken,
@@ -294,7 +293,7 @@ export default (authConfig: AuthConfig) => {
       const { emailVerificationToken } = query.to as { emailVerificationToken: string };
 
       for (const account of records) {
-        await AUTH_CONFIG?.sendEmail?.({
+        await authConfig?.sendEmail?.({
           account,
           type:
             operation === 'EMAIL_VERIFICATION_RESEND' ? 'ACCOUNT_CREATION' : operation,

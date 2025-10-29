@@ -2,8 +2,6 @@ import { EmptyFieldsError, InvalidPermissionsError } from 'blade/errors';
 import { type JWTPayload, verifyJWT } from 'blade/server/utils';
 import type { SetQueryInstructions, TriggerOptions } from 'blade/types';
 
-import type { AuthConfig } from '@/utils/types';
-
 /**
  * Check given object for empty values. Throws an error if the object contains
  * empty values.
@@ -42,14 +40,14 @@ if (!AUTH_SECRET && typeof import.meta.env !== 'undefined')
 /**
  * Retrieve the account that authored the incoming query.
  *
- * @param triggerOptions - The options object passed to the surrounding effect.
+ * @param cookies - The list of cookies provided to the trigger.
  *
  * @returns The ID of the account that authored the incoming query.
  */
 export const getSessionCookie = async (
-  triggerOptions: TriggerOptions,
+  cookies: TriggerOptions['cookies'],
 ): Promise<JWTPayload> => {
-  const token = triggerOptions.cookies.session;
+  const token = cookies.session;
 
   let sessionId: string | null = null;
   let accountId: string | null = null;
@@ -73,14 +71,6 @@ export const getSessionCookie = async (
 
   return { sessionId, accountId };
 };
-
-let AUTH_CONFIG: AuthConfig | undefined;
-
-export const setAuthConfig = (config: AuthConfig): void => {
-  AUTH_CONFIG = config;
-};
-
-export { AUTH_CONFIG };
 
 /**
  * Generate pseudo-random unique identifiers.
