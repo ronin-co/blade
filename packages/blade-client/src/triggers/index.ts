@@ -144,14 +144,14 @@ export type Triggers<
   TOptions extends object = TriggerOptions<TType, TSchema>,
 > = {
   [K in TriggerKeys]?: K extends 'before' | `before${string}`
-    ? Trigger<'before', TType, never, TOptions>[]
+    ? Trigger<'before', TType, never, TOptions>
     : K extends 'after' | `after${string}`
-      ? Trigger<'after', TType, never, TOptions>[]
+      ? Trigger<'after', TType, never, TOptions>
       : K extends 'resolving' | `resolving${string}`
-        ? Trigger<'resolving', TType, TSchema, TOptions>[]
+        ? Trigger<'resolving', TType, TSchema, TOptions>
         : K extends 'following' | `following${string}`
-          ? Trigger<'following', TType, TSchema, TOptions>[]
-          : Trigger<'during', TType>[];
+          ? Trigger<'following', TType, TSchema, TOptions>
+          : Trigger<'during', TType>;
 };
 
 export type TriggersPerModel<TSchema = unknown> = Record<

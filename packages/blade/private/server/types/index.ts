@@ -84,10 +84,6 @@ export type RecursiveRequired<T> = {
 
 export type ValueOf<T> = T[keyof T];
 
-type ValuesAsUnion<T extends Record<PropertyKey, readonly unknown[]>> = {
-  [K in keyof T]: NonNullable<T[K]>[number];
-};
-
 export type Trigger<
   TStage extends ClientTriggerType,
   TType extends QueryType,
@@ -99,7 +95,7 @@ export type Triggers<
   TType extends QueryType = QueryType,
   TSchema = unknown,
   TOptions extends object = TriggerOptions<TType, TSchema>,
-> = ValuesAsUnion<ClientTriggers<TType, TSchema, TOptions>>;
+> = ClientTriggers<TType, TSchema, TOptions>;
 
 export type TriggersList<TSchema = unknown> = Record<
   string,
