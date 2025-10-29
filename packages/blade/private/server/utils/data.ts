@@ -1,7 +1,7 @@
 import { waitUntil as vercelWaitUntil } from '@vercel/functions';
 import { runQueries } from 'blade-client';
 import type {
-  BeforeGetTrigger,
+  Trigger as ClientTrigger,
   TriggerOptions as ClientTriggerOptions,
   FormattedResults,
   QueryHandlerOptions,
@@ -14,7 +14,7 @@ import type { ServerContext } from '@/private/server/context';
 import type { WaitUntil } from '@/private/server/types';
 import type {
   TriggerOptions as NewTriggerOptions,
-  Triggers,
+  Triggers as NewTriggers,
 } from '@/private/server/types';
 import { VERBOSE_LOGGING } from '@/private/server/utils/constants';
 import { WRITE_QUERY_TYPES } from '@/private/server/utils/constants';
@@ -115,7 +115,7 @@ export const getClientConfig = (
   };
 
   const list = Object.entries(triggers || {}).map(
-    ([fileName, triggerList]): [string, Triggers] => {
+    ([fileName, triggerList]): [string, NewTriggers] => {
       // For every trigger, update the existing options argument to provide additional
       // options that are specific to BLADE.
       const extendedTriggerEntries = Object.entries(triggerList).map(
@@ -124,9 +124,8 @@ export const getClientConfig = (
           // This handles triggers of all types, but for the sake of being able to parse
           // the arguments of the original trigger type, we're using only the type of
           // `before*` triggers.
-          (...args: Parameters<BeforeGetTrigger>) => {
-            const argsBeforeLast = args.slice(0, -1);
-            const oldOptions = args.at(-1) as ClientTriggerOptions;
+          (...args: Parameters<ClientTrigger<'before', 'get'>>) => {
+            const clientOptions = args[0] as ClientTriggerOptions;
 
             // Create an object of options that are specific to the current trigger
             // function, in order to avoid modifying the global object.
@@ -143,7 +142,7 @@ export const getClientConfig = (
               //
               // Otherwise, if the client does not provide us with such information, we
               // need to check if the query is headless based on Blade's own primitives.
-              if (oldOptions.parentTrigger) {
+              if (clientOptions.parentTrigger) {
                 newOptions.headless = false;
               } else {
                 // If the queries stem from multiple different data sources, the type of
@@ -161,9 +160,8 @@ export const getClientConfig = (
               }
             }
 
-            const finalArgs = [...argsBeforeLast, { ...oldOptions, ...newOptions }];
-
-            return triggerFunction(...finalArgs);
+            // @ts-expect-error This is a valid assignment.
+            return triggerFunction({ ...clientOptions, ...newOptions });
           },
         ],
       );
@@ -202,6 +200,7 @@ export const getClientConfig = (
   }
 
   return {
+    // @ts-expect-error This is a valid assignment.
     triggers: finalTriggers,
     waitUntil: serverContext.waitUntil,
     models,

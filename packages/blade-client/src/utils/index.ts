@@ -1,5 +1,6 @@
 export { processStorableObjects, isStorableObject } from '@/src/storage';
 export { ClientError } from '@/src/utils/errors';
+export { TRIGGER_TYPES, getTriggerName } from '@/src/triggers';
 export * from '@/src/triggers/errors';
 
 // When invoking the client and capturing errors, it must be guaranteed that the error

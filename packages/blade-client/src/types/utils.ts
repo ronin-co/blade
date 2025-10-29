@@ -7,14 +7,14 @@ import type {
   StoredObject,
 } from 'blade-compiler';
 
-import type { TriggerOptions, Triggers } from '@/src/triggers';
+import type { ParentTrigger, TriggersPerModel } from '@/src/triggers';
 import type { StorableObject } from '@/src/types/storage';
 
 export interface QueryHandlerOptions {
   /**
    * Object containing triggers for defined schemas.
    */
-  triggers?: Triggers;
+  triggers?: TriggersPerModel;
 
   /**
    * Token used to authenticate against RONIN. By default,
@@ -89,7 +89,7 @@ export interface QueryHandlerOptions {
    * It is highly recommended to rely on `options.client` for running queries in triggers
    * instead of initializing a custom client, as that resumes the configuration.
    */
-  parentTrigger?: TriggerOptions['parentTrigger'];
+  parentTrigger?: ParentTrigger;
 
   /** A list of models used for compiling Blade queries to SQL. */
   models?: Array<Model>;

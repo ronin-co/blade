@@ -4,10 +4,9 @@ import type { CombinedInstructions, Query, QueryType, Statement } from 'blade-co
 import { createSyntaxFactory } from '@/src/index';
 import { runQueriesWithStorageAndTriggers } from '@/src/queries';
 import {
-  type AddTrigger,
   type FilteredTriggerQuery,
-  type FollowingAddTrigger,
-  type ResolvingAddTrigger,
+  type Trigger,
+  type Triggers,
   runQueriesWithTriggers,
 } from '@/src/triggers';
 
@@ -50,8 +49,8 @@ describe('triggers', () => {
     const factory = createSyntaxFactory({
       triggers: {
         account: {
-          get(query, multiple) {
-            if (multiple) {
+          get({ query, multipleRecords }) {
+            if (multipleRecords) {
               query.with = {
                 email: {
                   endingWith: '@ronin.co',
@@ -101,7 +100,7 @@ describe('triggers', () => {
     const factory = createSyntaxFactory({
       triggers: {
         account: {
-          get(query) {
+          get({ query }) {
             const fullQuery: Query = {
               get: {
                 team: query,
@@ -136,8 +135,8 @@ describe('triggers', () => {
     const factory = createSyntaxFactory(() => ({
       triggers: {
         account: {
-          get(query, multiple) {
-            if (multiple) {
+          get({ query, multipleRecords }) {
+            if (multipleRecords) {
               query.with = {
                 email: {
                   endingWith: '@ronin.co',
@@ -191,8 +190,8 @@ describe('triggers', () => {
     const factory = createSyntaxFactory({
       triggers: {
         schema: {
-          resolvingGet(_query, multiple) {
-            if (multiple)
+          resolvingGet({ multipleRecords }) {
+            if (multipleRecords)
               return [
                 {
                   id: '1',
@@ -202,7 +201,7 @@ describe('triggers', () => {
                 },
               ];
 
-            if (!multiple)
+            if (!multipleRecords)
               return {
                 id: '1',
               };
@@ -271,11 +270,11 @@ describe('triggers', () => {
       },
       triggers: {
         model: {
-          followingCreate(query, multiple, beforeResult, afterResult) {
+          followingCreate({ query, multipleRecords, previousRecords, records }) {
             finalQuery = query;
-            finalMultiple = multiple;
-            finalBeforeResult = beforeResult;
-            finalAfterResult = afterResult;
+            finalMultiple = multipleRecords;
+            finalBeforeResult = previousRecords;
+            finalAfterResult = records;
           },
         },
       },
@@ -356,11 +355,11 @@ describe('triggers', () => {
       models: [{ slug: 'account' }],
       triggers: {
         model: {
-          followingAlter(query, multiple, beforeResult, afterResult) {
+          followingAlter({ query, multipleRecords, previousRecords, records }) {
             finalQuery = query;
-            finalMultiple = multiple;
-            finalBeforeResult = beforeResult;
-            finalAfterResult = afterResult;
+            finalMultiple = multipleRecords;
+            finalBeforeResult = previousRecords;
+            finalAfterResult = records;
           },
         },
       },
@@ -438,11 +437,11 @@ describe('triggers', () => {
       }),
       triggers: {
         model: {
-          followingDrop(query, multiple, beforeResult, afterResult) {
+          followingDrop({ query, multipleRecords, previousRecords, records }) {
             finalQuery = query;
-            finalMultiple = multiple;
-            finalBeforeResult = beforeResult;
-            finalAfterResult = afterResult;
+            finalMultiple = multipleRecords;
+            finalBeforeResult = previousRecords;
+            finalAfterResult = records;
           },
         },
       },
@@ -500,9 +499,9 @@ describe('triggers', () => {
       ],
       triggers: {
         account: {
-          followingRemove(_query, _multiple, beforeResult, afterResult) {
-            finalBeforeResult = beforeResult;
-            finalAfterResult = afterResult;
+          followingRemove({ previousRecords, records }) {
+            finalBeforeResult = previousRecords;
+            finalAfterResult = records;
           },
         },
       },
@@ -567,13 +566,13 @@ describe('triggers', () => {
       ],
       triggers: {
         account: {
-          followingSet(query, multiple, beforeResult, afterResult) {
+          followingSet({ query, multipleRecords, previousRecords, records }) {
             finalQuery = query;
-            finalMultiple = multiple;
-            finalBeforeResult = beforeResult as
+            finalMultiple = multipleRecords;
+            finalBeforeResult = previousRecords as
               | Array<Record<string, unknown>>
               | undefined;
-            finalAfterResult = afterResult as Array<Record<string, unknown>> | undefined;
+            finalAfterResult = records as Array<Record<string, unknown>> | undefined;
           },
         },
       },
@@ -631,9 +630,9 @@ describe('triggers', () => {
       models: [{ slug: 'member' }],
       triggers: {
         account: {
-          resolvingGet(query, multiple) {
+          resolvingGet({ query, multipleRecords }) {
             finalQuery = query;
-            finalMultiple = multiple;
+            finalMultiple = multipleRecords;
 
             return { id: 'juri' };
           },
@@ -697,9 +696,13 @@ describe('triggers', () => {
       },
     ];
 
-    let duringAddOptions: Parameters<AddTrigger>[2] | undefined;
-    let resolvingAddOptions: Parameters<ResolvingAddTrigger>[2] | undefined;
-    let followingAddOptions: Parameters<FollowingAddTrigger>[4] | undefined;
+    let duringAddOptions: Parameters<Trigger<'during', 'add'>>[0] | undefined;
+    let resolvingAddOptions:
+      | Parameters<Trigger<'resolving', 'add', unknown>>[0]
+      | undefined;
+    let followingAddOptions:
+      | Parameters<Trigger<'following', 'add', unknown>>[0]
+      | undefined;
 
     const results = await runQueriesWithStorageAndTriggers(
       {
@@ -723,15 +726,15 @@ describe('triggers', () => {
         }),
         triggers: {
           sink: {
-            add: (query, _multiple, options) => {
+            add: (options) => {
               duringAddOptions = options;
-              return query;
+              return options.query;
             },
-            resolvingAdd: (query, _multiple, options) => {
+            resolvingAdd: (options) => {
               resolvingAddOptions = options;
-              return query.with;
+              return options.query.with;
             },
-            followingAdd: (_query, _multiple, _beforeResult, _afterResult, options) => {
+            followingAdd: (options) => {
               followingAddOptions = options;
             },
           },
@@ -763,17 +766,19 @@ describe('triggers', () => {
   test('return queries from `before` trigger', async () => {
     let mockStatements: Array<Statement> | undefined;
 
-    let accountTriggersOptions = {} as Parameters<FollowingAddTrigger>[4];
-    const accountTriggers: { followingAdd: FollowingAddTrigger } = {
-      followingAdd: (_query, _multiple, _before_, _after, options) => {
+    let accountTriggersOptions = {} as Parameters<
+      Trigger<'following', 'add', unknown>
+    >[0];
+    const accountTriggers: Triggers<'add'> = {
+      followingAdd: (options) => {
         accountTriggersOptions = options;
       },
     };
     const accountTriggersSpy = spyOn(accountTriggers, 'followingAdd');
 
-    let spaceTriggersOptions = {} as Parameters<FollowingAddTrigger>[4];
-    const spaceTriggers: { followingAdd: FollowingAddTrigger } = {
-      followingAdd: (_query, _multiple, _before_, _after, options) => {
+    let spaceTriggersOptions = {} as Parameters<Trigger<'following', 'add', unknown>>[0];
+    const spaceTriggers: Triggers<'add'> = {
+      followingAdd: (options) => {
         spaceTriggersOptions = options;
       },
     };
@@ -782,7 +787,7 @@ describe('triggers', () => {
     const factory = createSyntaxFactory({
       triggers: {
         member: {
-          beforeAdd(query) {
+          beforeAdd({ query }) {
             const accountQuery: Query = {
               add: {
                 account: {
@@ -916,12 +921,12 @@ describe('triggers', () => {
       },
     ]);
 
-    expect(accountTriggersOptions).toEqual({
+    expect(accountTriggersOptions).toMatchObject({
       parentTrigger: { model: 'member', type: 'before' },
       client: expect.any(Object),
       context: expect.any(Map),
     });
-    expect(spaceTriggersOptions).toEqual({
+    expect(spaceTriggersOptions).toMatchObject({
       parentTrigger: { model: 'member', type: 'before' },
       client: expect.any(Object),
       context: expect.any(Map),
@@ -979,7 +984,7 @@ describe('triggers', () => {
     const factory = createSyntaxFactory({
       triggers: {
         space: {
-          afterAdd(query) {
+          afterAdd({ query }) {
             const memberQuery: Query = {
               add: {
                 member: {
