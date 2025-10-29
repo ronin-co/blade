@@ -58,10 +58,10 @@ export interface TriggerOptions<
   waitUntil?: QueryHandlerOptions['waitUntil'];
 
   /** The list of records, before the query was executed. */
-  previousRecords?: TSchema;
+  previousRecords: TSchema;
 
   /** The list of records, after the query was executed. */
-  records?: TSchema;
+  records: TSchema;
 }
 
 type ReturnedQueries = () => Array<Promise<any>>;
