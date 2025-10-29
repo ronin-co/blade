@@ -109,11 +109,17 @@ type FollowingTriggerHandler<TOptions extends object> = (
 
 // The order of these types is important, as they determine the order in which
 // triggers are run (the "trigger lifecycle").
-const TRIGGER_TYPES = ['before', 'during', 'after', 'resolving', 'following'] as const;
+export const TRIGGER_TYPES = [
+  'before',
+  'during',
+  'after',
+  'resolving',
+  'following',
+] as const;
 
 export type TriggerType = (typeof TRIGGER_TYPES)[number];
 
-type TriggerKeys = (
+type TriggerName = (
   | { [K in QueryType]: `before${Capitalize<K>}` }
   | { [K in QueryType]: K }
   | { [K in QueryType]: `after${Capitalize<K>}` }
@@ -143,7 +149,7 @@ export type Triggers<
   TSchema = unknown,
   TOptions extends object = TriggerOptions<TType, TSchema>,
 > = {
-  [K in TriggerKeys]?: K extends 'before' | `before${string}`
+  [K in TriggerName]?: K extends 'before' | `before${string}`
     ? Trigger<'before', TType, never, TOptions>
     : K extends 'after' | `after${string}`
       ? Trigger<'after', TType, never, TOptions>
@@ -195,9 +201,13 @@ const getModel = (
  *
  * @returns The method name constructed from the trigger and query types.
  */
-const getMethodName = (triggerType: TriggerType, queryType: QueryType): string => {
+export const getMethodName = (
+  triggerType: TriggerType,
+  queryType: QueryType,
+): TriggerName => {
   const capitalizedQueryType = queryType[0].toUpperCase() + queryType.slice(1);
-  return triggerType === 'during' ? queryType : triggerType + capitalizedQueryType;
+  if (triggerType === 'during') return queryType;
+  return (triggerType + capitalizedQueryType) as TriggerName;
 };
 
 /**
