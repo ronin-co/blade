@@ -26,7 +26,7 @@ const primeId: Trigger<TriggerType, QueryType> = async ({
   return query;
 };
 
-export default (authConfig?: AuthConfig) => {
+export default (_authConfig?: AuthConfig) => {
   return triggers<Session>({
     get: primeId,
 
