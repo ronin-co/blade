@@ -108,36 +108,6 @@ const fetchFromCDN = async (
   }
 };
 
-const DEFAULT_EXCLUDED_DEPENDENCIES = new Set([
-  // React server contexts can conflict if multiple versions are loaded
-  'react',
-  'react-dom',
-  'scheduler',
-]);
-
-/**
- * Checks if an import ID or importer path is from an excluded dependency.
- *
- * @param id - The import ID or importer path to check.
- *
- * @returns True if the ID is from an excluded dependency.
- */
-const isExcludedDependency = (id: string, config: BuildConfig): boolean => {
-  const excludedDependencies = new Set<string>(
-    config.dependencies?.excluded || DEFAULT_EXCLUDED_DEPENDENCIES,
-  );
-  if (excludedDependencies.has(id)) return true;
-
-  for (const pkgName of excludedDependencies) {
-    if (id.startsWith(`${pkgName}/`)) return true;
-
-    // Check if path contains the excluded dependency (handles node_modules paths)
-    if (id.includes(`/${pkgName}/`) || id.includes(`\\${pkgName}\\`)) return true;
-  }
-
-  return false;
-};
-
 const makePathAbsolute = (input: string) => {
   if (input.startsWith('./')) return input.slice(1);
   if (input.startsWith('/')) return input;
@@ -189,10 +159,6 @@ interface BuildConfig {
    * Any additional configuration for dependencies to include in the build.
    */
   dependencies?: {
-    /**
-     * List of dependency names to exclude from being fetched from CDN.
-     */
-    excluded?: Array<string>;
     /**
      * Map of dependency names to override their resolution.
      */
@@ -274,50 +240,46 @@ export const build = async (
           handler(id, importer) {
             const resolvedId = overridePackageId(id, config);
 
-            // Skip blade/* imports - these are framework internals, not external CDN deps
-            if (resolvedId.startsWith('blade/')) {
-              try {
-                return resolveFrom(nodePath, resolvedId);
-              } catch (error) {
-                console.warn(
-                  `Failed to resolve ${resolvedId} from node_modules, falling back to default resolution`,
-                  error,
-                );
-                return null;
+            // Handle relative imports from CDN modules
+            const isRelativePath =
+              resolvedId.includes('../') || resolvedId.includes('./');
+            if (isRelativePath && importer?.startsWith('cdn:')) {
+              const importerCdnId = importer.replace('cdn:', '');
+
+              // Attempt to look up the final URL (after redirects) from cache
+              let finalImporterUrl = DEPENDENCY_CACHE.get(importer);
+              if (!finalImporterUrl) {
+                // If not in cache, make an educated guess
+                // Bare package paths (no extension) typically resolve to /index.js
+                const hasExtension = /\.[a-z]+$/i.test(importerCdnId);
+                finalImporterUrl = hasExtension
+                  ? importerCdnId
+                  : `${importerCdnId}/index.js`;
               }
+
+              const url = resolveImportPath(resolvedId, finalImporterUrl);
+              return `cdn:${url}`;
             }
 
-            // Skip excluded dependencies (React, etc.) - these are resolved via aliases from node_modules
-            if (isExcludedDependency(resolvedId, config)) return null;
+            // Handle relative imports from local node_modules
+            if (isRelativePath && importer) {
+              const resolvedIdRelative = path.join(path.dirname(importer), resolvedId);
+              const splitLastNodeModule = resolvedIdRelative
+                .split(/node_modules[\\/]/)
+                .pop();
 
-            // Skip imports that look like rolldown-generated chunk files (contain hash patterns like -BYv80wED)
-            // These are internal framework chunks, not npm packages
-            if (/-[A-Za-z0-9_-]{8,}\.js$/.test(resolvedId)) return null;
+              // TODO(@nurodev): Add nullish check
 
-            // Skip relative imports from excluded dependencies (e.g., React's internal ./cjs/... imports)
-            // These should be resolved normally by Rolldown from node_modules
-            if (
-              importer &&
-              (resolvedId.startsWith('./') || resolvedId.startsWith('../')) &&
-              isExcludedDependency(importer, config)
-            )
-              return null;
-
-            // If the importer is a CDN module, resolve relative to it
-            if (importer?.startsWith('cdn:')) {
-              const importerUrl =
-                DEPENDENCY_CACHE.get(importer) || importer.replace('cdn:', '');
-              const resolvedUrl = resolveImportPath(resolvedId, importerUrl);
-              return `cdn:${resolvedUrl}`;
+              return `cdn:https://unpkg.com/${splitLastNodeModule}`;
             }
 
-            // Only resolve bare imports that look like actual npm packages
-            // npm package names: can start with @ (scoped), or letter, contain letters/numbers/-/_
-            // Reject if it looks like an internal chunk (has .js extension without /node_modules/)
-            if (resolvedId.endsWith('.js') && !resolvedId.includes('/')) return null;
+            // Handle bare imports (non-relative) from CDN modules
+            // For bare imports from CDN, still use unpkg.com
+            if (importer?.startsWith('cdn:'))
+              return `cdn:https://unpkg.com/${resolvedId}`;
 
-            const resolvedUrl = resolveImportPath(resolvedId, 'https://unpkg.com/');
-            return `cdn:${resolvedUrl}`;
+            // Handle bare imports from local files
+            return `cdn:https://unpkg.com/${resolvedId}`;
           },
         },
         load: {
