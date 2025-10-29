@@ -1,5 +1,4 @@
 import path from 'node:path';
-import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
@@ -146,17 +145,6 @@ const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
 const reEscape = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const toPosix = (input: string) => input.replace(/\\/g, '/');
 
-/**
- * Checks if we're using a linked package (e.g., `bun link`).
- * When linked, the source directory is outside the current working directory.
- */
-const isLinkedPackage = (): boolean => {
-  const cwd = toPosix(process.cwd());
-  const source = toPosix(sourceDirPath);
-  // If source is outside cwd, we're using a linked package
-  return !source.startsWith(cwd);
-};
-
 const ignoreStart = new RegExp(
   `^(?:${[nodePath, sourceDirPath].map((p) => reEscape(toPosix(p))).join('|')})`,
 );
@@ -251,16 +239,6 @@ export const build = async (
           handler(id, importer) {
             const resolvedId = overridePackageId(id, config);
 
-            // Check if this import is pointing to a linked package (outside cwd)
-            // If so, use resolve-from to properly resolve local dependencies
-            if (isLinkedPackage()) {
-              try {
-                return resolveFrom(nodePath, resolvedId);
-              } catch {
-                return null;
-              }
-            }
-
             // Handle relative imports from CDN modules
             const isRelativePath =
               resolvedId.includes('../') || resolvedId.includes('./');
@@ -294,12 +272,6 @@ export const build = async (
               return `cdn:https://unpkg.com/${splitLastNodeModule}`;
             }
 
-            // Handle bare imports (non-relative) from CDN modules
-            // For bare imports from CDN, still use unpkg.com
-            if (importer?.startsWith('cdn:'))
-              return `cdn:https://unpkg.com/${resolvedId}`;
-
-            // Handle bare imports from local files
             return `cdn:https://unpkg.com/${resolvedId}`;
           },
         },
