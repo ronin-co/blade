@@ -58,10 +58,10 @@ export interface TriggerOptions<
   waitUntil?: QueryHandlerOptions['waitUntil'];
 
   /** The list of records, before the query was executed. */
-  previousRecords?: TSchema;
+  previousRecords: Array<TSchema>;
 
   /** The list of records, after the query was executed. */
-  records?: TSchema;
+  records: Array<TSchema>;
 }
 
 type ReturnedQueries = () => Array<Promise<any>>;
@@ -157,7 +157,7 @@ export type Triggers<
         ? Trigger<'resolving', TType, TSchema, TOptions>
         : K extends 'following' | `following${string}`
           ? Trigger<'following', TType, TSchema, TOptions>
-          : Trigger<'during', TType>;
+          : Trigger<'during', TType, never, TOptions>;
 };
 
 export type TriggersPerModel<TSchema = unknown> = Record<
@@ -337,6 +337,8 @@ const applyTrigger = async <T extends ResultRecord>(
       waitUntil: options.clientOptions.waitUntil,
       context: options.context,
       ...(triggerFile === 'sink' ? { model: queryModel, database } : {}),
+      previousRecords: [],
+      records: [],
     };
 
     // For triggers of type "following" (such as `followingAdd`), we want to pass

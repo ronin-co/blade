@@ -1,1 +1,1 @@
-export { getSessionCookie, setAuthConfig } from 'blade-auth/utils';
+export { getSessionCookie } from 'blade-auth/utils';

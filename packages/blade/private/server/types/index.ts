@@ -94,8 +94,7 @@ export type Trigger<
 export type Triggers<
   TType extends QueryType = QueryType,
   TSchema = unknown,
-  TOptions extends object = TriggerOptions<TType, TSchema>,
-> = ClientTriggers<TType, TSchema, TOptions>;
+> = ClientTriggers<TType, TSchema, TriggerOptions<TType, TSchema>>;
 
 export type TriggersList<TSchema = unknown> = Record<
   string,
