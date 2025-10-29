@@ -115,7 +115,7 @@ export const getClientConfig = (
   };
 
   const list = Object.entries(triggers || {}).map(
-    ([fileName, triggerList]): [string, NewTriggers] => {
+    ([fileName, { default: triggerList }]): [string, NewTriggers] => {
       // For every trigger, update the existing options argument to provide additional
       // options that are specific to BLADE.
       const extendedTriggerEntries = Object.entries(triggerList).map(

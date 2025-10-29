@@ -98,7 +98,7 @@ export type Triggers<
 
 export type TriggersList<TSchema = unknown> = Record<
   string,
-  Triggers<QueryType, TSchema>
+  { default: Triggers<QueryType, TSchema> }
 >;
 export type PageList = Record<string, TreeItem | 'DIRECTORY'>;
 export type ModelList = { 'index.ts'?: Record<string, Model> };
