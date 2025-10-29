@@ -1,11 +1,11 @@
 import { verifyPassword } from 'better-auth/crypto';
 import { InvalidFieldsError, MultipleWithInstructionsError } from 'blade/errors';
+import { triggers } from 'blade/schema';
 import { getRecordIdentifier, signJWT } from 'blade/server/utils';
 import type { QueryType, Session, Trigger, TriggerType } from 'blade/types';
 
 import { AUTH_SECRET, getSessionCookie } from '@/utils/index';
 import type { AuthConfig } from '@/utils/types';
-import { triggers } from 'blade/schema';
 
 const primeId: Trigger<TriggerType, QueryType> = async ({
   query,
