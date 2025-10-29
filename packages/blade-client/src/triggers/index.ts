@@ -337,6 +337,8 @@ const applyTrigger = async <T extends ResultRecord>(
       waitUntil: options.clientOptions.waitUntil,
       context: options.context,
       ...(triggerFile === 'sink' ? { model: queryModel, database } : {}),
+      previousRecords: [],
+      records: [],
     };
 
     // For triggers of type "following" (such as `followingAdd`), we want to pass
