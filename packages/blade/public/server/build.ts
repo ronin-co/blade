@@ -1,5 +1,4 @@
 import path from 'node:path';
-import resolveFrom from 'resolve-from';
 import { aliasPlugin } from 'rolldown/experimental';
 
 import { nodePath, sourceDirPath } from '@/private/shell/constants';
