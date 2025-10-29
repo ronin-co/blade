@@ -24,13 +24,15 @@ generate a new secret that you can store in the environment variable.
 ```ts
 // triggers/account.ts
 
-export * from 'blade/auth/triggers/account';
+import { getAccountTriggers } from 'blade/auth/triggers';
+export default getAccountTriggers();
 ```
 
 ```ts
 // triggers/session.ts
 
-export * from 'blade/auth/triggers/session';
+import { getSessionTriggers } from 'blade/auth/triggers';
+export default getSessionTriggers();
 ```
 
 The following [models](/models) must be added as well:
@@ -44,18 +46,24 @@ export { Account, Session } from 'blade/auth/models';
 ## Config
 
 To customize the behavior of the authentication logic and handle actions such as sending
-emails, you can provide the following function call in the respective trigger file:
+emails, you can provide configuration options to the function call in the respective trigger file:
 
 ```ts
 // triggers/account.ts
 
-import { setAuthConfig } from 'blade/auth/utils';
+import { triggers } from 'blade/schema';
+import { getAccountTriggers } from 'blade/auth/triggers';
 
-setAuthConfig({
+const authTriggers = getAccountTriggers({
   sendEmail: async ({ type, account, token, options }) => {
     if (type === "ACCOUNT_CREATION") {}
     if (type === "PASSWORD_RESET") {}
   }
+});
+
+export default triggers(authTriggers, {
+  // If needed, provide additional triggers that should be run.
+  add: () => {}
 });
 ```
 
@@ -322,11 +330,14 @@ For example, you could place the trigger below inside the trigger file of a mode
 which you would like to log a message every time a record is added.
 
 ```ts
-import type { FollowingAddTrigger } from "blade/types";
+import { triggers } from 'blade/schema';
 import { getSessionCookie } from 'blade/auth/utils';
+import type { Session } from 'blade/types';
 
-export const followingAdd: FollowingAddTrigger = async (_, _, options) => {
-  const { accountId } = await getSessionCookie(options);
-  console.log(`A new record was added by ${accountId}`);
-};
+export default triggers<Session>({
+  followingAdd: async ({ cookies }) => {
+    const { accountId } = await getSessionCookie(cookies);
+    console.log(`A new record was added by ${accountId}`);
+  }
+});
 ```
