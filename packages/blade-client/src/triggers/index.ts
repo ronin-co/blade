@@ -237,7 +237,7 @@ interface TriggerResults<T> {
  *
  * @returns The modified query and its results, if any are available.
  */
-const invokeTriggers = async <T extends ResultRecord>(
+const applyTrigger = async <T extends ResultRecord>(
   triggerType: TriggerType,
   definition: QueryFromTrigger<T> & {
     resultBefore?: unknown;
@@ -453,7 +453,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
   // Invoke `beforeAdd`, `beforeGet`, `beforeSet`, `beforeRemove`, and `beforeCount`.
   await Promise.all(
     queries.map(async (queryItem, index) => {
-      const triggerResults = await invokeTriggers('before', queryItem, options);
+      const triggerResults = await applyTrigger('before', queryItem, options);
       queries.splice(index, 0, ...(triggerResults?.queries || []));
     }),
   );
@@ -464,7 +464,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
       let triggerResults: TriggerResults<T> | undefined;
 
       try {
-        triggerResults = await invokeTriggers('during', queryItem, options);
+        triggerResults = await applyTrigger('during', queryItem, options);
       } catch (err) {
         const queryType = Object.keys(queryItem.query)[0] as QueryType;
 
@@ -493,7 +493,7 @@ export const applySyncTriggers = async <T extends ResultRecord>(
       // need to collect additional queries that should run in the same transaction.
       if (queryItem.result !== EMPTY) return;
 
-      const triggerResults = await invokeTriggers('after', queryItem, options);
+      const triggerResults = await applyTrigger('after', queryItem, options);
       queries.splice(index + 1, 0, ...(triggerResults?.queries || []));
     }),
   );
@@ -570,7 +570,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
       // If the query already has a result, we don't need to try and obtain one.
       if (queryItem.result !== EMPTY) return;
 
-      const triggerResults = await invokeTriggers('resolving', queryItem, options);
+      const triggerResults = await applyTrigger('resolving', queryItem, options);
       queries[index].result = triggerResults.result as FormattedResults<T>[number];
     }),
   );
@@ -619,7 +619,7 @@ export const applyAsyncTriggers = async <T extends ResultRecord>(
 
     // Run the actual trigger functions.
     const queryDetails = { ...queryItem, resultBefore, resultAfter };
-    const promise = invokeTriggers('following', queryDetails, options);
+    const promise = applyTrigger('following', queryDetails, options);
 
     // The result of the trigger should not be made available, otherwise
     // developers might start relying on it. Only errors should be propagated.
