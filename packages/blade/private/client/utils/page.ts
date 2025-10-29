@@ -1,7 +1,6 @@
 import { createParser } from 'eventsource-parser';
 import { omit } from 'radash';
 import type { ReactNode } from 'react';
-import { hydrateRoot } from 'react-dom/client';
 
 import { fetchRetry } from '@/private/client/utils/data';
 import { createFromReadableStream } from '@/private/client/utils/parser';
@@ -155,26 +154,6 @@ export const createStreamSource = async (
 let BLADE_ROOT: import('react-dom/client').Root | null = null;
 
 /**
- * Receives a React node and renders it at the root of the page.
- *
- * @param content - The React node to render.
- *
- * @returns Nothing.
- */
-export const renderRoot = (content: ReactNode): void => {
-  if (BLADE_ROOT) {
-    BLADE_ROOT.render(content);
-    return;
-  }
-
-  BLADE_ROOT = hydrateRoot(document, content, {
-    onRecoverableError(error, errorInfo) {
-      console.error('Hydration error occurred:', error, errorInfo);
-    },
-  });
-};
-
-/**
  * Resolves a new page from the server-side of Blade.
  *
  * @param path - The path of the page.
@@ -218,7 +197,10 @@ export const fetchPage = async (
       const dataStream = new Blob([event.data]).stream();
       const content = await createFromReadableStream(dataStream);
 
-      if (stream.subscribed) return renderRoot(content);
+      if (stream.subscribed) {
+        BLADE_ROOT!.render(content);
+        return;
+      }
 
       resolve(content);
     });
