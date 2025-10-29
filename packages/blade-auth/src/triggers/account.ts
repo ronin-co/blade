@@ -7,17 +7,9 @@ import {
   SetNotAllowedError,
   TooManyRequestsError,
 } from 'blade/errors';
+import { triggers } from 'blade/schema';
 import { getRecordIdentifier } from 'blade/server/utils';
-import type {
-  Account,
-  Accounts,
-  AddTrigger,
-  FollowingAddTrigger,
-  FollowingSetTrigger,
-  GetTrigger,
-  RemoveTrigger,
-  SetTrigger,
-} from 'blade/types';
+import type { Account, QueryType, Trigger } from 'blade/types';
 
 import {
   AUTH_CONFIG,
@@ -26,290 +18,290 @@ import {
   generateUniqueId,
   getSessionCookie,
 } from '@/utils/index';
+import type { AuthConfig } from '@/utils/types';
 
-const primeId: GetTrigger = async (query, _multiple, options) => {
+const primeId: Trigger<'during', QueryType> = async ({ query, cookies }) => {
   if (Object.keys(query.with || {}).length > 0) return query;
   query.with = {};
 
-  const accountId =
-    options.cookies.account || (await getSessionCookie(options)).accountId;
+  const accountId = cookies.account || (await getSessionCookie(cookies)).accountId;
   query.with.id = accountId;
 
   return query;
 };
 
-export const get: GetTrigger = (query, multiple, options) => {
-  return primeId(query, multiple, options);
-};
+export default (authConfig: AuthConfig) => {
+  return triggers<Account>({
+    get: primeId,
 
-export const add: AddTrigger = async (query, _multiple, options) => {
-  if (!query.with) throw new Error('A `with` instruction must be given.');
+    add: async ({ query, parentTrigger, setCookie }) => {
+      if (!query.with) throw new Error('A `with` instruction must be given.');
 
-  if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
+      if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
 
-  const id = getRecordIdentifier('acc');
+      const id = getRecordIdentifier('acc');
 
-  Object.assign(query.with, {
-    id,
-    password: await hashPassword(query.with.password as string),
+      Object.assign(query.with, {
+        id,
+        password: await hashPassword(query.with.password as string),
 
-    emailVerified: false,
-    emailVerificationToken: generateUniqueId(),
-    emailVerificationSentAt: new Date(),
-  });
-
-  // Store the ID of the newly created account in a cookie, to let the UI know that there
-  // is a pending account for which the email hasn't yet been verified.
-  if (!options.parentTrigger) options.setCookie('account', id);
-
-  return query;
-};
-
-export const set: SetTrigger = async (query, multiple, options) => {
-  const { get } = options.client;
-
-  await primeId(query, multiple, options);
-
-  if (!query.with) throw new Error('A `with` instruction must be given.');
-  if (!query.to) throw new Error('A `to` instruction must be given.');
-
-  if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
-
-  avoidEmptyFields(query.to, ['password']);
-
-  // These actions are arranged in the order in which they are executed after a
-  // new account is created.
-  const operation = query.to.emailVerificationSentAt
-    ? 'EMAIL_VERIFICATION_RESEND'
-    : query.to.emailVerified === true
-      ? 'EMAIL_VERIFICATION_DONE'
-      : query.to.password === null
-        ? 'PASSWORD_RESET'
-        : query.to.password && query.with?.emailVerificationToken
-          ? 'PASSWORD_RESET_DONE'
-          : query.to.password
-            ? 'PASSWORD_CHANGE'
-            : null;
-
-  options.context.set('operation', operation);
-
-  if (
-    // These operations should work without an active session.
-    operation === 'EMAIL_VERIFICATION_RESEND' ||
-    operation === 'EMAIL_VERIFICATION_DONE' ||
-    operation === 'PASSWORD_RESET' ||
-    operation === 'PASSWORD_RESET_DONE'
-  ) {
-    // However, completing any of the aforementioned processes, meaning completing the
-    // email verification or the password reset, should only be possible with the right
-    // email verification token.
-    if (!(operation === 'EMAIL_VERIFICATION_RESEND' || operation === 'PASSWORD_RESET')) {
-      const { emailVerificationToken } = query.with || {};
-
-      if (!emailVerificationToken) {
-        throw new EmptyFieldsError({
-          message:
-            'For this action, the field `with.emailVerificationToken` must be provided.',
-          fields: ['emailVerificationToken'],
-        });
-      }
-
-      const account = await get.account.with({ emailVerificationToken });
-
-      if (!account) {
-        throw new InvalidFieldsError({ fields: ['id', 'currentPassword'] });
-      }
-
-      if (!query.to.ronin) query.to.ronin = {};
-      (query.to.ronin as Record<string, string>).updatedBy = account.id as string;
-    }
-  } else {
-    // TODO: Check to make sure the user has permission to update / delete an account.
-  }
-
-  if (operation)
-    console.debug(
-      `Performing \`${operation}\` on selector \`${JSON.stringify(query.with)}\``,
-    );
-
-  // `currentPassword` is an ephemeral field, so we want to delete it before letting
-  // Blade update the record.
-  const currentPassword = query.to.currentPassword;
-  delete query.to.currentPassword;
-
-  if (currentPassword && !query.to.password) {
-    throw new EmptyFieldsError({ fields: ['password'] });
-  }
-
-  // Don't allow `emailVerificationToken` to be written to. We do this in order to
-  // prevent anyone setting a custom `emailVerificationToken`. A new
-  // `emailVerificationToken` can only be generated by setting `emailVerificationSentAt`.
-  // This intentionally throws an `InvalidFieldsError` to completely hide the existence
-  // of this field from the outside.
-  if (query.to.emailVerificationToken) {
-    throw new InvalidFieldsError({ fields: ['emailVerificationToken'] });
-  }
-
-  if (operation === 'EMAIL_VERIFICATION_DONE') {
-    const account = (await get.account.with.id(query.with.id as string)) as Account;
-
-    if (!account)
-      throw new RecordNotFoundError({
-        message: 'Account subject to verification does not exist.',
+        emailVerified: false,
+        emailVerificationToken: generateUniqueId(),
+        emailVerificationSentAt: new Date(),
       });
 
-    if (account.emailVerificationToken !== query.with?.emailVerificationToken) {
-      throw new InvalidFieldsError({
-        message: 'Invalid verification token provided.',
-        fields: ['emailVerificationToken'],
-      });
-    }
+      // Store the ID of the newly created account in a cookie, to let the UI know that there
+      // is a pending account for which the email hasn't yet been verified.
+      if (!parentTrigger) setCookie('account', id);
 
-    // Abort if the account already has a verified email address.
-    if (account.emailVerified) {
-      throw new SetNotAllowedError({
-        message: 'This account already has a verified email address.',
-      });
-    }
-  }
+      return query;
+    },
 
-  if (operation === 'EMAIL_VERIFICATION_RESEND' || operation === 'PASSWORD_RESET') {
-    const account = (await get.account.with(query.with)) as Account;
+    set: async (options) => {
+      const { query } = options;
+      const { get } = options.client;
 
-    // Abort if no matching account was found for the provided query.
-    if (!account) {
-      throw new RecordNotFoundError({ fields: ['email'] });
-    }
+      await primeId(options);
 
-    // Abort if the account already has a verified email address.
-    if (operation === 'EMAIL_VERIFICATION_RESEND' && account.emailVerified) {
-      throw new SetNotAllowedError({
-        message: 'This account already has a verified email address.',
-      });
-    }
+      if (!query.with) throw new Error('A `with` instruction must be given.');
+      if (!query.to) throw new Error('A `to` instruction must be given.');
 
-    const newDate = query.to.emailVerificationSentAt
-      ? new Date(query.to.emailVerificationSentAt as string)
-      : new Date();
-    const previousDate = new Date(account.emailVerificationSentAt);
+      if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
 
-    // Don't send another verification email if `emailVerificationSentAt` is
-    // set to the past.
-    if (newDate < previousDate) {
-      throw new InvalidFieldsError({
-        message:
-          'The date provided for `emailVerificationSentAt` must not be in the past.',
-        fields: ['emailVerificationSentAt'],
-      });
-    }
+      avoidEmptyFields(query.to, ['password']);
 
-    // Don't allow sending new emails too quickly, in order to not spam the email
-    // provider and decrease the email reputation.
-    if (newDate.getTime() < previousDate.getTime() + EMAIL_VERIFICATION_COOLDOWN) {
-      throw new TooManyRequestsError({ fields: ['emailVerificationSentAt'] });
-    }
+      // These actions are arranged in the order in which they are executed after a
+      // new account is created.
+      const operation = query.to.emailVerificationSentAt
+        ? 'EMAIL_VERIFICATION_RESEND'
+        : query.to.emailVerified === true
+          ? 'EMAIL_VERIFICATION_DONE'
+          : query.to.password === null
+            ? 'PASSWORD_RESET'
+            : query.to.password && query.with?.emailVerificationToken
+              ? 'PASSWORD_RESET_DONE'
+              : query.to.password
+                ? 'PASSWORD_CHANGE'
+                : null;
 
-    query.to = {
-      ...query.to,
-      emailVerificationToken: generateUniqueId(),
-      emailVerificationSentAt: newDate,
-    };
-  }
-
-  if (operation === 'PASSWORD_CHANGE' || operation === 'PASSWORD_RESET_DONE') {
-    avoidEmptyFields(query.to);
-
-    if (operation === 'PASSWORD_CHANGE') {
-      const match = (await get.account.with(query.with)) as Account;
-
-      if (!(query.with?.emailVerificationToken || currentPassword)) {
-        throw new EmptyFieldsError({ fields: ['currentPassword'] });
-      }
+      options.context.set('operation', operation);
 
       if (
-        !(
-          // Abort if no matching account was found for the provided query.
-          (
-            match &&
-            // Abort if the provided `currentPassword` doesn't match the account's
-            // stored password.
-            //
-            // If a matching `emailVerificationToken` is provided, however, we don't need
-            // to compare the passwords, because in that case the password is being reset
-            // (the old password is not known in such a case).
-            (query.with?.emailVerificationToken ||
-              (await verifyPassword({
-                hash: match.password || '',
-                password: currentPassword as string,
-              })))
-          )
-        )
+        // These operations should work without an active session.
+        operation === 'EMAIL_VERIFICATION_RESEND' ||
+        operation === 'EMAIL_VERIFICATION_DONE' ||
+        operation === 'PASSWORD_RESET' ||
+        operation === 'PASSWORD_RESET_DONE'
       ) {
-        throw new InvalidFieldsError({ fields: ['id', 'currentPassword'] });
+        // However, completing any of the aforementioned processes, meaning completing the
+        // email verification or the password reset, should only be possible with the right
+        // email verification token.
+        if (
+          !(operation === 'EMAIL_VERIFICATION_RESEND' || operation === 'PASSWORD_RESET')
+        ) {
+          const { emailVerificationToken } = query.with || {};
+
+          if (!emailVerificationToken) {
+            throw new EmptyFieldsError({
+              message:
+                'For this action, the field `with.emailVerificationToken` must be provided.',
+              fields: ['emailVerificationToken'],
+            });
+          }
+
+          const account = await get.account.with({ emailVerificationToken });
+
+          if (!account) {
+            throw new InvalidFieldsError({ fields: ['id', 'currentPassword'] });
+          }
+
+          if (!query.to.ronin) query.to.ronin = {};
+          (query.to.ronin as Record<string, string>).updatedBy = account.id as string;
+        }
+      } else {
+        // TODO: Check to make sure the user has permission to update / delete an account.
       }
-    }
 
-    query.to.password = await hashPassword(query.to.password as string);
-  } else {
-    // Don't allow writing `password` unless a password change was requested.
-    delete query.to.password;
-  }
+      if (operation)
+        console.debug(
+          `Performing \`${operation}\` on selector \`${JSON.stringify(query.with)}\``,
+        );
 
-  return query;
-};
+      // `currentPassword` is an ephemeral field, so we want to delete it before letting
+      // Blade update the record.
+      const currentPassword = query.to.currentPassword;
+      delete query.to.currentPassword;
 
-export const remove: RemoveTrigger = async (query, multiple, options) => {
-  await primeId(query, multiple, options);
+      if (currentPassword && !query.to.password) {
+        throw new EmptyFieldsError({ fields: ['password'] });
+      }
 
-  // Only allow for deleting accounts whose email isn't verified.
-  //
-  // @ts-expect-error The function above guarantees the higher props to exist.
-  query.with.emailVerified = false;
+      // Don't allow `emailVerificationToken` to be written to. We do this in order to
+      // prevent anyone setting a custom `emailVerificationToken`. A new
+      // `emailVerificationToken` can only be generated by setting `emailVerificationSentAt`.
+      // This intentionally throws an `InvalidFieldsError` to completely hide the existence
+      // of this field from the outside.
+      if (query.to.emailVerificationToken) {
+        throw new InvalidFieldsError({ fields: ['emailVerificationToken'] });
+      }
 
-  // If an `account` cookie is available from the signup, remove it now.
-  if (options.cookies.account) options.setCookie('account', null);
+      if (operation === 'EMAIL_VERIFICATION_DONE') {
+        const account = (await get.account.with.id(query.with.id as string)) as Account;
 
-  return query;
-};
+        if (!account)
+          throw new RecordNotFoundError({
+            message: 'Account subject to verification does not exist.',
+          });
 
-export const followingAdd: FollowingAddTrigger<Accounts> = async (
-  _query,
-  _multipleRecords,
-  _previousAccounts,
-  accounts,
-  options,
-) => {
-  for (const account of accounts) {
-    await AUTH_CONFIG?.sendEmail?.({
-      account,
-      type: 'ACCOUNT_CREATION',
-      token: account.emailVerificationToken,
-      options,
-    });
-  }
-};
+        if (account.emailVerificationToken !== query.with?.emailVerificationToken) {
+          throw new InvalidFieldsError({
+            message: 'Invalid verification token provided.',
+            fields: ['emailVerificationToken'],
+          });
+        }
 
-export const followingSet: FollowingSetTrigger<Accounts> = async (
-  query,
-  _multipleRecords,
-  _previousAccounts,
-  accounts,
-  options,
-) => {
-  const operation = options.context.get('operation');
+        // Abort if the account already has a verified email address.
+        if (account.emailVerified) {
+          throw new SetNotAllowedError({
+            message: 'This account already has a verified email address.',
+          });
+        }
+      }
 
-  if (!(operation === 'PASSWORD_RESET' || operation === 'EMAIL_VERIFICATION_RESEND')) {
-    return;
-  }
+      if (operation === 'EMAIL_VERIFICATION_RESEND' || operation === 'PASSWORD_RESET') {
+        const account = (await get.account.with(query.with)) as Account;
 
-  const { emailVerificationToken } = query.to as { emailVerificationToken: string };
+        // Abort if no matching account was found for the provided query.
+        if (!account) {
+          throw new RecordNotFoundError({ fields: ['email'] });
+        }
 
-  for (const account of accounts) {
-    await AUTH_CONFIG?.sendEmail?.({
-      account,
-      type: operation === 'EMAIL_VERIFICATION_RESEND' ? 'ACCOUNT_CREATION' : operation,
-      token: emailVerificationToken,
-      options,
-    });
-  }
+        // Abort if the account already has a verified email address.
+        if (operation === 'EMAIL_VERIFICATION_RESEND' && account.emailVerified) {
+          throw new SetNotAllowedError({
+            message: 'This account already has a verified email address.',
+          });
+        }
+
+        const newDate = query.to.emailVerificationSentAt
+          ? new Date(query.to.emailVerificationSentAt as string)
+          : new Date();
+        const previousDate = new Date(account.emailVerificationSentAt);
+
+        // Don't send another verification email if `emailVerificationSentAt` is
+        // set to the past.
+        if (newDate < previousDate) {
+          throw new InvalidFieldsError({
+            message:
+              'The date provided for `emailVerificationSentAt` must not be in the past.',
+            fields: ['emailVerificationSentAt'],
+          });
+        }
+
+        // Don't allow sending new emails too quickly, in order to not spam the email
+        // provider and decrease the email reputation.
+        if (newDate.getTime() < previousDate.getTime() + EMAIL_VERIFICATION_COOLDOWN) {
+          throw new TooManyRequestsError({ fields: ['emailVerificationSentAt'] });
+        }
+
+        query.to = {
+          ...query.to,
+          emailVerificationToken: generateUniqueId(),
+          emailVerificationSentAt: newDate,
+        };
+      }
+
+      if (operation === 'PASSWORD_CHANGE' || operation === 'PASSWORD_RESET_DONE') {
+        avoidEmptyFields(query.to);
+
+        if (operation === 'PASSWORD_CHANGE') {
+          const match = (await get.account.with(query.with)) as Account;
+
+          if (!(query.with?.emailVerificationToken || currentPassword)) {
+            throw new EmptyFieldsError({ fields: ['currentPassword'] });
+          }
+
+          if (
+            !(
+              // Abort if no matching account was found for the provided query.
+              (
+                match &&
+                // Abort if the provided `currentPassword` doesn't match the account's
+                // stored password.
+                //
+                // If a matching `emailVerificationToken` is provided, however, we don't need
+                // to compare the passwords, because in that case the password is being reset
+                // (the old password is not known in such a case).
+                (query.with?.emailVerificationToken ||
+                  (await verifyPassword({
+                    hash: match.password || '',
+                    password: currentPassword as string,
+                  })))
+              )
+            )
+          ) {
+            throw new InvalidFieldsError({ fields: ['id', 'currentPassword'] });
+          }
+        }
+
+        query.to.password = await hashPassword(query.to.password as string);
+      } else {
+        // Don't allow writing `password` unless a password change was requested.
+        delete query.to.password;
+      }
+
+      return query;
+    },
+
+    remove: async (options) => {
+      const { query, cookies, setCookie } = options;
+      await primeId(options);
+
+      // Only allow for deleting accounts whose email isn't verified.
+      //
+      // @ts-expect-error The function above guarantees the higher props to exist.
+      query.with.emailVerified = false;
+
+      // If an `account` cookie is available from the signup, remove it now.
+      if (cookies.account) setCookie('account', null);
+
+      return query;
+    },
+
+    followingAdd: async (options) => {
+      const { records } = options;
+
+      for (const account of records) {
+        await AUTH_CONFIG?.sendEmail?.({
+          account,
+          type: 'ACCOUNT_CREATION',
+          token: account.emailVerificationToken,
+          options,
+        });
+      }
+    },
+
+    followingSet: async (options) => {
+      const { query, context, records } = options;
+      const operation = context.get('operation');
+
+      if (
+        !(operation === 'PASSWORD_RESET' || operation === 'EMAIL_VERIFICATION_RESEND')
+      ) {
+        return;
+      }
+
+      const { emailVerificationToken } = query.to as { emailVerificationToken: string };
+
+      for (const account of records) {
+        await AUTH_CONFIG?.sendEmail?.({
+          account,
+          type:
+            operation === 'EMAIL_VERIFICATION_RESEND' ? 'ACCOUNT_CREATION' : operation,
+          token: emailVerificationToken,
+          options,
+        });
+      }
+    },
+  });
 };
