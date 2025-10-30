@@ -239,9 +239,10 @@ export const build = async (
           handler(id, importer) {
             const resolvedId = overridePackageId(id, config);
 
-            // Handle relative imports from CDN modules
             const isRelativePath =
               resolvedId.includes('../') || resolvedId.includes('./');
+
+            // Handle relative imports from CDN modules
             if (isRelativePath && importer?.startsWith('cdn:')) {
               const importerCdnId = importer.replace('cdn:', '');
 
