@@ -12,7 +12,8 @@ export const AddPostButton = () => {
           userId: 1,
         });
       }}
-      type="button">
+      type="button"
+      style={{ cursor: 'pointer' }}>
       Add Post
     </button>
   );

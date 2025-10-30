@@ -1,6 +1,5 @@
 import { MultipleWithInstructionsError } from 'blade/errors';
-
-import type { ResolvingAddTrigger, ResolvingGetTrigger } from 'blade/types';
+import { triggers } from 'blade/schema';
 
 interface Post {
   body: string;
@@ -9,7 +8,7 @@ interface Post {
   userId: number;
 }
 
-const posts = [
+const posts: Array<Post> = [
   {
     body: 'quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto',
     id: 1,
@@ -28,28 +27,31 @@ const posts = [
     title: 'ea molestias quasi exercitationem repellat qui ipsa sit aut',
     userId: 1,
   },
-] satisfies Array<Post>;
+];
 
-export const resolvingAdd: ResolvingAddTrigger<Post> = (query, multiple) => {
-  if (multiple) throw new MultipleWithInstructionsError();
+export default triggers<Post>({
+  resolvingAdd: ({ query, multipleRecords }) => {
+    if (multipleRecords) throw new MultipleWithInstructionsError();
+    if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
 
-  const newPost = {
-    body: query.with?.body as string,
-    id: posts.length + 1,
-    title: query.with?.title as string,
-    userId: query.with?.userId as number,
-  } satisfies Post;
+    const newPost = {
+      body: query.with?.body as string,
+      id: posts.length + 1,
+      title: query.with?.title as string,
+      userId: query.with?.userId as number,
+    } satisfies Post;
 
-  posts.push(newPost);
+    posts.push(newPost);
 
-  return newPost;
-};
+    return newPost;
+  },
 
-export const resolvingGet: ResolvingGetTrigger<Post | null | Array<Post>> = async (
-  query,
-  multiple,
-) => {
-  if (multiple) return posts;
+  resolvingGet: async ({ query, multipleRecords }) => {
+    if (Array.isArray(query.with)) throw new MultipleWithInstructionsError();
+    const id = Number.parseInt(query.with?.id as string);
 
-  return posts.find((post) => post.id === Number.parseInt(query.with?.id)) ?? null;
-};
+    if (multipleRecords) return posts as unknown as Post;
+
+    return posts.find((post) => post.id === id) as Post;
+  },
+});

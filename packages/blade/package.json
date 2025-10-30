@@ -1,6 +1,6 @@
 {
   "name": "blade",
-  "version": "3.28.0",
+  "version": "3.29.1",
   "type": "module",
   "description": "React at the edge.",
   "repository": {
@@ -37,13 +37,9 @@
       "default": "./dist/public/server/utils.js",
       "types": "./dist/public/server/utils.d.ts"
     },
-    "./auth/triggers/account": {
-      "default": "./dist/public/universal/auth/triggers/account.js",
-      "types": "./dist/public/universal/auth/triggers/account.d.ts"
-    },
-    "./auth/triggers/session": {
-      "default": "./dist/public/universal/auth/triggers/session.js",
-      "types": "./dist/public/universal/auth/triggers/session.d.ts"
+    "./auth/triggers": {
+      "default": "./dist/public/universal/auth/triggers.js",
+      "types": "./dist/public/universal/auth/triggers.d.ts"
     },
     "./auth/schema": {
       "default": "./dist/public/universal/auth/schema.js",
@@ -91,11 +87,8 @@
       "server/utils": [
         "./dist/public/server/utils"
       ],
-      "auth/triggers/account": [
-        "./dist/public/universal/auth/triggers/account"
-      ],
-      "auth/triggers/session": [
-        "./dist/public/universal/auth/triggers/session"
+      "auth/triggers": [
+        "./dist/public/universal/auth/triggers"
       ],
       "auth/schema": [
         "./dist/public/universal/auth/schema"
