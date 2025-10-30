@@ -269,8 +269,12 @@ export const build = async (
               const splitLastNodeModule = resolvedIdRelative
                 .split(/node_modules[\\/]/)
                 .pop();
-
-              // TODO(@nurodev): Add nullish check
+              if (!splitLastNodeModule) {
+                console.warn(
+                  `Failed to resolve relative dependency: ${resolvedId} from ${importer}`,
+                );
+                return null;
+              }
 
               return `cdn:https://unpkg.com/${splitLastNodeModule}`;
             }
