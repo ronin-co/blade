@@ -239,6 +239,8 @@ export const build = async (
           handler(id, importer) {
             const resolvedId = overridePackageId(id, config);
 
+            // TODO: Add support for symbolic linking `blade`
+
             const isRelativePath =
               resolvedId.includes('../') || resolvedId.includes('./');
 
