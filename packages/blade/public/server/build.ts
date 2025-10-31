@@ -8,6 +8,32 @@ import { type VirtualFileItem, composeBuildContext } from '@/private/shell/utils
 const DEPENDENCY_CACHE = new Map<string, string>();
 
 /**
+ * Remaps a package ID based on the provided build configuration.
+ *
+ * @param id - The original package ID.
+ * @param config - The build configuration containing dependency overrides.
+ *
+ * @returns The remapped package ID if an override exists; otherwise, the original ID.
+ */
+const overridePackageId = (id: string, config: BuildConfig): string => {
+  if (!config.dependencies || !config.dependencies.overrides) return id;
+
+  // Check for direct package remapping
+  const overriddenId = config.dependencies.overrides[id];
+  if (overriddenId) return overriddenId;
+
+  // Check for scoped package remapping
+  // (e.g., 'foo/bar' -> remap 'foo' to 'baz' = 'baz/bar')
+  for (const [from, to] of Object.entries(config.dependencies.overrides)) {
+    if (id === from || id.startsWith(`${from}/`)) {
+      return id.replace(from, to);
+    }
+  }
+
+  return id;
+};
+
+/**
  * Resolves a relative or absolute import path relative to a CDN URL.
  *
  * @param importPath - The import path (e.g., './utils', '../foo', or 'lodash').
@@ -86,7 +112,7 @@ const fetchFromCDN = async (
  * Set of dependencies that should not be fetched from CDN.
  * These are resolved from local node_modules via aliases.
  */
-const EXCLUDED_DEPENDENCIES = new Set([
+const DEFAULT_EXCLUDED_DEPENDENCIES = new Set([
   // React server contexts can conflict if multiple versions are loaded
   'react',
   'react-dom',
@@ -100,10 +126,14 @@ const EXCLUDED_DEPENDENCIES = new Set([
  *
  * @returns True if the ID is from an excluded dependency.
  */
-const isExcludedDependency = (id: string): boolean => {
-  if (EXCLUDED_DEPENDENCIES.has(id)) return true;
+const isExcludedDependency = (id: string, config: BuildConfig): boolean => {
+  const excludedDependencies = new Set<string>(
+    config?.dependencies?.external || DEFAULT_EXCLUDED_DEPENDENCIES,
+  );
 
-  for (const excluded of EXCLUDED_DEPENDENCIES) {
+  if (excludedDependencies.has(id)) return true;
+
+  for (const excluded of excludedDependencies) {
     if (id.startsWith(`${excluded}/`)) return true;
 
     // Check if path contains the excluded dependency (handles node_modules paths)
@@ -156,9 +186,33 @@ const ignoreStart = new RegExp(
 );
 
 interface BuildConfig {
-  sourceFiles: Array<VirtualFileItem>;
-  environment?: 'development' | 'production';
+  /**
+   * Optional prefix to prepend to asset URLs in the build output.
+   */
   assetPrefix?: string;
+  /**
+   * Any additional configuration for dependencies to include in the build.
+   */
+  dependencies?: {
+    /**
+     * List of dependency names to treat as external and not bundle.
+     */
+    external?: string[];
+    /**
+     * Map of dependency names to override their resolution.
+     */
+    overrides?: Record<string, string>;
+  };
+  /**
+   * The build environment, either 'development' or 'production'.
+   *
+   * @default 'development'
+   */
+  environment?: 'development' | 'production';
+  /**
+   * The source files to include in the build.
+   */
+  sourceFiles: Array<VirtualFileItem>;
 }
 
 /**
@@ -223,13 +277,15 @@ export const build = async (
             id: [/^[\w@][\w./-]*$/, /^\.\.?\//],
           },
           handler(id, importer) {
+            const resolvedId = overridePackageId(id, config);
+
             // Skip blade/* imports - these are framework internals, not external CDN deps
-            if (id.startsWith('blade/')) {
+            if (resolvedId.startsWith('blade/')) {
               try {
-                return resolveFrom(nodePath, id);
+                return resolveFrom(nodePath, resolvedId);
               } catch (error) {
                 console.warn(
-                  `Failed to resolve ${id} from node_modules, falling back to default resolution`,
+                  `Failed to resolve ${resolvedId} from node_modules, falling back to default resolution`,
                   error,
                 );
                 return null;
@@ -237,18 +293,18 @@ export const build = async (
             }
 
             // Skip excluded dependencies (React, etc.) - these are resolved via aliases from node_modules
-            if (isExcludedDependency(id)) return null;
+            if (isExcludedDependency(resolvedId, config)) return null;
 
             // Skip imports that look like rolldown-generated chunk files (contain hash patterns like -BYv80wED)
             // These are internal framework chunks, not npm packages
-            if (/-[A-Za-z0-9_-]{8,}\.js$/.test(id)) return null;
+            if (/-[A-Za-z0-9_-]{8,}\.js$/.test(resolvedId)) return null;
 
             // Skip relative imports from excluded dependencies (e.g., React's internal ./cjs/... imports)
             // These should be resolved normally by Rolldown from node_modules
             if (
               importer &&
-              (id.startsWith('./') || id.startsWith('../')) &&
-              isExcludedDependency(importer)
+              (resolvedId.startsWith('./') || resolvedId.startsWith('../')) &&
+              isExcludedDependency(importer, config)
             )
               return null;
 
@@ -256,16 +312,16 @@ export const build = async (
             if (importer?.startsWith('cdn:')) {
               const importerUrl =
                 DEPENDENCY_CACHE.get(importer) || importer.replace('cdn:', '');
-              const resolvedUrl = resolveImportPath(id, importerUrl);
+              const resolvedUrl = resolveImportPath(resolvedId, importerUrl);
               return `cdn:${resolvedUrl}`;
             }
 
             // Only resolve bare imports that look like actual npm packages
             // npm package names: can start with @ (scoped), or letter, contain letters/numbers/-/_
             // Reject if it looks like an internal chunk (has .js extension without /node_modules/)
-            if (id.endsWith('.js') && !id.includes('/')) return null;
+            if (resolvedId.endsWith('.js') && !resolvedId.includes('/')) return null;
 
-            const resolvedUrl = resolveImportPath(id, 'https://unpkg.com/');
+            const resolvedUrl = resolveImportPath(resolvedId, 'https://unpkg.com/');
             return `cdn:${resolvedUrl}`;
           },
         },
