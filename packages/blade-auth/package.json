@@ -1,6 +1,6 @@
 {
   "name": "blade-auth",
-  "version": "3.29.1",
+  "version": "3.29.2",
   "type": "module",
   "description": "Easily set up auth for Blade apps",
   "repository": {
