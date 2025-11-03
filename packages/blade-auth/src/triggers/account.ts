@@ -256,10 +256,10 @@ export default (authConfig?: AuthConfig) => {
       const { query, cookies, setCookie } = options;
       await primeId(options);
 
-      // Only allow for deleting accounts whose email isn't verified.
+      // Without a session, only allow for deleting accounts whose email isn't verified.
       //
       // @ts-expect-error The function above guarantees the higher props to exist.
-      query.with.emailVerified = false;
+      if (!options.cookies.session) query.with.emailVerified = false;
 
       // If an `account` cookie is available from the signup, remove it now.
       if (cookies.account) setCookie('account', null);
