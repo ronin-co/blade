@@ -108,41 +108,6 @@ const fetchFromCDN = async (
   }
 };
 
-/**
- * Set of dependencies that should not be fetched from CDN.
- * These are resolved from local node_modules via aliases.
- */
-const DEFAULT_EXCLUDED_DEPENDENCIES = new Set([
-  // React server contexts can conflict if multiple versions are loaded
-  'react',
-  'react-dom',
-  'scheduler',
-]);
-
-/**
- * Checks if an import ID or importer path is from an excluded dependency.
- *
- * @param id - The import ID or importer path to check.
- *
- * @returns True if the ID is from an excluded dependency.
- */
-const isExcludedDependency = (id: string, config: BuildConfig): boolean => {
-  const excludedDependencies = new Set<string>(
-    config?.dependencies?.external || DEFAULT_EXCLUDED_DEPENDENCIES,
-  );
-
-  if (excludedDependencies.has(id)) return true;
-
-  for (const excluded of excludedDependencies) {
-    if (id.startsWith(`${excluded}/`)) return true;
-
-    // Check if path contains the excluded dependency (handles node_modules paths)
-    if (id.includes(`/${excluded}/`) || id.includes(`\\${excluded}\\`)) return true;
-  }
-
-  return false;
-};
-
 const makePathAbsolute = (input: string) => {
   if (input.startsWith('./')) return input.slice(1);
   if (input.startsWith('/')) return input;
