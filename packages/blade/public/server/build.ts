@@ -78,34 +78,29 @@ const fetchFromCDN = async (
 ): Promise<{
   content: string;
   finalUrl: string;
-} | null> => {
-  try {
-    if (DEPENDENCY_CACHE.has(url))
-      return {
-        content: DEPENDENCY_CACHE.get(url)!,
-        finalUrl: url,
-      };
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.warn(`Failed to fetch ${url} from CDN: ${response.status}`);
-      return null;
-    }
-
-    const finalUrl = response.url;
-    const content = await response.text();
-
-    DEPENDENCY_CACHE.set(url, content);
-    DEPENDENCY_CACHE.set(finalUrl, content);
-
+}> => {
+  if (DEPENDENCY_CACHE.has(url))
     return {
-      content,
-      finalUrl,
+      content: DEPENDENCY_CACHE.get(url)!,
+      finalUrl: url,
     };
-  } catch (error) {
-    console.warn(`Error fetching ${url} from CDN:`, error);
-    return null;
-  }
+
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(`Failed to fetch ${url} from CDN`, {
+      cause: response,
+    });
+
+  const finalUrl = response.url;
+  const content = await response.text();
+
+  DEPENDENCY_CACHE.set(url, content);
+  DEPENDENCY_CACHE.set(finalUrl, content);
+
+  return {
+    content,
+    finalUrl,
+  };
 };
 
 /**
@@ -332,10 +327,17 @@ export const build = async (
           async handler(id) {
             const url = id.replace('cdn:', '');
 
-            const result = await fetchFromCDN(url);
-            if (!result) throw new Error(`Failed to fetch dependency: ${url}`);
+            let result: Awaited<ReturnType<typeof fetchFromCDN>>;
+            try {
+              result = await fetchFromCDN(url);
+              DEPENDENCY_CACHE.set(id, result.finalUrl);
+            } catch (error) {
+              if (error instanceof Error) throw error;
 
-            DEPENDENCY_CACHE.set(id, result.finalUrl);
+              throw new Error(`Failed to fetch dependency: ${url}`, {
+                cause: error,
+              });
+            }
 
             return {
               code: result.content,
