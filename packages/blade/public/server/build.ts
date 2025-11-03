@@ -292,22 +292,6 @@ export const build = async (
               }
             }
 
-            // Skip excluded dependencies (React, etc.) - these are resolved via aliases from node_modules
-            if (isExcludedDependency(resolvedId, config)) return null;
-
-            // Skip imports that look like rolldown-generated chunk files (contain hash patterns like -BYv80wED)
-            // These are internal framework chunks, not npm packages
-            if (/-[A-Za-z0-9_-]{8,}\.js$/.test(resolvedId)) return null;
-
-            // Skip relative imports from excluded dependencies (e.g., React's internal ./cjs/... imports)
-            // These should be resolved normally by Rolldown from node_modules
-            if (
-              importer &&
-              (resolvedId.startsWith('./') || resolvedId.startsWith('../')) &&
-              isExcludedDependency(importer, config)
-            )
-              return null;
-
             // If the importer is a CDN module, resolve relative to it
             if (importer?.startsWith('cdn:')) {
               const importerUrl =
@@ -315,11 +299,6 @@ export const build = async (
               const resolvedUrl = resolveImportPath(resolvedId, importerUrl);
               return `cdn:${resolvedUrl}`;
             }
-
-            // Only resolve bare imports that look like actual npm packages
-            // npm package names: can start with @ (scoped), or letter, contain letters/numbers/-/_
-            // Reject if it looks like an internal chunk (has .js extension without /node_modules/)
-            if (resolvedId.endsWith('.js') && !resolvedId.includes('/')) return null;
 
             const resolvedUrl = resolveImportPath(resolvedId, 'https://unpkg.com/');
             return `cdn:${resolvedUrl}`;
