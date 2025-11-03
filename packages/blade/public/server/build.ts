@@ -144,11 +144,6 @@ const composeAliases = (config: string): Parameters<typeof aliasPlugin>[0] => {
 
 // Tiny helpers for safe, cross-platform matching.
 const reEscape = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const toPosix = (input: string) => input.replace(/\\/g, '/');
-
-const ignoreStart = new RegExp(
-  `^(?:${[nodePath, sourceDirPath].map((p) => reEscape(toPosix(p))).join('|')})`,
-);
 
 interface BuildConfig {
   /**
@@ -206,16 +201,41 @@ export const build = async (
       {
         name: 'Memory File Loader',
         resolveId: {
-          filter: {
-            id: { include: [/^\//], exclude: [ignoreStart] },
-          },
-          handler(id) {
+          async handler(id, importer) {
+            // 1. see if there is a matching source file
+
             const rx = new RegExp(`^${reEscape(id)}(?:\\.(?:ts|tsx|js|jsx))?$`);
             const sourceFile = virtualFiles.find(({ path }) => rx.test(path));
 
-            if (!sourceFile) return;
+            if (sourceFile) return `virtual:${sourceFile.path}`;
 
-            return `virtual:${sourceFile.path}`;
+            // Skip this for now
+            if (!importer) return null;
+
+            // is dep
+            if (!(id.startsWith('.') && id.startsWith('/'))) {
+              const packageName = id.split('/')[0];
+              const nearestPackageJSON = importer.startsWith('/node_modules')
+                ? `dep:${path.join(importer.split(packageName)[0], packageName)}`
+                : 'virtual:/package.json';
+
+              const packageJSON = await this.load({ id: nearestPackageJSON });
+              const { dependencies } = JSON.parse(packageJSON.code || '{}');
+              console.log(dependencies);
+            }
+
+            // 2. if not, see if there is a matching dep in the package.json of the importer
+            // find nearest package.json
+            if (!importer) {
+              console.log('FOR ID', id);
+            }
+
+            // if there is no importer, it's an entrypoint
+
+            // 1. with importer, find nearest package.json
+            // 2. in package.json, read
+
+            return null;
           },
         },
         load: {
@@ -226,7 +246,7 @@ export const build = async (
             const absolutePath = id.replace('virtual:', '');
             const sourceFile = virtualFiles.find(({ path }) => path === absolutePath);
 
-            if (!sourceFile) return;
+            if (!sourceFile) throw new Error('Missing source file');
 
             return {
               code: sourceFile.content,
@@ -235,46 +255,46 @@ export const build = async (
           },
         },
       },
-      {
-        name: 'Memory Dependency Loader',
-        resolveId: {
-          filter: {
-            id: [/^[\w@][\w./-]*$/, /^\.\.?\//],
-          },
-          handler(id, importer) {
-            const resolvedId = overridePackageId(id, config);
+      // {
+      //   name: 'Memory Dependency Loader',
+      //   resolveId: {
+      //     filter: {
+      //       id: [/^[\w@][\w./-]*$/, /^\.\.?\//],
+      //     },
+      //     handler(id, importer) {
+      //       const resolvedId = overridePackageId(id, config);
 
-            // If the importer is a CDN module, resolve relative to it
-            if (importer?.startsWith('cdn:')) {
-              const importerUrl =
-                DEPENDENCY_CACHE.get(importer) || importer.replace('cdn:', '');
-              const resolvedUrl = resolveImportPath(resolvedId, importerUrl);
-              return `cdn:${resolvedUrl}`;
-            }
+      //       // If the importer is a CDN module, resolve relative to it
+      //       if (importer?.startsWith('cdn:')) {
+      //         const importerUrl =
+      //           DEPENDENCY_CACHE.get(importer) || importer.replace('cdn:', '');
+      //         const resolvedUrl = resolveImportPath(resolvedId, importerUrl);
+      //         return `cdn:${resolvedUrl}`;
+      //       }
 
-            const resolvedUrl = resolveImportPath(resolvedId, 'https://unpkg.com/');
-            return `cdn:${resolvedUrl}`;
-          },
-        },
-        load: {
-          filter: {
-            id: /^cdn:/,
-          },
-          async handler(id) {
-            const url = id.replace('cdn:', '');
+      //       const resolvedUrl = resolveImportPath(resolvedId, 'https://unpkg.com/');
+      //       return `cdn:${resolvedUrl}`;
+      //     },
+      //   },
+      //   load: {
+      //     filter: {
+      //       id: /^cdn:/,
+      //     },
+      //     async handler(id) {
+      //       const url = id.replace('cdn:', '');
 
-            const result = await fetchFromCDN(url);
-            if (!result) throw new Error(`Failed to fetch dependency: ${url}`);
+      //       const result = await fetchFromCDN(url);
+      //       if (!result) throw new Error(`Failed to fetch dependency: ${url}`);
 
-            DEPENDENCY_CACHE.set(id, result.finalUrl);
+      //       DEPENDENCY_CACHE.set(id, result.finalUrl);
 
-            return {
-              code: result.content,
-              moduleType: detectModuleType(result.finalUrl),
-            };
-          },
-        },
-      },
+      //       return {
+      //         code: result.content,
+      //         moduleType: detectModuleType(result.finalUrl),
+      //       };
+      //     },
+      //   },
+      // },
     ],
     assetPrefix: config.assetPrefix,
   });
