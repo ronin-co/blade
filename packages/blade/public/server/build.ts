@@ -244,19 +244,6 @@ export const build = async (
           handler(id, importer) {
             const resolvedId = overridePackageId(id, config);
 
-            // Skip blade/* imports - these are framework internals, not external CDN deps
-            if (resolvedId.startsWith('blade/')) {
-              try {
-                return resolveFrom(nodePath, resolvedId);
-              } catch (error) {
-                console.warn(
-                  `Failed to resolve ${resolvedId} from node_modules, falling back to default resolution`,
-                  error,
-                );
-                return null;
-              }
-            }
-
             // If the importer is a CDN module, resolve relative to it
             if (importer?.startsWith('cdn:')) {
               const importerUrl =
