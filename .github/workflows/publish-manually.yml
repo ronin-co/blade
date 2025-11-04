@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version_type:
-        description: 'Version type to bump the package version by.'
+        description: "Version type to bump the package version by."
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
           - major
@@ -15,12 +15,70 @@ on:
           - prerelease
 
 jobs:
-  publish:
-    uses: ronin-co/actions/.github/workflows/publish-manually.yml@main
-    with:
-      version_type: ${{ inputs.version_type }}
-      workspaces: true
-    secrets:
-      NPM_TOKEN_READ_AND_WRITE: ${{ secrets.NPM_TOKEN_READ_AND_WRITE }}
-      ORG_GH_APP_ID: ${{ secrets.ORG_GH_RONIN_APP_ID }}
-      ORG_GH_APP_PRIVATE_KEY: ${{ secrets.ORG_GH_RONIN_APP_PRIVATE_KEY }}
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+
+    steps:
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.ORG_GH_RONIN_APP_ID }}
+          private_key: ${{ secrets.ORG_GH_RONIN_APP_PRIVATE_KEY }}
+
+      - name: Code Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3.5.1
+
+      - name: Configure NPM Auth
+        run: echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN_READ_AND_WRITE }}' > ~/.npmrc
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+
+      - name: Install Dependencies
+        run: |
+          cd ./
+          bun install --frozen-lockfile
+
+      - name: Build Package
+        run: |
+          cd ./
+          bun run build
+
+      - name: Set Git Config
+        run: |
+          git config --global user.name "ronin-app[bot]"
+          git config --global user.email "135042755+ronin-app[bot]@users.noreply.github.com"
+
+      - name: Bump Package Versions
+        run: |
+          npm version ${{ inputs.version_type }} --no-git-tag-version --no-workspaces-update --workspaces
+          echo "NEW_VERSION=$(npm pkg get version --workspaces=true | jq -r 'to_entries[0].value')" >> $GITHUB_ENV
+
+      - name: Adjust Lockfile
+        run: bun install --force --ignore-scripts
+
+      - name: Push New Version
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          git fetch
+          git checkout "${GITHUB_REF_NAME}"
+          git pull origin "${GITHUB_REF_NAME}"
+          git add -A
+          git commit -m "${{ env.NEW_VERSION }}" --no-verify
+          git tag -a "${{ env.NEW_VERSION }}" -m "${{ env.NEW_VERSION }}"
+          git push origin "${GITHUB_REF_NAME}"
+          git push origin "${{ env.NEW_VERSION }}"
+
+      - name: Publish npm Packages
+        run: |
+          npm publish --workspaces=true
