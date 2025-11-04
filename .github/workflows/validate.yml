@@ -9,5 +9,46 @@ on:
       - main
 
 jobs:
-  validate:
-    uses: ronin-co/actions/.github/workflows/validate.yml@main
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+
+      - name: Install Dependencies
+        run: |
+          cd ./
+          bun install --frozen-lockfile
+
+      - name: Lint
+        run: |
+          cd ./
+          bun run lint
+
+  test:
+    name: Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+
+      - name: Install Dependencies
+        run: |
+          cd ./
+          bun install --frozen-lockfile
+
+      - name: Test
+        run: |
+          cd ./
+          bun run test
