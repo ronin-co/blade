@@ -136,7 +136,7 @@ export const composeBuildContext = async (
       getMdxLoader(environment),
       getReactAriaLoader(),
       getClientReferenceLoader(),
-      getTailwindLoader(environment),
+      getTailwindLoader(environment, options?.virtualFiles),
       getProviderLoader(environment, provider),
       ...(options?.plugins || []),
     ],

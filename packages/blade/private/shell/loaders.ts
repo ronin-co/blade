@@ -290,6 +290,7 @@ export const getProviderLoader = (
 
 export const getTailwindLoader = (
   environment: 'development' | 'production',
+  virtualFiles?: Array<VirtualFileItem>,
 ): RolldownPlugin => {
   let compiler: Awaited<ReturnType<typeof compileTailwind>>;
   let candidates: Array<string> = [];
@@ -304,7 +305,10 @@ export const getTailwindLoader = (
       // Always reading the file and handling the error if the file doesn't exist is
       // faster than first checking if the file exists.
       try {
-        input = await readFile(styleInputFile, 'utf8');
+        const virtualFile = virtualFiles?.find((item) => item.path === '/styles.css');
+        input = virtualFile
+          ? virtualFile.content
+          : await readFile(styleInputFile, 'utf8');
       } catch (err) {
         if ((err as { code: string }).code !== 'ENOENT') throw err;
       }
