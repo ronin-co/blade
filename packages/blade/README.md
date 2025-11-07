@@ -73,7 +73,7 @@ To start contributing code, [clone the repo](https://docs.github.com/en/reposito
 bun install
 ```
 
-Once that's done, link the package to make it available to all of your local projects:
+Once that's done, link the package to make it available to all of your local projects, by running the following command in the `packages/blade` directory:
 
 ```bash
 bun link
