@@ -23,10 +23,13 @@ To get started with locally developing database triggers, create a `triggers` di
 at the root of your project. Within it, create a file with the slug of the
 [model](/models) that you would like to address with your triggers.
 
-For example, if the slug of your model is `account`, you could add this file:
+For example, if the slug of your model is `chatMessage`, you could add the file below.
+
+While the slugs of [models](/models) are [camel-case](https://developer.mozilla.org/en-US/docs/Glossary/Camel_case) (that's how properties are defined
+in JavaScript), the file names of triggers are [kebab-case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case) (that's the most common file naming convention in the JavaScript ecosystem and prevents issues on [case-insensitive](https://en.wikipedia.org/wiki/Case_sensitivity) file systems).
 
 ```ts
-// triggers/account.ts
+// triggers/chat-message.ts
 
 import { triggers } from 'blade/schema';
 import type { Account } from 'blade/types';
