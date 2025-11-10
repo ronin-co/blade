@@ -52,7 +52,7 @@ const defaultDatabaseCaller: QueryHandlerOptions['databaseCaller'] = async (
   options,
 ) => {
   const { token, database, stream } = options;
-  const key = `${token || 'local'}${stream ? '-stream' : ''}`;
+  const key = `${token || 'local'}${stream ? `-${stream}` : ''}`;
 
   if (!clients[key]) {
     // If a token is available, initiate a connection to the remote storage.
