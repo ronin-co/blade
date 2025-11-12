@@ -170,6 +170,7 @@ export const composeBuildContext = async (
         },
         assetFileNames: getPublicFile(bundleId, 'css'),
         chunkFileNames: getPublicFile(bundleId, 'js', true),
+        inlineDynamicImports: true,
       };
 
       try {
