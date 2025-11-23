@@ -6,12 +6,6 @@
 
 This package exposes the `blade` command.
 
-## Setup
-
-You don't need to install this package explicitly, as it is already included in the [RONIN client](https://github.com/ronin-co/client).
-
-However, we would be excited to welcome your feature suggestions or bug fixes for the RONIN CLI. Read on to learn more about how to suggest changes.
-
 ## Contributing
 
 To start contributing code, first make sure you have [Bun](https://bun.sh) installed, which is a JavaScript runtime.
