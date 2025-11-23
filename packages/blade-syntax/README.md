@@ -1,10 +1,10 @@
-# RONIN Syntax
+# Blade Syntax
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/syntax/validate.yml?label=tests)](https://github.com/ronin-co/syntax/actions/workflows/validate.yml)
 [![code coverage](https://img.shields.io/codecov/c/github/ronin-co/syntax)](https://codecov.io/github/ronin-co/syntax)
 [![install size](https://packagephobia.com/badge?p=blade-syntax)](https://packagephobia.com/result?p=blade-syntax)
 
-This package makes it possible to define [RONIN](https://ronin.co) queries and schemas in TypeScript code.
+This package makes it possible to define [Blade](https://blade.im) queries and schemas in TypeScript code.
 
 ## Setup
 
