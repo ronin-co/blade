@@ -56,7 +56,6 @@
   "author": "ronin",
   "license": "Apache-2.0",
   "repository": "ronin-co/client",
-  "homepage": "https://ronin.co/docs/typescript-client",
   "engines": {
     "node": ">=18.17.0"
   },

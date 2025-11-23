@@ -17,7 +17,7 @@ describe('triggers', () => {
         accounts: {
           with: {
             email: {
-              endingWith: 'ronin.co',
+              endingWith: 'example.com',
             },
           },
         },
@@ -53,7 +53,7 @@ describe('triggers', () => {
             if (multipleRecords) {
               query.with = {
                 email: {
-                  endingWith: '@ronin.co',
+                  endingWith: '@example.com',
                 },
               };
             } else {
@@ -87,10 +87,10 @@ describe('triggers', () => {
 
     await factory.get.accounts();
     // Make sure the email address of all resolved accounts ends with the
-    // `@ronin.co` domain name.
+    // `@example.com` domain name.
     expect(mockStatements?.[0]).toMatchObject({
       sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "email" LIKE ?1',
-      params: ['%@ronin.co'],
+      params: ['%@example.com'],
     });
   });
 
@@ -139,7 +139,7 @@ describe('triggers', () => {
             if (multipleRecords) {
               query.with = {
                 email: {
-                  endingWith: '@ronin.co',
+                  endingWith: '@example.com',
                 },
               };
             } else {
@@ -173,14 +173,14 @@ describe('triggers', () => {
     });
 
     await factory.get.accounts.with({
-      email: { endingWith: '@ronin.co' },
+      email: { endingWith: '@example.com' },
     });
 
     // Make sure the email address of all resolved accounts ends with the
-    // `@ronin.co` domain name.
+    // `@example.com` domain name.
     expect(mockStatements?.[0]).toMatchObject({
       sql: 'SELECT "id", "ronin.createdAt", "ronin.createdBy", "ronin.updatedAt", "ronin.updatedBy", "handle", "email" FROM "accounts" WHERE "email" LIKE ?1',
-      params: ['%@ronin.co'],
+      params: ['%@example.com'],
     });
   });
 
@@ -537,7 +537,7 @@ describe('triggers', () => {
         'ronin.createdBy': '1234',
         'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
         'ronin.updatedBy': '1234',
-        email: 'prev@ronin.co',
+        email: 'prev@example.com',
       },
       {
         id: '2',
@@ -545,13 +545,13 @@ describe('triggers', () => {
         'ronin.createdBy': '1234',
         'ronin.updatedAt': '2024-04-16T15:02:12.710Z',
         'ronin.updatedBy': '1234',
-        email: 'prev@ronin.co',
+        email: 'prev@example.com',
       },
     ];
 
     const nextAccounts = previousAccounts.map((account) => ({
       ...account,
-      email: 'test@ronin.co',
+      email: 'test@example.com',
     }));
 
     const { set } = createSyntaxFactory({
@@ -581,26 +581,26 @@ describe('triggers', () => {
     const accounts = (await set.accounts({
       with: {
         email: {
-          endingWith: '@ronin.co',
+          endingWith: '@example.com',
         },
       },
       to: {
-        email: 'test@ronin.co',
+        email: 'test@example.com',
       },
     })) as unknown as Array<Record<string, unknown>>;
 
     // Make sure all accounts were updated successfully.
-    expect(accounts.every(({ email }) => email === 'test@ronin.co')).toBe(true);
+    expect(accounts.every(({ email }) => email === 'test@example.com')).toBe(true);
 
     // Make sure `finalQuery` matches the initial query.
     expect(finalQuery).toMatchObject({
       with: {
         email: {
-          endingWith: '@ronin.co',
+          endingWith: '@example.com',
         },
       },
       to: {
-        email: 'test@ronin.co',
+        email: 'test@example.com',
       },
     });
 

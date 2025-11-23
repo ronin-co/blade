@@ -49,7 +49,7 @@ app.use('*', secureHeaders({ xFrameOptions: false }));
 app.use('*', async (c, next) => {
   const requestURL = new URL(c.req.url);
 
-  // - `requestOrigin` might be `https://ronin.co`
+  // - `requestOrigin` might be `https://example.com`
   // - `requestPath` might be `/account/settings`
   const { origin: requestOrigin, pathname: requestPath } = requestURL;
 
