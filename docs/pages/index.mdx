@@ -139,28 +139,3 @@ multiple times), the `add.account` query returns the new record you just created
 To read the data across different pages, you could then write read queries with
 the [`use`](/hooks#use-server) hook. In other words, `useMutation` handles write queries, while
 read queries are handled by `use`.
-
-If you need any help, just let us know on our [Discord server](https://discord.gg/ronin) and the
-team will be with you immediately.
-
-### Production
-
-While this works well during the development of your application and also for small single-region
-applications in production, larger applications require much more sophisticated database features.
-
-For that purpose, you may choose to use a full data infrastructure offered by RONIN, the
-team behind Blade. At the moment, this infrastructure is available in its alpha release phase, which
-means that access tokens are currently only handed out via our [Discord server](https://discord.gg/ronin).
-If you are interested, please feel free to join our Discord server and a RONIN team member will send you
-a free token with no additional obligations immediately. A interface for generating tokens will follow soon.
-
-You will then be able to use the following two environment variables to access your production database,
-which is replicated to 18 regions across the globe and offers a strong consistency model.
-
-```txt
-RONIN_TOKEN=xxxxxx
-RONIN_ID=xxxxxx
-```
-
-Once you've placed this file in the root directory of your project, Blade will automatically read it and
-use it to access your origin SQLite database, from which it will then automatically retrieve data as needed.

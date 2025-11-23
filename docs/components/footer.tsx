@@ -26,14 +26,7 @@ export const Footer = (props: FooterProps) => {
 
       <div className="flex w-full max-w-3xl flex-col justify-between gap-2 sm:flex-row sm:items-center 2xl:max-w-4xl">
         <p className="flex flex-row items-center gap-1 font-medium text-muted-foreground text-xs">
-          <a
-            className="transition duration-200 hover:text-primary hover:duration-0"
-            href="https://ronin.co"
-            rel="noreferrer"
-            target="_blank">
-            &copy; RONIN {new Date().getFullYear()}.
-          </a>
-          <span>All rights reserved.</span>
+          &copy; Blade {new Date().getFullYear()}. All rights reserved.
         </p>
 
         <div className="flex flex-row items-center gap-2">
@@ -46,14 +39,6 @@ export const Footer = (props: FooterProps) => {
           </a>
 
           <ThemeToggle initial={props.theme} />
-
-          <a
-            className="rounded-md p-1.5 text-muted-foreground transition duration-200 hover:bg-accent hover:text-primary hover:duration-0"
-            href="https://discord.gg/ronin"
-            rel="noreferrer"
-            target="_blank">
-            <Icons.Discord className="size-4.5" />
-          </a>
 
           <a
             className="rounded-md p-1.5 text-muted-foreground transition duration-200 hover:bg-accent hover:text-primary hover:duration-0"
