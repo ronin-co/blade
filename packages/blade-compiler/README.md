@@ -1,16 +1,10 @@
-# RONIN Compiler
+# Blade Compiler
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/compiler/validate.yml?label=tests)](https://github.com/ronin-co/compiler/actions/workflows/validate.yml)
 [![code coverage](https://img.shields.io/codecov/c/github/ronin-co/compiler)](https://codecov.io/github/ronin-co/compiler)
 [![install size](https://packagephobia.com/badge?p=blade-compiler)](https://packagephobia.com/result?p=blade-compiler)
 
-This package compiles [RONIN queries](https://ronin.co/docs/queries) to [SQLite](https://www.sqlite.org) statements.
-
-## Setup
-
-You don't need to install this package explicitly, as it is already included in the [RONIN client](https://github.com/ronin-co/client).
-
-However, we would be excited to welcome your feature suggestions or bug fixes for the RONIN compiler. Read on to learn more about how to suggest changes.
+This package compiles [Blade queries](https://blade.im/queries) to [SQLite](https://www.sqlite.org) statements.
 
 ## Contributing
 

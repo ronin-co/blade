@@ -1,16 +1,10 @@
-# RONIN CLI
+# Blade CLI
 
 [![tests](https://img.shields.io/github/actions/workflow/status/ronin-co/cli/validate.yml?label=tests)](https://github.com/ronin-co/cli/actions/workflows/validate.yml)
 [![code coverage](https://img.shields.io/codecov/c/github/ronin-co/cli)](https://codecov.io/github/ronin-co/cli)
 [![install size](https://packagephobia.com/badge?p=blade-cli)](https://packagephobia.com/result?p=blade-cli)
 
-This package exposes the `blade` command, which you can run from your terminal to interact with [RONIN](https://ronin.co).
-
-## Setup
-
-You don't need to install this package explicitly, as it is already included in the [RONIN client](https://github.com/ronin-co/client).
-
-However, we would be excited to welcome your feature suggestions or bug fixes for the RONIN CLI. Read on to learn more about how to suggest changes.
+This package exposes the `blade` command.
 
 ## Contributing
 

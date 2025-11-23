@@ -4,33 +4,7 @@
 [![code coverage](https://img.shields.io/codecov/c/github/ronin-co/client)](https://codecov.io/github/ronin-co/client)
 [![install size](https://packagephobia.com/badge?p=blade-client)](https://packagephobia.com/result?p=blade-client)
 
-This package allows for querying data from [RONIN](https://ronin.co) with ease.
-
-## Setup
-
-First, install the [package](https://www.npmjs.com/package/blade-client) with a package manager of your choice:
-
-```bash
-# Bun
-bun add blade-client
-
-# npm
-npm install blade-client
-```
-
-Next, create a new app token on the [RONIN dashboard](http://ronin.co) (under "Apps" in the sidebar), and add it as a environment variable named `RONIN_TOKEN` to your project.
-
-Afterward, you can start invoking RONIN from anywhere in your code:
-
-```typescript
-import { get } from 'blade-client';
-
-const posts = await get.posts();
-```
-
-That's it! 🎉
-
-You can now start inserting records with the [RONIN query syntax](https://ronin.co/docs/queries), or add them on the [RONIN dashboard](http://ronin.co). Everything you can do with the RONIN client, you can also do on the dashboard (creating records, retrieving them, filtering them, updating them, etc).
+This package allows for querying data with ease.
 
 ## Contributing
 
