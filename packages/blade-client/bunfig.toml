@@ -1,4 +1,6 @@
 [test]
+coverage = true
+coverageReporter = ["text", "lcov"]
 preload = ['./tests/preload.ts']
 
 [install]
