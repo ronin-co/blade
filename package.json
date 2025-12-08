@@ -16,7 +16,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/node": "24.0.4",
-    "tsdown": "0.17.1",
+    "tsdown": "0.15.9",
     "turbo": "2.5.8",
     "typescript": "5.9.3"
   }
