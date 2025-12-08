@@ -15,7 +15,7 @@
   "workspaces": ["packages/*"],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "24.10.1",
+    "@types/node": "24.0.4",
     "tsdown": "0.17.1",
     "turbo": "2.5.8",
     "typescript": "5.9.3"
